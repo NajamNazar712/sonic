@@ -13,6 +13,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -4665,4 +4666,180 @@ class APIController extends Controller
             return ['status' => 0, 'message' => 'Unauthorized IP'];
         }
     }
+
+    //BOTSIFY WhatsApp API
+    public function whatsapp_shipper_phone_number(Request $request)
+    {
+        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+            $rules = [
+                'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            }
+            else {
+                $phone_number = $request->phone_number;
+                $shipper = User::where('phone', $phone_number);
+                if($shipper->exists()){
+                    $shipper = $shipper->first();
+                    $current_status['Status'] = 1;
+                    $current_status['StatusText'] = 'SUCCESS';
+                    $current_status['Date'] = Carbon::now()->toIso8601String();
+                    $current_status['Success'] = 'Substitute Shipper found against phone number: ' . $phone_number;
+
+                    $details['UserID'] = $shipper->id;
+                    $details['UserName'] = $shipper->name;
+                }
+                else{
+                    $sub_shipper = SubstituteUser::where('phone_number', $phone_number);
+                    if($sub_shipper->exists()){
+                        $sub_shipper = $sub_shipper->first();
+                        $current_status['Status'] = 1;
+                        $current_status['StatusText'] = 'SUCCESS';
+                        $current_status['Date'] = Carbon::now()->toIso8601String();
+                        $current_status['Success'] = 'Substitute Shipper found against phone number: ' . $phone_number;
+
+                        $details['UserID'] = $sub_shipper->user_id;
+                        $details['UserName'] = $sub_shipper->shipper->name;
+                        $details['SubstituteUserName'] = $sub_shipper->name;
+                    }
+                    else{
+                        $current_status['Status'] = 0;
+                        $current_status['StatusText'] = 'ERROR';
+                        $current_status['Date'] = Carbon::now()->toIso8601String();
+                        $current_status['Error'] = 'No shipper exists against phone number: ' . $phone_number;
+
+                        return response()->json(['CurrentStatus' => $current_status]);
+                    }
+                }
+
+                return response()->json(['CurrentStatus' => $current_status, 'Details' => $details]);
+            }
+        } else {
+            $current_status = array();
+
+            $current_status['Status'] = 'ERROR';
+            $current_status['Date'] = Carbon::now()->toIso8601String();
+            $current_status['Error'] = 'Unauthorized Host';
+
+            return response()->json(['CurrentStatus' => $current_status]);
+        }
+    }
+
+    public function whatsapp_shipper_tracking(Request $request)
+    {
+        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+            $rules = [
+                'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            }
+            else {
+                $phone_number = $request->phone_number;
+                $tracking_number = $request->tracking_number;
+                $shipper = User::where('phone', $phone_number);
+                if($shipper->exists()){
+                    $shipper = $shipper->first();
+
+                    $details['UserID'] = $shipper->id;
+                    $details['UserName'] = $shipper->name;
+                }
+                else{
+                    $sub_shipper = SubstituteUser::where('phone_number', $phone_number);
+                    if($sub_shipper->exists()){
+                        $sub_shipper = $sub_shipper->first();
+
+                        $details['UserID'] = $sub_shipper->user_id;
+                        $details['UserName'] = $sub_shipper->shipper->name;
+                        $details['SubstituteUserName'] = $sub_shipper->name;
+
+                        $shipper = $sub_shipper->shipper;
+                    }
+                    else{
+                        $current_status['Status'] = 0;
+                        $current_status['StatusText'] = 'ERROR';
+                        $current_status['Date'] = Carbon::now()->toIso8601String();
+                        $current_status['Error'] = 'No Shipper/Substitute Shipper exists against phone number: ' . $phone_number;
+
+                        return response()->json(['CurrentStatus' => $current_status]);
+                    }
+                }
+            }
+            $shipment = Shipment::where('tracking_number', $tracking_number);
+            if($shipment->exists()){
+                $shipment = $shipment->where('user_id', $shipper->user_id);
+                if($shipment->exists()){
+                    $current_status['Status'] = 1;
+                    $current_status['StatusText'] = 'SUCCESS';
+                    $current_status['Date'] = Carbon::now()->toIso8601String();
+                    $current_status['Success'] = 'Shipment found against Tracking Number: ' . $tracking_number;
+
+                    $details['ServiceType'] = $shipment->booking_type->booking_type;
+                    $details['OriginCity'] = $shipment->pickup_address->city->name;
+                    $details['DestinationCity'] = $shipment->consignee_city->name;
+                    $details['ConsigneeName'] = $shipment->consignee_name;
+                    $details['ConsigneeAddress'] = $shipment->consignee_address;
+                    $details['ConsigneePhone'] = $shipment->consignee_phone_number_1;
+                    if ($shipment->consignee_phone_number_2 != null) {
+                        $details['ConsigneePhone'] .= ' / ' . $shipment->consignee_phone_number_2;
+                    }
+                    $details['OrderID'] = $shipment->order_id;
+                    $details['Amount'] = $shipper->amount;
+                    $details['CurrentStatus'] = $shipper->status_shipper->name;
+
+                    if($shipment->status == 5){
+                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
+                        $delivery_note = $delivery_note_shipment->delivery_note;
+                        $rider = $delivery_note->rider;
+
+                        $details['RiderName'] = $rider->name;
+                        $details['RiderPhoneNumber'] = $rider->phone;
+                    }
+
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->get();
+                    foreach ($shipment_journey as $journey){
+                        $details['Journey'][]['ShipmentStatus'] = $journey->shipment_status_shipper->name;
+                        $details['Journey'][]['StatusDateTime'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                    }
+                }
+                else{
+                    $current_status['Status'] = 0;
+                    $current_status['StatusText'] = 'ERROR';
+                    $current_status['Date'] = Carbon::now()->toIso8601String();
+                    $current_status['Error'] = 'Shipment does\'nt belongs to ' . $shipper->name;
+
+                    return response()->json(['CurrentStatus' => $current_status]);
+                }
+            }
+            else{
+                $current_status['Status'] = 0;
+                $current_status['StatusText'] = 'ERROR';
+                $current_status['Date'] = Carbon::now()->toIso8601String();
+                $current_status['Error'] = 'Shipment not found against Tracking Number: ' . $tracking_number;
+
+                return response()->json(['CurrentStatus' => $current_status]);
+            }
+
+            return response()->json(['CurrentStatus' => $current_status, 'Details' => $details]);
+        } else {
+            $current_status = array();
+
+            $current_status['Status'] = 'ERROR';
+            $current_status['Date'] = Carbon::now()->toIso8601String();
+            $current_status['Error'] = 'Unauthorized Host';
+
+            return response()->json(['CurrentStatus' => $current_status]);
+        }
+    }
+    //BOTSIFY WhatsApp API
 }
