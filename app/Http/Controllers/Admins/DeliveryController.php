@@ -7800,4 +7800,24 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
         }
     }
+
+    public function bulk_closed(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if ($station_deposit_note->status == 1) {
+                    $station_deposit_note->status = 3;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }
+            }
+            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+
+        } else {
+            return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
+
+        }
+    }
 }

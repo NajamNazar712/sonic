@@ -1232,6 +1232,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
             Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
             Route::post('closed','Admins\DeliveryController@closed')->name('closed');
+            Route::post('bulk_closed','Admins\DeliveryController@bulk_closed')->name('bulk_closed');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');

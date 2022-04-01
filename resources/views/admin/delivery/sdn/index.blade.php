@@ -128,6 +128,7 @@
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
                         <th class="border-primary border-darken-1">Difference Amount</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -770,6 +771,7 @@
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
                             head.push('Difference Amount');
+                            head.push('Aging');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -790,7 +792,7 @@
                                 row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
                                 row.push(values.difference_amount);
-
+                                row.push(values.aging);
                                 body.push(row);
                             });
                         },
@@ -835,24 +837,30 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-                                        blockPagePermanently();
                                         $.ajax({
-                                            url:"{{route('admin.delivery.lost.confirm.status')}}",
+                                            url:"{{route('admin.delivery.sdn.bulk_closed')}}",
                                             method:'POST',
                                             data:{
-                                                'shipment_ids':selected_rows,
-                                                'reason':return_reason_select,
+                                                'sdn_ids':selected_rowsx,
                                                 '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
-                                            UnblockPagePermanently();
-                                            $('#ReturnConfirmReasonModal').modal('hide');
-                                            selected_rows = [];
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.draw('false');
-                                            table.rows().deselect();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            if (data.status == 1) {
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rowsx = [];
+
+                                                        table.rows().deselect();
+                                                        table.draw(true);
+                                                        table.button('.closed').disable();
                                         });
                                     }
                                 });
@@ -1009,6 +1017,7 @@
                         orderable: false,
                         searchable: false
                     },
+                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function (row, data, index) {
@@ -1050,13 +1059,14 @@
                         '<option value="0">Created</option>' +
                         '<option value="1">Deposited</option>' +
                         '<option value="2">Resolved</option>' +
+                        '<option value="3">Closed</option>' +
                         '</select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')  || $(header).is('.aging') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))
@@ -1705,6 +1715,57 @@
                     });
                 }
             });
+            $('body').on('click', '.update_status_closed', function () {
+            var id = $(this).parents('tr').attr('id');
+            if (id) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Mark SDN Closed!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.sdn.closed') !!}',
+                            type: 'POST',
+                            data: {
+                                'sdn_id': id,
+                                '_token': '{{ csrf_token() }}'
+                          }
+                          }).done(function (data) {
+                              if (data.status == 1) {
+                                 table.draw(false);
+                                  toastr.success(data.message, 'Success!', {
+                                     positionClass: 'toast-bottom-center',
+                                     containerId: 'toast-bottom-center'
+                                 });
+                             } else {
+                                 toastr.error(data.message, 'Error!', {
+                                     positionClass: 'toast-top-center',
+                                     containerId: 'toast-top-center'
+                                 });
+                             }
+                         });
+                     }
+                 });
+             }
+         });
             $('body').on('click', '.add_dncc', function () {
                 var id = $(this).parents('tr').attr('id');
                 if (id) {
