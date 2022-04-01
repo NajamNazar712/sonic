@@ -3810,11 +3810,10 @@ class AdminHumanResourseController extends Controller
         if($DN) {
             $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn', 'sdn.id', 'delivery_note_station_deposit_notes.station_deposit_note_id')
                 ->select(['sdn.status'])
-                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id)
-                ->first();
+                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id);
 
-            if ($sdn_note->status == 0) {
-                return back()->with("error", "Rider Has An Unresolved Station Deposit Note");
+            if ($sdn_note->doesntExist()) {
+                return back()->with("error", "Rider Station Deposit Note Has Not Been Created Yet");
             }
         }
 
