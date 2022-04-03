@@ -7807,7 +7807,7 @@ class DeliveryController extends Controller
         if ($station_deposit_notes->exists()) {
             $station_deposit_notes = $station_deposit_notes->get();
             foreach($station_deposit_notes as $station_deposit_note){
-                if ($station_deposit_note->status == 1) {
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
                     $station_deposit_note->status = 3;
                     $station_deposit_note->closed_at = Carbon::now();
                     $station_deposit_note->save();

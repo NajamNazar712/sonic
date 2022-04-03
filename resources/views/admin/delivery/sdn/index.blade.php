@@ -954,7 +954,7 @@
                 rowId: 'sdn_id',
                 order: [[2, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1 serial_number', targets: 0, render: function (data, type, row) {return '';}},
 
                     {
                         orderable: false,
