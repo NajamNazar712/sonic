@@ -360,9 +360,9 @@ class RegisterController extends Controller
                 $territory_id = null;
             }
         }
-        $referral = Referral::where('name',$data['sub_segments'])->get()->first();
+        $referral = Referral::where('name',$data['referral'])->get()->first();
         if($referral){
-            $referral_id = $referral->name;
+            $referral_id = $referral->id;
         }else{
             $referral_id = null;
         }
