@@ -537,6 +537,7 @@
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
+                    enabled: false,
                     action : function(e) {
                         e.preventDefault();
 
@@ -556,6 +557,7 @@
 
                                 table.button('.assign').enable();
                                 table.button('.update').enable();
+
                             }
                         });
                     }
