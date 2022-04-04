@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Auto Tagging 
+                    Auto Tagging
                 </h1>
 
                 <div class="card">
@@ -479,7 +479,7 @@
                         status +='<option value="1">Enable</option>';
                         status +='<option value="0">Disable</option>';
                         status +='</select>';
-                   
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -508,7 +508,7 @@
                             }
                         }
                     });
-                    
+
 
                     $('#status').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",

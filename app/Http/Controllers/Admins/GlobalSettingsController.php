@@ -5624,6 +5624,7 @@ public function sales_incentive()
 
         })
         ->editColumn('service2', function($roles) {
+
             if($roles->service2 == '' || $roles->service2 == null){
                 return 'All Services';
             }else{
@@ -5633,6 +5634,7 @@ public function sales_incentive()
         })
 
         ->editColumn('territory_name', function($roles) {
+
             if($roles->territory_name == '' || $roles->territory_name == null){
                 return 'All Territories';
             }else{
