@@ -15,7 +15,7 @@ class UpdateEmployeeNotificationForStatus extends Migration
     {
         Schema::table('employee_notification_histories', function (Blueprint $table) {
             $table->tinyInteger('status')->default('0')->index();
-            $table->Integer('screen_id')->nullable();
+            $table->Integer('screen_id')->nullable()->index();
         });
     }
 
