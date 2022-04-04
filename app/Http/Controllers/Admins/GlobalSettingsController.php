@@ -6450,6 +6450,8 @@ public function sales_incentive()
     }
 
     public function referral(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 520);
 
         return view('admin.settings.referral');
     }
