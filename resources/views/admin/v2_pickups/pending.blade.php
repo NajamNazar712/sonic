@@ -516,17 +516,17 @@
                 },
 
                 @endif
-                {
-                    text: 'Update',
-                    className: 'btn btn-primary update',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        $('#update_pickup_modal .reason').val(null).trigger('change');
-                        $('#update_pickup_modal #trax_remarks').val('');
-
-                        $('#update_pickup_modal').modal('show');
-                    }
-                },
+                // {
+                //     text: 'Update',
+                //     className: 'btn btn-primary update',
+                //     enabled: false,
+                //     action: function (e, dt, node, config) {
+                //         $('#update_pickup_modal .reason').val(null).trigger('change');
+                //         $('#update_pickup_modal #trax_remarks').val('');
+                //
+                //         $('#update_pickup_modal').modal('show');
+                //     }
+                // },
                 {
                     extend: 'excel',
                     title: 'Pending Pickups',
@@ -537,7 +537,6 @@
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
-                    enabled: false,
                     action : function(e) {
                         e.preventDefault();
 
