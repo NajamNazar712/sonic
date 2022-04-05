@@ -1767,6 +1767,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('data','Admins\DisputeController@get_data')->name('data');
         Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
 
+        Route::prefix('shipments')->name('shipments.')->group(function (){
+            Route::get('','Admins\DisputeController@dispute_index')->name('index');
+            Route::get('list','Admins\DisputeController@dispute_list')->name('list');
+        });
+
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function() {
