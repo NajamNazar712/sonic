@@ -4664,8 +4664,10 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $from = $request->from_date;
-            $to = $request->to_date;
+            $from = Carbon::parse($request->from_date)->format('Y-m-d h:i A');
+            $to = Carbon::parse($request->to_date);
+            // $from = $request->from_date;
+            // $to = $request->to_date;
 
             $receiving_sheets = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
