@@ -34,7 +34,8 @@ class User extends Authenticatable
     }
 
     public function city2() {
-        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id')->where('hub',1);
+        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
+//            ->where('hub',1);
     }
 
     public function bank(){

@@ -1162,11 +1162,13 @@ class AdminTrackingController extends Controller
 
                             }
 
-                            $cityy = '-';
+
                             if (isset($journey->admin->city->name)) {
                                 $cityy = $journey->admin->city->name;
                             }else if(isset($journey->user->city2->name)){
                                 $cityy = $journey->user->city2->name;
+                            }else if($shipment->destination_city->name){
+                                $cityy = $shipment->destination_city->name;
                             }
 
 
