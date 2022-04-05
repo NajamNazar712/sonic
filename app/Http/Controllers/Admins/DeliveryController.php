@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -6383,6 +6383,7 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
+                    ShipmentChargesController::weight($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
@@ -6600,6 +6601,7 @@ class DeliveryController extends Controller
                     ]);
 
                     ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::weight($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());

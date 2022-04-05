@@ -427,6 +427,14 @@ Route::name('api.')->group(function () {
 
     });
 
+    Route::prefix('botsify')->name('botsify.')->group(function () {
+        Route::post('shipper/phone_number', 'APIController@whatsapp_shipper_phone_number')->name('shipper.phone_number');
+        Route::post('shipment/tracking', 'APIController@whatsapp_shipper_tracking')->name('shipment.tracking');
+        Route::post('crm/launch', 'APIController@whatsapp_crm_request_create')->name('crm.launch');
+        Route::post('crm/tracking', 'APIController@whatsapp_shipper_crm_tracking')->name('crm.tracking');
+
+    });
+
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
     //Hbl Konnect
