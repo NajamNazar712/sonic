@@ -263,7 +263,7 @@ class RetailCashDepositController extends Controller
                                                 <td>' . number_format(ROUND($data['total_cash'], 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                             </tr>';
 
-                                            $cash_deposit_total_cash += number_format(ROUND($data['total_cash'], 0, PHP_ROUND_HALF_DOWN));
+                                            $cash_deposit_total_cash += $data['total_cash'];
                                     }
 
             $html .= '
