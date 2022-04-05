@@ -357,6 +357,39 @@
                 }
             });
 
+            $('#datatable tbody').on('click', '.hr_print', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('hr_print')) {
+                    var route = '{!! route('admin.human_resource.fnf.hr.print') !!}';
+                    // route = route.replace(':id', fnf_id);
+                    $.ajax({
+                    url: route,
+                    method: 'POST',
+                    data: {
+                        'id': fnf_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function(data) {
+                        var tab = window.open('', '_blank');
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                });
+                    
+                }
+            });
+
             $('#datatable tbody').on('click', '.update', function () {
                 var fnf_id = table.row($(this).parents('tr')).data().id;
                 if ($(this).hasClass('update')) {

@@ -14,6 +14,46 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 ">
+                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col-5 mt-1">
+                                            <div class="form-group input-group ">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_from"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_from" placeholder="Select From Date">
+                                            </div>
+                                        </div>
+                                        <div class="col-5 mt-1">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_to"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_to" placeholder="Select To Date">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 mt-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -30,6 +70,8 @@
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
+                                    <th class="border-primary border-darken-1">IBAN No.</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
@@ -314,10 +356,40 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="designationChangeLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
+            <div class="modal-content" style="width: 60%!important;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="designation_logs_heading">Designation Change Logs<span></span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body designation_logs" id="designation_logs_body">
+                    <table class="table table-bordered datatable" id="designation_logs_table">
+                        <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Designation</th>
+                                <th class="border-primary border-darken-1">Updated By</th>
+                                <th class="border-primary border-darken-1">Updated At</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 @endsection
@@ -326,6 +398,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
             type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
@@ -449,6 +524,34 @@
                 }
             });
 
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             $("#editRiderForm").validate({
 
                 errorClass: "danger",
@@ -505,6 +608,8 @@
                             head.push('Rider Main Category');
                             head.push('Designation');
                             head.push('Department Name');
+                            head.push('IBAN No.');
+                            head.push('Zone Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
@@ -524,6 +629,8 @@
                                 row.push(values.rider_main_category);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
+                                row.push(values.iban);
+                                row.push(values.zone_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
@@ -754,8 +861,14 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[15, 'desc']],
+                ajax: {
+                    url: '{{ route('admin.human_resource.employee_directory.list') }}',
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
+                order: [[17, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -772,6 +885,8 @@
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
+                    {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
+                    {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
@@ -799,6 +914,10 @@
 
                     var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
                         '</select>';
+
+                    var employee_zone = '<select name="employee_zone_search" id="employee_zone_search" class="select2 form-control">' +
+                        '</select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -816,6 +935,13 @@
                         else if($(header).is('.status'))
                         {
                             $(employee_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.zone_name'))
+                        {
+                            $(employee_zone).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -845,7 +971,7 @@
                         }
                     });
 
-                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'}];
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
@@ -863,6 +989,19 @@
                     $("#employee_status_search").prepend('<option value="" selected></option>').select2({
                         data: status_data,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var zone_data = $.map({!! $employee_zones !!}, function (obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#employee_zone_search").prepend('<option value="" selected></option>').select2({
+                        data: zone_data,
+                        placeholder: "Select Zone",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -1111,6 +1250,57 @@
                             });
                     }
                 });
+            });
+            var log_datatable = $('#designation_logs_table').DataTable({
+                dom: 'ltipr',
+                scrollX: false,
+                autoWidth : false,
+                paging:false,
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'designation', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'updated_by', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'updated_at', class: 'align-middle', orderable: false, searchable: false},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = log_datatable.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('body').on('click', '.designation_logs_1', function (e) {
+                var id = $(this).data('target-id');
+                $.ajax({
+                    url:'{!! route('admin.human_resource.employee_directory.designation_logs') !!}',
+                    type:'POST',
+                    data: {
+                        'employee_id': id,
+                        '_token':'{!! csrf_token() !!}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        var logs = data.logs;
+                        $.each(logs, function (index, value) {
+                            log_datatable.row.add([0, value.designation, value.updated_by, value.updated_at]);
+                            log_datatable.draw(true);
+                        });
+                        $('#designationChangeLogModal').modal('show');
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
+            $('body').on('hidden.bs.modal', '#designationChangeLogModal', function () {
+                log_datatable.clear().draw();
             });
 
             function edit_Rider_function(elm,rejoin=false)
@@ -1768,6 +1958,10 @@
                             });
                     }
                 });
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
 
 

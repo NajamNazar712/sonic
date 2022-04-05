@@ -9,9 +9,13 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -130,6 +134,13 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
     public function intercept_re_book_update(Request $request)
     {
+        $rules = [
+            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
@@ -145,6 +156,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                 if ($shipment['intercepted'] == 1) {
+
                     return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
                 } else {
                     $shipment = Shipment::find($request->shipment_id);
@@ -205,10 +217,23 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
-                   }
-                    
+                       if($request->hasFile('replacement_parcel_image')){
+                           $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                           if($shipment_parcel_image->exists()){
+                               $shipment_parcel_image = $shipment_parcel_image->first();
+                               Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                           }else{
+                               $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                               $shipment_parcel_image->shipment_id = $request->shipment_id;
+                           }
+                           $time = Carbon::now()->toDateString();
+                           $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                           Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
+                           $shipment_parcel_image->picture_path = $picture_path;
+                           $shipment_parcel_image->save();
+                       }
 
-                    
+                   }
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
@@ -217,6 +242,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         } else {
             return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
+    }
     }
 
     

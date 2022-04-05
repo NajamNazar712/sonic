@@ -2,8 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Support\Facades\Auth;
-
+use Session;
 use Closure;
 
 class Permission
@@ -222,6 +223,10 @@ class Permission
             'cargo_manifest.history' => 556,
             'cargo_manifest.history.list' => 556,
 
+            'cargo_manifest.draft.setting.list' => 682,
+            'cargo_manifest.draft.setting' => 682,
+            'cargo_manifest.draft.update' => 682,
+
 
 
 
@@ -368,6 +373,7 @@ class Permission
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
+            'return.confirmation_pending_sms' => 675,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -586,6 +592,12 @@ class Permission
             
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
+            
+            'reports.crm_count.index' => 673,
+            'reports.crm_count.list' => 673,
+
+            'reports.pickup_history_cn_wise.index' => 679,
+            'reports.pickup_history_cn_wise.list' => 679,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -773,6 +785,8 @@ class Permission
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
+            'settings.debriefing_break_time.index' => 674,
+            'settings.debriefing_break_time.store' => 674,
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
@@ -902,9 +916,15 @@ class Permission
 
             'settings.shippers_origin_change.index' => 667,
             'settings.shippers_return_address.index' => 668,
+            'settings.rcp_sms.index' => 680,
 
+            'settings.consignee_sms_expire.index' => 683,
+			'settings.sales.user_restriction.index' => 681,
 
+            'settings.return_shipments_address.index' => 689,
 
+            'settings.return_reason_mandatory.index' => 684,
+            'settings.return_reason_mandatory.list' => 684,
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -1115,7 +1135,10 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-            
+
+            'reports.debriefing.agent_list' => 676,
+            'reports.debriefing.agent_index' => 676,
+
 			'finance.ftl_invoice.index' => 509,           
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
@@ -1166,12 +1189,24 @@ class Permission
             'qa_evaluation.edit' => 654,
             'qa_evaluation.view' => 655,
             'qa_evaluation.edit_activities' => 656,
+
+            'qa.high_alert.shippers.index' => 692,
+
             'settings.lead_tagging.index' => 661,
             'settings.lead_tagging.list' => 661,
             'settings.lead_zones.index' => 664,
             'settings.lead_zones.list' => 664,
             'settings.lead_notification.index' => 671,
             'settings.lead_notification.list' => 671,
+            
+            'reports.crm_special_approval.index' => 688,
+            'reports.crm_special_approval.list' => 688,
+            'settings.cn_print_right.cn_print_right' =>699,
+
+            
+            'admin.settings.auto_tag_territories.index' => 697,
+            'admin.settings.auto_tag_territories.list' => 697,
+            
         ],
 
         'shipper' => [
@@ -1280,6 +1315,27 @@ class Permission
     public function handle($request, Closure $next) {
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
+            if(session('department_id') == 7){
+                if(!Session::has('sale_users_bypass')){
+                    $sale_users_bypass = array();
+                    $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        $sale_users_bypass = array_map('intval', explode(',', $settings->text));
+                        session(['sale_users_bypass' => $sale_users_bypass]);
+
+                    }
+                    else{
+                        session(['sale_users_bypass' => []]);
+                    }
+                }
+
+            }
+            else{
+                session(['sale_users_bypass' => []]);
+            }
+
 
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);

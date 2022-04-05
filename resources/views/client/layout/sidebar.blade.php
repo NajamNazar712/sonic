@@ -10,33 +10,33 @@
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book</span></a>
-                        <ul class="menu-content">
-                        @if (session('user_type') == 1 || in_array(1, session('permissions')))
-                            @if (session('account_type') == 1 && session('rate_status') == 1)
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
-                                    <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
-                            @elseif (session('account_type') == 2 && session('rate_status') == 1)
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
-                                    @if(session('user_id') == 10354)
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
-                                    @else
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
+                            <ul class="menu-content">
+                                @if (session('user_type') == 1 || in_array(1, session('permissions')))
+                                    @if (session('account_type') == 1 && session('rate_status') == 1)
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
+                                    @elseif (session('account_type') == 2 && session('rate_status') == 1)
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
+                                        @if(session('user_id') == 10354)
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
+                                        @else
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
+                                        @endif
                                     @endif
-                            @endif
-                            @if(session('international_rates') == 1)
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
-                            @endif
-                        @endif
-                        </ul>
+                                    @if(session('international_rates') == 1)
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
+                                    @endif
+                                @endif
+                            </ul>
                         </li>
                         @if (session('user_type') == 1 || in_array(3, session('permissions')))
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
                                 <ul class="menu-content">
-                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
                                 </ul>
                             </li>
                         @endif
@@ -52,7 +52,8 @@
                         @if(session('shipper_return_address') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.book.return_address.excel.index') }}">Return Address</a></li>
                         @endif
-{{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
+
+                        {{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
                     </ul>
                 </li>
             @endif
@@ -85,6 +86,11 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
                     </ul>
+                    @if(session('shipment_return_address_change') == 1)
+                        <ul class="menu-content">
+                            <li><a class="menu-item" href="{{ route('cod.shipment.return_address_change.index') }}">Return Address Change</a></li>
+                        </ul>
+                    @endif
                     <ul class="menu-content">
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return Sheet</span></a>
                             <ul class="menu-content">
@@ -94,6 +100,7 @@
                             </ul>
                         </li>
                     </ul>
+
                 </li>
             @endif
 
@@ -111,7 +118,7 @@
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
                         <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
-                        @if((session('account_type') == 2 && session('user_type') == 1) || (session('user_type') == 2 && in_array(14, session('permissions'))))
+                        @if (session('user_type') == 1 || in_array(14, session('permissions')))
                             <li><a href="{{ route('cod.finance.invoice.index') }}">Invoice</a></li>
                         @endif
                     </ul>
@@ -120,7 +127,7 @@
 
             {{--<li class=" nav-item"><a href="https://form.jotform.me/81993400128456" target="_blank"><span class="menu-title" data-i18n="nav.dash.main">Complain Form</span></a></li>--}}
             @if (session('user_type') == 1 || count(array_intersect([8, 15], session('permissions'))) !== 0)
-            
+
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('user_id') == 3324)
@@ -154,7 +161,7 @@
             @if (session('user_type') == 1 || in_array(10, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
             @endif
-            
+
             @if (session('user_type') == 1)
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif
@@ -163,14 +170,14 @@
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         @if(session('user_type') == 1 || in_array(11, session('permissions')))
-                        <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Information And Print Count</a></li>
-                        <li><a class="menu-item" href="{{route('cod.settings.logo.index')}}">Logo</a></li>
+                            <li><a class="menu-item" href="{{route('cod.settings.air_waybill_printing.index')}}">Air Waybill Information And Print Count</a></li>
+                            <li><a class="menu-item" href="{{route('cod.settings.logo.index')}}">Logo</a></li>
                         @endif
                         @if(session('pickup_wise_account'))
-                        <li><a class="menu-item" href="{{route('cod.settings.shipping_information.index')}}">IBAN</a></li>
+                            <li><a class="menu-item" href="{{route('cod.settings.shipping_information.index')}}">IBAN</a></li>
                         @endif
                         @if(session('user_type') == 1)
-                        <li><a class="menu-item" href="{{route('cod.settings.subscription.index')}}">Shipment Status Subscription</a></li>
+                            <li><a class="menu-item" href="{{route('cod.settings.subscription.index')}}">Shipment Status Subscription</a></li>
                         @endif
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.payment_subscription.index')}}">Payment Status Subscription</a></li>
@@ -180,6 +187,10 @@
                         @endif
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.final_charges_subscription.index')}}">Final Charges Subscription</a></li>
+                        @endif
+
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.receiving_sheet.index')}}">Receiving Sheet (Shipment Description)</a></li>
                         @endif
                     </ul>
 

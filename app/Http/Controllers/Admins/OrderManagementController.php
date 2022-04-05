@@ -83,7 +83,7 @@ class OrderManagementController extends Controller
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2', 'shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category', 'pm.mode as payment_mode']);
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -294,14 +294,16 @@ class OrderManagementController extends Controller
 
                                     $warehouse_id = $fulfilment_hub->warehouse_id;
 
-                                    foreach ($packaging_material_request_details as $detail_add) {
-                                        $type_id = $detail_add->type_id;
-                                        $type_size_id = $detail_add->type_size_id;
-                                        $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+                                    if($packaging_material_request_details){
+                                        foreach ($packaging_material_request_details as $detail_add) {
+                                            $type_id = $detail_add->type_id;
+                                            $type_size_id = $detail_add->type_size_id;
+                                            $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
 
-                                        $stock = $stock->first();
-                                        $stock->stock = $stock['stock'] + $detail_add->quantity;
-                                        $stock->save();
+                                            $stock = $stock->first();
+                                            $stock->stock = $stock['stock'] + $detail_add->quantity;
+                                            $stock->save();
+                                        }
                                     }
 
                                     $packaging_request_history_replenished = new PackagingMaterialRequestHistory();
@@ -507,7 +509,7 @@ class OrderManagementController extends Controller
         ->where('shipments.shipper_status_id', '=', 15);
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });

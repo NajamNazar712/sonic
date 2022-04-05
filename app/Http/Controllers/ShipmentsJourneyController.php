@@ -7,6 +7,7 @@ use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -120,6 +121,13 @@ class ShipmentsJourneyController extends Controller
         $shipment_journey->ip_address = $client_address;
       }
 
+        if($shipper_status_id == 53){
+            $shipment = Shipment::find($shipment_id);
+            if ($shipment) {
+                $shipment_journey->city_id = $shipment->pickup_address->city_id;
+            }
+        }
+
       $shipment_journey->save();
       if($verification == 1){
           if($shipper_status_id != 1){
@@ -154,8 +162,8 @@ class ShipmentsJourneyController extends Controller
             ShipperShipmentsSubscription::where('shipment_id', $shipment_id)->delete();
         }
 
-        /*if($shipper_status_id == 52){
+        if($shipper_status_id == 52){
             ReattemptShipmentStatusController::auto_reattempt_status_for_max_delivery_ratio($shipment_id);
-        }*/
+        }
     }
 }

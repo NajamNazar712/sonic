@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\Admin\AdminAppSlider;
-use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
-use App\Http\Models\FleetVendor;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
@@ -36,12 +33,19 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\Admin\RetailAppSlider;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RouteManagement;
 use App\Http\Models\Admin\RouteManagementJunction;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\Admin\SalesDesignationJourney;
+use App\Http\Models\Admin\SalesIncentiveDate;
 use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Admin\VehicleType;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
@@ -64,37 +68,36 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CrmAgent;
-use App\Http\Models\CrmAgentLog;
 use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\FleetDriver;
+use App\Http\Models\FleetVendor;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Holiday;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
-use App\Http\Models\RateStatus;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderCategory;
 use App\Http\Models\Rider\RidersIncentiveSetting;
 use App\Http\Models\Rider\RidersShipmentPaymentType;
 use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\Runner;
 use App\Http\Models\RunnerJunction;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
@@ -104,12 +107,8 @@ use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
-use App\Http\Models\Admin\SalesDesignationJourney;
-use App\Http\Models\Admin\SalesDesignation;
-use App\Http\Models\Admin\Territory;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
-use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -117,6 +116,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
@@ -846,6 +846,57 @@ class GlobalSettingsController extends Controller
         $start->setting_value = $request->debriefing_report_day_cut_off_time;
 
         $start->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function debriefing_break_time_setting_index()
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting')->first();
+        $total = GlobalSettings::where('type', 'debriefing_total_time_setting')->first();
+
+        $break_timings = 0;
+        $total_timings = 0;
+        if ($settings) {
+            $break_timings = floatval($settings->text);
+        }
+
+        if ($total) {
+            $total_timings = floatval($total->text);
+        }
+
+        return view('admin.settings.debriefing_total_time_setting',compact('break_timings','total_timings'));
+    }
+
+    public function debriefing_break_time_setting_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_break_time_setting';
+        }
+
+        $settings->text = $request->break_timings;
+
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'debriefing_total_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_total_time_setting';
+        }
+
+        $settings->text = $request->total_timings;
+
+        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -1596,8 +1647,8 @@ class GlobalSettingsController extends Controller
     public function crm_case_nature_types_list(Request $request)
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
-            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status');
-
+            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status')
+            ->where('crm_request_case_nature_types.id','<>',34);
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function($case_nature_types) {
                 if($case_nature_types->status==1){
@@ -2247,7 +2298,7 @@ class GlobalSettingsController extends Controller
         }
         $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -2664,13 +2715,23 @@ class GlobalSettingsController extends Controller
     {
         $reason = trim($request->reason);
         if ($reason) {
-            $shipment_reason = new ShipmentStatusReason();
-            $shipment_reason->name = $reason;
-            $shipment_reason->save();
+            $shipment_reasons = ShipmentStatusReason::where('name', 'like', strtolower($reason));
+            if(!$shipment_reasons->exists()){
 
-            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                $shipment_reason = new ShipmentStatusReason();
+                $shipment_reason->name = $reason;
+                $shipment_reason->save();
 
-            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+            else{
+                $shipment_reason = $shipment_reasons->first();
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
@@ -4826,16 +4887,15 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),469);
         $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
         $zones = Zone::where('status',1)->where('business_category_id',1)->get();
-        $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
+        // $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
 
-        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones, 'case_natures' => $case_natures]);
+        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones]);
     }
 
     public function crm_auto_assigning_list(){
         $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
                  ->join('zones as z','z.id','crm_agents.zone_id')   
-                 ->join('crm_request_case_nature as cn','cn.id','crm_agents.case_nature_id')   
-        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature','crm_agents.status as status');
+        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name','crm_agents.status as status','crm_agents.case_nature_id as case_nature');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -4899,13 +4959,20 @@ class GlobalSettingsController extends Controller
                 return 'Disable';
             }
             
+        })->editColumn('case_nature', function($roles) {
+            if($roles->case_nature == 4){
+                return 'Claim';
+            }else{
+                return 'Complaints / Service Request';
+            }
+            
         });
 
     return $datatables->make(true);
     }
 
     public function crm_auto_assigning_submit(Request $request){
-        $crm_agent = CrmAgent::where('admin_id',$request->admin_id)->where('case_nature_id',$request->case_nature_id);
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id);
         if(!$crm_agent->exists()){
 
             CrmAgent::create($request->all());
@@ -4914,8 +4981,6 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Agent Already Exists!');
 
         }
-
-
     }
 
     public function crm_auto_assigning_data(Request $request){
@@ -4923,9 +4988,9 @@ class GlobalSettingsController extends Controller
 
         $agent_id = $crm_agent_data->admin_id;
         $zone_id = $crm_agent_data->zone_id;
-        $case_nature_id = $crm_agent_data->case_nature_id;
+        // $case_nature_id = $crm_agent_data->case_nature_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'case_nature_id'=> $case_nature_id,'crm_agent_id'=> $crm_agent_id]);
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'crm_agent_id'=> $crm_agent_id]);
 
     }
 
@@ -4941,7 +5006,7 @@ class GlobalSettingsController extends Controller
 
         $crm_agent_data->admin_id = $request->admin_id;
         $crm_agent_data->zone_id = $request->zone_id;
-        $crm_agent_data->case_nature_id = $request->case_nature_id;
+        // $crm_agent_data->case_nature_id = $request->case_nature_id;
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
 
@@ -6043,4 +6108,355 @@ public function sales_incentive()
         return redirect()->back()->with('success','Setting Updated');
     }
 
+    public function consignee_sms_expire_index()
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time')->first();
+
+        if ($settings) {
+            $consignee_sms_expire_time = $settings->setting_value;
+        } else {
+            $consignee_sms_expire_time = 20;
+        }
+
+        return view('admin.settings.last_mile.consignee_sms_expire_time')->with(['consignee_sms_expire_time' => $consignee_sms_expire_time]);
+    }
+
+    public function consignee_sms_expire_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'consignee_sms_expire_time';
+        }
+
+        $settings->setting_value = $request->consignee_sms_expire_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+	public function sales_user_restriction_index()
+    {
+        $user_ids = array();
+
+        $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $user_ids = array_map('intval', explode(',', $settings->text));
+        }
+
+        $sale_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+
+        return view('admin.settings.sales.sale_person_restriction_bypass')->with(['sale_persons' => $sale_persons, 'user_ids' => $user_ids]);
+    }
+
+    public function sales_user_restriction_store(Request $request)
+    {
+        if ($request->has('users')) {
+            $roles = implode(',', $request->users);
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'sales_user_restriction_bypass';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $roles;
+            $settings->save();
+        } else {
+            GlobalSettings::where('type', 'sales_user_restriction_bypass')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function return_reason_mandatory_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
+        $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
+        $shippers = User::join('cities as c', 'users.city_id', '=', 'c.id')
+            ->where('users.status', 3)->where('users.blacklist', 0)->whereNotIn('users.id',$already_added_shippers)->select('users.id as id', 'users.name as name');
+        if (session('role_id') != 1) {
+            $shippers = $shippers->whereIn('c.hub_id', session('hubs'));
+        }
+        $shippers = $shippers->get();
+        return view('admin.settings.return.return_reason_mandatory',compact('shippers'));
+
+    }
+
+    public function return_reason_mandatory_list(Request $request){
+        $shippers = ReturnReasonMandatoryShipper::join('users as u', 'return_reason_mandatory_shippers.shipper_id', 'u.id')
+            ->join('admins as ad', 'return_reason_mandatory_shippers.added_by', '=', 'ad.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->select('u.name as shipper_name', 'ad.name as added_by','c.name as shipper_city', 'return_reason_mandatory_shippers.created_at as added_at');
+        if (session('role_id') != 1) {
+            $shippers = $shippers->whereIn('c.hub_id', session('hubs'));
+        }
+        $datatables = Datatables::of($shippers)
+            ->editColumn('added_at', function ($shippers) {
+                return Carbon::parse($shippers->added_at)->format("Y-m-d");
+            });
+        return $datatables->make(true);
+    }
+
+    public function return_reason_mandatory_store(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $return_shipper_reason = new ReturnReasonMandatoryShipper();
+        $return_shipper_reason->shipper_id = $shipper_id;
+        $return_shipper_reason->added_by = Auth::id();
+        $return_shipper_reason->save();
+        return redirect()->back()->with('success', 'Shipper Has Been Added!');
+    }
+    public function cn_print_right()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
+        $admin_roles_id = AdminRole::all();
+//        dd($admin_roles);
+        $settings = GlobalSettings::where('type', 'cn_print_rights');
+        $foc_account_tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $admin_roles = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles_id,'existing_admin_roles'=> $admin_roles ]);
+    }
+    public function cn_print_right_store(Request $request)
+    {
+
+        if ($request->has('admin_role')) {
+
+            $newids=$request->get('admin_role');
+//            $admin = Admin::select('id')->whereIn('role_id',$newids)->get();
+//            $admin = $admin->pluck('id')->toArray();
+
+            $role_ids = GlobalSettings::where('type','cn_print_rights')->first();
+            $exist = $role_ids->text;
+            if ($exist == null) {
+
+                $default = 0;
+                $role_ids->text = implode(",",$newids);
+                $role_ids->save();
+                return redirect()->back()->with('success', 'Settings Updated!');
+
+            } else {
+                $role_ids->text = null;
+                $role_ids->save();
+
+                $role_ids->text = implode(",",$newids);
+////                $newids = $exist.','.implode(",",$admin);
+//
+//                $role_ids->text = $newids;
+                $role_ids->save();
+                return redirect()->back()->with('success', 'Settings Updated!');
+            }
+        }
+        else
+        {
+            $role_ids = GlobalSettings::where('type','cn_print_rights')->first();
+            $role_ids->text = null;
+            $role_ids->save();
+
+            return redirect()->back()->with('error', 'Updated But No Admin-Role selected!');
+        }
+
+    }
+
+    public function bolt_update_version_index(){
+        if(session('role_id') == 1){
+            $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
+            return view('admin.settings.bolt_update_version')->with('settings', $settings);
+        }else{
+            return redirect()->route('admin.access_denied');
+        }
+    }
+
+    public function bolt_update_version_store(Request $request){
+        if(session('role_id') == 1){
+        $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
+        $settings->setting_value = $request->updated_version;
+        $settings->save();
+        return redirect()->back()->with('success', 'Settings Updated!');
+        }else{
+            return redirect()->route('admin.access_denied');
+        }
+    }
+
+
+    public function return_shipments_address_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'return_shipments_address_change_shippers');
+        $return_shipments_address_change_shippers = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $return_shipments_address_change_shippers = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.return_shipments_address_change_shippers')->with(['shippers' => $shippers, 'return_shipments_address_change_shippers' => $return_shipments_address_change_shippers]);
+    }
+
+    public function return_shipments_address_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'return_shipments_address_change_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'return_shipments_address_change_shippers';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
+    public function auto_tag_territories_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 518);
+
+        $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
+                            ->select(['admins.id', 'admins.name'])
+                            ->where('admins.status', 1)->where('ar.department_id', 7)->get();
+
+        $territories = Territory::where('territory_status',1)->get();
+        $cities = City::where('status',1)->get();
+        return view('admin.settings.auto_tag_territory',compact('agents','territories','cities'));
+    }
+
+
+    public function auto_tag_territories_list(Request $request){
+       
+        $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
+        ->leftjoin('territories as t','t.id','auto_tag_territories.territory_id')   
+        ->leftjoin('cities as c','c.id','t.city_id')   
+        ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name','auto_tag_territories.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(698, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        })->editColumn('city_name', function($roles) {
+            if($roles->city_name == '' || $roles->city_name == null){
+                return 'All Cities';
+            }else{
+                return $roles->city_name;
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function auto_tag_territories_store(Request $request){
+        $check_tagging = AutoTagTerritory::where('admin_id',$request->agent_id);
+            
+        if(!$check_tagging->exists()){
+            $auto_tagging = new AutoTagTerritory;
+            $auto_tagging->admin_id = $request->agent_id;
+            $auto_tagging->territory_id = $request->territory_id;
+            $auto_tagging->save();
+
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');
+
+        }else{
+            return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+        }
+    }
+    public function auto_tag_territories_enable_disable(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->id);
+        if($auto_tagging->status == 1){
+            $auto_tagging->status = 0;
+            $auto_tagging->save();
+        return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!');
+
+        }else{
+            $auto_tagging->status = 1;
+            $auto_tagging->save();
+        return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!');
+
+        }
+    }
+
+    public function auto_tag_territories_data(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->id);
+
+        $agent_id = $auto_tagging->admin_id;
+        $territory_id = $auto_tagging->territory_id;
+        $city_id = Territory::find($territory_id)->city_id;
+        $auto_tagging_id = $auto_tagging->id;
+
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'auto_tagging_id'=> $auto_tagging_id ,'territory_id'=> $territory_id]);
+
+    }
+
+    public function auto_tag_territories_update(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
+        if($request->agent_id == $auto_tagging->admin_id){
+            $auto_tagging->territory_id = $request->territory_id;
+            $auto_tagging->save();
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+        }else{
+            $check_tagging = AutoTagTerritory::where('admin_id',$request->agent_id);
+            if(!$check_tagging->exists()){
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $request->territory_id;
+                $auto_tagging->save();
+                return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+            }else{
+                return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+            }
+        }
+    }
+    
+    
 }

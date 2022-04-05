@@ -697,7 +697,8 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
+                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620,690,691], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist()))
+                {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -708,14 +709,30 @@ class RiderManagementController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                     }
 
-                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
-                        if ($rider->status == 1) {
+//                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+//                        if ($rider->status == 1) {
+//                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+//                        }
+//                        else {
+//                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+//                        }
+//                    }
+
+                    if (session('role_id') == 1 || in_array(691, session('permissions')))
+                    {
+                        if ($rider->status == 1)
+                        {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
                         }
-                        else {
+                    }
+                    if (session('role_id') == 1 || in_array(690, session('permissions')))
+                    {
+                        if ($rider->status != 1)
+                        {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                         }
                     }
+
                     if (session('role_id') == 1 || in_array(381, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Permanent</div></button>';
                     }

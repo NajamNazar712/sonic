@@ -31,7 +31,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.1">
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.3
+">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column bg-full-screen-image  menu-expanded blank-page blank-page"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">

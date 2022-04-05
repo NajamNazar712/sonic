@@ -14,7 +14,7 @@
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
 
-                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('admin.intercept.update')}}">
+                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('admin.intercept.update')}}" enctype="multipart/form-data">
                 @csrf
                     <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
                         <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
@@ -57,6 +57,13 @@
                             <div class="form-group">
                                 <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                             </div>
+
+                            @if($shipment->booking_type_id == 2)
+                                <div class="form-group d-none" id="replacement_parcel_image_div">
+                                    <label class="d-block bold">Replacement Parcel Image</label>
+                                    <input class="form-control form-control-sm" type="file" name="replacement_parcel_image"  id="replacement_parcel_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                            @endif
                         </div>
                         <div class="col col_custom">
                             <h4 class="form-section mb-2 text-center">Payment Information</h4>
@@ -110,12 +117,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var con_city = $('#consignee_city').val();
-
-           
-
-            
+            var consignee_name = @json($shipment['consignee_name']);
             var city = @json($shipment['consignee_city_id']);
+            var email = @json($shipment['consignee_email']);
+            var amount = @json($shipment['amount']);
+
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'
@@ -125,16 +131,19 @@
                 placeholder: 'Consignee*'
             }).bind('change', function () {
               if(this.value == 2){
-
+                  $('#consignee_city').val(city).trigger('change');
                   var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                   $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
                   $('#intercept_type').val(2);
-                  $('#consignee_city').val(city).trigger('change');
                   $('#consignee_city').addClass('disabled')  //disable class
                       .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
+                  $( "#consignee_name" ).val(consignee_name);
                   $( "#consignee_name" ).prop('readonly', true);
+                  $( "#consignee_email" ).val(email);
                   $( "#consignee_email" ).prop('readonly', true);
+                  $( "#amount" ).val(amount);
                   $( "#amount" ).prop('readonly', true);
+                  $("#replacement_parcel_image_div").removeClass("d-none");
               }
               else{
                   $( "#consignee_name" ).prop('readonly', false);
@@ -144,6 +153,7 @@
                   $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
                   $('#consignee_city').removeClass('disabled')  //remove disable class
                       .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
+                  $("#replacement_parcel_image_div").addClass("d-none");
               }
             });
 

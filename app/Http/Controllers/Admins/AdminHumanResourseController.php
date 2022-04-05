@@ -27,6 +27,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDesignationHub;
+use App\Http\Models\HR\EmployeeDesignationLog;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -229,7 +230,8 @@ class AdminHumanResourseController extends Controller
         $employee_shifts = EmployeeShift::where('status',1)->get(['id','name']);
         $city = City::where('business_category_id', 1)->get();
         $staff_categories = StaffCategory::all();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories]);
+        $employee_zones = Zone::where('status',1)->where('business_category_id',1)->get(['id', 'name']);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones]);
     }
 
     public function employee_directory_list(Request $request)
@@ -252,7 +254,9 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_main_categories as rmc','rmc.id','=','employees.rider_main_category')
             ->leftjoin('employee_designations as ed','ed.id','=','employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id'])
+            ->leftjoin('employee_bank_informations as eb', 'eb.employee_id', '=', 'employees.id')
+            ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -262,7 +266,7 @@ class AdminHumanResourseController extends Controller
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
         }
 
-        return Datatables::of($employees)
+        $datatable =  Datatables::of($employees)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->employee_id, 6, '0', STR_PAD_LEFT);
             })
@@ -271,20 +275,25 @@ class AdminHumanResourseController extends Controller
             })
             ->filterColumn('et.name', function ($query, $keyword) {
                 if ($keyword == 1) {
-                    return $query->where('employees.employee_type_id', '=', 1);
-                } elseif ($keyword == 2) {
+                    return $query->where('employees.staff_category_id', '=', 1);
+                }
+                elseif ($keyword == 2) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
                             $q->where('employees.rider_type_id',1)
                                 ->orwhere('r_rt.id', 1);
                         });
 
-                } elseif ($keyword == 3) {
+                }
+                elseif ($keyword == 3) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
                             $q->where('employees.rider_type_id',2)
                                 ->orwhere('r_rt.id', 2);
                         });
+                }
+                if ($keyword == 4) {
+                    return $query->where('employees.staff_category_id', '=', 2);
                 }
 
                 return null;
@@ -299,10 +308,10 @@ class AdminHumanResourseController extends Controller
                 if ($user->employee_type_id == 1) {
 
                     if($user->staff_category_id == 2) {
-                        return $user->employee_type." - ".$user->staff_category;
+                        return "Intern";
                     }
                     else{
-                        return $user->employee_type;
+                        return "Staff";
                     }
                 } else {
 
@@ -335,9 +344,7 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-
-                        if ($result->request_status_id == 1 || $result->request_status_id == 2) {
+                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
@@ -417,6 +424,12 @@ class AdminHumanResourseController extends Controller
                             $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                         }
 
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                        if($result->employee_type_id == 1){
+                            $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                        }
+                    }
+
                         $dropdown .= '
                 </div>
               </div>
@@ -426,8 +439,18 @@ class AdminHumanResourseController extends Controller
                 else {
                     return '';
                 }
-            })
-            ->make(true);
+            });
+            if ($request->get('search_date_from')) {
+                if($request->get('search_date_to')){
+                    $from = $request->get('search_date_from').' 00:00:00';
+                    $to = $request->get('search_date_to').' 23:59:59';
+                    $datatable->whereBetween('employees.created_at', [$from, $to]);
+                }else{
+                    $from = $request->get('search_date_from');
+                    $datatable->whereDate('employees.created_at', $from);
+                }
+            }
+        return $datatable->make(true);
     }
 
     public function employee_directory_pin(Request $request)
@@ -1032,6 +1055,7 @@ class AdminHumanResourseController extends Controller
         $employee->religion_id = $request->religion;
         $employee->nationality_id = $request->nationality;
         $employee->domicile_id = $request->domicile;
+        $employee->employee_gender_id = $request->gender;
         $employee->marital_status_id = $request->marital_status;
         $employee->blood_group = $request->blood_group;
         $employee->personal_email = $request->personal_email;
@@ -1040,6 +1064,15 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+
+        if($employee->designation_id != $request->designation){
+            $designation_logs = new EmployeeDesignationLog();
+            $designation_logs->updated_by = Auth::id();
+            $designation_logs->designation_id = $employee->designation_id;
+            $designation_logs->employee_id = $employee->id;
+            $designation_logs->save();
+        }
+
         $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
         $employee->department_id = ($request->has('department')) ? $request->department : 6;
@@ -1115,7 +1148,6 @@ class AdminHumanResourseController extends Controller
                 $rider->dummy_pin = $employee->pin;
                 $rider->shift_id = $employee->shift_id;
                 $rider->pin = bcrypt($employee->pin);
-                $rider->rider_type_id = $request->rider_type;
                 $rider->rider_main_category_id = $request->rider_main_category;
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
@@ -1201,12 +1233,12 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_bank_update(Employee $employee, Request $request)
     {
-        if ($employee->bank_info()->exists()) {
-            $bank_info = $employee->bank_info->first();
+        $bank_info = EmployeeBankInformation::where('employee_id', $employee->id);
+        if ($bank_info->exists()) {
+            $bank_info = $bank_info->first();
         } else {
             $bank_info = new EmployeeBankInformation();
         }
-
         $bank_info->employee_id = $employee->id;
         $bank_info->account_title = $request->account_title;
         $bank_info->branch_code = $request->branch_code;
@@ -3765,12 +3797,15 @@ class AdminHumanResourseController extends Controller
         $rider = $rider->first();
 
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+        $dn_check = DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
             $q->where('status', 0)
                 ->orWhere('dncc_status', 0);
-        })->exists())
+        });
+        if($dn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Delivery Note");
+            $dn_check = $dn_check->pluck('id')->toArray();
+            $dn = implode(", ", $dn_check);
+            return back()->with("error", "Rider Has An Unfinished Following Delivery Note : " .$dn);
         }
 
 
@@ -3778,23 +3813,28 @@ class AdminHumanResourseController extends Controller
         if($DN) {
             $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn', 'sdn.id', 'delivery_note_station_deposit_notes.station_deposit_note_id')
                 ->select(['sdn.status'])
-                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id)
-                ->first();
+                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id);
 
-            if ($sdn_note->status == 0) {
-                return back()->with("error", "Rider Has An Unresolved Station Deposit Note");
+            if ($sdn_note->doesntExist()) {
+                return back()->with("error", "Rider Station Deposit Note Has Not Been Created Yet");
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
+        $pn_check = V2PickupNote::where('rider_id',$rider->id)->where('status', 0);
+        if($pn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Pickup Note");
+            $pn_check = $pn_check->pluck('id')->toArray();
+            $pn = implode(", ", $pn_check);
+            return back()->with("error","Rider Has An Unfinished Following Pickup Note : ".$pn);
         }
 
 
-        if(ReturnNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        $rn_check = ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2]);
+        if($rn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Return Note");
+            $rn_check = $rn_check->pluck('id')->toArray();
+            $rn = implode(", ", $rn_check);
+            return back()->with("error","Rider Has An Unfinished Following Return Note : ".$rn);
         }
 
         $admin = new Admin();
@@ -3884,5 +3924,18 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
         }
         return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
+    }
+
+    public function designation_change_logs(Request $request){
+        $designation_logs = EmployeeDesignationLog::join('admins as a', 'a.id','=','employee_designation_logs.updated_by')
+            ->join('employee_designations as ed', 'ed.id', '=', 'employee_designation_logs.designation_id')
+            ->select('a.name as updated_by', 'ed.name as designation', 'employee_designation_logs.created_at as updated_at')
+            ->where('employee_designation_logs.employee_id', $request->employee_id)->orderBy('employee_designation_logs.id', 'DESC');
+        if($designation_logs->exists()){
+            $designation_logs = $designation_logs->get();
+            return response()->json(['status' => 1, 'logs' => $designation_logs]);
+        }else{
+            return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
+        }
     }
 }

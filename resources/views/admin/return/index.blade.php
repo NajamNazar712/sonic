@@ -52,7 +52,7 @@
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
-                        <th class="border-primary border-darken-1">RCP SMS Count</th>
+                     {{--   <th class="border-primary border-darken-1">RCP SMS Count</th>--}}
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -520,7 +520,7 @@
                             head.push('Consignee Phone');
                             head.push('Address');
                             head.push('Collection Amount');
-                            head.push('RCP SMS Count');
+                           /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Status');
@@ -555,7 +555,7 @@
                                 row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
-                                row.push(values.message_count);
+                            /*    row.push(values.message_count);*/
                                 row.push(values.mode);
                                 row.push(values.service_type);
                                 row.push(values.status);
@@ -1014,7 +1014,7 @@
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},
+                   /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
@@ -1929,7 +1929,58 @@
                     form.submit();
                 }
             });
-       
+
+            $('#datatable tbody').on('click', '.dropdown-menu a.rcp_sms', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                if(id){
+
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Estimated Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            $.ajax({
+                                url: '{!! route('admin.return.rcp_sms') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'id': id
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
+                        }
+                    });
+                }
+            });
+
 
       
         });

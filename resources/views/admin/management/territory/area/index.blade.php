@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Territory</th>
+                                    <th class="border-primary border-darken-1">Area Status</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
@@ -220,6 +221,7 @@
                             head.push('S.No');
                             head.push('Area');
                             head.push('Territory');
+                            head.push('area_status');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Updated At');
@@ -231,6 +233,7 @@
                                 row.push(index + 1);
                                 row.push(values.area);
                                 row.push(values.territory);
+                                row.push(values.area_status);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
@@ -436,12 +439,13 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.area.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
+                    {data: 'area_status', name: 'area_status', class: 'align-middle area_status'},
                     {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.created_by', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
@@ -539,6 +543,62 @@
                             console.log(route);
                             $("#edit_area_form").attr('action', route);
 
+                        }
+
+                    });
+
+                }
+                if ($(this).hasClass('disable_area_status')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.area.disable_area_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': area_id
+                        }
+                    }).done(function(data){
+
+                        if(data.status == 1 )
+                        {
+                            table.draw(false);
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+
+                    });
+
+                }
+                if ($(this).hasClass('enable_area_status')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.area.enable_area_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': area_id
+                        }
+                    }).done(function(data){
+
+                        if(data.status == 1 )
+                        {
+                            table.draw(false);
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
                         }
 
                     });

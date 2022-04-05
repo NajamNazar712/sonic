@@ -206,6 +206,48 @@
 
                             </div>
                         </div>
+
+                        @if($crm_details['status_id'] == 4 || $crm_details['reopen_count'] > 0)
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h2>Feedback</h2>
+                                <div class="feedback">
+                                    @if(isset($crm_details->feedback))
+                                        @foreach($ratings as $rating)
+
+                                                @if($crm_details->feedback->rating_id === $rating->id)
+                                                    <div class="item">
+                                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                                            <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" checked="checked" alt="{{ $rating->name }}" {{ ($give_feedback != true)? 'disabled':'' }}>
+                                                            <span>{{$rating->code}}</span>
+                                                        </label>
+                                                    </div>
+                                                @else
+                                                    <div class="item">
+                                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                                            <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" {{ ($give_feedback != true)? 'disabled':'' }}>
+                                                            <span>{{$rating->code}}</span>
+                                                        </label>
+                                                    </div>
+                                                @endif
+
+                                        @endforeach
+                                    @else
+                                        @foreach($ratings as $rating)
+
+                                            <div class="item">
+                                                <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                                    <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" {{ ($give_feedback != true)? 'disabled':'' }}>
+                                                    <span>{{$rating->code}}</span>
+                                                </label>
+                                            </div>
+
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -241,6 +283,38 @@
         }
         .table tr th, .table tr td {
             vertical-align: middle !important;
+        }
+        .feedback {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .feedback .item {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+        .feedback .radio {
+            display: none;
+        }
+        .feedback .radio ~ span {
+            font-size: 3rem;
+            filter: grayscale(100);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .feedback .radio:checked ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
+        }
+        .feedback .radio:hover ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
         }
     </style>
 @endsection
@@ -408,6 +482,39 @@
                 });
             }
         });
+        @if($crm_details->status_id == 4 && $reopen_check == true)
+        var request_id = '{{$crm_details->id}}';
+        var feedback_flag = true;
+        $('div.feedback .item').on('click', 'input[name="feedback"]', function (){
+            var rating_id = parseInt($(this).val());
+            if(rating_id && feedback_flag){
+                $.ajax({
+                    url: '{!! route('cod.crm.request.feedback') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'rating_id':rating_id,
+                        'request_id': request_id
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        $('input[name="feedback"]').prop('disabled', true);
+                    }
+                    else{
+                        toastr.error(data.message, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    feedback_flag = false;
+                });
+            }
+        });
+        $('.item label').tooltip({
+            placement : 'top'
+        });
+        @endif
 
     </script>
 @endsection

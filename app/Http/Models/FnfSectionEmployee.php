@@ -32,10 +32,10 @@ class FnfSectionEmployee extends Model
         return $this->hasOne('App\FnfSectionHod','fnf_id','id')->orderBy('created_at','desc');
     }
     public function reporting_manager(){
-        return $this->belongsTo('App\Http\Models\Admin\Admin','line_manager','id');
+        return $this->belongsTo('App\Http\Models\HR\Employee','line_manager','id');
     }
     public function department_head(){
-        return $this->belongsTo('App\Http\Models\Admin\Admin','hod','id');
+        return $this->belongsTo('App\Http\Models\HR\Employee','hod','id');
     }
     public function requested_by(){
         return $this->belongsTo('App\Http\Models\Admin\Admin','created_by','id');

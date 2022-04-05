@@ -1528,40 +1528,26 @@ class AdminReportsEmailController extends Controller
             $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
             $retail_done_payments = $retail_done_payments->get();
             $shippers = array();
-            $shipper_ids = array();
-            $walk_in_shipper = GlobalSettings::where('type', 'Walk-In');
-            if($walk_in_shipper->exists()){
-                $walk_in_shipper = $walk_in_shipper->first();
-                $shipper_ids[] = $walk_in_shipper->setting_value;
-            }
-            $foc_shippers = GlobalSettings::where('type', 'foc_account_tag');
-            if($foc_shippers->exists()){
-                $foc_shippers = $foc_shippers->first();
-                $foc_account_tags = array_map('intval', explode(',', $foc_shippers->text));
-                $shipper_ids = array_merge($shipper_ids, $foc_account_tags);
-            }
             $serial = 0;
             foreach ($retail_done_payments as $retail_done_payment) {
-                if (!in_array($retail_done_payment->retail_done_payment->shipper->id, $shipper_ids)) {
-                    if (!in_array($retail_done_payment->retail_done_payment->shipper->id, $shippers)) {
-                        $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
-                    }
-                    if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
-                        $iban = $retail_done_payment->retail_done_payment->shipper->iban;
-                    } else {
-                        $iban = '-';
-                    }
-                    $retail_done_payment_report = new RetailDonePaymentsReport();
-                    $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
-                    $retail_done_payment_report->shipper_id = $retail_done_payment->retail_done_payment->shipper->id;
-                    $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->shipper_name;
-                    $retail_done_payment_report->amount = $retail_done_payment->payable;
-                    $retail_done_payment_report->iban_number = $iban;
-                    $retail_done_payment_report->save();
-                    $serial++;
-                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
-                    $total_amount = $total_amount + $retail_done_payment->payable;
+                if (!in_array($retail_done_payment->retail_done_payment->shipper->id, $shippers)) {
+                    $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
                 }
+                if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
+                    $iban = $retail_done_payment->retail_done_payment->shipper->iban;
+                } else {
+                    $iban = '-';
+                }
+                $retail_done_payment_report = new RetailDonePaymentsReport();
+                $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
+                $retail_done_payment_report->shipper_id = $retail_done_payment->retail_done_payment->shipper->id;
+                $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->shipper_name;
+                $retail_done_payment_report->amount = $retail_done_payment->payable;
+                $retail_done_payment_report->iban_number = $iban;
+                $retail_done_payment_report->save();
+                $serial++;
+                $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
+                $total_amount = $total_amount + $retail_done_payment->payable;
             }
             $retail_done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
             $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
@@ -1594,8 +1580,8 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-            $date_file_name = $date;
-            $sheet->setTitle('Retail Done Payments ' . $date_file_name);
+            $date_file_name = Carbon::now()->format('Y_m_d_s');
+            $sheet->setTitle('Retail Done Payments');
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="retail_done_payment_report.xlsx"');
