@@ -46,7 +46,7 @@ class Admin extends Authenticatable
     }
 
     public function city() {
-        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id');
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id')->where('hub',1);
     }
 
     public function hubs() {
