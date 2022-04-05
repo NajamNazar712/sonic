@@ -10179,7 +10179,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10195,7 +10196,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10246,7 +10248,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10262,7 +10265,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10328,7 +10332,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10345,7 +10350,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
@@ -10416,7 +10422,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10432,7 +10439,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
