@@ -918,50 +918,6 @@
 {{--                                                </fieldset>--}}
 {{--                                            </div>--}}
                                         </div>
-                                        @php
-                                            $on_open_box_sw = '';
-                                            $on_open_box_switch = '';
-                                            $on_open_box_disable = '';
-                                            if((isset($open_box[1][0]) && $open_box[1][0]->charges != '')){
-                                            $on_open_box_sw = $open_box[1][0]->charges;
-                                            $on_open_box_switch = 'checked';
-                                            $on_open_box_disable = '';
-                                             }else{
-                                            $on_open_box_sw = '';
-                                            $on_open_box_switch = '';
-                                            $on_open_box_disable = 'disabled';
-                                            }
-                                            if((isset($e_open_box[1][0]) && $e_open_box[1][0]->charges != '')){
-                                            $e_on_open_box_sw = $e_open_box[1][0]->charges;
-                                             }else{
-                                            $e_on_open_box_sw = '';
-                                            }
-                                        @endphp
-
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="on_open_box_switch" class="switchery on_open_box_switch" data-color="success" data-size="sm" {{$on_open_box_switch}}>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-overnight">
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        {{-- <input type="text"  class="form-control" name="overnight_open_box" id="on_open_box" data-rule-required="true" data-msg-required="This field is required"  @if($on_ob_charges == null) disabled @endif value="{{ ($on_ob_charges != null) ? $on_ob_charges : '' }}">--}}
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_open_box[1][0]) && $e_on_open_box_sw != $on_open_box_sw) changed @elseif(!isset($e_open_box[1][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_open_box[1][0]) && $e_on_open_box_sw != $on_open_box_sw) {{$e_on_open_box_sw}} @endif" name="overnight_open_box" value="{{$on_open_box_sw}}" {{$on_open_box_disable}} id="on_open_box">
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
-
                                         <hr>
 
                                         @php
@@ -1950,51 +1906,7 @@
 
 
                                         </div>
-                                        @php
-                                            $ol_open_box_sw = '';
-                                            $ol_open_box_switch = '';
-                                            $ol_open_box_disable = '';
-                                            if((isset($open_box[2][0]) && $open_box[2][0]->charges != '')){
-                                            $ol_open_box_sw = $open_box[2][0]->charges;
-                                            $ol_open_box_switch = 'checked';
-                                            $ol_open_box_disable = '';
-                                             }else{
-                                            $ol_open_box_sw = '';
-                                            $ol_open_box_switch = '';
-                                            $ol_open_box_disable = 'disabled';
-                                            }
-                                            if((isset($e_open_box[2][0]) && $e_open_box[2][0]->charges != '')){
-                                            $e_ol_open_box_sw = $e_open_box[2][0]->charges;
-                                             }else{
-                                            $e_ol_open_box_sw = '';
-                                            }
-                                        @endphp
 
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="ol_open_box_switch" class="switchery ol_open_box_switch" data-color="success" data-size="sm" {{$ol_open_box_switch}} >
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-overland">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        {{-- <input type="text"  class="form-control" name="overland_open_box" id="ol_open_box" data-rule-required="true" data-msg-required="This field is required" @if($ol_ob_charges == null) disabled @endif value="{{ ($ol_ob_charges != null) ? $ol_ob_charges : '' }}">--}}
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_open_box[2][0]) && $e_ol_open_box_sw != $ol_open_box_sw) changed @elseif(!isset($e_open_box[2][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_open_box[2][0]) && $e_ol_open_box_sw != $ol_open_box_sw) {{$e_ol_open_box_sw}} @endif" name="overland_open_box" value="{{$ol_open_box_sw}}" {{$ol_open_box_disable}} id="ol_open_box">
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
 
                                         <hr>
 
@@ -2988,54 +2900,6 @@
 {{--                                            </div>--}}
                                         </div>
 
-                                        @php
-                                            $detain_open_box_sw = '';
-                                            $detain_open_box_switch = '';
-                                            $detain_open_box_disable = '';
-                                            if((isset($open_box[3][0]) && $open_box[3][0]->charges != '')){
-                                            $detain_open_box_sw = $open_box[3][0]->charges;
-                                            $detain_open_box_switch = 'checked';
-                                            $detain_open_box_disable = '';
-                                             }else{
-                                            $detain_open_box_sw = '';
-                                            $detain_open_box_switch = '';
-                                            $detain_open_box_disable = 'disabled';
-                                            }
-                                            if((isset($e_open_box[3][0]) && $e_open_box[3][0]->charges != '')){
-                                            $e_detain_open_box_sw = $e_open_box[3][0]->charges;
-                                             }else{
-                                            $e_detain_open_box_sw = '';
-                                            }
-                                        @endphp
-
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    {{--<input type="checkbox" name="detain_open_box_switch" class="switchery detain_open_box_switch" data-color="success" data-size="sm" @if($detain_ob_charges != null) checked @endif>--}}
-                                                    <input type="checkbox" name="detain_open_box_switch" class="switchery detain_open_box_switch" data-color="success" data-size="sm" {{$detain_open_box_switch}}>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-detain">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        {{-- <input type="text"  class="form-control" name="detain_open_box" id="detain_open_box" data-rule-required="true" data-msg-required="This field is required" @if($detain_ob_charges == null) disabled @endif value="{{ ($detain_ob_charges != null) ? $detain_ob_charges : '' }}">--}}
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_open_box[3][0]) && $e_detain_open_box_sw != $detain_open_box_sw) changed @elseif(!isset($e_open_box[3][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_open_box[3][0]) && $e_detain_open_box_sw != $detain_open_box_sw) {{$e_detain_open_box_sw}} @endif" name="detain_open_box" value="{{$detain_open_box_sw}}" {{$detain_open_box_disable}} id="detain_open_box">
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
-
-                                        <hr>
 
                                         @php
                                             $ondhide = 'd-none';
@@ -3973,54 +3837,6 @@
 {{--                                                </fieldset>--}}
 {{--                                            </div>--}}
                                         </div>
-
-                                        @php
-                                            $sd_open_box_sw = '';
-                                            $sd_open_box_switch = '';
-                                            $sd_open_box_disable = '';
-                                            if((isset($open_box[4][0]) && $open_box[4][0]->charges != '')){
-                                            $sd_open_box_sw = $open_box[4][0]->charges;
-                                            $sd_open_box_switch = 'checked';
-                                            $sd_open_box_disable = '';
-                                             }else{
-                                            $sd_open_box_sw = '';
-                                            $sd_open_box_switch = '';
-                                            $sd_open_box_disable = 'disabled';
-                                            }
-                                            if((isset($e_open_box[4][0]) && $e_open_box[4][0]->charges != '')){
-                                            $e_on_open_box_sw = $e_open_box[4][0]->charges;
-                                             }else{
-                                            $e_on_open_box_sw = '';
-                                            }
-                                        @endphp
-
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="sd_open_box_switch" class="switchery sd_open_box_switch" data-color="success" data-size="sm" {{$sd_open_box_switch}}>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-overnight">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        {{-- <input type="text"  class="form-control" name="sd_open_box" id="sd_open_box" data-rule-required="true" data-msg-required="This field is required" @if($sameday_ob_charges == null) disabled @endif value="{{ ($sameday_ob_charges != null) ? $sameday_ob_charges : '' }}">--}}
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control @if(isset($e_open_box[4][0]) && $e_on_open_box_sw != $sd_open_box_sw) changed @elseif(!isset($e_open_box[4][0]) && $existing == 1) new @endif dec-percent on-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_open_box[4][0]) && $e_on_open_box_sw != $sd_open_box_sw) {{$e_on_open_box_sw}} @endif" name="sd_open_box" value="{{$sd_open_box_sw}}" {{$sd_open_box_disable}} id="sd_open_box">
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
-
-
 
                                         <hr>
 
@@ -6699,40 +6515,6 @@
             }
             $(this).parent().parent().remove();
         });
-        $(".on_open_box_switch").on('change', function(){
-            if($(".on_open_box_switch").is(":checked")){
-                $('#on_open_box').attr('disabled', false);
-            }else{
-                $('#on_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".ol_open_box_switch").on('change', function(){
-            if($(".ol_open_box_switch").is(":checked")){
-                $('#ol_open_box').attr('disabled', false);
-            }else{
-                $('#ol_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".detain_open_box_switch").on('change', function(){
-            if($(".detain_open_box_switch").is(":checked")){
-                $('#detain_open_box').attr('disabled', false);
-            }else{
-                $('#detain_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".sd_open_box_switch").on('change', function(){
-            if($(".sd_open_box_switch").is(":checked")){
-                $('#sd_open_box').attr('disabled', false);
-            }else{
-                $('#sd_open_box').attr('disabled', true);
-            }
-        });
-
-
-
 
         //Origin And Destination Cities Start
         $('#on_origin_hubs').select2({

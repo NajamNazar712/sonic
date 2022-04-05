@@ -656,31 +656,6 @@
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
                                         </div>
-                                        <hr>
-
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="on_open_box_switch" class="switchery on_open_box_switch" data-color="success" data-size="sm"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-overnight">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <input type="text"  class="form-control" name="overnight_open_box" id="on_open_box" data-rule-required="true" data-msg-required="This field is required" disabled>
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
 
                                         <hr>
 
@@ -1337,32 +1312,6 @@
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
                                         </div>
-                                        <hr>
-
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="ol_open_box_switch" class="switchery ol_open_box_switch" data-color="success" data-size="sm"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-overland">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <input type="text"  class="form-control" name="overland_open_box" id="ol_open_box" data-rule-required="true" data-msg-required="This field is required" disabled>
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
-
 
                                         <hr>
 
@@ -2028,33 +1977,6 @@
 
                                         <hr>
 
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="detain_open_box_switch" class="switchery detain_open_box_switch" data-color="success" data-size="sm"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-detain">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <input type="text"  class="form-control" name="detain_open_box" id="detain_open_box" data-rule-required="true" data-msg-required="This field is required" disabled>
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
-
-
-                                        <hr>
-
                                         <div class="discount-weight-origin-wise-addition-detain">
                                             <div class="row">
                                                 <div class="col-md-4">
@@ -2651,32 +2573,6 @@
                                             {{--                                                    </div>--}}
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <h3 class="card-title">Open Box</h3>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group ">
-                                                    <input type="checkbox" name="sd_open_box_switch" class="switchery sd_open_box_switch" data-color="success" data-size="sm"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row open-box-div-sameday">
-
-                                            <div class="col-md-2 text-center">
-                                                <label class="card-title">Charges</label>
-                                                <fieldset>
-                                                    <div class="input-group form-group">
-                                                        <input type="text"  class="form-control" name="sd_open_box" id="sd_open_box" data-rule-required="true" data-msg-required="This field is required" disabled>
-
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-
                                         </div>
 
                                         <hr>
@@ -5870,39 +5766,6 @@
             }
             $(this).parent().parent().remove();
         })
-
-        $(".on_open_box_switch").on('change', function(){
-            if($(".on_open_box_switch").is(":checked")){
-                $('#on_open_box').attr('disabled', false);
-            }else{
-                $('#on_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".ol_open_box_switch").on('change', function(){
-            if($(".ol_open_box_switch").is(":checked")){
-                $('#ol_open_box').attr('disabled', false);
-            }else{
-                $('#ol_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".detain_open_box_switch").on('change', function(){
-            if($(".detain_open_box_switch").is(":checked")){
-                $('#detain_open_box').attr('disabled', false);
-            }else{
-                $('#detain_open_box').attr('disabled', true);
-            }
-        });
-
-        $(".sd_open_box_switch").on('change', function(){
-            if($(".sd_open_box_switch").is(":checked")){
-                $('#sd_open_box').attr('disabled', false);
-            }else{
-                $('#sd_open_box').attr('disabled', true);
-            }
-        });
-
 
 
         $('#ratesAdditionForm').on('keypress', function (e) {

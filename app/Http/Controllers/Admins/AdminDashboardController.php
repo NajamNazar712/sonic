@@ -1670,13 +1670,11 @@ class AdminDashboardController extends Controller
                     $userstatus = UserCheckStatus::where('user_id', $user_id)->count();
 
                     if ($userstatus == 1) {
-//                        dd('exist');
                         $userstatus = UserCheckStatus::where('user_id', $user_id)->first();
                         $count = $userstatus->status_count + 1;
                         $userstatus->status_count = $count;
                         $userstatus->save();
                     } elseif ($userstatus == 0) {
-//                        dd('not exist');
                         $userstatus = new UserCheckStatus();
                         $userstatus->user_id = $user_id;
                         $userstatus->status = $user->status;
@@ -2321,7 +2319,7 @@ class AdminDashboardController extends Controller
     }
 
     public function editRates(Request $request, $id)
-    {   //dd(1);
+    {
         $user = User::find($id);
 
         if ($user['status'] != 3) {
@@ -3130,7 +3128,6 @@ class AdminDashboardController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
 
                 //shipping_mode 1 //weight_charges 0
 
@@ -3451,7 +3448,6 @@ class AdminDashboardController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
                 if ($request->has('ol_dws_weight')) {
                     if ($request->ol_dws_weight == 2) {
                         DwsWeightChargesController::edit($id, 2, 2, Auth::id());
@@ -3770,7 +3766,6 @@ class AdminDashboardController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
                 if ($request->has('detain_dws_weight')) {
                     if ($request->detain_dws_weight == 2) {
                         DwsWeightChargesController::edit($id, 3, 2, Auth::id());
@@ -4090,7 +4085,6 @@ class AdminDashboardController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
                 if ($request->has('sameday_dws_weight')) {
                     if ($request->sameday_dws_weight == 2) {
                         DwsWeightChargesController::edit($id, 4, 2, Auth::id());
@@ -4684,7 +4678,6 @@ class AdminDashboardController extends Controller
             $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
 
             $validate = Validator::make($request->all(), $validations, $messages);
-            //dd($validate);
             if ($validate->fails()) {
                 return redirect()->back()
                     ->withErrors($validate)
@@ -4939,7 +4932,6 @@ class AdminDashboardController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
                     if ($request->on_dws_weight == 2) {
                         DwsWeightChargesController::edit($id, 1, 2, Auth::id());
@@ -5689,7 +5681,6 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            //dd($weightAlready);
 
             if ($request->approve == 1) {
                 $user = User::find($id);
@@ -7622,7 +7613,6 @@ class AdminDashboardController extends Controller
                 }
 
             }
-            //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
                 if ($request->on_dws_weight == 2) {
                     DwsWeightChargesController::add($id, 1, 2, Auth::id());
@@ -8463,7 +8453,6 @@ class AdminDashboardController extends Controller
             $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
             $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
             $weight_addition_diff = $this->compare_data($standard_weight_addition, $weight_addition);
-            //dd($weight_addition,$standard_weight_addition,$weight_addition_diff);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
@@ -8560,19 +8549,20 @@ class AdminDashboardController extends Controller
                     $on_dws_weight_diff = 1;
                 }
             }
-
-            $on_open_box_diff = 0;
+			 $on_open_box_diff = 0;
             if ($request->has('on_open_box_switch') && $request->on_open_box_switch == 'on') {
                 if($request->overnight_open_box != null){
                     $on_open_box_diff = 1;
                 }
             }
+            $on_discount_weight_charges_diff = 0;
+            if ($request->has('on_discount_destination_wise_weight_switch')) {
+                    $on_discount_weight_charges_diff = 1;
+            }
 
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1 || $on_open_box_diff == 1) {
-                $overnight_changes = 1;
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1 || $on_discount_weight_charges_diff == 1 || $on_open_box_diff == 1) {                $overnight_changes = 1;
 
             }
-//            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff,$overnight_changes);
         }
 
         //overland
@@ -8692,15 +8682,18 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            $ol_open_box_diff = 0;
-            if ($request->has('ol_open_box_switch') && $request->ol_open_box_switch == 'on') {
-                if($request->overland_open_box != null){
-                    $ol_open_box_diff = 1;
-                }
+            $ol_discount_weight_charges_diff = 0;
+            if ($request->has('ol_discount_destination_wise_weight_switch')) {
+                    $ol_discount_weight_charges_diff = 1;
+            }
+			 $ol_open_box_diff = 0;
+	            if ($request->has('ol_open_box_switch') && $request->ol_open_box_switch == 'on') {
+	                if($request->overland_open_box != null){
+	                    $ol_open_box_diff = 1;
+	                }
             }
 
-
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1 || $ol_open_box_diff == 1) {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1 || $ol_discount_weight_charges_diff == 1 || $ol_open_box_diff == 1) {
                 $overland_changes = 1;
             }
         }
@@ -8821,15 +8814,20 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            $detain_open_box_diff = 0;
-            if ($request->has('detain_open_box_switch') && $request->detain_open_box_switch == 'on') {
-                if($request->detain_open_box != null){
-                    $detain_open_box_diff = 1;
-                }
+            $d_discount_weight_charges_diff = 0;
+                if ($request->d_discount_destination_wise_weight_switch == "on") {
+                    $d_discount_weight_charges_diff = 1;
+            }
+
+			$detain_open_box_diff = 0;
+	            if ($request->has('detain_open_box_switch') && $request->detain_open_box_switch == 'on') {
+	                if($request->detain_open_box != null){
+	                    $detain_open_box_diff = 1;
+	                }
             }
 
 
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1 || $detain_open_box_diff == 1) {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1 || $d_discount_weight_charges_diff == 1 || $d_discount_weight_charges_diff == 1 || $detain_open_box_diff == 1) {
                 $detain_changes = 1;
             }
         }
@@ -8951,20 +8949,22 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            $sd_open_box_diff = 0;
-            if ($request->has('sd_open_box_switch') && $request->sd_open_box_switch == 'on') {
-                if($request->sd_open_box != null){
-                    $sd_open_box_diff = 1;
+            $sd_discount_weight_charges_diff = 0;
+            if ($request->has('sd_discount_destination_wise_weight_switch')) {
+                    $sd_discount_weight_charges_diff = 1;
+            }
+			$sd_open_box_diff = 0;
+            	if ($request->has('sd_open_box_switch') && $request->sd_open_box_switch == 'on') {
+                	if($request->sd_open_box != null){
+                    	$sd_open_box_diff = 1;
                 }
             }
 
-
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1 || $sd_open_box_diff == 1) {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1 || $sd_discount_weight_charges_diff == 1 || $sd_open_box_diff == 1) {
                 $sameday_changes = 1;
             }
         }
 
-        //dd($overnight_changes,$overland_changes,$detain_changes,$sameday_changes,$warehouse_charges);
 
         if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
@@ -10179,7 +10179,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10195,7 +10196,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10246,7 +10248,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10262,7 +10265,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10328,7 +10332,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10345,7 +10350,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
@@ -10416,7 +10422,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10432,7 +10439,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
@@ -10650,7 +10658,6 @@ class AdminDashboardController extends Controller
     public function addRouteDetails(Request $request)
     {
 
-        //dd($request);
         $validations = [
             'city_id' => 'required|numeric',
             'route_code' => 'required',
@@ -12113,9 +12120,7 @@ class AdminDashboardController extends Controller
 //            $data = array();
 //            foreach($shipping_modes as $id){
 //                $shipping_mode = ShippingMode::find($id)->mode;
-////                dd($shipping_mode);
 //                $name = $shipping_mode;
-//                dd($name);
 //                $data[] = $name;
 //            }
 //            return response()->json(['status' => 1, 'shipping_mode' => $data]);
@@ -12173,9 +12178,6 @@ class AdminDashboardController extends Controller
 
     public function todayActiveAccountsList()
     {
-        // dd(Carbon::parse('-24 hours'));
-        // dd(Carbon::today('-12 hours'));
-        // dd(Carbon::today('+12 hours'));
         ActivityTrailController::createActivityTrailLog(Auth::id(), 279);
         return view('admin.accounts.today_active_accounts_list');
 
@@ -12220,7 +12222,6 @@ class AdminDashboardController extends Controller
     {
         if (count($array_2) == count($array_1)) {
             $diff = array_diff($array_1, $array_2);
-            //dd(count($diff));
             if (count($diff) > 0) {
                 return 1;
             } else {
