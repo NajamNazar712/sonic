@@ -4664,10 +4664,11 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $from = Carbon::parse($request->from_date)->format('Y-m-d h:i A');
-            $to = Carbon::parse($request->to_date);
-            // $from = $request->from_date;
-            // $to = $request->to_date;
+            $date_from = explode('-',  $request->from_date);
+            $date_to = explode('-',  $request->to_date);
+            
+            $from = Carbon::create($date_from[0], $date_from[1], $date_from[2], '0', '0', '0', 'UTC')->toDateTimeString();
+            $to = Carbon::create($date_to[0], $date_to[1], $date_to[2], '23', '59', '59', 'UTC')->toDateTimeString();
 
             $receiving_sheets = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
@@ -4680,8 +4681,8 @@ class APIController extends Controller
 
                 $details = array();
                 $details['status'] = 0;
-                $details['from_date'] = $from;
-                $details['to_date'] = $to;
+                $details['from_date'] = $request->from_date;
+                $details['to_date'] = $request->to_date;
                 $details['receiving_sheets'] = [];
                 foreach ($receiving_sheets as $receiving_sheet) {
                     $detail = array();
