@@ -74,6 +74,34 @@
         </div>
     </div>
 
+    <div class="modal fade" id="reject_reason_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="reject_reason_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Enter Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+                    <form method="post" id="reject_reason_form"  novalidate="novalidate" action="{{route('admin.human_resource.erf.reject_reason')}}">
+                        @method('POST')
+                        @csrf
+                        <div class="form-group">
+                            <input type="hidden" name="erf_id" id="erf_id">
+                            <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter Reason" data-rule-required="true" data-msg-required="Reason is required">
+                        </div>
+                        <div class="form-group text-center mt-2">
+                            <button type="submit" class="btn btn-primary" id="reason_submit_btn">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="documents_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="documents_modal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -335,6 +363,15 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('admin_reject')) {
+                    $('#reject_reason_modal #erf_id').val(erf_id);
+                    $('#reject_reason_modal').modal('show');
+                }
+            });
+
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
 
@@ -461,7 +498,28 @@
 
                 swal({
                     title: 'Please Wait!',
-                    text: 'Route is being updated!',
+                    text: 'File is being uploaded!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+
+                form.submit();
+            }
+        });
+
+        $("#reject_reason_form").validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Reason is being updated!',
                     icon: 'info',
                     buttons: false,
                     closeOnClickOutside: false,

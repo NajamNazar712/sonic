@@ -101,10 +101,12 @@ class AdminERFController extends Controller
 
                     if (($result->status_id == 1) && (session('role_id') == 1 || in_array(518, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
 
                     }
                     if (($result->status_id == 2) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By CEO</div></button>';
 
                     }
                     if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
@@ -164,7 +166,7 @@ class AdminERFController extends Controller
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
-        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->whereNotIn('trax_id',$invalid_employees)->get();
+        $employee_trax_id = Employee::whereNotIn('trax_id',$invalid_employees)->get();
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
@@ -527,7 +529,7 @@ class AdminERFController extends Controller
         }
 
     public function file_upload(Request $request){
-        //dd($request->file);
+
         $erf_id = str_replace("ERF","",$request->erf_id);
         $erf =EmployeeRequisition::find($erf_id);
         $date = Carbon::now()->format('Y_m_d');
@@ -621,6 +623,32 @@ class AdminERFController extends Controller
         $data['department_head'] = Admin::find($department->department_head_id);
         $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
         return response()->json(['status' => 1,'emplyee_detail' => $data]);
+
+    }
+
+    public function reject_reason(Request $request){
+
+        $erf_id = str_replace("ERF","",$request->erf_id);
+        $erf = EmployeeRequisition::find($erf_id);
+
+
+        if(in_array($erf->status_id,[1,2,3])){
+            $erf->status_id = 5;
+        }
+        else{
+            return redirect()->back()->with('error','Status already marked approved or rejected');
+        }
+
+        $erf->save();
+
+        $log = new EmployeeRequisitionStatusLog();
+        $log->er_id = $erf_id;
+        $log->admin_id = Auth::id();
+        $log->status_id = $erf->status_id;
+        $log->reject_reason = $request->reason;
+        $log->save();
+
+        return redirect()->back()->with('success', 'Reason Added!');
 
     }
 

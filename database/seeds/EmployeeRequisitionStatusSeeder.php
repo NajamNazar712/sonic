@@ -19,6 +19,7 @@ class EmployeeRequisitionStatusSeeder extends Seeder
             array('id' => 2, 'name' => 'Approved by HOD','created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 3, 'name' => 'Approved by CEO','created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 4, 'name' => 'Approved','created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 5, 'name' => 'Rejected','created_at'=>$timestamp,'updated_at'=>$timestamp),
         ));
     }
 }
