@@ -1604,6 +1604,7 @@ class RetailShipmentBookController extends Controller
         $retail_user_id = Auth::id();
         $retail_user = RetailUser::find($retail_user_id);
         $retail_trax_center = RetailTraxCenter::find($retail_user->category_id);
+        dd($retail_trax_center);
         $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
             ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.created_at as created_at')
             ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
