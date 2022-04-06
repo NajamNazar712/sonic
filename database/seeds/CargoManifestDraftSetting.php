@@ -12,7 +12,7 @@ class CargoManifestDraftSetting extends Seeder
      */
     public function run()
     {
-        $data = DB::table('module_permissions')->insert([
+        $data = DB::table('module_permissions')->where('module_id', '14')->first()([
             'id' => '682',
             'name' => 'Cargo Manifest',
             'module_id' => '24',
