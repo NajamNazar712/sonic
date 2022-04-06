@@ -5213,7 +5213,8 @@ class AdminFinanceController extends Controller
 
                         // Calculates the difference between DateTime objects
                         $interval = date_diff($datetime1, $datetime2);
-                        return $interval->format('%m months, %d days,%h hours and %i mints');
+//                        return $interval->format('%m months, %d days,%h hours and %i mints');
+                        return $interval->format('%h hours');
                     } else {
                         return '-';
                     }
