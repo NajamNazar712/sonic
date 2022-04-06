@@ -1121,37 +1121,37 @@
 							'id': id
 						}
 					})
-							.done(function(data) {
-								var result = JSON.parse(data);
-								var count = JSON.parse(data).length;
-								$('#view_status_history_modal').modal('show');
+					.done(function(data) {
+						var result = JSON.parse(data);
+						var count = JSON.parse(data).length;
+						$('#view_status_history_modal').modal('show');
+						$('#view_status_history tbody ').html('');
+						$('#view_status_history_modal #view_status_history_title').html('Status History');
+						$('#view_status_history_id').text(`(${id})`);
+
+
+						$.each(result.payment_id,function(index, value){
+							// console.log(result.payment_id);
+
+							if (result.status[index] == 2) {
+								$('#view_status_history tbody ').append(`
+							<tr>
+
+							<td>${result.payment_status[index]}</td>
+							<td>${result.status_updated_at[index]}</td>
+							<td>${result.status_updated_by[index]}</td>
+							</tr>`)
+							} else {
 								$('#view_status_history tbody ').html('');
-								$('#view_status_history_modal #view_status_history_title').html('Status History');
-								$.each(result.payment_id,function(index, value){
-									// console.log(result.payment_id);
-
-									if (result.status[index] == 2) {
-										$('#view_status_history_id').text(`(${result.payment_id[index]})`);
-
-
-										$('#view_status_history tbody ').append(`
-                                    <tr>
-
-                                    <td>${result.payment_status[index]}</td>
-                                    <td>${result.status_updated_at[index]}</td>
-                                    <td>${result.status_updated_by[index]}</td>
-                                    </tr>`)
-									} else {
-										$('#view_status_history tbody ').html('');
-									}
-									if (result.status == 0) {
-										toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-									}
-									if (result.status == 1) {
-										toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-									}
-								});
-							});
+							}
+							if (result.status == 0) {
+								toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+							if (result.status == 1) {
+								toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+						});
+					});
 				}
 				// todo view status history end
 				else if ($(this).hasClass('export_to_excel')) {
