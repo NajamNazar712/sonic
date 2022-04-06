@@ -201,16 +201,7 @@ class RetailCompletedDeliveries extends Controller
                         'retail_pickup_note_id' => $pncc
                     ]);
                     RetailPickupNote::where('id', $pncc)->update(['expense' => $request->expense[$pncc], 'net_amount' => $request->net_amount[$pncc], 'remarks' => $request->remarks[$pncc], 'pncc_status' => 1]);
-                    $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id',$pncc)->get()->first();
-                    if($retail_shipment){
-                        $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
-                        if($retail_cash_depost){
-
-                            RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
-                                'status' => 2,
-                            ]);
-                        }
-                    }
+                    
                 }
                 DeliveryController::add_sdn_logs($sdn->id, 0, $created_by);
 

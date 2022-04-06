@@ -5117,6 +5117,18 @@ class DeliveryController extends Controller
         $sdn->status = 1;
         $sdn->save();
 
+        $pnsdn = PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->get()->first();
+            if ($pnsdn) {
+                    $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id', $pnsdn->retail_pickup_note_id)->get()->first();
+                    if($retail_shipment){
+                        $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+                        if($retail_cash_depost){
+
+                            RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                                'status' => 2,
+                            ]);
+                        }
+                    }
         self::add_sdn_logs($sdn_id, 1, Auth::id());
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 
