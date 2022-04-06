@@ -2946,9 +2946,9 @@ class DeliveryController extends Controller
 
                 $shipment_count = 0;
                 $dispute_shipments = array();
-                $delivered_status_array = array(14, 30, 36, 37);
+                $delivered_status_array = array(14, 30, 36, 37, 26, 27, 28);
 
-                $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
+                $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56 , 26, 27, 28);
                 foreach ($shipments as $index => $shipment) {
                     $shipment_details = Shipment::find($shipment);
                     if (!in_array($shipment_details->shipper_status_id, $restrict_statuses)) {

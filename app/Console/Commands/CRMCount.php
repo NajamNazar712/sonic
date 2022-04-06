@@ -62,7 +62,9 @@ class CRMCount extends Command
                 if($pending->exists()){
                     $pending = $pending->first();
                     $pending_count = (($pending->pending + $pending->new_launched) - $pending->closed);
-        
+                    if($pending_count < 0){
+                        $pending_count = 0;
+                    }
                 }else{
                     $pending_count = 0;
         
@@ -94,7 +96,9 @@ class CRMCount extends Command
                 if($pending->exists()){
                     $pending = $pending->first();
                     $pending_count = (($pending->pending + $pending->new_launched) - $pending->closed);
-        
+                    if($pending_count < 0){
+                        $pending_count = 0;
+                    }
                 }else{
                     $pending_count = 0;
         
