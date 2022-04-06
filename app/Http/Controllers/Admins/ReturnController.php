@@ -4140,7 +4140,7 @@ class ReturnController extends Controller
                     return $row . ': ' . $tracking_number;
                 }, array_keys($tracking_numbers), $tracking_numbers));
 
-                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Assigned with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
             }
             else{
                 $errors = array_map(function ($row, $errors) {
