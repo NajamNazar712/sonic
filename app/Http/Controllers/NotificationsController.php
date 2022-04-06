@@ -9140,8 +9140,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[total_amount]') !== FALSE) {
                         $body = str_replace('[total_amount]', $reference_3_id, $body);
                     }
-                    if (strpos($body, '[payment_id]') !== FALSE) {
-                        $body = str_replace('[payment_id]', $reference_4_id, $body);
+                    if (strpos($body, '[updated_at]') !== FALSE) {
+                        $body = str_replace('[updated_at]', $reference_4_id, $body);
                     }
                     $link ='https://sonic.pk/cod/finance/payments';
                     if (strpos($body, '[status_link]') !== FALSE) {

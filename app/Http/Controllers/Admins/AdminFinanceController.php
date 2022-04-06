@@ -12682,12 +12682,13 @@ class AdminFinanceController extends Controller
                 if(isset($done_payment->shipper->shipper_name)){
                     $name = $done_payment->shipper->shipper_name;
                     $phone = $done_payment->shipper->shipper_phone_no;
+                    $updated_at = $done_payment->updated_at;
                     $amount = isset($done_payment->retail_done_payment_calculations->payable) ? $done_payment->retail_done_payment_calculations->payable : 0;
                     $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
 
                     $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
 
-                    NotificationsController::send(172, $name, $phone,$amount,$done_payment_id);
+                    NotificationsController::send(172, $name, $phone,$amount,$updated_at);
                 }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();
