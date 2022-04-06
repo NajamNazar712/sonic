@@ -12,8 +12,6 @@ class CargoManifestDraftSetting extends Seeder
      */
     public function run()
     {
-        $permission = DB::table('module_permissions')->where('id', '682')->first();
-        $permission->module_id = 24;
-        $permission->save();
+        DB::table('module_permissions')->where('id', 682)->update(['module_id' => 24]);
     }
 }
