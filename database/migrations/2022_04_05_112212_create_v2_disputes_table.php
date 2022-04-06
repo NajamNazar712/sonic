@@ -17,6 +17,10 @@ class CreateV2DisputesTable extends Migration
             $table->increments('id');
             $table->integer('shipment_id')->index();
             $table->integer('status_id')->index();
+            $table->integer('added_by')->index();
+            $table->integer('reason_id')->index();
+            $table->string('remarks')->nullable();
+            $table->integer('updated_by')->nullable()->index();
             $table->timestamps();
         });
     }
