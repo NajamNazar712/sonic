@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Cargo Manifest Draft Setting
+                    Manifest Draft
                 </h1>
 
                 <div class="card">
