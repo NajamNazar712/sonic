@@ -18,6 +18,7 @@ use App\Http\Models\EmployeeRequisitionStatusLog;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\Admin\AdminPositionTypes;
+use App\Http\Models\HR\EmployeePayslip;
 use SnappyImage;
 use SnappyPDF;
 use Carbon\Carbon;
@@ -670,6 +671,35 @@ class AdminERFController extends Controller
 
         return redirect()->back()->with('success', 'Reason Added!');
 
+    }
+
+    public function employee_details(Request $request){
+       $trax_id = $request->trax_id;
+       if($trax_id){
+           $last_salary = 0;
+           $employee = Employee::where('trax_id',$trax_id)->first();
+           if($employee){
+                 $details['designation'] = $employee->designation->name;
+                 $details['name'] = $employee->name;
+                 if($employee->last_working_date == null){
+                     $details['last_working_date'] = '-';
+                 }
+                 else{
+                     $details['last_working_date'] = $employee->last_working_date;
+                 }
+                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest()->first();
+                 if($salary){
+                     $details['last_salary'] = $salary->total_salary;
+                 }
+                 else{
+                     $details['last_salary'] = '-';
+                 }
+                 return response()->json(['status' => 1, 'details' => $details]);
+           }
+           else{
+               return response()->json(['status' => 0,'error' => 'No employee found with this trax id']);
+           }
+       }
     }
 
 }

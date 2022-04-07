@@ -3698,6 +3698,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
            // Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('/employee_data', 'Admins\AdminERFController@employee_data')->name('employee_data');
+            Route::post('/employee_details', 'Admins\AdminERFController@employee_details')->name('employee_details');
 
             
 
