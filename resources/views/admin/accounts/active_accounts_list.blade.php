@@ -761,7 +761,7 @@
                         head.push('Intl Rates Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
-                        head.push('Referral');
+                        head.push('Referral Code');
                         $.each(result.data, function(index, values) {
                             row = [];
 

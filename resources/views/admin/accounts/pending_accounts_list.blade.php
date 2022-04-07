@@ -533,7 +533,7 @@
                         head.push('Documents Rejection Reason');
                         head.push('Segment');
                         head.push('Sub Category Segment');
-                        head.push('Referral');
+                        head.push('Referral Code');
                         $.each(result.data, function(index, values) {
                             row = [];
 
