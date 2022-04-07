@@ -33,6 +33,7 @@
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
+                                    <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -228,6 +229,7 @@
                             head.push('Hub');
                             head.push('City');
                             head.push('Line Manager');
+                            head.push('Type');
                             head.push('Status');
                             head.push('Aging');
 
@@ -241,6 +243,7 @@
                                 row.push(values.hub);
                                 row.push(values.city);
                                 row.push(values.admin);
+                                row.push(values.type);
                                 row.push(values.status);
                                 row.push(values.aging);
                                 body.push(row);
@@ -312,6 +315,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
+                    {data: 'type', name: 'employee_requisitions.type', class: 'align-middle type'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},

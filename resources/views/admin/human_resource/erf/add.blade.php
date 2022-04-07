@@ -202,10 +202,16 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
-        .markhighlighted {
-            background-color: red !important;
-            color:white;
-        }
+
+      /* .select2-results .select2-results__option {
+           background-color: yellowgreen !important;
+           color: white;
+       }*/
+
+      .select2-results .select2-results__option[id*="id"] {
+          color: red !important;
+      }
+
     </style>
 @endsection
 
@@ -457,7 +463,8 @@
                     '<div class="row w-100 justify-content-center mb-5" id="new_div">' +
                     '<table class="table table-bordered mb-5" id="dynamic_field">  \n' +
                     '                    <tr>  \n' +
-                    '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}" class="markhighlighted">{{$employee->trax_id}}</option> @endforeach</select></div></td> \n' +
+                    '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
+                        <option id="id" value="{{$employee->trax_id}}" >{{$employee->trax_id}}</option> @endforeach</select></div></td> \n' +
                     '                        <td><div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Last Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
                     '                        <td><div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
                     '                        <td class="text-center"><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +

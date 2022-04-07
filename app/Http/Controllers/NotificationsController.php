@@ -9118,6 +9118,39 @@ class NotificationsController extends Controller
                     $to = $phone_number;
                     self::sms($body, $to);
                 }
+                else if ($id == 173) {
+                    $erf_id = $reference_1_id;
+                    $erf = EmployeeRequisition::find($erf_id);
+                    $hod_email = Admin::find($erf->department_head_id)->email;
+                    if (strpos($body, '[erf_id]') !== FALSE) {
+                        $body = str_replace('[erf_id]', $erf_id, $body);
+                    }
+                    $to = $hod_email;
+                    self::email($subject, $body, $to);
+
+                }
+                else if ($id == 174) {
+                    $erf_id = $reference_1_id;
+                    $erf = EmployeeRequisition::find($erf_id);
+                    if($erf->status_id == 2){
+                        $admin = Admin::find($erf->department_head_id);
+                        $name = $admin->name .' '.'(HOD)';
+                        $to = 'hassan@trax.pk';
+                    }
+                    else if($erf->status_id == 3){
+                        $name = 'Muhammad Hassan Khan' . '(CEO)';
+                        $to = 'hr.dept@trax.pk';
+                    }
+                    if (strpos($body, '[erf_id]') !== FALSE) {
+                        $body = str_replace('[erf_id]', $erf_id, $body);
+                    }
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+
+                }
             }
         }
     }

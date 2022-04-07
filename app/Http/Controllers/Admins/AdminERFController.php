@@ -58,7 +58,7 @@ class AdminERFController extends Controller
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document']);
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type']);
 
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
@@ -67,6 +67,14 @@ class AdminERFController extends Controller
         $datatables = Datatables::of($erf)
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
+            })
+            ->editColumn('type',function($erf){
+                if($erf->type == 1){
+                    return 'Additional';
+                }
+                else{
+                    return 'Replacement';
+                }
             })
             ->addColumn('aging',function ($erf){
                 $log = EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',3);
@@ -91,6 +99,16 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.id', $keyword);
                 }
             })
+            ->filterColumn('employee_requisitions.type', function($query, $keyword) {
+                $keyword =  strtolower($keyword);
+                if($keyword == 'replacement'){
+                    $query->where('employee_requisitions.type', 2);
+                }
+                else{
+                    $query->where('employee_requisitions.type', 1);
+                }
+            })
+
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -104,19 +122,15 @@ class AdminERFController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
 
                     }
-                    if (($result->status_id == 2) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
+                    if (($result->status_id == 2 && $result->type == 1) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By CEO</div></button>';
 
                     }
-                    if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
+                    if (($result->status_id == 2 && $result->type == 2 || ($result->status_id == 3))  && (session('role_id') == 1 || in_array(520, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                    /*if ($result->document != null && (session('role_id') == 1 || in_array(521, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
-
-                    }*/
                     if (session('role_id') == 1 || in_array(521, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
 
@@ -568,6 +582,8 @@ class AdminERFController extends Controller
 
         $erf->save();
 
+        NotificationsController::send(174,$erf_id);
+
             $log = new EmployeeRequisitionStatusLog();
             $log->er_id = $erf_id;
             $log->admin_id = Auth::id();
@@ -581,7 +597,7 @@ class AdminERFController extends Controller
         $erf_id = str_replace("ERF","",$request->id);
         $erf = EmployeeRequisition::find($erf_id);
      
-        if($erf->status_id == 3){
+        if($erf->status_id == 3 || ($erf->status_id == 2 && $erf->type == 2 ) ){
             $erf->status_id = 4;
             $erf->save();
 
@@ -630,10 +646,14 @@ class AdminERFController extends Controller
 
         $erf_id = str_replace("ERF","",$request->erf_id);
         $erf = EmployeeRequisition::find($erf_id);
-
-
-        if(in_array($erf->status_id,[1,2,3])){
+        
+        if(in_array($erf->status_id,[1,2,3]) && Auth::id() == 4){
+            $erf->status_id = 6;
+            NotificationsController::send(173,$erf_id);
+        }
+        else if(in_array($erf->status_id,[1,2,3])){
             $erf->status_id = 5;
+
         }
         else{
             return redirect()->back()->with('error','Status already marked approved or rejected');
