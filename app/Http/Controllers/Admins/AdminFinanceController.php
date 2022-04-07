@@ -5215,22 +5215,22 @@ class AdminFinanceController extends Controller
         if (!empty($request->id)) {
 
             $status_history = array();
-            $done_payments = DonePayment::
-                 join('shipments_payment_journey as spj', 'spj.payment_id', '=', 'done_payments.id')
-                ->leftjoin('admins', 'admins.id', '=', 'spj.admin_id')
-                ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
-                ->where('done_payments.id', $request->id)
-                ->select('done_payments.id as payment_id', 'spj.id', 'spj.status_id as status_id', 'spj.admin_id', 'spj.updated_at as updated_at', 'admins.name as admin', 'sps.name as payment_status')
-                ->get();
-
-
-//            $done_payments = DonePayment::join('shipments_payment_journey as spj', 'spj.payment_id', '=', 'done_payments.id')
+//            $done_payments = DonePayment::
+//                 join('shipments_payment_journey as spj', 'spj.payment_id', '=', 'done_payments.id')
 //                ->leftjoin('admins', 'admins.id', '=', 'spj.admin_id')
 //                ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
 //                ->where('done_payments.id', $request->id)
 //                ->select('done_payments.id as payment_id', 'spj.id', 'spj.status_id as status_id', 'spj.admin_id', 'spj.updated_at as updated_at', 'admins.name as admin', 'sps.name as payment_status')
-//                ->groupBy('shipment_id')
 //                ->get();
+
+
+            $done_payments = DonePayment::join('shipments_payment_journey as spj', 'spj.payment_id', '=', 'done_payments.id')
+                ->leftjoin('admins', 'admins.id', '=', 'spj.admin_id')
+                ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
+                ->where('done_payments.id', $request->id)
+                ->select('done_payments.id as payment_id', 'spj.id', 'spj.status_id as status_id', 'spj.admin_id', 'spj.updated_at as updated_at', 'admins.name as admin', 'sps.name as payment_status')
+                ->groupBy('shipment_id')
+                ->get();
 
 //Shipments::select('id', 'shipment_id', DB::raw('MAX(date) as latest_date'))
 //                            ->where('is_active', 1)
