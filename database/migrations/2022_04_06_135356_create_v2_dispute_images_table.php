@@ -15,6 +15,9 @@ class CreateV2DisputeImagesTable extends Migration
     {
         Schema::create('v2_dispute_images', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('dispute_id')->index();
+            $table->string('image');
+            $table->integer('added_by');
             $table->timestamps();
         });
     }

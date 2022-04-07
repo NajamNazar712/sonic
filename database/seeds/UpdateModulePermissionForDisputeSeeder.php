@@ -13,7 +13,8 @@ class UpdateModulePermissionForDisputeSeeder extends Seeder
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 702, 'name' => 'Dispute - View', 'module_id' => 31),
-            array('id' => 703, 'name' => 'Dispute - Action', 'module_id' => 31),
+            array('id' => 703, 'name' => 'Dispute Update- Action', 'module_id' => 31),
+            array('id' => 704, 'name' => 'Add Dispute - Action', 'module_id' => 31),
         ));
 
         DB::table('activity_trail_actions')->insert(array(

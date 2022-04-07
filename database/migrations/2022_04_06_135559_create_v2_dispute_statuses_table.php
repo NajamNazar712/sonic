@@ -15,6 +15,7 @@ class CreateV2DisputeStatusesTable extends Migration
     {
         Schema::create('v2_dispute_statuses', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
             $table->timestamps();
         });
     }

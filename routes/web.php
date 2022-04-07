@@ -1768,8 +1768,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
 
         Route::prefix('shipments')->name('shipments.')->group(function (){
-            Route::get('','Admins\DisputeController@dispute_index')->name('index');
-            Route::get('list','Admins\DisputeController@dispute_list')->name('list');
+            Route::get('','Admins\V2AdminDisputeShipmentsController@index')->name('index');
+            Route::get('list','Admins\V2AdminDisputeShipmentsController@list')->name('list');
+            Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
+            Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
         });
 
     });

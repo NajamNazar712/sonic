@@ -21,6 +21,7 @@ class CreateV2DisputesTable extends Migration
             $table->integer('reason_id')->index();
             $table->string('remarks')->nullable();
             $table->integer('updated_by')->nullable()->index();
+            $table->tinyInteger('image')->index();
             $table->timestamps();
         });
     }

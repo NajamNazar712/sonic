@@ -60,73 +60,54 @@
             </div>
         </div>
     </div>
-    <!--Rider popup -->
-    <div class="modal fade text-left" id="RiderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RiderModal"
+
+
+    <div class="modal fade text-left" id="AddShipmentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddShipmentModal"
          aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Rider (Return Note)</h4>
+                    <h4 class="modal-title white">Add Dispute Shipment</h4>
 
                 </div>
-                <form id="return_rider_form" class="justify-content-center" novalidate="novalidate" method="post" action="{{ route('admin.multiple_pieces.hold.return_note_create') }}">
+                <form id="add_dispute_shipment_form" class="justify-content-center" novalidate="novalidate" method="post" action="{{ route('admin.dispute.shipments.submit') }}" enctype="multipart/form-data">
                     @csrf
                     @method('POST')
                     <div class="modal-body text-center">
-                        <input type="hidden" name="shipment_ids" id="shipment_ids">
+
                         <div class="form-group">
-                            <select name="rider_select" id="rider_select" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                            <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+
+                        </div>
+
+                        <div class="form-group">
+                            <select name="reason_id" id="reason_select" class="form-control select2" data-rule-required="true" data-msg-required="Reason is required">
+                                @foreach($reasons as $reason)
+                                    <option value="{{$reason->id}}">{{$reason->name}}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <select name="route" id="route" class="form-control select2" data-rule-required="true" data-msg-required="Route is required">
-                                @foreach($routes as $route)
-                                    <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
-                            </select>
+                            <textarea name="remarks" id="remarks" rows="5" class="form-control" data-rule-required="true" data-msg-required="Remarks are required"></textarea>
                         </div>
-
-                    </div>
-                    <div class="modal-footer text-center">
-                        <button type="submit" class="btn btn-primary">Create & Print</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!--Rider popup -->
-    <!--Image Upload popup -->
-    <div class="modal fade text-left" id="uploadImage" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadImage"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Image Upload</h4>
-
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="attachment_upload_form" class="form-horizontal" method="post" action="{{route('admin.multiple_pieces.upload_attachment')}}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="col text-center mt-2">
-                            <h4><b>Upload Attachment</b></h4>
+                        <div>
+                            <h2>Images Upload</h2>
                         </div>
                         <div class="col form-group">
-                            <input type="hidden" name="shipment_image_id" id="shipment_image_id"/>
-                            <input class="form-control form-control-sm" type="file" name="upload_attachment" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-rule-required="true" data-msg-required="Image is required" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                            <input class="form-control form-control-sm" type="file" name="image_1" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-rule-required="true" data-msg-required="Image is required" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </div>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
-                            </div>
-                            <div class="col-3">
-                                <button type="submit" name="update" id="attachment_upload_form_submit" class="btn btn-primary">Submit</button>
-                            </div>
+                        <div class="col form-group">
+                            <input class="form-control form-control-sm" type="file" name="image_2" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-rule-required="true" data-msg-required="Image is required" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer text-center">
+                        <div class="col-3">
+                            <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"><i class="la la-plus"></i> Add</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -229,6 +210,12 @@
                 }
             });
 
+            $('#add_dispute_shipment_form #tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            })
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -244,31 +231,28 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Shipper');
-                            head.push('COD');
+                            head.push('Reason');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Hub');
-                            head.push('Date & Time Entered');
+                            head.push('COD Amount');
+                            head.push('Actual Weight');
                             head.push('Status');
-                            head.push('Request Status');
-                            head.push('Last Status By Date');
-                            head.push('Last Status By');
+                            head.push('Remarks');
+                            head.push('Created At');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
-                                row.push(values.amount);
+                                row.push(values.reason);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.created_at);
+                                row.push(values.amount);
+                                row.push(values.actual_weight);
                                 row.push(values.status);
-                                row.push(values.request_status);
-                                row.push(values.last_updated_by);
-                                row.push(values.last_updated_at);
+                                row.push(values.remarks);
+                                row.push(values.created_at);
 
                                 body.push(row);
                             });
@@ -279,320 +263,31 @@
                     return {body: body, header: head};
                 }
             } );
-            var selected_rows = [];
+
+
+            $("#reason_select").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width:'100%',
+                dropdownParent: $('#AddShipmentModal')
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: true,
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(649, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(704, session('permissions')))
                     {
-                        text: 'Wait For Remaining Piece(s)',
-                        className: 'btn btn-primary remaining_piece',
-                        enabled: false,
+                        text: '<i class="la la-plus"></i> Add Dispute Shipment',
+                        className: 'btn btn-primary',
+                        enabled: true,
                         action: function (e, dt, node, config) {
-                            if(selected_rows.length > 0){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipments to Wait for Remaining piece!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        blockPagePermanently();
-                                        $.ajax({
-                                            url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces_bulk')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids': selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                            }
-                                        }).done(function (data) {
-                                            if(data.status == 0){
-                                                table.rows().nodes().each(function(index) {
-                                                    var row = table.row(index);
-
-                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                        row.deselect();
-
-                                                        id = parseInt(row.id());
-
-                                                        var index = $.inArray(id, selected_rows);
-
-                                                        if (index !== -1) {
-                                                            selected_rows.splice(index, 1);
-                                                        }
-
-                                                        if (selected_rows.length == 0) {
-                                                            table.button('.print').disable();
-                                                            table.button('.remaining_piece').disable();
-                                                            table.button('.return_back_shipper').disable();
-                                                            table.button('.single_piece').disable();
-                                                        }
-                                                    }
-                                                });
-                                                table.draw('false');
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }else{
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                            }
-                                            UnblockPagePermanently();
-
-                                        });
-                                    }
-                                });
-                            }
-
+                            $('#AddShipmentModal').modal('show');
                         }
                     },
                         @endif
-                        @if (session('role_id') == 1 || in_array(650, session('permissions')))
-                    {
-                        text: 'Return Back To Shipper',
-                        className: 'btn btn-primary return_back_shipper',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows.length > 0){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipments to Return Back to Shipper!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        blockPagePermanently();
-                                        $.ajax({
-                                            url:"{{route('admin.multiple_pieces.hold.return_back_to_shipper_bulk')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids': selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                            }
-                                        }).done(function (data) {
-                                            if(data.status == 0){
-                                                table.rows().nodes().each(function(index) {
-                                                    var row = table.row(index);
 
-                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                        row.deselect();
-
-                                                        id = parseInt(row.id());
-
-                                                        var index = $.inArray(id, selected_rows);
-
-                                                        if (index !== -1) {
-                                                            selected_rows.splice(index, 1);
-                                                        }
-
-                                                        if (selected_rows.length == 0) {
-                                                            table.button('.print').disable();
-                                                            table.button('.remaining_piece').disable();
-                                                            table.button('.return_back_shipper').disable();
-                                                            table.button('.single_piece').disable();
-                                                        }
-                                                    }
-                                                });
-                                                table.draw('false');
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }else{
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                            }
-                                            UnblockPagePermanently();
-
-                                        });
-                                    }
-                                });
-                            }
-
-                        }
-                    },
-                        @endif
-                        @if (session('role_id') == 1 || in_array(651, session('permissions')))
-                    {
-                        text: 'Switch To Single Piece',
-                        className: 'btn btn-primary single_piece',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows.length > 0){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipments to Single Piece!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        blockPagePermanently();
-                                        $.ajax({
-                                            url:"{{route('admin.multiple_pieces.hold.single_piece_bulk')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids': selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                            }
-                                        }).done(function (data) {
-                                            if(data.status == 0){
-                                                table.rows().nodes().each(function(index) {
-                                                    var row = table.row(index);
-
-                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                                        row.deselect();
-
-                                                        id = parseInt(row.id());
-
-                                                        var index = $.inArray(id, selected_rows);
-
-                                                        if (index !== -1) {
-                                                            selected_rows.splice(index, 1);
-                                                        }
-
-                                                        if (selected_rows.length == 0) {
-                                                            table.button('.print').disable();
-                                                            table.button('.remaining_piece').disable();
-                                                            table.button('.return_back_shipper').disable();
-                                                            table.button('.single_piece').disable();
-                                                        }
-                                                    }
-                                                });
-                                                table.draw('false');
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }else{
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                            }
-                                            UnblockPagePermanently();
-
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    },
-                        @endif
-                        @if (session('role_id') == 1 || in_array(372, session('permissions')))
-                    {
-                        text: '<i class="la la-print"></i> Print & Create Return Note',
-                        className: 'btn btn-primary print',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows.length > 0){
-                                $('#RiderModal').modal('show');
-                            }
-
-                        }
-                    },
-                        @endif
-                    {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.print').enable();
-                                    table.button('.remaining_piece').enable();
-                                    table.button('.return_back_shipper').enable();
-                                    table.button('.single_piece').enable();
-                                }
-                            });
-                        }
-                    },
-                    {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.print').disable();
-                                        table.button('.remaining_piece').disable();
-                                        table.button('.return_back_shipper').disable();
-                                        table.button('.single_piece').disable();
-                                    }
-                                }
-                            });
-                        }
-                    },
                     {
                         extend: 'excel',
-                        title: 'Shipment Pieces List',
+                        title: 'Dispute Shipments',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -613,36 +308,28 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                rowId: 'shipment_id',
+                rowId: 'dispute_id',
                 order: [[8, 'desc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'reason', name: 'dr.name', class: 'align-middle reason' , orderable: false, searchable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'created_at', name: 'shipment_pieces_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
-                    {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
-                    {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
-                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa',orderable: false, searchable: false},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'actual_weight', name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa', orderable: false, searchable: false},
+                    {data: 'status', name: 'ds.name', class: 'align-middle status' , orderable: false, searchable: false},
+                    {data: 'remarks', name: 'v2_disputes.remarks', class: 'align-middle remarks'},
+                    {data: 'created_at', name: 'v2_disputes.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if (data.request_status_id == 3 || data.status == 'Pending') {
-                        $('td:eq(0)', row).addClass('select-checkbox');
 
-                        if ($.inArray(data.shId, selected_rows) !== -1) {
-                            table.row(row).select();
-                        }
-                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -650,28 +337,13 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var request_status_select = '<select name="request_status_select" id="request_status_select" class="select2 form-control"></select>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="1">Pending</option>' +
-                        '<option value="2">Resolved</option>' +
-                        '</select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.image_viewa')) {
+                        if ($(header).is('.reason') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.action') || $(header).is('.image_view')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.request_status')){
-                            $(request_status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -683,68 +355,12 @@
                             }
                         }
                     });
-                    var data = $.map({!! $request_status !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-                        return obj;
-                    });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#request_status_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Request Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+
                     this.api().table().columns.adjust();
                 }
             });
 
-            $("#rider_select").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Rider*",
-                width:'100%',
-                dropdownParent:$('#return_rider_form')
-            });
-            $('#route').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Route*',
-                width:'100%',
-                dropdownParent:$('#return_rider_form')
-            });
-            $('#rider_name').on('change',function () {
-                var route = $(this).find(":selected").data("id");
-                $('#route').val(route).trigger('change');
-            });
 
-            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-
-                var index = $.inArray(id, selected_rows);
-
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.print').enable();
-                    table.button('.remaining_piece').enable();
-                    table.button('.return_back_shipper').enable();
-                    table.button('.single_piece').enable();
-                }
-                else {
-                    table.button('.print').disable();
-                    table.button('.remaining_piece').disable();
-                    table.button('.return_back_shipper').disable();
-                    table.button('.single_piece').disable();
-                }
-            });
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
@@ -753,10 +369,10 @@
             $('#datatable tbody').on('click','tr td.action a',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if(id){
-                    if($(this).hasClass('single_piece')){
+                    if($(this).hasClass('update')){
                         swal({
                             title: 'Are You Sure?',
-                            text: 'Select Yes to change shipment to Single Piece!',
+                            text: 'Select Yes to update dispute!',
                             icon: 'warning',
                             buttons: {
                                 cancel: {
@@ -779,10 +395,10 @@
                             if(confirm){
                                 blockPagePermanently();
                                 $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.single_piece')}}",
+                                    url:"{{route('admin.dispute.shipments.update')}}",
                                     method:'POST',
                                     data:{
-                                        'shipment_id':id,
+                                        'dispute_id':id,
                                         '_token':'{{ csrf_token() }}',
                                     }
                                 }).done(function (data) {
@@ -899,18 +515,18 @@
 
             });
 
-            $('#return_rider_form').validate({
+            $('#add_dispute_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $('#shipment_ids').val(selected_rows);
+
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     swal({
                         title: 'Please Wait!',
-                        text: 'Return Note is being created!',
+                        text: 'Shipment is being added to Dispute!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -922,64 +538,14 @@
                 }
             });
 
-            @if(session('print'))
-            var pid = '{{ session('print') }}';
-            print(pid);
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.multiple_pieces.hold.return_note_print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+            $('#AddShipmentModal').on('hidden.bs.modal',function () {
+                $('#add_dispute_shipment_form')[0].reset();
+                var form_errors = $('#add_dispute_shipment_form');
+                form_errors.validate().resetForm();
+                $('#add_dispute_shipment_form #reason_select').val('').trigger('change');
+            });
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-            @endif
-            $('#attachment_upload_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Uploading Attachment!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
-                }
-            });
-            $('#uploadImage').on('hidden.bs.modal', function () {
-                $("#attachment_upload_form").validate().resetForm();
-                $('#upload_attachment').val('');
-            });
+
         });
     </script>
 @endsection
