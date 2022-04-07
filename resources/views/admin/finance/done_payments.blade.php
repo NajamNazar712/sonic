@@ -205,6 +205,7 @@
 												<table class="table table-striped" id="view_status_history">
 													<thead>
 													<tr>
+														<th>S.No#</th>
 														<th>Shipment ID</th>
 														<th>Payment Status</th>
 														<th>Updated At</th>
@@ -1131,12 +1132,14 @@
 						$('#view_status_history_id').text(`(${id})`);
 
 
+						var sc = 1;
 						$.each(result.payment_id,function(index, value){
 							// console.log(result.payment_id);
 
 							if (result.status[index] == 2) {
 								$('#view_status_history tbody ').append(`
 							<tr>
+							<td>${sc++}</td>
 							<td>${result.shipment_id[index]}</td>
 
 							<td>${result.payment_status[index]}</td>
