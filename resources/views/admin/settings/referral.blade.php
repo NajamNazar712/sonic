@@ -22,8 +22,8 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Referral Code</th>
-                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Added By</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -115,13 +115,13 @@
                 },
                 ajax: '{{ route('admin.settings.referral.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'referrals.name', class: 'align-middle zone'},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'status', name: 'referrals.status', class: 'align-middle status'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'action', orderable: false, searchable: false, name: 'action', class: 'align-middle action '}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -178,109 +178,7 @@
 
             
             
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url:'{!! route("admin.settings.lead_tagging.data") !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#lead_tagging_id').val(data.lead_tagging_id);
 
-                    if(data.zone_id == 0){
-                        $('#edit_zone_id').val(data.zone_id).change();
-                        $('#edit_city_id').css('display','none');
-                        $('#edit_territory_id').css('display','none');
-                        $('#edit_city_select').css('display','none');
-                        $('#edit_territory_select').css('display','none');
-                        $('#edit_service_id').val(data.service_id).change();
-
-                        $('#edit_agent_id').val(data.agent_id).change();
-
-                    }else{
-                        if(data.city_id == 0){
-                            $('#edit_zone_id').val(data.zone_id).change();
-                        console.log('agent _cty  zero',data.agent_id);
-
-                        console.log('city_0');
-                        $('#edit_city_id').css('display','block');
-                        $('#edit_city_select').css('display','block');
-                        $('#edit_agent_id').val(data.agent_id).change();
-                            // $('#edit_agent_id').val(2);
-                            $('#edit_city_id').val(data.city_id);
-                            $('#edit_service_id').val(data.service_id).change();
-                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
-                            $('#edit_territory_id').css('display','none');
-
-                            $('#edit_territory_select').css('display','none');
-
-                            // $('#edit_territory_id').val(data.territory_id).change();
-                        }else{
-                        console.log('agent _cty not zero',data.agent_id);
-                            $('#edit_zone_id').val(data.zone_id).change();
-
-                            $('#edit_territory_select').css('display','block');
-                            $('#edit_territory_id').css('display','block');
-
-                            $('#edit_agent_id').val(data.agent_id).change();
-                            $('#edit_city_id').val(data.city_id).change();
-                            $('#edit_service_id').val(data.service_id).change();
-                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
-                            $('#edit_territory_id').val(data.territory_id).change();
-                        }
-                        
-                    }
-                    
-                    $('#EditAgentModal').modal('show');
-
-                })
-                
-            });
-
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                swal({
-                                text: 'Are you sure, you want to Delete?',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_tagging.delete") !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'id': id,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            table.draw();
-                                        });
-                            });
-
-                
-            });
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                                          $.ajax({

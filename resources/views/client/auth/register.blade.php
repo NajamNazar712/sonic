@@ -319,7 +319,7 @@
                                                         <label for="referral">Referral:
                                                         </label>
                                                         <div>
-                                                            <input type="text" class="form-control" value="{{ old('referral') }}" name="referral" placeholder="Referral Name"  data-rule-remote="{{ route('cod.referral.valid') }}" data-msg-remote="Referral Code not found">
+                                                            <input type="text" class="form-control" value="{{ old('referral') }}" name="referral" placeholder="Referral Code"  data-rule-remote="{{ route('cod.referral.valid') }}" data-msg-remote="Referral Code not found">
                                                         </div>
                                                     </div>
                                                 </div>

@@ -6526,12 +6526,12 @@ public function sales_incentive()
         if($referral->status == 1){
             $referral->status = 0;
             $referral->save();
-        return redirect()->back()->with('success', 'Referral Disabled!');
+            return response()->json(['status' => 1, 'success' => 'Referral Disabled!']);
 
         }else{
             $referral->status = 1;
             $referral->save();
-        return redirect()->back()->with('success', 'Referral Enabled!');
+            return response()->json(['status' => 1, 'success' => 'Referral Enabled!']);
 
         } 
     }

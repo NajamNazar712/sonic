@@ -100,7 +100,7 @@
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
-                                        <th class="border-primary border-darken-1">Referral</th>
+                                        <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
