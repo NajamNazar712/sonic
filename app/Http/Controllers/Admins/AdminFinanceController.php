@@ -5072,7 +5072,7 @@ class AdminFinanceController extends Controller
                     $start_date=Carbon::parse($start_date);
                     $end_date=Carbon::parse($end_date);
                     $interval = $end_date->diffInHours($start_date);
-                    return $interval.' hours';
+                    return $interval.' Hrs';
 
 //                    $start_date = isset($done_payment->start_date) ? date('Y-m-d H:i:s', strtotime($done_payment->start_date)) : '';
 //                    $end_date = isset($done_payment->VisionSoftCodPaymentClear->created_at) ? date('Y-m-d H:i:s', strtotime($done_payment->VisionSoftCodPaymentClear->created_at)) : date('Y-m-d H:i:s', strtotime($done_payment->end_date));

@@ -206,7 +206,7 @@
 													<thead>
 													<tr>
 														<th>S.No#</th>
-														<th>Shipment ID</th>
+{{--														<th>Shipment ID</th>--}}
 														<th>Payment Status</th>
 														<th>Updated At</th>
 														<th>Updated By</th>
@@ -1140,7 +1140,6 @@
 								$('#view_status_history tbody ').append(`
 							<tr>
 							<td>${sc++}</td>
-							<td>${result.shipment_id[index]}</td>
 
 							<td>${result.payment_status[index]}</td>
 							<td>${result.status_updated_at[index]}</td>
