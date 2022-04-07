@@ -5226,8 +5226,8 @@ class AdminFinanceController extends Controller
 
                 $done_payments = ShipmentsPaymentJourney::with('admin','status')
                 ->where('payment_id',$request->id)
-                ->groupBy('shipment_id')
-                ->orderBy('shipment_id', 'DESC')
+                ->groupBy('status_id')
+                ->orderBy('status_id', 'DESC')
                 ->get();
 
 
