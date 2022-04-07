@@ -36,4 +36,14 @@ class DonePayment extends Model
     public function payment_status() {
         return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'status', 'id');
     }
+
+
+    public function shipment_payment_journey() {
+        return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney', 'payment_id', 'id')->groupBy('shipment_id')
+            ->orderBy('shipment_id', 'DESC');
+    }
+
+
+
+
 }

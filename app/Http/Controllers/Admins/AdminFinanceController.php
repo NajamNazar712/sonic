@@ -5224,33 +5224,22 @@ class AdminFinanceController extends Controller
 //                ->get();
 
 
-            $done_payments = DonePayment::join('shipments_payment_journey as spj', 'spj.payment_id', '=', 'done_payments.id')
-                ->leftjoin('admins', 'admins.id', '=', 'spj.admin_id')
-                ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
-                ->where('done_payments.id', $request->id)
-                ->select('done_payments.id as payment_id', 'spj.id', 'spj.status_id as status_id', 'spj.admin_id', 'spj.updated_at as updated_at', 'admins.name as admin', 'sps.name as payment_status')
+                $done_payments = ShipmentsPaymentJourney::with('admin','status')
+                ->where('payment_id',$request->id)
                 ->groupBy('shipment_id')
+                ->orderBy('shipment_id', 'DESC')
                 ->get();
 
-//Shipments::select('id', 'shipment_id', DB::raw('MAX(date) as latest_date'))
-//                            ->where('is_active', 1)
-//                            ->groupBy('shipment_id')
-//                            ->get();
-            if (!empty($done_payments)) {
-                foreach ($done_payments as $key => $done_payment) {
-                    $payment_id = $done_payment->payment_id;
-                    $payment_id = str_pad($payment_id, 6, '0', STR_PAD_LEFT);
 
-                    $payment_status = $done_payment->payment_status;
-                    $status_updated_at = $done_payment->updated_at;
+            if (count($done_payments) > 0) {
+                foreach ($done_payments as $key => $pj) {
 
-                    $updated_by = $done_payment->admin;
-
-                    $status_history['payment_id'][$key] = isset($payment_id) ? $payment_id : '';
-                    $status_history['payment_status'][$key] = isset($payment_status) ? $payment_status : '';
-                    $status_history['status_updated_at'][$key] = isset($status_updated_at) ? date('Y-m-d H:i:s', strtotime($status_updated_at)) : '';
-                    $status_history['status_updated_by'][$key] = isset($updated_by) ? $updated_by : '';
-                    $status_history['status'][$key] = 2;
+                $status_history['shipment_id'][$key] = $pj->shipment_id;
+                $status_history['admin'][$key] = isset($pj->admin->name) ? $pj->admin->name : 'N/A';
+                $status_history['payment_id'][$key] = isset($pj->payment_id) ? $pj->payment_id : '';
+                $status_history['payment_status'][$key] = isset($pj->status->name) ? $pj->status->name : '';
+                $status_history['status_updated_at'][$key] = isset($pj->updated_at) ? date('Y-m-d H:i:s', strtotime($pj->updated_at)) : '';
+                $status_history['status'][$key] = 2;
 
 
                 }

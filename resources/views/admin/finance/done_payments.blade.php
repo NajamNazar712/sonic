@@ -205,6 +205,7 @@
 												<table class="table table-striped" id="view_status_history">
 													<thead>
 													<tr>
+														<th>Shipment ID</th>
 														<th>Payment Status</th>
 														<th>Updated At</th>
 														<th>Updated By</th>
@@ -534,8 +535,8 @@
                             head.push('Done Datetime');
                             head.push('Company Bank');
                             head.push('Status');
-							head.push('Updated At');
-							head.push('Updated By');
+							// head.push('Updated At');
+							// head.push('Updated By');
 							head.push('Aging');
 
                             $.each(result.data, function(index, values) {
@@ -565,8 +566,8 @@
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
                                 row.push(values.status);
-								row.push(values.updated_at);
-								row.push(values.updated_by);
+								// row.push(values.updated_at);
+								// row.push(values.updated_by);
 								row.push(values.aging);
 
 
@@ -1136,10 +1137,11 @@
 							if (result.status[index] == 2) {
 								$('#view_status_history tbody ').append(`
 							<tr>
+							<td>${result.shipment_id[index]}</td>
 
 							<td>${result.payment_status[index]}</td>
 							<td>${result.status_updated_at[index]}</td>
-							<td>${result.status_updated_by[index]}</td>
+							<td>${result.admin[index]}</td>
 							</tr>`)
 							} else {
 								$('#view_status_history tbody ').html('');
