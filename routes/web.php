@@ -1772,6 +1772,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list','Admins\V2AdminDisputeShipmentsController@list')->name('list');
             Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
             Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
+            Route::post('images','Admins\V2AdminDisputeShipmentsController@dispute_images')->name('images');
         });
 
     });

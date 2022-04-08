@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\V2Dispute;
 use App\Http\Models\Admin\V2DisputeImage;
 use App\Http\Models\Admin\V2DisputeReason;
 use App\Http\Models\Admin\V2DisputeStatus;
+use App\Http\Models\City;
 use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,11 +28,11 @@ class V2AdminDisputeShipmentsController extends Controller
 
     public function index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 521);
-
+        $cities = City::select('id', 'name')->where('status', 1)->get();
         $reasons = V2DisputeReason::all();
         $status = V2DisputeStatus::all();
-
-        return view('admin.v2_dispute.index')->with(['reasons' => $reasons, 'statuses' => $status]);
+        $admins = Admin::where('status', 1)->select('id', 'name')->get();
+        return view('admin.v2_dispute.index')->with(['reasons' => $reasons, 'statuses' => $status, 'cities' => $cities, 'admins' => $admins]);
     }
     public function list(Request $request){
         if ($request->get('excel') && $request->get('excel') == true) {
@@ -45,7 +47,7 @@ class V2AdminDisputeShipmentsController extends Controller
         ->join('v2_dispute_reasons as dr', 'dr.id', '=', 'v2_disputes.reason_id')
         ->join('v2_dispute_statuses as ds', 'ds.id', '=', 'v2_disputes.status_id')
         ->leftjoin('admins as ub', 'ub.id', '=', 'v2_disputes.updated_by')
-        ->select(['v2_disputes.id as dispute_id','v2_disputes.shipment_id', 'v2_disputes.remarks', 'v2_disputes.image', 'ab.name as added_by', 'ub.name as updated_by', 'v2_disputes.created_at', 'v2_disputes.updated_at', 'shipments.tracking_number', 'shipments.actual_weight', 'shipments.amount as cod_amount', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'usi.poc as poc', 'dr.name as reason', 'ds.name as status']);
+        ->select(['v2_disputes.id as dispute_id','v2_disputes.shipment_id', 'v2_disputes.remarks', 'v2_disputes.image', 'ab.name as added_by', 'ub.name as updated_by', 'v2_disputes.created_at', 'v2_disputes.updated_at', 'shipments.tracking_number', 'shipments.actual_weight', 'shipments.amount as cod_amount', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'usi.poc as poc', 'dr.name as reason', 'ds.name as status', 'v2_disputes.status_id', 'v2_disputes.reason_id']);
         if (session('role_id') != 1) {
             $dispute = $dispute->where(function ($query) {
                 $query->whereIn('oc.hub_id', session('hubs'))
@@ -81,7 +83,7 @@ class V2AdminDisputeShipmentsController extends Controller
             })
             ->addColumn('image_view',function ($dispute){
                 if($dispute->image){
-                    return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
+                    return "<a href='#' class='btn btn-block btn-outline-info mr-1 image_popup'><i class='la la-image'></i></a>";
                 }
                 else{
                     return '-';
@@ -99,8 +101,10 @@ class V2AdminDisputeShipmentsController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">';
 
                     if (session('role_id') == 1 || in_array(703, session('permissions'))){
+                        if($result->status_id < 3){
 
-                        $dropdown .= $status_update;
+                            $dropdown .= $status_update;
+                        }
                     }else{
                         return '-';
                     }
@@ -114,6 +118,24 @@ class V2AdminDisputeShipmentsController extends Controller
                     return '';
                 }
             });
+
+        if ($origin = $request->get('search_origin')) {
+            $dispute->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $dispute->where('dc.id', '=', $destination);
+        }
+
+        if ($reason = $request->get('search_reason')) {
+            $dispute->where('v2_disputes.reason_id', '=', $reason);
+        }
+        if ($status = $request->get('search_status')) {
+            $dispute->where('v2_disputes.status_id', '=', $status);
+        }
+        if ($launched_by = $request->get('search_launched_by')) {
+            $dispute->where('v2_disputes.added_by', '=', $launched_by);
+        }
+
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -189,14 +211,35 @@ class V2AdminDisputeShipmentsController extends Controller
         if($dispute_id){
             $dispute = V2Dispute::find($dispute_id);
             if($dispute){
-                if($dispute->status == 2){
-                    $dispute->status = 3;
-                }
-                else if($dispute->status == 3){
 
+                if($dispute->status_id == 1){
+                    $dispute->status_id = 2;
                 }
+                else if($dispute->status_id == 2){
+                    $dispute->status_id = 3;
+                }
+                $dispute->save();
+                return response()->json(['status' => 0, 'success' => 'Status updated successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+    }
+
+    public function dispute_images(Request $request){
+        $dispute_id = $request->dispute_id;
+
+        if($dispute_id){
+            $dispute_images = V2DisputeImage::where('dispute_id', $dispute_id);
+            if($dispute_images->exists()){
+                $dispute_images = $dispute_images->get();
+                $data = array();
+                foreach ($dispute_images as $index => $dispute_image) {
+                    $url = Storage::url('dispute_shipments/'.$dispute_image->image);
+                    $data[] = '<img src="'.asset($url) .'">';
+                }
+                return response()->json(['status' => 0, 'images' => $data]);
             }
         }
     }
-
 }

@@ -12,6 +12,52 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
+
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_reasons" id="search_reasons" class="form-control select2">
+                                @foreach($reasons as $reason)
+                                    <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_status" id="search_status" class="form-control select2">
+                                @foreach($statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_launched_by" id="search_launched_by" class="form-control select2">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <div class="form-group input-group ml">
                             <div class="input-group-prepend">
@@ -50,8 +96,8 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Image</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Added At</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Added At</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -210,6 +256,33 @@
                 }
             });
 
+
+            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Origin',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Destination',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Status',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_reasons').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Reasons',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_launched_by').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Launched By',
+                width:'100%',
+                allowClear:true
+            });
+
             $('#add_dispute_shipment_form #tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -236,8 +309,8 @@
                             head.push('Destination');
                             head.push('COD Amount');
                             head.push('Actual Weight');
-                            head.push('Status');
                             head.push('Remarks');
+                            head.push('Status');
                             head.push('Created At');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -250,8 +323,8 @@
                                 row.push(values.destination);
                                 row.push(values.amount);
                                 row.push(values.actual_weight);
-                                row.push(values.status);
                                 row.push(values.remarks);
+                                row.push(values.status);
                                 row.push(values.created_at);
 
                                 body.push(row);
@@ -304,6 +377,11 @@
                 ajax:{
                     url: '{{ route('admin.dispute.shipments.list') }}',
                     data: function (d) {
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_reason = $('#search_reasons').val();
+                        d.search_status = $('#search_status').val();
+                        d.search_launched_by = $('#search_launched_by').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -319,9 +397,9 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'actual_weight', name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
-                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa', orderable: false, searchable: false},
-                    {data: 'status', name: 'ds.name', class: 'align-middle status' , orderable: false, searchable: false},
+                    {data: 'image_view', name: 'image_view', class: 'align-middle image_view', orderable: false, searchable: false},
                     {data: 'remarks', name: 'v2_disputes.remarks', class: 'align-middle remarks'},
+                    {data: 'status', name: 'ds.name', class: 'align-middle status' , orderable: false, searchable: false},
                     {data: 'created_at', name: 'v2_disputes.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
@@ -415,104 +493,52 @@
                             }
                         });
 
-                    }else if($(this).hasClass('remaining_piece')){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to wait for remaining pieces!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    UnblockPagePermanently();
-
-                                });
-                            }
-                        });
-                    }else if($(this).hasClass('return_to_shipper')){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to wait for Return Back To Shipper!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
-                                blockPagePermanently();
-                                $.ajax({
-                                    url:"{{route('admin.multiple_pieces.hold.return_back_to_shipper')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_id':id,
-                                        '_token':'{{ csrf_token() }}',
-                                    }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                    }
-                                    UnblockPagePermanently();
-
-                                });
-                            }
-                        });
-                    }
-                    else if($(this).hasClass('image_upload')){
-                        $('#uploadImage #shipment_image_id').val(id);
-                        $('#uploadImage').modal('show');
                     }
                 }
 
+            });
 
+            $('#datatable tbody').on('click','tr td.image_view a',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $.ajax({
+                        url:"{{route('admin.dispute.shipments.images')}}",
+                        method:'POST',
+                        data:{
+                            'dispute_id':id,
+                            '_token':'{{ csrf_token() }}',
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+
+
+                            var tab = window.open('', '_blank');
+                            if (!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            } else {
+                                var html = '<div class="container">';
+                                $.each(data.images, function (index, image){
+                                    html += '<div>'+ image +'</div>';
+                                });
+                                html += '</div>';
+                                tab.document.write(html);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+
+                    });
+                }
             });
 
             $('#add_dispute_shipment_form').validate({
