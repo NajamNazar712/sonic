@@ -49,6 +49,7 @@
                                 <th class="border-primary border-darken-1">Booking Code</th>
                                 <th class="border-primary border-darken-1">Cash</th>
                                 <th class="border-primary border-darken-1">Booking Date</th>
+                                <th class="border-primary border-darken-1">Status</th>
                             </tr>
                             </thead>
                         </table>
@@ -155,6 +156,8 @@
                             head.push('Booking Code');
                             head.push('Cash');
                             head.push('Booking Date');
+                            head.push('Status');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -165,6 +168,7 @@
                                 row.push(values.booking_code);
                                 row.push(values.total_cash);
                                 row.push(values.booking_date);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -211,7 +215,8 @@
                     {data: 'category', name: 'retail_cash_deposits.category', class: 'align-middle text-center category'},
                     {data: 'booking_code', name: 'ru.id', class: 'align-middle text-center booking_code'},
                     {data: 'total_cash', name: 'retail_cash_deposits.total_cash', class: 'align-middle text-center total_cash'},
-                    {data: 'booking_date', name: 'retail_cash_deposits.created_at', class: 'align-middle text-center booking_date'}
+                    {data: 'booking_date', name: 'retail_cash_deposits.created_at', class: 'align-middle text-center booking_date'},
+                    {data: 'status', name: 'retail_cash_deposits.status', class: 'align-middle text-center status'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -224,6 +229,11 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var shipping_mode = '<select name="shipping_mode" id="shipping_mode" class="select2 form-control"></select>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Pending</option>' +
+                        '<option value="1">Cash Collected</option>' +
+                        '<option value="2">Deposited</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -231,6 +241,11 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.destination_arrival')) {
                             $(td).appendTo($(search));
+                        } else if ($(header).is('.status')) {
+                            $(drop_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }else if($(header).is('.shipping_mode')){
                             $(shipping_mode).appendTo($(search))
                                 .on( 'change', function () {
@@ -253,7 +268,12 @@
 
                         return obj;
                     });
-
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select a Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     $("#shipping_mode").prepend('<option value="" selected></option>').select2({
                         data:data,
                         placeholder: "Select Shipping Mode",

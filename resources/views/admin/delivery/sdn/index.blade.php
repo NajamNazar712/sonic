@@ -110,6 +110,7 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -127,6 +128,7 @@
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
                         <th class="border-primary border-darken-1">Difference Amount</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -769,6 +771,7 @@
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
                             head.push('Difference Amount');
+                            head.push('Aging');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -789,7 +792,7 @@
                                 row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
                                 row.push(values.difference_amount);
-
+                                row.push(values.aging);
                                 body.push(row);
                             });
                         },
@@ -800,18 +803,134 @@
                 }
             });
 
+        var selected_rowsx = [];
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
+                        text: 'Mark Closed',
+                        className: 'btn btn-primary closed',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Mark as Closed!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url:"{{route('admin.delivery.sdn.bulk_closed')}}",
+                                            method:'POST',
+                                            data:{
+                                                'sdn_ids':selected_rowsx,
+                                                '_token':'{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            if (data.status == 1) {
+                                                            toastr.success(data.success, 'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                        } else {
+                                                            toastr.error(data.error, 'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                        }
+                                                        selected_rowsx = [];
+
+                                                        table.rows().deselect();
+                                                        table.draw(true);
+                                                        table.button('.closed').disable();
+                                        });
+                                    }
+                                });
+                        }
+                    },
+                    {
                         extend: 'excel',
                         title: 'Station Deposit Notes',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
+                    },{
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rowsx);
+
+                                if (index === -1) {
+                                    selected_rowsx.push(id);
+                                }
+
+                                table.button('.closed').enable();
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rowsx);
+
+                                if (index !== -1) {
+                                    selected_rowsx.splice(index, 1);
+                                }
+
+                                if (selected_rowsx.length == 0) {
+                                    table.button('.closed').disable();
+                                }
+                            }
+                        });
+                    }
+                },
                     'reset'],
+                    select: {
+                        info: false,
+                        style: 'multi',
+                        selector: 'td.select-checkbox',
+                        className: 'selected bg-primary bg-lighten-5 primary'
+                    },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -833,8 +952,10 @@
                     }
                 },
                 rowId: 'sdn_id',
-                order: [[1, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1 serial_number', targets: 0, render: function (data, type, row) {return '';}},
+
                     {
                         orderable: false,
                         searchable: false,
@@ -896,12 +1017,17 @@
                         orderable: false,
                         searchable: false
                     },
+                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                if ($.inArray(data.id, selected_rowsx) !== -1) {
+                    table.row(row).select();
+                }
                 },
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api(settings);
@@ -933,13 +1059,14 @@
                         '<option value="0">Created</option>' +
                         '<option value="1">Deposited</option>' +
                         '<option value="2">Resolved</option>' +
+                        '<option value="3">Closed</option>' +
                         '</select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')  || $(header).is('.aging') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))
@@ -1173,6 +1300,26 @@
             });
             var route = '{!! route('admin.tracking.index') !!}';
 
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var index = $.inArray(id, selected_rowsx);
+
+                if (index === -1) {
+                    selected_rowsx.push(id);
+                }
+                else {
+                    selected_rowsx.splice(index, 1);
+                }
+                console.log(selected_rowsx);
+
+
+                if (selected_rowsx.length > 0) {
+                    table.button('.closed').enable();
+                }
+                else {
+                    table.button('.closed').disable();
+                }
+            });
             $('#datatable tbody').on('click', 'tr td.dncc_link button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if (id) {
@@ -1568,6 +1715,57 @@
                     });
                 }
             });
+            $('body').on('click', '.update_status_closed', function () {
+            var id = $(this).parents('tr').attr('id');
+            if (id) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Mark SDN Closed!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.sdn.closed') !!}',
+                            type: 'POST',
+                            data: {
+                                'sdn_id': id,
+                                '_token': '{{ csrf_token() }}'
+                          }
+                          }).done(function (data) {
+                              if (data.status == 1) {
+                                 table.draw(false);
+                                  toastr.success(data.message, 'Success!', {
+                                     positionClass: 'toast-bottom-center',
+                                     containerId: 'toast-bottom-center'
+                                 });
+                             } else {
+                                 toastr.error(data.message, 'Error!', {
+                                     positionClass: 'toast-top-center',
+                                     containerId: 'toast-top-center'
+                                 });
+                             }
+                         });
+                     }
+                 });
+             }
+         });
             $('body').on('click', '.add_dncc', function () {
                 var id = $(this).parents('tr').attr('id');
                 if (id) {
@@ -1707,6 +1905,25 @@
                             });
                         }
                     });
+                }
+            });
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.closed').enable();
+                }
+                else {
+                    table.button('.closed').disable();
                 }
             });
 
