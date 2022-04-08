@@ -59,7 +59,7 @@ class AdminERFController extends Controller
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type']);
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es']);
 
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
@@ -77,6 +77,14 @@ class AdminERFController extends Controller
                     return 'Replacement';
                 }
             })
+            ->editColumn('es',function($erf){
+                if($erf->es == 1){
+                    return 'Inactive';
+                }
+                else if($erf->es == 2){
+                    return 'Notice Period';
+                }
+            })
             ->addColumn('aging',function ($erf){
                 $log = EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',3);
                 if($log->exists())
@@ -87,11 +95,8 @@ class AdminERFController extends Controller
                         $to = Carbon::now();
                         return $from->diffInDays($to);
                     }
-
                     return "-";
-
                 }
-
                 return "-";
             })
             ->filterColumn('erf_id', function($query, $keyword) {
@@ -107,6 +112,15 @@ class AdminERFController extends Controller
                 }
                 else{
                     $query->where('employee_requisitions.type', 1);
+                }
+            })
+            ->filterColumn('employee_requisitions.employee_status', function($query, $keyword) {
+                $keyword =  strtolower($keyword);
+                if($keyword == 'inactive'){
+                    $query->where('employee_requisitions.employee_status', 1);
+                }
+                else if($keyword == 'notice period' || $keyword == 'notice'){
+                    $query->where('employee_requisitions.employee_status', 2);
                 }
             })
 
@@ -136,9 +150,6 @@ class AdminERFController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
 
                     }
-
-
-
                     $dropdown .= '
                         </div>
                       </div>
@@ -174,7 +185,7 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        // $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+      
         $department_admins = AdminDepartment::all()->pluck('department_head_id')->toArray();
         $department_heads = Admin::whereIn('id', $department_admins)->where('status', 1)->select('id','name')->get();
 

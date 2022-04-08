@@ -28,13 +28,14 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">ERF ID</th>
+                                    <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
-                                    <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -224,13 +225,14 @@
 
                             head.push('S.No');
                             head.push('ERF ID');
+                            head.push('Type');
                             head.push('Department');
                             head.push('Designation');
                             head.push('Hub');
                             head.push('City');
                             head.push('Line Manager');
-                            head.push('Type');
                             head.push('Status');
+                            head.push('Employee Status');
                             head.push('Aging');
 
                             $.each(result.data, function (index, values) {
@@ -238,13 +240,14 @@
 
                                 row.push(index + 1);
                                 row.push(values.erf_id);
+                                row.push(values.type);
                                 row.push(values.department);
                                 row.push(values.designation);
                                 row.push(values.hub);
                                 row.push(values.city);
                                 row.push(values.admin);
-                                row.push(values.type);
                                 row.push(values.status);
+                                row.push(values.es);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -310,13 +313,14 @@
                     },
 
                     {data: 'erf_id', name: 'erf_id', class: 'align-middle erf_id'},
+                    {data: 'type', name: 'employee_requisitions.type', class: 'align-middle type'},
                     {data: 'department', name: 'dp.name', class: 'align-middle department'},
                     {data: 'designation', name: 'd.name', class: 'align-middle designation'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
-                    {data: 'type', name: 'employee_requisitions.type', class: 'align-middle type'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
+                    {data: 'es', name: 'employee_requisitions.employee_status', class: 'align-middle es'},
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 

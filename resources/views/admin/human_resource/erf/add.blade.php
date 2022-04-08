@@ -459,7 +459,7 @@
                         '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
                             '<div class="col text-center">\n' +
                                 '<label>Trax Id</label>' +
-                                '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
+                                '<div class="form-group validated duplicate_check"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
                                 @if($employee->status_id == 2)
                                 @php $mark = 'Disabled' @endphp
                                 @else
@@ -518,7 +518,7 @@
                             }
                         }).done(function (data) {
                             if (data.status == 1) {
-                                 $('#salary').val(data.details.last_salary );
+                                 $('#salary').val(data.details.last_salary);
                                  $('#name').val(data.details.name );
                                  $('#employee_designation').val(data.details.designation);
                                  $('#last_day').val(data.details.last_working_date );
@@ -616,7 +616,7 @@
                         '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
                     '<div class="col text-center">\n' +
 
-                    '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
+                    '<div class="form-group validated duplicate_check"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
                             @if($employee->status_id == 2)
                               @php $mark = 'Disabled' @endphp
                             @else
@@ -747,6 +747,24 @@
                     form.submit();
                 }
             }
+
         });
+
+        $.validator.addMethod("duplicate_check", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.duplicate_check')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
+            }
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Trax ID Can Not Be Duplicate");
+
+
+
     </script>
 @endsection
