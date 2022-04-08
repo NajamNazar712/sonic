@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePendingOpenBoxChargesTable extends Migration
+class CreateV2DisputeReasonsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreatePendingOpenBoxChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('pending_open_box_charges', function (Blueprint $table) {
+        Schema::create('v2_dispute_reasons', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->index();
-            $table->integer('shipping_mode_id')->index();
-            $table->integer('charges');
+            $table->string('name');
             $table->timestamps();
-
         });
     }
 
@@ -30,6 +27,6 @@ class CreatePendingOpenBoxChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pending_open_box_charges');
+        Schema::dropIfExists('v2_dispute_reasons');
     }
 }
