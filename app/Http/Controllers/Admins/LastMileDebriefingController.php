@@ -924,7 +924,7 @@ class LastMileDebriefingController extends Controller
 
                     if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                         //dispatch(new RCPSmsToConsignee($shipment));
-                        ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
+                        ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                     }
 
                     if (!empty($dispute_shipments)) {

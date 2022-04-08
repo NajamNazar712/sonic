@@ -1188,7 +1188,6 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Shipments has been marked Resolved'];
     }
 
-
     public function revert_requested_image($image_id){
         $revert_Status_request = RevertStatusRequest::find($image_id);
         $image_url = $revert_Status_request->image;
