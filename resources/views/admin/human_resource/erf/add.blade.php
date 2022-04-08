@@ -459,7 +459,7 @@
                         '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
                             '<div class="col text-center">\n' +
                                 '<label>Trax Id</label>' +
-                                '<div class="form-group validated duplicate_check"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
+                                '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
                                 @if($employee->status_id == 2)
                                 @php $mark = 'Disabled' @endphp
                                 @else
@@ -616,7 +616,7 @@
                         '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
                     '<div class="col text-center">\n' +
 
-                    '<div class="form-group validated duplicate_check"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
+                    '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
                             @if($employee->status_id == 2)
                               @php $mark = 'Disabled' @endphp
                             @else
