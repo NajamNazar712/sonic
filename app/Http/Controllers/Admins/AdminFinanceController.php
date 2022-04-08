@@ -54,6 +54,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\ZoneClassCity;
+use DateTime;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -4948,7 +4949,7 @@ class AdminFinanceController extends Controller
 
         $count = $count->count();
 
-        $done_payments = DonePayment::with('VisionSoftCodPaymentClear')
+        $done_payments = DonePayment::with('VisionSoftCodPaymentClear','shipment_payment_journey_last_status_two')
             ->join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
@@ -4972,7 +4973,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name','done_payments.updated_at as updated_at');
+            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 'done_payments.updated_at as updated_at');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -5067,12 +5068,12 @@ class AdminFinanceController extends Controller
                 if ($done_payment->status == 0) {
 
 //                    $start_date = date_create($done_payment->updated_at);
-                    $start_date=date('d-m-Y H:i:s', strtotime($done_payment->updated_at));
-                    $end_date=date('d-m-Y H:i:s', strtotime(Carbon::now()));
-                    $start_date=Carbon::parse($start_date);
-                    $end_date=Carbon::parse($end_date);
+                    $start_date = date('d-m-Y H:i:s', strtotime($done_payment->updated_at));
+                    $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
+                    $start_date = Carbon::parse($start_date);
+                    $end_date = Carbon::parse($end_date);
                     $interval = $end_date->diffInHours($start_date);
-                    return $interval.' Hrs';
+                    return $interval . ' Hrs';
 
 //                    $start_date = isset($done_payment->start_date) ? date('Y-m-d H:i:s', strtotime($done_payment->start_date)) : '';
 //                    $end_date = isset($done_payment->VisionSoftCodPaymentClear->created_at) ? date('Y-m-d H:i:s', strtotime($done_payment->VisionSoftCodPaymentClear->created_at)) : date('Y-m-d H:i:s', strtotime($done_payment->end_date));
@@ -5089,6 +5090,23 @@ class AdminFinanceController extends Controller
 //                    } else {
 //                        return '-';
 //                    }
+                } elseif ($done_payment->status == 2) {
+//                    $done_payment = ShipmentsPaymentJourney::with('done_payment')
+//                        ->where('status_id', 2)
+//                        ->where('payment_id', 54)
+//                        ->groupBy('status_id')
+//                        ->orderBy('status_id', 'DESC')
+//                        ->select('shipments_payment_journey.id', 'shipments_payment_journey.status_id', 'shipments_payment_journey.created_at as date')->get();
+
+
+                    $start_date = (isset($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) ? date('d-m-Y H:i:s', strtotime($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) : $done_payment->updated_at;
+                    $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
+                    $start_date = Carbon::parse($start_date);
+                    $end_date = Carbon::parse($end_date);
+                    $interval = $end_date->diffInHours($start_date);
+
+                    return $interval . ' Hrs';
+
                 } else {
                     return '-';
                 }
@@ -5224,8 +5242,8 @@ class AdminFinanceController extends Controller
 //                ->get();
 
 
-                $done_payments = ShipmentsPaymentJourney::with('admin','status')
-                ->where('payment_id',$request->id)
+            $done_payments = ShipmentsPaymentJourney::with('admin', 'status')
+                ->where('payment_id', $request->id)
                 ->groupBy('status_id')
                 ->orderBy('status_id', 'DESC')
                 ->get();
@@ -5234,12 +5252,12 @@ class AdminFinanceController extends Controller
             if (count($done_payments) > 0) {
                 foreach ($done_payments as $key => $pj) {
 
-                $status_history['shipment_id'][$key] = $pj->shipment_id;
-                $status_history['admin'][$key] = isset($pj->admin->name) ? $pj->admin->name : 'N/A';
-                $status_history['payment_id'][$key] = isset($pj->payment_id) ? $pj->payment_id : '';
-                $status_history['payment_status'][$key] = isset($pj->status->name) ? $pj->status->name : '';
-                $status_history['status_updated_at'][$key] = isset($pj->updated_at) ? date('Y-m-d H:i:s', strtotime($pj->updated_at)) : '';
-                $status_history['status'][$key] = 2;
+                    $status_history['shipment_id'][$key] = $pj->shipment_id;
+                    $status_history['admin'][$key] = isset($pj->admin->name) ? $pj->admin->name : 'N/A';
+                    $status_history['payment_id'][$key] = isset($pj->payment_id) ? $pj->payment_id : '';
+                    $status_history['payment_status'][$key] = isset($pj->status->name) ? $pj->status->name : '';
+                    $status_history['status_updated_at'][$key] = isset($pj->updated_at) ? date('Y-m-d H:i:s', strtotime($pj->updated_at)) : '';
+                    $status_history['status'][$key] = 2;
 
 
                 }
