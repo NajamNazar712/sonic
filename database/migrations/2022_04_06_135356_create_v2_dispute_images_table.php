@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAutoTagTerritoriesTable extends Migration
+class CreateV2DisputeImagesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateAutoTagTerritoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('auto_tag_territories', function (Blueprint $table) {
+        Schema::create('v2_dispute_images', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('admin_id')->index();
-            $table->integer('territory_id')->index();
-            $table->tinyInteger('status')->default(1)->index();
+            $table->integer('dispute_id')->index();
+            $table->string('image');
+            $table->integer('added_by');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ class CreateAutoTagTerritoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('auto_tag_territories');
+        Schema::dropIfExists('v2_dispute_images');
     }
 }

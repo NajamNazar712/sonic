@@ -1231,6 +1231,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get/petty_cash_statements','Admins\DeliveryController@get_petty_cash_statements')->name('get.petty_cash_statements');
             Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
             Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
+            Route::post('closed','Admins\DeliveryController@closed')->name('closed');
+            Route::post('bulk_closed','Admins\DeliveryController@bulk_closed')->name('bulk_closed');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
@@ -1766,6 +1768,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('update/submit','Admins\DisputeController@update_dispute')->name('update.submit');
         Route::post('data','Admins\DisputeController@get_data')->name('data');
         Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
+
+        Route::prefix('shipments')->name('shipments.')->group(function (){
+            Route::get('','Admins\V2AdminDisputeShipmentsController@index')->name('index');
+            Route::get('list','Admins\V2AdminDisputeShipmentsController@list')->name('list');
+            Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
+            Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
+            Route::post('images','Admins\V2AdminDisputeShipmentsController@dispute_images')->name('images');
+        });
 
     });
 

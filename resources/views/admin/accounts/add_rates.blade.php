@@ -2575,7 +2575,6 @@
                                             {{--                                            </div>--}}
                                         </div>
 
-
                                         <hr>
 
                                         <div class="discount-weight-origin-wise-addition-sameday">
@@ -5766,7 +5765,7 @@
                 }
             }
             $(this).parent().parent().remove();
-        });
+        })
 
 
         $('#ratesAdditionForm').on('keypress', function (e) {

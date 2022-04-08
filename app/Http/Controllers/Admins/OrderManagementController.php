@@ -294,14 +294,16 @@ class OrderManagementController extends Controller
 
                                     $warehouse_id = $fulfilment_hub->warehouse_id;
 
-                                    foreach ($packaging_material_request_details as $detail_add) {
-                                        $type_id = $detail_add->type_id;
-                                        $type_size_id = $detail_add->type_size_id;
-                                        $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+                                    if($packaging_material_request_details){
+                                        foreach ($packaging_material_request_details as $detail_add) {
+                                            $type_id = $detail_add->type_id;
+                                            $type_size_id = $detail_add->type_size_id;
+                                            $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
 
-                                        $stock = $stock->first();
-                                        $stock->stock = $stock['stock'] + $detail_add->quantity;
-                                        $stock->save();
+                                            $stock = $stock->first();
+                                            $stock->stock = $stock['stock'] + $detail_add->quantity;
+                                            $stock->save();
+                                        }
                                     }
 
                                     $packaging_request_history_replenished = new PackagingMaterialRequestHistory();

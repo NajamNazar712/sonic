@@ -918,7 +918,6 @@
 {{--                                                </fieldset>--}}
 {{--                                            </div>--}}
                                         </div>
-
                                         <hr>
 
                                         @php
@@ -1907,6 +1906,7 @@
 
 
                                         </div>
+
 
                                         <hr>
 
@@ -2901,8 +2901,6 @@
                                         </div>
 
 
-                                        <hr>
-
                                         @php
                                             $ondhide = 'd-none';
                                             $ondtoggle = '';
@@ -3839,7 +3837,6 @@
 {{--                                                </fieldset>--}}
 {{--                                            </div>--}}
                                         </div>
-
 
                                         <hr>
 
@@ -6518,8 +6515,6 @@
             }
             $(this).parent().parent().remove();
         });
-
-
 
         //Origin And Destination Cities Start
         $('#on_origin_hubs').select2({

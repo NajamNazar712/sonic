@@ -220,11 +220,16 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 386,501,551], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 386,501,551,682], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-truck"></i>Supply Chain</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(376, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.cargo.supply_chain.supply_chain_index') }}">Order Management</a></li>
+                        @endif
+                    </ul>
+                    <ul>
+                        @if (session('role_id') == 1 || in_array(682, session('permissions')))
+                           <li><a class="menu-item" href="{{ route('admin.cargo_manifest.draft.setting') }}">Cargo Manifest Draft Setting</a></li>
                         @endif
                     </ul>
                     
@@ -1240,9 +1245,9 @@
                                     @if (session('role_id') == 1 || in_array(544, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.mapping.manifest.index') }}">Mapping (Cargo Manifest)</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(682, session('permissions')))
-                                            <li><a class="menu-item" href="{{ route('admin.cargo_manifest.draft.setting') }}">Cargo Manifest Draft Setting</a></li>
-                                        @endif
+{{--                                    @if (session('role_id') == 1 || in_array(682, session('permissions')))--}}
+{{--                                            <li><a class="menu-item" href="{{ route('admin.cargo_manifest.draft.setting') }}">Cargo Manifest Draft Setting</a></li>--}}
+{{--                                        @endif--}}
                                     @if (session('role_id') == 1 || in_array(198, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.mapping.index') }}">Mapping</a></li>
                                     @endif
@@ -1808,6 +1813,9 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(692, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.qa.high_alert.shippers.index')}}">High Alert Shippers</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || in_array(702, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.dispute.shipments.index')}}">Dispute Shipments</a></li>
                     @endif
                 </ul>
             </li>

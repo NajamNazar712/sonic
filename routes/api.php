@@ -66,6 +66,7 @@ Route::name('api.')->group(function () {
             Route::post('add', 'APIController@receiving_sheet_add')->name('add');
             Route::post('remove', 'APIController@receiving_sheet_void')->name('remove');
             Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
+            Route::post('list', 'APIController@receiving_sheet_list')->name('list');
 		});
 
 		Route::get('cities', 'APIController@cities')->name('cities');
@@ -424,6 +425,14 @@ Route::name('api.')->group(function () {
                 Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
             });
         });
+
+    });
+
+    Route::prefix('botsify')->name('botsify.')->group(function () {
+        Route::post('shipper/phone_number', 'APIController@whatsapp_shipper_phone_number')->name('shipper.phone_number');
+        Route::post('shipment/tracking', 'APIController@whatsapp_shipper_tracking')->name('shipment.tracking');
+        Route::post('crm/launch', 'APIController@whatsapp_crm_request_create')->name('crm.launch');
+        Route::post('crm/tracking', 'APIController@whatsapp_shipper_crm_tracking')->name('crm.tracking');
 
     });
 
