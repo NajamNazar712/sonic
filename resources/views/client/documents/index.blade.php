@@ -171,7 +171,7 @@
         }
         else
         {
-            shopfiy_link="https://shopify-sonic.trax.pk?shop="+shopify_text+'.myshopify.com';
+            shopfiy_link="https://s-app-sonic.trax.pk?shop="+shopify_text+'.myshopify.com';
             window.open(shopfiy_link);
             document.getElementById('shopify_text').value="";
         }
