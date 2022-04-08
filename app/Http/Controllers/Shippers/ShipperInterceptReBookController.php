@@ -8,6 +8,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ShipperInterceptReBookController extends Controller
 {
@@ -61,6 +64,13 @@ class ShipperInterceptReBookController extends Controller
 
     public function intercept_re_book_update(Request $request)
     {
+        $rules = [
+            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
@@ -124,6 +134,22 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+
+                        if($request->hasFile('replacement_parcel_image')){
+                            $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                            if($shipment_parcel_image->exists()){
+                                $shipment_parcel_image = $shipment_parcel_image->first();
+                                Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                            }else{
+                                $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                                $shipment_parcel_image->shipment_id = $request->shipment_id;
+                            }
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                            Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
+                            $shipment_parcel_image->picture_path = $picture_path;
+                            $shipment_parcel_image->save();
+                        }
                         
                     }
 
@@ -136,6 +162,7 @@ class ShipperInterceptReBookController extends Controller
         } else {
             return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
+    }
     }
 
 }

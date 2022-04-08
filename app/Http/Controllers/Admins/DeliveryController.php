@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -96,6 +96,8 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
@@ -842,10 +844,6 @@ class DeliveryController extends Controller
 
                 }
 
-                if ($normal_rider) {
-                    NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
-                }
-
                 foreach ($valid_shipments as $index => $shipment) {
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
@@ -873,6 +871,9 @@ class DeliveryController extends Controller
                     }
                 }
                 NotificationsController::send(40, $note->id);
+                if ($normal_rider) {
+                    NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
+                }
             }
 
             //rider attendance
@@ -2108,7 +2109,7 @@ class DeliveryController extends Controller
                             }
                             if(in_array(session('role_id'),[18,19]) && $selected_status == 12 && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                 //dispatch(new RCPSmsToConsignee($shipment));
-                                ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
+                                ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                             }
 
                         }
@@ -2664,7 +2665,8 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['riders.name as rider_name', 'delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status', 'sj.created_at as arrival', 'usi.poc', 'rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id', 'dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered'])
+            ->leftjoin('shipment_open_boxes as sob', 'shipments.id', '=', 'sob.shipment_id')
+            ->select(['riders.name as rider_name', 'delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status', 'sj.created_at as arrival', 'usi.poc', 'rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id', 'dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered', 'sob.open_box_type as open_box_type'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering', 'asc', 'dns.shipment_id', 'asc');
 
@@ -2903,6 +2905,17 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('open_box_type', function ($deliveries) {
+                if ($deliveries->open_box_type != null) {
+                    if($deliveries->open_box_type == 1){
+                        return 'On Request';
+                    }else{
+                        return 'Forcefully';
+                    }
+                } else {
+                    return '-';
+                }
+            })
             ->make(true);
     }
 
@@ -3096,7 +3109,7 @@ class DeliveryController extends Controller
                                                     if ($parcel->shipper_status_id != 12) {
                                                          if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                                               //dispatch(new RCPSmsToConsignee($shipment));
-                                                             ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
+                                                             ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                                                           }
                             ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                     }
@@ -3268,7 +3281,7 @@ class DeliveryController extends Controller
                                         }
                                         if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                             //dispatch(new RCPSmsToConsignee($shipment));
-                                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
+                                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                                         }
                                     }//main if condition
 
@@ -4457,7 +4470,7 @@ class DeliveryController extends Controller
                     $pickup_notes = RetailPickupNote::where('status', 4)->where('pncc_status', 0)->where('hub_id', $sdn->hub_id)->orderBy('id', 'desc')->get(['id']);
                     return response()->json(['status' => 1, 'dn' => $pickup_notes]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not add PNCC to SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4492,9 +4505,9 @@ class DeliveryController extends Controller
                     $pickup_note->pncc_status = 1;
                     $pickup_note->update();
 
-                    return back()->with(['success' => 'PNCC added to SDN']);
+                    return back()->with(['success' => 'RNCC added to SDN']);
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4517,7 +4530,7 @@ class DeliveryController extends Controller
 
                     return response()->json(['status' => 1, 'pncc' => RetailPickupNote::whereIn('id', $pickup_note_ids)->get()]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not remove PNCC from SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not remove RNCC from SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4560,12 +4573,12 @@ class DeliveryController extends Controller
                         $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
                         $sdn->update();
 
-                        return back()->with(['success' => 'PNCC removed successfully']);
+                        return back()->with(['success' => 'RNCC removed successfully']);
                     } else {
-                        return back()->with('error', 'Invalid PNCC');
+                        return back()->with('error', 'Invalid RNCC');
                     }
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4723,7 +4736,7 @@ class DeliveryController extends Controller
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest']);
+            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -4829,6 +4842,16 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('aging', function ($sdn) {
+                $start_date = Carbon::parse($sdn->created_at);
+                if ($sdn->status == 3) {
+                    $end_date = Carbon::parse($sdn->closed_at);
+                    return $end_date->diffInHours($start_date);;
+                } else {
+                    $end_date = Carbon::now();
+                    return $end_date->diffInHours($start_date);;
+                }
+            })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
                 $retail_route = route('admin.delivery.sdn.retail.details', ['id' => $result->sdn_id]);
@@ -4842,11 +4865,11 @@ class DeliveryController extends Controller
 
                 $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
 
-                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add RNCC</div></button>';
 
                 $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
 
-                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove RNCC</div></button>';
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
@@ -4855,6 +4878,12 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1){
+
+                    $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
+                    $dropdown .= $closed_status;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4906,8 +4935,10 @@ class DeliveryController extends Controller
                     return 'Created';
                 } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
@@ -4916,6 +4947,8 @@ class DeliveryController extends Controller
                 } else if ($keyword == 1) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 3) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
@@ -5106,6 +5139,19 @@ class DeliveryController extends Controller
         $sdn->status = 1;
         $sdn->save();
 
+        $pnsdn = PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->get()->first();
+            if ($pnsdn) {
+                    $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id', $pnsdn->retail_pickup_note_id)->get()->first();
+                    if($retail_shipment){
+                        $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+                        if($retail_cash_depost){
+
+                            RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                                'status' => 2,
+                            ]);
+                        }
+                    }
+            }
         self::add_sdn_logs($sdn_id, 1, Auth::id());
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 
@@ -6301,6 +6347,7 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
+                    ShipmentChargesController::weight($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
@@ -6518,6 +6565,7 @@ class DeliveryController extends Controller
                     ]);
 
                     ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::weight($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
@@ -6743,14 +6791,54 @@ class DeliveryController extends Controller
     {
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::where('id', $shipment_id)->first();
-            $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->first();
-            $insurance = $product_type['insurance'];
-            $type = $product_type['type'];
-            $product_type_id = $product_type['product_type_id'];
-            $item_description = $product_type['description'];
-            $item_quantity = $product_type['quantity'];
-            $item_price = $product_type['price'];
-            $replacement_charges = $shipment['replacement_charges'];
+            if($shipment->warehouse == 1){
+                $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->get();
+                foreach ($product_type as $product){
+                    $insurance = $product['insurance'];
+                    $type = $product['type'];
+                    $product_type_id = $product['product_type_id'];
+                    $item_description = $product['description'];
+                    $item_quantity = $product['quantity'];
+                    $item_price = $product['price'];
+                    if($item_price == null){
+                        $item_price = 0;
+                    }
+                    $replacement_charges = $shipment->replacement_charges;
+                    ReplacementToRegularLog::create([
+                        'shipment_id' => $shipment->id,
+                        'updated_by' => Auth::id(),
+                        'replacement_charges' => $replacement_charges,
+                        'product_type_id' => $product_type_id,
+                        'item_description' => $item_description,
+                        'item_quantity' => $item_quantity,
+                        'item_price' => $item_price,
+                        'insurance' => $insurance,
+                        'type' => $type,
+                    ]);
+                }
+            }
+            else{
+                $product_type = ShipmentItem::where(['shipment_id' => $shipment_id, 'type' => 1])->first();
+                $insurance = $product_type['insurance'];
+                $type = $product_type['type'];
+                $product_type_id = $product_type['product_type_id'];
+                $item_description = $product_type['description'];
+                $item_quantity = $product_type['quantity'];
+                $item_price = $product_type['price'];
+                $replacement_charges = $shipment['replacement_charges'];
+                ReplacementToRegularLog::create([
+                    'shipment_id' => $shipment->id,
+                    'updated_by' => Auth::id(),
+                    'replacement_charges' => $replacement_charges,
+                    'product_type_id' => $product_type_id,
+                    'item_description' => $item_description,
+                    'item_quantity' => $item_quantity,
+                    'item_price' => $item_price,
+                    'insurance' => $insurance,
+                    'type' => $type,
+                ]);
+            }
+
             Shipment::where('id', $shipment_id)->update([
                 'booking_type_id' => 1,
                 'shipper_status_id' => 13,
@@ -6767,17 +6855,7 @@ class DeliveryController extends Controller
             }
 
             ShipmentsJourneyController::add($shipment_id, 13, 13, $request->shipment_reason[$shipment_id], NULL, NULL, Auth::id());
-            ReplacementToRegularLog::create([
-                'shipment_id' => $shipment->id,
-                'updated_by' => Auth::id(),
-                'replacement_charges' => $replacement_charges,
-                'product_type_id' => $product_type_id,
-                'item_description' => $item_description,
-                'item_quantity' => $item_quantity,
-                'item_price' => $item_price,
-                'insurance' => $insurance,
-                'type' => $type,
-            ]);
+
 
             ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1])->delete();
         }
@@ -6852,16 +6930,64 @@ class DeliveryController extends Controller
         $shipment = Shipment::where('id', $request->shipment_id);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            $replacement_charges = $shipment['replacement_charges'];
             $product_type = ShipmentItem::where(['shipment_id' => $shipment->id, 'type' => 1]);
             if ($shipment->booking_type_id == 2) {
                 if ($product_type->exists()) {
-                    $product_type = $product_type->first();
-                    $insurance = $product_type['insurance'];
-                    $type = $product_type['type'];
-                    $product_type_id = $product_type['product_type_id'];
-                    $item_description = $product_type['description'];
-                    $item_quantity = $product_type['quantity'];
-                    $item_price = $product_type['price'];
+
+                    if($shipment->warehouse == 1){
+                        $product_type = $product_type->get();
+                        foreach ($product_type as $product){
+                            $insurance = $product['insurance'];
+                            $type = $product['type'];
+                            $product_type_id = $product['product_type_id'];
+                            $item_description = $product['description'];
+                            $item_quantity = $product['quantity'];
+                            $item_price = $product['price'];
+
+                            if($item_price == null){
+                                $item_price = 0;
+                            }
+
+
+                            ReplacementToRegularLog::create([
+                                'shipment_id' => $shipment->id,
+                                'updated_by' => Auth::id(),
+                                'replacement_charges' => $replacement_charges,
+                                'product_type_id' => $product_type_id,
+                                'item_description' => $item_description,
+                                'item_quantity' => $item_quantity,
+                                'item_price' => $item_price,
+                                'insurance' => $insurance,
+                                'type' => $type,
+                            ]);
+                        }
+
+                    }
+                    else{
+                        $product_type = $product_type->first();
+                        $insurance = $product_type['insurance'];
+                        $type = $product_type['type'];
+                        $product_type_id = $product_type['product_type_id'];
+                        $item_description = $product_type['description'];
+                        $item_quantity = $product_type['quantity'];
+                        $item_price = $product_type['price'];
+
+                        ReplacementToRegularLog::create([
+                            'shipment_id' => $shipment->id,
+                            'updated_by' => Auth::id(),
+                            'replacement_charges' => $replacement_charges,
+                            'product_type_id' => $product_type_id,
+                            'item_description' => $item_description,
+                            'item_quantity' => $item_quantity,
+                            'item_price' => $item_price,
+                            'insurance' => $insurance,
+                            'type' => $type,
+                        ]);
+
+                    }
+
+
                     Shipment::where('id', $request->shipment_id)->update([
                         'booking_type_id' => 1,
                         'shipper_status_id' => 13,
@@ -6869,19 +6995,6 @@ class DeliveryController extends Controller
                     ]);
                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
 
-                    $replacement_charges = $shipment['replacement_charges'];
-
-                    ReplacementToRegularLog::create([
-                        'shipment_id' => $shipment->id,
-                        'updated_by' => Auth::id(),
-                        'replacement_charges' => $replacement_charges,
-                        'product_type_id' => $product_type_id,
-                        'item_description' => $item_description,
-                        'item_quantity' => $item_quantity,
-                        'item_price' => $item_price,
-                        'insurance' => $insurance,
-                        'type' => $type,
-                    ]);
                     if ($replacement_charges != null) {
                         AdminFinanceController::add_adjustment($shipment->id, $replacement_charges, 5, 5);
                     }
@@ -6894,13 +7007,13 @@ class DeliveryController extends Controller
 
                     return redirect()->back()->with('success', 'Shipment Service type has been updated to Regular');
                 } else {
-                    return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+                    return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
                 }
             } else {
-                return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+                return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
             }
         } else {
-            return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+            return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
         }
     }
 
@@ -7695,8 +7808,8 @@ class DeliveryController extends Controller
                 $rider->delivery_note_otp = $otp;
                 $rider->otp_date = Carbon::now();
                 $rider->save();
-                NotificationsController::send(144, $rider, $otp);
                 NotificationsController::app_notification(9, $rider->id, 2, $otp);
+                NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
             } else {
                 return response()->json(['status' => 0, 'error' => 'Rider not found!']);
@@ -7748,8 +7861,11 @@ class DeliveryController extends Controller
                     else if($log->status_id == 1){
                         $status_logs[$log->id]['status'] = 'Deposited';
                     }
-                    else{
+                    else if($log->status_id == 2){
                         $status_logs[$log->id]['status'] = 'Resolved';
+                    }
+                    else{
+                        $status_logs[$log->id]['status'] = 'Closed';
                     }
                     $status_logs[$log->id]['updated_by'] = $log->updated_by->name;
                     $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
@@ -7758,6 +7874,43 @@ class DeliveryController extends Controller
                 return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function closed(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if ($station_deposit_note->status == 1) {
+                $station_deposit_note->status = 3;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
+    public function bulk_closed(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
+                    $station_deposit_note->status = 3;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }
+            }
+            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+
+        } else {
+            return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
+
         }
     }
 }
