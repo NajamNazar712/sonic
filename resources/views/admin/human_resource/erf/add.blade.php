@@ -200,6 +200,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
 @endsection
 
 @section('js')
@@ -440,6 +441,10 @@
             });
 
 
+            @php
+                $index = 0;
+            @endphp
+                
             var today = '{{ $today }}';
             $('#replacement').click(function () {
                 $("#department").val('').change();
@@ -448,33 +453,40 @@
                 $("#city").val('').change();
                 $("#hub").val('').change();
                 $("div").remove("#vacancies_div,#position_div,#allowance_div,#description_div,#skills_div,#qualification_div,#range_div");
-                
-                        @php
-                            $mark = ' ';
-                        $index = 0;
-                        @endphp
 
                 var new_row ='<hr>'+
                     '<div class="row" id="main_div" style="width:100% !important">'+
                         '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
                             '<div class="col text-center">\n' +
+                                '<label>Trax Id</label>' +
                                 '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
-                            @if($employee->status_id == 2)
-                            @php
-                                $mark = 'Disabled';
-                            @endphp
-                            @endif
+                                @if($employee->status_id == 2)
+                                @php $mark = 'Disabled' @endphp
+                                @else
+                                @php $mark = ' ' @endphp
+                                @endif
                         <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
                 '</div>\n' +
                             '<div class="col text-center">\n' +
-                    '\n' +
-                    '           <div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Last Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div>'+
+                    '\n' +        '<label>Last Gross Salary</label>' +
+                    '           <div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Gross Salary*" class="form-control" data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
                             '</div>\n' +
                         '<div class="col text-center">\n' +
-                    '\n' +
-                        '<div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>'+
+                '\n' +  '<label>Date</label>' +
+                        '<div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required" style="width:230px"></div>'+
                     '</div>\n' +
-
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Name</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][name]" class="form-control" id="name" placeholder="Name" disabled></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Designation</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][employee_designation]" class="form-control" id="employee_designation" placeholder="Designation" disabled></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Last Working Day</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][last_day]" class="form-control" id="last_day" placeholder="Last Working Day" disabled></div>'+
+                    '</div>\n' +
                     '<div class="col-1 close_row0">\n' +
                     '@if($index == 1)\n' +
                     '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
@@ -506,13 +518,16 @@
                             }
                         }).done(function (data) {
                             if (data.status == 1) {
-                                 console.log(data.details.designation);
-                                let detail_row = '<div class="col">'+data.details.name +'</div>'+
-                                    '<div class="col">'+ data.details.designation +'</div>'+
-                                    '<div class="col">'+ data.details.last_working_date + '</div>'+
-                                    '<div class="col">'+ data.details.last_salary +'</div>';
-                                    
-                                    $(detail_row).insertAfter("#on_weight_row0 .close_row0");
+                                 $('#salary').val(data.details.last_salary );
+                                 $('#name').val(data.details.name );
+                                 $('#employee_designation').val(data.details.designation);
+                                 $('#last_day').val(data.details.last_working_date );
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         });
                     }
@@ -600,23 +615,31 @@
                 let htmdiv =
                         '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
                     '<div class="col text-center">\n' +
+
                     '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 highlight" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
                             @if($employee->status_id == 2)
-                            @php
-                                $mark = 'Disabled';
-                            @endphp
+                              @php $mark = 'Disabled' @endphp
+                            @else
+                                @php $mark = ' ' @endphp
                             @endif
                         <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
                     '</div>\n' +
                     '<div class="col text-center">\n' +
-                    '\n' +
-                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][salary]" id="gross_salary'+row_count+'" placeholder="Last Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div>'+
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][salary]" id="gross_salary'+row_count+'" placeholder="Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
                     '</div>\n' +
                     '<div class="col text-center">\n' +
                     '\n' +
-                    '<div class="form-group"> <input type="text" name="addmore['+row_count+'][date]" class="form-control bg-primary border-primary white rounded-right" id="append_date'+row_count+'" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>'+
+                    '<div class="form-group"> <input type="text" name="addmore['+row_count+'][date]" class="form-control bg-primary border-primary white rounded-right" id="append_date'+row_count+'" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required" style="width:230px"></div>'+
                     '</div>\n' +
-
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][name]" id="leavers_name'+row_count+'" placeholder="Name" class="form-control"  disabled/></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][designation]" id="leavers_designation'+row_count+'" placeholder="Designation" class="form-control"  disabled/></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][last_working_day]" id="leavers_last_working_day'+row_count+'" placeholder="Last Working Day" class="form-control" disabled/></div>'+
+                    '</div>\n' +
                     '<div class="col-1">\n' +
                     '@if($index>0)\n' +
                     '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
@@ -638,7 +661,35 @@
                 $('#leavers_trax_id'+row_count+'').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id*'
+                }).bind('change',function() {
+                    var trax_id = $(this).val();
+                    if (trax_id) {
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.erf.employee_details') !!}',
+                            method: 'POST',
+                            data: {
+                                'trax_id': trax_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                $('#gross_salary'+row_count+'').val(data.details.last_salary );
+                                $('#leavers_name'+row_count+'').val(data.details.name );
+                                $('#leavers_designation'+row_count+'').val(data.details.designation);
+                                $('#leavers_last_working_day'+row_count+'').val(data.details.last_working_date );
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
                 });
+
+
+
                 $('#gross_salary'+row_count+'').inputmask({
                     'alias': 'decimal',
                     'allowMinus': false,
@@ -694,18 +745,8 @@
                         closeOnEsc: false
                     });
                     form.submit();
-
                 }
-                
             }
         });
-
-
-       /* $('#erf_form').on('keypress',function (e) {
-            if(e.keyCode == 13) {
-                e.preventDefault();
-            }
-        });*/
-
     </script>
 @endsection
