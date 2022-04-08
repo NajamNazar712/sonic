@@ -728,7 +728,7 @@ class AdminFnfController extends Controller
 
                 <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                <title>Digital Sales Performa</title>
+                <title>RNCC (Retail Note Cash Collection)</title>
 
             <style>
               @page {

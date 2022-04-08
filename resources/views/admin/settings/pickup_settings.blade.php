@@ -28,7 +28,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Request Cut-Off Time</span>
                                                 </div>
-                                                <input type="text" name="request_cut_off_time" class="form-control request_cut_off_time" placeholder="Request Cut-Off Time*" data-rule-required="true" data-msg-required="Request Cut-Off Time is required" value="{{ $pickup_request_cut_off_time }}" data-rule-min="0" data-msg-min="Request Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Arrival Cut-Off Time can not be more than 23">
+                                                <input type="text" name="request_cut_off_time" class="form-control request_cut_off_time" placeholder="Request Cut-Off Time*" data-rule-required="true" data-msg-required="Request Cut-Off Time is required" value="{{ $pickup_request_cut_off_time }}" data-rule-min="0" data-msg-min="Request Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Pickup Cut-Off Time can not be more than 23">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">hours</span>
                                                 </div>
@@ -39,7 +39,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Arrival Cut-Off Time</span>
                                                 </div>
-                                                <input type="text" name="arrival_cut_off_time" class="form-control arrival_cut_off_time" placeholder="Arrival Cut-Off Time*" data-rule-required="true" data-msg-required="Arrival Cut-Off Time is required" value="{{ $pickup_arrival_cut_off_time }}" data-rule-min="0" data-msg-min="Arrival Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Debriefing Report Arrival Cut-Off Time can not be more than 23">
+                                                <input type="text" name="arrival_cut_off_time" class="form-control arrival_cut_off_time" placeholder="Arrival Cut-Off Time*" data-rule-required="true" data-msg-required="Arrival Cut-Off Time is required" value="{{ $pickup_arrival_cut_off_time }}" data-rule-min="0" data-msg-min="Arrival Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Arrival Cut-Off Time can not be more than 23">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">hours</span>
                                                 </div>
