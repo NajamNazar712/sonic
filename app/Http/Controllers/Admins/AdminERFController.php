@@ -234,11 +234,13 @@ class AdminERFController extends Controller
         $erf->save();
 
        if($request->erf_type == 1){
-           foreach($request->allowances as $allowance){
-               $assigned_benefits = new EmployeeRequisitionAllowances();
-               $assigned_benefits->er_id = $erf->id;
-               $assigned_benefits->allowance_id = $allowance;
-               $assigned_benefits->save();
+           if($request->has('allowances')){
+               foreach($request->allowances as $allowance){
+                   $assigned_benefits = new EmployeeRequisitionAllowances();
+                   $assigned_benefits->er_id = $erf->id;
+                   $assigned_benefits->allowance_id = $allowance;
+                   $assigned_benefits->save();
+               }
            }
        }
        else{

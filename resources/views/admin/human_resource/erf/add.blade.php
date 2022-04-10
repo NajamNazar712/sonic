@@ -286,7 +286,7 @@
             });
             $('#allowance').select2({
                 width:'100%',
-                placeholder:"Requirements/Allowances*",
+                placeholder:"Requirements/Allowances",
                 allowClear:true,
                 dropdownParent:$('#erf_form')
             });
@@ -422,7 +422,7 @@
 
                 var allowance = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">\n' +
                     '                                        <div class="form-group ">\n' +
-                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowances are required">\n' +
+                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">\n' +
                     '                                              @foreach($allowances as $allowance)\n' +
                     '                                                  <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>\n' +
                     '                                              @endforeach\n' +
@@ -433,7 +433,7 @@
                 $("#erf_form #description_div").after(allowance);
                 $('#allowance').select2({
                     width:'100%',
-                    placeholder:"Allowances*",
+                    placeholder:"Allowances",
                     allowClear:true,
                     dropdownParent:$('#erf_form')
                 });
