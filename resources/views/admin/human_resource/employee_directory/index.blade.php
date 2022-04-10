@@ -400,6 +400,7 @@
                     <div class="modal-body mx-3">
                       
                             <input type="hidden" class="employee_id" name="employee_id">
+                            <input type="hidden" class="employee_type" name="employee_type">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -596,7 +597,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        $('#last_working_day_form #last_working_day').pickadate('picker');
                     }
                 }
             });
@@ -650,10 +651,18 @@
                 },
                 submitHandler: function (form) {
                       var id = $('#last_working_day_form .employee_id').val();
+                      var type = $('#last_working_day_form .employee_type').val();
                       var date = $('#last_working_day_form #last_working_day').val();
+                      var url ='';
 
+                      if(type == 1){
+                          url ='{!! route('admin.human_resource.employee_directory.staff.deactivate') !!}';
+                      }
+                      else{
+                          url ='{!! route('admin.human_resource.employee_directory.rider.deactivate') !!}';
+                      }
                       $.ajax({
-                           url: '{!! route('admin.human_resource.employee_directory.staff.deactivate') !!}',
+                           url:url,
                            method: 'POST',
                            data: {
                               'employee_id': id,
@@ -1701,68 +1710,17 @@
 
             $('body').on('click', '.deactivate', function (e) {
                 var id = $(this).data('target-id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Make Rider Inactive!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Making Rider Inactive',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                console.log(id);
+                $('#LastWorkingDayModal .employee_id').val(id);
+                $('#LastWorkingDayModal .employee_type').val(2);
+                $('#LastWorkingDayModal').modal('show');
 
-                        $.ajax({
-                            url: '{!! route('admin.human_resource.employee_directory.rider.deactivate') !!}',
-                            method: 'POST',
-                            data: {
-                                'employee_id': id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
-                            });
-                    }
-                });
             });
 
             
             $('body').on('click', '.deactivate_staff', function (e) {
                 var id = $(this).data('target-id');
+                $('#LastWorkingDayModal .employee_type').val(1);
                 $('#LastWorkingDayModal .employee_id').val(id);
                 $('#LastWorkingDayModal').modal('show');
             });

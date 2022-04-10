@@ -689,6 +689,7 @@ class AdminHumanResourseController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
