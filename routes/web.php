@@ -63,6 +63,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
     
+    Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
+   
     Route::prefix('orders')->name('orders.')->group(function(){
         Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
@@ -1231,6 +1233,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get/petty_cash_statements','Admins\DeliveryController@get_petty_cash_statements')->name('get.petty_cash_statements');
             Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
             Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
+            Route::post('closed','Admins\DeliveryController@closed')->name('closed');
+            Route::post('bulk_closed','Admins\DeliveryController@bulk_closed')->name('bulk_closed');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
@@ -1766,6 +1770,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('update/submit','Admins\DisputeController@update_dispute')->name('update.submit');
         Route::post('data','Admins\DisputeController@get_data')->name('data');
         Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
+
+        Route::prefix('shipments')->name('shipments.')->group(function (){
+            Route::get('','Admins\V2AdminDisputeShipmentsController@index')->name('index');
+            Route::get('list','Admins\V2AdminDisputeShipmentsController@list')->name('list');
+            Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
+            Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
+            Route::post('images','Admins\V2AdminDisputeShipmentsController@dispute_images')->name('images');
+        });
 
     });
 
@@ -3242,6 +3254,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::get('', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
 			Route::post('store', 'Admins\GlobalSettingsController@cn_print_right_store')->name('store');
 		});
+        Route::prefix('referral')->name('referral.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@referral')->name('index');
+			Route::get('list', 'Admins\GlobalSettingsController@referral_list')->name('list');
+			Route::post('submit', 'Admins\GlobalSettingsController@referral_store')->name('submit');
+            Route::get('name', 'Admins\GlobalSettingsController@referral_name')->name('name');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@referral_enable_disable')->name('enable_disable');
+            
+
+        });
 	});
 
 
@@ -3699,10 +3720,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\AdminERFController@submit_form')->name('submit');
             Route::post('print', 'Admins\AdminERFController@print')->name('print');
             Route::post('file_upload', 'Admins\AdminERFController@file_upload')->name('file_upload');
+            Route::post('reject_reason', 'Admins\AdminERFController@reject_reason')->name('reject_reason');
             Route::post('approve', 'Admins\AdminERFController@approve')->name('approve');
            // Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('/employee_data', 'Admins\AdminERFController@employee_data')->name('employee_data');
+            Route::post('/employee_details', 'Admins\AdminERFController@employee_details')->name('employee_details');
 
 
 

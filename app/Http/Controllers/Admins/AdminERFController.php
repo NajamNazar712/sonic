@@ -18,6 +18,7 @@ use App\Http\Models\EmployeeRequisitionStatusLog;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\Admin\AdminPositionTypes;
+use App\Http\Models\HR\EmployeePayslip;
 use SnappyImage;
 use SnappyPDF;
 use Carbon\Carbon;
@@ -58,7 +59,7 @@ class AdminERFController extends Controller
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document']);
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es']);
 
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
@@ -67,6 +68,22 @@ class AdminERFController extends Controller
         $datatables = Datatables::of($erf)
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
+            })
+            ->editColumn('type',function($erf){
+                if($erf->type == 1){
+                    return 'Additional';
+                }
+                else{
+                    return 'Replacement';
+                }
+            })
+            ->editColumn('es',function($erf){
+                if($erf->es == 1){
+                    return 'Inactive';
+                }
+                else if($erf->es == 2){
+                    return 'Notice Period';
+                }
             })
             ->addColumn('aging',function ($erf){
                 $log = EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',3);
@@ -78,11 +95,8 @@ class AdminERFController extends Controller
                         $to = Carbon::now();
                         return $from->diffInDays($to);
                     }
-
                     return "-";
-
                 }
-
                 return "-";
             })
             ->filterColumn('erf_id', function($query, $keyword) {
@@ -91,6 +105,25 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.id', $keyword);
                 }
             })
+            ->filterColumn('employee_requisitions.type', function($query, $keyword) {
+                $keyword =  strtolower($keyword);
+                if($keyword == 'replacement'){
+                    $query->where('employee_requisitions.type', 2);
+                }
+                else{
+                    $query->where('employee_requisitions.type', 1);
+                }
+            })
+            ->filterColumn('employee_requisitions.employee_status', function($query, $keyword) {
+                $keyword =  strtolower($keyword);
+                if($keyword == 'inactive'){
+                    $query->where('employee_requisitions.employee_status', 1);
+                }
+                else if($keyword == 'notice period' || $keyword == 'notice'){
+                    $query->where('employee_requisitions.employee_status', 2);
+                }
+            })
+
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -101,27 +134,22 @@ class AdminERFController extends Controller
 
                     if (($result->status_id == 1) && (session('role_id') == 1 || in_array(518, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
 
                     }
-                    if (($result->status_id == 2) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
+                    if (($result->status_id == 2 && $result->type == 1) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item admin_reject" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By CEO</div></button>';
 
                     }
-                    if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
+                    if (($result->status_id == 2 && $result->type == 2 || ($result->status_id == 3))  && (session('role_id') == 1 || in_array(520, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                    /*if ($result->document != null && (session('role_id') == 1 || in_array(521, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
-
-                    }*/
                     if (session('role_id') == 1 || in_array(521, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
 
                     }
-
-
-
                     $dropdown .= '
                         </div>
                       </div>
@@ -157,21 +185,21 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        // $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+      
         $department_admins = AdminDepartment::all()->pluck('department_head_id')->toArray();
         $department_heads = Admin::whereIn('id', $department_admins)->where('status', 1)->select('id','name')->get();
 
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
-        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->whereNotIn('trax_id',$invalid_employees)->get();
+        $employee_trax_id = Employee::whereNotIn('trax_id',$invalid_employees)->get();
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
     }
 
     public function submit_form(Request $request){
-
+        
         $erf = new EmployeeRequisition();
         $erf->department_id = $request->department;
         $erf->designation_id = $request->designation;
@@ -188,6 +216,16 @@ class AdminERFController extends Controller
         $erf->qualifications = $request->qualification;
         $erf->skills = $request->skills;
         $erf->job_description = $request->job_description;
+
+        if($request->has('employee_status')){
+            if($request->employee_status == 1){
+                $erf->employee_status = 1;
+            }
+            else {
+                $erf->employee_status = 2;
+            }
+        }
+
         $erf->save();
 
        if($request->erf_type == 1){
@@ -210,6 +248,7 @@ class AdminERFController extends Controller
              $replacement->save();
           }
        }
+
 
        $log = new EmployeeRequisitionStatusLog();
        $log->er_id = $erf->id ;
@@ -516,7 +555,7 @@ class AdminERFController extends Controller
         }
 
     public function file_upload(Request $request){
-        //dd($request->file);
+
         $erf_id = str_replace("ERF","",$request->erf_id);
         $erf =EmployeeRequisition::find($erf_id);
         $date = Carbon::now()->format('Y_m_d');
@@ -555,6 +594,8 @@ class AdminERFController extends Controller
 
         $erf->save();
 
+        NotificationsController::send(174,$erf_id);
+
             $log = new EmployeeRequisitionStatusLog();
             $log->er_id = $erf_id;
             $log->admin_id = Auth::id();
@@ -568,7 +609,7 @@ class AdminERFController extends Controller
         $erf_id = str_replace("ERF","",$request->id);
         $erf = EmployeeRequisition::find($erf_id);
      
-        if($erf->status_id == 3){
+        if($erf->status_id == 3 || ($erf->status_id == 2 && $erf->type == 2 ) ){
             $erf->status_id = 4;
             $erf->save();
 
@@ -611,6 +652,66 @@ class AdminERFController extends Controller
         $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
         return response()->json(['status' => 1,'emplyee_detail' => $data]);
 
+    }
+
+    public function reject_reason(Request $request){
+
+        $erf_id = str_replace("ERF","",$request->erf_id);
+        $erf = EmployeeRequisition::find($erf_id);
+        
+        if(in_array($erf->status_id,[1,2,3]) && Auth::id() == 4){
+            $erf->status_id = 6;
+            NotificationsController::send(173,$erf_id);
+        }
+        else if(in_array($erf->status_id,[1,2,3])){
+            $erf->status_id = 5;
+
+        }
+        else{
+            return redirect()->back()->with('error','Status already marked approved or rejected');
+        }
+
+        $erf->save();
+
+        $log = new EmployeeRequisitionStatusLog();
+        $log->er_id = $erf_id;
+        $log->admin_id = Auth::id();
+        $log->status_id = $erf->status_id;
+        $log->reject_reason = $request->reason;
+        $log->save();
+
+        return redirect()->back()->with('success', 'Reason Added!');
+
+    }
+
+    public function employee_details(Request $request){
+       $trax_id = $request->trax_id;
+       if($trax_id){
+           $last_salary = 0;
+           $employee = Employee::where('trax_id',$trax_id)->first();
+           if($employee){
+              
+                 $details['designation'] = $employee->designation->name;
+                 $details['name'] = $employee->name;
+                 if($employee->last_working_date == null){
+                     $details['last_working_date'] = '-';
+                 }
+                 else{
+                     $details['last_working_date'] = $employee->last_working_date;
+                 }
+                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest()->first();
+                 if($salary){
+                     $details['last_salary'] = $salary->total_salary;
+                 }
+                 else{
+                     $details['last_salary'] = 0;
+                 }
+                 return response()->json(['status' => 1, 'details' => $details]);
+           }
+           else{
+               return response()->json(['status' => 0,'error' => 'No employee found with this trax id']);
+           }
+       }
     }
 
 }

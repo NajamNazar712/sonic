@@ -723,6 +723,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_staff_deactivate(Request $request)
     {
+
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
@@ -741,6 +742,7 @@ class AdminHumanResourseController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);

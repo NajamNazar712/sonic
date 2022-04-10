@@ -10,6 +10,9 @@ use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\RetailPickupNoteStatus;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
@@ -34,13 +37,13 @@ class RetailCashCollectionController extends Controller
         }
 
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
+            // ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
             ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
             ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
             ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
            ->whereIn('retail_pickup_notes.status', [1,2,3])
            ->where('retail_pickup_notes.pncc_status', '=', 0);
 
@@ -162,6 +165,15 @@ class RetailCashCollectionController extends Controller
         $notes = array();
         foreach ($note_ids as $note_id) {
             $note_details = RetailPickupNote::where('id', $note_id)->where('status', 3)->first();
+            $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id',$note_id)->get()->first();
+            if($retail_shipment){
+                $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+                if($retail_cash_depost){
+                    RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                        'status' => 1,
+                    ]);
+                }
+            }
             if ($note_details) {
                 $note_details->status = 4;
                 $note_details->cash_collected_by = Auth::id();
