@@ -9135,8 +9135,9 @@ class NotificationsController extends Controller
                     $erf_id = $reference_1_id;
                     $erf = EmployeeRequisition::find($erf_id);
                     $hod_email = Admin::find($erf->department_head_id)->email;
+                    $erf = "ERF ID #" .$erf_id;
                     if (strpos($body, '[erf_id]') !== FALSE) {
-                        $body = str_replace('[erf_id]', $erf_id, $body);
+                        $body = str_replace('[erf_id]', $erf, $body);
                     }
                     $to = $hod_email;
                     self::email($subject, $body, $to);
