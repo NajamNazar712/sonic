@@ -9154,8 +9154,10 @@ class NotificationsController extends Controller
                         $name = 'Muhammad Hassan Khan' . '(CEO)';
                         $to = 'hr.dept@trax.pk';
                     }
+
+                    $erf = "ERF ID #" .$erf_id;
                     if (strpos($body, '[erf_id]') !== FALSE) {
-                        $body = str_replace('[erf_id]', $erf_id, $body);
+                        $body = str_replace('[erf_id]', $erf, $body);
                     }
                     if (strpos($body, '[admin]') !== FALSE) {
                         $body = str_replace('[admin]', $name, $body);
