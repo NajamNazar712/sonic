@@ -9157,8 +9157,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[erf_id]') !== FALSE) {
                         $body = str_replace('[erf_id]', $erf_id, $body);
                     }
-                    if (strpos($body, '[name]') !== FALSE) {
-                        $body = str_replace('[name]', $name, $body);
+                    if (strpos($body, '[admin]') !== FALSE) {
+                        $body = str_replace('[admin]', $name, $body);
                     }
 
                     self::email($subject, $body, $to);
