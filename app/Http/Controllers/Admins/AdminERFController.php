@@ -192,7 +192,12 @@ class AdminERFController extends Controller
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
-        $employee_trax_id = Employee::whereNotIn('trax_id',$invalid_employees)->get();
+        if (session('role_id') == 1) {
+            $employee_trax_id = Employee::whereNotIn('trax_id', $invalid_employees)->get();
+        }
+        else{
+            $employee_trax_id = Employee::where('department_id',session('department_id'))->whereNotIn('trax_id', $invalid_employees)->get();
+        }
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
