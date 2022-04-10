@@ -20,7 +20,7 @@
                                             <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                             <div class="heading-elements">
                                                 <ul class="list-inline mb-0">
-                                                    <li><a href="{{ asset('file/documents/API Document - SONIC Version 1.15.pdf') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1" target="_blank"> <i class=" ft-download"></i> Download</a></li>
+                                                    <li><a href="{{ asset('file/documents/API Document - SONIC Version 1.16.pdf') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1" target="_blank"> <i class=" ft-download"></i> Download</a></li>
                                                 </ul>
                                             </div>
                                         </div>
