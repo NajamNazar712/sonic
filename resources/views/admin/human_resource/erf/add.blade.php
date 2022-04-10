@@ -143,7 +143,7 @@
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">
                                             <div class="form-group ">
-                                                <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowance is required">
+                                                <select name="allowances[]" class="select2" id="allowance" multiple="multiple">
                                                     @foreach($allowances as $allowance)
                                                         <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>
                                                     @endforeach
