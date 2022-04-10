@@ -666,7 +666,7 @@ class AdminERFController extends Controller
         $erf_id = str_replace("ERF","",$request->erf_id);
         $erf = EmployeeRequisition::find($erf_id);
         
-        if(in_array($erf->status_id,[1,2,3]) && Auth::id() == 4){
+        if(in_array($erf->status_id,[1,2,3]) && Auth::id() == 8){
             $erf->status_id = 6;
             NotificationsController::send(173,$erf_id);
         }
