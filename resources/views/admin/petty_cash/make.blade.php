@@ -91,7 +91,7 @@
                                 <th class="border-primary border-darken-1"> Designation </th>
                                 <th class="border-primary border-darken-1">Reference No.</th>
                                 <th class="border-primary border-darken-1">Remarks</th>
-                                <th class="border-primary border-darken-1"> DNCC/PNCC </th>
+                                <th class="border-primary border-darken-1"> DNCC/RNCC </th>
                                 <th class="border-primary border-darken-1"> Delivered Shipment Count</th>
                                 <th class="border-primary border-darken-1">Reference Documents</th>
                                 <th class="border-primary border-darken-1"></th>
@@ -488,7 +488,7 @@
 
                 $('select[name="dncc['+rows_count+']"]').html(dncc_data);
                 $('select[name="dncc['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select DNCC/PNCC',
+                    placeholder:'Select DNCC/RNCC',
                     dropdownCssClass: 'form-control-sm p-0',
                     allowClear:true,
                 }).bind('change',function (){

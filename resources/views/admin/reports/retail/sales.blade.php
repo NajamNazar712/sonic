@@ -116,7 +116,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
-                        <th class="border-primary border-darken-1">PNCC Number</th>
+                        <th class="border-primary border-darken-1">RNCC Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -307,7 +307,7 @@
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Payment ID');
-                            head.push('PNCC Number');
+                            head.push('RNCC Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');

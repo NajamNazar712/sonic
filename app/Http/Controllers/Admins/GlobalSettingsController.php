@@ -87,6 +87,7 @@ use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
+use App\Http\Models\Referral;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
@@ -2715,13 +2716,23 @@ class GlobalSettingsController extends Controller
     {
         $reason = trim($request->reason);
         if ($reason) {
-            $shipment_reason = new ShipmentStatusReason();
-            $shipment_reason->name = $reason;
-            $shipment_reason->save();
+            $shipment_reasons = ShipmentStatusReason::where('name', 'like', strtolower($reason));
+            if(!$shipment_reasons->exists()){
 
-            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                $shipment_reason = new ShipmentStatusReason();
+                $shipment_reason->name = $reason;
+                $shipment_reason->save();
 
-            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+            else{
+                $shipment_reason = $shipment_reasons->first();
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
@@ -5561,10 +5572,10 @@ public function sales_incentive()
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
         ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
-        ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
         ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
         ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
-        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5614,6 +5625,33 @@ public function sales_incentive()
                 return $roles->city_name;
             }
             
+        })
+        ->editColumn('service', function($roles) {
+            if($roles->service == '' || $roles->service == null){
+                return '0';
+            }else{
+                return $roles->service;
+            }
+
+        })
+        ->editColumn('service2', function($roles) {
+
+            if($roles->service2 == '' || $roles->service2 == null){
+                return 'All Services';
+            }else{
+                return $roles->service2;
+            }
+
+        })
+
+        ->editColumn('territory_name', function($roles) {
+
+            if($roles->territory_name == '' || $roles->territory_name == null){
+                return 'All Territories';
+            }else{
+                return $roles->territory_name;
+            }
+
         });
 
     return $datatables->make(true);
@@ -6447,6 +6485,94 @@ public function sales_incentive()
             }
         }
     }
+
+    public function referral(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 520);
+
+        return view('admin.settings.referral');
+    }
+
+    public function referral_list(Request $request){
+        $referral = Referral::join('admins as ad','ad.id','=','referrals.admin_id')
+                    ->select('referrals.id','referrals.name as name','referrals.status as status','ad.name as agent_name');
+        $datatables = Datatables::of($referral)
+                    ->addColumn('action', function($referral) {
+                        if (session('role_id') == 1 || in_array(663, session('permissions'))) {
+                                $dropdown = '<div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                ';
+                                
+                                //  <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                                if($referral->status == 1 ){
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                                }else{
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                                }
+                                
+                                $dropdown .='</div>
+                              </div>
+                      ';
+            
+                      return $dropdown;
+                           
+                        }
+                        else {
+                            return '';
+                        }
+                    })->editColumn('status', function($referral) {
+                        if($referral->status == 1){
+                            return 'Enable';
+                        }else{
+                            return 'Disable';
+                        }
+                        
+                    });
+            
+                return $datatables->make(true);
+    }
+    
+    public function referral_name(Request $request){
+        if ($request->filled('referral_code')) {
+            $referral = Referral::where('name', $request->input('referral_code'));
+
+            if (!$referral->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'false';
+        }
+    }
+
+    public function referral_store(Request $request){
+        $referral = new Referral;
+        $referral->name = $request->referral_code;
+        $referral->admin_id = session('id');
+        $referral->save();
+        return redirect()->back()->with('success', 'Referral Added!');
+
+    }
+
+    public function referral_enable_disable(Request $request){
+        $referral = Referral::find($request->id);
+        if($referral->status == 1){
+            $referral->status = 0;
+            $referral->save();
+            return response()->json(['status' => 1, 'success' => 'Referral Disabled!']);
+
+        }else{
+            $referral->status = 1;
+            $referral->save();
+            return response()->json(['status' => 1, 'success' => 'Referral Enabled!']);
+
+        } 
+    }
+
     
     
 }

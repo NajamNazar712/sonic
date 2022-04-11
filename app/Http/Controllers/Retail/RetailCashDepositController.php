@@ -28,11 +28,14 @@ class RetailCashDepositController extends Controller
 
     public function list(Request $request){
         $cash_deposit = RetailCashDeposit::join('retail_users as ru', 'ru.id', '=', 'retail_cash_deposits.retail_user_id')
-            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id')
+            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id', 'retail_cash_deposits.status as status')
         ->where('retail_cash_deposits.retail_user_id', Auth::id());
         $datatable = Datatables::of($cash_deposit)
             ->addColumn('shipments_button', function ($data) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $data->total_shipments . '</button>';
+                $retail_cash_deposit_shipments = RetailCashDepositShipment::join('shipments as s','s.id','retail_cash_deposit_shipments.shipment_id')
+                ->where('retail_cash_deposit_shipments.cash_deposit_id',$data->performa_no)
+                ->whereNotIn('s.shipper_status_id',[17,25])->count();
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $retail_cash_deposit_shipments . '</button>';
             })
             ->editColumn('performa_no', function ($data) {
                 return str_pad($data->performa_no, 6, '0', STR_PAD_LEFT);
@@ -53,6 +56,15 @@ class RetailCashDepositController extends Controller
             })
             ->addColumn('performa_button', function ($data) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . str_pad($data->performa_no, 6, '0', STR_PAD_LEFT) . '</button>';
+            })
+            ->editColumn('status', function ($data) {
+                if($data->status == 0){
+                    return 'Pending';
+                }elseif($data->status == 1){
+                    return 'Cash Collected';
+                }else{
+                    return 'Deposited';
+                }
             });
 
         if ($request->get('search_from') && $request->get('search_to')) {
@@ -70,7 +82,10 @@ class RetailCashDepositController extends Controller
         if($cash_deposit_shipments->count() != 0){
             foreach ($cash_deposit_shipments as $cash_deposit_shipment){
                 $shipment = Shipment::find($cash_deposit_shipment->shipment_id);
-                $shipments[] = $shipment->tracking_number;
+                if(!in_array($shipment->shipper_status_id,[17,25])){
+
+                    $shipments[] = $shipment->tracking_number;
+                }
             }
             return ['status' => 1, 'success' => 'Cash Deposit Shipments', 'shipments' => $shipments];
         }else{
@@ -82,16 +97,23 @@ class RetailCashDepositController extends Controller
         $cash_deposit_id = $request->id;
         $cash_deposit = RetailCashDeposit::find($cash_deposit_id);
         $cash_deposit_shipments = $cash_deposit->shipments;
+        $cash_deposit_total_cns = RetailCashDepositShipment::join('shipments as s','s.id','retail_cash_deposit_shipments.shipment_id')
+                ->where('retail_cash_deposit_shipments.cash_deposit_id',$cash_deposit_id)
+                ->whereNotIn('s.shipper_status_id',[17,25])->count();
+        $cash_deposit_total_cash = 0;
+
         $shipping_mode_data = array();
         foreach ($cash_deposit_shipments as $cash_deposit_shipment){
-            if(array_key_exists($cash_deposit_shipment->shipping_mode_id, $shipping_mode_data)){
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn']++;
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] + $cash_deposit_shipment->retail_shipment->total_charges;
-            }
-            else{
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['name'] = $cash_deposit_shipment->shipping_mode->name;
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn'] = 1;
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $cash_deposit_shipment->retail_shipment->total_charges;
+            if(!in_array($cash_deposit_shipment->shipment->shipper_status_id, [17, 25]) ){
+                if(array_key_exists($cash_deposit_shipment->shipping_mode_id, $shipping_mode_data)){
+                    $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn']++;
+                    $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] + $cash_deposit_shipment->retail_shipment->total_charges;
+                }
+                else{
+                    $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['name'] = $cash_deposit_shipment->shipping_mode->name;
+                    $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn'] = 1;
+                    $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $cash_deposit_shipment->retail_shipment->total_charges;
+                }
             }
         }
         $html = '<!doctype html>
@@ -103,7 +125,7 @@ class RetailCashDepositController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Digital Sales Performa</title>
+                    <title>RNCC (Retail Note Cash Collection)</title>
 
                 <style>
                   @page {
@@ -207,14 +229,14 @@ class RetailCashDepositController extends Controller
                                     <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">
                                 </div>
                                 <div class="col">
-                                    <h2>Digital Sales Performa</h2>
+                                    <h2>RNCC (Retail Note Cash Collection)</h2>
                                 </div>
                             </div>
                             <div class="row justify-content-end mb-2">
                                 <div class="col">
                                         <table class="table table-bordered border">
                                             <tbody>
-                                            <tr><td class="color primary w-50">Performa No.</td><td class=" w-50">'. str_pad($cash_deposit->id, 6, '0', STR_PAD_LEFT) .'</td></tr>
+                                            <tr><td class="color primary w-50">Retail Note</td><td class=" w-50">'. str_pad($cash_deposit->id, 6, '0', STR_PAD_LEFT) .'</td></tr>
                                             <tr><td class="color primary w-50">Branch Name</td><td class=" w-50">'. $cash_deposit->user->store->name .'</td></tr>
                                             <tr><td class="color primary w-50">Staff</td><td class=" w-50">'. $cash_deposit->user->name .'</td></tr>
                                             <tr><td class="color primary w-50">Booking Code</td><td class=" w-50">'. str_pad($cash_deposit->user->id, 6, '0', STR_PAD_LEFT) .'</td></tr>
@@ -249,13 +271,15 @@ class RetailCashDepositController extends Controller
                                                 <td>' . $data['total_cn'] . '</td>
                                                 <td>' . number_format(ROUND($data['total_cash'], 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                             </tr>';
+
+                                            $cash_deposit_total_cash += $data['total_cash'];
                                     }
 
             $html .= '
                                             <tr>
                                                 <td><b>Total</b></td>
-                                                <td><b>' . $cash_deposit->total_cn . '</b></td>
-                                                <td><b>' . number_format(ROUND($cash_deposit->total_cash, 0, PHP_ROUND_HALF_DOWN)) . '</b></td>
+                                                <td><b>' . $cash_deposit_total_cns . '</b></td>
+                                                <td><b>' . ($cash_deposit_total_cns == 0 ? 0 : number_format(ROUND($cash_deposit_total_cash, 0, PHP_ROUND_HALF_DOWN))) . '</b></td>
                                             </tr>';
 
             $html .= '
