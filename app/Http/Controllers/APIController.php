@@ -1321,39 +1321,39 @@ class APIController extends Controller
 
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
                     $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
-                    $current_status = $shipment_journey->shipment_status_consignee->name;
+                    $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
-                    $current_status = $shipment->status_consignee->name;
+                    $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             }
 
@@ -2871,26 +2871,50 @@ class APIController extends Controller
                 foreach ($shipments as $shipment) {
                     $detail = array();
 
+                    $detail['origin'] = $shipment->pickup_address->city->name;
+                    $detail['destination'] = $shipment->consignee_city->name;
+
                     if ($type == 0) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     } else {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     }
 
                     $detail['tracking_number'] = $shipment->tracking_number;
                     $detail['status'] = $current_status;
+                    $detail['reason'] = $reason;
+                    $detail['current_status_datetime'] = $current_status_datetime;
 
                     $details[] = $detail;
                 }
@@ -4672,6 +4696,71 @@ class APIController extends Controller
         }
     }
 
+    public function receiving_sheet_list(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+
+            'from_date' => ['required', 'date_format:Y-m-d'],
+            'to_date' => ['required', 'date_format:Y-m-d'],
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $date_from = explode('-',  $request->from_date);
+            $date_to = explode('-',  $request->to_date);
+
+            $from = Carbon::create($date_from[0], $date_from[1], $date_from[2], '0', '0', '0', 'UTC')->toDateTimeString();
+            $to = Carbon::create($date_to[0], $date_to[1], $date_to[2], '23', '59', '59', 'UTC')->toDateTimeString();
+
+            $receiving_sheets = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
+                ->join('users as u','u.id','=','receiving_sheets.user_id')
+                ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.created_at as created_at','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving','receiving_sheets.pickup_address_id as pickup_address', 'c.name as origin', 'usi.pickup_address as address')
+                ->whereBetween('receiving_sheets.created_at', [$from,$to]);
+
+            if($receiving_sheets->exists()){
+                $receiving_sheets = $receiving_sheets->get();
+
+                $details = array();
+                $details['status'] = 0;
+                $details['from_date'] = $request->from_date;
+                $details['to_date'] = $request->to_date;
+                $details['receiving_sheets'] = [];
+                foreach ($receiving_sheets as $receiving_sheet) {
+                    $detail = array();
+                    $detail['receiving_sheet_id'] = str_pad($receiving_sheet->receiving_sheet_id, 6, '0', STR_PAD_LEFT);
+                    $detail['created_at'] = Carbon::parse($receiving_sheet->created_at)->format('d/m/Y h:i A');
+                    $detail['shipments_booked'] = $receiving_sheet->bookings;
+                    $detail['shipments_received'] = $receiving_sheet->receiving;
+                    if($receiving_sheet->bookings != 0){
+                        $detail['shipments_short_received'] = $receiving_sheet->bookings - $receiving_sheet->receiving;
+                    }else{
+                        $detail['shipments_short_received'] = 0;
+                    }
+                    $detail['pickup_address_id'] = $receiving_sheet->pickup_address;
+                    $detail['origin_city'] = $receiving_sheet->origin;
+                    $detail['address'] = $receiving_sheet->address;
+                    array_push($details['receiving_sheets'] , $detail);
+                }
+
+                return response()->json($details);
+
+
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Receiving Sheet Not Found ']);
+
+            }
+
+        }
+    }
 
     public function hbl_konnect_transactions(Request $request)
     {
@@ -4728,6 +4817,33 @@ class APIController extends Controller
             }
         }
     }
+    public function hbl_konnect_delivery_note_information(Request $request)
+    {
+        $rules = [
+            'delivery_note_id' => ['required', 'integer', Rule::exists('delivery_notes', 'id')]
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $delivery_note_id = $request->delivery_note_id;
+            $delivery_note = DeliveryNote::where('id', $delivery_note_id);
+            if($delivery_note->exists()){
+                $delivery_note = $delivery_note->first();
+                $net_amount = $delivery_note->total_cod_amount - $delivery_note->received_cod_amount;
+
+                return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount]);
+            }
+            else{
+                return response()->json(['status' => 0, 'message' => 'Delivery Note Not Found!']);
+            }
+        }
+    }
+
     //BOTSIFY WhatsApp API
     public function whatsapp_shipper_phone_number(Request $request)
     {

@@ -99,6 +99,8 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
@@ -2977,9 +2979,9 @@ class DeliveryController extends Controller
 
                 $shipment_count = 0;
                 $dispute_shipments = array();
-                $delivered_status_array = array(14, 30, 36, 37);
+                $delivered_status_array = array(14, 30, 36, 37, 26, 27, 28);
 
-                $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
+                $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56 , 26, 27, 28);
                 foreach ($shipments as $index => $shipment) {
                     $shipment_details = Shipment::find($shipment);
                     if (!in_array($shipment_details->shipper_status_id, $restrict_statuses)) {
@@ -4539,7 +4541,7 @@ class DeliveryController extends Controller
                     $pickup_notes = RetailPickupNote::where('status', 4)->where('pncc_status', 0)->where('hub_id', $sdn->hub_id)->orderBy('id', 'desc')->get(['id']);
                     return response()->json(['status' => 1, 'dn' => $pickup_notes]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not add PNCC to SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4574,9 +4576,9 @@ class DeliveryController extends Controller
                     $pickup_note->pncc_status = 1;
                     $pickup_note->update();
 
-                    return back()->with(['success' => 'PNCC added to SDN']);
+                    return back()->with(['success' => 'RNCC added to SDN']);
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4599,7 +4601,7 @@ class DeliveryController extends Controller
 
                     return response()->json(['status' => 1, 'pncc' => RetailPickupNote::whereIn('id', $pickup_note_ids)->get()]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not remove PNCC from SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not remove RNCC from SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4642,12 +4644,12 @@ class DeliveryController extends Controller
                         $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
                         $sdn->update();
 
-                        return back()->with(['success' => 'PNCC removed successfully']);
+                        return back()->with(['success' => 'RNCC removed successfully']);
                     } else {
-                        return back()->with('error', 'Invalid PNCC');
+                        return back()->with('error', 'Invalid RNCC');
                     }
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4805,7 +4807,7 @@ class DeliveryController extends Controller
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest']);
+            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -4911,6 +4913,16 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('aging', function ($sdn) {
+                $start_date = Carbon::parse($sdn->created_at);
+                if ($sdn->status == 3) {
+                    $end_date = Carbon::parse($sdn->closed_at);
+                    return $end_date->diffInHours($start_date);;
+                } else {
+                    $end_date = Carbon::now();
+                    return $end_date->diffInHours($start_date);;
+                }
+            })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
                 $retail_route = route('admin.delivery.sdn.retail.details', ['id' => $result->sdn_id]);
@@ -4924,11 +4936,11 @@ class DeliveryController extends Controller
 
                 $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
 
-                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add RNCC</div></button>';
 
                 $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
 
-                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove RNCC</div></button>';
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
@@ -4937,6 +4949,12 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1){
+
+                    $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
+                    $dropdown .= $closed_status;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4988,8 +5006,10 @@ class DeliveryController extends Controller
                     return 'Created';
                 } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
@@ -4998,6 +5018,8 @@ class DeliveryController extends Controller
                 } else if ($keyword == 1) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 3) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
@@ -5188,6 +5210,19 @@ class DeliveryController extends Controller
         $sdn->status = 1;
         $sdn->save();
 
+        $pnsdn = PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->get()->first();
+            if ($pnsdn) {
+                    $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id', $pnsdn->retail_pickup_note_id)->get()->first();
+                    if($retail_shipment){
+                        $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+                        if($retail_cash_depost){
+
+                            RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                                'status' => 2,
+                            ]);
+                        }
+                    }
+            }
         self::add_sdn_logs($sdn_id, 1, Auth::id());
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 
@@ -7897,8 +7932,11 @@ class DeliveryController extends Controller
                     else if($log->status_id == 1){
                         $status_logs[$log->id]['status'] = 'Deposited';
                     }
-                    else{
+                    else if($log->status_id == 2){
                         $status_logs[$log->id]['status'] = 'Resolved';
+                    }
+                    else{
+                        $status_logs[$log->id]['status'] = 'Closed';
                     }
                     $status_logs[$log->id]['updated_by'] = $log->updated_by->name;
                     $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
@@ -7907,6 +7945,43 @@ class DeliveryController extends Controller
                 return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function closed(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if ($station_deposit_note->status == 1) {
+                $station_deposit_note->status = 3;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
+    public function bulk_closed(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
+                    $station_deposit_note->status = 3;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }
+            }
+            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+
+        } else {
+            return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
+
         }
     }
 }

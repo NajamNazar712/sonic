@@ -28,12 +28,14 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">ERF ID</th>
+                                    <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -67,6 +69,34 @@
                         </div>
                         <div class="form-group text-center mt-2">
                             <button type="submit" class="btn btn-primary" id="form_btn">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reject_reason_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="reject_reason_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Enter Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+                    <form method="post" id="reject_reason_form"  novalidate="novalidate" action="{{route('admin.human_resource.erf.reject_reason')}}">
+                        @method('POST')
+                        @csrf
+                        <div class="form-group">
+                            <input type="hidden" name="erf_id" id="erf_id">
+                            <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter Reason" data-rule-required="true" data-msg-required="Reason is required">
+                        </div>
+                        <div class="form-group text-center mt-2">
+                            <button type="submit" class="btn btn-primary" id="reason_submit_btn">Submit</button>
                         </div>
                     </form>
                 </div>
@@ -195,12 +225,14 @@
 
                             head.push('S.No');
                             head.push('ERF ID');
+                            head.push('Type');
                             head.push('Department');
                             head.push('Designation');
                             head.push('Hub');
                             head.push('City');
                             head.push('Line Manager');
                             head.push('Status');
+                            head.push('Employee Status');
                             head.push('Aging');
 
                             $.each(result.data, function (index, values) {
@@ -208,12 +240,14 @@
 
                                 row.push(index + 1);
                                 row.push(values.erf_id);
+                                row.push(values.type);
                                 row.push(values.department);
                                 row.push(values.designation);
                                 row.push(values.hub);
                                 row.push(values.city);
                                 row.push(values.admin);
                                 row.push(values.status);
+                                row.push(values.es);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -279,12 +313,14 @@
                     },
 
                     {data: 'erf_id', name: 'erf_id', class: 'align-middle erf_id'},
+                    {data: 'type', name: 'employee_requisitions.type', class: 'align-middle type'},
                     {data: 'department', name: 'dp.name', class: 'align-middle department'},
                     {data: 'designation', name: 'd.name', class: 'align-middle designation'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
+                    {data: 'es', name: 'employee_requisitions.employee_status', class: 'align-middle es'},
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
@@ -332,6 +368,15 @@
                 if ($(this).hasClass('admin_approve')) {
                     $('#erf_id').val(erf_id);
                     $('#file_modal').modal('show');
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('admin_reject')) {
+                    $('#reject_reason_modal #erf_id').val(erf_id);
+                    $('#reject_reason_modal').modal('show');
                 }
             });
 
@@ -461,7 +506,28 @@
 
                 swal({
                     title: 'Please Wait!',
-                    text: 'Route is being updated!',
+                    text: 'File is being uploaded!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+
+                form.submit();
+            }
+        });
+
+        $("#reject_reason_form").validate({
+
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Reason is being updated!',
                     icon: 'info',
                     buttons: false,
                     closeOnClickOutside: false,

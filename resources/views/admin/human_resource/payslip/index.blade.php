@@ -332,7 +332,7 @@
                 },
                 serverSide: true,
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[1, 'desc']],
                 ajax: {
                     url: '{{ route('admin.human_resource.payslip.list') }}',
                     data: function (d) {
