@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
@@ -17,7 +18,6 @@ use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\DiscountWeightCharge;

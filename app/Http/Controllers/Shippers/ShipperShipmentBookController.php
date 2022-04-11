@@ -855,9 +855,19 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 NotificationsController::send(2, $shipment_id);
-                $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+                $pickup_city = City::where('id', $pickup_city_id)->whereNotNull('pickup_cut_off_time');
+                if($pickup_city->exists()){
+                    $pickup_city = $pickup_city->first();
+                    $cutofftime = $pickup_city->pickup_cut_off_time . ":00:00";
+                }
+                else{
+                    $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+                    $cutofftime = $settingsfortime->setting_value . ":00:00";
+                }
+
                 $now = Carbon::now()->format('H:i:s');
-                $cutofftime = $settingsfortime->setting_value . ":00:00";
                 if ($now > $cutofftime) {
                     NotificationsController::send(152, $shipment_id);
                     NotificationsController::send(153, $shipment_id);
@@ -887,9 +897,20 @@ class ShipperShipmentBookController extends Controller
 
                 if ($msg_string != null) {
                     NotificationsController::send(32, $shipment_id, $msg_string);
-                    $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+                    $pickup_city = City::where('id', $pickup_city_id)->whereNotNull('pickup_cut_off_time');
+                    if($pickup_city->exists()){
+                        $pickup_city = $pickup_city->first();
+                        $cutofftime = $pickup_city->pickup_cut_off_time . ":00:00";
+                    }
+                    else{
+                        $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+                        $cutofftime = $settingsfortime->setting_value . ":00:00";
+                    }
+
                     $now = Carbon::now()->format('H:i:s');
-                    $cutofftime = $settingsfortime->setting_value . ":00:00";
+                    
                     if ($now > $cutofftime) {
                         NotificationsController::send(152, $shipment_id);
                         NotificationsController::send(153, $shipment_id);
@@ -3274,16 +3295,10 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if($request->open_shipment=='on'){
-            $open_shipment=1;
-        }else{
-            $open_shipment=0;
-
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
             $open_shipment = 0;
-
         }
         if (!empty($request->input('shipping_mode'))) {
             $user_id = session('user_id');
