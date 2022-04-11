@@ -34,6 +34,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                         <select name="search_origin" id="search_origin" class="form-control select2">
                             @foreach($cities as $origin)
                                 <option value="{{$origin->id}}">{{$origin->name}}</option>
@@ -50,15 +59,7 @@
                         </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                        <select name="search_hub" id="search_hub" class="form-control select2">
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select>
-                        </fieldset>
-                    </div>
+
                     <div class="col-4">
                         <fieldset class="form-group">
                         <select name="search_qsr" id="search_qsr" class="form-control select2">
@@ -70,9 +71,27 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                @foreach($shipment_status as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
                                 @foreach($shippimg_modes as $shippimg_mode)
                                     <option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_types" id="search_types" class="form-control select2">
+                                @foreach($types as $id => $type)
+                                    <option value="{{ $id }}">{{ $type }}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -97,15 +116,7 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_types" id="search_types" class="form-control select2">
-                                @foreach($types as $id => $type)
-                                    <option value="{{ $id }}">{{ $type }}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -209,6 +220,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
@@ -392,6 +408,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.qsr.list') }}',
                     data: function (d) {
+                        d.search_shipment_status = $('#search_shipment_status').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
