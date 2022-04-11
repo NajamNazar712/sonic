@@ -225,7 +225,9 @@
                 width: '100%',
                 placeholder: 'HOD*'
             });
-            
+
+            var trax_ids = [];
+
             $('#department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
@@ -253,10 +255,17 @@
                                 data:data1,
                                 placeholder: 'Select Designation*'
                             });
-                        $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
+                            $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
 
-                            department_head
-                            console.log(data);
+
+                            $('.auto_trax_id').empty();
+                            $.each(data.trax_ids, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('.auto_trax_id').append(newOption);
+                            });
+                            $('.auto_trax_id').val('').trigger('change');
+
+                            trax_ids = data.trax_ids;
                         }
                         else{
                             toastr.error(data.error, 'Error!', {
@@ -264,6 +273,7 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+
                     });
                 }
             });
@@ -443,9 +453,6 @@
             });
 
 
-            @php
-                $index = 0;
-            @endphp
                 
             var today = '{{ $today }}';
             $('#replacement').click(function () {
@@ -456,19 +463,19 @@
                 $("#hub").val('').change();
                 $(".replacement_employee_status").removeClass('d-none');
                 $("div").remove("#vacancies_div,#position_div,#allowance_div,#description_div,#skills_div,#qualification_div,#range_div");
+                
+                    @php
+                        $count = 0;
+                    @endphp
 
                 var new_row ='<hr>'+
                     '<div class="row" id="main_div" style="width:100% !important">'+
                         '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
                             '<div class="col text-center">\n' +
                                 '<label>Trax Id</label>' +
-                                '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
-                                @if($employee->status_id == 2)
-                                @php $mark = '-inactive' @endphp
-                                @else
-                                @php $mark = ' ' @endphp
-                                @endif
-                        <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
+                                '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check auto_trax_id" id="trax_id" name="addmore[0][trax_id]">' +
+
+                       '</select></div>' +
                 '</div>\n' +
                             '<div class="col text-center">\n' +
                     '\n' +        '<label>Gross Salary</label>' +
@@ -497,7 +504,7 @@
                     '</div>\n' +
                      @endif
                     '<div class="col mt-2 close_row0">\n' +
-                    '@if($index == 1)\n' +
+                    '@if($count == 1)\n' +
                     '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
                     '@endif\n' +
                     '</div>\n' +
@@ -619,19 +626,13 @@
             var count = 0;
 
             $('body').on('click','#add_slabs_btn',function () {
-
                 var row_count = count + 1;
                 let htmdiv =
                         '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
                     '<div class="col text-center">\n' +
 
-                    '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
-                            @if($employee->status_id == 2)
-                              @php $mark = '-inactive' @endphp
-                            @else
-                                @php $mark = ' ' @endphp
-                            @endif
-                        <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
+                    '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2 auto_trax_id" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]"></select></div>'+
+
                     '</div>\n' +
                     '<div class="col text-center">\n' +
                     '<div class="form-group"><input type="text" name="addmore['+row_count+'][salary]" id="gross_salary'+row_count+'" placeholder="Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
@@ -655,9 +656,7 @@
                     '</div>\n' +
                         @endif
                     '<div class="col">\n' +
-                    '@if($index>0)\n' +
-                    '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
-                    '@endif\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
                     '</div>\n' +
                     '\n' +
                     '</div></div>\n';
@@ -702,6 +701,12 @@
                     }
                 });
 
+               
+                $.each(trax_ids, function (key, value) {
+                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                    $('#leavers_trax_id' + row_count + '').append(newOption);
+                });
+                $('#leavers_trax_id' + row_count + '').val('').trigger('change');
 
 
                 $('#gross_salary'+row_count+'').inputmask({
