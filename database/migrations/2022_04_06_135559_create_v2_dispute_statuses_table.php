@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOpenBoxChargesTable extends Migration
+class CreateV2DisputeStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreateOpenBoxChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('open_box_charges', function (Blueprint $table) {
+        Schema::create('v2_dispute_statuses', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->index();
-            $table->integer('shipping_mode_id')->index();
-            $table->integer('charges');
+            $table->string('name');
             $table->timestamps();
-
         });
     }
 
@@ -30,6 +27,6 @@ class CreateOpenBoxChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_box_charges');
+        Schema::dropIfExists('v2_dispute_statuses');
     }
 }

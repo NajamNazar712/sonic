@@ -689,6 +689,7 @@ class AdminHumanResourseController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
@@ -723,6 +724,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_staff_deactivate(Request $request)
     {
+
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
@@ -741,6 +743,7 @@ class AdminHumanResourseController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
@@ -3797,12 +3800,15 @@ class AdminHumanResourseController extends Controller
         $rider = $rider->first();
 
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+        $dn_check = DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
             $q->where('status', 0)
                 ->orWhere('dncc_status', 0);
-        })->exists())
+        });
+        if($dn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Delivery Note");
+            $dn_check = $dn_check->pluck('id')->toArray();
+            $dn = implode(", ", $dn_check);
+            return back()->with("error", "Rider Has An Unfinished Following Delivery Note : " .$dn);
         }
 
 
@@ -3817,15 +3823,21 @@ class AdminHumanResourseController extends Controller
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
+        $pn_check = V2PickupNote::where('rider_id',$rider->id)->where('status', 0);
+        if($pn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Pickup Note");
+            $pn_check = $pn_check->pluck('id')->toArray();
+            $pn = implode(", ", $pn_check);
+            return back()->with("error","Rider Has An Unfinished Following Pickup Note : ".$pn);
         }
 
 
-        if(ReturnNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        $rn_check = ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2]);
+        if($rn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Return Note");
+            $rn_check = $rn_check->pluck('id')->toArray();
+            $rn = implode(", ", $rn_check);
+            return back()->with("error","Rider Has An Unfinished Following Return Note : ".$rn);
         }
 
         $admin = new Admin();

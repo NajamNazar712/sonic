@@ -32,15 +32,15 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1"></th>
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">PNCC No.</th>
+                            <th class="border-primary border-darken-1">RNCC No.</th>
                             <th class="border-primary border-darken-1">Hub</th>
-                            <th class="border-primary border-darken-1">Rider</th>
+                            {{-- <th class="border-primary border-darken-1">Rider</th> --}}
                             <th class="border-primary border-darken-1">Center/Franchise Name</th>
                             <th class="border-primary border-darken-1">No Of Shipments</th>
                             <th class="border-primary border-darken-1">Center and Franchise Code</th>
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
-                            <th class="border-primary border-darken-1">PNCC Amount</th>
+                            <th class="border-primary border-darken-1">RNCC Amount</th>
 {{--                            <th class="border-primary border-darken-1">Action</th>--}}
                         </tr>
                         </thead>
@@ -103,15 +103,15 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('PNCC No.');
+                            head.push('RNCC No.');
                             head.push('Hub');
-                            head.push('Rider');
+                            // head.push('Rider');
                             head.push('Center/Franchise Name');
                             head.push('No. Of Shipments');
                             head.push('Center and Franchise Code');
                             head.push('Assigned By');
                             head.push('Assigned Date');
-                            head.push('PNCC Amount');
+                            head.push('RNCC Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -119,7 +119,7 @@
                                 row.push(index + 1);
                                 row.push(values.retail_pickup_note_id);
                                 row.push(values.hub);
-                                row.push(values.rider);
+                                // row.push(values.rider);
                                 row.push(values.store);
                                 row.push(values.shipments_count);
                                 row.push(values.code);
@@ -200,7 +200,7 @@
                                                     if(data.notes != null){
                                                         $.each(data.notes,function (index,id) {
                                                             $msg += '<br>';
-                                                            $msg += 'PNCC # '+id;
+                                                            $msg += 'RNCC # '+id;
                                                         });
                                                     }
                                                     toastr.error($msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -314,13 +314,13 @@
                     }
                 },
                  rowId: 'retail_pickup_note_id',
-                order: [[1, 'asc']],
+                order: [[9, 'desc']],
                 columns: [
                      {data: 'retail_pickup_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'retail_pickup_note_id',name:'retail_pickup_notes.id', class: 'text-center align-middle retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
+                    // { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
                     { data:'store' ,name: 'store', class: 'align-middle store text-center', orderable: false, searchable: false},
                     { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
                     { data:'code' ,name: 'code', class: 'align-middle code text-center', orderable: false, searchable: false},
