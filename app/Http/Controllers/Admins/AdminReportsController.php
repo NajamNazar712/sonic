@@ -10192,6 +10192,7 @@ class AdminReportsController extends Controller
         $crm_count_records = $crm_count_records->groupBy(function ($date) {
             return Carbon::parse($date->date)->format('W');
         });
+        
         // if ($request->search_date_from && $request->search_date_to) {
         //     $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->groupBy(function($date) {
         //         return Carbon::parse($date->date)->format('W');
@@ -10204,11 +10205,19 @@ class AdminReportsController extends Controller
         // }
 
         foreach ($crm_count_records as $key => $value) {
-
+            $remaining_count_val = 0;
+            
             $crm_count_data[$key]['count_days'] = $value->count();
             $avg_closed = 0;
             $avg_remaining = 0;
             foreach ($value as $item) {
+                if((($item->pending + $item->new_launched) - $item->closed) < 0){
+                    $remaining_count_val = 0;
+
+                }else{
+                    $remaining_count_val = (($item->pending + $item->new_launched) - $item->closed);
+
+                }
                 if ($item->pending + $item->new_launched == 0) {
                     $avg_closed += 0;
                     $avg_remaining += 0;
@@ -10216,16 +10225,16 @@ class AdminReportsController extends Controller
                     $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
                 } else {
                     $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
-                    $avg_remaining += number_format((((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100), 2);
+                    $avg_remaining += number_format((( $remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
                     $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
-                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100), 2);
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((($remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
                 }
                 $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
                 $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
                 $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
                 $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
                 $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
-                $crm_count_data[$key]['data'][$item->id]['remaining'] = (($item->pending + $item->new_launched) - $item->closed);
+                $crm_count_data[$key]['data'][$item->id]['remaining'] = $remaining_count_val;
                 $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
                 $inner_pending = $item->pending;
             }

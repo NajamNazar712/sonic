@@ -14,7 +14,7 @@ class GlobalSettingForCnPrintRightsSeeder extends Seeder
         DB::table('global_settings')->insert([
             'setting_value' => 0,
             'type' => 'cn_print_rights',
-            'text' => null,
+            'text' => '',
         ]);
     }
 }

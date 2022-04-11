@@ -119,10 +119,15 @@
         <div class="col-3">
             <h4 class="card-title font-weight-bold">Pickup</h4>
         </div>
-        <div class="col">
+        <div class="col-2">
             <fieldset class="">
-                <input type="checkbox" name="pickup" class="icheckbox">
+                <input type="checkbox" name="pickup" id="pickup_checkbox" class="icheckbox">
                 <label for="pickup" class="">Pickup</label>
+            </fieldset>
+        </div>
+        <div class="col-7">
+            <fieldset class="form-group">
+                <input type="text" name="pickup_cut_off_time" id="pickup_cut_off_time" class="form-control pickup_cut_off_time" placeholder="Pickup Cut Off time" data-rule-min="0" data-msg-min="Pickup Cut-Off Time can not be less than 0" data-rule-max="23" data-msg-min="Pickup Cut-Off Time can not be more than 23" disabled data-rule-required="true" data-msg-required="Please enter hour between 0 and 23">
             </fieldset>
         </div>
     </div>
@@ -228,6 +233,11 @@
             'allowPlus': false,
             'rightAlign': false,
             'digits': 6,
+        });
+        $('#pickup_cut_off_time').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
         });
         var errors = 0;
         function checkAtleastOne(targ,id) {
@@ -353,6 +363,12 @@
         });
         @endforeach
 
+        $('#pickup_checkbox').on('ifChecked', function(event){
+            $('#pickup_cut_off_time').prop('disabled', false);
+        });
+        $('#pickup_checkbox').on('ifUnchecked', function(event){
+            $('#pickup_cut_off_time').prop('disabled', true);
+        });
 
         $( "#addCityHubForm" ).validate({
 

@@ -68,6 +68,7 @@
                     
                     <div class="form-group" id="service_select">
                         <select name="service_id" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
+                            <option value="0" > All Services </option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" > {{ $service->name }} </option>
                             @endforeach
@@ -125,6 +126,7 @@
                     </div>
                     <div class="form-group" id="edit_territory_select">
                         <select name="territory_id" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            <option value="0" > All Territories </option>
                             @foreach($territories as $territory)
                                 <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
@@ -133,6 +135,7 @@
 
                     <div class="form-group">
                         <select name="service_id" id="edit_service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
+                            <option value="0" > All Services </option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" > {{ $service->name }} </option>
                             @endforeach
@@ -226,7 +229,7 @@
             }).bind('change', function() {
                 // $('#service_select').css('display','block');
                 // $('#agent_select').css('display','block');
-                
+
                
                 var id = parseInt($(this).val());
                 if(id == 0){
@@ -243,11 +246,15 @@
                     city_obj.length = 0
 
                 $.map({!! $cities !!}, function (obj,index) {
+
+                    // city_obj.push({id: obj.id, text: obj.name});
+
                     if(index == 0){
                         city_obj.push({id: 0, text: 'All Cities'});
                     }
-                        if(id == obj.zone_id){
+                    if(id == obj.zone_id){
                             city_obj.push({id: obj.id, text: obj.name});
+
                         }
                 });
 
@@ -278,10 +285,13 @@
                                 var territory_obj  = [];
                                 territory_obj.length = 0
 
-                            $.map({!! $territories !!}, function (obj) {
-                                    if(id == obj.city_id){
+                            $.map({!! $territories !!}, function (obj,index) {
+                                if(index == 0) {
+                                    territory_obj.push({id: 0, text: 'All Territories'});
+                                }
+                               if(id == obj.city_id){
                                         territory_obj.push({id: obj.id, text: obj.name});
-                                    }
+                                }
                             });
 
                             $('#territory_id').prepend('<option selected></option>').select2({
@@ -292,7 +302,6 @@
                                     data:territory_obj
                                 });
                         }
-
                     });
                 }
             });    
@@ -331,7 +340,7 @@
                 
                 // $("#edit_agent_id").select2('val', '');
                 // $("#edit_service_id").select2('val', '');
-                
+
 
                
                 var id = parseInt($(this).val());
@@ -391,8 +400,11 @@
                             var territory_obj = [];
                             territory_obj.length = 0
 
-                        $.map({!! $territories !!}, function (obj) {
-                                if(id == obj.city_id){
+                        $.map({!! $territories !!}, function (obj,index) {
+                            if(index == 0){
+                                territory_obj.push({id: 0, text: 'All Territories'});
+                            }
+                            if(id == obj.city_id){
                                     territory_obj.push({id: obj.id, text: obj.name});
                                 }
                         });
@@ -445,7 +457,7 @@
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
-                    {data: 'service', name: 's.name', class: 'align-middle service'},
+                    {data: 'service2', name: 's.name', class: 'align-middle service'},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'status', name: 'lead_taggings.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -467,7 +479,7 @@
                         status +='<option value="1">Enable</option>';
                         status +='<option value="0">Disable</option>';
                         status +='</select>';
-                   
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -496,7 +508,7 @@
                             }
                         }
                     });
-                    
+
 
                     $('#status').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
@@ -525,6 +537,7 @@
 
                     if(data.zone_id == 0){
                         $('#edit_zone_id').val(data.zone_id).change();
+
                         $('#edit_city_id').css('display','none');
                         $('#edit_territory_id').css('display','none');
                         $('#edit_city_select').css('display','none');

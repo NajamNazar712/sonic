@@ -26205,7 +26205,7 @@ class AdminCorporateAccountsController extends Controller
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
-                    'discount_d_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
+                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //sameday
