@@ -16,8 +16,6 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
-use App\Http\Models\Admin\OpenBoxCharges;
-use App\Http\Models\Admin\PendingOpenBoxCharges;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\Territory;
@@ -2061,7 +2059,6 @@ class AdminDashboardController extends Controller
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $open_box = OpenBoxCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2161,12 +2158,12 @@ class AdminDashboardController extends Controller
             }
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'open_box'=> $open_box]);
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'open_box'=> $open_box]);
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
 
         } elseif (($user['rate_status'] >= 1) && ($user['status'] == 3)) {
@@ -2192,7 +2189,7 @@ class AdminDashboardController extends Controller
             $e_invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $e_discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_discount_weight_charges = DiscountWeightCharge::all()->where('user_id', $id)->groupBy(['shipping_mode_id','destination_id']);
-            $e_open_box = OpenBoxCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
             $e_rate_status = $user['rate_status'];
             $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
 
@@ -2228,7 +2225,7 @@ class AdminDashboardController extends Controller
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
-            $open_box = PendingOpenBoxCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
             
             $packaging_charges = array();
             $packaging_sizes = array();
@@ -2306,12 +2303,12 @@ class AdminDashboardController extends Controller
             $existing = 1;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'e_open_box'=> $e_open_box,'open_box'=>$open_box]);
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'e_open_box'=> $e_open_box,'open_box'=>$open_box]);
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
         } else {
             return redirect(route('admin.accounts.pending'));
@@ -7623,18 +7620,6 @@ class AdminDashboardController extends Controller
 
             }
 
-            if($request->has('on_open_box_switch') && $request->on_open_box_switch == 'on'){
-                $open_box_charges = $request->overnight_open_box != null ? $request->overnight_open_box : 0;
-
-                if($open_box_charges != 0){
-                    OpenBoxCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'charges' =>  $open_box_charges,
-                    ]);
-                }
-            }
-
 
         }
         //Overland
@@ -7865,17 +7850,6 @@ class AdminDashboardController extends Controller
 
                 }
 
-            }
-            if($request->has('ol_open_box_switch') && $request->ol_open_box_switch == 'on'){
-                $open_box_charges = $request->overland_open_box != null ? $request->overland_open_box : 0;
-
-                if($open_box_charges != 0){
-                    OpenBoxCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'charges' =>  $open_box_charges,
-                    ]);
-                }
             }
 
         }
@@ -8108,17 +8082,6 @@ class AdminDashboardController extends Controller
                 }
 
             }
-            if($request->has('detain_open_box_switch') && $request->detain_open_box_switch == 'on'){
-                $open_box_charges = $request->detain_open_box != null ? $request->detain_open_box : 0;
-
-                if($open_box_charges != 0){
-                    OpenBoxCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'charges' =>  $open_box_charges,
-                    ]);
-                }
-            }
 
         }
         //Sameday
@@ -8349,17 +8312,6 @@ class AdminDashboardController extends Controller
 
             }
 
-            if($request->has('sd_open_box_switch') && $request->sd_open_box_switch == 'on'){
-                $open_box_charges = $request->sd_open_box != null ? $request->sd_open_box : 0;
-
-                if($open_box_charges != 0){
-                    OpenBoxCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'charges' =>  $open_box_charges,
-                    ]);
-                }
-            }
         }
 
         $warehouse_charges = 0;
@@ -9076,6 +9028,7 @@ class AdminDashboardController extends Controller
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p', 'p.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('referrals as ref', 'ref.id', '=', 'users.referral_id')
             ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
             ->leftjoin('admins as rab', 'rab.id', '=', 'users.rates_added_by')
             ->leftjoin('admins as rabna', 'rabna.id', '=', 'users.rates_updated_by')
@@ -9099,7 +9052,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
-            ->select(['users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment','ucs.status_count as status_count'])->whereIn('users.status', [3, 4])->where('blacklist', 0);
+            ->select(['users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count'])->whereIn('users.status', [3, 4])->where('blacklist', 0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -9449,6 +9402,7 @@ class AdminDashboardController extends Controller
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products', 'products.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('referrals as ref', 'ref.id', '=', 'users.referral_id')
             ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
             ->leftjoin('admins as rab', 'rab.id', '=', 'users.rates_added_by')
             ->leftjoin('admins as rabb', 'rabb.id', '=', 'users.rates_authorized_by')
@@ -9469,7 +9423,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
+            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -10179,7 +10133,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10195,7 +10150,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10246,7 +10202,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     CityHistory::create([
                         'city_id' => $id,
@@ -10262,7 +10219,8 @@ class AdminDashboardController extends Controller
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
                         'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
+                        'address' => $request->address,
+                        'pickup_cut_off_time' => $request->pickup_cut_off_time
                     ]);
                     WalkInCities::where('city_id', $id)->delete();
                     if (!empty($request->walk_in_delivery)) {
@@ -10328,7 +10286,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10345,7 +10304,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
@@ -10416,7 +10376,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             CityHistory::create([
@@ -10432,7 +10393,8 @@ class AdminDashboardController extends Controller
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
                 'hub_location_longitude' => $request->hub_longitude,
-                'address' => $request->address
+                'address' => $request->address,
+                'pickup_cut_off_time' => $request->pickup_cut_off_time
             ]);
 
             if (!empty($request->walk_in_delivery)) {
