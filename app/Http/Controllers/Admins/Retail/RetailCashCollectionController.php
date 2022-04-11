@@ -14,6 +14,7 @@ use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\RetailPickupNoteStatus;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
 class RetailCashCollectionController extends Controller
@@ -25,6 +26,7 @@ class RetailCashCollectionController extends Controller
     }
 
     public function retail_index(){
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),22);
         return view('admin.retail.pending_cash_collection.index');
     }
@@ -36,16 +38,34 @@ class RetailCashCollectionController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),82);
         }
 
-        $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
-            // ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
-            ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
-            ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
-            ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
-            ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
-            ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
-           ->whereIn('retail_pickup_notes.status', [1,2,3])
-           ->where('retail_pickup_notes.pncc_status', '=', 0);
+         // $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
+        //     // ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
+        //     ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
+        //     ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+        //     ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
+        //     ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
+        //     ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
+        //     ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'retail_pickup_notes.assigned_at', 'retail_pickup_notes.shipments as shipments_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'retail_pickup_notes.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
+        //    ->whereIn('retail_pickup_notes.status', [1,2,3])
+        //    ->where('retail_pickup_notes.pncc_status', '=', 0)->get();
+        // dd($deliveries);
+
+        $deliveries = RetailCashDeposit::leftjoin('retail_users as ru', 'ru.id', '=', 'retail_cash_deposits.retail_user_id')
+                        ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
+                        ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
+                        ->leftjoin('retail_cash_deposit_shipments as rcds', function ($join) {
+                            $join->on('rcds.cash_deposit_id', '=', 'retail_cash_deposits.id')
+                                ->where('rcds.id', '=',
+                                    DB::raw('(select max(id) from retail_cash_deposit_shipments where retail_cash_deposit_shipments.cash_deposit_id = retail_cash_deposits.id )'));
+                        })
+                        ->leftjoin('retail_pickup_note_shipments as rpns','rpns.shipment_id','=','rcds.shipment_id')
+                        ->leftjoin('retail_pickup_notes as rpn','rpn.id','=','rpns.retail_pickup_note_id')
+                        ->join('cities AS oc', 'rpn.hub_id', '=', 'oc.id')
+                        ->leftjoin('admins as a', 'a.id', '=', 'rpn.assigned_by')
+                        ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'rpn.pickup_address_id')
+                        ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'rpn.assigned_at', 'retail_cash_deposits.total_cn as shipments_count', 'rpn.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'rpn.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
+                        ->whereIn('rpn.status', [1,2,3])
+                        ->where('rpn.pncc_status', '=', 0);
 
         $datatable = Datatables::of($deliveries)
             ->addColumn('count', function($deliveries) {
@@ -110,8 +130,7 @@ class RetailCashCollectionController extends Controller
                     return $dropdown;
             });
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('retail_pickup_note_shipments as rpns', 'retail_pickup_notes.id', '=', 'rpns.retail_pickup_note_id')
-                ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+            $datatable->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
         return $datatable->make(true);
@@ -119,7 +138,9 @@ class RetailCashCollectionController extends Controller
 
     public function number_of_shipments(Request $request){
         $pickup_note_id = $request->input('pickup_note_id');
-        $pickup_note_shipments= RetailPickupNoteShipment::where('retail_pickup_note_id',$pickup_note_id);
+        $pickup_note_shipments = RetailCashDepositShipment::where('cash_deposit_id',$pickup_note_id);
+
+        // $pickup_note_shipments= RetailPickupNoteShipment::where('retail_pickup_note_id',$pickup_note_id);
         if($pickup_note_shipments->exists()){
             $pickup_note_shipments = $pickup_note_shipments->get();
              $shipments = array();
