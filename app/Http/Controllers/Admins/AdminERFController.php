@@ -192,7 +192,7 @@ class AdminERFController extends Controller
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
-        if (session('role_id') == 1) {
+        if (session('role_id') == 1 || session('department_id') == 10) {
             $employee_trax_id = Employee::whereNotIn('trax_id', $invalid_employees)->get();
         }
         else{
