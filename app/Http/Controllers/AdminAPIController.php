@@ -87,11 +87,9 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WMS\WmsCourierOrders;
 use App\Http\Models\WMS\WmsOrderProcess;
 use App\Http\Models\WMS\WmsPendingPicking;
-use App\Http\Models\WMS\WmsPendingPickingShipments;
 use App\Http\Models\WMS\WmsPicklist;
 use App\Http\Models\WMS\WmsPicklistItem;
 use App\Http\Models\WMS\WmsProductBarcode;
-use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -103,6 +101,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Password;
 
 class AdminAPIController extends Controller
@@ -5175,7 +5174,7 @@ class AdminAPIController extends Controller
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
                         $file = $request->file('image_name');
-                        $filename = 'image_name' . $date . '.' . $file->extension();
+                        $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
@@ -6711,5 +6710,39 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
         }
 
+    }
+
+    public function store_dws_image(Request $request){
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')],
+            'picture' => ['required', 'mimes:png,jpeg,jpg']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(false);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_details = ShipmentDetail::where('shipment_id', $shipment->id);
+            if($shipment_details->exists()){
+                $shipment_details = $shipment_details->first();
+                if($shipment_details->dws_status == 1 && $shipment_details->dws_image == null){
+                    $date = Carbon::now()->format('Y_m_d');
+                    $file = $request->file('picture');
+                    $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
+                    $directory = 'dws_images';
+                    $picture_path = $directory . '/' . $filename;
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                    $shipment_details->dws_image = $picture_path;
+                    $shipment_details->save();
+                    return response()->json(true);
+                }
+                return response()->json(false);
+            }
+            return response()->json(false);
+        }
     }
 }
