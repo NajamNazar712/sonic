@@ -1315,39 +1315,39 @@ class APIController extends Controller
 
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
                     $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
-                    $current_status = $shipment_journey->shipment_status_consignee->name;
+                    $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
-                    $current_status = $shipment->status_consignee->name;
+                    $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             }
 
@@ -2865,26 +2865,50 @@ class APIController extends Controller
                 foreach ($shipments as $shipment) {
                     $detail = array();
 
+                    $detail['origin'] = $shipment->pickup_address->city->name;
+                    $detail['destination'] = $shipment->consignee_city->name;
+
                     if ($type == 0) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     } else {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     }
 
                     $detail['tracking_number'] = $shipment->tracking_number;
                     $detail['status'] = $current_status;
+                    $detail['reason'] = $reason;
+                    $detail['current_status_datetime'] = $current_status_datetime;
 
                     $details[] = $detail;
                 }
