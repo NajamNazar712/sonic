@@ -204,7 +204,7 @@ class AdminERFController extends Controller
     }
 
     public function submit_form(Request $request){
-        
+       
         $erf = new EmployeeRequisition();
         $erf->department_id = $request->department;
         $erf->designation_id = $request->designation;
@@ -706,9 +706,9 @@ class AdminERFController extends Controller
                  else{
                      $details['last_working_date'] = $employee->last_working_date;
                  }
-                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest()->first();
+                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest('payroll_month')->first();
                  if($salary){
-                     $details['last_salary'] = $salary->total_salary;
+                     $details['last_salary'] = $salary->gross_salary;
                  }
                  else{
                      $details['last_salary'] = 0;
