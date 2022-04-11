@@ -1593,6 +1593,8 @@
             });
             $('#tracking').on('click', '.rider_information', function () {
                 id = $(this).attr('data-id');
+                var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
+                var note = $(this).attr('data-note');
 
                 $.ajax({
                     url: '{!! route('admin.tracking.rider_information') !!}',
@@ -1610,6 +1612,9 @@
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+                        if(showRiderResponseBtn != undefined) {
+                            details += '<tr data-id="' + data.id + '" data-note="'+note+'"><td class="align-middle text-center"><button type="button" class="btn btn-warning btnRiderResponsiveStatus" data-type="1">Unresponsive</button></td><td class="align-middle text-center"><button type="button" class="btn btn-danger btnRiderResponsiveStatus" data-type="2">Powered Off</button></td></tr>';
+                        }
 
                         details += '</tbody></table>';
 
@@ -1617,6 +1622,64 @@
 
                         $('#rider_information').modal('show');
                     });
+            });
+
+            $('body').on('click', '.btnRiderResponsiveStatus', function () {
+                var text = $(this).html();
+                var type = $(this).attr('data-type');
+                var id = $(this).closest('tr').attr('data-id');
+                var note = $(this).closest('tr').attr('data-note');
+                console.log(type,id);
+                swal({
+                    text: 'Are you sure, you want to Mark Rider '+text+'?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.tracking.rider_unresponsive_status') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': id,
+                                'type': type,
+                                'note': note,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function (data) {
+                            if(data.status == 1)
+                            {
+                                toastr.success("Rider Marked as "+text, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
+                });
+
             });
 
             $('#tracking').on('click', '.cargo_note_print', function () {

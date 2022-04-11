@@ -599,6 +599,9 @@ class Permission
             'reports.pickup_history_cn_wise.index' => 679,
             'reports.pickup_history_cn_wise.list' => 679,
 
+            'reports.rider_unresponsive_report.index' => 705,
+            'reports.rider_unresponsive_report.list' => 705,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
