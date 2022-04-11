@@ -143,7 +143,7 @@
                         <th class="border-primary border-darken-1">Employee Name</th>
                         <th class="border-primary border-darken-1">Employee Designation</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
-                        <th class="border-primary border-darken-1">DNCC/PNCC Count</th>
+                        <th class="border-primary border-darken-1">DNCC/RNCC Count</th>
                         <th class="border-primary border-darken-1">Delivery Note No</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">Delivery Note Amount</th>
@@ -160,7 +160,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="pncc_modal_title">No. Of PNCC(s)</h4>
+                    <h4 class="modal-title" id="pncc_modal_title">No. Of RNCC(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -390,7 +390,7 @@
                             head.push('Employee Name');
                             head.push('Employee Designation');
                             head.push('SDN No.');
-                            head.push('DNCC/PNCC Count');
+                            head.push('DNCC/RNCC Count');
                             head.push('Delivery Note No');
                             head.push('Delivered Shipments');
                             head.push('Delivery Note Amount');
@@ -567,7 +567,7 @@
                     })
                         .done(function (data) {
                             if (data.status == 1) {
-                                var notes = '<div>PNCC Number(s) :</div>';
+                                var notes = '<div>RNCC Number(s) :</div>';
 
                                 if (data.pickup_notes) {
                                     $.each(data.pickup_notes, function (index, value) {

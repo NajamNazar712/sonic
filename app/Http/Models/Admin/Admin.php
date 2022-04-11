@@ -45,6 +45,10 @@ class Admin extends Authenticatable
         return $this->belongsTo('App\Http\Models\Admin\AdminRole', 'role_id', 'id');
     }
 
+    public function city() {
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id')->where('hub',1);
+    }
+
     public function hubs() {
         return $this->hasMany('App\Http\Models\Admin\AdminHub', 'admin_id', 'id');
     }

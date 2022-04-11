@@ -16,5 +16,9 @@ class RetailDonePayment extends Model
     public function company_bank() {
         return $this->belongsTo('App\Http\Models\BanksList', 'company_bank_id', 'id');
     }
+    public function retail_done_payment_calculations()
+    {
+        return $this->belongsTo('App\Http\Models\RetailDonePaymentCalculation', 'id', 'retail_done_payment_id');
+    }
 
 }

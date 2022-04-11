@@ -1188,7 +1188,6 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Shipments has been marked Resolved'];
     }
 
-
     public function revert_requested_image($image_id){
         $revert_Status_request = RevertStatusRequest::find($image_id);
         $image_url = $revert_Status_request->image;
@@ -6279,7 +6278,7 @@ class AdminFinanceController extends Controller
                     }
                 }
                 else if ($user_banking_information->invoicing_cycle_id == 3) {
-                    if (Carbon::now()->endOfMonth()->toDateString() == $current_date_string) {
+                    if ($user_banking_information->generation_date == $current_date->day) {
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
@@ -12669,12 +12668,28 @@ class AdminFinanceController extends Controller
         foreach ($request->ids as $done_payment_id) {
             $done_payment = RetailDonePayment::find($done_payment_id);
 
+
             if ($done_payment->status != 1) {
                 $done_payment->status = 1;
                 $done_payment->status_updated_at = Carbon::now();
                 $done_payment->status_updated_by = Auth::id();
 
                 $done_payment->save();
+
+                $name = "";
+                $phone = "";
+                $amount = 0;
+                if(isset($done_payment->shipper->shipper_name)){
+                    $name = $done_payment->shipper->shipper_name;
+                    $phone = $done_payment->shipper->shipper_phone_no;
+                    $updated_at = $done_payment->updated_at;
+                    $amount = isset($done_payment->retail_done_payment_calculations->payable) ? $done_payment->retail_done_payment_calculations->payable : 0;
+                    $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
+
+                    $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
+
+                    NotificationsController::send(172, $name, $phone,$amount,$updated_at);
+                }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();
                 $payment_clear->payment_id = $done_payment_id;
@@ -12699,10 +12714,13 @@ class AdminFinanceController extends Controller
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
                     }
                 }
+
             }
         }
 
         return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
+
+
     }
 
     public function retail_done_payments_reverted(Request $request) {

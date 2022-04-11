@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','strn_no','url','city_id','status','blacklist', 'api_token','rates_added_by','rates_added_at','rates_approved_at','rates_rejected_at','rates_rejected_by','rates_updated_by','rates_authorized_by','account_activated_by','activated_at','reactivated_at','product_id','rate_status','account_type_id','default_shipping_mode','average_shipments','reference_id','average_shipment_duration_id','other_product_name','brand_name','segment_id','lead_id','territory_id','rcp_tat_option_id','rcp_tat_updated_by','rcp_tat_updated_at','new_rate_type_id','rate_type_id_status','agreement_signed','sub_segment_id'
+        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','strn_no','url','city_id','status','blacklist', 'api_token','rates_added_by','rates_added_at','rates_approved_at','rates_rejected_at','rates_rejected_by','rates_updated_by','rates_authorized_by','account_activated_by','activated_at','reactivated_at','product_id','rate_status','account_type_id','default_shipping_mode','average_shipments','reference_id','average_shipment_duration_id','other_product_name','brand_name','segment_id','lead_id','territory_id','rcp_tat_option_id','rcp_tat_updated_by','rcp_tat_updated_at','new_rate_type_id','rate_type_id_status','agreement_signed','sub_segment_id','referral_id'
     ];
 
     /**
@@ -31,6 +31,11 @@ class User extends Authenticatable
     }
     public function city(){
         return $this->belongsTo('App\Http\Models\City');
+    }
+
+    public function city2() {
+        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
+//            ->where('hub',1);
     }
 
     public function bank(){
@@ -70,5 +75,10 @@ class User extends Authenticatable
 
     public function dws_charges(){
         return $this->hasMany('App\Http\Models\DwsWeightCharges');
+    }
+
+    public function referral()
+    {
+        return $this->belongsTo('App\Http\Models\Referral', 'referral_id', 'id');
     }
 }

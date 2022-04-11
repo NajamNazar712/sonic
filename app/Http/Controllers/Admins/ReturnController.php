@@ -44,6 +44,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Zone;
+use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
@@ -350,6 +351,7 @@ class ReturnController extends Controller
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
                 $edit_estimate_charges = '<a href="javascript:void(0);" class="dropdown-item editEstimateCharges" data-action="editEstimateCharges"><i class="ft-plus-circle primary"></i> Edit Estimate Charges</a>';
+                $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
                 if(session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions')))) {
@@ -384,6 +386,9 @@ class ReturnController extends Controller
                                     $dropdown .= $intercept;
                                 }
                             }
+                        }
+                        if(session('role_id') == 1 || in_array(700, session('permissions'))){
+                            $dropdown .= $manual_sms_btn;
                         }
 
                         $dropdown .= "
@@ -1896,8 +1901,6 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                NotificationsController::app_notification(6, $rider, 2, $note->id);
-
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
                         $shipment = Shipment::where('id', $shipment_id);
@@ -1981,6 +1984,7 @@ class ReturnController extends Controller
                         $return_sheet->save();
 
                     }
+                    NotificationsController::app_notification(6, $rider, 2, $note->id);
                 }
                 EmployeeAttendanceController::riders_attendance_mark($rider);
 
@@ -3970,9 +3974,13 @@ class ReturnController extends Controller
             'digits_between' => ':attribute must be between :min and :max Digits.',
             'unique' => ':attribute is already Present.'
         ];
-        $rules = [
+        $rules_with_agent = [
             'tracking_number' => ['required', 'integer'],
             'agent_id' => ['required', 'integer']
+        ];
+
+        $rules_without_agent = [
+            'tracking_number' => ['required', 'integer']
         ];
         $fields = [0 => 'tracking_number', 1 => 'agent_id'];
 
@@ -4020,8 +4028,11 @@ class ReturnController extends Controller
             $tracking_id_row = array();
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
-
-                $validate = Validator::make($row, $rules, $messages);
+                if(!empty($row['agent_id'])) {
+                    $validate = Validator::make($row, $rules_with_agent, $messages);
+                }else{
+                    $validate = Validator::make($row, $rules_without_agent, $messages);
+                }
 
                 $validate->setAttributeNames($names);
 
@@ -4047,8 +4058,10 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
-                    if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id',3)->where('a.status',1)->where('a.id', $row['agent_id'])->exists()) {
-                        $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
+                    if(!empty($row['agent_id'])) { //if agent = 1 or 2 or 3
+                        if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->where('a.status', 1)->where('a.id', $row['agent_id'])->exists()) {
+                            $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id']; //remove for ticket no 4934
+                        }
                     }
                 }
             }
@@ -4056,15 +4069,14 @@ class ReturnController extends Controller
                 $tracking_numbers = array();
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
-                    $shipment_id = trim($row['tracking_number']);
-                    $agent_id = trim($row['agent_id']);
-                    
+                    $shipment_id = trim($row['tracking_number']); //111
+                    $agent_id = trim($row['agent_id']); //22
+
                     $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
                     $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
                     if($check_already_assigned){
                         $check_already_assigned->status = 0;
                         $check_already_assigned->save();
-    
                                 $return_assign_log = new ReturnAssignedShipmentLogs();
                                 $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
                                 $return_assign_log->status = 4;
@@ -4074,35 +4086,50 @@ class ReturnController extends Controller
                     $assign_shipments = new ReturnAssignedShipments();
                     $assign_shipments->admin_id = $agent_id;
                     $assign_shipments->shipment_id =  $id_shipment->id;
-                    $assign_shipments->status = 1;
+                    $assign_shipments->status = !empty($agent_id) ? 1 : 0;
                     $assign_shipments->assigned_by = Auth::id();
                     $assign_shipments->save();
-    
+
                     $return_assign_log = new ReturnAssignedShipmentLogs();
                     $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
-                    $return_assign_log->status = 0;
+                    $return_assign_log->status = !empty($agent_id) ? 0 : 4;
                     $return_assign_log->assigned_by = Auth::id();
                     $return_assign_log->save();
-    
-                    //set record in login/logut table
-                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
-                                    
-                    if(!$check_agent_return_confrimation->exists()){
-                        $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
 
-                        if($agent_role->exists()){
-                            $agent_return_confrimation = new AgentReturnConfirmation;
-                            $agent_return_confrimation->admin_id = $agent_id;
-                            $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                            $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                            $agent_return_confrimation->save();
+
+                    //if agent is !empty
+
+                    if(!empty($agent_id)){
+                        $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
+
+                        if(!$check_agent_return_confrimation->exists()){
+                            $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                                ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
+
+                            if($agent_role->exists()){
+                                $agent_return_confrimation = new AgentReturnConfirmation;
+                                $agent_return_confrimation->admin_id = $agent_id;
+                                $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                                $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                                $agent_return_confrimation->save();
+                            }
                         }
-                    }
-                    else{
-                        $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
-                        $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                        $check_agent_return_confrimation->save();
+                        else{
+                            $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
+                            $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                            $check_agent_return_confrimation->save();
+                        }
+
+                    }else {
+                        //if agent data is empty
+                        $check_agent_return_confrimation = AgentReturnConfirmation::
+                                where('return_assigned_shipment_id', $assign_shipments->id)
+                                    ->orderby('current_date','desc')->first();
+                        if(!empty($check_agent_return_confrimation)) {
+                            $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                            $check_agent_return_confrimation->save();
+                        }
+
                     }
                     //set record in login/logut table end
 
@@ -4113,7 +4140,7 @@ class ReturnController extends Controller
                     return $row . ': ' . $tracking_number;
                 }, array_keys($tracking_numbers), $tracking_numbers));
 
-                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Assigned with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
             }
             else{
                 $errors = array_map(function ($row, $errors) {
@@ -4714,7 +4741,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),503);
         }
        $rcp = ReturnConfirmationPendingSmsAttempt::join('shipments as s','s.id','=','return_confirmation_pending_sms_attempts.shipment_id')
-           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status');
+           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status','return_confirmation_pending_sms_attempts.count as count');
 
        $datatable = DataTables::of($rcp)
            ->editColumn('tracking_number', function ($shipments) {
@@ -4770,5 +4797,28 @@ class ReturnController extends Controller
        });
 
         return $datatable->make(true);
+    }
+
+    public function manual_rcp_sms(Request $request){
+        if($request->id){
+            $shipment = Shipment::find($request->id)->id;
+            if($shipment){
+                $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
+                if($rcp_sms->exists()){
+                    $rcp_sms = $rcp_sms->latest('id')->first();
+                    $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+
+                    if ($rcp_sms->count <= $limit->text){
+                        dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+            }
+        }
     }
 }

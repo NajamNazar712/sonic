@@ -720,6 +720,18 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['name'];
         }
+		else if ($id == 172)
+        {
+            $details['fields'] = ['shipper_name','total_amount','status_link','updated_at'];
+        }
+        else if ($id == 173)
+        {
+            $details['fields'] = ['erf_id'];
+        }
+        else if ($id == 174)
+        {
+            $details['fields'] = ['erf_id','admin'];
+        }
 		return $details;
     }
 

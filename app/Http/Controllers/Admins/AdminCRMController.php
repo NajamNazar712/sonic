@@ -433,7 +433,12 @@ class AdminCRMController extends Controller
             }
             $tagged_operation = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 5)->get()->first();
             if($tagged_operation){
-                $tagged_operation_name = Admin::find($tagged_operation->tagged_id)->name;
+                $tagged_operation_name = Admin::find($tagged_operation->tagged_id);
+                if($tagged_operation_name){
+                    $tagged_operation_name = $tagged_operation_name->name;
+                }else{
+                    $tagged_operation_name = '';
+                }
             }else{
                 $tagged_operation_name = '';
             }
@@ -1913,7 +1918,11 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
-                    return $admin->name;
+                    if($admin){
+                        return $admin->name;
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }

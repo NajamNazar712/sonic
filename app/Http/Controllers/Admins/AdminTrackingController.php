@@ -9,6 +9,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -852,6 +853,16 @@ class AdminTrackingController extends Controller
                             $details['shipper']['email'] = $shipper->email;
                             $details['shipper']['sales_person'] = $sales_person_name;
                             $details['shipper']['tagged_kae'] = $tagged_kae_name;
+
+                            $high_alert = HighAlertShipper::where('user_id', $shipper->id)->where('status', 1);
+                            if($high_alert->exists()){
+                                $high_alert = $high_alert->latest()->first();
+
+                                $details['high_alert'] = "High alert marked on ". Carbon::parse($high_alert->created_at)->toDateTimeString() . " by " . $high_alert->alerted_by->name . " because of " . $high_alert->description;
+
+                            }
+
+
                         } else {
                             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
                             if ($retail_shipment) {
@@ -979,7 +990,7 @@ class AdminTrackingController extends Controller
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
-                            if (in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37])) {
+                            if (in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
                                 $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
                                 if ($rider_delivery->exists()) {
                                     $rider_delivery = $rider_delivery->get()->first();
@@ -1151,10 +1162,22 @@ class AdminTrackingController extends Controller
 
                             }
 
+
+                            if (isset($journey->admin->city->name)) {
+                                $cityy = $journey->admin->city->name;
+                            }else if(isset($journey->user->city2->name)){
+                                $cityy = $journey->user->city2->name;
+                            }else if($journey->rider->city->name){
+                                $cityy = $journey->rider->city->name;
+                            }
+
+
+//                            ($journey->city_id) ? $journey->city->name : '';
+
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
-                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['city'] = $cityy;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';

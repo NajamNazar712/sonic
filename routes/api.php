@@ -66,6 +66,7 @@ Route::name('api.')->group(function () {
             Route::post('add', 'APIController@receiving_sheet_add')->name('add');
             Route::post('remove', 'APIController@receiving_sheet_void')->name('remove');
             Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
+            Route::post('list', 'APIController@receiving_sheet_list')->name('list');
 		});
 
 		Route::get('cities', 'APIController@cities')->name('cities');
@@ -138,6 +139,7 @@ Route::name('api.')->group(function () {
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
                 Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
+                Route::post('pick_v3', 'Rider\RiderAPIController@pickup_pick_v3')->name('pickup_pick_v3');
 
                 Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
 
@@ -168,6 +170,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered_v3', 'Rider\RiderAPIController@shipment_delivered_v3')->name('delivered_v3');
                 Route::post('delivered_v4', 'Rider\RiderAPIController@shipment_delivered_v4')->name('delivered_v4');
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
+                Route::post('undelivered_v3', 'Rider\RiderAPIController@shipment_undelivered_v3')->name('undelivered_v3');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -230,6 +233,7 @@ Route::name('api.')->group(function () {
 
                 Route::get('index_v2', 'Rider\RiderAPIController@get_profile_v2')->name('index_v2');
                 Route::get('check_v2', 'Rider\RiderAPIController@check_profile_v2')->name('check_v2');
+                Route::post('check_v3', 'Rider\RiderAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'Rider\RiderAPIController@update_profile_v2')->name('update_v2');
             });
 
@@ -332,6 +336,7 @@ Route::name('api.')->group(function () {
 
                 Route::get('index_v2', 'AdminAPIController@get_profile_v2')->name('index_v2');
                 Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
+                Route::post('check_v3', 'AdminAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
@@ -420,6 +425,14 @@ Route::name('api.')->group(function () {
                 Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
             });
         });
+
+    });
+
+    Route::prefix('botsify')->name('botsify.')->group(function () {
+        Route::post('shipper/phone_number', 'APIController@whatsapp_shipper_phone_number')->name('shipper.phone_number');
+        Route::post('shipment/tracking', 'APIController@whatsapp_shipper_tracking')->name('shipment.tracking');
+        Route::post('crm/launch', 'APIController@whatsapp_crm_request_create')->name('crm.launch');
+        Route::post('crm/tracking', 'APIController@whatsapp_shipper_crm_tracking')->name('crm.tracking');
 
     });
 
