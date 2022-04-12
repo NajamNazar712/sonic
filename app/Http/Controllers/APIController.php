@@ -332,7 +332,7 @@ class APIController extends Controller
             'email_address' => ['required', 'email'],
             'address' => ['required', 'between:1,190'],
             'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-            'brand_name' => ['required', 'string'],
+            'brand_name' => ['string'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
