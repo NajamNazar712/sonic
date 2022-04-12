@@ -16,4 +16,11 @@ class ShipmentsPaymentJourney extends Model
     public function admin() {
     	return $this->belongsTo('App\Http\Models\Admin\Admin', 'admin_id', 'id');
     }
+
+    public function done_payment() {
+        return $this->belongsTo('App\Http\Models\DonePayment', 'payment_id', 'id');
+    }
+
+
+
 }
