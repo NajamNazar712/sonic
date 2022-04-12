@@ -134,7 +134,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <textarea name="remarks" id="remarks" rows="5" class="form-control" data-rule-required="true" data-msg-required="Remarks are required"></textarea>
+                            <textarea name="remarks" id="remarks" rows="5" class="form-control" data-rule-required="true" data-msg-required="Remarks are required" placeholder="Remarks"></textarea>
                         </div>
                         <div>
                             <h2>Images Upload</h2>
@@ -387,7 +387,7 @@
                     }
                 },
                 rowId: 'dispute_id',
-                order: [[8, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -406,7 +406,7 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                 },
                 initComplete: function() {
