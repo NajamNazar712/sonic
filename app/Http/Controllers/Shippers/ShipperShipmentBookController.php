@@ -932,10 +932,20 @@ class ShipperShipmentBookController extends Controller
 
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
-                        $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
                         $now = Carbon::now()->format('H:i:s');
-                        $cutofftime = $settingsfortime->setting_value.":00:00";
-                        if($now>$cutofftime)
+                        $pickup_city = City::where('id', $pickup_city_id)->whereNotNull('pickup_cut_off_time');
+                        if($pickup_city->exists()){
+                            $pickup_city = $pickup_city->first();
+                            $cutofftime = $pickup_city->pickup_cut_off_time . ":00:00";
+                        }
+                        else{
+                            $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+
+                            $cutofftime = $settingsfortime->setting_value . ":00:00";
+                        }
+
+                        if($now > $cutofftime)
                         {
                             NotificationsController::send(152, $shipment_id);
                             NotificationsController::send(153, $shipment_id);
