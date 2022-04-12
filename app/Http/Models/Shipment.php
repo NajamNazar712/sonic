@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
 {
-
+    protected $fillable = ['booking_type_id', 'shipper_status_id', 'consignee_status_id'];
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
@@ -32,6 +32,9 @@ class Shipment extends Model
 	public function consignee_city() {
 		return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
 	}
+    public function destination_city() {
+        return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
+    }
 
 	public function user() {
 		return $this->belongsTo('App\Http\Models\Shipper\User');
