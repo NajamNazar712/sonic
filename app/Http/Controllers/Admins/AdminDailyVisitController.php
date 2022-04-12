@@ -21,14 +21,15 @@ class AdminDailyVisitController extends Controller
     }
     public function daily_visit_index(){
         $lead_statuses = DailyVisitLeadStatus::get(['id', 'name']);
-        $users = User::where('status', 3)->get(['id', 'name']);
-        return view('admin.daily_visit.index')->with(['lead_statuses' => $lead_statuses, 'users' => $users]);
+        $shippers = User::where('status', 3)->get(['id', 'name','poc','address','email','phone']);
+        return view('admin.daily_visit.index')->with(['lead_statuses' => $lead_statuses,'shippers'=>$shippers]);
     }
 
     public function daily_visit_store(Request $request){
-        if($request->company_name != null && $request->customer_name != null && $request->customer_address != null && $request->phone_no != null && $request->email_address != null && $request->lead_status != null && $request->feedback != null && $request->latitude != null && $request->longitude != null){
+        if($request->company_name != null && $request->customer_name != null && $request->customer_address != null && $request->phone_no != null && $request->email_address != null && $request->lead_status != null && $request->feedback != null && $request->latitude != null && $request->longitude != null && $request->shipper != null){
 
             $daily_visit = new DailyVisit();
+            $daily_visit->shipper_id = $request->shipper;
             $daily_visit->company_name = $request->company_name;
             $daily_visit->customer_name = $request->customer_name;
             $daily_visit->customer_address = $request->customer_address;
