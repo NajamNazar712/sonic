@@ -205,11 +205,11 @@ class LeadManagementController extends Controller
             }
             $leads->whereIn('leads.status_id', $search_statuses);
         }
-        /*if ($request->get('search_date_from') && $request->get('search_date_to')) {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $leads->whereBetween('leads.requested_date', [$from, $to]);
-        }*/
+        }
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword != '') {
