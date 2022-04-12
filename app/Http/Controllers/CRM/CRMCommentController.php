@@ -44,7 +44,7 @@ class CRMCommentController extends Controller
                     NotificationsController::send(176, 2, $comment->id);
                 }
             }
-            if($comment_type == 2 && $sms == 1){
+            if($comment_type == 0 && $sms == 1){
                 //Send SMS to Shipper
                 NotificationsController::send(176, 1, $comment->id);
             }
