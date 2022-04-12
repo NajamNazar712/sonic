@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\City;
+use App\Http\Models\Reference;
 use App\Http\Models\ServiceList;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -86,6 +87,13 @@ class WebsiteLead extends Command
                     continue;
                 }
 
+                $reference = Reference::where('name', $lead->data->reference_name[0])->first();
+                if($reference){
+                    $reference_id = $reference->id;
+                }
+                else{
+                    continue;
+                }
 
                 $new_lead = new Lead();
                 $new_lead->contact_person = $lead->data->full_name;
@@ -96,6 +104,7 @@ class WebsiteLead extends Command
                 $new_lead->email_address = $lead->data->email;
                 $new_lead->requested_date = Carbon::now();
                 $new_lead->service_id = $service_id;
+                $new_lead->reference_id = $reference_id;
 //                $new_lead->company = $lead->company;
                 $new_lead->save();
 
@@ -112,13 +121,9 @@ class WebsiteLead extends Command
             }
         }
 
-        if(count($new_leads) > 0){
-            NotificationsController::send(203, $new_leads, Carbon::today());
-        }
-
         if(count($leads_added) > 0){
             $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-            $response = $client->delete('leads', [
+            $client->delete('leads', [
                 'form_params' => [
                     "token" => 'TraxOnlinePvtLtdAYWD',
                     "ids" => $leads_added
@@ -126,6 +131,9 @@ class WebsiteLead extends Command
             ]);
         }
 
+        if(count($new_leads) > 0){
+            NotificationsController::send(203, $new_leads, Carbon::today());
+        }
 //        echo $response->message;
     }
 }
