@@ -2507,29 +2507,29 @@ class AdminHumanResourseController extends Controller
                     $designation_hub->save();
                 }
             }
-            $admins = Admin::where('designation_id',$designation->id)->get();
-            foreach ($admins as $admin)
-            {
-                $admin->role_id = $request->role_id;
-                $admin->save();
-
-                AdminHub::where('admin_id',$admin->id)->delete();
-                if($request->has('hub_id') && count($request->hub_id) > 0)
-                {
-                    foreach ($request->hub_id as $hub) {
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $hub;
-                        $admin_hub->save();
-                    }
-                }
-                else {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin->id;
-                    $admin_hub->hub_id = $admin->default_hub_id;
-                    $admin_hub->save();
-                }
-            }
+//            $admins = Admin::where('designation_id',$designation->id)->get();
+//            foreach ($admins as $admin)
+//            {
+//                $admin->role_id = $request->role_id;
+//                $admin->save();
+//
+//                AdminHub::where('admin_id',$admin->id)->delete();
+//                if($request->has('hub_id') && count($request->hub_id) > 0)
+//                {
+//                    foreach ($request->hub_id as $hub) {
+//                        $admin_hub = new AdminHub();
+//                        $admin_hub->admin_id = $admin->id;
+//                        $admin_hub->hub_id = $hub;
+//                        $admin_hub->save();
+//                    }
+//                }
+//                else {
+//                    $admin_hub = new AdminHub();
+//                    $admin_hub->admin_id = $admin->id;
+//                    $admin_hub->hub_id = $admin->default_hub_id;
+//                    $admin_hub->save();
+//                }
+//            }
         }
 
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
