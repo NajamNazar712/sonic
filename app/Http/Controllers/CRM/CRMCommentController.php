@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 
 class CRMCommentController extends Controller
 {
-    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments,$shipper_email){
+    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments, $shipper_email, $sms){
         $comment = new CrmComments();
         $comment->crm_request_id = $crm_request_id;
         $comment->comment_by_id = $comment_by_id;
@@ -31,6 +31,23 @@ class CRMCommentController extends Controller
                 }
             }
 
+        }
+        if($comment_by == 0){
+            if($comment_type == 3){
+                if($sms == 1){
+                    //Send SMS to Shipper and Consignee
+                    NotificationsController::send(176, 1, $comment->id);
+                    NotificationsController::send(176, 2, $comment->id);
+                }
+                else{
+                    //Send SMS to Consignee
+                    NotificationsController::send(176, 2, $comment->id);
+                }
+            }
+            if($comment_type == 2 && $sms == 1){
+                //Send SMS to Shipper
+                NotificationsController::send(176, 1, $comment->id);
+            }
         }
     }
 }

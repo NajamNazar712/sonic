@@ -9187,6 +9187,64 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
 
                 }
+                else if ($id == 176) {
+                    $flag = true;
+                    $crm_comment_id = $reference_2_id;
+                    $crm_comment = CrmComments::find($crm_comment_id);
+                    if($crm_comment){
+                        $crm_request = CrmRequest::find($crm_comment->crm_request_id);
+                        if($crm_request){
+                            $type = $reference_1_id;
+                            if($type == 1){
+                                    $shipper =  User::find($crm_request->shipper_id);
+                                    if($shipper){
+                                        $name = $shipper->name;
+                                        $phone_number = $shipper->phone;
+                                    }
+                                    else{
+                                        $flag = false;
+                                    }
+                            }else if ($type == 2){
+                                if($crm_request->shipment_id != null){
+                                    $shipment = Shipment::find($crm_request->shipment_id);
+                                    if($shipment){
+                                        $name = $shipment->consignee_name;
+                                        $phone_number = $shipment->consignee_phone_number_1;
+                                    }
+                                    else{
+                                        $flag = false;
+                                    }
+                                }
+                                else{
+                                    $flag = false;
+                                }
+                            }
+                            else{
+                                $flag = false;
+                            }
+                        }
+                        else{
+                            $flag = false;
+                        }
+                    }
+                    else{
+                        $flag = false;
+                    }
+                    if($flag){
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $name, $body);
+                        }
+                        if (strpos($body, '[crm_request_id]') !== FALSE) {
+                            $body = str_replace('[crm_request_id]', str_pad($crm_request->id, 6, '0', STR_PAD_LEFT), $body);
+                        }
+                        if (strpos($body, '[comment]') !== FALSE) {
+                            $body = str_replace('[comment]', $crm_comment->comment, $body);
+                        }
+
+                        $to = $phone_number;
+                        self::sms($body, $to);
+                    }
+                }
             }
         }
     }
