@@ -728,6 +728,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['erf_id','admin'];
         }
+        else if ($id == 175)
+        {
+            $details['fields'] = ['link'];
+        }
 		return $details;
     }
 

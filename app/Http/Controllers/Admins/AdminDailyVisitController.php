@@ -6,10 +6,14 @@ use App\DailyVisit;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\DailyVisitLeadStatus;
 use App\Http\Models\Shipper\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdminDailyVisitController extends Controller
 {
@@ -81,4 +85,64 @@ class AdminDailyVisitController extends Controller
 
         return view('admin.daily_visit.view_daily_visit_photo')->with(['url' => $url]);
     }
+
+    public static function daily_visit_sales_report($from,$to,$admin_id,$admin_name)
+    {
+        $visits = DB::connection('reports')->table('daily_visits')
+            ->leftjoin('crm_request_ratings as crr','crr.id','daily_visits.rating_id')
+            ->leftjoin('daily_visit_lead_statuses as dvls','dvls.id','daily_visits.lead_status_id')
+            ->select(['daily_visits.created_at','daily_visits.company_name','daily_visits.customer_name','daily_visits.customer_address','daily_visits.phone_no','daily_visits.email','daily_visits.feedback','daily_visits.comment','crr.name as rating','dvls.name as lead_status'])
+            ->where('daily_visits.admin_id',$admin_id)
+            ->whereBetween('daily_visits.created_at', [$from, $to])
+            ->get();
+
+        if($visits->count() > 0) {
+            $details[] = ['S. No.', 'Visit Date Time', 'Company Name', 'Customer Name', 'Customer Address', 'Phone Number', 'Email Address', 'Lead Status', 'Meeting Feedback', 'Shipper Rating', 'Shipper Feedback'];
+
+            $serial_number = 1;
+            foreach ($visits as $visit) {
+                $row = array();
+                $row[] = $serial_number;
+                $row[] = $visit->created_at;
+                $row[] = $visit->company_name;
+                $row[] = $visit->customer_name;
+                $row[] = $visit->customer_address;
+                $row[] = $visit->phone_no;
+                $row[] = $visit->email;
+                $row[] = $visit->lead_status;
+                $row[] = $visit->feedback;
+                $row[] = $visit->rating;
+                $row[] = $visit->comment;
+
+                $details[] = $row;
+                $serial_number++;
+            }
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet()->fromArray($details);
+
+            $sheet->setTitle('Weekly Sales Visit Report');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="weekly_sales_visit_report.xlsx"');
+            header('Cache-Control: max-age=0');
+
+            $from_file_name = Carbon::parse($from)->format('Y_m_d');
+            $to_file_name = Carbon::parse($to)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/weekly_sales_visit_report_" . $admin_name . '_' . $from_file_name . '_' . $to_file_name . '_' . $time_string . ".xlsx";
+            $file_name = public_path() . '/' . $file_name_without_path;
+
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
+        }
+        else{
+            return null;
+        }
+    }
+
 }
