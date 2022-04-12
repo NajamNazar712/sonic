@@ -17,7 +17,6 @@ use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use Auth;
-use Illuminate\Support\Facades\DB;
 
 class RetailCompletedDeliveries extends Controller
 {
@@ -40,36 +39,17 @@ class RetailCompletedDeliveries extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),84);
         }
 
-        $deliveries = RetailCashDeposit::leftjoin('retail_users as ru', 'ru.id', '=', 'retail_cash_deposits.retail_user_id')
-                        ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
-                        ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
-                        ->leftjoin('retail_cash_deposit_shipments as rcds', function ($join) {
-                            $join->on('rcds.cash_deposit_id', '=', 'retail_cash_deposits.id')
-                                ->where('rcds.id', '=',
-                                    DB::raw('(select max(id) from retail_cash_deposit_shipments where retail_cash_deposit_shipments.cash_deposit_id = retail_cash_deposits.id )'));
-                        })
-                        ->leftjoin('retail_pickup_note_shipments as rpns','rpns.shipment_id','=','rcds.shipment_id')
-                        ->leftjoin('retail_pickup_notes as rpn','rpn.id','=','rpns.retail_pickup_note_id')
-                        ->join('cities AS oc', 'rpn.hub_id', '=', 'oc.id')
-                        ->leftjoin('riders as r', 'rpn.rider_id', '=', 'r.id')
-                        ->join('admins as a', 'a.id', '=', 'rpn.assigned_by')
-                        ->join('admins as cc', 'cc.id', '=', 'rpn.cash_collected_by')
-                        ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'rpn.pickup_address_id')
-                        ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'rpn.assigned_at as assigned_at', 'rpn.shipments as shipment_count', 'rpn.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','rpn.cash_collected_at', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
-                        ->where('rpn.status', 4)
-                        ->where('rpn.pncc_status', '=', 0);
-
-            // $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
-            //     ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
-            //     ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
-            //     ->join('admins as cc', 'cc.id', '=', 'retail_pickup_notes.cash_collected_by')
-            //     ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
-            //     ->leftJoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
-            //     ->leftJoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
-            //     ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
-            //     ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
-            //     ->where('retail_pickup_notes.status', 4)
-            //     ->where('retail_pickup_notes.pncc_status', '=', 0);
+        $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
+            ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
+            ->join('admins as cc', 'cc.id', '=', 'retail_pickup_notes.cash_collected_by')
+            ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+            ->leftJoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
+            ->leftJoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
+            ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
+            ->where('retail_pickup_notes.status', 4)
+            ->where('retail_pickup_notes.pncc_status', '=', 0);
 
 
         $datatable = Datatables::of($deliveries)

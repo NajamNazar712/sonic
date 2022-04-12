@@ -65,7 +65,7 @@ class RetailCashCollectionController extends Controller
                         ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'rpn.pickup_address_id')
                         ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'rpn.assigned_at', 'retail_cash_deposits.total_cn as shipments_count', 'rpn.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'rpn.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
                         ->whereIn('rpn.status', [1,2,3])
-                        ->where('rpn.pncc_status', '=', 0);
+                        ->where('rpn.pncc_status', '=', 0)->where('retail_cash_deposits.status', '=', 0);
 
         $datatable = Datatables::of($deliveries)
             ->addColumn('count', function($deliveries) {
@@ -185,29 +185,66 @@ class RetailCashCollectionController extends Controller
         $note_ids =  $request->pickup_note_ids;
         $notes = array();
         foreach ($note_ids as $note_id) {
-            $note_details = RetailPickupNote::where('id', $note_id)->where('status', 3)->first();
-            $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id',$note_id)->get()->first();
-            if($retail_shipment){
-                $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
-                if($retail_cash_depost){
-                    RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
-                        'status' => 1,
-                    ]);
+            
+            $retail_cash_depost = RetailCashDeposit::where('id',$note_id)->get()->first();
+            if($retail_cash_depost){
+                
+                $total_cn = $retail_cash_depost->total_cn;
+            }
+        
+            $retail_shipment = RetailCashDepositShipment::where('cash_deposit_id',$note_id)->get()->first();
+            
+            $retail_pickup_note_shipment = RetailPickupNoteShipment::where('shipment_id',$retail_shipment->shipment_id);
+
+            if($retail_pickup_note_shipment->exists()){
+                $retail_pickup_note_shipment = $retail_pickup_note_shipment->get()->first();
+                $note_details = RetailPickupNote::where('id', $retail_pickup_note_shipment->retail_pickup_note_id)->where('status', 3)->first();
+                if ($note_details) {
+                    
+                    $note_details->partail_collected += $total_cn;
+                    $note_details->save();
+                    if($retail_cash_depost->finalize == 0){
+                        $retail_cash_depost->finalize = 1;
+                    }
+
+                    $retail_cash_depost->status = 1;
+
+                    $retail_cash_depost->save();
+                    
+                    if($note_details->partail_collected == $note_details->shipments){
+
+                        $note_details->status = 4;
+                        $note_details->cash_collected_by = Auth::id();
+                        $note_details->cash_collected_at = Carbon::now();
+                        $note_details->save();
+                    }
+                    
+                } else {
+                    $notes[] = $note_id;
                 }
+
             }
-            if ($note_details) {
-                $note_details->status = 4;
-                $note_details->cash_collected_by = Auth::id();
-                $note_details->cash_collected_at = Carbon::now();
-                $note_details->save();
-            } else {
-                $notes[] = $note_id;
-            }
+
+                
+            // $note_details = RetailPickupNote::where('id', $note_id)->where('status', 3)->first();
+            // $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id',$note_id)->get()->first();
+            // if($retail_shipment){
+            //     $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+            //     if($retail_cash_depost){
+            //         RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+            //             'status' => 1,
+            //         ]);
+            //     }
+            // }
+
+
+
+            
         }
         if (empty($notes)) {
             return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
         } else {
-            return response()->json(['status' => 0, 'error' => 'These Pickup notes could not be updated!', 'notes' => $notes]);
+            return response()->json(['status' => 0, 'error' => 'These RNCC no. could not be updated!', 'notes' => $notes]);
         }
 
     }
