@@ -10219,6 +10219,23 @@ class AdminFinanceController extends Controller
 
                 return $dropdown;
             });
+
+        if ($request->get('invoice_from') && $request->get('invoice_to')) {
+            $from = date('Y-m-d 00:00:01', strtotime($request->get('invoice_from')));
+            $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            $datatables->whereBetween('invoices.invoicing_date', [$from, $to]);
+
+        }
+
+        if ($request->get('generation_from') && $request->get('generation_to')) {
+            $from = date('Y-m-d 00:00:01', strtotime($request->get('generation_from')));
+            $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            $datatables->whereBetween('invoices.created_at', [$from, $to]);
+
+        }
+
+
+
         return $datatables->make(true);
     }
 
