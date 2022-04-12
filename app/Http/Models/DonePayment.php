@@ -38,10 +38,10 @@ class DonePayment extends Model
     }
 
     public function shipment_payment_journey_last_status_two() {
-        return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney', 'payment_id', 'id')
-            ->where('status_id',2)
-            ->orderBy('id', 'asc')
-            ->limit(1);
+        return $this->hasOne('App\Http\Models\ShipmentsPaymentJourney', 'payment_id', 'id')
+            ->where('status_id',1)
+            ->latest();
+//            ->limit(1);
     }
 
 

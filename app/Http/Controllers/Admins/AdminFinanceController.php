@@ -4985,6 +4985,8 @@ class AdminFinanceController extends Controller
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
+
+
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
             ->addColumn('id_padded', function ($done_payment) {
@@ -5098,13 +5100,18 @@ class AdminFinanceController extends Controller
 //                        ->orderBy('status_id', 'DESC')
 //                        ->select('shipments_payment_journey.id', 'shipments_payment_journey.status_id', 'shipments_payment_journey.created_at as date')->get();
 
+//                    dd($done_payment->shipment_payment_journey_last_status_two[0]->created_at);
+                    if(isset($done_payment->shipment_payment_journey_last_status_two)) {
 
-                    $start_date = (isset($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) ? date('d-m-Y H:i:s', strtotime($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) : $done_payment->updated_at;
-                    $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
-                    $start_date = Carbon::parse($start_date);
-                    $end_date = Carbon::parse($end_date);
-                    $interval = $end_date->diffInHours($start_date);
+//                    $start_date = (isset($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) ? date('d-m-Y H:i:s', strtotime($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) : $done_payment->updated_at;
 
+                        $start_date = $done_payment->shipment_payment_journey_last_status_two->created_at;
+                        $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
+                        $start_date = Carbon::parse($start_date);
+                        $end_date = Carbon::parse($end_date);
+                        $interval = $end_date->diffInHours($start_date);
+
+                    }
                     return $interval . ' Hrs';
 
                 } else {
@@ -5224,7 +5231,10 @@ class AdminFinanceController extends Controller
             $datatables->whereBetween('done_payments.status_updated_at', [$from, $to]);
         }
 
+
+//         dd($datatables->make(true));
         return $datatables->make(true);
+
 
     }
 
