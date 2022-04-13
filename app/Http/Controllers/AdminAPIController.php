@@ -6772,8 +6772,6 @@ class AdminAPIController extends Controller
         $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
-        $employee_nature = EmployeeNature::select('id', 'name')->get();
-        $replacement_employees = Employee::select('id', 'trax_id', 'name')->whereNotNull('trax_id')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -6781,14 +6779,6 @@ class AdminAPIController extends Controller
             $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
             $shift_data[] = $datum;
         }
-
-        $replacement_employee_data = array();
-        foreach($replacement_employees as $replacement_employee){
-            $datum = array();
-            $datum['id'] = $replacement_employee->id;
-            $datum['name'] = $replacement_employee->trax_id.' | '.$replacement_employee->name;
-            $replacement_employee_data[] = $datum;
-        }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
     }
 }

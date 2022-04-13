@@ -4512,7 +4512,7 @@ class RiderAPIController extends Controller
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $employee_nature = EmployeeNature::select('id', 'name')->get();
-        $replacement_employees = Employee::select('id', 'trax_id', 'name')->whereNotNull('trax_id')->get();
+        $replacement_employees = Employee::select('id', 'trax_id', 'name')->where('employee_type_id', 2)->whereNotNull('trax_id')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -10313,12 +10313,19 @@ class RiderAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'fuel' => ['nullable', 'integer'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
                 'branch_name' => ['nullable'],
                 'iban' => ['nullable'],
+
+                //replacementInfo
+                'replacement_employee_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+                'replacement_last_working_day' => ['nullable'],
+
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -10339,19 +10346,6 @@ class RiderAPIController extends Controller
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
-                //Check RiderRequest Already Exist
-//                if ($rider_request->exists()) {
-//                    $rider_request = $rider_request->first();
-//                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "Phone Number & CNIC Already Exists";
-//
-//                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
-//                        $message = "Phone Number Already Exist";
-//
-//                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "CNIC Already Exist";
-//                    }
-//                } else
                 if ($employee->exists()) {
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
@@ -10408,6 +10402,9 @@ class RiderAPIController extends Controller
                             $employee_request->rider_sub_category = $request->rider_sub_category;
                             $employee_request->rider_type_id = $request->rider_type_id;
                             $employee_request->department_id = 6;
+                            $employee_request->fuel = $request->fuel;
+                            $employee_request->replacement_employee_id = $request->replacement_employee_id;
+                            $employee_request->replacement_last_working_day = $request->replacement_last_working_day;
                             $employee_request->save();
 
                             if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){

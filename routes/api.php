@@ -264,7 +264,7 @@ Route::name('api.')->group(function () {
         Route::get('logout', 'AdminAPIController@logout')->name('logout');
         Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
         Route::prefix('register_request')->name('register_request.')->group(function () {
-            Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::get('signup_data', 'AdminAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::prefix('store_v3')->name('store_v3.')->group(function () {
                 Route::post('required_details', 'AdminAPIController@signup_required_details')->name('required_details');
