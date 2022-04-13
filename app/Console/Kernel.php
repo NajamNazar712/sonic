@@ -319,7 +319,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
         $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
-        $schedule->command('website:leads')->hourly()->runInBackground();
+//        $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
         $schedule->command('website:pamleads')->hourly()->runInBackground();
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
