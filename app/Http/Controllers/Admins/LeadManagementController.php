@@ -747,10 +747,12 @@ class LeadManagementController extends Controller
         if($lead_id){
             $details = array();
             $details['city'] = '';
+            $details['city_id'] = NULL;
             $details['territory'] = '';
             $details['area'] = '';
             if($lead->city_id){
                 $details['city'] = $lead->city->name;
+                $details['city_id'] = $lead->city_id;
             }
 
             if($lead->territory_id){
