@@ -376,7 +376,7 @@ class ReturnController extends Controller
                         }
 
                         if (session('role_id') == 1 || in_array(212, session('permissions'))) {
-                            if ($result->reason_id == 12 || $result->current_status_id == 52) {
+                            if ($result->reason_id == 12 && ($result->current_status_id == 52 || $result->current_status_id == 12)) {
                                 $dropdown .= $edit_estimate_charges;
                             }
                         }

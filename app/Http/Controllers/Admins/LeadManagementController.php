@@ -747,10 +747,12 @@ class LeadManagementController extends Controller
         if($lead_id){
             $details = array();
             $details['city'] = '';
+            $details['city_id'] = NULL;
             $details['territory'] = '';
             $details['area'] = '';
             if($lead->city_id){
                 $details['city'] = $lead->city->name;
+                $details['city_id'] = $lead->city_id;
             }
 
             if($lead->territory_id){
@@ -784,8 +786,10 @@ class LeadManagementController extends Controller
                 $lead->email_address = $request->email_address;
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
+                $lead->status_id = 15;
                 $lead->save();
 
+                LeadTaggingController::auto_tagging($lead->id,386);
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');
