@@ -40,6 +40,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -56,6 +57,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -64,7 +66,9 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
+use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
@@ -73,6 +77,7 @@ use App\Http\Models\Product;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
@@ -92,6 +97,7 @@ use App\Http\Models\WMS\WmsPicklistItem;
 use App\Http\Models\WMS\WmsProductBarcode;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -6744,5 +6750,45 @@ class AdminAPIController extends Controller
             }
             return response()->json(false);
         }
+    }
+
+    public function signup_data(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $designation = EmployeeDesignation::where('status', 1)->select('id', 'name', 'department_id')->get();
+        $domicile = EmployeeDomicile::select('id', 'name')->get();
+        $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
+        $nationality = EmployeeNationality::select('id', 'name')->get();
+        $religion = EmployeeReligion::select('id', 'name')->get();
+        $gender = EmployeeGender::select('id', 'name')->get();
+        $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $department = AdminDepartment::select('id', 'name')->get();
+        $hub = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $relationships = EmployeeRelationship::select('id', 'name')->get();
+        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
+        $banks = BanksList::select('id', 'name')->where('status', 1)->get();
+        $rider_type = RiderType::select('id', 'name')->get();
+        $staff_categories = StaffCategory::select('id', 'name')->get();
+        $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
+        $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
+        $employee_nature = EmployeeNature::select('id', 'name')->get();
+        $replacement_employees = Employee::select('id', 'trax_id', 'name')->whereNotNull('trax_id')->get();
+        $shift_data = array();
+        foreach($shifts as $shift){
+            $datum = array();
+            $datum['id'] = $shift->id;
+            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
+            $shift_data[] = $datum;
+        }
+
+        $replacement_employee_data = array();
+        foreach($replacement_employees as $replacement_employee){
+            $datum = array();
+            $datum['id'] = $replacement_employee->id;
+            $datum['name'] = $replacement_employee->trax_id.' | '.$replacement_employee->name;
+            $replacement_employee_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
     }
 }
