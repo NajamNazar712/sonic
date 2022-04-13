@@ -612,10 +612,17 @@ class AdminTrackingController extends Controller
                     $details['destination'] = $shipment->consignee_city->name;
 
                     //                    yahan p join lgana h shipment and delivery note shipment ka our delivery note id uthaleni h
-                    $delivery_note_id = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+                    $delivery_note_shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+                        ->select('delivery_note_shipments.delivery_note_id as delivery_note_id')
                         ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
-                        ->orderBy('delivery_note_shipments.delivery_note_id', 'desc')->first();
-                    $dn = $delivery_note_id->delivery_note_id;
+                        ->orderBy('delivery_note_shipments.shipment_id', 'desc');
+                    if($delivery_note_shipment->exists()){
+                        $delivery_note_shipment = $delivery_note_shipment->first();
+                        $dn = str_pad($delivery_note_shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
+                    }
+                    else{
+                        $dn = '-';
+                    }
                     $details['delivery_note_id'] = $dn;
                     //                    yahan p join lgana h shipment and delivery note shipment ka our delivery note id uthaleni h end
 
@@ -849,7 +856,7 @@ class AdminTrackingController extends Controller
 
                             $high_alert = HighAlertShipper::where('user_id', $shipper->id)->where('status', 1);
                             if($high_alert->exists()){
-                                $high_alert = $high_alert->first();
+                                $high_alert = $high_alert->latest()->first();
 
                                 $details['high_alert'] = "High alert marked on ". Carbon::parse($high_alert->created_at)->toDateTimeString() . " by " . $high_alert->alerted_by->name . " because of " . $high_alert->description;
 
@@ -983,7 +990,7 @@ class AdminTrackingController extends Controller
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
-                            if (in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37])) {
+                            if (in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
                                 $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
                                 if ($rider_delivery->exists()) {
                                     $rider_delivery = $rider_delivery->get()->first();

@@ -1233,12 +1233,12 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_bank_update(Employee $employee, Request $request)
     {
-        if ($employee->bank_info()->exists()) {
-            $bank_info = $employee->bank_info->first();
+        $bank_info = EmployeeBankInformation::where('employee_id', $employee->id);
+        if ($bank_info->exists()) {
+            $bank_info = $bank_info->first();
         } else {
             $bank_info = new EmployeeBankInformation();
         }
-
         $bank_info->employee_id = $employee->id;
         $bank_info->account_title = $request->account_title;
         $bank_info->branch_code = $request->branch_code;
@@ -2507,29 +2507,29 @@ class AdminHumanResourseController extends Controller
                     $designation_hub->save();
                 }
             }
-            $admins = Admin::where('designation_id',$designation->id)->get();
-            foreach ($admins as $admin)
-            {
-                $admin->role_id = $request->role_id;
-                $admin->save();
-
-                AdminHub::where('admin_id',$admin->id)->delete();
-                if($request->has('hub_id') && count($request->hub_id) > 0)
-                {
-                    foreach ($request->hub_id as $hub) {
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $hub;
-                        $admin_hub->save();
-                    }
-                }
-                else {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin->id;
-                    $admin_hub->hub_id = $admin->default_hub_id;
-                    $admin_hub->save();
-                }
-            }
+//            $admins = Admin::where('designation_id',$designation->id)->get();
+//            foreach ($admins as $admin)
+//            {
+//                $admin->role_id = $request->role_id;
+//                $admin->save();
+//
+//                AdminHub::where('admin_id',$admin->id)->delete();
+//                if($request->has('hub_id') && count($request->hub_id) > 0)
+//                {
+//                    foreach ($request->hub_id as $hub) {
+//                        $admin_hub = new AdminHub();
+//                        $admin_hub->admin_id = $admin->id;
+//                        $admin_hub->hub_id = $hub;
+//                        $admin_hub->save();
+//                    }
+//                }
+//                else {
+//                    $admin_hub = new AdminHub();
+//                    $admin_hub->admin_id = $admin->id;
+//                    $admin_hub->hub_id = $admin->default_hub_id;
+//                    $admin_hub->save();
+//                }
+//            }
         }
 
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
@@ -3797,12 +3797,15 @@ class AdminHumanResourseController extends Controller
         $rider = $rider->first();
 
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+        $dn_check = DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
             $q->where('status', 0)
                 ->orWhere('dncc_status', 0);
-        })->exists())
+        });
+        if($dn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Delivery Note");
+            $dn_check = $dn_check->pluck('id')->toArray();
+            $dn = implode(", ", $dn_check);
+            return back()->with("error", "Rider Has An Unfinished Following Delivery Note : " .$dn);
         }
 
 
@@ -3810,23 +3813,28 @@ class AdminHumanResourseController extends Controller
         if($DN) {
             $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn', 'sdn.id', 'delivery_note_station_deposit_notes.station_deposit_note_id')
                 ->select(['sdn.status'])
-                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id)
-                ->first();
+                ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id);
 
-            if ($sdn_note->status == 0) {
-                return back()->with("error", "Rider Has An Unresolved Station Deposit Note");
+            if ($sdn_note->doesntExist()) {
+                return back()->with("error", "Rider Station Deposit Note Has Not Been Created Yet");
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
+        $pn_check = V2PickupNote::where('rider_id',$rider->id)->where('status', 0);
+        if($pn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Pickup Note");
+            $pn_check = $pn_check->pluck('id')->toArray();
+            $pn = implode(", ", $pn_check);
+            return back()->with("error","Rider Has An Unfinished Following Pickup Note : ".$pn);
         }
 
 
-        if(ReturnNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        $rn_check = ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2]);
+        if($rn_check->exists())
         {
-            return back()->with("error","Rider Has An Unfinished Return Note");
+            $rn_check = $rn_check->pluck('id')->toArray();
+            $rn = implode(", ", $rn_check);
+            return back()->with("error","Rider Has An Unfinished Following Return Note : ".$rn);
         }
 
         $admin = new Admin();

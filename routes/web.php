@@ -601,7 +601,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
         Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
         Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
-        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile')->name('submit');
     });
 
 
@@ -1373,6 +1373,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
+        Route::post('rcp_sms','Admins\ReturnController@manual_rcp_sms')->name('rcp_sms');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
@@ -2405,7 +2406,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('destination_delivery_received')->name('destination_delivery_received.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
-            Route::get('get/dn_no', 'Admins\AdminReportsController@get_dn_no')->name('get.dn_no');
         });
 
         Route::prefix('account_reconciliation')->name('account_reconciliation.')->group(function (){
@@ -3221,6 +3221,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+//            Route::get('cn_print_right', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
         });
 
         Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
@@ -3228,7 +3229,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
         });
 
-    });
+        Route::prefix('auto_tag_territories')->name('auto_tag_territories.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_tag_territories_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@auto_tag_territories_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@auto_tag_territories_store')->name('submit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@auto_tag_territories_enable_disable')->name('enable_disable');
+            Route::post('data', 'Admins\GlobalSettingsController@auto_tag_territories_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@auto_tag_territories_update')->name('update');
+        
+        });
+		Route::prefix('cn_print_right')->name('cn_print_right.')->group(function () {
+			Route::get('', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
+			Route::post('store', 'Admins\GlobalSettingsController@cn_print_right_store')->name('store');
+		});
+	});
 
 
     Route::prefix('shipment')->name('shipment.')->group(function () {

@@ -1201,7 +1201,11 @@ class Permission
             
             'reports.crm_special_approval.index' => 688,
             'reports.crm_special_approval.list' => 688,
+            'settings.cn_print_right.cn_print_right' =>699,
 
+            
+            'admin.settings.auto_tag_territories.index' => 697,
+            'admin.settings.auto_tag_territories.list' => 697,
             
         ],
 

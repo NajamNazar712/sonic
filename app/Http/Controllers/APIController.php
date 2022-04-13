@@ -43,6 +43,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -61,6 +62,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
@@ -577,6 +579,7 @@ class APIController extends Controller
                 'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
                 'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+                'replacement_item_image' => ['nullable', 'mimes:png,jpeg,jpg'],
 
                 'items' => ['required_if:service_type_id,3', 'array'],
                 'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -1099,6 +1102,23 @@ class APIController extends Controller
                 $replacement_item_type = 1;
 
                 ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
+
+                if($request->has('replacement_item_image')){
+                    $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
+                    if($shipment_parcel_image->exists()){
+                        $shipment_parcel_image = $shipment_parcel_image->first();
+                        Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                    }else{
+                        $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                        $shipment_parcel_image->shipment_id = $shipment_id;
+                    }
+                    $time = Carbon::now()->toDateString();
+                    $picture_path = 'replacement_parcel/' . $shipment_id . '_' . $time . '.png';
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_item_image));
+                    $shipment_parcel_image->picture_path = $picture_path;
+                    $shipment_parcel_image->save();
+                }
+
             } else if ($service_type_id == 3) {
                 $try_and_buy_cod_amount = intval($try_and_buy_charges);
                 foreach ($request->input('items') as $item) {
@@ -1295,39 +1315,39 @@ class APIController extends Controller
 
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
                     $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-                if($shipment_journey->status_reason_id)
-                {
-                    $reasonID = $shipment_journey->status_reason_id;
-                    $reason = ShipmentStatusReason::find($reasonID)->name;
-                }
-                else
-                {
-                    $reason=null;
-                }
+
                 if ($shipment_journey) {
-                    $current_status = $shipment_journey->shipment_status_consignee->name;
+                    $current_status = $shipment_journey->shipment_status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                    if ($shipment_journey->status_reason_id) {
+                        $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                    }
+                    else {
+                        $reason = null;
+                    }
                 } else {
-                    $current_status = $shipment->status_consignee->name;
+                    $current_status = $shipment->status_shipper->name;
                     $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                    $reason = null;
                 }
             }
 
@@ -2845,26 +2865,50 @@ class APIController extends Controller
                 foreach ($shipments as $shipment) {
                     $detail = array();
 
+                    $detail['origin'] = $shipment->pickup_address->city->name;
+                    $detail['destination'] = $shipment->consignee_city->name;
+
                     if ($type == 0) {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_shipper->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     } else {
                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
 
                         if ($shipment_journey) {
                             $current_status = $shipment_journey->shipment_status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                            }
+                            else {
+                                $reason = null;
+                            }
                         } else {
                             $current_status = $shipment->status_consignee->name;
+                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                            $reason = null;
                         }
                     }
 
                     $detail['tracking_number'] = $shipment->tracking_number;
                     $detail['status'] = $current_status;
+                    $detail['reason'] = $reason;
+                    $detail['current_status_datetime'] = $current_status_datetime;
 
                     $details[] = $detail;
                 }
@@ -4490,161 +4534,159 @@ class APIController extends Controller
         }
     }
 
-    public function rcp_sms_from_consignee(Request $request)
-    {
-        $rcp_token = GuestApiToken::where('name','telecard_rcp_sms')->first();
-        $api_token = $request->header('Authorization');
-       
-        if ($api_token) {
-            if($api_token == $rcp_token->token) {
-
+    public function rcp_sms_from_consignee(Request $request) {
+        if ($request->ip() == "202.141.247.130" || $request->ip() == "202.141.247.133") {
+            if ($request->has('message') && !empty($request->message)) {
                 $message = $request->message;
-                if($message != null) {
-                    $data = explode(" ", $message);
-                    if (count($data) == 3) {
-                        $response_yes = array("YES",'YE','Y');
-                        $response_no = array("NO", 'N');
-                        $res = strtoupper($data[1]);
-                        $tracking_number = $data[2];
 
-                        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-                        if ($shipment) {
-                            $rcp = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment->id)->where('status', 0);
-                            if ($rcp->exists()) {
-                                $rcp = $rcp->first();
-                                if (in_array($res, $response_yes)) {
+                $data = explode(" ", urldecode($message));
 
-                                        if(!in_array($shipment->shipper_status_id, [13, 20])){
-                                            /*$remark_inp = "remark.$shipment->id";
-                                            $remarks = ($request->has($remark_inp) && $request->remark[$shipment->id] != null)? $request->remark[$shipment->id] : null;*/
+                if (count($data) == 3) {
+                    $response_yes = array("YES",'YE','Y');
+                    $response_no = array("NO", 'N');
+                    $res = strtoupper($data[1]);
+                    $tracking_number = $data[2];
 
-                                            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
+                    $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-                                            if ($journey) {
-                                                if ($shipment->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
-                                                    $shipment->nsa_osa_status = 1;
+                    if ($shipment) {
+                        $rcp = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment->id)->where('status', 0);
 
-                                                    $shipment->save();
+                        if ($rcp->exists()) {
+                            $rcp = $rcp->first();
 
-                                                    ShipmentChargesController::nsa_osa_charges($shipment->id);
+                            if (in_array($res, $response_yes)) {
+                                if (in_array($shipment->shipper_status_id, [12, 52])) {
+                                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
 
-                                                    NotificationsController::send(33, $shipment->id);
-                                                }
-                                                else if ($shipment->shipper_status_id == 52) {
-                                                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
+                                    if ($journey) {
+                                        if ($shipment->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                                            $shipment->nsa_osa_status = 1;
 
-                                                    if ($journey && ($journey->status_reason_id == 12)) {
-                                                        $shipment->nsa_osa_status = 1;
-
-                                                        $shipment->save();
-
-                                                        ShipmentChargesController::nsa_osa_charges($shipment->id);
-                                                    }
-                                                }
-                                            }
-
-                                            $shipment->shipper_status_id = 13;
-                                            $shipment->consignee_status_id = 13;
                                             $shipment->save();
 
-                                            ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 50);
-                                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
-                                            if($return_assign_shipment){
-                                                $return_assign_shipment->status = 0;
-                                                $return_assign_shipment->save();
+                                            ShipmentChargesController::nsa_osa_charges($shipment->id);
 
-                                                $return_assign_log = new ReturnAssignedShipmentLogs();
-                                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                                $return_assign_log->status = 1;
-                                                $return_assign_log->assigned_by = 50;
-                                                $return_assign_log->save();
-                                            }
-                                            NotificationsController::send(15, 0, $shipment->id);
-                                            NotificationsController::send(16, 0, $shipment->id);
+                                            NotificationsController::send(33, $shipment->id);
                                         }
-                                    $res_from_consignee = $data[0] . " ". $res;
+                                        else if ($shipment->shipper_status_id == 52) {
+                                            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
 
-                                    $rcp->response = $res_from_consignee;
-                                    $rcp->status = 2;
-                                    $rcp->save();
-                                    return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
-                                }
-                                elseif (in_array($res, $response_no)) {
-
-                                    if(!in_array($shipment->shipper_status_id, [13, 15, 20, 54, 55])){
-
-                                        $shipment->shipper_status_id = 20;
-                                        $shipment->consignee_status_id = 20;
-                                        $shipment->save();
-
-                                        NotificationsController::send(15, 0, $shipment->id);
-                                        NotificationsController::send(16, 0, $shipment->id);
-
-                                        if ($shipment->shipment_type == 1) {
-                                            if ($shipment->booking_type_id != 4) {
-                                                ShipmentChargesController::return($shipment->id);
-
-                                                if ($shipment->packaging_material_request != 1) {
-
-                                                    AdminFinanceController::add_payment($shipment->id, 1);
-                                                }
-                                            }
-                                            else {
-                                                ShipmentChargesController::walk_in_return($shipment->id);
-
-                                                $shipment->walk_in_status = 2;
+                                            if ($journey && ($journey->status_reason_id == 12)) {
+                                                $shipment->nsa_osa_status = 1;
 
                                                 $shipment->save();
 
-                                                AdminFinanceController::done_payment($shipment->id, 1);
+                                                ShipmentChargesController::nsa_osa_charges($shipment->id);
                                             }
-                                        }
-                                        ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 50);
-                                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
-                                        if($return_assign_shipment->exists()){
-
-                                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                                            $return_assign_shipment->status = 0;
-                                            $return_assign_shipment->save();
-
-                                            $return_assign_log = new ReturnAssignedShipmentLogs();
-                                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                            $return_assign_log->status = 2;
-                                            $return_assign_log->assigned_by = 50;
-                                            $return_assign_log->save();
                                         }
                                     }
 
-                                    $res_from_consignee = $data[0] . " ". $res;
+                                    $shipment->shipper_status_id = 13;
+                                    $shipment->consignee_status_id = 13;
+                                    $shipment->save();
 
-                                    $rcp->response = $res_from_consignee;
-                                    $rcp->status = 1;
-                                    $rcp->save();
-                                    return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
+                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 1728);
+                                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
+
+                                    if ($return_assign_shipment){
+                                        $return_assign_shipment->status = 0;
+                                        $return_assign_shipment->save();
+
+                                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                        $return_assign_log->status = 1;
+                                        $return_assign_log->assigned_by = 1728;
+                                        $return_assign_log->save();
+                                    }
+
+                                    NotificationsController::send(15, 0, $shipment->id);
+                                    NotificationsController::send(16, 0, $shipment->id);
+
                                 }
-                                else{
-                                    return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                                
+                                $res_from_consignee = $data[0] . " ". $res;
+
+                                $rcp->response = $res_from_consignee;
+                                $rcp->status = 2;
+                                $rcp->save();
+
+                                return ['status' => 1, 'message' => 'Message Received'];
+
+                            }
+                            elseif (in_array($res, $response_no)) {
+                                if (in_array($shipment->shipper_status_id, [12, 52])) {
+                                    $shipment->shipper_status_id = 20;
+                                    $shipment->consignee_status_id = 20;
+                                    $shipment->save();
+
+                                    NotificationsController::send(15, 0, $shipment->id);
+                                    NotificationsController::send(16, 0, $shipment->id);
+
+                                    if ($shipment->shipment_type == 1) {
+                                        if ($shipment->booking_type_id != 4) {
+                                            ShipmentChargesController::return($shipment->id);
+
+                                            if ($shipment->packaging_material_request != 1) {
+                                                AdminFinanceController::add_payment($shipment->id, 1);
+                                            }
+                                        }
+                                        else {
+                                            ShipmentChargesController::walk_in_return($shipment->id);
+
+                                            $shipment->walk_in_status = 2;
+
+                                            $shipment->save();
+
+                                            AdminFinanceController::done_payment($shipment->id, 1);
+                                        }
+                                    }
+                                    ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 1728);
+                                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
+                                    if ($return_assign_shipment->exists()){
+                                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                                        $return_assign_shipment->status = 0;
+                                        $return_assign_shipment->save();
+
+                                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                        $return_assign_log->status = 2;
+                                        $return_assign_log->assigned_by = 1728;
+                                        $return_assign_log->save();
+                                    }
                                 }
+
+                                $res_from_consignee = $data[0] . " " . $res;
+
+                                $rcp->response = $res_from_consignee;
+                                $rcp->status = 1;
+                                $rcp->save();
+
+                                return ['status' => 1, 'message' => 'Message Received'];
+
+                            }
+                            else {
+                                return ['status' => 0, 'message' => 'Invalid message response from consignee'];
                             }
                         }
-                        else{
-                            return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                        else {
+                            return ['status' => 0, 'message' => 'Invalid message response from consignee - attempt'];
                         }
                     }
-                    else{
-                        return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                    else {
+                        return ['status' => 0, 'message' => 'Invalid message response from consignee - tracking number'];
                     }
                 }
-                else{
-                    return ['status' => 0, 'message' => 'message field is required'];
+                else {
+                    return ['status' => 0, 'message' => 'Invalid message response from consignee - format'];
                 }
             }
-            else{
-                return ['status' => 0, 'message' => 'Invalid Api Token'];
+            else {
+                return ['status' => 0, 'message' => 'message field is required'];
             }
         }
-        else{
-            return ['status' => 0, 'message' => 'Api Token is required'];
+        else {
+            return ['status' => 0, 'message' => 'Unauthorized IP'];
         }
     }
 }
