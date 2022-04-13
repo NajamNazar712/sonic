@@ -3137,7 +3137,7 @@ class AdminFinanceController extends Controller
                     }
                     else {
                         if (!$shipment->packaging_material_request) {
-                            if ($amount != 0 || $crs) {
+                            if ($crs) {
                                 $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                                 $pending_payment_shipment->shipment_id = $shipment_id;
                                 $pending_payment_shipment->type = $type;
