@@ -6882,7 +6882,7 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 180);
         }
         $adjustments = DB::connection('reports')->table('adjustment_logs')
-            ->leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'adjustment_logs.done_id')
+            ->leftjoin('done_payment_shipments as dps', 'dps.id', '=', 'adjustment_logs.done_id')
             ->leftjoin('shipments as s', 's.id', '=', 'adjustment_logs.shipment_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
