@@ -51,6 +51,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
@@ -4510,6 +4511,8 @@ class RiderAPIController extends Controller
         $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
+        $employee_nature = EmployeeNature::select('id', 'name')->get();
+        $replacement_riders = Employee::select('id', 'trax_id', 'name')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -4517,7 +4520,15 @@ class RiderAPIController extends Controller
             $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
             $shift_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+
+        $replacement_rider_data = array();
+        foreach($replacement_riders as $replacement_rider){
+            $datum = array();
+            $datum['id'] = $replacement_rider->id;
+            $datum['name'] = $replacement_rider->trax_id.' | '.$replacement_rider->name;
+            $replacement_rider_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_rider_data]);
     }
 
     public function rider_signup_v2(Request $request)
