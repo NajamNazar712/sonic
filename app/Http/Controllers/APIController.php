@@ -4772,7 +4772,7 @@ class APIController extends Controller
     {
 //        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
-                'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                'phone_number' => ['required', 'regex:/^[03][0-9]{4}[-]{1}[0-9]{7}$/'],
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -4834,7 +4834,7 @@ class APIController extends Controller
     {
 //        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
-                'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                'phone_number' => ['required', 'regex:/^[03][0-9]{4}[-]{1}[0-9]{7}$/'],
                 'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4946,7 +4946,7 @@ class APIController extends Controller
     {
 //        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
                 $rules = [
-                    'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                    'phone_number' => ['required', 'regex:/^[03][0-9]{4}[-]{1}[0-9]{7}$/'],
                     'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
                 ];
                 $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -5143,7 +5143,7 @@ class APIController extends Controller
     {
 //        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
-                'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                'phone_number' => ['required', 'regex:/^[03][0-9]{4}[-]{1}[0-9]{7}$/'],
                 'tracking_number' => ['required_without:crm_request_id', 'integer', 'digits_between:10,20'],
                 'crm_request_id' => ['required_without:tracking_number', 'integer', 'digits_between:3,10']
             ];
