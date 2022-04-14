@@ -4880,6 +4880,7 @@ class APIController extends Controller
             if($shipment->exists()){
                 $shipment = $shipment->where('user_id', $shipper->id);
                 if($shipment->exists()){
+                    $shipment = $shipment->first();
                     $current_status['Status'] = 1;
                     $current_status['StatusText'] = 'SUCCESS';
                     $current_status['Date'] = Carbon::now()->toIso8601String();
