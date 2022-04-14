@@ -331,6 +331,17 @@
                                                 <input type="text" name="joining_date" data-rule-required="true" data-msg-required="Joining Date is required" data-value="{{$employee->joining_date != null ? $employee->joining_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date">
                                             </div>
                                         </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Employee Nature<span class="text-danger">*</span></label>
+                                                <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($employee_natures as $employee_nature)
+                                                        <option value="{{$employee_nature->id}}">{{$employee_nature->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2280,6 +2291,12 @@
                 width:'100%',
             });
             $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
+
+            $("#employee_nature_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Employee Nature",
+                width:'100%',
+            });
+            $("#employee_nature_list").val("{{$employee->employee_nature_id ?? ''}}").trigger('change');
 
             $("#place_of_birth").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Place of Birth",
