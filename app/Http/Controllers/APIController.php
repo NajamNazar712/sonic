@@ -4789,7 +4789,7 @@ class APIController extends Controller
                     $current_status['Status'] = 1;
                     $current_status['StatusText'] = 'SUCCESS';
                     $current_status['Date'] = Carbon::now()->toIso8601String();
-                    $current_status['Success'] = 'Substitute Shipper found against phone number: ' . $phone_number;
+                    $current_status['Success'] = 'Shipper found against phone number: ' . $phone_number;
 
                     $details['UserID'] = $shipper->id;
                     $details['UserName'] = $shipper->name;
