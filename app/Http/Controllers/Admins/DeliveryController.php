@@ -874,14 +874,7 @@ class DeliveryController extends Controller
                     }
                 }
                 NotificationsController::send(40, $note->id);
-				//HBL Konnect Integration
-                $hbl_konnect_delivery_note = new HblKonnectDeliveryNote();
-                $hbl_konnect_delivery_note->delivery_note_id = $note->id;
-                $hbl_konnect_delivery_note->rider_name = $rider->name;
-                $hbl_konnect_delivery_note->rider_cnic = $rider->cnic;
-                $hbl_konnect_delivery_note->rider_phone_no = $rider->phone;
-                $hbl_konnect_delivery_note->save();
-                //HBL Konnect Integration                if ($normal_rider) {
+                if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
                 }
             }
