@@ -68,7 +68,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive','riders.incentive_amount')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -174,6 +174,7 @@ class RiderManagementController extends Controller
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function addRiderDetails(Request $request){
+
         $type = $request->rider_type;
         $validations = [
             'city_id'=>'required|numeric',
@@ -242,6 +243,7 @@ class RiderManagementController extends Controller
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
             'shift_id' => 1,
+            'incentive_amount' => $request->incentive_amount,
         ]);
         if($rider){
             $employee = new Employee();
@@ -1368,11 +1370,19 @@ class RiderManagementController extends Controller
                 }
 
                 if($pickup_incentive > 0 || $delivery_incentive > 0){
+                    $incentive_amount = 0;
+                    if($pickup_shipments_count < 0){
+                        if($rider->incentive_amount != null){
+                            $incentive_amount = ($rider->incentive_amount)*$pickup_shipments_count;
+                        }
+                    }
+
                     $riders_incentive = new RidersIncentive();
                     $riders_incentive->rider_id = $rider->id;
                     $riders_incentive->date = Carbon::now();
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
-                    $riders_incentive->pickup_incentive = $pickup_incentive;
+                    
+                    $riders_incentive->pickup_incentive = $incentive_amount;
                     $riders_incentive->delivery_shipments = $delivered_shipment_count;
                     $riders_incentive->delivery_incentive = $delivery_incentive;
                     $riders_incentive->save();

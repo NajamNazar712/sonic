@@ -68,6 +68,7 @@
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
+                                    <th class="border-primary border-darken-1">Incentive Amount</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
@@ -718,6 +719,7 @@
                             head.push('Phone No.');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
+                            head.push('Incentive Amount');
                             head.push('Designation');
                             head.push('Department Name');
                             head.push('IBAN No.');
@@ -739,6 +741,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
+                                row.push(values.incentive_amount);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
                                 row.push(values.iban);
@@ -995,6 +998,7 @@
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
+                    {data: 'incentive_amount', name: 'r.incentive_amount', class: 'align-middle incentive_amount'},
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
