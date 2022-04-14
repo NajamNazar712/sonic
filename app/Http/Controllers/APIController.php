@@ -4845,8 +4845,9 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
-                $phone_number = $request->phone_number;
                 $tracking_number = $request->tracking_number;
+                $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
+
                 $shipper = User::where('phone', $phone_number);
                 if($shipper->exists()){
                     $shipper = $shipper->first();
@@ -4956,7 +4957,7 @@ class APIController extends Controller
                 if ($validate->fails()) {
                     return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                 } else {
-                    $phone_number = $request->phone_number;
+                    $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
                     $shipper = User::where('phone', $phone_number);
                     if($shipper->exists()){
                         $shipper = $shipper->first();
@@ -5155,7 +5156,7 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
-                $phone_number = $request->phone_number;
+                $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
                 $shipper = User::where('phone', $phone_number);
                 if($shipper->exists()){
                     $shipper = $shipper->first();
