@@ -93,7 +93,16 @@ class V2AdminDisputeShipmentsController extends Controller
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([703], session('permissions'))) !== 0) {
 
-                    $status_update = '<a href="javascript:void(0);" class="dropdown-item update"><i class="ft-plus-circle primary"></i> Update</a>';
+                    if($result->status_id == 1){
+                        $update = 'Mark as In-process';
+                    }
+                    else if($result->status_id == 2){
+                        $update = 'Mark as Resolved';
+                    }
+                    else{
+                        $update = '';
+                    }
+                    $status_update = '<a href="javascript:void(0);" class="dropdown-item update"><i class="ft-plus-circle primary"></i> '. $update .'</a>';
 
                     $dropdown = '
                       <div class="btn-group">

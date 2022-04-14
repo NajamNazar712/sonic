@@ -1284,6 +1284,8 @@ class Permission
             'dispute.rebook.list' => 7,
             'dispute.rebook.shipment.info' => 7,
             'dispute.rebook.shipment.update' => 7,
+            
+            'dispute.shipments.index' => 702,
 
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,
