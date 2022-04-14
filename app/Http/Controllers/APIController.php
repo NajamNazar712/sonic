@@ -5332,7 +5332,7 @@ class APIController extends Controller
             else{
                 $crm_request = CrmRequest::find($crm_request_id);
                 if($crm_request){
-                    if($crm_request->user_id != $user_id){
+                    if($crm_request->shipper_id != $user_id){
                         $current_status['Status'] = 0;
                         $current_status['StatusText'] = 'ERROR';
                         $current_status['Date'] = Carbon::now()->toIso8601String();
