@@ -98,7 +98,7 @@
                             <th class="border-primary border-darken-1"> Designation </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1"> DNCC/PNCC </th>
+                            <th class="border-primary border-darken-1"> DNCC/RNCC </th>
                             <th class="border-primary border-darken-1"> Delivered Shipments</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> Status</th>

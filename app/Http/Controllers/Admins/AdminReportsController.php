@@ -22,6 +22,7 @@ use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
@@ -74,7 +75,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types]);
+        $shipment_status = ShipmentStatus::where('id' ,'>' ,0)->select('id','name')->get();
+//        dd($shipment_status);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types,'shipment_status' => $shipment_status]);
     }
 
     public function qsr_list(Request $request)
@@ -225,6 +228,10 @@ class AdminReportsController extends Controller
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
+        }
+        if ($status_id = $request->get('search_shipment_status')) {
+//            dd($status_id);
+            $datatable->where('ss.id', '=', $status_id);
         }
 
         return $datatable->make(true);
@@ -10185,6 +10192,7 @@ class AdminReportsController extends Controller
         $crm_count_records = $crm_count_records->groupBy(function ($date) {
             return Carbon::parse($date->date)->format('W');
         });
+        
         // if ($request->search_date_from && $request->search_date_to) {
         //     $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->groupBy(function($date) {
         //         return Carbon::parse($date->date)->format('W');
@@ -10197,11 +10205,19 @@ class AdminReportsController extends Controller
         // }
 
         foreach ($crm_count_records as $key => $value) {
-
+            $remaining_count_val = 0;
+            
             $crm_count_data[$key]['count_days'] = $value->count();
             $avg_closed = 0;
             $avg_remaining = 0;
             foreach ($value as $item) {
+                if((($item->pending + $item->new_launched) - $item->closed) < 0){
+                    $remaining_count_val = 0;
+
+                }else{
+                    $remaining_count_val = (($item->pending + $item->new_launched) - $item->closed);
+
+                }
                 if ($item->pending + $item->new_launched == 0) {
                     $avg_closed += 0;
                     $avg_remaining += 0;
@@ -10209,16 +10225,16 @@ class AdminReportsController extends Controller
                     $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
                 } else {
                     $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
-                    $avg_remaining += number_format((((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100), 2);
+                    $avg_remaining += number_format((( $remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
                     $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
-                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100), 2);
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((($remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
                 }
                 $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
                 $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
                 $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
                 $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
                 $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
-                $crm_count_data[$key]['data'][$item->id]['remaining'] = (($item->pending + $item->new_launched) - $item->closed);
+                $crm_count_data[$key]['data'][$item->id]['remaining'] = $remaining_count_val;
                 $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
                 $inner_pending = $item->pending;
             }

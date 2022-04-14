@@ -7,6 +7,8 @@ use App\Http\Controllers\Admins\DeliveryController;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
@@ -199,6 +201,7 @@ class RetailCompletedDeliveries extends Controller
                         'retail_pickup_note_id' => $pncc
                     ]);
                     RetailPickupNote::where('id', $pncc)->update(['expense' => $request->expense[$pncc], 'net_amount' => $request->net_amount[$pncc], 'remarks' => $request->remarks[$pncc], 'pncc_status' => 1]);
+                    
                 }
                 DeliveryController::add_sdn_logs($sdn->id, 0, $created_by);
 

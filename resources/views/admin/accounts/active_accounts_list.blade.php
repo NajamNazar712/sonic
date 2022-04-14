@@ -100,6 +100,7 @@
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
+                                        <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -760,6 +761,7 @@
                         head.push('Intl Rates Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
+                        head.push('Referral Code');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -805,6 +807,7 @@
                             row.push(values.international_rejected_reason);
                             row.push(values.segment);
                             row.push(values.sub_segment);
+                            row.push(values.referral_name);
 
                             body.push(row);
                         });
@@ -1465,6 +1468,8 @@
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
+                {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {

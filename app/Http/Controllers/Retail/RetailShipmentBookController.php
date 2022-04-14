@@ -401,7 +401,7 @@ class RetailShipmentBookController extends Controller
             if($cash_deposit->exists()){
                 $cash_deposit = $cash_deposit->first();
                 $total_shipments = $cash_deposit->total_cn + 1;
-                $total_cash = $cash_deposit->total_cash + $amount;
+                $total_cash = floatval($cash_deposit->total_cash) + floatval($amount);
                 $cash_deposit->total_cn = $total_shipments;
                 $cash_deposit->total_cash = $total_cash;
                 $cash_deposit->save();
@@ -411,7 +411,7 @@ class RetailShipmentBookController extends Controller
                 $cash_deposit->category = Auth::user()->category;
                 $cash_deposit->retail_user_id = Auth::id();
                 $cash_deposit->total_cn = 1;
-                $cash_deposit->total_cash = $amount;
+                $cash_deposit->total_cash = floatval($amount);
                 $cash_deposit->save();
             }
 

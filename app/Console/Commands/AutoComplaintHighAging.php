@@ -70,18 +70,6 @@ class AutoComplaintHighAging extends Command
                         CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $shipment->user_id, null, $description);
                     }
                       
-                }elseif($shipment->shipper_status_id == 2){
-                    //launch request
-                    $nature_id = 1;
-                    $complaint_id = 34;
-                    $description = 'Auto Complaint Locking High Aging';
-                    $launched_by = 0;
-                    $user_id = 1910; //default user
-
-                    $crm_req = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',34);
-                    if(!$crm_req->exists()){
-                        CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $shipment->user_id, null, $description);
-                    }
                 }
             }
 

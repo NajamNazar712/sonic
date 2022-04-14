@@ -1204,8 +1204,12 @@ class Permission
             'settings.cn_print_right.cn_print_right' =>699,
 
             
-            'admin.settings.auto_tag_territories.index' => 697,
-            'admin.settings.auto_tag_territories.list' => 697,
+            'settings.auto_tag_territories.index' => 697,
+            'settings.auto_tag_territories.list' => 697,
+
+            'settings.referral.index' => 701,
+            'settings.referral.list' => 701,
+
             
         ],
 
@@ -1280,6 +1284,8 @@ class Permission
             'dispute.rebook.list' => 7,
             'dispute.rebook.shipment.info' => 7,
             'dispute.rebook.shipment.update' => 7,
+            
+            'dispute.shipments.index' => 702,
 
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,

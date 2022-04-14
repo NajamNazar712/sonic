@@ -22,11 +22,11 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">PNCC No.</th>
+                        <th class="border-primary border-darken-1">RNCC No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">PNCC Amount</th>
+                        <th class="border-primary border-darken-1">RNCC Amount</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                     </tr>
                     </thead>
@@ -56,7 +56,7 @@
                         <fieldset>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text">Total PNCC Amount</span>
+                                    <span class="input-group-text">Total RNCC Amount</span>
                                 </div>
                                 <input type="text" class="form-control" name="total_pncc_amount" id="pncc_amount" readonly placeholder="Total pncc Amount">
                             </div>
