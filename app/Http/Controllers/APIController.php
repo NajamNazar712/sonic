@@ -4770,7 +4770,7 @@ class APIController extends Controller
     //BOTSIFY WhatsApp API
     public function whatsapp_shipper_phone_number(Request $request)
     {
-        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+//        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
                 'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             ];
@@ -4782,14 +4782,14 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
-                $phone_number = $request->phone_number;
+                $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
                 $shipper = User::where('phone', $phone_number);
                 if($shipper->exists()){
                     $shipper = $shipper->first();
                     $current_status['Status'] = 1;
                     $current_status['StatusText'] = 'SUCCESS';
                     $current_status['Date'] = Carbon::now()->toIso8601String();
-                    $current_status['Success'] = 'Substitute Shipper found against phone number: ' . $phone_number;
+                    $current_status['Success'] = 'Shipper found against phone number: ' . $phone_number;
 
                     $details['UserID'] = $shipper->id;
                     $details['UserName'] = $shipper->name;
@@ -4819,20 +4819,20 @@ class APIController extends Controller
 
                 return response()->json(['CurrentStatus' => $current_status, 'Details' => $details]);
             }
-        } else {
-            $current_status = array();
-
-            $current_status['Status'] = 'ERROR';
-            $current_status['Date'] = Carbon::now()->toIso8601String();
-            $current_status['Error'] = 'Unauthorized Host';
-
-            return response()->json(['CurrentStatus' => $current_status]);
-        }
+//        } else {
+//            $current_status = array();
+//
+//            $current_status['Status'] = 'ERROR';
+//            $current_status['Date'] = Carbon::now()->toIso8601String();
+//            $current_status['Error'] = 'Unauthorized Host';
+//
+//            return response()->json(['CurrentStatus' => $current_status]);
+//        }
     }
 
     public function whatsapp_shipper_tracking(Request $request)
     {
-        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+//        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
                 'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
@@ -4845,8 +4845,9 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
-                $phone_number = $request->phone_number;
                 $tracking_number = $request->tracking_number;
+                $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
+
                 $shipper = User::where('phone', $phone_number);
                 if($shipper->exists()){
                     $shipper = $shipper->first();
@@ -4879,6 +4880,7 @@ class APIController extends Controller
             if($shipment->exists()){
                 $shipment = $shipment->where('user_id', $shipper->id);
                 if($shipment->exists()){
+                    $shipment = $shipment->first();
                     $current_status['Status'] = 1;
                     $current_status['StatusText'] = 'SUCCESS';
                     $current_status['Date'] = Carbon::now()->toIso8601String();
@@ -4931,20 +4933,20 @@ class APIController extends Controller
             }
 
             return response()->json(['CurrentStatus' => $current_status, 'Details' => $details]);
-        } else {
-            $current_status = array();
-
-            $current_status['Status'] = 'ERROR';
-            $current_status['Date'] = Carbon::now()->toIso8601String();
-            $current_status['Error'] = 'Unauthorized Host';
-
-            return response()->json(['CurrentStatus' => $current_status]);
-        }
+//        } else {
+//            $current_status = array();
+//
+//            $current_status['Status'] = 'ERROR';
+//            $current_status['Date'] = Carbon::now()->toIso8601String();
+//            $current_status['Error'] = 'Unauthorized Host';
+//
+//            return response()->json(['CurrentStatus' => $current_status]);
+//        }
     }
 
     public function whatsapp_crm_request_create(Request $request)
     {
-        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+//        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
                 $rules = [
                     'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
                     'tracking_number' => ['required', 'integer', 'digits_between:10,20'],
@@ -4956,7 +4958,7 @@ class APIController extends Controller
                 if ($validate->fails()) {
                     return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                 } else {
-                    $phone_number = $request->phone_number;
+                    $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
                     $shipper = User::where('phone', $phone_number);
                     if($shipper->exists()){
                         $shipper = $shipper->first();
@@ -5128,20 +5130,20 @@ class APIController extends Controller
                         return response()->json(['CurrentStatus' => $current_status]);
                     }
                 }
-            }
-        else {
-            $current_status = array();
-
-            $current_status['Status'] = 'ERROR';
-            $current_status['Date'] = Carbon::now()->toIso8601String();
-            $current_status['Error'] = 'Unauthorized Host';
-
-            return response()->json(['CurrentStatus' => $current_status]);
-        }
+//            }
+//        else {
+//            $current_status = array();
+//
+//            $current_status['Status'] = 'ERROR';
+//            $current_status['Date'] = Carbon::now()->toIso8601String();
+//            $current_status['Error'] = 'Unauthorized Host';
+//
+//            return response()->json(['CurrentStatus' => $current_status]);
+//        }
     }
     public function whatsapp_shipper_crm_tracking(Request $request)
     {
-        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
+//        if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'app.botsify.com')) {
             $rules = [
                 'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
                 'tracking_number' => ['required_without:crm_request_id', 'integer', 'digits_between:10,20'],
@@ -5155,7 +5157,7 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
-                $phone_number = $request->phone_number;
+                $phone_number = substr($request->phone_number, 0, 4) . '-' . substr($request->phone_number, 4, 7);
                 $shipper = User::where('phone', $phone_number);
                 if($shipper->exists()){
                     $shipper = $shipper->first();
@@ -5271,15 +5273,15 @@ class APIController extends Controller
                 }
 
             return response()->json(['CurrentStatus' => $current_status, 'Details' => $details]);
-        } else {
-            $current_status = array();
-
-            $current_status['Status'] = 'ERROR';
-            $current_status['Date'] = Carbon::now()->toIso8601String();
-            $current_status['Error'] = 'Unauthorized Host';
-
-            return response()->json(['CurrentStatus' => $current_status]);
-        }
+//        } else {
+//            $current_status = array();
+//
+//            $current_status['Status'] = 'ERROR';
+//            $current_status['Date'] = Carbon::now()->toIso8601String();
+//            $current_status['Error'] = 'Unauthorized Host';
+//
+//            return response()->json(['CurrentStatus' => $current_status]);
+//        }
     }
     //BOTSIFY WhatsApp API
 }
