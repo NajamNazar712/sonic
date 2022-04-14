@@ -5104,7 +5104,12 @@ class APIController extends Controller
                                     if ($validate->fails()) {
                                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                                     } else {
-                                        $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                        if(CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->exists()){
+                                            return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
+                                        }
+                                        else{
+                                            $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                        }
                                         return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                     }
                                 } else {
@@ -5115,7 +5120,12 @@ class APIController extends Controller
                                 $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->where('status_id',1)->pluck('id')->toArray();
                                 if (in_array($complaint_id, $crm_request_type)) {
                                     if ($complaint_id == 26) {
-                                        $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                        if(CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->exists()){
+                                            return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
+                                        }
+                                        else{
+                                            $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                        }
                                         return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
 
                                     }
@@ -5138,7 +5148,13 @@ class APIController extends Controller
                                         if ($validate->fails()) {
                                             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                                         } else {
+
+                                            if(CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->exists()){
+                                                return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
+                                            }
+                                            else{
                                                 $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price );
+                                            }
 
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                         }
@@ -5163,7 +5179,12 @@ class APIController extends Controller
                                         if ($validate->fails()) {
                                             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                                         } else {
+                                            if(CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->exists()){
+                                                return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
+                                            }
+                                            else{
                                                 $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), Null, Null, Null, Null, $request->file('missing_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture') , $request->missing_product_price);
+                                            }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                         }
                                     }
@@ -5183,8 +5204,12 @@ class APIController extends Controller
                                         if ($validate->fails()) {
                                             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                                         } else {
+                                            if(CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->exists()){
+                                                return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
+                                            }
+                                            else{
                                                 $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
-
+                                            }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                             }
                                         }
