@@ -3521,7 +3521,7 @@ class AdminHumanResourseController extends Controller
         }
         $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
-            ->join('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
+            ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
@@ -3533,6 +3533,16 @@ class AdminHumanResourseController extends Controller
                 $employee_leaves->where('employee_leaves.employee_type_id', 1);
             }
         }*/
+
+        if ((!in_array(session('role_id'), [63, 69, 70])) && (session('role_id') != 1)) {
+
+            $employee_leaves = $employee_leaves->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('employee_leaves.employee_id', Auth::id());
+                        });
+            });
+        }
+
 
         $datatable = Datatables::of($employee_leaves)
             ->editColumn('trax_id', function ($employee) {
@@ -3652,6 +3662,43 @@ class AdminHumanResourseController extends Controller
             });
         }
         return $datatable->make(true);
+    }
+    public function leave_request(Request $request)
+    {
+        if((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+            $admin_id = $request->admin_id;
+            $from = $request->requested_from_date;
+            $to = $request->requested_to_date;
+            $reason = $request->leave_request_reason;
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                if ($leave->exists()) {
+                    return response()->json(['status' => 3, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                }
+                $leave_request = new EmployeeLeave();
+                $leave_request->employee_id = $admin_id;
+                $leave_request->employee_type_id = 1;
+                if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                    $reporter_id = 8;
+                } else {
+                    $reporter_id = $admin->role->department->department_head_id;
+                }
+                $leave_request->reporter_id = $reporter_id;
+                $leave_request->from = $from;
+                $leave_request->to = $to;
+                $leave_request->applied_reason = $reason;
+                $leave_request->updated_by = auth()->id();
+                $leave_request->save();
+
+                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+            }
+            return response()->json(['status' => '1', 'error' => 'User Not Found']);
+        }
+        else
+        {
+            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
+        }
     }
 
     public function leave_approve(Request $request)

@@ -16,10 +16,12 @@
 
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
-                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <form id="search_form" class="form-inline mb-1 justify-content-center"
+                                          novalidate="novalidate">
                                         <div class="col-6 mt-1">
                                             <fieldset class="form-group">
-                                                <select name="search_admin" id="search_admin" class="form-control select2">
+                                                <select name="search_admin" id="search_admin"
+                                                        class="form-control select2">
                                                     @foreach($admins as $admin)
                                                         <option value="{{$admin->id}}">{{$admin->name}}</option>
                                                     @endforeach
@@ -28,7 +30,8 @@
                                         </div>
                                         <div class="col-6 mt-1">
                                             <fieldset class="form-group">
-                                                <select name="search_rider" id="search_rider" class="form-control select2">
+                                                <select name="search_rider" id="search_rider"
+                                                        class="form-control select2">
                                                     @foreach($riders as $rider)
                                                         <option value="{{$rider->id}}">{{$rider->name}}</option>
                                                     @endforeach
@@ -37,7 +40,8 @@
                                         </div>
                                         <div class="col-5 mt-1">
                                             <fieldset class="form-group">
-                                                <select name="search_trax_id" id="search_trax_id" class="form-control select2">
+                                                <select name="search_trax_id" id="search_trax_id"
+                                                        class="form-control select2">
                                                     @foreach($trax_ids as $trax_id)
                                                         <option value="{{$trax_id}}">{{$trax_id}}</option>
                                                     @endforeach
@@ -46,7 +50,8 @@
                                         </div>
                                         <div class="col-5 mt-1">
                                             <fieldset class="form-group">
-                                                <select name="search_cnic" id="search_cnic" class="form-control select2">
+                                                <select name="search_cnic" id="search_cnic"
+                                                        class="form-control select2">
                                                     @foreach($cnics as $cnic)
                                                         <option value="{{$cnic}}">{{$cnic}}</option>
                                                     @endforeach
@@ -56,12 +61,22 @@
                                         <div class="col-2 mt-1">
                                             <div class="form-group">
                                                 <button type="button" id="search_filter_btn"
-                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                        class="btn btn-outline-info btn-min-width"><i
+                                                            class="la la-search"></i>
                                                     Search
                                                 </button>
                                             </div>
                                         </div>
                                     </form>
+                                    <div class="col-2 mt-1">
+                                        <div class="form-group">
+                                            <button type="button" id="leave_request_btn"
+                                                    class="btn btn-primary btn-min-width"><i
+                                                        class="la leave_request_btn"></i>
+                                                Add Leave Request
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -96,6 +111,64 @@
             </div>
         </div>
     </section>
+    <div class="modal fade" id="leave_request" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="leave_request" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_mapping_title">Add Leave Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="track_form" action="{{route('admin.human_resource.leave.leave_request')}}"
+                          method="post" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        @csrf
+                        <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
+                        <div class="row mb-2 justify-content-center">
+                            <div class="col-6 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                    </div>
+                                    <input type="text" name="requested_from_date"
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="requested_from_date" placeholder="Requested Date From" required>
+                                </div>
+                            </div>
+                            <div class="col-6 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                    </div>
+                                    <input type="text" name="requested_to_date"
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="requested_to_date" placeholder="Requested Date To" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" placeholder="Reasons of Leaves"
+                                       name="leave_request_reason"
+                                       id="leave_request_reason" required></textarea>
+                            </div>
+{{--                            <div class=""></div>--}}
+                            <div class="col-12">
+                                <button type="submit" id="search_filter_btn"
+                                        class="btn btn-outline-primary btn-min-width search mt-1"><i
+                                            class="la la-search"></i> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="editLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="editLeaveModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -107,7 +180,9 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editLeaveForm" novalidate="novalidate">
+                    <form action="{{route('admin.human_resource.leave.edit')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="editLeaveForm"
+                          novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="row mb-2 justify-content-center">
@@ -127,14 +202,16 @@
                             <div class="col-6 mt-1">
                                 <div class="form-group">
                                     <label for="edit_designation" class="text-left">Designation</label>
-                                    <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
+                                    <input type="text" name="designation" id="edit_designation" class="form-control"
+                                           readonly>
                                 </div>
                             </div>
 
                             <div class="col-6 mt-1">
                                 <div class="form-group">
                                     <label for="edit_department" class="text-left">Department</label>
-                                    <input type="text" name="department" id="edit_department" class="form-control" readonly>
+                                    <input type="text" name="department" id="edit_department" class="form-control"
+                                           readonly>
                                 </div>
                             </div>
 
@@ -148,7 +225,8 @@
                                     </div>
                                     <input type="text" name="from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
+                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true"
+                                           data-msg-required="Leave-From Date is required">
                                 </div>
                             </div>
 
@@ -167,13 +245,15 @@
                             </div>
                             <div class="col mt-1">
                                 <div class="form-group">
-                                    <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
+                                    <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason"
+                                              readonly></textarea>
                                 </div>
                             </div>
 
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Edit</button>
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Edit
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -192,11 +272,14 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.reject')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectLeaveForm" novalidate="novalidate">
+                    <form action="{{route('admin.human_resource.leave.reject')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectLeaveForm"
+                          novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="reject_leave_id" value="">
                         <div class="form-group">
-                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason" rows="6" maxlength="255"></textarea>
+                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason"
+                                      rows="6" maxlength="255"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="reject" class="btn btn-primary" value="reject">Reject</button>
@@ -218,7 +301,9 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.approve')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveLeaveForm" novalidate="novalidate">
+                    <form action="{{route('admin.human_resource.leave.approve')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="approveLeaveForm"
+                          novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="approve_leave_id" value="">
                     </form>
@@ -232,45 +317,83 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
 
-
+    {{--    todo date filter field--}}
+    <script>
+        var booking_from_date = $('#requested_from_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+        var booking_to_date = $('#requested_to_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+    </script>
+    {{--    todo date filter field end--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
             $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Staff',
-                width:'100%',
-                allowClear:true
+                placeholder: 'Search Staff',
+                width: '100%',
+                allowClear: true
             });
             $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
-                width:'100%',
-                allowClear:true
+                placeholder: 'Search Rider',
+                width: '100%',
+                allowClear: true
             });
             $('#search_trax_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Employee ID',
-                width:'100%',
-                allowClear:true
+                placeholder: 'Search Employee ID',
+                width: '100%',
+                allowClear: true
             });
             $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search CNIC',
-                width:'100%',
-                allowClear:true
+                placeholder: 'Search CNIC',
+                width: '100%',
+                allowClear: true
             });
 
             var from_date = $('#editLeaveForm #edit_from').pickadate({
@@ -280,7 +403,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
                     }
@@ -293,7 +416,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
                         $('#editLeaveForm #edit_from').pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
@@ -364,11 +487,20 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
+                        text: 'Add Leave Request',
+                        className: 'btn btn-primary leave_request_btn',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#leave_request').modal('show');
+                        }
+                    },
+                    {
                         extend: 'excel',
                         title: 'Employee Leaves',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
+
                     'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -393,26 +525,60 @@
                 order: [[1, 'desc']],
                 rowId: 'id',
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
                     },
                     {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'employee_type', name: 'employee_leaves.employee_type_id', class: 'align-middle employee_type'},
+                    {
+                        data: 'employee_type',
+                        name: 'employee_leaves.employee_type_id',
+                        class: 'align-middle employee_type'
+                    },
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
-                    {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
+                    {
+                        data: 'leave_count',
+                        name: 'ls.name',
+                        class: 'align-middle leave_count',
+                        orderable: false,
+                        searchable: false
+                    },
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
-                    {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false},
-                    {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false},
+                    {
+                        data: 'applied_reason',
+                        name: 'employee_leaves.applied_reason',
+                        class: 'align-middle applied_reason',
+                        orderable: false
+                    },
+                    {
+                        data: 'reject_reason',
+                        name: 'employee_leaves.rejected_reason',
+                        class: 'align-middle reject_reason',
+                        orderable: false
+                    },
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
                     {data: 'days', name: '', class: 'align-middle days', orderable: false, searchable: false},
                     {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'employee_leaves.updated_at', class: 'align-middle updated'},
-                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
+                    {
+                        data: 'action',
+                        name: 'action',
+                        class: 'align-middle text-center action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -436,20 +602,17 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.days') || $(header).is('.leave_count') || $(header).is('.name') || $(header).is('.trax_id') || $(header).is('.cnic')) {
                             $(td).appendTo($(search));
-                        }
-                        else if ($(header).is('.employee_type')) {
+                        } else if ($(header).is('.employee_type')) {
                             $(employee_type).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                        else if ($(header).is('.status')) {
+                        } else if ($(header).is('.status')) {
                             $(status_filter).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                        else {
+                        } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -462,7 +625,7 @@
 
                     $('#employee_type').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Employee Type",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -475,9 +638,9 @@
                     });
 
                     $('#status_filter').prepend('<option value="" selected></option>').select2({
-                        data:data,
+                        data: data,
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -485,7 +648,7 @@
                 }
             });
 
-            $('#search_filter_btn').on('click',function () {
+            $('#search_filter_btn').on('click', function () {
                 table.draw(true);
             });
 
@@ -499,8 +662,8 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                from_date.pickadate('picker').set('select',new Date(from));
-                to_date.pickadate('picker').set('select',new Date(to));
+                from_date.pickadate('picker').set('select', new Date(from));
+                to_date.pickadate('picker').set('select', new Date(to));
                 from_date.pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
@@ -592,6 +755,51 @@
                 });
 
             });
+
+            //todo : for calling buttons id
+            $("#leave_request_btn").click(function () {
+                $("#leave_request").modal('show');
+            });
+            //todo : for calling buttons id end
+
+            //todo : leave request form submission
+            $("#track_form").submit(function (e) {
+                e.preventDefault(); // prevent actual form submit
+                var form = $(this);
+                var url = form.attr('action'); //get submit url [replace url here if desired]
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(), // serializes form input
+                }).done(function (data) {
+                    // console.log(data);
+                    $('#leave_request').modal('hide');
+
+                    if (data.status == 3) {
+                        toastr.error(data.message, 'Denied!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else if (data.status == 2) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else if (data.status == 1) {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else if (data.status == 0) {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    $("#track_form")[0].reset();
+                });
+            });
+            //todo : leave request form submission end
         });
     </script>
 
