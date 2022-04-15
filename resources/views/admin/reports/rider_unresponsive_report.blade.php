@@ -74,6 +74,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <style>
+        a.btn.btn-secondary {
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         .bg-gradient-directional-inprocess {
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
@@ -110,6 +114,7 @@
 
             $('#search_date_from').pickadate({
                 firstDay: 1,
+                max: "{{now()->format('Y-m-d')}}",
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
@@ -124,6 +129,7 @@
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: "{{now()->format('Y-m-d')}}",
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -199,7 +205,7 @@
                         d.search_status = $('#search_status').val();
                     }
                 },
-                order: [[2, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'created_at' ,name: 'rider_unresponsive_statuses.created_at', class: 'align-middle created_at'},
