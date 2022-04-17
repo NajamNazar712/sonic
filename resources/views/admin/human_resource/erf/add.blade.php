@@ -24,22 +24,22 @@
                                         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
                                             <h2 class="ml-2"> ERF Type</h2>
                                         </div>
-                                        <div class="col-md-6 col-lg-6 mb-2">
+                                        <div class="col-md-8 col-lg-8 mb-2">
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
-                                                <label class="form-check-label" for="inlineRadio1" >Additional</label>
+                                                <h4 class="form-check-label" for="inlineRadio1"><b>New</b></h4>
                                             </div>
 
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
-                                                <label class="form-check-label" for="inlineRadio2">Replacement</label>
+                                                <h4 class="form-check-label" for="inlineRadio2"><b>Replacement</b></h4>
                                             </div>
-                                            <div class="form-check form-check-inline pull-left">
+                                            <div class="form-check form-check-inline pull-right replacement_employee_status d-none">
                                                 <input class="form-check-input" type="radio" name="employee_status" id="inactive" value="1"/>
                                                 <label class="form-check-label" for="inlineRadio1" >Inactive</label>
                                             </div>
 
-                                            <div class="form-check form-check-inline pull-left">
+                                            <div class="form-check form-check-inline pull-right replacement_employee_status d-none">
                                                 <input class="form-check-input" type="radio" name="employee_status" id="notice_period" value="2"/>
                                                 <label class="form-check-label" for="inlineRadio2">Notice Period</label>
                                             </div>
@@ -225,7 +225,9 @@
                 width: '100%',
                 placeholder: 'HOD*'
             });
-            
+
+            var trax_ids = [];
+
             $('#department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
@@ -253,10 +255,17 @@
                                 data:data1,
                                 placeholder: 'Select Designation*'
                             });
-                        $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
+                            $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
 
-                            department_head
-                            console.log(data);
+
+                            $('.auto_trax_id').empty();
+                            $.each(data.trax_ids, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('.auto_trax_id').append(newOption);
+                            });
+                            $('.auto_trax_id').val('').trigger('change');
+
+                            trax_ids = data.trax_ids;
                         }
                         else{
                             toastr.error(data.error, 'Error!', {
@@ -264,6 +273,7 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+
                     });
                 }
             });
@@ -327,6 +337,8 @@
                  $('#main_div').remove();
                  $('.add_slab_div').remove();
                  $('hr').remove();
+                 $('.replacement_employee_status').addClass('d-none');
+
 
 
                 var vacancies = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">\n' +
@@ -441,9 +453,6 @@
             });
 
 
-            @php
-                $index = 0;
-            @endphp
                 
             var today = '{{ $today }}';
             $('#replacement').click(function () {
@@ -452,23 +461,27 @@
                 $("#department_head").val('').change();
                 $("#city").val('').change();
                 $("#hub").val('').change();
+                $(".replacement_employee_status").removeClass('d-none');
+                $('#main_div').remove();
+                $('.add_slab_div').remove();
+                $('hr').remove();
                 $("div").remove("#vacancies_div,#position_div,#allowance_div,#description_div,#skills_div,#qualification_div,#range_div");
+                
+                    @php
+                        $count = 0;
+                    @endphp
 
                 var new_row ='<hr>'+
                     '<div class="row" id="main_div" style="width:100% !important">'+
                         '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
                             '<div class="col text-center">\n' +
                                 '<label>Trax Id</label>' +
-                                '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check" id="trax_id" name="addmore[0][trax_id]">@foreach($employee_trax_id as $index => $employee)
-                                @if($employee->status_id == 2)
-                                @php $mark = 'Disabled' @endphp
-                                @else
-                                @php $mark = ' ' @endphp
-                                @endif
-                        <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
+                                '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check auto_trax_id" id="trax_id" name="addmore[0][trax_id]">' +
+
+                       '</select></div>' +
                 '</div>\n' +
                             '<div class="col text-center">\n' +
-                    '\n' +        '<label>Last Gross Salary</label>' +
+                    '\n' +        '<label>Gross Salary</label>' +
                     '           <div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Gross Salary*" class="form-control" data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
                             '</div>\n' +
                         '<div class="col text-center">\n' +
@@ -487,8 +500,14 @@
                     '\n' +  '<label>Last Working Day</label>' +
                     '<div class="form-group"> <input type="text" name="addmore[0][last_day]" class="form-control" id="last_day" placeholder="Last Working Day" disabled></div>'+
                     '</div>\n' +
-                    '<div class="col-1 close_row0">\n' +
-                    '@if($index == 1)\n' +
+                     @if(session('role_id') == 1 || in_array(Auth::id(),[3,69,372,500,8,70,32,497,57,12,760,897,8,577]) || session('department_id') == 10)
+                         '<div class="col text-center">\n' +
+                    '\n' +  '<label>Last Gross Salary</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][last_salary]" class="form-control" id="last_salary" placeholder="Last Salary" disabled></div>'+
+                    '</div>\n' +
+                     @endif
+                    '<div class="col mt-2 close_row0">\n' +
+                    '@if($count == 1)\n' +
                     '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
                     '@endif\n' +
                     '</div>\n' +
@@ -518,7 +537,7 @@
                             }
                         }).done(function (data) {
                             if (data.status == 1) {
-                                 $('#salary').val(data.details.last_salary);
+                                 $('#last_salary').val(data.details.last_salary);
                                  $('#name').val(data.details.name );
                                  $('#employee_designation').val(data.details.designation);
                                  $('#last_day').val(data.details.last_working_date );
@@ -610,19 +629,13 @@
             var count = 0;
 
             $('body').on('click','#add_slabs_btn',function () {
-
                 var row_count = count + 1;
                 let htmdiv =
                         '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
                     '<div class="col text-center">\n' +
 
-                    '<div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]">@foreach($employee_trax_id as $index => $employee)
-                            @if($employee->status_id == 2)
-                              @php $mark = 'Disabled' @endphp
-                            @else
-                                @php $mark = ' ' @endphp
-                            @endif
-                        <option value="{{$employee->trax_id}}" >{{$employee->trax_id}} {{$mark}}</option> @endforeach</select></div>' +
+                    '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2 auto_trax_id" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]"></select></div>'+
+
                     '</div>\n' +
                     '<div class="col text-center">\n' +
                     '<div class="form-group"><input type="text" name="addmore['+row_count+'][salary]" id="gross_salary'+row_count+'" placeholder="Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
@@ -640,10 +653,13 @@
                     '<div class="col text-center">\n' +
                     '<div class="form-group"><input type="text" name="addmore['+row_count+'][last_working_day]" id="leavers_last_working_day'+row_count+'" placeholder="Last Working Day" class="form-control" disabled/></div>'+
                     '</div>\n' +
-                    '<div class="col-1">\n' +
-                    '@if($index>0)\n' +
-                    '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
-                    '@endif\n' +
+                    @if(session('role_id') == 1 || in_array(Auth::id(),[3,69,372,500,8,70,32,497,57,12,760,897,8,577]) || session('department_id') == 10)
+                            '<div class="col text-center">\n' +
+                    '<div class="form-group"> <input type="text" name="addmore['+row_count+'][last_salary]" class="form-control" id="add_last_salary'+row_count+'" placeholder="Last Salary" disabled></div>'+
+                    '</div>\n' +
+                        @endif
+                    '<div class="col">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
                     '</div>\n' +
                     '\n' +
                     '</div></div>\n';
@@ -673,7 +689,7 @@
                             }
                         }).done(function (data) {
                             if (data.status == 1) {
-                                $('#gross_salary'+row_count+'').val(data.details.last_salary );
+                                $('#add_last_salary'+row_count+'').val(data.details.last_salary );
                                 $('#leavers_name'+row_count+'').val(data.details.name );
                                 $('#leavers_designation'+row_count+'').val(data.details.designation);
                                 $('#leavers_last_working_day'+row_count+'').val(data.details.last_working_date );
@@ -688,6 +704,12 @@
                     }
                 });
 
+               
+                $.each(trax_ids, function (key, value) {
+                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                    $('#leavers_trax_id' + row_count + '').append(newOption);
+                });
+                $('#leavers_trax_id' + row_count + '').val('').trigger('change');
 
 
                 $('#gross_salary'+row_count+'').inputmask({
@@ -732,8 +754,18 @@
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
-                $('#department_head').removeAttr('disabled');
 
+                if ($("#replacement").is(":checked")) {
+                    if(!$("#inactive").is(':checked') && !$("#notice_period").is(':checked')) {
+                        toastr.error("Mark Inactive/Notice Period for Replacement", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+                }
+                
+                $('#department_head').removeAttr('disabled');
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
                     swal({
