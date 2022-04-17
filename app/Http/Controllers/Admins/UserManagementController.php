@@ -395,13 +395,8 @@ class UserManagementController extends Controller
                 foreach($request->input('hubs') as $hub_id) {
                     $admin_hub_exist = AdminHub::where('admin_id',$user_id)->where('hub_id',$hub_id)->first();
                    
-                    if($admin_hub_exist)
+                    if(!$admin_hub_exist)
                     {
-                    break;
-                        // dd($admin_hub_exist);
-                       
-                    }
-                    else{
                         $admin_hub = new AdminHub();
 
                         $admin_hub->hub_id = $hub_id;

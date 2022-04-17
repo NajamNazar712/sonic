@@ -1196,10 +1196,22 @@ class AdminTrackingController extends Controller
 
                             }
 
+
+                            if (isset($journey->admin->city->name)) {
+                                $cityy = $journey->admin->city->name;
+                            }else if(isset($journey->user->city2->name)){
+                                $cityy = $journey->user->city2->name;
+                            }else if($journey->rider->city->name){
+                                $cityy = $journey->rider->city->name;
+                            }
+
+
+//                            ($journey->city_id) ? $journey->city->name : '';
+
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
-                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['city'] = $cityy;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';

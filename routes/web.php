@@ -35,6 +35,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
     Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
+    Route::post('rate/daily_visit','Shippers\ShipperDashboardController@rate_daily_visit')->name('rate_daily_visit');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -492,6 +493,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('add_remarks', 'Shippers\ShipperPickupController@add_remarks')->name('add_remarks');
         Route::post('cancel', 'Shippers\ShipperPickupController@cancel')->name('cancel');
         Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
+        Route::get('view_details', 'Shippers\ShipperPickupController@view_details')->name('view_details');
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
@@ -1140,6 +1142,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
                 Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
+                //HBL Konnect
+                Route::post('transactions/information','Admins\DeliveryController@hbl_konnect_transactions_information')->name('transactions.information');
+                //HBL Konnect
 
             });
             Route::prefix('retail')->name('retail.')->group(function(){
@@ -1980,6 +1985,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
             Route::get('generate_report_to_email', 'Admins\AdminFinanceController@done_payments_generate_report_to_email')->name('generate_report_to_email');
             Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
+            Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {

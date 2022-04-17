@@ -56,6 +56,8 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">CCD Receipts</th>
+                        <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                        <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -105,6 +107,26 @@
         </div>
     </div>
     <!--Shipments popup -->
+    <!--HBL Konnect Information -->
+    <div class="modal fade" id="transactions_information_modal" data-backdrop="static" role="dialog" aria-labelledby="transactions_information_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white" id="transactions_information_modal_title">HBL Konnect Amount</h4>
+
+                    <button type="button" class="close white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--HBL Konnect Information -->
     <!--CCD Slip popup-->
 
     <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog"
@@ -242,6 +264,8 @@
                             head.push('Updated By');
                             head.push('Updated Date');
                             head.push('DNCC Amount');
+                            head.push('HBL Konnect  Amount');
+                            head.push('Cash Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -259,6 +283,8 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.amount);
+                                row.push(values.transactions_amount);
+                                row.push(values.cash_amount);
 
                                 body.push(row);
                             });
@@ -472,6 +498,8 @@
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
+                    { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
+                    { data:'cash_amount' ,name: 'cash_amount', class: 'align-middle cash_amount'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -794,6 +822,45 @@
                                 });
                             }
                             $('#delivered_shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+            $('#datatable tbody').on('click','tr td.transactions_amount button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#transactions_information_modal .modal-body').html('');
+                $('#transactions_information_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.transactions.information') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status === 1) {
+                            var html = '';
+                            html += '<table class="table table-bordered text-center">';
+                            html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.details, function (index, value) {
+                                console.log(value);
+                                var ind = index + 1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value.transaction_id + '</td>';
+                                html += '<td>' + value.amount + '</td>';
+                                html += '<td>' + value.deposited_at + '</td>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            $('#transactions_information_modal .modal-body').html(html);
+                            $('#transactions_information_modal').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
 

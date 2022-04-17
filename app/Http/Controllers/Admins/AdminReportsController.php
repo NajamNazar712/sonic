@@ -18,10 +18,12 @@ use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
@@ -74,7 +76,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types]);
+        $shipment_status = ShipmentStatus::where('id' ,'>' ,0)->select('id','name')->get();
+//        dd($shipment_status);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types,'shipment_status' => $shipment_status]);
     }
 
     public function qsr_list(Request $request)
@@ -225,6 +229,10 @@ class AdminReportsController extends Controller
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
+        }
+        if ($status_id = $request->get('search_shipment_status')) {
+//            dd($status_id);
+            $datatable->where('ss.id', '=', $status_id);
         }
 
         return $datatable->make(true);
@@ -7283,8 +7291,12 @@ class AdminReportsController extends Controller
     public function daily_visit_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 193);
-        $admins = Admin::where('status', 1)->get(['id', 'name']);
-        return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
+        $admins = Admin::where('admins.status', 1)
+            ->leftjoin('employee_designations as ed','admins.designation_id','ed.id')
+            ->where('ed.department_id',7)
+            ->get(['admins.id', 'admins.name']);
+        $ratings = CrmRequestRating::all();
+        return view('admin.reports.daily_visit_report')->with(['admins' => $admins,'ratings'=>$ratings]);
     }
 
     public function daily_visit_list(Request $request)
@@ -7297,7 +7309,8 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
             ->leftjoin('cities as c', 'c.id', '=', 'a.default_hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone');
+            ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr) {
@@ -7331,6 +7344,10 @@ class AdminReportsController extends Controller
         //AdminUser Filter
         if ($team_member = $request->get('team_member')) {
             $datatables->where('a.id', $team_member);
+        }
+
+        if ($rating = $request->get('rating')) {
+            $datatables->where('daily_visits.rating_id', $rating);
         }
         //VisitDate filter
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
