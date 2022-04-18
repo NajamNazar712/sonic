@@ -3618,6 +3618,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('approve_individual', 'Admins\AdminHumanResourseController@employee_directory_approve_individual')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');

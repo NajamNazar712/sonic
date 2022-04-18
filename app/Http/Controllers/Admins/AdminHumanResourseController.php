@@ -43,9 +43,8 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
-use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\HR\LeaveStatus;
-use App\Http\Models\PickupNote;
+use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
@@ -232,7 +231,9 @@ class AdminHumanResourseController extends Controller
         $city = City::where('business_category_id', 1)->get();
         $staff_categories = StaffCategory::all();
         $employee_zones = Zone::where('status',1)->where('business_category_id',1)->get(['id', 'name']);
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones]);
+        $employee_natures = EmployeeNature::select('id', 'name')->get();
+        $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', 1)->whereNotNull('trax_id')->get();
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones, 'employee_natures' => $employee_natures, 'replacement_employees' => $replacement_employees]);
     }
 
     public function employee_directory_list(Request $request)
@@ -982,6 +983,95 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public function employee_directory_approve_individual(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+        if($employee){
+            if (in_array($employee->request_status_id, [1, 2])) {
+                if ($employee->trax_id == null) {
+                    if ($employee->employee_type_id == 1) {
+                        if ($employee->staff_category_id == 1) {
+                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                            $trax_id_prefix = 'Trax';
+                        } elseif ($employee->staff_category_id == 2) {
+                            $global_setting = GlobalSettings::where('type', 'latest_intern_id');
+                            $trax_id_prefix = 'Trax-I-';
+                        } else {
+                            return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
+                        }
+                    } else {
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                        $trax_id_prefix = 'Trax';
+                    }
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+
+                    $employee->trax_id = $trax_id;
+
+                }
+                $employee->request_status_id = 3;
+                $employee->save();
+
+                if ($employee->employee_type_id == 1) {
+
+                    $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+
+                    if ($admin->doesntExist()) {
+                        $admin = new Admin();
+
+                        $admin->name = $employee->name;
+                        $admin->email = $employee->official_email;
+                        $admin->phone_number = $employee->phone_number;
+                        $admin->official_phone_number = $employee->official_phone_number;
+                        $admin->cnic = $employee->cnic;
+                        $admin->role_id = $employee->designation->role_id ?? 79;
+                        $admin->default_hub_id = $employee->city->hub_city->id;
+                        $admin->password = bcrypt($employee->pin);
+                        $admin->dummy_pin = $employee->pin;
+                        $admin->designation_id = $employee->designation_id;
+                        $admin->shift_id = $employee->shift_id;
+
+                        if ($employee->status_id == 2) {
+                            $admin->status = 0;
+                        } else {
+                            $admin->status = 1;
+                        }
+
+                        $admin->updated_by = Auth::id();
+                        $admin->trax_id = $employee->trax_id;
+                        $admin->employee_id = $employee->id;
+
+                        $admin->save();
+
+                        if (count($employee->designation->hubs) == 0) {
+                            $admin_hub = new AdminHub();
+                            $admin_hub->admin_id = $admin->id;
+                            $admin_hub->hub_id = $admin->default_hub_id;
+                            $admin_hub->save();
+                        } else {
+                            foreach ($employee->designation->hubs as $hub) {
+                                $admin_hub = new AdminHub();
+                                $admin_hub->admin_id = $admin->id;
+                                $admin_hub->hub_id = $hub->hub_id;
+                                $admin_hub->save();
+                            }
+                        }
+                    }
+
+                }
+            }
+            return response()->json(['status' => 0, 'success' => 'Employee(s) Approved Successfully!']);
+        }
+    }
+
     public function employee_directory_reject(Request $request)
     {
         if (is_array($request->employee_ids)) {
@@ -1016,7 +1106,6 @@ class AdminHumanResourseController extends Controller
         $departments = AdminDepartment::all();
         $relationships = EmployeeRelationship::all();
         $banks = BanksList::where('status', 1)->get();
-        $employee_natures = EmployeeNature::select('id', 'name')->get();
         $medical_infos = $employee->medical_infos;
         $bank_info = $employee->bank_info;
         $reference = $employee->reference;
@@ -1035,8 +1124,9 @@ class AdminHumanResourseController extends Controller
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
+        $employee_natures = EmployeeNature::select('id', 'name')->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes', 'replacement_info', 'employee_natures'));
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)

@@ -357,6 +357,79 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="employeeRequiredInfoModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="employeeRequiredInfoModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Employee Required Info</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-left">
+                    <form action="{{route('admin.human_resource.employee_directory.rider.convert')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="convertRiderForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Employee Nature<span class="text-danger">*</span></label>
+                                <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control " style="width: 100%">
+                                    @foreach($employee_natures as $employee_nature)
+                                        <option value="{{$employee_nature->id}}">{{$employee_nature->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Joining Date<span class="text-danger">*</span></label>
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                </div>
+                                <input type="text" name="joining_date" data-rule-required="true"
+                                       data-msg-required="This Field is required"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="joining_date" placeholder="Joining Date">
+                            </div>
+                        </div>
+                        <div class="d-none" id="replacement_info_div">
+                            <h4 class="form-section">Replacement Info</h4>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Replacement Employee<span class="text-danger">*</span></label>
+                                    <select name="replacement_employee_id" id="replacement_employee_list" data-rule-required="true"  data-msg-required="Replacement Employee is required" class="select2 form-control " style="width: 100%">
+                                        @foreach($replacement_employees as $replacement_employee)
+                                            <option value="{{$replacement_employee->id}}">{{$replacement_employee->trax_id}} | {{$replacement_employee->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Last Working Day<span class="text-danger">*</span></label>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                    </div>
+                                    <input type="text" name="replacement_last_working_day" data-rule-required="true" data-msg-required="This Field is required" class="form-control bg-primary border-primary white rounded-right pickadate" id="replacement_last_working_day" placeholder="Last Working Day">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary" value="edit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="designationChangeLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
             <div class="modal-content" style="width: 60%!important;">
@@ -409,6 +482,8 @@
 
 
     <script type="text/javascript">
+        var today = new Date();
+        today.setHours(0,0,0,0);
         $(document).ready(function () {
             let route_id;
             var elm = document.getElementById("edit_ccd_rider_checkbox");
@@ -522,6 +597,44 @@
                 }else{
                     $('#new_route_div').addClass('d-none');
                 }
+            });
+
+            $("#employee_nature_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Employee Nature",
+                width:'100%',
+            }).
+            bind('change', function () {
+                if(this.value == 2){
+                    $("#replacement_info_div").removeClass("d-none");
+                }
+                else {
+                    $("#replacement_info_div").addClass("d-none");
+                }
+            });
+
+            $("#replacement_employee_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Replacement Employee",
+                width:'100%',
+            });
+
+            var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            var joining_date = $('#joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
             });
 
             var search_date_to = $('#search_form #search_date_to').pickadate({
@@ -653,7 +766,8 @@
                         text: 'Approve',
                         className: 'btn btn-primary bulk_approve',
                         enabled: false,
-                        action: function (e, dt, node, config) {swal({
+                        action: function (e, dt, node, config) {
+                            swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes Approve Employee!',
                             icon: 'warning',
@@ -1059,7 +1173,11 @@
             });
 
             $('body').on('click', '.approve', function (e) {
+                $('#employeeRequiredInfoModal').modal('show');
+            });
+            /*$('body').on('click', '.approve', function (e) {
                 var id = $(this).data('target-id');
+                $('#employeeRequiredInfoModal').show();
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes Approve Employee!',
@@ -1081,7 +1199,8 @@
                     closeOnClickOutside: false,
                     closeOnEsc: false,
                     dangerMode: true
-                }).then(function (confirm) {
+                }).
+                then(function (confirm) {
                     if (confirm) {
                         swal({
                             title: 'Please Wait!',
@@ -1120,7 +1239,7 @@
                 // var id = $(this).data('target-id');
                 // $('#employee_id').val(id);
                 // $('#approveRiderModal').modal('show');
-            });
+            });*/
 
 
 
