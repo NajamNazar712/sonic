@@ -990,17 +990,17 @@ class AdminHumanResourseController extends Controller
         if($employee){
             if (in_array($employee->request_status_id, [1, 2])) {
                 if ($employee->trax_id == null) {
-                    if ($employee->employee_type_id == 1) {
-                        if ($employee->staff_category_id == 1) {
+                    if($employee->employee_type_id == 1){
+                        if($employee->staff_category_id == 1){
                             $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                             $trax_id_prefix = 'Trax';
-                        } elseif ($employee->staff_category_id == 2) {
+                        }elseif ($employee->staff_category_id == 2){
                             $global_setting = GlobalSettings::where('type', 'latest_intern_id');
                             $trax_id_prefix = 'Trax-I-';
-                        } else {
-                            return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
+                        }else{
+                            return redirect()->back()->with('error', 'Invalid Staff Category');
                         }
-                    } else {
+                    }else{
                         $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                         $trax_id_prefix = 'Trax';
                     }
@@ -1018,11 +1018,12 @@ class AdminHumanResourseController extends Controller
 
                 }
                 $employee->request_status_id = 3;
+                $employee->joining_date = $request->joining_date_formatted;
                 $employee->save();
 
                 if ($employee->employee_type_id == 1) {
 
-                    $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                    $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
 
                     if ($admin->doesntExist()) {
                         $admin = new Admin();
@@ -1051,12 +1052,13 @@ class AdminHumanResourseController extends Controller
 
                         $admin->save();
 
-                        if (count($employee->designation->hubs) == 0) {
+                        if(count($employee->designation->hubs) == 0) {
                             $admin_hub = new AdminHub();
                             $admin_hub->admin_id = $admin->id;
                             $admin_hub->hub_id = $admin->default_hub_id;
                             $admin_hub->save();
-                        } else {
+                        }
+                        else{
                             foreach ($employee->designation->hubs as $hub) {
                                 $admin_hub = new AdminHub();
                                 $admin_hub->admin_id = $admin->id;
@@ -1066,9 +1068,39 @@ class AdminHumanResourseController extends Controller
                         }
                     }
 
+                    $employee->replacement_employee_id = $request->replacement_employee_id;
+                    $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
+                    $employee->save();
+
                 }
             }
-            return response()->json(['status' => 0, 'success' => 'Employee(s) Approved Successfully!']);
+            return redirect()->back()->with('success', 'Employee Approved Successfully!');
+        }
+        else {
+            return redirect()->back()->with('error', 'Invalid Selection!');
+        }
+    }
+
+    public function employee_directory_required_info(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+        if($employee){
+            if (in_array($employee->request_status_id, [1, 2])) {
+                if ($employee->employee_type_id == 1) {
+                    return response()->json(['status' => 2, 'info' => 'Open Modal for Admin', 'employee_id' => $employee_id]);
+                }
+                elseif ($employee->employee_type_id == 2){
+
+                    return response()->json(['status' => 3, 'info' => 'Open Modal for Rider', 'employee_id' => $employee_id]);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Invalid Employee Request Status']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Invalid Employee']);
         }
     }
 
@@ -1184,6 +1216,15 @@ class AdminHumanResourseController extends Controller
         $employee->rider_main_category = $request->rider_main_category;
         $employee->joining_date = $request->joining_date_formatted;
         $employee->emergency_contact_person = $request->emergency_contact_person;
+        if($request->employee_nature_id == 1){
+           $employee->replacement_employee_id = null;
+           $employee->replacement_last_working_day = null;
+        } else{
+            $employee->replacement_employee_id = $request->replacement_employee_id;
+            $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
+        }
+        $employee->fuel = $request->fuel;
+        $employee->employee_nature_id = $request->employee_nature_id;
         $employee->update();
 
         if($employee->employee_type_id == 1)

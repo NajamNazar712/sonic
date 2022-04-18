@@ -312,7 +312,7 @@
                                         @if($employee->employee_type_id == 2)
                                             <div class="col-md-12">
                                                 <div class="form-group">
-                                                    <label>Fuel</label>
+                                                    <label>Fuel (Ltrs) <span class="text-danger">*</span></label>
                                                     <input type="text" id="fuel" class="form-control" value="{{$employee->fuel}}" name="fuel" >
                                                 </div>
                                             </div>
