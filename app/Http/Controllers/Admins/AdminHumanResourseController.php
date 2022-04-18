@@ -3486,7 +3486,6 @@ class AdminHumanResourseController extends Controller
 
     public function leave_list(Request $request)
     {
-//        dd(session('department_id'), session('role_id'));
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
         }
@@ -3671,6 +3670,9 @@ class AdminHumanResourseController extends Controller
                 $leave_request->updated_by = auth()->id();
                 $leave_request->save();
 
+
+                NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                 return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
             }
             return response()->json(['status' => '1', 'error' => 'User Not Found']);
