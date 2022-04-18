@@ -111,8 +111,7 @@
             </div>
         </div>
     </section>
-    <div class="modal fade" id="leave_request" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="leave_request" aria-hidden="true">
+    <div class="modal fade" id="leave_request" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="leave_request" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -156,7 +155,7 @@
                                        name="leave_request_reason"
                                        id="leave_request_reason" required></textarea>
                             </div>
-{{--                            <div class=""></div>--}}
+                                {{--                            <div class=""></div>--}}
                             <div class="col-12">
                                 <button type="submit" id="search_filter_btn"
                                         class="btn btn-outline-primary btn-min-width search mt-1"><i
@@ -167,6 +166,7 @@
                     </form>
             </div>
         </div>
+    </div>
     </div>
 
     <div class="modal fade text-left" id="editLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"

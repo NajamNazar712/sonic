@@ -227,11 +227,11 @@ class AdminHumanResourseController extends Controller
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
         $employee_department = AdminDepartment::all();
-        $employee_shifts = EmployeeShift::where('status',1)->get(['id','name']);
+        $employee_shifts = EmployeeShift::where('status', 1)->get(['id', 'name']);
         $city = City::where('business_category_id', 1)->get();
         $staff_categories = StaffCategory::all();
-        $employee_zones = Zone::where('status',1)->where('business_category_id',1)->get(['id', 'name']);
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones]);
+        $employee_zones = Zone::where('status', 1)->where('business_category_id', 1)->get(['id', 'name']);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city, 'employee_types' => $employee_types, 'rider_categories' => $rider_categories, 'rider_types' => $rider_type, 'routes' => $route, 'operation_rider_category' => $operation_rider_category, 'route_types' => $route_types, 'employee_statuses' => $employee_statuses, 'employee_department' => $employee_department, 'rider_main_categories' => $rider_main_categories, 'employee_shifts' => $employee_shifts, 'staff_categories' => $staff_categories, 'employee_zones' => $employee_zones]);
     }
 
     public function employee_directory_list(Request $request)
@@ -251,12 +251,12 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('staff_categories as est', 'est.id', '=', 'employees.staff_category_id')
             ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
-            ->leftjoin('rider_main_categories as rmc','rmc.id','=','employees.rider_main_category')
-            ->leftjoin('employee_designations as ed','ed.id','=','employees.designation_id')
+            ->leftjoin('rider_main_categories as rmc', 'rmc.id', '=', 'employees.rider_main_category')
+            ->leftjoin('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
             ->leftjoin('employee_bank_informations as eb', 'eb.employee_id', '=', 'employees.id')
             ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name'])
+            ->select(['r.name as check_if_rider_present_bit', 'r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name', 'employees.shift_id as shift_id', 'employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id', 'er_rt.name as rider_type', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'rmc.name as rider_main_category', 'employees.rider_type_id as rider_type_id', 'ed.name as designation', 'r.id as rider_id', 'staff.id as staff_id', 'eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -266,7 +266,7 @@ class AdminHumanResourseController extends Controller
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
         }
 
-        $datatable =  Datatables::of($employees)
+        $datatable = Datatables::of($employees)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->employee_id, 6, '0', STR_PAD_LEFT);
             })
@@ -276,19 +276,17 @@ class AdminHumanResourseController extends Controller
             ->filterColumn('et.name', function ($query, $keyword) {
                 if ($keyword == 1) {
                     return $query->where('employees.staff_category_id', '=', 1);
-                }
-                elseif ($keyword == 2) {
+                } elseif ($keyword == 2) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
-                            $q->where('employees.rider_type_id',1)
+                            $q->where('employees.rider_type_id', 1)
                                 ->orwhere('r_rt.id', 1);
                         });
 
-                }
-                elseif ($keyword == 3) {
+                } elseif ($keyword == 3) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
-                            $q->where('employees.rider_type_id',2)
+                            $q->where('employees.rider_type_id', 2)
                                 ->orwhere('r_rt.id', 2);
                         });
                 }
@@ -298,158 +296,154 @@ class AdminHumanResourseController extends Controller
 
                 return null;
             })
-            ->addColumn('employee_hub',function($user){
-                return City::where('id',$user->city_id)->first()->hub_city->name ?? "";
+            ->addColumn('employee_hub', function ($user) {
+                return City::where('id', $user->city_id)->first()->hub_city->name ?? "";
             })
-            ->addColumn('employee_designation',function($user){
+            ->addColumn('employee_designation', function ($user) {
                 return ($user->designation) ? $user->designation : '-';
             })
-			->editColumn('employee_type', function ($user) {
+            ->editColumn('employee_type', function ($user) {
                 if ($user->employee_type_id == 1) {
 
-                    if($user->staff_category_id == 2) {
+                    if ($user->staff_category_id == 2) {
                         return "Intern";
-                    }
-                    else{
+                    } else {
                         return "Staff";
                     }
                 } else {
 
                     $type = $user->employee_type;
 
-                    if($user->rider_type != null)
-                    {
-                        $type .= ' - '.$user->rider_type;
+                    if ($user->rider_type != null) {
+                        $type .= ' - ' . $user->rider_type;
                     }
 
                     return $type;
 
                 }
             })
-            ->editColumn('employee_name',function ($user){
+            ->editColumn('employee_name', function ($user) {
                 return $user->employee_name;
             })
             ->filterColumn('ads.name', function ($query, $keyword) {
 
                 if ($keyword != '') {
-                    $query->where('ads.name', "like","%".$keyword."%");
+                    $query->where('ads.name', "like", "%" . $keyword . "%");
                 } else {
                     $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
-                if(session('role_id') == 1 || in_array(652, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                     if ($result->request_status_id == 1 || $result->request_status_id == 2) {
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-
-                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-
-                                $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-
-                            }
-                        }
-                        if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                            if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
-                                $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
-
-                                if($result->staff_category_id == 2){
-                                    $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
-                                }
-
-                            }
-
-                            if ($result->status_id == 2) {
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
-                                }
-
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    if ($result->first_inactive == 1) {
-                                        $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
-                                    }
-                                }
-                            }
-                        }
-
-                        if ($result->request_status_id == 3 && $result->employee_type_id == 2) {
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
-                            }
-
-                            if ($result->status_id != 2) {
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    if ($result->active_rider_type_id == 1) {
-                                        $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
-                                    }
-                                    else {
-                                        $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
-                                    }
-
-                                }
-
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist Rider</div></button>';
-                                }
-
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
-
-
-                                    $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider To Staff</div></button>';
-                                }
-
-
-                            }
-
-                            if ($result->status_id == 2 && $result->check_if_rider_present_bit != null) {
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
-                                }
-
-                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                    if ($result->first_inactive == 1) {
-                                        $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
-                                    }
-                                }
-                            }
-                        }
-
                         if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                            $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                            $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
+
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+
                         }
+                    }
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+
+                            if ($result->staff_category_id == 2) {
+                                $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
+                            }
+
+                        }
+
+                        if ($result->status_id == 2) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
+                            }
+
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                if ($result->first_inactive == 1) {
+                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
+                                }
+                            }
+                        }
+                    }
+
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 2) {
+                        if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
+                        }
+
+                        if ($result->status_id != 2) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                if ($result->active_rider_type_id == 1) {
+                                    $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
+                                } else {
+                                    $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
+                                }
+
+                            }
+
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist Rider</div></button>';
+                            }
+
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+
+
+                                $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider To Staff</div></button>';
+                            }
+
+
+                        }
+
+                        if ($result->status_id == 2 && $result->check_if_rider_present_bit != null) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            }
+
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                if ($result->first_inactive == 1) {
+                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                                }
+                            }
+                        }
+                    }
 
                     if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        if($result->employee_type_id == 1){
+                        $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
+                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                        if ($result->employee_type_id == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
                         }
                     }
 
-                        $dropdown .= '
+                    $dropdown .= '
                 </div>
               </div>
             ';
-                        return $dropdown;
-                }
-                else {
+                    return $dropdown;
+                } else {
                     return '';
                 }
             });
-            if ($request->get('search_date_from')) {
-                if($request->get('search_date_to')){
-                    $from = $request->get('search_date_from').' 00:00:00';
-                    $to = $request->get('search_date_to').' 23:59:59';
-                    $datatable->whereBetween('employees.created_at', [$from, $to]);
-                }else{
-                    $from = $request->get('search_date_from');
-                    $datatable->whereDate('employees.created_at', $from);
-                }
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $datatable->whereBetween('employees.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $datatable->whereDate('employees.created_at', $from);
             }
+        }
         return $datatable->make(true);
     }
 
@@ -469,19 +463,17 @@ class AdminHumanResourseController extends Controller
             $employee->pin = $request->pin;
             $employee->update();
 
-            if($employee->employee_type_id == 1)
-            {
-                $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-                if($admin->exists()) {
+            if ($employee->employee_type_id == 1) {
+                $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($admin->exists()) {
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
                     $admin->dummy_pin = $employee->pin;
                     $admin->update();
                 }
-            }
-            else {
-                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-                if($rider->exists()) {
+            } else {
+                $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($rider->exists()) {
                     $rider = $rider->first();
                     $rider->pin = bcrypt($employee->pin);
                     $rider->dummy_pin = $employee->pin;
@@ -489,7 +481,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            return back()->with(['success'=>'Employee Pin Updated Successfully']);
+            return back()->with(['success' => 'Employee Pin Updated Successfully']);
         }
         return back()->with(['error' => 'Employee Not Found']);
     }
@@ -497,23 +489,20 @@ class AdminHumanResourseController extends Controller
     public function rejoin_employee(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Employee not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Employee not found!']);
         }
 
-        if($employee->employee_type_id == 1)
-        {
-            $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        if ($employee->employee_type_id == 1) {
+            $staff = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        } else {
+            $staff = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
         }
-        else{
-            $staff = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        }
-        if($staff->doesntExist()){
+        if ($staff->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Employee not found!']);
         }
         $staff = $staff->first();
@@ -546,10 +535,9 @@ class AdminHumanResourseController extends Controller
         $employee_id = $request->employee_id;
         if ($employee_id) {
             $employee = Employee::find($employee_id);
-            if($employee){
-                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-                if($rider->exists())
-                {
+            if ($employee) {
+                $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($rider->exists()) {
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
                     if ($rider_status == 1) {
@@ -575,10 +563,9 @@ class AdminHumanResourseController extends Controller
         $employee_id = $request->employee_id;
         if ($employee_id) {
             $employee = Employee::find($employee_id);
-            if($employee){
-                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-                if($rider->exists())
-                {
+            if ($employee) {
+                $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+                if ($rider->exists()) {
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
                     if ($rider_status == 2) {
@@ -623,8 +610,8 @@ class AdminHumanResourseController extends Controller
         if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($rider->doesntExist()){
+        $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($rider->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
 
@@ -651,8 +638,8 @@ class AdminHumanResourseController extends Controller
         if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($rider->doesntExist()){
+        $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($rider->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $rider = $rider->first();
@@ -678,8 +665,8 @@ class AdminHumanResourseController extends Controller
         if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($rider->doesntExist()){
+        $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($rider->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $rider = $rider->first();
@@ -705,8 +692,8 @@ class AdminHumanResourseController extends Controller
         if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
-        $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($staff->doesntExist()){
+        $staff = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($staff->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $staff = $staff->first();
@@ -733,8 +720,8 @@ class AdminHumanResourseController extends Controller
         if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
-        $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($staff->doesntExist()){
+        $staff = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($staff->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $staff = $staff->first();
@@ -777,8 +764,8 @@ class AdminHumanResourseController extends Controller
 
         $employee = $employee->first();
         $trax_id = $employee->trax_id;
-        $rider = Rider::where('trax_id',$trax_id)->where('trax_id','!=',null);
-        if($rider->doesntExist()) {
+        $rider = Rider::where('trax_id', $trax_id)->where('trax_id', '!=', null);
+        if ($rider->doesntExist()) {
             $rider = new Rider();
             $rider->city_id = $request->city_id;
             $rider->name = $request->rider_name;
@@ -791,18 +778,17 @@ class AdminHumanResourseController extends Controller
             $rider->created_by = Auth::id();
             $rider->trax_id = $trax_id;
             $rider->shift_id = $request->shift_id;
-            if($request->rider_type == 1) {
+            if ($request->rider_type == 1) {
                 $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
             }
-            $rider->rider_type_id  = $request->rider_type;
+            $rider->rider_type_id = $request->rider_type;
             $rider->save();
 
             $employee->first_inactive = 1;
             $employee->status_id = self::GetStatusOfEmployee($employee->id);
             $employee->save();
 
-        }
-        else{
+        } else {
             $rider = $rider->first();
         }
         if ($request->route_id == 'other') {
@@ -821,7 +807,7 @@ class AdminHumanResourseController extends Controller
             $route_id = $request->route_id;
         }
 
-        if($request->rider_type == 1) {
+        if ($request->rider_type == 1) {
             $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
         }
         $rider->route_id = $route_id;
@@ -842,20 +828,17 @@ class AdminHumanResourseController extends Controller
             $employee->rider_type_id = $request->rider_type;
             $employee->save();
 
-            if($request->has('rejoin_rider_bit'))
-            {
+            if ($request->has('rejoin_rider_bit')) {
                 $rejoin_request = new \Illuminate\Http\Request();
                 $rejoin_request->query->add(['employee_id' => $request->employee_id]);
                 $response = $this->rejoin_employee($rejoin_request);
-                if($response->getData()->status == 0)
-                {
-                    return redirect()->back()->with('success',$response->getData()->success);
-                }
-                else{
-                    return redirect()->back()->with('error',$response->getData()->error);
+                if ($response->getData()->status == 0) {
+                    return redirect()->back()->with('success', $response->getData()->success);
+                } else {
+                    return redirect()->back()->with('error', $response->getData()->error);
                 }
             }
-            return redirect()->back()->with('success','Rider Updated successfully');
+            return redirect()->back()->with('success', 'Rider Updated successfully');
         }
     }
 
@@ -897,17 +880,17 @@ class AdminHumanResourseController extends Controller
                 $employee = Employee::find($employee_id);
                 if (in_array($employee->request_status_id, [1, 2])) {
                     if ($employee->trax_id == null) {
-                        if($employee->employee_type_id == 1){
-                            if($employee->staff_category_id == 1){
+                        if ($employee->employee_type_id == 1) {
+                            if ($employee->staff_category_id == 1) {
                                 $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                                 $trax_id_prefix = 'Trax';
-                            }elseif ($employee->staff_category_id == 2){
+                            } elseif ($employee->staff_category_id == 2) {
                                 $global_setting = GlobalSettings::where('type', 'latest_intern_id');
                                 $trax_id_prefix = 'Trax-I-';
-                            }else{
+                            } else {
                                 return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
                             }
-                        }else{
+                        } else {
                             $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                             $trax_id_prefix = 'Trax';
                         }
@@ -929,7 +912,7 @@ class AdminHumanResourseController extends Controller
 
                     if ($employee->employee_type_id == 1) {
 
-                        $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+                        $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
 
                         if ($admin->doesntExist()) {
                             $admin = new Admin();
@@ -958,13 +941,12 @@ class AdminHumanResourseController extends Controller
 
                             $admin->save();
 
-                            if(count($employee->designation->hubs) == 0) {
+                            if (count($employee->designation->hubs) == 0) {
                                 $admin_hub = new AdminHub();
                                 $admin_hub->admin_id = $admin->id;
                                 $admin_hub->hub_id = $admin->default_hub_id;
                                 $admin_hub->save();
-                            }
-                            else{
+                            } else {
                                 foreach ($employee->designation->hubs as $hub) {
                                     $admin_hub = new AdminHub();
                                     $admin_hub->admin_id = $admin->id;
@@ -1024,7 +1006,7 @@ class AdminHumanResourseController extends Controller
         $educations = $employee->education_infos;
         $employments = $employee->employment_history;
         $attachments = $employee->attachments;
-        $place_of_birth_cities = City::where('business_category_id',1)->get();
+        $place_of_birth_cities = City::where('business_category_id', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
         $staff_categories = StaffCategory::all();
         $genders = EmployeeGender::all();
@@ -1035,19 +1017,19 @@ class AdminHumanResourseController extends Controller
         $rider_routes = Route::all();
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;
         $rider_route_id = $employee->rider->route_id ?? null;
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes'));
+        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
 //        return $request->joining_date_formatted;
         $request->validate([
-            'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
-            'official_number'=> 'bail|nullable|'.Rule::unique('employees', 'phone_number')->ignore($employee->id).'|'.Rule::unique('employees', 'official_phone_number')->ignore($employee->id).'',
-            'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
-            'email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
-            'personal_email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
-            'official_email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
+            'personal_number' => [Rule::unique('employees', 'phone_number')->ignore($employee->id), Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
+            'official_number' => 'bail|nullable|' . Rule::unique('employees', 'phone_number')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_phone_number')->ignore($employee->id) . '',
+            'cnic' => [Rule::unique('employees', 'cnic')->ignore($employee->id)],
+            'email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
+            'personal_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
+            'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
         ]);
 
 //        $employee->request_status_id = 2;
@@ -1068,7 +1050,7 @@ class AdminHumanResourseController extends Controller
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
 
-        if($employee->designation_id != $request->designation){
+        if ($employee->designation_id != $request->designation) {
             $designation_logs = new EmployeeDesignationLog();
             $designation_logs->updated_by = Auth::id();
             $designation_logs->designation_id = $employee->designation_id;
@@ -1095,25 +1077,21 @@ class AdminHumanResourseController extends Controller
         $employee->emergency_contact_person = $request->emergency_contact_person;
         $employee->update();
 
-        if($employee->employee_type_id == 1)
-        {
-            $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-            if($admin->exists())
-            {
+        if ($employee->employee_type_id == 1) {
+            $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+            if ($admin->exists()) {
                 $admin = $admin->first();
 
-                if($admin->designation_id != $employee->designation_id)
-                {
-                    AdminHub::where('admin_id',$admin->id)->delete();
+                if ($admin->designation_id != $employee->designation_id) {
+                    AdminHub::where('admin_id', $admin->id)->delete();
 
-                    $hubs = EmployeeDesignationHub::where('designation_id',$employee->designation_id)->get(['hub_id']);
-                    if(count($hubs) == 0) {
+                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+                    if (count($hubs) == 0) {
                         $admin_hub = new AdminHub();
                         $admin_hub->admin_id = $admin->id;
                         $admin_hub->hub_id = $employee->city->hub_city->id;
                         $admin_hub->save();
-                    }
-                    else{
+                    } else {
                         foreach ($hubs as $hub) {
                             $admin_hub = new AdminHub();
                             $admin_hub->admin_id = $admin->id;
@@ -1137,11 +1115,9 @@ class AdminHumanResourseController extends Controller
                 $admin->update();
 
             }
-        }
-        else{
-            $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-            if($rider->exists())
-            {
+        } else {
+            $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+            if ($rider->exists()) {
                 $rider = $rider->first();
                 $rider->city_id = $employee->city_id;
                 $rider->name = $employee->name;
@@ -2392,8 +2368,8 @@ class AdminHumanResourseController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 390);
         $departments = AdminDepartment::all();
-        $hubs = City::select('id','name')->where('hub',1)->get();
-        return view('admin.human_resource.designation',compact('departments','hubs'));
+        $hubs = City::select('id', 'name')->where('hub', 1)->get();
+        return view('admin.human_resource.designation', compact('departments', 'hubs'));
     }
 
     public function designation_list(Request $request)
@@ -2413,8 +2389,8 @@ class AdminHumanResourseController extends Controller
                     return 'Active';
                 }
             })
-            ->addColumn('hubs',function($data){
-                return EmployeeDesignationHub::where('designation_id',$data->id)->get(['hub_id'])->toArray();
+            ->addColumn('hubs', function ($data) {
+                return EmployeeDesignationHub::where('designation_id', $data->id)->get(['hub_id'])->toArray();
             })
             ->addColumn("action", function ($data) {
                 if (session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))) {
@@ -2475,7 +2451,7 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
-        if(session('role_id') == 1) {
+        if (session('role_id') == 1) {
             if ($request->has('hub_id')) {
                 foreach ($request->hub_id as $hub) {
                     $designation_hub = new EmployeeDesignationHub();
@@ -2485,7 +2461,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
         }
-        $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
+        $designation->code = 'Des' . str_pad($designation->id, 3, '0', STR_PAD_LEFT);
         $designation->save();
         return redirect()->back()->with('success', 'Designation Added Successfully!');
     }
@@ -2499,7 +2475,7 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
-        if(session('role_id') == 1) {
+        if (session('role_id') == 1) {
             EmployeeDesignationHub::where('designation_id', $designation->id)->delete();
 
             if ($request->has('hub_id')) {
@@ -2540,15 +2516,13 @@ class AdminHumanResourseController extends Controller
 
     public function employee_get_designation(Request $request)
     {
-        if($request->has('department_id'))
-        {
-            $designations = EmployeeDesignation::where('department_id',$request->department_id)->where('status',1);
-            if($designations->exists())
-            {
-                return response()->json(['status'=>1,'designations'=>$designations->get()]);
+        if ($request->has('department_id')) {
+            $designations = EmployeeDesignation::where('department_id', $request->department_id)->where('status', 1);
+            if ($designations->exists()) {
+                return response()->json(['status' => 1, 'designations' => $designations->get()]);
             }
 
-            return response()->json(['status'=>1]);
+            return response()->json(['status' => 1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Department is Required']);
         }
@@ -2556,14 +2530,12 @@ class AdminHumanResourseController extends Controller
 
     public function employee_get_cities(Request $request)
     {
-        if($request->has('zone_id'))
-        {
-            $cities = City::where('zone_id',$request->zone_id)->where('status',1);
-            if($cities->exists())
-            {
-                return response()->json(['status'=>1,'cities'=>$cities->get(['id','name'])]);
+        if ($request->has('zone_id')) {
+            $cities = City::where('zone_id', $request->zone_id)->where('status', 1);
+            if ($cities->exists()) {
+                return response()->json(['status' => 1, 'cities' => $cities->get(['id', 'name'])]);
             }
-            return response()->json(['status'=>1]);
+            return response()->json(['status' => 1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Zone is Required']);
         }
@@ -2571,14 +2543,12 @@ class AdminHumanResourseController extends Controller
 
     public function employee_get_routes(Request $request)
     {
-        if($request->has('city_id'))
-        {
-            $routes = Route::where('city_id',$request->city_id)->where('status',1);
-            if($routes->exists())
-            {
-                return response()->json(['status'=>1,'routes'=>$routes->get()]);
+        if ($request->has('city_id')) {
+            $routes = Route::where('city_id', $request->city_id)->where('status', 1);
+            if ($routes->exists()) {
+                return response()->json(['status' => 1, 'routes' => $routes->get()]);
             }
-            return response()->json(['status'=>1]);
+            return response()->json(['status' => 1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'City is Required']);
         }
@@ -2805,7 +2775,7 @@ class AdminHumanResourseController extends Controller
         }
         $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary');
         if (!in_array(596, session('permissions'))) {
-            $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
+            $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
         }
 
         $datatable = Datatables::of($payslips)
@@ -3511,11 +3481,12 @@ class AdminHumanResourseController extends Controller
         $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
-        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic]);
     }
 
     public function leave_list(Request $request)
     {
+//        dd(session('department_id'), session('role_id'));
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
         }
@@ -3525,23 +3496,30 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
 
-//        dd($employee_leaves);
         /*if(session('role_id') != 1 && session('role_id') != 63){
             $employee_leaves->where('ad.id', session('department_id'));
             if(session('department_id') != 6){
                 $employee_leaves->where('employee_leaves.employee_type_id', 1);
             }
         }*/
+        $find_manager = AdminDepartment::where('department_head_id', auth::user()->id)->first();
+        $department_head = "";
+        if (!empty($find_manager)) {
+            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
+                $department_head = $find_manager->department_head_id;
+                $employee_leaves = $employee_leaves->where(function ($query) use ($find_manager) {
+                    $query->where('department_id', $find_manager->id);
+                });
+            }
+        }else{
+            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {  //
+                $employee_leaves = $employee_leaves->where(function ($query) {
+                    $query->where('employee_leaves.employee_id', Auth::id());
+                });
+            }
 
-        if ((!in_array(session('role_id'), [63, 69, 70])) && (session('role_id') != 1)) {
-
-            $employee_leaves = $employee_leaves->where(function ($query) {
-
-                $query->where('employee_leaves.employee_id', Auth::id());
-
-            });
         }
 
 
@@ -3554,7 +3532,7 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->editColumn('leave_id', function ($employee) {
-                    return $employee->leave_id;
+                return $employee->leave_id;
             })
             ->editColumn('name', function ($employee) {
                 if ($employee->employee_type == 2) {
@@ -3592,11 +3570,11 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->editColumn('days', function ($employee) {
-                if($employee->to){
+                if ($employee->to) {
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
                     return $start_date->diffInDays($end_date) + 1;
-                }else{
+                } else {
                     return 1;
                 }
             })
@@ -3615,7 +3593,7 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             })
             ->addColumn("action", function ($employee) {
-                if (in_array($employee->status_id, [1,2,3])) {
+                if (in_array($employee->status_id, [1, 2, 3])) {
                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
                         $dropdown = '
               <div class="btn-group">
@@ -3645,28 +3623,29 @@ class AdminHumanResourseController extends Controller
 
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type_id',1);
+            $datatable->where('a.id', $search_admin)->where('employee_type_id', 1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider)->where('employee_type_id',2);
+            $datatable->where('r.id', $search_rider)->where('employee_type_id', 2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
-                $q->where([['a.trax_id', $search_trax_id],['employee_type_id',1]])
-                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type_id',2]]);
+            $datatable->where(function ($q) use ($search_trax_id) {
+                $q->where([['a.trax_id', $search_trax_id], ['employee_type_id', 1]])
+                    ->orWhere([['r.trax_id', $search_trax_id], ['employee_type_id', 2]]);
             });
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function($q) use ($search_cnic){
-                $q->where([['a.cnic', $search_cnic],['employee_type_id',1]])
-                    ->orWhere([['r.cnic', $search_cnic],['employee_type_id',2]]);
+            $datatable->where(function ($q) use ($search_cnic) {
+                $q->where([['a.cnic', $search_cnic], ['employee_type_id', 1]])
+                    ->orWhere([['r.cnic', $search_cnic], ['employee_type_id', 2]]);
             });
         }
         return $datatable->make(true);
     }
+
     public function leave_request(Request $request)
     {
-        if((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+        if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
             $admin_id = $request->admin_id;
             $from = $request->requested_from_date;
             $to = $request->requested_to_date;
@@ -3695,9 +3674,7 @@ class AdminHumanResourseController extends Controller
                 return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
             }
             return response()->json(['status' => '1', 'error' => 'User Not Found']);
-        }
-        else
-        {
+        } else {
             return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
         }
     }
@@ -3710,7 +3687,7 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1,2,3])) {
+                if (in_array($employee_leaves->status, [1, 2, 3])) {
                     $employee_leaves->status = 4;
                     $employee_leaves->updated_by = $admin_id;
                     if ($employee_leaves->employee_id == 1) {
@@ -3718,7 +3695,7 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $user = Rider::find($employee_leaves->employee_id);
                     }
-                    if(!$user){
+                    if (!$user) {
                         return redirect()->back()->with('error', 'Invalid Employee ID');
                     }
                     $shift = EmployeeShift::find($user->shift_id);
@@ -3794,7 +3771,7 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1,2,3])) {
+                if (in_array($employee_leaves->status, [1, 2, 3])) {
                     $employee_leaves->status = 5;
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
@@ -3814,54 +3791,51 @@ class AdminHumanResourseController extends Controller
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
         if ($admin) {
-                $leave_request = EmployeeLeave::where('id', $request->leave_id);
-                if ($leave_request->exists()) {
-                    $leave_request = $leave_request->first();
-                    if (in_array($leave_request->status, [1,2,3])) {
-                        $leave_request->from = Carbon::Parse($request->from)->format("Y-m-d");
-                        $leave_request->to = Carbon::Parse($request->to)->format("Y-m-d");
-                        $leave_request->applied_reason = $request->reason;
-                        $leave_request->updated_by = $admin_id;
-                        $leave_request->save();
-                        return redirect()->back()->with('success', 'Leave Edit Successfully');
-                    }
-                    return redirect()->back()->with('error', 'Leave Already Approved');
+            $leave_request = EmployeeLeave::where('id', $request->leave_id);
+            if ($leave_request->exists()) {
+                $leave_request = $leave_request->first();
+                if (in_array($leave_request->status, [1, 2, 3])) {
+                    $leave_request->from = Carbon::Parse($request->from)->format("Y-m-d");
+                    $leave_request->to = Carbon::Parse($request->to)->format("Y-m-d");
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->updated_by = $admin_id;
+                    $leave_request->save();
+                    return redirect()->back()->with('success', 'Leave Edit Successfully');
                 }
-                return redirect()->back()->with('error', 'Invalid Leave ID');
+                return redirect()->back()->with('error', 'Leave Already Approved');
             }
+            return redirect()->back()->with('error', 'Invalid Leave ID');
+        }
     }
 
     public function convert_rider_to_staff(Request $request)
     {
         $employee = Employee::find($request->employee_id);
-        if(!$employee)
-        {
-            return back()->with("error","Rider Not Found");
+        if (!$employee) {
+            return back()->with("error", "Rider Not Found");
         }
 
-        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-        if($rider->doesntExist())
-        {
-            return back()->with("error","Rider Not Found");
+        $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        if ($rider->doesntExist()) {
+            return back()->with("error", "Rider Not Found");
         }
 
         $rider = $rider->first();
 
 
-        $dn_check = DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+        $dn_check = DeliveryNote::where('rider_id', $rider->id)->where('status', '!=', 4)->where(function ($q) {
             $q->where('status', 0)
                 ->orWhere('dncc_status', 0);
         });
-        if($dn_check->exists())
-        {
+        if ($dn_check->exists()) {
             $dn_check = $dn_check->pluck('id')->toArray();
             $dn = implode(", ", $dn_check);
-            return back()->with("error", "Rider Has An Unfinished Following Delivery Note : " .$dn);
+            return back()->with("error", "Rider Has An Unfinished Following Delivery Note : " . $dn);
         }
 
 
-        $DN = DeliveryNote::where('rider_id',$rider->id)->where('status',1)->where('dncc_status',1)->first();
-        if($DN) {
+        $DN = DeliveryNote::where('rider_id', $rider->id)->where('status', 1)->where('dncc_status', 1)->first();
+        if ($DN) {
             $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn', 'sdn.id', 'delivery_note_station_deposit_notes.station_deposit_note_id')
                 ->select(['sdn.status'])
                 ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id);
@@ -3871,28 +3845,26 @@ class AdminHumanResourseController extends Controller
             }
         }
 
-        $pn_check = V2PickupNote::where('rider_id',$rider->id)->where('status', 0);
-        if($pn_check->exists())
-        {
+        $pn_check = V2PickupNote::where('rider_id', $rider->id)->where('status', 0);
+        if ($pn_check->exists()) {
             $pn_check = $pn_check->pluck('id')->toArray();
             $pn = implode(", ", $pn_check);
-            return back()->with("error","Rider Has An Unfinished Following Pickup Note : ".$pn);
+            return back()->with("error", "Rider Has An Unfinished Following Pickup Note : " . $pn);
         }
 
 
-        $rn_check = ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2]);
-        if($rn_check->exists())
-        {
+        $rn_check = ReturnNote::where('rider_id', $rider->id)->whereNotIn('status', [1, 2]);
+        if ($rn_check->exists()) {
             $rn_check = $rn_check->pluck('id')->toArray();
             $rn = implode(", ", $rn_check);
-            return back()->with("error","Rider Has An Unfinished Following Return Note : ".$rn);
+            return back()->with("error", "Rider Has An Unfinished Following Return Note : " . $rn);
         }
 
         $admin = new Admin();
         $admin->name = $rider->name;
         $admin->phone_number = $rider->phone;
         $admin->cnic = $rider->cnic;
-        $admin->role_id = EmployeeDesignation::where('id',$request->designation_id)->first()->role_id ?? 79;
+        $admin->role_id = EmployeeDesignation::where('id', $request->designation_id)->first()->role_id ?? 79;
         $admin->password = $rider->pin;
         $admin->default_hub_id = $rider->city->hub_city->id;
         $admin->trax_id = $rider->trax_id;
@@ -3902,15 +3874,13 @@ class AdminHumanResourseController extends Controller
         $admin->dummy_pin = $rider->dummy_pin;
         $admin->save();
 
-        $hubs = EmployeeDesignationHub::where('designation_id',$request->designation_id)->get();
-        if(count($hubs) == 0)
-        {
+        $hubs = EmployeeDesignationHub::where('designation_id', $request->designation_id)->get();
+        if (count($hubs) == 0) {
             $admin_hub = new AdminHub();
             $admin_hub->admin_id = $admin->id;
             $admin_hub->hub_id = $admin->default_hub_id;
             $admin_hub->save();
-        }
-        else {
+        } else {
             foreach ($hubs as $hub) {
                 $admin_hub = new AdminHub();
                 $admin_hub->admin_id = $admin->id;
@@ -3936,21 +3906,21 @@ class AdminHumanResourseController extends Controller
         $rider->update();
 
         EmployeeConvertHistory::create([
-           'rider_id' => $rider->id,
+            'rider_id' => $rider->id,
             'converted_by' => Auth::id(),
         ]);
 
-        return back()->with("success","Rider Converted To Staff Successfully");
+        return back()->with("success", "Rider Converted To Staff Successfully");
     }
 
-    public function convert_intern_to_staff(Request $request){
+    public function convert_intern_to_staff(Request $request)
+    {
         $employee = Employee::find($request->employee_id);
-        if($employee)
-        {
+        if ($employee) {
             $admin = Admin::where('trax_id', $employee->trax_id);
-            if($admin->exists()){
+            if ($admin->exists()) {
                 $admin = $admin->first();
-                if($employee->staff_category_id == 2){
+                if ($employee->staff_category_id == 2) {
                     $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                     $trax_id_prefix = 'Trax';
                     if ($global_setting->exists()) {
@@ -3977,15 +3947,16 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
     }
 
-    public function designation_change_logs(Request $request){
-        $designation_logs = EmployeeDesignationLog::join('admins as a', 'a.id','=','employee_designation_logs.updated_by')
+    public function designation_change_logs(Request $request)
+    {
+        $designation_logs = EmployeeDesignationLog::join('admins as a', 'a.id', '=', 'employee_designation_logs.updated_by')
             ->join('employee_designations as ed', 'ed.id', '=', 'employee_designation_logs.designation_id')
             ->select('a.name as updated_by', 'ed.name as designation', 'employee_designation_logs.created_at as updated_at')
             ->where('employee_designation_logs.employee_id', $request->employee_id)->orderBy('employee_designation_logs.id', 'DESC');
-        if($designation_logs->exists()){
+        if ($designation_logs->exists()) {
             $designation_logs = $designation_logs->get();
             return response()->json(['status' => 1, 'logs' => $designation_logs]);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
         }
     }
