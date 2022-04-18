@@ -248,7 +248,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
         }
 
-        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
 //        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
 
 
