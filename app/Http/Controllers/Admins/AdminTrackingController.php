@@ -1165,7 +1165,7 @@ class AdminTrackingController extends Controller
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
-                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';

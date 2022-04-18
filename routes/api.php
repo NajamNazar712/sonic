@@ -66,6 +66,7 @@ Route::name('api.')->group(function () {
             Route::post('add', 'APIController@receiving_sheet_add')->name('add');
             Route::post('remove', 'APIController@receiving_sheet_void')->name('remove');
             Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
+            Route::post('list', 'APIController@receiving_sheet_list')->name('list');
 		});
 
 		Route::get('cities', 'APIController@cities')->name('cities');
@@ -427,8 +428,21 @@ Route::name('api.')->group(function () {
 
     });
 
+    Route::prefix('botsify')->name('botsify.')->group(function () {
+        Route::post('shipper/phone_number', 'APIController@whatsapp_shipper_phone_number')->name('shipper.phone_number');
+        Route::post('shipment/tracking', 'APIController@whatsapp_shipper_tracking')->name('shipment.tracking');
+        Route::post('crm/launch', 'APIController@whatsapp_crm_request_create')->name('crm.launch');
+        Route::post('crm/tracking', 'APIController@whatsapp_shipper_crm_tracking')->name('crm.tracking');
+
+    });
+
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
-
+    //Hbl Konnect
+    Route::prefix('banking')->name('banking.')->group(function () {
+        Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
+        Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+    });
+    //Hbl Konnect
     
 });

@@ -222,7 +222,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL,$reference_3_id = NULL,$reference_4_id = NULL)
     {
         $notification = Notification::find($id);
 
@@ -9134,6 +9134,62 @@ class NotificationsController extends Controller
 
                     $to = $phone_number;
                     self::sms($body, $to);
+                }
+				else if ($id == 172) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $name, $body);
+                    }
+                    if (strpos($body, '[total_amount]') !== FALSE) {
+                        $body = str_replace('[total_amount]', $reference_3_id, $body);
+                    }
+                    if (strpos($body, '[updated_at]') !== FALSE) {
+                        $body = str_replace('[updated_at]', $reference_4_id, $body);
+                    }
+                    $link ='https://sonic.pk/cod/finance/payments';
+                    if (strpos($body, '[status_link]') !== FALSE) {
+                        $body = str_replace('[status_link]', $link, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
+                }                
+				else if ($id == 173) {
+                    $erf_id = $reference_1_id;
+                    $erf = EmployeeRequisition::find($erf_id);
+                    $hod_email = Admin::find($erf->department_head_id)->email;
+                    $erf = "ERF ID #" .$erf_id;
+                    if (strpos($body, '[erf_id]') !== FALSE) {
+                        $body = str_replace('[erf_id]', $erf, $body);
+                    }
+                    $to = $hod_email;
+                    self::email($subject, $body, $to);
+
+                }
+                else if ($id == 174) {
+                    $erf_id = $reference_1_id;
+                    $erf = EmployeeRequisition::find($erf_id);
+                    if($erf->status_id == 2){
+                        $admin = Admin::find($erf->department_head_id);
+                        $name = $admin->name .' '.'(HOD)';
+                        $to = 'hassan@trax.pk';
+                    }
+                    else if($erf->status_id == 3){
+                        $name = 'Muhammad Hassan Khan' . '(CEO)';
+                        $to = 'hr.dept@trax.pk';
+                    }
+
+                    $erf = "ERF ID #" .$erf_id;
+                    if (strpos($body, '[erf_id]') !== FALSE) {
+                        $body = str_replace('[erf_id]', $erf, $body);
+                    }
+                    if (strpos($body, '[admin]') !== FALSE) {
+                        $body = str_replace('[admin]', $name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+
                 }
             }
         }

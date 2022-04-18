@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -19,6 +19,9 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -96,6 +99,8 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
@@ -1505,6 +1510,19 @@ class DeliveryController extends Controller
             }
             $category = $rider->rider_category->name;
             $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
+
+            //HBL Konnect Integration
+            $hbl_transactions_amount = 0;
+            $hbl_transactions_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $request->id);
+            if($hbl_transactions_delivery_note->exists()){
+                $hbl_transactions_delivery_note = $hbl_transactions_delivery_note->first();
+                $hbl_transactions_amount = $hbl_transactions_delivery_note->transactions_amount;
+                $cash_amount = $hbl_transactions_delivery_note->cash_amount;
+            }
+            else{
+                $cash_amount = $delivery_note->recived_cod_amount;
+            }
+            //HBL Konnect Integration
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1517,7 +1535,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                            <td colspan="2" rowspan="9" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1541,6 +1559,14 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Collection Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>HBL Transactions Amount</strong></td>
+                            <td>Rs ' . number_format($hbl_transactions_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Cash Amount</strong></td>
+                            <td>Rs ' . number_format($cash_amount) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
@@ -4106,7 +4132,8 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone'])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
@@ -4121,6 +4148,22 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
+            })
+            ->editColumn('transactions_amount', function ($shipment) {
+                if($shipment->transactions_amount != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('cash_amount', function ($shipment) {
+                if($shipment->cash_amount != null){
+                    return number_format($shipment->cash_amount);
+                }
+                else{
+                    return number_format($shipment->amount);
+                }
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -4236,6 +4279,29 @@ class DeliveryController extends Controller
 
 
     }
+
+    //HBL Konnect Information
+    public function hbl_konnect_transactions_information(Request $request)
+    {
+        $delivery_note_id = $request->delivery_note_id;
+        $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $delivery_note_id);
+        if($hbl_konnect_transactions->exists()){
+            $hbl_konnect_transactions = $hbl_konnect_transactions->get();
+            $details = array();
+            foreach ($hbl_konnect_transactions as $key => $hbl_konnect_transaction){
+                $details[$key]['transaction_id'] = $hbl_konnect_transaction->transaction_id;
+                $details[$key]['amount'] = $hbl_konnect_transaction->amount;
+                $details[$key]['deposited_at'] = Carbon::parse($hbl_konnect_transaction->created_at)->toDateTimeString();
+            }
+            return response()->json(['status' => 1, 'details' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Transactions not found!']);
+        }
+
+
+    }
+    //HBL Konnect Information
 
     public function completed_deliveries_index()
     {
@@ -4468,7 +4534,7 @@ class DeliveryController extends Controller
                     $pickup_notes = RetailPickupNote::where('status', 4)->where('pncc_status', 0)->where('hub_id', $sdn->hub_id)->orderBy('id', 'desc')->get(['id']);
                     return response()->json(['status' => 1, 'dn' => $pickup_notes]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not add PNCC to SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4503,9 +4569,9 @@ class DeliveryController extends Controller
                     $pickup_note->pncc_status = 1;
                     $pickup_note->update();
 
-                    return back()->with(['success' => 'PNCC added to SDN']);
+                    return back()->with(['success' => 'RNCC added to SDN']);
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4528,7 +4594,7 @@ class DeliveryController extends Controller
 
                     return response()->json(['status' => 1, 'pncc' => RetailPickupNote::whereIn('id', $pickup_note_ids)->get()]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not remove PNCC from SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not remove RNCC from SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4571,12 +4637,12 @@ class DeliveryController extends Controller
                         $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
                         $sdn->update();
 
-                        return back()->with(['success' => 'PNCC removed successfully']);
+                        return back()->with(['success' => 'RNCC removed successfully']);
                     } else {
-                        return back()->with('error', 'Invalid PNCC');
+                        return back()->with('error', 'Invalid RNCC');
                     }
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4734,7 +4800,7 @@ class DeliveryController extends Controller
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest']);
+            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -4840,6 +4906,16 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('aging', function ($sdn) {
+                $start_date = Carbon::parse($sdn->created_at);
+                if ($sdn->status == 3) {
+                    $end_date = Carbon::parse($sdn->closed_at);
+                    return $end_date->diffInHours($start_date);;
+                } else {
+                    $end_date = Carbon::now();
+                    return $end_date->diffInHours($start_date);;
+                }
+            })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
                 $retail_route = route('admin.delivery.sdn.retail.details', ['id' => $result->sdn_id]);
@@ -4853,11 +4929,11 @@ class DeliveryController extends Controller
 
                 $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
 
-                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add RNCC</div></button>';
 
                 $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
 
-                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove RNCC</div></button>';
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
@@ -4866,6 +4942,12 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1){
+
+                    $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
+                    $dropdown .= $closed_status;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4917,8 +4999,10 @@ class DeliveryController extends Controller
                     return 'Created';
                 } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
@@ -4927,6 +5011,8 @@ class DeliveryController extends Controller
                 } else if ($keyword == 1) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 2) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 3) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
@@ -5117,6 +5203,19 @@ class DeliveryController extends Controller
         $sdn->status = 1;
         $sdn->save();
 
+        $pnsdn = PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->get()->first();
+            if ($pnsdn) {
+                    $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id', $pnsdn->retail_pickup_note_id)->get()->first();
+                    if($retail_shipment){
+                        $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
+                        if($retail_cash_depost){
+
+                            RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                                'status' => 2,
+                            ]);
+                        }
+                    }
+            }
         self::add_sdn_logs($sdn_id, 1, Auth::id());
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 
@@ -6312,6 +6411,7 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
+                    ShipmentChargesController::weight($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
@@ -6529,6 +6629,7 @@ class DeliveryController extends Controller
                     ]);
 
                     ShipmentChargesController::cash_handling($shipment_id);
+                    ShipmentChargesController::weight($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
@@ -7824,8 +7925,11 @@ class DeliveryController extends Controller
                     else if($log->status_id == 1){
                         $status_logs[$log->id]['status'] = 'Deposited';
                     }
-                    else{
+                    else if($log->status_id == 2){
                         $status_logs[$log->id]['status'] = 'Resolved';
+                    }
+                    else{
+                        $status_logs[$log->id]['status'] = 'Closed';
                     }
                     $status_logs[$log->id]['updated_by'] = $log->updated_by->name;
                     $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
@@ -7834,6 +7938,43 @@ class DeliveryController extends Controller
                 return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function closed(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if ($station_deposit_note->status == 1) {
+                $station_deposit_note->status = 3;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
+    public function bulk_closed(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
+                    $station_deposit_note->status = 3;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }
+            }
+            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+
+        } else {
+            return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
+
         }
     }
 }

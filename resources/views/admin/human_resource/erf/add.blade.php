@@ -24,19 +24,28 @@
                                         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
                                             <h2 class="ml-2"> ERF Type</h2>
                                         </div>
-                                        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 mb-2">
+                                        <div class="col-md-8 col-lg-8 mb-2">
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
-                                                <label class="form-check-label" for="inlineRadio1" >Additional</label>
+                                                <h4 class="form-check-label" for="inlineRadio1"><b>New</b></h4>
                                             </div>
 
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
-                                                <label class="form-check-label" for="inlineRadio2">Replacement</label>
+                                                <h4 class="form-check-label" for="inlineRadio2"><b>Replacement</b></h4>
+                                            </div>
+                                            <div class="form-check form-check-inline pull-right replacement_employee_status d-none">
+                                                <input class="form-check-input" type="radio" name="employee_status" id="inactive" value="1"/>
+                                                <label class="form-check-label" for="inlineRadio1" >Inactive</label>
+                                            </div>
+
+                                            <div class="form-check form-check-inline pull-right replacement_employee_status d-none">
+                                                <input class="form-check-input" type="radio" name="employee_status" id="notice_period" value="2"/>
+                                                <label class="form-check-label" for="inlineRadio2">Notice Period</label>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row div_row">
+                                    <div class="row form_div_row">
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                             <div class="form-group">
                                                 <input type="hidden"  name="admin_email" id="admin_email">
@@ -134,7 +143,7 @@
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">
                                             <div class="form-group ">
-                                                <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowance is required">
+                                                <select name="allowances[]" class="select2" id="allowance" multiple="multiple">
                                                     @foreach($allowances as $allowance)
                                                         <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>
                                                     @endforeach
@@ -191,6 +200,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
 @endsection
 
 @section('js')
@@ -215,7 +225,9 @@
                 width: '100%',
                 placeholder: 'HOD*'
             });
-            
+
+            var trax_ids = [];
+
             $('#department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
@@ -243,10 +255,17 @@
                                 data:data1,
                                 placeholder: 'Select Designation*'
                             });
-                        $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
+                            $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
 
-                            department_head
-                            console.log(data);
+
+                            $('.auto_trax_id').empty();
+                            $.each(data.trax_ids, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('.auto_trax_id').append(newOption);
+                            });
+                            $('.auto_trax_id').val('').trigger('change');
+
+                            trax_ids = data.trax_ids;
                         }
                         else{
                             toastr.error(data.error, 'Error!', {
@@ -254,6 +273,7 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+
                     });
                 }
             });
@@ -276,7 +296,7 @@
             });
             $('#allowance').select2({
                 width:'100%',
-                placeholder:"Requirements/Allowances*",
+                placeholder:"Requirements/Allowances",
                 allowClear:true,
                 dropdownParent:$('#erf_form')
             });
@@ -313,7 +333,12 @@
                  $("#city").val('').change();
                  $("#hub").val('').change();
                  $('#new_div').remove();
+                 $('#new_div').remove();
+                 $('#main_div').remove();
+                 $('.add_slab_div').remove();
                  $('hr').remove();
+                 $('.replacement_employee_status').addClass('d-none');
+
 
 
                 var vacancies = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">\n' +
@@ -409,7 +434,7 @@
 
                 var allowance = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">\n' +
                     '                                        <div class="form-group ">\n' +
-                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowances are required">\n' +
+                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">\n' +
                     '                                              @foreach($allowances as $allowance)\n' +
                     '                                                  <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>\n' +
                     '                                              @endforeach\n' +
@@ -420,7 +445,7 @@
                 $("#erf_form #description_div").after(allowance);
                 $('#allowance').select2({
                     width:'100%',
-                    placeholder:"Allowances*",
+                    placeholder:"Allowances",
                     allowClear:true,
                     dropdownParent:$('#erf_form')
                 });
@@ -428,6 +453,7 @@
             });
 
 
+                
             var today = '{{ $today }}';
             $('#replacement').click(function () {
                 $("#department").val('').change();
@@ -435,25 +461,97 @@
                 $("#department_head").val('').change();
                 $("#city").val('').change();
                 $("#hub").val('').change();
+                $(".replacement_employee_status").removeClass('d-none');
+                $('#main_div').remove();
+                $('.add_slab_div').remove();
+                $('hr').remove();
                 $("div").remove("#vacancies_div,#position_div,#allowance_div,#description_div,#skills_div,#qualification_div,#range_div");
+                
+                    @php
+                        $count = 0;
+                    @endphp
 
                 var new_row ='<hr>'+
-                    '<div class="row w-100 justify-content-center mb-5" id="new_div">' +
-                    '<table class="table table-bordered mb-5" id="dynamic_field">  \n' +
-                    '                    <tr>  \n' +
-                    '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td> \n' +
-                    '                        <td><div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Last Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
-                    '                        <td><div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
-                    '                        <td class="text-center"><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
-                    '                    </tr>  \n' +
-                    '                </table>'+
+                    '<div class="row" id="main_div" style="width:100% !important">'+
+                        '<div class="row" id="on_weight_row0" style="width:100% !important">\n' +
+                            '<div class="col text-center">\n' +
+                                '<label>Trax Id</label>' +
+                                '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 validated duplicate_check auto_trax_id" id="trax_id" name="addmore[0][trax_id]">' +
 
-                    '</div>';
-                $("#erf_form .button_div").prepend(new_row);
+                       '</select></div>' +
+                '</div>\n' +
+                            '<div class="col text-center">\n' +
+                    '\n' +        '<label>Gross Salary</label>' +
+                    '           <div class="form-group"><input type="text" name="addmore[0][salary]" id="salary" placeholder="Gross Salary*" class="form-control" data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
+                            '</div>\n' +
+                        '<div class="col text-center">\n' +
+                '\n' +  '<label>Date</label>' +
+                        '<div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required" style="width:230px"></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Name</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][name]" class="form-control" id="name" placeholder="Name" disabled></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Designation</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][employee_designation]" class="form-control" id="employee_designation" placeholder="Designation" disabled></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +  '<label>Last Working Day</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][last_day]" class="form-control" id="last_day" placeholder="Last Working Day" disabled></div>'+
+                    '</div>\n' +
+                     @if(session('role_id') == 1 || in_array(Auth::id(),[3,69,372,500,8,70,32,497,57,12,760,897,8,577]) || session('department_id') == 10)
+                         '<div class="col text-center">\n' +
+                    '\n' +  '<label>Last Gross Salary</label>' +
+                    '<div class="form-group"> <input type="text" name="addmore[0][last_salary]" class="form-control" id="last_salary" placeholder="Last Salary" disabled></div>'+
+                    '</div>\n' +
+                     @endif
+                    '<div class="col mt-2 close_row0">\n' +
+                    '@if($count == 1)\n' +
+                    '    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
+                    '@endif\n' +
+                    '</div>\n' +
+                    '\n' +
+                    '</div>\n' +
+
+                    '</div>\n' +
+                    '<div class ="add_slab_div">\n' +
+                    '    <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="add_slabs_btn"><i class="la la-plus"></i></button>\n' +
+                    '                                        </div>';
+
+               
+                $('#erf_form .button_div').before(new_row);
+
                 $('#trax_id').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id*'
+                }).bind('change',function() {
+                    var trax_id = $(this).val();
+                    if (trax_id) {
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.erf.employee_details') !!}',
+                            method: 'POST',
+                            data: {
+                                'trax_id': trax_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                 $('#last_salary').val(data.details.last_salary);
+                                 $('#name').val(data.details.name );
+                                 $('#employee_designation').val(data.details.designation);
+                                 $('#last_day').val(data.details.last_working_date );
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
                 });
+
                 var to_date = $('#to_date').pickadate({
                     firstDay: 1,
                     clear: 'Clear',
@@ -528,18 +626,93 @@
                  }
              });
 
+            var count = 0;
 
-            var i = 0;
-            $('body').on('click','#add',function(){
-                ++i;
-                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id'+i+'" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" id="gross_salary'+i+'" /></div></td> ' +
-                    ' <td><div class="form-group"> <input type="text" name="addmore['+i+'][date]" class="form-control bg-primary border-primary white rounded-right " id="append_date'+i+'" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div></td>' +
-                    '<td class="text-center"><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
-                $('#leavers_trax_id'+i+'').prepend('<option value="" selected="selected"></option>').select2({
+            $('body').on('click','#add_slabs_btn',function () {
+                var row_count = count + 1;
+                let htmdiv =
+                        '<div class="row" id="on_weight_row'+row_count+'" style="width: 100% !important">\n' +
+                    '<div class="col text-center">\n' +
+
+                    '<div class="form-group" style="width:150px !important"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control validated duplicate_check select2 auto_trax_id" id="leavers_trax_id'+row_count+'" name="addmore['+row_count+'][trax_id]"></select></div>'+
+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][salary]" id="gross_salary'+row_count+'" placeholder="Gross Salary*" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" min=1 /></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '\n' +
+                    '<div class="form-group"> <input type="text" name="addmore['+row_count+'][date]" class="form-control bg-primary border-primary white rounded-right" id="append_date'+row_count+'" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required" style="width:230px"></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][name]" id="leavers_name'+row_count+'" placeholder="Name" class="form-control"  disabled/></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][designation]" id="leavers_designation'+row_count+'" placeholder="Designation" class="form-control"  disabled/></div>'+
+                    '</div>\n' +
+                    '<div class="col text-center">\n' +
+                    '<div class="form-group"><input type="text" name="addmore['+row_count+'][last_working_day]" id="leavers_last_working_day'+row_count+'" placeholder="Last Working Day" class="form-control" disabled/></div>'+
+                    '</div>\n' +
+                    @if(session('role_id') == 1 || in_array(Auth::id(),[3,69,372,500,8,70,32,497,57,12,760,897,8,577]) || session('department_id') == 10)
+                            '<div class="col text-center">\n' +
+                    '<div class="form-group"> <input type="text" name="addmore['+row_count+'][last_salary]" class="form-control" id="add_last_salary'+row_count+'" placeholder="Last Salary" disabled></div>'+
+                    '</div>\n' +
+                        @endif
+                    '<div class="col">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>\n' +
+                    '</div>\n' +
+                    '\n' +
+                    '</div></div>\n';
+
+
+                $('#main_div').append(htmdiv);
+
+                $("#on_weight_row"+row_count+" .validated").each(function(){
+                    $( this ).rules( "add", {
+                        required: true,
+                    });
+
+                });
+
+                $('#leavers_trax_id'+row_count+'').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id*'
+                }).bind('change',function() {
+                    var trax_id = $(this).val();
+                    if (trax_id) {
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.erf.employee_details') !!}',
+                            method: 'POST',
+                            data: {
+                                'trax_id': trax_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                $('#add_last_salary'+row_count+'').val(data.details.last_salary );
+                                $('#leavers_name'+row_count+'').val(data.details.name );
+                                $('#leavers_designation'+row_count+'').val(data.details.designation);
+                                $('#leavers_last_working_day'+row_count+'').val(data.details.last_working_date );
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
                 });
-                $('#gross_salary'+i+'').inputmask({
+
+               
+                $.each(trax_ids, function (key, value) {
+                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                    $('#leavers_trax_id' + row_count + '').append(newOption);
+                });
+                $('#leavers_trax_id' + row_count + '').val('').trigger('change');
+
+
+                $('#gross_salary'+row_count+'').inputmask({
                     'alias': 'decimal',
                     'allowMinus': false,
                     'allowPlus': false,
@@ -547,7 +720,7 @@
                     'digits': 2,
                 });
 
-                var date = $('#append_date'+i+'').pickadate({
+                var date = $('#append_date'+row_count+'').pickadate({
                     firstDay: 1,
                     clear: 'Clear',
                     max : new Date(today),
@@ -564,11 +737,13 @@
 
                     }
                 });
+                count++;
             });
 
-            $(document).on('click', '.remove-tr', function(){
-                $(this).parents('tr').remove();
-            });
+        });
+
+        $('body').on('click','.on_weight_close',function () {
+            $(this).parent().parent().remove();
         });
 
         $('#erf_form').validate({
@@ -579,8 +754,18 @@
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
-                $('#department_head').removeAttr('disabled');
 
+                if ($("#replacement").is(":checked")) {
+                    if(!$("#inactive").is(':checked') && !$("#notice_period").is(':checked')) {
+                        toastr.error("Mark Inactive/Notice Period for Replacement", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+                }
+                
+                $('#department_head').removeAttr('disabled');
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
                     swal({
@@ -592,18 +777,26 @@
                         closeOnEsc: false
                     });
                     form.submit();
-
                 }
-                
             }
+
         });
 
-
-       /* $('#erf_form').on('keypress',function (e) {
-            if(e.keyCode == 13) {
-                e.preventDefault();
+        $.validator.addMethod("duplicate_check", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.duplicate_check')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
             }
-        });*/
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Trax ID Can Not Be Duplicate");
+
+
 
     </script>
 @endsection
