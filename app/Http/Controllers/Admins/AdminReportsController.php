@@ -18,6 +18,7 @@ use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
@@ -7290,8 +7291,12 @@ class AdminReportsController extends Controller
     public function daily_visit_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 193);
-        $admins = Admin::where('status', 1)->get(['id', 'name']);
-        return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
+        $admins = Admin::where('admins.status', 1)
+            ->leftjoin('employee_designations as ed','admins.designation_id','ed.id')
+            ->where('ed.department_id',7)
+            ->get(['admins.id', 'admins.name']);
+        $ratings = CrmRequestRating::all();
+        return view('admin.reports.daily_visit_report')->with(['admins' => $admins,'ratings'=>$ratings]);
     }
 
     public function daily_visit_list(Request $request)
@@ -7304,7 +7309,8 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
             ->leftjoin('cities as c', 'c.id', '=', 'a.default_hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone');
+            ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr) {
@@ -7338,6 +7344,10 @@ class AdminReportsController extends Controller
         //AdminUser Filter
         if ($team_member = $request->get('team_member')) {
             $datatables->where('a.id', $team_member);
+        }
+
+        if ($rating = $request->get('rating')) {
+            $datatables->where('daily_visits.rating_id', $rating);
         }
         //VisitDate filter
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -10404,6 +10414,53 @@ class AdminReportsController extends Controller
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatable->whereBetween('sar.created_at', [$from,$to]);
+        }
+
+        return $datatable->make(true);
+    }
+
+    public function rider_unresponsive_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),523);
+        return view('admin.reports.rider_unresponsive_report');
+    }
+
+    public function rider_unresponsive_report_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),524);
+        }
+        $data = DB::connection('reports')->table('rider_unresponsive_statuses')
+            ->leftjoin('riders as r','r.id','=','rider_unresponsive_statuses.rider_id')
+            ->leftjoin('admins as a','a.id','=','rider_unresponsive_statuses.admin_id')
+            ->select('r.name as rider','a.name as admin','rider_unresponsive_statuses.status as status','rider_unresponsive_statuses.created_at','rider_unresponsive_statuses.note_id');
+
+        $datatable = Datatables::of($data)
+            ->addColumn('display_status', function ($data) {
+                if($data->status == 1)
+                {
+                    return "Unresponsive";
+                }
+                else{
+                    return "Powered Off";
+                }
+            })
+            ->addColumn('display_note_id', function ($data) {
+                if($data->note_id == null)
+                {
+                    return "-";
+                }
+                else{
+                    return str_pad($data->note_id, 6, '0', STR_PAD_LEFT);
+                }
+            });
+        if($status = $request->get('search_status')){
+            $datatable->where('rider_unresponsive_statuses.status', $status);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('rider_unresponsive_statuses.created_at', [$from,$to]);
         }
 
         return $datatable->make(true);

@@ -9187,7 +9187,19 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
 
                 }
-                else if ($id == 176) {
+                else if($id == 175){
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $to = [$reference_1_id];
+
+                    self::email($subject, $body, $to);
+                }
+				else if ($id == 176) {
                     $flag = true;
                     $crm_comment_id = $reference_2_id;
                     $crm_comment = CrmComments::find($crm_comment_id);
