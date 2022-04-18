@@ -8,6 +8,7 @@ use App\Http\Models\CrmAgent;
 use App\Http\Models\CrmAgentLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AutoAssignCrmAgent extends Command
 {
@@ -42,6 +43,7 @@ class AutoAssignCrmAgent extends Command
      */
     public function handle()
     {
+        Log::info('Cron Worked');
         $crm_agents = CrmAgent::where('status',1)->get();
         foreach ($crm_agents as $crm_agent) {
             $crm_agent_log = new CrmAgentLog();
@@ -57,7 +59,7 @@ class AutoAssignCrmAgent extends Command
                                     ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
                                     ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id','crm_requests.case_nature_type_id as case_nature_type_id')
                                     ->where('crm_requests.agent_id','=',Null)
-                                    ->where('crm_requests.case_nature_id','<>',3)
+                                    ->where('crm_requests.case_nature_id','!=',3)
                                     ->get();
         foreach ($crm_requests as $value) {
             if($value->case_nature_id == 4){
