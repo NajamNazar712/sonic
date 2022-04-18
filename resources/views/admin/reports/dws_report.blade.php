@@ -69,6 +69,7 @@
                         <th class="border-primary border-darken-1">Breadth (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Height (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">DWS Image</th>
                     </tr>
                     </thead>
                 </table>
@@ -317,6 +318,7 @@
                     {data: 'width', name: 'width', class: 'align-middle width'},
                     {data: 'height', name: 'height', class: 'align-middle height'},
                     {data: 'date', name: 'date', class: 'align-middle date'},
+                    {data: 'dws_image', name: 'dws_image', class: 'align-middle dws_image'},
 
                 ],
                 rowCallback: function(row, data, index) {

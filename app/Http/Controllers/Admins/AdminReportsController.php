@@ -9910,6 +9910,22 @@ class AdminReportsController extends Controller
                     return "Low";
 
                 }
+            })->addColumn('dws_image', function ($shipments) {
+                if ($shipments->dws_image != null) {
+                    $image = '';
+                    $exists = Storage::disk('public')->exists($shipments->dws_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->dws_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->dws_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return "-";
+
+                }
             });
 
         if ($request->get('search_from') && $request->get('search_to')) {
