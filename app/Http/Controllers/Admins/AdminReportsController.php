@@ -9896,7 +9896,7 @@ class AdminReportsController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select(['shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'sd.dense_weight as dense_weight', 'sd.dimension_l as length', 'sd.dimension_w as width', 'sd.dimension_h as height', 'sd.dws_status as weight_type', 'sj.created_at as date'])
+            ->select(['shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'sd.dense_weight as dense_weight', 'sd.dimension_l as length', 'sd.dimension_w as width', 'sd.dimension_h as height', 'sd.dws_status as weight_type', 'sj.created_at as date', 'sd.dws_image as dws_image'])
             ->where('sd.dws_status', '<>', Null);
 
         $datatable = Datatables::of($shipments)
