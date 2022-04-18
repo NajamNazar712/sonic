@@ -3021,7 +3021,7 @@ class AdminFinanceController extends Controller
             }
 
             if ($valid) {
-                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request && $amount != 0) || $crs) {
+                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
                     if ($pending_payment->exists()) {
@@ -3072,31 +3072,32 @@ class AdminFinanceController extends Controller
                         self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
                     } else {
                         if (!$shipment->packaging_material_request) {
-                            if ($amount != 0 || $crs) {
-                                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                                $pending_payment_shipment->shipment_id = $shipment_id;
-                                $pending_payment_shipment->type = $type;
-                                $pending_payment_shipment->amount = $amount;
-                                if ($crs) {
-                                    $pending_payment_shipment->charges = $charges;
-                                    $pending_payment_shipment->gst = $gst;
-                                    $pending_payment_shipment->wht = $wht;
-                                    $pending_payment_shipment->payable = $payable;
-                                } else {
-                                    $pending_payment_shipment->charges = 0;
-                                    $pending_payment_shipment->gst = 0;
-                                    $pending_payment_shipment->wht = 0;
-                                    $pending_payment_shipment->payable = $amount;
-                                }
 
-                                $pending_payment_shipment->save();
+                            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                            $pending_payment_shipment->shipment_id = $shipment_id;
+                            $pending_payment_shipment->type = $type;
+                            $pending_payment_shipment->amount = $amount;
+                            if ($crs)
+                            {
+                                $pending_payment_shipment->charges = $charges;
+                                $pending_payment_shipment->gst = $gst;
+                                $pending_payment_shipment->wht = $wht;
+                                $pending_payment_shipment->payable = $payable;
+                            }
+                            else{
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+                                $pending_payment_shipment->wht = 0;
+                                $pending_payment_shipment->payable = $amount;
+                            }
 
-                                if ($crs) {
-                                    self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
-                                } else {
-                                    self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0);
-                                }
+                            $pending_payment_shipment->save();
 
+                            if($crs) {
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable,$wht);
+                            }
+                            else{
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount,0);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -4948,8 +4949,9 @@ class AdminFinanceController extends Controller
 
         $count = $count->count();
 
-        $done_payments = DonePayment::with('VisionSoftCodPaymentClear','shipment_payment_journey_last_status_two')
-            ->join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DonePayment::
+//        with('VisionSoftCodPaymentClear','shipment_payment_journey_last_status_two')
+            join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('admins as ad', function ($join) {
@@ -5064,60 +5066,60 @@ class AdminFinanceController extends Controller
                     return 'Unknown';
                 }
             })
-            ->addColumn('aging', function ($done_payment) {
-
-                if ($done_payment->status == 0) {
-
-//                    $start_date = date_create($done_payment->updated_at);
-                    $start_date = date('d-m-Y H:i:s', strtotime($done_payment->updated_at));
-                    $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
-                    $start_date = Carbon::parse($start_date);
-                    $end_date = Carbon::parse($end_date);
-                    $interval = $end_date->diffInHours($start_date);
-                    return $interval . ' Hrs';
-
-//                    $start_date = isset($done_payment->start_date) ? date('Y-m-d H:i:s', strtotime($done_payment->start_date)) : '';
-//                    $end_date = isset($done_payment->VisionSoftCodPaymentClear->created_at) ? date('Y-m-d H:i:s', strtotime($done_payment->VisionSoftCodPaymentClear->created_at)) : date('Y-m-d H:i:s', strtotime($done_payment->end_date));
+//            ->addColumn('aging', function ($done_payment) {
 //
-//                    if (!empty($end_date) && !empty($start_date)) {
+//                if ($done_payment->status == 0) {
 //
-//                        $datetime1 = date_create($start_date);
-//                        $datetime2 = date_create($end_date);
+////                    $start_date = date_create($done_payment->updated_at);
+//                    $start_date = date('d-m-Y H:i:s', strtotime($done_payment->updated_at));
+//                    $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
+//                    $start_date = Carbon::parse($start_date);
+//                    $end_date = Carbon::parse($end_date);
+//                    $interval = $end_date->diffInHours($start_date);
+//                    return $interval . ' Hrs';
 //
-//                        // Calculates the difference between DateTime objects
-//                        $interval = date_diff($datetime1, $datetime2);
-////                        return $interval->format('%m months, %d days,%h hours and %i mints');
-//                        return $interval->format('%h hours and %i mints');
-//                    } else {
-//                        return '-';
+////                    $start_date = isset($done_payment->start_date) ? date('Y-m-d H:i:s', strtotime($done_payment->start_date)) : '';
+////                    $end_date = isset($done_payment->VisionSoftCodPaymentClear->created_at) ? date('Y-m-d H:i:s', strtotime($done_payment->VisionSoftCodPaymentClear->created_at)) : date('Y-m-d H:i:s', strtotime($done_payment->end_date));
+////
+////                    if (!empty($end_date) && !empty($start_date)) {
+////
+////                        $datetime1 = date_create($start_date);
+////                        $datetime2 = date_create($end_date);
+////
+////                        // Calculates the difference between DateTime objects
+////                        $interval = date_diff($datetime1, $datetime2);
+//////                        return $interval->format('%m months, %d days,%h hours and %i mints');
+////                        return $interval->format('%h hours and %i mints');
+////                    } else {
+////                        return '-';
+////                    }
+//                } elseif ($done_payment->status == 2) {
+////                    $done_payment = ShipmentsPaymentJourney::with('done_payment')
+////                        ->where('status_id', 2)
+////                        ->where('payment_id', 54)
+////                        ->groupBy('status_id')
+////                        ->orderBy('status_id', 'DESC')
+////                        ->select('shipments_payment_journey.id', 'shipments_payment_journey.status_id', 'shipments_payment_journey.created_at as date')->get();
+//
+////                    dd($done_payment->shipment_payment_journey_last_status_two[0]->created_at);
+//                    if(isset($done_payment->shipment_payment_journey_last_status_two)) {
+//
+////                    $start_date = (isset($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) ? date('d-m-Y H:i:s', strtotime($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) : $done_payment->updated_at;
+//
+//                        $start_date = $done_payment->shipment_payment_journey_last_status_two->created_at;
+//                        $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
+//                        $start_date = Carbon::parse($start_date);
+//                        $end_date = Carbon::parse($end_date);
+//                        $interval = $end_date->diffInHours($start_date);
+//
 //                    }
-                } elseif ($done_payment->status == 2) {
-//                    $done_payment = ShipmentsPaymentJourney::with('done_payment')
-//                        ->where('status_id', 2)
-//                        ->where('payment_id', 54)
-//                        ->groupBy('status_id')
-//                        ->orderBy('status_id', 'DESC')
-//                        ->select('shipments_payment_journey.id', 'shipments_payment_journey.status_id', 'shipments_payment_journey.created_at as date')->get();
-
-//                    dd($done_payment->shipment_payment_journey_last_status_two[0]->created_at);
-                    if(isset($done_payment->shipment_payment_journey_last_status_two)) {
-
-//                    $start_date = (isset($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) ? date('d-m-Y H:i:s', strtotime($done_payment->shipment_payment_journey_last_status_two[0]->created_at)) : $done_payment->updated_at;
-
-                        $start_date = $done_payment->shipment_payment_journey_last_status_two->created_at;
-                        $end_date = date('d-m-Y H:i:s', strtotime(Carbon::now()));
-                        $start_date = Carbon::parse($start_date);
-                        $end_date = Carbon::parse($end_date);
-                        $interval = $end_date->diffInHours($start_date);
-
-                    }
-                    return $interval . ' Hrs';
-
-                } else {
-                    return '-';
-                }
-
-            })
+//                    return $interval . ' Hrs';
+//
+//                } else {
+//                    return '-';
+//                }
+//
+//            })
             ->addColumn('updated_at', function ($done_payment) {
                 if (!empty($done_payment->status_updated_at)) {
                     $updated_at = $done_payment->status_updated_at;
