@@ -25,7 +25,7 @@
 								</div>
 								<input type="text" name="invoice_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_from" placeholder="Invoice Date From">
+									   id="invoice_from" placeholder="Invoicing Date From">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -37,7 +37,7 @@
 								</div>
 								<input type="text" name="invoice_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_to" placeholder="Invoice Date To">
+									   id="invoice_to" placeholder="Invoicing Date To">
 							</div>
 						</div>
 						<div class="col-md-2">
