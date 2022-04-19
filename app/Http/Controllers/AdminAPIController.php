@@ -6829,8 +6829,12 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
-            $action_date = Carbon::now()->format("Y-m-d");
+            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date)->orderBy('id', 'DESC')->first();
+            if ($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) {
+                $attendance_date = $attendance_date->addDays(1);
+            }
             $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                 ->whereDate('attendance_date', $attendance_date)
                 ->where('employee_type', 1);
@@ -6845,11 +6849,13 @@ class AdminAPIController extends Controller
             }
             $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
-                $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
-                $admin_attendance->clock_in_latitude = $request->latitude;
-                $admin_attendance->clock_in_longitude = $request->longitude;
-                $admin_attendance->clock_in_location = $location_status;
-                $admin_attendance->save();
+                if($admin_attendance->clock_in_datetime == null){
+                    $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                    $admin_attendance->clock_in_latitude = $request->latitude;
+                    $admin_attendance->clock_in_longitude = $request->longitude;
+                    $admin_attendance->clock_in_location = $location_status;
+                    $admin_attendance->save();
+                }
 
                 $admin_attendance_action->employee_id = $admin_id;
                 $admin_attendance_action->employee_type = 1;
@@ -6862,7 +6868,12 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
-            } elseif ($request->action == 2) {
+            }
+            elseif ($request->action == 2) {
+                $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)->orderBy('id', 'DESC')->where('action_id', 1)->first();
+                $attendance_date = $last_clockin_action->attendance_date;
+
                 $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance->clock_out_latitude = $request->latitude;
                 $admin_attendance->clock_out_longitude = $request->longitude;
