@@ -496,6 +496,42 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="LastWorkingDayModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="LastWorkingDayModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Last Working Day</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="last_working_day_form"  novalidate="novalidate" method="post">
+                    <div class="modal-body mx-3">
+                      
+                            <input type="hidden" class="employee_id" name="employee_id">
+                            <input type="hidden" class="employee_type" name="employee_type">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o"></span>
+                                                    </span>
+                                </div>
+                                <input type="text" name="last_working_day"
+                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                       id="last_working_day" placeholder="Last Working Day" data-rule-required="true" data-msg-required="This field is required">
+                            </div>
+
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" id="working_day_btn">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -716,6 +752,20 @@
                 }
             });
 
+            var date = $('#LastWorkingDayModal #last_working_day').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#last_working_day_form #last_working_day').pickadate('picker');
+                    }
+                }
+            });
+
             $("#editRiderForm").validate({
 
                 errorClass: "danger",
@@ -747,6 +797,68 @@
                     form.submit();
                 }
             });
+
+            $("#UpdatePinForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
+            $("#last_working_day_form").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                      var id = $('#last_working_day_form .employee_id').val();
+                      var type = $('#last_working_day_form .employee_type').val();
+                      var date = $('#last_working_day_form #last_working_day').val();
+                      var url ='';
+
+                      if(type == 1){
+                          url ='{!! route('admin.human_resource.employee_directory.staff.deactivate') !!}';
+                      }
+                      else{
+                          url ='{!! route('admin.human_resource.employee_directory.rider.deactivate') !!}';
+                      }
+                      $.ajax({
+                           url:url,
+                           method: 'POST',
+                           data: {
+                              'employee_id': id,
+                              'date': date,
+                              '_token': '{{ csrf_token() }}'
+                              }
+                           })
+                          .done(function (data) {
+                              if (data.status == 0) {
+                                  toastr.success(data.success, 'Success!', {
+                                      positionClass: 'toast-bottom-center',
+                                      containerId: 'toast-bottom-center'
+                                  });
+                              } else {
+                                  toastr.error(data.error, 'Error!', {
+                                      positionClass: 'toast-top-center',
+                                      containerId: 'toast-top-center'
+                                  });
+                              }
+                              $('#LastWorkingDayModal').modal('hide');
+                              swal.close();
+                              table.draw('false');
+                          });
+                }
+            });
+
+
+            $('#LastWorkingDayModal').on('hide.bs.modal', function () {
+                $('#last_working_day').val('');
+            });
+
+
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -1766,125 +1878,21 @@
 
             $('body').on('click', '.deactivate', function (e) {
                 var id = $(this).data('target-id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Make Rider Inactive!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Making Rider Inactive',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                console.log(id);
+                $('#LastWorkingDayModal .employee_id').val(id);
+                $('#LastWorkingDayModal .employee_type').val(2);
+                $('#LastWorkingDayModal').modal('show');
 
-                        $.ajax({
-                            url: '{!! route('admin.human_resource.employee_directory.rider.deactivate') !!}',
-                            method: 'POST',
-                            data: {
-                                'employee_id': id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
-                            });
-                    }
-                });
             });
 
+            
             $('body').on('click', '.deactivate_staff', function (e) {
                 var id = $(this).data('target-id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Make Staff Inactive!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Making Staff Inactive',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                        $.ajax({
-                            url: '{!! route('admin.human_resource.employee_directory.staff.deactivate') !!}',
-                            method: 'POST',
-                            data: {
-                                'employee_id': id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
-                            });
-                    }
-                });
+                $('#LastWorkingDayModal .employee_type').val(1);
+                $('#LastWorkingDayModal .employee_id').val(id);
+                $('#LastWorkingDayModal').modal('show');
             });
+
 
             $('body').on('click', '.activate', function (e) {
                 var id = $(this).data('target-id');

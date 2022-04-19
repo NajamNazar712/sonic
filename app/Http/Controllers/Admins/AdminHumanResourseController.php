@@ -691,6 +691,7 @@ class AdminHumanResourseController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
@@ -725,6 +726,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_staff_deactivate(Request $request)
     {
+
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
@@ -743,6 +745,7 @@ class AdminHumanResourseController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
+        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
@@ -2642,29 +2645,29 @@ class AdminHumanResourseController extends Controller
                     $designation_hub->save();
                 }
             }
-            $admins = Admin::where('designation_id',$designation->id)->get();
-            foreach ($admins as $admin)
-            {
-                $admin->role_id = $request->role_id;
-                $admin->save();
-
-                AdminHub::where('admin_id',$admin->id)->delete();
-                if($request->has('hub_id') && count($request->hub_id) > 0)
-                {
-                    foreach ($request->hub_id as $hub) {
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $hub;
-                        $admin_hub->save();
-                    }
-                }
-                else {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin->id;
-                    $admin_hub->hub_id = $admin->default_hub_id;
-                    $admin_hub->save();
-                }
-            }
+//            $admins = Admin::where('designation_id',$designation->id)->get();
+//            foreach ($admins as $admin)
+//            {
+//                $admin->role_id = $request->role_id;
+//                $admin->save();
+//
+//                AdminHub::where('admin_id',$admin->id)->delete();
+//                if($request->has('hub_id') && count($request->hub_id) > 0)
+//                {
+//                    foreach ($request->hub_id as $hub) {
+//                        $admin_hub = new AdminHub();
+//                        $admin_hub->admin_id = $admin->id;
+//                        $admin_hub->hub_id = $hub;
+//                        $admin_hub->save();
+//                    }
+//                }
+//                else {
+//                    $admin_hub = new AdminHub();
+//                    $admin_hub->admin_id = $admin->id;
+//                    $admin_hub->hub_id = $admin->default_hub_id;
+//                    $admin_hub->save();
+//                }
+//            }
         }
 
         return redirect()->back()->with('success', 'Designation Updated Successfully!');

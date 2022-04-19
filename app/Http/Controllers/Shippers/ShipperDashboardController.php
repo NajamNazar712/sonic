@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -30,11 +32,14 @@ use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\DiscountWeightCharge;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\FuelSurcharge;
@@ -1124,6 +1129,8 @@ class ShipperDashboardController extends Controller
 
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
+            $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
+
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
             $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
             $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
@@ -1206,13 +1213,20 @@ class ShipperDashboardController extends Controller
 
                 }
             }
-            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates]);
         }
         else {
             if ($user->corporate_rate_type_id != 3) {
+                if($user->corporate_rate_type_id == 2){
+                    $weight = CorporateWeightChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                    $return = CorporateReturnChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                }
+                else{
+                    $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                    $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                }
                 $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-                $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1316,6 +1330,8 @@ class ShipperDashboardController extends Controller
                 $return = CorporateDefaultReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $fuel = CorporateDefaultFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+                $discount_weight_rates = CorporateDefaultDiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
                 $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
                 $packaging = PackagingCharge::all()->where('user_id', $id);
                 $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
@@ -1402,7 +1418,7 @@ class ShipperDashboardController extends Controller
 
                     }
                 }
-                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates]);
 
             }
         }
@@ -1631,6 +1647,31 @@ class ShipperDashboardController extends Controller
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
+    }
+
+    public function rate_daily_visit (Request $request)
+    {
+        $visit = DailyVisit::where('id',$request->daily_visit_id)->where('shipper_id',session('user_id'));
+        if($visit->doesntExist())
+        {
+            return back()->with(['error'=>'Invalid Request!!']);
+        }
+        $visit = $visit->first();
+        if($visit->rated == 1)
+        {
+            return back()->with(['error'=>'Visit Already Been Rated.']);
+        }
+
+        if($request->action == 2)
+        {
+            $visit->rating_id = $request->rating;
+            $visit->comment = $request->comment;
+        }
+
+        $visit->rated = 1;
+        $visit->save();
+
+        return back()->with(['success'=>'Visit Rated Successfully']);
     }
 
     

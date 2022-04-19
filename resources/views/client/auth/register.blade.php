@@ -314,6 +314,15 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="referral">Referral:
+                                                        </label>
+                                                        <div>
+                                                            <input type="text" class="form-control" value="{{ old('referral') }}" name="referral" placeholder="Referral Code"  data-rule-remote="{{ route('cod.referral.valid') }}" data-msg-remote="Referral Code not found">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
