@@ -6832,7 +6832,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            return response()->json(['status' => 1, 'message' => $request->attendance_date]);
+            return response()->json(['status' => 0, 'message' => $request->attendance_date]);
             $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
             $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date)->orderBy('id', 'DESC')->first();
