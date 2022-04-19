@@ -8,7 +8,6 @@ use App\Http\Models\CrmAgent;
 use App\Http\Models\CrmAgentLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class AutoAssignCrmAgent extends Command
 {
@@ -43,7 +42,6 @@ class AutoAssignCrmAgent extends Command
      */
     public function handle()
     {
-        Log::info('Cron Worked');
         $crm_agents = CrmAgent::where('status',1)->get();
         foreach ($crm_agents as $crm_agent) {
             $crm_agent_log = new CrmAgentLog();

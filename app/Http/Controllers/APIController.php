@@ -4801,7 +4801,7 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
                 $transaction_id = $request->transaction_id;
@@ -4875,14 +4875,20 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
                 $delivery_note_id = $request->delivery_note_id;
                 $delivery_note = DeliveryNote::where('id', $delivery_note_id);
                 if($delivery_note->exists()){
                     $delivery_note = $delivery_note->first();
-                    $net_amount = $delivery_note->total_cod_amount - $delivery_note->received_cod_amount;
+                    $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note->id);
+                    $transactions_amount = 0;
+                    if($hbl_konnect_transaction_delivery_note->exists()){
+                        $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                        $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                    }
+                    $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
 
                     return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount]);
                 }
