@@ -82,6 +82,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\V2Pickup\DwsPickupNote;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -6596,9 +6597,20 @@ class AdminAPIController extends Controller
     public function daily_visit_index()
     {
         $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
-        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses]);
+        $shippers = User::where('status', 3)->get(['id', 'name','poc','address','email','phone']);
+        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses, 'shippers' => $shippers]);
     }
 
+    public function shipper_details(Request $request){
+
+        $shipper_detail = User::where('status', 3)->where('id', $request->shipper_id)->select('name','poc','address','email','phone');
+        if($shipper_detail){
+            $shipper_detail = $shipper_detail->get();
+            return response()->json(['status' => 0, 'shipper_detail' => $shipper_detail]);
+        }else {
+            return response()->json(['status' => 1, 'message' => "Invalid Shipper!"]);
+        }
+    }
     public function daily_visit_store(Request $request)
     {
         $rules = [
@@ -6613,6 +6625,7 @@ class AdminAPIController extends Controller
             'longitude' => ['required'],
             'business_card_image' => ['required'],
             'location_image' => ['required'],
+            'shipper_id' => ['nullable', 'integer', 'exists:users,id'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -6621,6 +6634,7 @@ class AdminAPIController extends Controller
         }else{
             try{
                 $daily_visit = new DailyVisit();
+                $daily_visit->shipper_id = $request->shipper;
                 $daily_visit->company_name = str_replace('"',"",$request->company_name);
                 $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
                 $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
