@@ -6598,7 +6598,6 @@ class AdminAPIController extends Controller
     {
         $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
         $shippers = User::where('status', 3)->get(['id', 'name']);
-        $shippers[] = ['0', 'Other'];
         return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses, 'shippers' => $shippers]);
     }
 
@@ -6612,6 +6611,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "Invalid Shipper!"]);
         }
     }
+
     public function daily_visit_store(Request $request)
     {
         $rules = [
@@ -6830,6 +6830,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $action_date = Carbon::now()->format("Y-m-d");
             $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                 ->whereDate('attendance_date', $attendance_date)
                 ->where('employee_type', 1);
