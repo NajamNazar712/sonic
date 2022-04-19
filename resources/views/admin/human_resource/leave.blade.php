@@ -68,15 +68,6 @@
                                             </div>
                                         </div>
                                     </form>
-                                    <div class="col-2 mt-1">
-                                        <div class="form-group">
-                                            <button type="button" id="leave_request_btn"
-                                                    class="btn btn-primary btn-min-width"><i
-                                                        class="la leave_request_btn"></i>
-                                                Add Leave Request
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -121,8 +112,8 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="track_form" action="{{route('admin.human_resource.leave.leave_request')}}"
-                          method="post" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form id="track_form"  action="{{route('admin.human_resource.leave.leave_request')}}"
+                          method="post" class="form-horizontal mb-1 justify-content-center" >
                         @csrf
                         <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
                         <div class="row mb-2 justify-content-center">
@@ -134,8 +125,8 @@
                                                     </span>
                                     </div>
                                     <input type="text" name="requested_from_date"
-                                           class="form-control bg-primary border-primary white rounded-right"
-                                           id="requested_from_date" placeholder="Requested Date From" required>
+                                           class="form-control bg-primary border-primary white rounded-right required"
+                                           id="requested_from_date" placeholder="From" aria-required="true" required="required">
                                 </div>
                             </div>
                             <div class="col-6 mt-1">
@@ -146,20 +137,19 @@
                                                     </span>
                                     </div>
                                     <input type="text" name="requested_to_date"
-                                           class="form-control bg-primary border-primary white rounded-right"
-                                           id="requested_to_date" placeholder="Requested Date To" required>
+                                           class="form-control bg-primary border-primary white rounded-right required"
+                                           id="requested_to_date" placeholder="To" aria-required="true" required="required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <textarea class="form-control" placeholder="Reasons of Leaves"
                                        name="leave_request_reason"
-                                       id="leave_request_reason" required></textarea>
+                                       id="leave_request_reason" required="required"></textarea>
                             </div>
-                                {{--                            <div class=""></div>--}}
                             <div class="col-12">
-                                <button type="submit" id="search_filter_btn"
-                                        class="btn btn-outline-primary btn-min-width search mt-1"><i
-                                            class="la la-search"></i> Submit
+                                <button type="submit"
+                                        class="btn btn-outline-primary btn-min-width mt-1">
+                                             Submit
                                 </button>
                             </div>
                         </div>
@@ -347,7 +337,7 @@
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 00:00:00',
-            hiddenSuffix: '_formatted',
+            // hiddenSuffix: '_formatted',
             onSet: function (context) {
                 if (context.select) {
                     $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
@@ -363,7 +353,7 @@
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
-            hiddenSuffix: '_formatted',
+            // hiddenSuffix: '_formatted',
             onSet: function (context) {
                 if (context.select) {
                     $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
@@ -764,40 +754,48 @@
 
             //todo : leave request form submission
             $("#track_form").submit(function (e) {
-                e.preventDefault(); // prevent actual form submit
-                var form = $(this);
-                var url = form.attr('action'); //get submit url [replace url here if desired]
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(), // serializes form input
-                }).done(function (data) {
-                    // console.log(data);
-                    $('#leave_request').modal('hide');
+                // $(this).validate();
+                e.preventDefault(); // prevent actual form
+                // var requested_from_date = $('#requested_from_date').val();
+                // var requested_to_date = $('#requested_to_date').val();
+                // if(requested_from_date && requested_to_date) {
+                    var form = $(this);
+                    var url = form.attr('action'); //get submit url [replace url here if desired]
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: form.serialize(), // serializes form input
+                    }).done(function (data) {
+                        // console.log(data);
+                        $('#leave_request').modal('hide');
 
-                    if (data.status == 3) {
-                        toastr.error(data.message, 'Denied!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    } else if (data.status == 2) {
-                        toastr.success(data.success, 'Success!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    } else if (data.status == 1) {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    } else if (data.status == 0) {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    $("#track_form")[0].reset();
-                });
+                        if (data.status == 3) {
+                            toastr.error(data.message, 'Denied!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else if (data.status == 2) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else if (data.status == 1) {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else if (data.status == 0) {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        $("#track_form")[0].reset();
+                    });
+                // }else{
+                //     alert('Fill the dates');
+                //
+                // }
             });
             //todo : leave request form submission end
         });
