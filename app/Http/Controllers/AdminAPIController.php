@@ -6840,7 +6840,7 @@ class AdminAPIController extends Controller
                 $attendance_date = $attendance_date->addDays(1);
             }
             $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
-                ->whereDate('attendance_date', $attendance_date)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
                 ->where('employee_type', 1);
             $admin_attendance_action = new EmployeeAttendanceActionLog();
             if ($admin_attendance->exists()) {
