@@ -48,14 +48,14 @@
 								</button>
 							</div>
 						</div>
-						<div class="col-md-2">
-							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">
-								<button type="button" id="refresh_filter_btn"
-										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
-											class="la la-refresh" style="margin-right: 10px"></i> Refresh
-								</button>
-							</div>
-						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
@@ -96,14 +96,14 @@
 								</button>
 							</div>
 						</div>
-						<div class="col-md-2">
-							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">
-								<button type="button" id="refresh_filter_btn_generation"
-										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
-											class="la la-refresh" style="margin-right: 10px"></i> Refresh
-								</button>
-							</div>
-						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn_generation"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
