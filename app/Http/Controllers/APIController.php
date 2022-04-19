@@ -4801,7 +4801,7 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
                 $transaction_id = $request->transaction_id;
@@ -4875,7 +4875,7 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }
             else {
                 $delivery_note_id = $request->delivery_note_id;
