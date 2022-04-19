@@ -3423,7 +3423,7 @@ class AdminAPIController extends Controller
         if($admins){
             $response = array();
             $employee_shift = EmployeeShift::where('id', $admins->shift_id);
-            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+            $last_action_log = EmployeeAttendance::where('employee_id', $admin_id)
                 ->where('employee_type', 1)->orderBy('id', 'DESC')->first();
             $response["status"] = 0;
             if ($employee_shift->exists()){
