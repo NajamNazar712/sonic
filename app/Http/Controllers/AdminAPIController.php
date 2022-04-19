@@ -5325,7 +5325,8 @@ class AdminAPIController extends Controller
                     ->where('employee_type', 1)
                     ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
-                    $attendance = $attendance->first();
+                    $attendance = $attendance->get();
+                    dd($attendance);
                     if ($shift_exists == 1) {
                         if ($attendance->clock_in_datetime) {
                             $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
