@@ -16,7 +16,7 @@ class UpdateEmployeesForNewColumns extends Migration
         Schema::table('employees', function (Blueprint $table) {
             $table->Integer('employee_nature_id')->nullable()->index();
             $table->Integer('replacement_employee_id')->nullable()->index();
-            $table->Integer('replacement_last_working_day')->nullable();
+            $table->date('replacement_last_working_day')->nullable();
             $table->Integer('fuel')->nullable();
         });
     }
