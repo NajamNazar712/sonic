@@ -6870,7 +6870,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
 
-                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action, 'attendance_date' => $attendance_date]);
             }
             elseif ($request->action == 2) {
                 $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
@@ -6892,7 +6892,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
-                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action, 'attendance_date' => $attendance_date]);
             }
 
             return response()->json(['status' => 1, 'message' => 'Failed']);
