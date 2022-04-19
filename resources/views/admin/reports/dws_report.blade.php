@@ -180,10 +180,6 @@
                 },
             });
 
-           
-
-
-
             var today = '{{ Carbon\Carbon::today() }}';
             var next_month = '{{ Carbon\Carbon::today()->addMonths(1) }}';
             var from_date = $('#from_date').pickadate({
@@ -335,6 +331,11 @@
             $('#search_filter_btn').on('click',function () {
                table.button('.excel').enable();
                table.draw();
+            });
+
+            $('body').on('click','.dws_image button',function () {
+                var link = $(this).attr('data-link');
+                window.open(link, "_blank")
             });
 
 
