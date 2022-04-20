@@ -42,6 +42,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\RetailDonePayment;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Runner;
@@ -9138,18 +9139,31 @@ class NotificationsController extends Controller
 				else if ($id == 172) {
                     $name = $reference_1_id;
                     $phone_number = $reference_2_id;
+                    $payment_id = $reference_3_id;
+                    $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
+                        ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
+                        ->where('retail_done_payments.id',$payment_id)
+                        ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id')->first();
+//                   dd($payment->payable);
+
+                    $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
+                    $adjustment = $payment->adjustment;
+                    $total_amaount = $payment->total_amount;
+                    $tracking_no = $payment->tracking_number;
+                    $user_id = $payment->user_id;
+
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $name, $body);
                     }
                     if (strpos($body, '[total_amount]') !== FALSE) {
-                        $body = str_replace('[total_amount]', $reference_3_id, $body);
+                        $body = str_replace('[total_amount]', $total_amaount, $body);
                     }
                     if (strpos($body, '[updated_at]') !== FALSE) {
                         $body = str_replace('[updated_at]', $reference_4_id, $body);
                     }
-                    $link ='https://sonic.pk/cod/finance/payments';
-                    if (strpos($body, '[status_link]') !== FALSE) {
-                        $body = str_replace('[status_link]', $link, $body);
+                    $link =  url('payment_details'.'/'.utf8_encode($payment_id).'/'.utf8_encode($user_id));
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
                     }
 
                     $to = $phone_number;

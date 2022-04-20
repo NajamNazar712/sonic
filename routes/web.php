@@ -11,6 +11,8 @@ use App\Http\Models\HR\Employee;
 |
 */
 
+Route::get('payment_details/{id}/{id1}','done_payment@done_payment_details')->name('payment_details');
+
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });

@@ -12555,9 +12555,9 @@ class AdminFinanceController extends Controller
                     $amount = isset($done_payment->retail_done_payment_calculations->payable) ? $done_payment->retail_done_payment_calculations->payable : 0;
                     $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
 
-                    $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
+//                    $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
 
-                    NotificationsController::send(172, $name, $phone,$amount,$updated_at);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
+                    NotificationsController::send(172, $name, $phone,$done_payment_id,$updated_at);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
                 }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();
