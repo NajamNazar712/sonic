@@ -37,7 +37,21 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Update</button>
+
+                                    {{--      Date/Time Cron    --}}
+                                    <div class="row">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                  <span class="">Time</span>
+                                              </span>
+                                            </div>
+                                            <input type="text" name="cron_date" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="" id="cut_off_time_from" placeholder="SMS Time" data-rule-required="true" data-msg-required="SMS Time From is required">
+                                        </div>
+                                    </div>
+                                    {{--      End      --}}
+
+                                        <button type="submit" class="btn btn-primary">Update</button>
                                 </form>
                             </div>
                         </div>
@@ -50,13 +64,31 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
-    <script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.cut_off_time_from').pickatime({
+                clear: '',
+                format: 'h:i A',
+            });
+            $('.cut_off_time_to').pickatime({
+                clear: '',
+                format: 'h:i A',
+            });
+        </script>
+
+        <script>
         $(document).ready(function() {
             $('#settings_form input.reattempt_percentage').inputmask({
                 'alias': 'integer',

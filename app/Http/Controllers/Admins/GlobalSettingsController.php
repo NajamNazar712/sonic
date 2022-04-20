@@ -6131,6 +6131,7 @@ public function sales_incentive()
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $setting->setting_value = $request->toggle_check;
         $setting->text = $request->sms_count;
+        $setting->text = $request->cron_time;
         $setting->save();
 
         return redirect()->back()->with('success','Setting Updated');
