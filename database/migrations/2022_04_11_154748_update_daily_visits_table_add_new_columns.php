@@ -13,12 +13,12 @@ class UpdateDailyVisitsTableAddNewColumns extends Migration
      */
     public function up()
     {
-        Schema::table('daily_visits', function (Blueprint $table) {
+        /*Schema::table('daily_visits', function (Blueprint $table) {
             $table->integer('shipper_id')->index();
             $table->integer('rating_id')->index()->nullable();
             $table->text('comment')->nullable();
             $table->boolean('rated')->default(0);
-        });
+        });*/
     }
 
     /**
@@ -28,6 +28,11 @@ class UpdateDailyVisitsTableAddNewColumns extends Migration
      */
     public function down()
     {
-        //
+        /*Schema::table('daily_visits', function (Blueprint $table) {
+            $table->dropColumn('shipper_id');
+            $table->dropColumn('rating_id');
+            $table->dropColumn('comment');
+            $table->dropColumn('rated');
+        });*/
     }
 }
