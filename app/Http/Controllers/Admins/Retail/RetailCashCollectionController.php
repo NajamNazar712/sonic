@@ -63,7 +63,7 @@ class RetailCashCollectionController extends Controller
                         ->join('cities AS oc', 'rpn.hub_id', '=', 'oc.id')
                         ->leftjoin('admins as a', 'a.id', '=', 'rpn.assigned_by')
                         ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'rpn.pickup_address_id')
-                        ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'rpn.assigned_at', 'retail_cash_deposits.total_cn as shipments_count', 'rpn.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'rpn.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
+                        ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'rpn.assigned_at', 'retail_cash_deposits.total_cn as shipments_count', 'retail_cash_deposits.total_cash as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'rpn.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
                         ->whereIn('rpn.status', [1,2,3])
                         ->where('rpn.pncc_status', '=', 0)->where('retail_cash_deposits.status', '=', 0);
 

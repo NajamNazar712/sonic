@@ -326,7 +326,7 @@
                     { data:'code' ,name: 'code', class: 'align-middle code text-center', orderable: false, searchable: false},
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
                     { data:'time' ,name: 'rpn.assigned_at', class: 'align-middle time text-center'},
-                    { data:'amount' ,name: 'rpn.amount', class: 'align-middle amount'},
+                    { data:'amount' ,name: 'retail_cash_deposits.total_cash', class: 'align-middle amount'},
                     // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
