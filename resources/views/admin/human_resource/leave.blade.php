@@ -331,7 +331,7 @@
         var booking_from_date = $('#requested_from_date').pickadate({
             firstDay: 1,
             clear: '',
-            max: '{{ Carbon\Carbon::now() }}',
+            {{--max: '{{ Carbon\Carbon::now() }}',--}}
             // format: 'dd mmmm, yyyy',
             format: 'yyyy-mm-dd',
             selectYears: true,
@@ -347,7 +347,7 @@
         var booking_to_date = $('#requested_to_date').pickadate({
             firstDay: 1,
             clear: '',
-            max: '{{ Carbon\Carbon::now() }}',
+            {{--max: '{{ Carbon\Carbon::now() }}',--}}
             // format: 'dd mmmm, yyyy',
             format: 'yyyy-mm-dd',
             selectYears: true,
@@ -791,6 +791,7 @@
                             });
                         }
                         $("#track_form")[0].reset();
+                        table.draw();
                     });
                 // }else{
                 //     alert('Fill the dates');
