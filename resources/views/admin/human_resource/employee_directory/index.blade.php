@@ -359,7 +359,7 @@
 
     <div class="modal fade text-left" id="employeeRequiredInfoModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="employeeRequiredInfoModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel8">Employee Required Info</h4>
@@ -369,9 +369,10 @@
                 </div>
                 <form action="{{route('admin.human_resource.employee_directory.approve_individual')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveStaffForm" novalidate="novalidate">
                     <div class="modal-body text-left">
+                        <div class="row mb-2">
                             {{csrf_field()}}
                             <input type="hidden" name="employee_id" id="employee_id" value="">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Employee Nature<span class="text-danger">*</span></label>
                                     <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control " style="width: 100%">
@@ -381,7 +382,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Sub Department <span class="text-danger">*</span></label>
+                                    <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" name="sub_department" >
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <label>Joining Date<span class="text-danger">*</span></label>
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -395,16 +402,13 @@
                                            id="joining_date" placeholder="Joining Date">
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Sub Department <span class="text-danger">*</span></label>
-                                    <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" name="sub_department" >
-                                </div>
-                            </div>
-                            <div class="d-none" id="replacement_info_div">
-                                <h4 class="form-section">Replacement Info</h4>
-
+                        </div>
+                            <div class="d-none row mb-2" id="replacement_info_div">
                                 <div class="col-md-12">
+                                    <h4 class="form-section">Replacement Info</h4>
+                                </div>
+
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Replacement Employee<span class="text-danger">*</span></label>
                                         <select name="replacement_employee_id" id="replacement_employee_list" data-rule-required="true"  data-msg-required="Replacement Employee is required" class="select2 form-control " style="width: 100%">
@@ -415,7 +419,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label>Last Working Day<span class="text-danger">*</span></label>
                                     <div class="form-group input-group">
                                         <div class="input-group-prepend">
