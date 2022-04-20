@@ -113,7 +113,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <form id="track_form"  action="{{route('admin.human_resource.leave.leave_request')}}"
-                          method="post" class="form-horizontal mb-1 justify-content-center" >
+                          method="post" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         @csrf
                         <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
                         <div class="row mb-2 justify-content-center">
@@ -125,8 +125,8 @@
                                                     </span>
                                     </div>
                                     <input type="text" name="requested_from_date"
-                                           class="form-control bg-primary border-primary white rounded-right required"
-                                           id="requested_from_date" placeholder="From" aria-required="true" required="required">
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="requested_from_date" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
                                 </div>
                             </div>
                             <div class="col-6 mt-1">
@@ -138,13 +138,13 @@
                                     </div>
                                     <input type="text" name="requested_to_date"
                                            class="form-control bg-primary border-primary white rounded-right required"
-                                           id="requested_to_date" placeholder="To" aria-required="true" required="required">
+                                           id="requested_to_date" placeholder="To" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <textarea class="form-control" placeholder="Reasons of Leaves"
                                        name="leave_request_reason"
-                                       id="leave_request_reason" required="required"></textarea>
+                                       id="leave_request_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                             </div>
                             <div class="col-12">
                                 <button type="submit"
@@ -442,7 +442,7 @@
                             head.push('Days');
                             head.push('Requested Date');
                             head.push('Updated By');
-                            head.push('Updated At');
+                            head.push('Updated At');re
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -753,51 +753,61 @@
             //todo : for calling buttons id end
 
             //todo : leave request form submission
-            $("#track_form").submit(function (e) {
-                // $(this).validate();
-                e.preventDefault(); // prevent actual form
-                // var requested_from_date = $('#requested_from_date').val();
-                // var requested_to_date = $('#requested_to_date').val();
-                // if(requested_from_date && requested_to_date) {
-                    var form = $(this);
-                    var url = form.attr('action'); //get submit url [replace url here if desired]
-                    $.ajax({
-                        type: "POST",
-                        url: url,
-                        data: form.serialize(), // serializes form input
-                    }).done(function (data) {
-                        // console.log(data);
-                        $('#leave_request').modal('hide');
-
-                        if (data.status == 3) {
-                            toastr.error(data.message, 'Denied!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else if (data.status == 2) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else if (data.status == 1) {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else if (data.status == 0) {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        $("#track_form")[0].reset();
-                        table.draw();
-                    });
-                // }else{
-                //     alert('Fill the dates');
-                //
-                // }
+            $("#track_form").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('form'));
+                },
+                submitHandler: function(form) {
+                    form.submit()
+                }
             });
+            // $("#track_form").submit(function (e) {
+            //     $(this).validate();
+            //     e.preventDefault(); // prevent actual form
+            //     // var requested_from_date = $('#requested_from_date').val();
+            //     // var requested_to_date = $('#requested_to_date').val();
+            //     // if(requested_from_date && requested_to_date) {
+            //         var form = $(this);
+            //         var url = form.attr('action'); //get submit url [replace url here if desired]
+            //         $.ajax({
+            //             type: "POST",
+            //             url: url,
+            //             data: form.serialize(), // serializes form input
+            //         }).done(function (data) {
+            //             // console.log(data);
+            //             $('#leave_request').modal('hide');
+            //
+            //             if (data.status == 3) {
+            //                 toastr.error(data.message, 'Denied!', {
+            //                     positionClass: 'toast-top-center',
+            //                     containerId: 'toast-top-center'
+            //                 });
+            //             } else if (data.status == 2) {
+            //                 toastr.success(data.success, 'Success!', {
+            //                     positionClass: 'toast-top-center',
+            //                     containerId: 'toast-top-center'
+            //                 });
+            //             } else if (data.status == 1) {
+            //                 toastr.error(data.error, 'Error!', {
+            //                     positionClass: 'toast-top-center',
+            //                     containerId: 'toast-top-center'
+            //                 });
+            //             } else if (data.status == 0) {
+            //                 toastr.error(data.error, 'Error!', {
+            //                     positionClass: 'toast-top-center',
+            //                     containerId: 'toast-top-center'
+            //                 });
+            //             }
+            //             $("#track_form")[0].reset();
+            //             table.draw();
+            //         });
+            //     // }else{
+            //     //     alert('Fill the dates');
+            //     //
+            //     // }
+            // });
             //todo : leave request form submission end
         });
     </script>

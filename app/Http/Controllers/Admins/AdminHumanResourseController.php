@@ -3653,7 +3653,9 @@ class AdminHumanResourseController extends Controller
             if ($admin) {
                 $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
                 if ($leave->exists()) {
-                    return response()->json(['status' => 3, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    return redirect()->back()->with('error','Leave Request Already Submitted & Pending for Approval');
+
+//                    return response()->json(['status' => 3, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
                 }
                 $leave_request = new EmployeeLeave();
                 $leave_request->employee_id = $admin_id;
@@ -3673,11 +3675,14 @@ class AdminHumanResourseController extends Controller
 
                 NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
                 NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
-                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+//                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+                return redirect()->back()->with('success','Leave Request submitted successfully');
             }
-            return response()->json(['status' => '1', 'error' => 'User Not Found']);
+            return redirect()->back()->with('error','User Not Found');
+//            return response()->json(['status' => '1', 'error' => 'User Not Found']);
         } else {
-            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
+            return redirect()->back()->with('error','All Fields Are Mandatory!');
+//            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
         }
     }
 
