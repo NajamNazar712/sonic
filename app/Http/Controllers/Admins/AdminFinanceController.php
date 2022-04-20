@@ -12538,7 +12538,6 @@ class AdminFinanceController extends Controller
         foreach ($request->ids as $done_payment_id) {
             $done_payment = RetailDonePayment::find($done_payment_id);
 
-
             if ($done_payment->status != 1) {
                 $done_payment->status = 1;
                 $done_payment->status_updated_at = Carbon::now();
@@ -12558,7 +12557,7 @@ class AdminFinanceController extends Controller
 
                     $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
 
-                    NotificationsController::send(172, $name, $phone,$amount,$updated_at);
+                    NotificationsController::send(172, $name, $phone,$amount,$updated_at);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
                 }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();
@@ -12583,13 +12582,9 @@ class AdminFinanceController extends Controller
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
                     }
                 }
-
             }
         }
-
         return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
-
-
     }
 
     public function retail_done_payments_reverted(Request $request)
