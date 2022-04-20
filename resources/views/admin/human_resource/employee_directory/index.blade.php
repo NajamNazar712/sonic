@@ -395,6 +395,12 @@
                                            id="joining_date" placeholder="Joining Date">
                                 </div>
                             </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Sub Department <span class="text-danger">*</span></label>
+                                    <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" name="sub_department" >
+                                </div>
+                            </div>
                             <div class="d-none" id="replacement_info_div">
                                 <h4 class="form-section">Replacement Info</h4>
 

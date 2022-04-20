@@ -18,6 +18,7 @@ class UpdateEmployeesForNewColumns extends Migration
             $table->Integer('replacement_employee_id')->nullable()->index();
             $table->date('replacement_last_working_day')->nullable();
             $table->Integer('fuel')->nullable();
+            $table->string('sub_department')->nullable();
         });
     }
 
@@ -33,6 +34,7 @@ class UpdateEmployeesForNewColumns extends Migration
             $table->dropColumn('replacement_employee_id');
             $table->dropColumn('replacement_last_working_day');
             $table->dropColumn('fuel');
+            $table->dropColumn('sub_department');
         });
     }
 }

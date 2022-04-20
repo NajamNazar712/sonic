@@ -314,7 +314,7 @@
                     {data: 'width', name: 'width', class: 'align-middle width'},
                     {data: 'height', name: 'height', class: 'align-middle height'},
                     {data: 'date', name: 'date', class: 'align-middle date'},
-                    {data: 'dws_image', name: 'dws_image', class: 'align-middle dws_image'},
+                    {data: 'dws_image', name: 'dws_image', class: 'align-middle dws_image', searchable: false, orderable: false},
 
                 ],
                 rowCallback: function(row, data, index) {

@@ -282,7 +282,12 @@
                                             </div>
                                         </div>
                                         @endif
-
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Sub Department <span class="text-danger">*</span></label>
+                                                <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
+                                            </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
@@ -313,7 +318,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Fuel (Ltrs) <span class="text-danger">*</span></label>
-                                                    <input type="text" id="fuel" class="form-control" value="{{$employee->fuel}}" name="fuel" >
+                                                    <input type="text" id="fuel" data-rule-required="true"  data-msg-required="Fuel is required" class="form-control" value="{{$employee->fuel}}" name="fuel" >
                                                 </div>
                                             </div>
                                         @endif

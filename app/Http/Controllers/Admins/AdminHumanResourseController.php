@@ -1073,6 +1073,7 @@ class AdminHumanResourseController extends Controller
 
                     $employee->replacement_employee_id = $request->replacement_employee_id;
                     $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
+                    $employee->sub_department = $request->sub_department;
                     $employee->save();
 
                 }
@@ -1228,6 +1229,7 @@ class AdminHumanResourseController extends Controller
         }
         $employee->fuel = $request->fuel;
         $employee->employee_nature_id = $request->employee_nature_id;
+        $employee->sub_department = $request->sub_department;
         $employee->update();
 
         if($employee->employee_type_id == 1)
