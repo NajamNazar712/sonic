@@ -9161,7 +9161,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[updated_at]') !== FALSE) {
                         $body = str_replace('[updated_at]', $reference_4_id, $body);
                     }
-                    $link =  url('payment_details'.'/'.utf8_encode($payment_id).'/'.utf8_encode($user_id));
+                    $link =  url('payment_details'.'/'.base64_encode("$payment_id").'/'.base64_encode("$user_id"));
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }

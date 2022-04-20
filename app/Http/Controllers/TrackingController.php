@@ -8,6 +8,7 @@ use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
 
+use App\Http\Models\RetailDonePayment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -111,5 +112,23 @@ class TrackingController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Complain already laucnched against your shipment!']);
         }
+    }
+
+    public function payment_details($payment_id , $user_id)
+    {
+        $payment_id = base64_decode($payment_id);
+        $user_id = base64_decode($user_id);
+        $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
+            ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
+            ->where('retail_done_payments.id',$payment_id)
+            ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id')->first();
+//                   dd($payment->payable);
+//        dd($payment);
+        $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
+        $adjustment = $payment->adjustment;
+        $total_amount = $payment->total_amount;
+        $tracking_no = $payment->tracking_number;
+        $user_id = $payment->user_id;
+        return view('payment_details')->with(['payable'=>$payable,'adjustment'=>$adjustment,'total_amount'=>$total_amount,'tracking_no'=>$tracking_no]);
     }
 }
