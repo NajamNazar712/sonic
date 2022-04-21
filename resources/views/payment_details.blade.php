@@ -1,8 +1,4 @@
-{{--        {{$payable}}--}}
-{{--        {{$adjustment}}--}}
-{{--        {{$total_amount}}--}}
-{{--        {{$tracking_no}}--}}
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html class="loading" lang="en" data-textdirection="ltr">
 <head>
     @include('client.layout.header')
@@ -61,16 +57,16 @@
                                     <div class="table-responsive">
                                         <table class="table">
                                             <tr>
-                                                <th>Track No#</th>
+                                                <th>Tracking Number</th>
                                                 <th>Amount</th>
                                                 <th>Payable</th>
-                                                <th>Adjustment Charges</th>
+                                                <th>Type</th>
                                             </tr>
                                             <tr>
                                                 <td style="width: 50px">{{$tracking_no}}</td>
                                                 <td style="width: 50px">{{$total_amount}}</td>
                                                 <td style="width: 50px">{{$payable}}</td>
-                                                <td style="width: 50px">{{$adjustment}}</td>
+                                                <td style="width: 50px">{{$type}}</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -81,9 +77,8 @@
                 </div>
             </div>
         </div>
-{{--    </div>--}}
-{{--</div>--}}
 
-{{--@include('client.layout.footer')--}}
+
+@include('client.layout.footer')
 </body>
 </html>
