@@ -46,7 +46,14 @@
                                                   <span class="">Time</span>
                                               </span>
                                             </div>
-                                            <input type="text" name="cron_date" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="" id="cut_off_time_from" placeholder="SMS Time" data-rule-required="true" data-msg-required="SMS Time From is required">
+{{--                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{isset($val->$cut_off_time_from) ? $val->$cut_off_time_from : ''}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">--}}
+                                            <select name="cut_off_time_from" class="form-control">
+                                                @foreach($data as $val)
+                                                    @if($val->name == "TAT Cut-Off Time From")
+                                                      <option value="{{$val->setting_value}}">{{$val->setting_value}}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     {{--      End      --}}

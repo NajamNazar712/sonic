@@ -3137,6 +3137,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_confirmation_pending_sms_setting')->name('rcp_sms.')->group(function () {
             Route::get('','Admins\GlobalSettingsController@rcp_sms_index')->name('index');
             Route::post('update','Admins\GlobalSettingsController@rcp_sms_update')->name('update');
+
+
+//            Route::get('','Admins\GlobalSettingsController@rcp_sms_cron_index')->name('cron_index');
+//            Route::post('update','Admins\GlobalSettingsController@rcp_sms_cron_update')->name('cron_update');
         });
 
         Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {

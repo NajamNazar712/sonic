@@ -6124,18 +6124,38 @@ public function sales_incentive()
     public function rcp_sms_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),508);
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
-        return view('admin.settings.return.rcp_sms',compact('setting'));
+        $data = DB::table('rcp_sms_cron_time')->get();
+        return view('admin.settings.return.rcp_sms',compact('setting','data'));
     }
 
     public function rcp_sms_update(Request $request){
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $setting->setting_value = $request->toggle_check;
         $setting->text = $request->sms_count;
-        $setting->text = $request->cron_time;
         $setting->save();
 
         return redirect()->back()->with('success','Setting Updated');
     }
+
+//    CRON TIME SETTINGS
+
+        public function rcp_sms_cron_index(Request $request)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),508);
+            $setting = DB::table('rcp_sms_cron_time')->where('type','return_confirmation_pending_sms')->first();
+            return view('admin.settings.return.rcp_sms');
+        }
+
+        public function rcp_sms_cron_update(Request $request)
+        {
+            $from = DB::table('rcp_sms_cron_time')->where('name','TAT Cut-Off Time From')->first();
+
+            $cut_off_time_from = $from->setting_value;
+
+            return view('admin.settings.return.rcp_sms')->with(['cut_off_time_from' => $cut_off_time_from, 'cut_off_time_to' => $cut_off_time_to]);
+        }
+
+//      END
 
     public function consignee_sms_expire_index()
     {
