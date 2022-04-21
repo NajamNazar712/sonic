@@ -534,7 +534,7 @@ class AdminAttendanceController extends Controller
             } else{
                 $clock_in = 1;
             }
-            return view('admin.attendance.mark_index', compact('clock_in', 'clock_out', 'date'));
+            return view('admin.attendance.mark_index', compact('clock_in', 'clock_out', 'date', 'attendance_date'));
         } else {
             return redirect()->back()->with(['status' => 0, 'error' => 'User not found']);
         }
