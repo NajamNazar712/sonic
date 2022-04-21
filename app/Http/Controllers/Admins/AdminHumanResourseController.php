@@ -3513,12 +3513,11 @@ class AdminHumanResourseController extends Controller
                 });
             }
         }else{
-            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {  //
+            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
                 $employee_leaves = $employee_leaves->where(function ($query) {
                     $query->where('employee_leaves.employee_id', Auth::id());
                 });
             }
-
         }
 
 
@@ -3592,6 +3591,7 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             })
             ->addColumn("action", function ($employee) {
+//                dd($employee->status_id);
                 if (in_array($employee->status_id, [1, 2, 3])) {
                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
                         $dropdown = '
@@ -3599,11 +3599,17 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
+                        //todo:HOD
+                        if (($employee->status_id == 1) && (session('role_id') == 1 || in_array(615, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item hod_reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
+                        }
+                        //todo:HOD end
 
                         if (session('role_id') == 1 || in_array(614, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                         }
-                        if (session('role_id') == 1 || in_array(615, session('permissions'))) {
+                        if (($employee->status_id == 2) && (session('role_id') == 1 || in_array(615, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                         }
@@ -3768,6 +3774,17 @@ class AdminHumanResourseController extends Controller
             }
             return redirect()->back()->with('error', 'Invalid Leave ID');
         }
+    }
+
+    public function hod_approve(Request $request)
+    {
+        $leave_id = $request->leave_id;
+        $leave = EmployeeLeave::find($leave_id);
+        $leave->updated_by = auth()->id();
+        $leave->status = 2;
+        $leave->save();
+        return redirect()->back()->with('success', 'Leave Approved Successfully');
+//        dd($leave_id);
     }
 
     public function leave_reject(Request $request)

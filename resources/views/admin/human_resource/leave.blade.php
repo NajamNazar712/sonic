@@ -310,6 +310,27 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="hod_approveLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="hod_approveLeaveModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Approve Leave</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.leave.hod_approve')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="hod_approveLeaveForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="leave_id" id="hod_approve_leave_id" value="">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -729,6 +750,38 @@
 
                     form.submit();
                 }
+            });
+            $('body').on('click', '.hod_approve', function (e) {
+                var id = $(this).data('target-id');
+                $('#hod_approveLeaveForm #hod_approve_leave_id').val(id);
+                atext = "Select Yes to Approve Request!";
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#hod_approveLeaveForm').submit();
+                    }
+                });
+
             });
 
             $('body').on('click', '.approve', function (e) {
