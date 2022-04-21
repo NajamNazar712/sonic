@@ -6650,7 +6650,7 @@ class AdminAPIController extends Controller
             'longitude' => ['required'],
             'business_card_image' => ['required'],
             'location_image' => ['required'],
-            'shipper_id' => ['nullable', 'integer', 'exists:users,id'],
+            'shipper_id' => ['nullable', 'integer'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
