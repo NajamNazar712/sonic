@@ -512,19 +512,28 @@ class AdminAttendanceController extends Controller
                     $date = Carbon::now()->subDays(1)->format("Y-m-d");
                 }
             }
+            $attendance_date = Carbon::now()->format("Y-m-d");
+            $last_action_log = EmployeeAttendance::where('employee_id', $admin_id)
+                ->where('employee_type', 1)->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
+                $attendance_date = $last_action_log->attendance_date;
+            }
             $clock_in = 0;
             $clock_out = 0;
-            $attendance = EmployeeAttendance::where('employee_id', $admin_id)
-                ->whereDate('attendance_date', $date)
-                ->where('employee_type', 1);
+            $attendance = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->where('employee_type', 1)->orderBy('id', 'DESC');
             if ($attendance->exists()) {
                 $attendance = $attendance->first();
-                if ($attendance->clock_in_datetime != NULL) {
+                dd($attendance->action_id);
+                if ($attendance->action_id == 1) {
                     $clock_in = 1;
                 }
-                if ($attendance->clock_out_datetime != NULL) {
+                if ($attendance->action_id == 2) {
                     $clock_out = 1;
                 }
+            } else{
+                $clock_in = 1;
             }
             return view('admin.attendance.mark_index', compact('clock_in', 'clock_out', 'date'));
         } else {

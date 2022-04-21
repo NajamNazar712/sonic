@@ -3424,7 +3424,12 @@ class AdminAPIController extends Controller
             $response = array();
             $employee_shift = EmployeeShift::where('id', $admins->shift_id);
             $last_action_log = EmployeeAttendance::where('employee_id', $admin_id)
-                ->where('employee_type', 1)->orderBy('id', 'DESC')->first();
+                ->where('employee_type', 1)->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $date = $last_action_log->attendance_date;
+            }else{
+                $date = Carbon::now()->format("Y-m-d");
+            }
             $response["status"] = 0;
             if ($employee_shift->exists()){
                 $employee_shift = $employee_shift->first();
@@ -3437,7 +3442,7 @@ class AdminAPIController extends Controller
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
             }
-            $response["last_action_date"] = $last_action_log->attendance_date;
+            $response["last_action_date"] = $date;
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
@@ -6834,7 +6839,7 @@ class AdminAPIController extends Controller
         } else {
             $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
             $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
-                ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date)->orderBy('id', 'DESC')->first();
+                ->where('employee_type', 1)->orderBy('id', 'DESC')->first();
             if ($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) {
                 $attendance_date = $attendance_date->addDays(1);
             }
