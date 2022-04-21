@@ -3697,7 +3697,7 @@ class AdminHumanResourseController extends Controller
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
                     $employee_leaves->status = 4;
                     $employee_leaves->updated_by = $admin_id;
-                    if ($employee_leaves->employee_id == 1) {
+                    if ($employee_leaves->employee_tyoe_id == 1) {
                         $user = Admin::find($employee_leaves->employee_id);
                     } else {
                         $user = Rider::find($employee_leaves->employee_id);
