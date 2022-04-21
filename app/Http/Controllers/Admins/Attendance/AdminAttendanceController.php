@@ -525,13 +525,12 @@ class AdminAttendanceController extends Controller
                 ->where('employee_type', 1)->orderBy('id', 'DESC');
             if ($attendance->exists()) {
                 $attendance = $attendance->first();
-                dd($attendance->action_id);
                 if ($attendance->action_id == 2) {
                     $clock_in = 1;
                 }
-                /*if ($attendance->action_id == 2) {
+                if ($attendance->action_id == 1) {
                     $clock_out = 1;
-                }*/
+                }
             } else{
                 $clock_in = 1;
             }
