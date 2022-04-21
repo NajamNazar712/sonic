@@ -3426,6 +3426,7 @@ class AdminAPIController extends Controller
             $last_action_log = EmployeeAttendance::where('employee_id', $admin_id)
                 ->where('employee_type', 1)->orderBy('id', 'DESC');
             if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
                 $date = $last_action_log->attendance_date;
             }else{
                 $date = Carbon::now()->format("Y-m-d");
