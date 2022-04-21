@@ -125,26 +125,10 @@ class TrackingController extends Controller
             ->select('rdps.type as type','rdps.amount as total_amount','rdps.payable as payable','retail_done_payments.ibft_charges as charges','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id','s.tracking_number as tracking')->first();
 
         $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
-        if($payment->type == 0)
-        {
-            $type = 'Processed';
-        }
-        elseif ($payment->type == 1)
-        {
-            $type = 'Paid';
-        }
-        elseif ($payment->type == 2)
-        {
-            $type = 'Reverted';
-        }
-        else
-        {
-            $type = '-';
-        }
 
         $total_amount = $payment->total_amount;
         $tracking_no = $payment->tracking;
         $user_id = $payment->user_id;
-        return view('payment_details')->with(['payable'=>$payable,'type'=>$type,'total_amount'=>$total_amount,'tracking_no'=>$tracking_no]);
+        return view('payment_details')->with(['payable'=>$payable,'total_amount'=>$total_amount,'tracking_no'=>$tracking_no]);
     }
 }

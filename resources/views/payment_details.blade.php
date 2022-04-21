@@ -60,13 +60,11 @@
                                                 <th>Tracking Number</th>
                                                 <th>Amount</th>
                                                 <th>Payable</th>
-                                                <th>Type</th>
                                             </tr>
                                             <tr>
                                                 <td style="width: 50px">{{$tracking_no}}</td>
                                                 <td style="width: 50px">{{$total_amount}}</td>
                                                 <td style="width: 50px">{{$payable}}</td>
-                                                <td style="width: 50px">{{$type}}</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -79,6 +77,6 @@
         </div>
 
 
-@include('client.layout.footer')
+{{--@include('client.layout.footer')--}}
 </body>
 </html>
