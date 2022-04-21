@@ -12,6 +12,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
+use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -32,12 +33,30 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
-
+//        dd(session()->all());
+        $permission = session()->get('permissions');
         $case_nature = CrmRequestCaseNature::get();
+
+
+        foreach($case_nature as $nature) {
+            if (in_array(16,$permission) && ($nature->id == 1)) {
+                $row[] = $nature;
+            }
+
+            elseif (in_array(17,$permission) && ($nature->id == 2)) {
+                $row[] = $nature;
+            }
+
+            elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
+                $row[] = $nature;
+            }
+//            dd($row);
+        }
+
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-      return view('client.tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+      return view('client.tracking')->with([ 'case_nature' => $row, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims,'case_permission'=>$permission]);
     }
 
     public function track(Request $request) {
