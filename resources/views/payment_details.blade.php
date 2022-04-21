@@ -1,4 +1,3 @@
-
 {{--        {{$payable}}--}}
 {{--        {{$adjustment}}--}}
 {{--        {{$total_amount}}--}}
@@ -30,18 +29,20 @@
         border-collapse: collapse;
         width: 100%;
     }
-    th{
+
+    th {
         color: white;
         background-color: #649bc8;
     }
+
     td, th {
         border: 1px solid #dddddd;
         text-align: left;
         padding: 8px;
     }
 </style>
-<div class="app-content content">
-    <div class="content-wrapper">
+{{--<div class="app-content content">--}}
+{{--    <div class="">--}}
         <div class="content-body">
 
             <div class="app-content content">
@@ -57,24 +58,21 @@
                             <div class="card-content" aria-expanded="true">
                                 <div class="card-body">
                                     @include('client.inc.messages')
-
-                                    <table>
-                                        <tr>
-                                            <th>Tracking Number</th>
-                                            <th>Total Amount</th>
-                                            <th>Payable</th>
-                                            <th>Adjustment Charges</th>
-
-                                        </tr>
-                                        <tr>
-                                            <td>{{$tracking_no}}</td>
-                                            <td>{{$total_amount}}</td>
-                                            <td>{{$payable}}</td>
-                                            <td>{{$adjustment}}</td>
-                                        </tr>
-                                    </table>
-
-                                    <div class="tracking" id="tracking">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <tr>
+                                                <th>Track No#</th>
+                                                <th>Amount</th>
+                                                <th>Payable</th>
+                                                <th>Adj.Charges</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="width: 50px">{{$tracking_no}}</td>
+                                                <td style="width: 50px">{{$total_amount}}</td>
+                                                <td style="width: 50px">{{$payable}}</td>
+                                                <td style="width: 50px">{{$adjustment}}</td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -82,10 +80,10 @@
                     </div>
                 </div>
             </div>
-
         </div>
-    </div>
-</div>
-@include('client.layout.footer')
+{{--    </div>--}}
+{{--</div>--}}
+
+{{--@include('client.layout.footer')--}}
 </body>
 </html>
