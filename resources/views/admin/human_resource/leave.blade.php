@@ -118,6 +118,7 @@
                         <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
                         <div class="row mb-2 justify-content-center">
                             <div class="col-6 mt-1">
+
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -127,9 +128,12 @@
                                     <input type="text" name="requested_from_date"
                                            class="form-control bg-primary border-primary white rounded-right"
                                            id="requested_from_date" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
+                                    <label id="requested_from_date-error" class="danger w-100" for="requested_from_date"></label>
                                 </div>
+
                             </div>
                             <div class="col-6 mt-1">
+
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -139,13 +143,18 @@
                                     <input type="text" name="requested_to_date"
                                            class="form-control bg-primary border-primary white rounded-right required"
                                            id="requested_to_date" placeholder="To" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
+                                    <label id="requested_to_date-error" class="danger w-100" for="requested_to_date"></label>
                                 </div>
+
                             </div>
                             <div class="col-6">
+
                                 <textarea class="form-control" placeholder="Reasons of Leaves"
                                        name="leave_request_reason"
                                        id="leave_request_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                <label id="leave_request_reason-error" class="danger w-100" for="leave_request_reason"></label>
                             </div>
+
                             <div class="col-12">
                                 <button type="submit"
                                         class="btn btn-outline-primary btn-min-width mt-1">
@@ -331,7 +340,9 @@
         var booking_from_date = $('#requested_from_date').pickadate({
             firstDay: 1,
             clear: '',
-            {{--max: '{{ Carbon\Carbon::now() }}',--}}
+            yearRange: "2002:2012",
+            max: '{{ Carbon\Carbon::now()->addYear(1) }}',
+            min: '{{ Carbon\Carbon:: now()->subYear(1)}}',
             // format: 'dd mmmm, yyyy',
             format: 'yyyy-mm-dd',
             selectYears: true,
@@ -344,11 +355,18 @@
                 }
             }
         });
+
+        // var booking_from_date =  $( "#requested_from_date" ).datepicker({
+        //     yearRange: "2002:2012"
+        // });
+
         var booking_to_date = $('#requested_to_date').pickadate({
             firstDay: 1,
             clear: '',
             {{--max: '{{ Carbon\Carbon::now() }}',--}}
             // format: 'dd mmmm, yyyy',
+            max: '{{ Carbon\Carbon::now()->addYear(1) }}',
+            min: '{{ Carbon\Carbon:: now()->subYear(1)}}',
             format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
