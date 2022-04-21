@@ -3422,21 +3422,36 @@ class AdminAPIController extends Controller
         $admins = Admin::find($admin_id);
         if($admins){
             $response = array();
-            $employee_shift = EmployeeShift::where('id', $admins->shift_id);
-            $last_action_log = EmployeeAttendance::where('employee_id', $admin_id)
-                ->where('employee_type', 1)->orderBy('id', 'DESC');
-            if($last_action_log->exists()){
-                $last_action_log = $last_action_log->first();
-                $date = $last_action_log->attendance_date;
-            }else{
-                $date = Carbon::now()->format("Y-m-d");
+            $admin_shift = EmployeeShift::where('id', $admins->shift_id);
+            if ($admin_shift->exists()) {
+                $admin_shift = $admin_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+                if ($shift_time->lt(Carbon::now())) {
+                    $date = Carbon::now()->format("Y-m-d");
+                } else{
+                    if(Carbon::now()->format("l") == "Monday"){
+                        $date = Carbon::now()->subDays(2)->format("Y-m-d");
+                    }
+                    else{
+                        $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                    }
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                        ->where('employee_type', 1)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
+                    if($last_action_log->exists()){
+                        $last_action_log = $last_action_log->first();
+                        if($last_action_log->action_id == 2){
+                            $date = Carbon::now()->format("Y-m-d");
+                        }
+                    }
+
+                }
             }
             $response["status"] = 0;
-            if ($employee_shift->exists()){
-                $employee_shift = $employee_shift->first();
-                $response["shift_name"] = $employee_shift->name;
-                $response["start_time"] = $employee_shift->start_time;
-                $response["end_time"] = $employee_shift->end_time;
+            if ($admin_shift->exists()){
+                $admin_shift = $admin_shift->first();
+                $response["shift_name"] = $admin_shift->name;
+                $response["start_time"] = $admin_shift->start_time;
+                $response["end_time"] = $admin_shift->end_time;
             }
             else{
                 $response["shift_name"] = "default";
