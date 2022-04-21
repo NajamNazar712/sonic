@@ -2665,8 +2665,11 @@ class APIController extends Controller
         $user_id = $request->user_id;
 
         $rules = [
-            'tracking_numbers' => ['required', 'array', 'min:1'],
-            'tracking_numbers.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+            'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
             'orders' => ['required', 'array', 'min:1'],
