@@ -6659,7 +6659,7 @@ class AdminAPIController extends Controller
         }else{
             try{
                 $daily_visit = new DailyVisit();
-                $daily_visit->shipper_id = $request->shipper;
+                $daily_visit->shipper_id = $request->shipper_id;
                 $daily_visit->company_name = str_replace('"',"",$request->company_name);
                 $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
                 $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
