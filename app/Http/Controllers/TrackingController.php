@@ -120,14 +120,16 @@ class TrackingController extends Controller
         $user_id = base64_decode($user_id);
         $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
             ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
+            ->leftjoin('shipments as s','s.id','=','rdps.shipment_id')
             ->where('retail_done_payments.id',$payment_id)
-            ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id')->first();
+            ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id','s.tracking_number as tracking')->first();
 //                   dd($payment->payable);
 //        dd($payment);
         $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
         $adjustment = $payment->adjustment;
         $total_amount = $payment->total_amount;
         $tracking_no = $payment->tracking_number;
+        $tracking_no = $payment->tracking;
         $user_id = $payment->user_id;
         return view('payment_details')->with(['payable'=>$payable,'adjustment'=>$adjustment,'total_amount'=>$total_amount,'tracking_no'=>$tracking_no]);
     }

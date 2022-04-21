@@ -64,7 +64,7 @@
                                                 <th>Track No#</th>
                                                 <th>Amount</th>
                                                 <th>Payable</th>
-                                                <th>Adj.Charges</th>
+                                                <th>Adjustment Charges</th>
                                             </tr>
                                             <tr>
                                                 <td style="width: 50px">{{$tracking_no}}</td>
