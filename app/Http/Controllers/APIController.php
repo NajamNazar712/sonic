@@ -2699,7 +2699,7 @@ class APIController extends Controller
                     $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
                     if (!empty($request->orders[$shipment->tracking_number]) && $invoice) {
-                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting);
+                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting, $shipment);
                     }
                     $valid = true;
                 }
