@@ -118,17 +118,22 @@ class TrackingController extends Controller
     {
         $payment_id = base64_decode($payment_id);
         $user_id = base64_decode($user_id);
+
+//        dd($payment_id,$user_id);
         $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
-            ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
+//            ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
             ->leftjoin('shipments as s','s.id','=','rdps.shipment_id')
-            ->where('retail_done_payments.id',$payment_id)
-            ->select('rdps.type as type','rdps.amount as total_amount','rdps.payable as payable','retail_done_payments.ibft_charges as charges','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id','s.tracking_number as tracking')->first();
+            ->where('rdps.retail_done_payment_id',$payment_id)
+            ->select('rdps.amount as total_amount','rdps.payable as payable','retail_done_payments.ibft_charges as charges','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id','s.tracking_number as tracking')->get();
 
-        $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
 
-        $total_amount = $payment->total_amount;
-        $tracking_no = $payment->tracking;
-        $user_id = $payment->user_id;
-        return view('payment_details')->with(['payable'=>$payable,'total_amount'=>$total_amount,'tracking_no'=>$tracking_no]);
+//        $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
+//
+//        $total_amount = $payment->total_amount;
+//        $tracking_no = $payment->tracking;
+
+
+//        return view('payment_details')->with(['payable'=>$payment->payable,'total_amount'=>$payment->total_amount,'tracking_no'=>$payment->tracking]);
+        return view('payment_details')->with(['payments'=>$payment]);
     }
 }

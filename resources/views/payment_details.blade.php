@@ -61,11 +61,13 @@
                                                 <th>Amount</th>
                                                 <th>Payable</th>
                                             </tr>
+                                            @foreach($payments as $payment)
                                             <tr>
-                                                <td style="width: 50px">{{$tracking_no}}</td>
-                                                <td style="width: 50px">{{$total_amount}}</td>
-                                                <td style="width: 50px">{{$payable}}</td>
+                                                <td style="width: 50px">{{$payment->tracking}}</td>
+                                                <td style="width: 50px">{{$payment->total_amount}}</td>
+                                                <td style="width: 50px">{{$payment->payable}}</td>
                                             </tr>
+                                                @endforeach
                                         </table>
                                     </div>
                                 </div>
