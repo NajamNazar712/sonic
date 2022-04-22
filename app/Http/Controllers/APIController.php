@@ -1255,6 +1255,9 @@ class APIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
+            if($user_id == 1049){
+                Log::info('Tracking Number 1: ', json_encode($request->tracking_numbers));
+            }
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $tracking_number = $request->tracking_number;
