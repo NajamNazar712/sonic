@@ -318,7 +318,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Fuel (Ltrs) <span class="text-danger">*</span></label>
-                                                    <input type="text" id="fuel" data-rule-required="true"  data-msg-required="Fuel is required" class="form-control" value="{{$employee->fuel}}" name="fuel" >
+                                                    <input type="text" id="fuel" data-rule-required="true"  data-msg-required="Fuel is required" class="form-control" value="{{$employee->fuel}}" name="fuel" data-rule-number="true" data-msg-number="Fuel should not be Greater than 10000">
                                                 </div>
                                             </div>
                                         @endif
