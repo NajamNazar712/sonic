@@ -6,6 +6,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalesIncentiveDate;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use DB;
 
 class Kernel extends ConsoleKernel
 {
@@ -386,7 +387,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:autohighaging')->dailyAt('09:00')->runInBackground();
         $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
         $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
-        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
+
+        $cron = DB::table('rcp_sms_cron_time')->first();
+        $cron_time = isset($cron->seting_value) ? $cron->seting_value : "12:00";
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
     }
     /**
