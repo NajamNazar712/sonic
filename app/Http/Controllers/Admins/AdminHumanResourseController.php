@@ -3591,22 +3591,21 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             })
             ->addColumn("action", function ($employee) {
-//                dd($employee->status_id);
                 if (in_array($employee->status_id, [1, 2, 3])) {
-                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions')) || in_array(706, session('permissions'))) {
                         $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                         //todo:HOD
-                        if (($employee->status_id == 1) && (session('role_id') == 1 || in_array(615, session('permissions')))) {
+                        if ((($employee->status_id == 1) && in_array(session('id'),[3,69,372,500,8,70,32,497,57,12,760,897,577])) || (session('role_id') == 1 && $employee->status_id == 1)) {
                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item hod_reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
                         }
                         //todo:HOD end
 
-                        if (session('role_id') == 1 || in_array(614, session('permissions'))) {
+                        if (session('role_id') == 1 || (in_array(614, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                         }
                         if (($employee->status_id == 2) && (session('role_id') == 1 || in_array(615, session('permissions')))) {
@@ -3795,7 +3794,18 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1, 2, 3])) {
+                if (in_array($employee_leaves->status, [1])) {
+                    $employee_leaves->status = 3;
+                    $employee_leaves->rejected_reason = $request->reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return redirect()->back()->with('success', 'Leave Reject Successfully');
+                }
+//                else {
+//                    return redirect()->back()->with('error', 'Leave Already Rejected');
+//                }
+                elseif (in_array($employee_leaves->status, [2])) {
                     $employee_leaves->status = 5;
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
