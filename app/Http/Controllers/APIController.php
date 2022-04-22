@@ -1256,7 +1256,7 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             if($user_id == 1049){
-                Log::info('Tracking Number 1: ', json_encode($request->tracking_numbers));
+                Log::info($request->tracking_numbers);
             }
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
