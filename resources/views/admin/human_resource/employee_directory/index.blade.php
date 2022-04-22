@@ -57,7 +57,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
@@ -372,23 +372,23 @@
                         <div class="row mb-2">
                             {{csrf_field()}}
                             <input type="hidden" name="employee_id" id="employee_id" value="">
-                            <div class="col-md-6">
+                                <div class="col"  id="employee_nature_list_group">
                                 <div class="form-group">
                                     <label>Employee Nature<span class="text-danger">*</span></label>
-                                    <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control " style="width: 100%">
+                                    <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control" style="width: 100%">
                                         @foreach($employee_natures as $employee_nature)
                                             <option value="{{$employee_nature->id}}">{{$employee_nature->name}}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="col" id="sub_department_group">
+                                <div class="form-group" >
                                     <label>Sub Department <span class="text-danger">*</span></label>
                                     <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" name="sub_department" >
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                                <div class="col" id="joining_date_group">
                                 <label>Joining Date<span class="text-danger">*</span></label>
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -934,10 +934,16 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Employee Directory',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(652, session('permissions')))
                     {
                         text: 'Approve',
-                        className: 'btn btn-primary bulk_approve',
+                        className: 'btn btn-primary bulk_approve d-none',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
@@ -1004,7 +1010,7 @@
                     },
                     {
                         text: 'Reject',
-                        className: 'btn btn-danger bulk_reject',
+                        className: 'btn btn-danger bulk_reject d-none',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
@@ -1073,7 +1079,7 @@
                     {
                         extend: 'selectAll',
                         text: 'Select All',
-                        className: 'select_all',
+                        className: 'select_all d-none',
                         action : function(e) {
                             e.preventDefault();
 
@@ -1099,7 +1105,7 @@
                     }, {
                         extend: 'selectNone',
                         text: 'Select None',
-                        className: 'select_none',
+                        className: 'select_none d-none',
                         action : function(e) {
                             e.preventDefault();
 
@@ -1124,12 +1130,6 @@
                                 }
                             });
                         }
-                    },
-                    {
-                        extend: 'excel',
-                        title: 'Employee Directory',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
                 select: {
@@ -1158,7 +1158,7 @@
                 order: [[17, 'desc']],
                 rowId: 'employee_id',
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
@@ -1181,10 +1181,10 @@
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
-                    $('td:eq(0)', row).addClass('select-checkbox');
+                    // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1389,15 +1389,40 @@
                         })
                             .done(function (data) {
                                 if(data.status == 2){
+                                    if(!data.joining_date){
+                                        $('#approveStaffForm #joining_date_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #joining_date_group').addClass('d-none');
+                                    }
+
+                                    if(!data.employee_nature){
+                                        $('#approveStaffForm #employee_nature_list_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #employee_nature_list_group').addClass('d-none');
+                                    }
+
+                                    if(!data.sub_department){
+                                        $('#approveStaffForm #sub_department_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #sub_department_group').addClass('d-none');
+                                    }
+
                                     $('#approveStaffForm #employee_id').val(data.employee_id);
+
                                     $('#employeeRequiredInfoModal').modal('show');
                                 }
                                 else if(data.status == 3){
                                     $('#approveRiderForm #employee_id').val(data.employee_id);
                                     $('#RiderRequiredInfoModal').modal('show');
                                 }
-                                else {
+                                else if(data.status == 1) {
                                     toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                else if(data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });

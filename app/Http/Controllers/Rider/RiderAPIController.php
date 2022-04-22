@@ -10337,7 +10337,7 @@ class RiderAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
-                'fuel' => ['nullable', 'integer'],
+                'fuel' => ['nullable'],
                 'employee_nature_id' => ['nullable',  'integer', 'digits_between:1,10', 'exists:employee_natures,id'],
                 'sub_department' => ['nullable'],
 

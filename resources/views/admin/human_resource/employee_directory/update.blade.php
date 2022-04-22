@@ -2127,10 +2127,13 @@
             });
 
             $('#profile-form #fuel').inputmask({
-                'alias': 'integer',
+                'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
+                'max': 10000
             });
 
             var cnic_issue_date = $('#profile-form #cnic_issue_date').pickadate({

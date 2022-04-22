@@ -17,7 +17,7 @@ class UpdateEmployeesForNewColumns extends Migration
             $table->Integer('employee_nature_id')->nullable()->index();
             $table->Integer('replacement_employee_id')->nullable()->index();
             $table->date('replacement_last_working_day')->nullable();
-            $table->Integer('fuel')->nullable();
+            $table->decimal('fuel',10,2)->nullable();
             $table->string('sub_department')->nullable();
         });
     }

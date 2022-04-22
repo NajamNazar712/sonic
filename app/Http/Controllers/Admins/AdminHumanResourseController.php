@@ -215,6 +215,113 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public function employee_approve_individual_function(Request $request){
+        $employee_id = $request->employee_id;
+        $employee = Employee::find($employee_id);
+        if($employee){
+            if (in_array($employee->request_status_id, [1, 2])) {
+                if ($employee->trax_id == null) {
+                    if($employee->employee_type_id == 1){
+                        if($employee->staff_category_id == 1){
+                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                            $trax_id_prefix = 'Trax';
+                        }elseif ($employee->staff_category_id == 2){
+                            $global_setting = GlobalSettings::where('type', 'latest_intern_id');
+                            $trax_id_prefix = 'Trax-I-';
+                        }else{
+                            return redirect()->back()->with('error', 'Invalid Staff Category');
+                        }
+                    }else{
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                        $trax_id_prefix = 'Trax';
+                    }
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+
+                    $employee->trax_id = $trax_id;
+
+                }
+                $employee->request_status_id = 3;
+                if($request->has('joining_date_formatted'))
+                    $employee->joining_date = $request->joining_date_formatted;
+                $employee->save();
+
+                if ($employee->employee_type_id == 1) {
+
+                    $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+
+                    if ($admin->doesntExist()) {
+                        $admin = new Admin();
+
+                        $admin->name = $employee->name;
+                        $admin->email = $employee->official_email;
+                        $admin->phone_number = $employee->phone_number;
+                        $admin->official_phone_number = $employee->official_phone_number;
+                        $admin->cnic = $employee->cnic;
+                        $admin->role_id = $employee->designation->role_id ?? 79;
+                        $admin->default_hub_id = $employee->city->hub_city->id;
+                        $admin->password = bcrypt($employee->pin);
+                        $admin->dummy_pin = $employee->pin;
+                        $admin->designation_id = $employee->designation_id;
+                        $admin->shift_id = $employee->shift_id;
+
+                        if ($employee->status_id == 2) {
+                            $admin->status = 0;
+                        } else {
+                            $admin->status = 1;
+                        }
+
+                        $admin->updated_by = Auth::id();
+                        $admin->trax_id = $employee->trax_id;
+                        $admin->employee_id = $employee->id;
+
+                        $admin->save();
+
+                        if(count($employee->designation->hubs) == 0) {
+                            $admin_hub = new AdminHub();
+                            $admin_hub->admin_id = $admin->id;
+                            $admin_hub->hub_id = $admin->default_hub_id;
+                            $admin_hub->save();
+                        }
+                        else{
+                            foreach ($employee->designation->hubs as $hub) {
+                                $admin_hub = new AdminHub();
+                                $admin_hub->admin_id = $admin->id;
+                                $admin_hub->hub_id = $hub->hub_id;
+                                $admin_hub->save();
+                            }
+                        }
+                    }
+                    if ($request->employee_nature_id) {
+                        $employee->employee_nature_id = $request->employee_nature_id;
+                    }
+                    if ($request->replacement_employee_id) {
+                        $employee->replacement_employee_id = $request->replacement_employee_id;
+                    }
+                    if ($request->replacement_last_working_day_formatted) {
+                        $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
+                    }
+                    if ($request->sub_department) {
+                        $employee->sub_department = $request->sub_department;
+                    }
+                    $employee->save();
+
+                }
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public function employee_directory_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
@@ -988,99 +1095,10 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_approve_individual(Request $request)
     {
-        $employee_id = $request->employee_id;
-        $employee = Employee::find($employee_id);
-        if($employee){
-            if (in_array($employee->request_status_id, [1, 2])) {
-                if ($employee->trax_id == null) {
-                    if($employee->employee_type_id == 1){
-                        if($employee->staff_category_id == 1){
-                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-                            $trax_id_prefix = 'Trax';
-                        }elseif ($employee->staff_category_id == 2){
-                            $global_setting = GlobalSettings::where('type', 'latest_intern_id');
-                            $trax_id_prefix = 'Trax-I-';
-                        }else{
-                            return redirect()->back()->with('error', 'Invalid Staff Category');
-                        }
-                    }else{
-                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-                        $trax_id_prefix = 'Trax';
-                    }
-                    if ($global_setting->exists()) {
-                        $global_setting = $global_setting->first();
-                        $trax_id = $global_setting->setting_value + 1;
-                        $global_setting->setting_value = $trax_id;
-                        $global_setting->save();
-                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                    } else {
-                        $trax_id = null;
-                    }
-
-                    $employee->trax_id = $trax_id;
-
-                }
-                $employee->request_status_id = 3;
-                $employee->joining_date = $request->joining_date_formatted;
-                $employee->save();
-
-                if ($employee->employee_type_id == 1) {
-
-                    $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
-
-                    if ($admin->doesntExist()) {
-                        $admin = new Admin();
-
-                        $admin->name = $employee->name;
-                        $admin->email = $employee->official_email;
-                        $admin->phone_number = $employee->phone_number;
-                        $admin->official_phone_number = $employee->official_phone_number;
-                        $admin->cnic = $employee->cnic;
-                        $admin->role_id = $employee->designation->role_id ?? 79;
-                        $admin->default_hub_id = $employee->city->hub_city->id;
-                        $admin->password = bcrypt($employee->pin);
-                        $admin->dummy_pin = $employee->pin;
-                        $admin->designation_id = $employee->designation_id;
-                        $admin->shift_id = $employee->shift_id;
-
-                        if ($employee->status_id == 2) {
-                            $admin->status = 0;
-                        } else {
-                            $admin->status = 1;
-                        }
-
-                        $admin->updated_by = Auth::id();
-                        $admin->trax_id = $employee->trax_id;
-                        $admin->employee_id = $employee->id;
-
-                        $admin->save();
-
-                        if(count($employee->designation->hubs) == 0) {
-                            $admin_hub = new AdminHub();
-                            $admin_hub->admin_id = $admin->id;
-                            $admin_hub->hub_id = $admin->default_hub_id;
-                            $admin_hub->save();
-                        }
-                        else{
-                            foreach ($employee->designation->hubs as $hub) {
-                                $admin_hub = new AdminHub();
-                                $admin_hub->admin_id = $admin->id;
-                                $admin_hub->hub_id = $hub->hub_id;
-                                $admin_hub->save();
-                            }
-                        }
-                    }
-
-                    $employee->replacement_employee_id = $request->replacement_employee_id;
-                    $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
-                    $employee->sub_department = $request->sub_department;
-                    $employee->save();
-
-                }
-            }
+        $result = $this->employee_approve_individual_function($request);
+        if($result){
             return redirect()->back()->with('success', 'Employee Approved Successfully!');
-        }
-        else {
+        }else{
             return redirect()->back()->with('error', 'Invalid Selection!');
         }
     }
@@ -1092,11 +1110,29 @@ class AdminHumanResourseController extends Controller
         if($employee){
             if (in_array($employee->request_status_id, [1, 2])) {
                 if ($employee->employee_type_id == 1) {
-                    return response()->json(['status' => 2, 'info' => 'Open Modal for Admin', 'employee_id' => $employee_id]);
+                    if($employee->joining_date == null || $employee->sub_department == null || $employee->employee_nature_id == null){
+                        return response()->json(['status' => 2, 'info' => 'Open Modal for Admin', 'employee_id' => $employee_id, 'employee_nature' => $employee->employee_nature_id, 'joining_date' => $employee->joining_date, 'sub_department' => $employee->sub_department]);
+                    }
+                    else{
+                        $result = $this->employee_approve_individual_function($request);
+                        if($result){
+                            return response()->json(['status' => 0, 'success' => 'Employee Approved Successfully!']);
+                        } else{
+                            return response()->json(['status' => 1, 'error' => 'Invalid Selection!']);
+                        }
+                    }
                 }
                 elseif ($employee->employee_type_id == 2){
-
-                    return response()->json(['status' => 3, 'info' => 'Open Modal for Rider', 'employee_id' => $employee_id]);
+                    if($employee->joining_date == null){
+                        return response()->json(['status' => 3, 'info' => 'Open Modal for Rider', 'employee_id' => $employee_id, 'employee' => $employee]);
+                    }else{
+                        $result = $this->employee_approve_individual_function($request);
+                        if($result){
+                            return response()->json(['status' => 0, 'success' => 'Employee Approved Successfully!']);
+                        } else{
+                            return response()->json(['status' => 1, 'error' => 'Invalid Selection!']);
+                        }
+                    }
                 }
             }
             else{
@@ -4015,7 +4051,9 @@ class AdminHumanResourseController extends Controller
         $employee->rider_sub_category = null;
         $employee->rider_main_category = null;
         $employee->rider_type_id = null;
-
+        $employee->employee_nature_id = 1;
+        $employee->replacement_employee_id = null;
+        $employee->replacement_last_working_day = null;
         $employee->update();
 
         $rider->cnic = null;
