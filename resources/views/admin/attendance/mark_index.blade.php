@@ -16,9 +16,6 @@
                                      <div id="punch">
                                          <h2 class="centered text-white punch_msg"></h2>
                                      </div>
-                                    <div id="msg_div" class="d-none">
-                                        <h2 class="center text-danger msg">Attendance Already Marked</h2>
-                                    </div>
                                 </div>
                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -78,18 +75,15 @@
          var clock_in = @json($clock_in);
          var clock_out = @json($clock_out);
          var date = @json($date);
+         var attendance_date = @json($attendance_date);
 
 
-         if(clock_in == 0 && clock_out == 0){
+         if(clock_in == 1){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
              $('#msg_div').addClass('d-none');
          }
-         else if(clock_in == 1 && clock_out == 1 ){
-             $('#punch').addClass('d-none');
-             $('#msg_div').removeClass('d-none');
-         }
-         else{
+         else if(clock_out == 1){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK OUT</strong>');
              $('#msg_div').addClass('d-none');
@@ -141,16 +135,14 @@
                              if (data.status == 1) {
                                  $('.centered').html('');
                                  $('.centered').append('<strong>CLOCK OUT</strong>');
-                                 clock_in = 1;
-                                 clock_out = 0;
+                                 clock_in = 0;
+                                 clock_out = 1;
 
                              } else if (data.status == 2) {
-                                 console.log(232);
-                                $('.centered').text('');
+                                 $('.centered').html('');
+                                 $('.centered').append('<strong>CLOCK IN</strong>');
                                  clock_in = 1;
-                                 clock_out = 1;
-                                 $('#punch').addClass('d-none');
-                                 $('#msg_div').removeClass('d-none');
+                                 clock_out = 0;
                              }
                          }
                      });
@@ -179,7 +171,7 @@
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
                     data: function (d) {
-                        d.attendance_date = date;
+                        d.attendance_date = attendance_date;
                     }
                 },
                 order:['2','desc'],
