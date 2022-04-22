@@ -111,7 +111,7 @@
                                  containerId: 'toast-top-center'
                              });
                          } else {
-                             // table.draw();
+                             table.draw();
                              if(data.error == 0){
                                  swal({
                                      title: data.success,
