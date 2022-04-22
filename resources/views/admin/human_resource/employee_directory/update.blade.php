@@ -2133,9 +2133,7 @@
                 'rightAlign': false,
                 'digits': 2,
                 'min': 0.00,
-                'max': 10000.00,
-                'mask': '99999.99',
-                'clearIncomplete': true
+                'max': 10000.00
             });
 
             var cnic_issue_date = $('#profile-form #cnic_issue_date').pickadate({
