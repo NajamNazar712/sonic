@@ -573,7 +573,7 @@ class AdminAttendanceController extends Controller
                 }
                 $employee_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                     ->where('employee_type', 1)
-                    ->where('attendance_date', $attendance_date);
+                    ->where('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"));
                 if ($employee_attendance->exists()) {
                     $attendance = $employee_attendance->first();
                 } else {
@@ -593,7 +593,7 @@ class AdminAttendanceController extends Controller
                     if ($last_action->exists()) {
                         $last_action = $last_action->first();
                         if ($last_action->action_id == 2) {
-                            return response()->json(['status' => 2, 'message' => 'You have already marked Clock Out', 'error' => 1]);
+                            return response()->json(['status' => 2, 'message' => 'You have already marked Clock Out', 'attendance_date' => $attendance_date, 'error' => 1]);
                         } else {
                             $attendance->clock_out_datetime = $attendance_mark;
                             $attendance->clock_out_latitude = session('latitude');
@@ -611,10 +611,10 @@ class AdminAttendanceController extends Controller
                             $attendance_action_log->longitude = $attendance->clock_out_longitude;
                             $attendance_action_log->location_status = $location_status;
                             $attendance_action_log->save();
-                            return response()->json(['status' => 2, 'success' => 'Clock Out Successful', 'date' => $attendance_mark, 'error' => 0]);
+                            return response()->json(['status' => 2, 'success' => 'Clock Out Successful', 'date' => $attendance_mark,'attendance_date' => $attendance_date, 'error' => 0]);
                         }
                     } else {
-                        return response()->json(['status' => 2, 'message' => 'Unable to mark Clock Out', 'error' => 1]);
+                        return response()->json(['status' => 2, 'message' => 'Unable to mark Clock Out', 'attendance_date' => $attendance_date, 'error' => 1]);
                     }
 
                 }
@@ -624,7 +624,7 @@ class AdminAttendanceController extends Controller
                     if ($last_action->exists()) {
                         $last_action = $last_action->first();
                         if ($last_action->action_id == 1) {
-                            return response()->json(['status' => 1, 'message' => 'You have already marked Clock In', 'error' => 1]);
+                            return response()->json(['status' => 1, 'message' => 'You have already marked Clock In', 'attendance_date' => $attendance_date, 'error' => 1]);
                         } else {
                             if ($attendance->clock_in_datetime == NULL) {
                                 $attendance->clock_in_datetime = $attendance_mark;
@@ -644,7 +644,7 @@ class AdminAttendanceController extends Controller
                             $attendance_action_log->longitude = $attendance->clock_in_longitude;
                             $attendance_action_log->location_status = $location_status;
                             $attendance_action_log->save();
-                            return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'error' => 0]);
+                            return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'attendance_date' => $attendance_date, 'error' => 0]);
                         }
                     } else {
                         if ($attendance->clock_in_datetime == NULL) {
@@ -665,7 +665,7 @@ class AdminAttendanceController extends Controller
                         $attendance_action_log->longitude = $attendance->clock_in_longitude;
                         $attendance_action_log->location_status = $location_status;
                         $attendance_action_log->save();
-                        return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'error' => 0]);
+                        return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d"), 'error' => 0]);
                     }
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Unable to mark attendance']);
@@ -683,7 +683,7 @@ class AdminAttendanceController extends Controller
     {
         $date = Carbon::today()->toDateString();
         if ($request->has('attendance_date')) {
-            $date = $request->attendance_date;
+            $date = Carbon::parse($request->attendance_date)->format("Y-m-d");
         }
         $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::id())
             ->whereDate('attendance_date', $date)

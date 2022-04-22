@@ -111,7 +111,7 @@
                                  containerId: 'toast-top-center'
                              });
                          } else {
-                             table.draw();
+                             // table.draw();
                              if(data.error == 0){
                                  swal({
                                      title: data.success,
@@ -137,12 +137,16 @@
                                  $('.centered').append('<strong>CLOCK OUT</strong>');
                                  clock_in = 0;
                                  clock_out = 1;
+                                 attendance_date = data.attendance_date;
+                                 table.draw();
 
                              } else if (data.status == 2) {
                                  $('.centered').html('');
                                  $('.centered').append('<strong>CLOCK IN</strong>');
                                  clock_in = 1;
                                  clock_out = 0;
+                                 attendance_date = data.attendance_date;
+                                 table.draw();
                              }
                          }
                      });
