@@ -58,39 +58,36 @@
 {{--                                    </div>--}}
 
 
-                                    <div class="row">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                  <span class="">Time</span>
-                                              </span>
-                                            </div>
-{{--                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{isset($val->$cut_off_time_from) ? $val->$cut_off_time_from : ''}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">--}}
-                                            <select name="cut_off_time_from" class="form-control">
-                                                @foreach($data as $val)
-                                                    @if($val->name == "TAT Cut-Off Time From")
-                                                        <option value="{{$val->setting_value}}">{{$val->setting_value}}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-{{--                                        <div class="row">--}}
-{{--                                            <div class="form-group input-group">--}}
-{{--                                                <div class="input-group-prepend">--}}
-{{--                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                      <span class="">Time</span>--}}
-{{--                                                  </span>--}}
-{{--                                                </div>--}}
-{{--                                                <select name="cut_off_time_from" class="form-control">--}}
-{{--                                                    @foreach($data as $val)--}}
-{{--                                                        <form action="">--}}
-{{--                                                            <input type="time" id="" name="appt" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{$setting->text1}}">--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
+{{--                                    <div class="row">--}}
+{{--                                        <div class="form-group input-group">--}}
+{{--                                            <div class="input-group-prepend">--}}
+{{--                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
+{{--                                                  <span class="">Time</span>--}}
+{{--                                              </span>--}}
 {{--                                            </div>--}}
+{{--                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{isset($val->$cut_off_time_from) ? $val->$cut_off_time_from : ''}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">--}}
+{{--                                            <select name="cut_off_time_from" class="form-control">--}}
+{{--                                                @foreach($data as $val)--}}
+{{--                                                    @if($val->name == "TAT Cut-Off Time From")--}}
+{{--                                                        <option value="{{$val->setting_value}}">{{$val->setting_value}}</option>--}}
+{{--                                                    @endif--}}
+{{--                                                @endforeach--}}
+{{--                                            </select>--}}
 {{--                                        </div>--}}
+{{--                                    </div>--}}
+
+                                        <div class="row">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                      <span class="">Time</span>
+                                                  </span>
+                                                </div>
+                                                <div class="form">
+                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">
+                                                </div>
+                                            </div>
+                                        </div>
 
 
                                     {{--      End      --}}
@@ -112,12 +109,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
     <style>
-        span.input-group-text.bg-primary.bg-darken-2.border-primary.white.rounded-left {
-            margin: 0 0 0 11px;
+        input#time {
+            margin: 0 50px 0px 0px;
         }
 
-        input#appt {
-            padding: 0px 37px 0 56px;
+        span.input-group-text.bg-primary.bg-darken-2.border-primary.white.rounded-left span {
+            padding: 0 19px 0 11px;
         }
     </style>
 @endsection
