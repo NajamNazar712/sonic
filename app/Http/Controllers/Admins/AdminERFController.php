@@ -191,20 +191,14 @@ class AdminERFController extends Controller
 
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
-        $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
-        if (session('role_id') == 1) {
-            $employee_trax_id = Employee::whereNotIn('trax_id', $invalid_employees)->get();
-        }
-        else{
-            $employee_trax_id = Employee::where('department_id',session('department_id'))->whereNotIn('trax_id', $invalid_employees)->get();
-        }
+       
         $today = Carbon::now()->endOfDay();
 
-        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
+        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'today' => $today]);
     }
 
     public function submit_form(Request $request){
-        
+       
         $erf = new EmployeeRequisition();
         $erf->department_id = $request->department;
         $erf->designation_id = $request->designation;
@@ -657,7 +651,22 @@ class AdminERFController extends Controller
         $department = AdminDepartment::find($request->id);
         $data['department_head'] = Admin::find($department->department_head_id);
         $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
-        return response()->json(['status' => 1,'emplyee_detail' => $data]);
+
+        $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
+        $employee_trax_id  = Employee::whereNotIn('trax_id', $invalid_employees)->where('department_id',$request->id)->get();
+
+        $trax_ids = array();
+        $inactive = '';
+        foreach($employee_trax_id as $employee){
+            if($employee->status_id == 2){
+               $inactive = '-inactive';
+            }
+            $trax_id = $employee->trax_id . $inactive;
+            $trax_id_array = array('id' => $employee->trax_id,'name' => $trax_id);
+            array_push($trax_ids,$trax_id_array);
+
+        }
+        return response()->json(['status' => 1,'emplyee_detail' => $data,'trax_ids' => $trax_ids]);
 
     }
 
@@ -706,9 +715,9 @@ class AdminERFController extends Controller
                  else{
                      $details['last_working_date'] = $employee->last_working_date;
                  }
-                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest()->first();
+                 $salary = EmployeePayslip::where('trax_id',$trax_id)->latest('payroll_month')->first();
                  if($salary){
-                     $details['last_salary'] = $salary->total_salary;
+                     $details['last_salary'] = $salary->gross_salary;
                  }
                  else{
                      $details['last_salary'] = 0;

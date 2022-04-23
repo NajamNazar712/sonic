@@ -28,11 +28,12 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Trax Reason</th>
-                        <th class="border-primary border-darken-1">Trax Remarks</th>
-                        <th class="border-primary border-darken-1">Shipper Remarks</th>
-                        <th class="border-primary border-darken-1">Attempt Date/Time</th>
+{{--                        <th class="border-primary border-darken-1">Trax Reason</th>--}}
+{{--                        <th class="border-primary border-darken-1">Trax Remarks</th>--}}
+{{--                        <th class="border-primary border-darken-1">Shipper Remarks</th>--}}
+{{--                        <th class="border-primary border-darken-1">Attempt Date/Time</th>--}}
                         <th class="border-primary border-darken-1">Attempt Count</th>
+                        <th class="border-primary border-darken-1">View Details</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -54,6 +55,51 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="view_detail_modal" data-backdrop="static" role="dialog" aria-labelledby="view_detail_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="view_detail_modal_tittle"></h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="modal-body">
+                        <table class="table table-striped" id="view_details">
+                            <thead>
+                            <tr>
+                                <th>Reason</th>
+                                <th>Trax Remarks</th>
+                                <th>Shipper Remarks</th>
+                                <th>Attempt Date</th>
+                                <th>Attempts</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -547,11 +593,12 @@
                     {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                     {data: 'city', name: 'ci.name', class: 'align-middle city'},
                     {data: 'status', name: 'vprs.id', class: 'align-middle status'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, searchable: false, width: 200},
-                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
-                    {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
-                    {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
+                    // {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, searchable: false, width: 200},
+                    // {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
+                    // {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
+                    // {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
                     {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempt'},
+                    {data: 'view_details', name: '', class: 'align-middle view_details'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -574,7 +621,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempt_date_time') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.reason') || $(header).is('.view_details') || $(header).is('.remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempt_date_time') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -624,6 +671,43 @@
                     });
 
             });
+            //todo : yahan p mujhe popup show krna h
+            $('body').on('click','#datatable tbody tr td.view_details button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipment_modal #shipment_modal_tittle').html('');
+                $('#shipment_modal .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('cod.pickup.view_details') !!}',
+                    method: 'GET',
+                    data: {
+                        'pickup_request_id': id,
+                        'status': 1
+                    }
+                })
+                    .done(function(data) {
+                        var result = JSON.parse(data);
+                        var count = JSON.parse(data).length;
+                        $('#view_detail_modal').modal('show');
+                        if (count != 0) {
+
+                            $('#view_detail_modal #view_detail_modal_tittle').html('Details');
+                            $('#view_details tbody ').html(`
+                                    <tr>
+                                    <td>${result.reason}</td>
+                                    <td>${result.trax_remarks}</td>
+                                    <td>${result.shipper_remarks}</td>
+                                    <td>${result.attempt_date}</td>
+                                    <td>${result.attempts}</td>
+                                    </tr>`)
+                        }
+                        else{
+                            $('#view_details tbody ').html('') ;
+                        }
+                    });
+
+            });
+            //todo : yahan p mujhe popup show krna h end
 
             $('body').on('click','#datatable tbody tr td.received button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));

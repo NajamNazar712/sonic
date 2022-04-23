@@ -5,6 +5,7 @@
 @section('content')
 
     <div class="card">
+        @include('client.inc.messages')
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>

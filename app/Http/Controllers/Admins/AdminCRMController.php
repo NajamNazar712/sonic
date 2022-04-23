@@ -567,9 +567,10 @@ class AdminCRMController extends Controller
         $comment_type = 0;
         if($request->internal_switch == 1){
             $comment_type = 1;
-        }else
-        if($request->internal_switch == 2){
+        }else if($request->internal_switch == 2){
             $comment_type = 2;
+        }else if($request->internal_switch == 3){
+            $comment_type = 3;
         }
 
         if($comment == null){
@@ -585,8 +586,14 @@ class AdminCRMController extends Controller
         else{
             $shipper_email = 0;
         }
+        if($request->sms_check == 'true'){
+            $sms = 1;
+        }
+        else{
+            $sms = 0;
+        }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email, $sms);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }
