@@ -236,7 +236,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2) {
             $date = Carbon::today()->toDateString();
-            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $this->booking['category'])->where('retail_user_id', $this->booking['retail_user_id']);
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $this->booking['category'])->where('retail_user_id', $this->booking['retail_user_id'])->where('finalize', 0);
             if ($cash_deposit->exists()) {
                 $cash_deposit = $cash_deposit->first();
                 $total_shipments = $cash_deposit->total_cn + 1;

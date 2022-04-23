@@ -108,7 +108,7 @@ class RetailCashCollectionController extends Controller
                 if($user->rcd_status == 1){
                     return 'Cash Collected';
                 }else{
-                    return '-';
+                    return 'Pending';
                 }
             })
             ->editColumn('code', function ($user) {
