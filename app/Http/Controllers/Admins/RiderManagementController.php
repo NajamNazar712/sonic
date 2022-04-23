@@ -1368,7 +1368,7 @@ class RiderManagementController extends Controller
                     }
 
                 }
-
+                
                 if($pickup_incentive > 0 || $delivery_incentive > 0){
                     $incentive_amount = 0;
                     if($pickup_shipments_count < 0){
@@ -1382,7 +1382,7 @@ class RiderManagementController extends Controller
                     $riders_incentive->date = Carbon::now();
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
                     
-                    $riders_incentive->pickup_incentive = $incentive_amount;
+                    $riders_incentive->pickup_incentive = $pickup_incentive; //$incentive_amount
                     $riders_incentive->delivery_shipments = $delivered_shipment_count;
                     $riders_incentive->delivery_incentive = $delivery_incentive;
                     $riders_incentive->save();
