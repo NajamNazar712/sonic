@@ -341,7 +341,7 @@
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
-                    if(data.rcd_status != "-"){
+                    if(data.rcd_status != "Pending"){
                         $('td:eq(0)', row).removeClass('select-checkbox');
                     }
                 },
