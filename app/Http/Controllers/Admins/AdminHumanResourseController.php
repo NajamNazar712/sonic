@@ -322,6 +322,53 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public function rejoin_employee_function(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+
+        if($employee->employee_type_id == 1)
+        {
+            $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        }
+        else{
+            $staff = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        }
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->trax_id = $trax_id;
+        $staff->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->trax_id = $trax_id;
+        $employee->joining_date = $request->joining_date_formatted;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
+    }
+
     public function employee_directory_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
@@ -605,49 +652,14 @@ class AdminHumanResourseController extends Controller
 
     public function rejoin_employee(Request $request)
     {
-        $employee_id = $request->employee_id;
-        if(!$employee_id){
-            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
-        }
-        $employee = Employee::find($employee_id);
-        if(!$employee)
+        $response = $this->rejoin_employee_function($request);
+        if($response->getData()->status == 0)
         {
-            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
-        }
-
-        if($employee->employee_type_id == 1)
-        {
-            $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+            return redirect()->back()->with('success',$response->getData()->success);
         }
         else{
-            $staff = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+            return redirect()->back()->with('error',$response->getData()->error);
         }
-        if($staff->doesntExist()){
-            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
-        }
-        $staff = $staff->first();
-
-        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-        if ($global_setting->exists()) {
-            $global_setting = $global_setting->first();
-            $trax_id = $global_setting->setting_value + 1;
-            $global_setting->setting_value = $trax_id;
-            $global_setting->save();
-            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-        } else {
-            $trax_id = null;
-        }
-
-        $staff->status = 1;
-        $staff->updated_by = Auth::id();
-        $staff->trax_id = $trax_id;
-        $staff->save();
-
-        $employee->status_id = self::GetStatusOfEmployee($employee->id);
-        $employee->trax_id = $trax_id;
-        $employee->joining_date = Carbon::now();
-        $employee->save();
-        return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
     }
 
     public function employee_directory_make_rider_incentive(Request $request)
@@ -954,8 +966,8 @@ class AdminHumanResourseController extends Controller
             if($request->has('rejoin_rider_bit'))
             {
                 $rejoin_request = new \Illuminate\Http\Request();
-                $rejoin_request->query->add(['employee_id' => $request->employee_id]);
-                $response = $this->rejoin_employee($rejoin_request);
+                $rejoin_request->query->add(['employee_id' => $request->employee_id, 'joining_date_formatted' => $request->joining_date_formatted]);
+                $response = $this->rejoin_employee_function($rejoin_request);
                 if($response->getData()->status == 0)
                 {
                     return redirect()->back()->with('success',$response->getData()->success);

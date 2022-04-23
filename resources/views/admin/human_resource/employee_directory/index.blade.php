@@ -110,6 +110,22 @@
                                     <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                                 </div>
                             </div>
+                        <div class="row">
+                                <div class="col d-none" id="joining_date_group">
+                                    <label>Joining Date<span class="text-danger">*</span></label>
+                                    <fieldset class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                        </div>
+                                        <input type="text" name="joining_date" data-rule-required="true"
+                                               data-msg-required="This Field is required"
+                                               class="form-control bg-primary border-primary white rounded-right pickadate"
+                                               id="joining_date" placeholder="Joining Date">
+                                    </fieldset>
+                                </div>
+                            </div>
                         <div id="unEditableFields">
                             <div class="row">
                                 <div class="col-4">
@@ -148,7 +164,7 @@
 
                             <input type="hidden" name="employee_id" id="employee_id">
                             <div>
-                                <div class="row mb-2">
+                                <div class="row">
                                 <div class="col">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="rider_name" id="rider_name"
@@ -182,7 +198,7 @@
                             </div>
                             </div>
 
-                            <div class="row mb-2">
+                            <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
                                     <textarea name="address" class="form-control" placeholder="Address" id="address"
@@ -542,6 +558,44 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="rejoinStaffModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="rejoinStaffModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Rejoin Employee</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('admin.human_resource.employee_directory.rejoin')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="rejoinStaffForm" novalidate="novalidate">
+                    <div class="modal-body text-left">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="col-md-12">
+                            <label>Joining Date<span class="text-danger">*</span></label>
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                </div>
+                                <input type="text" name="joining_date" data-rule-required="true"
+                                       data-msg-required="This Field is required"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="joining_date" placeholder="Joining Date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -724,7 +778,37 @@
                 max: today,
             });
 
-            var joining_date = $('#approveRiderForm #joining_date').pickadate({
+            $('#approveRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#editRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#editRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#rejoinStaffForm #joining_date').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: 100,
@@ -1443,63 +1527,8 @@
                 var id = $(this).data('target-id');
                 var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
                 if(employee_type == 1) {
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes To Rejoin Employee!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Employee is being Rejoin',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-
-                            $.ajax({
-                                url: '{!! route('admin.human_resource.employee_directory.rejoin') !!}',
-                                method: 'POST',
-                                data: {
-                                    'employee_id': id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function (data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                    swal.close();
-                                    table.draw('false');
-                                });
-                        }
-                    });
+                    $("#rejoinStaffForm #employee_id").val(id);
+                    $("#rejoinStaffModal").modal("show");
                 }
                 else{
                     edit_Rider_function(this,true);
@@ -1674,11 +1703,13 @@
                 {
                     $('#editRiderModal .modal-title').text("Rejoin Rider");
                     $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
+                    $('#editRiderModal #joining_date_group').removeClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
                 }
                 else{
                     $('#editRiderModal .modal-title').text("Update Rider");
                     $('#editRiderModal .modal-footer #confirmAction').text("Update Rider");
+                    $('#editRiderModal #joining_date_group').addClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("");
                 }
                 $('#editRiderModal').modal('show');
@@ -1721,6 +1752,33 @@
                 $('#category').val(null).trigger('change');
 
 
+            });
+
+            $('body').on('hidden.bs.modal', '#rejoinStaffModal', function () {
+                $('#rejoinStaffForm #employee_id').val('');
+                $('#rejoinStaffForm #joining_date').val('');
+            });
+
+            $("#rejoinStaffForm").validate({
+
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    $('#rejoinStaffForm input,#rejoinStaffForm textarea,#rejoinStaffForm select').removeAttr('disabled');
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Employee is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
             });
 
             $('body').on('hidden.bs.modal', '#UpdatePinModal', function () {
@@ -2071,8 +2129,8 @@
                 $('#approveStaffForm #employee_id').val('');
                 $('#approveStaffForm #joining_date').val('');
                 $('#approveStaffForm #replacement_last_working_day').val('');
-                $('#approveStaffForm #replacement_employee_list').trigger('change')
-                $('#approveStaffForm #employee_nature_list').trigger('change')
+                $('#approveStaffForm #replacement_employee_list').val('').trigger('change')
+                $('#approveStaffForm #employee_nature_list').val('').trigger('change')
             });
 
             $('body').on('hidden.bs.modal', '#RiderRequiredInfoModal', function () {
