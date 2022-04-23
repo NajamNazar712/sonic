@@ -1029,7 +1029,7 @@ class RiderManagementController extends Controller
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
-        $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
+        $riders = Rider::where('status', 1)->select('id', 'rider_category_id','incentive_amount')->get();
         if(count($riders) > 0){
             foreach ($riders as $rider){
                 $rider_category_id = $rider->rider_category_id;
@@ -1368,10 +1368,10 @@ class RiderManagementController extends Controller
                     }
 
                 }
-                
                 if($pickup_incentive > 0 || $delivery_incentive > 0){
                     $incentive_amount = 0;
-                    if($pickup_shipments_count < 0){
+                    if($pickup_shipments_count){
+
                         if($rider->incentive_amount != null){
                             $incentive_amount = ($rider->incentive_amount)*$pickup_shipments_count;
                         }
@@ -1382,7 +1382,7 @@ class RiderManagementController extends Controller
                     $riders_incentive->date = Carbon::now();
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
                     
-                    $riders_incentive->pickup_incentive = $pickup_incentive; //$incentive_amount
+                    $riders_incentive->pickup_incentive = $incentive_amount; //$incentive_amount
                     $riders_incentive->delivery_shipments = $delivered_shipment_count;
                     $riders_incentive->delivery_incentive = $delivery_incentive;
                     $riders_incentive->save();
