@@ -6573,6 +6573,30 @@ public function sales_incentive()
         } 
     }
 
+    public function rider_deactivation_cron_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 525);
+
+        $settings = GlobalSettings::whereIn('type', ['rider_deactivation_cron_days', 'rider_deactivation_cron_status'])->get();
+
+        return view('admin.settings.rider_deactivation_cron')->with('settings', $settings);
+    }
+
+    public function rider_deactivation_cron_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 526);
+
+        $settings = GlobalSettings::where('type', 'rider_deactivation_cron_days')->first();
+        $settings->setting_value = $request->deactivation_days;
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'rider_deactivation_cron_status')->first();
+        $settings->setting_value = ($request->cron_status) ? 1 : 0;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
     
     
 }

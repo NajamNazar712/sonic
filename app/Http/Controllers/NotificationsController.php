@@ -8479,15 +8479,6 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     foreach ($datas as $data) {
-                        $data_set = Rider::find($data->id);
-                        $data_set->status = 0;
-                        $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
-                        if($employee_directory->exists()){
-                            $employee_directory = $employee_directory->first();
-                            $employee_directory->status_id = 2;
-                            $employee_directory->save();
-                        }
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
@@ -8502,7 +8493,8 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+//                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $to = ['muzaffar.kareem@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {

@@ -3166,6 +3166,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+        Route::prefix('rider_deactivation_cron')->name('rider_deactivation_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_deactivation_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_deactivation_cron_store')->name('store');
+        });
+
         Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@bolt_update_version_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@bolt_update_version_store')->name('store');

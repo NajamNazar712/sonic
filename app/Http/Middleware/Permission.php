@@ -925,6 +925,14 @@ class Permission
 
             'settings.return_reason_mandatory.index' => 684,
             'settings.return_reason_mandatory.list' => 684,
+
+            'settings.rider_deactivation_cron.index' => 707,
+            'settings.rider_deactivation_cron.store' => 707,
+
+            'settings.rider_shipment_attempt.index' => 562,
+            'settings.rider_shipment_attempt.store' => 562,
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
