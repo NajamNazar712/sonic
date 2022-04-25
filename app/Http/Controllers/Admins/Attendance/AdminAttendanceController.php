@@ -292,7 +292,7 @@ class AdminAttendanceController extends Controller
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('department_id', $search_department)->where('employee_type',1);
+                $datatable->where('ad.id', $search_department)->where('employee_type',1);
             }
             else{
                 $datatable->where(function($query) use($search_department){
