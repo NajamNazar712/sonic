@@ -1321,7 +1321,7 @@
                                                                 <li><a class="menu-item" href="{{route('admin.settings.rider_shipment_attempt.index')}}">Rider Shipments Attempt</a></li>
                                                             @endif
                                                             @if (session('role_id') == 1 || in_array(707, session('permissions')))
-                                                                <li><a class="menu-item" href="{{route('admin.settings.rider_shipment_attempt.index')}}">Rider Deactivation Cron</a></li>
+                                                                <li><a class="menu-item" href="{{route('admin.settings.rider_deactivation_cron.index')}}">Rider Deactivation Cron</a></li>
                                                             @endif
                                                         </ul>
                                                     </li>
