@@ -11486,7 +11486,8 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
-            } elseif ($request->action == 2) {
+            }
+            elseif ($request->action == 2) {
                 $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
                     ->where('employee_type', 2)->orderBy('id', 'DESC')->where('action_id', 1)->first();
                 $attendance_date = $last_clockin_action->attendance_date;

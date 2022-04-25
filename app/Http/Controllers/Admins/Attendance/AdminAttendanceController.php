@@ -644,9 +644,10 @@ class AdminAttendanceController extends Controller
                             $attendance_action_log->longitude = $attendance->clock_in_longitude;
                             $attendance_action_log->location_status = $location_status;
                             $attendance_action_log->save();
-                            return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'attendance_date' => $attendance_date, 'error' => 0]);
+                            return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d"), 'error' => 0]);
                         }
-                    } else {
+                    }
+                    else {
                         if ($attendance->clock_in_datetime == NULL) {
                             $attendance->clock_in_datetime = $attendance_mark;
                             $attendance->clock_in_latitude = session('latitude');
