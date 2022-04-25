@@ -1911,8 +1911,20 @@
                                 $('#edit_city').val(details.city_id).trigger('change');
                             }
 
+                            if(details.area){
+                                $('#edit_area').val(details.area).trigger('change');
+                            }
+
+                            if(details.territory){
+                                $('#edit_territory').val(details.territory).trigger('change');
+                            }
+
                             $('#edit_lead_modal_title span').text(lead_id);
-                            $('input#edit_lead_id').val(lead_id);
+                            $('#edit_lead_form #edit_lead_id').val(lead_id);
+                            $('#edit_lead_form #edit_phone_number').val(details.phone_number);
+                            $('#edit_lead_form #edit_email').val(details.email_address);
+                            $('#edit_lead_form #edit_brand').val(details.brand);
+                            $('#edit_lead_form #edit_company').val(details.company);
                             $('#edit_lead_modal').modal('show');
 
 
