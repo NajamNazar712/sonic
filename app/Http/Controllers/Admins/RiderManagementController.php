@@ -325,6 +325,7 @@ class RiderManagementController extends Controller
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
+        $rider->incentive_amount = $request->incentive_amount;
         $rider->shift_id = 1;
 
         $rider->rider_category_id = $request->rider_category;
