@@ -213,6 +213,7 @@ Route::name('api.')->group(function () {
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
                 Route::post('mark_v2', 'Rider\RiderAPIController@mark_attendance_v2')->name('mark_v2');
+                Route::post('mark_v3', 'Rider\RiderAPIController@mark_attendance_v3')->name('mark_v3');
                 Route::post('detail_v2', 'Rider\RiderAPIController@attendance_details_v2')->name('detail_v2');
             });
 
