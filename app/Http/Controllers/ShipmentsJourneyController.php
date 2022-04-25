@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Automation\ReattemptShipmentStatusController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Rider;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -41,76 +44,90 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->reference_2_id = $reference_2_id;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
 
-      if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50, 61])) {
-        $shipment = Shipment::find($shipment_id);
-
-        if ($shipment) {
-          $shipment_journey->city_id = $shipment->pickup_address->city_id;
-        }
+      if($user_id != null){
+          $city_id = User::find($user_id)->city_id;
+          $shipment_journey->city_id = $city_id;
       }
-      else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-          //$bag = Bag::find($shipment_journey->reference_1_id);
-          $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
-
-          if($bag){
-              $cargo_consignment = $bag;
-          }
-          else{
-              $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
-
-          }
-
-        if ($cargo_consignment) {
-          $shipment_journey->city_id = $cargo_consignment->origin_hub_id;
-        }
+      else if($admin_id != null){
+          $city_id = Admin::find($admin_id)->default_hub_id;
+          $shipment_journey->city_id = $city_id;
       }
-      else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-          $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
-          if($bag){
-              $cargo_consignment = $bag;
-          }
-          else{
-              $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
-          }
-
-        if ($cargo_consignment) {
-          $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
-        }
+      else if($rider_id != null){
+          $city_id = Rider::find($rider_id)->city_id;
+          $shipment_journey->city_id = $city_id;
       }
-      else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18])) {
-        if ($shipment_journey->reference_1_id) {
-          $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
+      else{
+          if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50, 61])) {
+              $shipment = Shipment::find($shipment_id);
 
-          if ($delivery_note) {
-            $shipment_journey->city_id = $delivery_note->hub_id;
+              if ($shipment) {
+                  $shipment_journey->city_id = $shipment->pickup_address->city_id;
+              }
           }
-          else if ($shipper_status_id == 13) {
-            $shipment = Shipment::find($shipment_id);
+          else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
+              //$bag = Bag::find($shipment_journey->reference_1_id);
+              $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
 
-            if ($shipment) {
-              $shipment_journey->city_id = $shipment->consignee_city_id;
-            }
+              if($bag){
+                  $cargo_consignment = $bag;
+              }
+              else{
+                  $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
+
+              }
+
+              if ($cargo_consignment) {
+                  $shipment_journey->city_id = $cargo_consignment->origin_hub_id;
+              }
           }
-        }
-      }
-      else if (in_array($shipper_status_id, [23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 37, 38, 44, 45, 46, 47, 48])) {
-        $return_note = ReturnNote::find($shipment_journey->reference_1_id);
+          else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
+              $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
+              if($bag){
+                  $cargo_consignment = $bag;
+              }
+              else{
+                  $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
+              }
 
-        if ($return_note) {
-          $shipment_journey->city_id = $return_note->hub_id;
-        }
-      }
-      else if ($shipper_status_id == 20) {
-        $shipment = Shipment::find($shipment_id);
+              if ($cargo_consignment) {
+                  $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
+              }
+          }
+          else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18])) {
+              if ($shipment_journey->reference_1_id) {
+                  $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
 
-        if ($shipment) {
-          $shipment_journey->city_id = $shipment->consignee_city_id;
-        }
-      }
-      else if (in_array($shipper_status_id, [54, 55])) {
-          $shipment = Shipment::find($shipment_id);
-          if ($shipment) {
-              $shipment_journey->city_id = $shipment->consignee_city_id;
+                  if ($delivery_note) {
+                      $shipment_journey->city_id = $delivery_note->hub_id;
+                  }
+                  else if ($shipper_status_id == 13) {
+                      $shipment = Shipment::find($shipment_id);
+
+                      if ($shipment) {
+                          $shipment_journey->city_id = $shipment->consignee_city_id;
+                      }
+                  }
+              }
+          }
+          else if (in_array($shipper_status_id, [23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 37, 38, 44, 45, 46, 47, 48])) {
+              $return_note = ReturnNote::find($shipment_journey->reference_1_id);
+
+              if ($return_note) {
+                  $shipment_journey->city_id = $return_note->hub_id;
+              }
+          }
+          else if ($shipper_status_id == 20) {
+              $shipment = Shipment::find($shipment_id);
+
+              if ($shipment) {
+                  $shipment_journey->city_id = $shipment->consignee_city_id;
+              }
+          }
+          else if (in_array($shipper_status_id, [54, 55])) {
+              $shipment = Shipment::find($shipment_id);
+              if ($shipment) {
+                  $shipment_journey->city_id = $shipment->consignee_city_id;
+              }
           }
       }
 
