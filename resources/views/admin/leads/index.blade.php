@@ -775,6 +775,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var area = '';
+            var territory = '';
+
             $("#search_origin").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Origin",
                 width: '100%'
@@ -1810,7 +1813,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_territory').append(newOption);
                             });
-                            $('#edit_territory').val('').trigger('change');
+                            $('#edit_territory').val(territory).trigger('change');
 
                         } else {
                             $('#edit_territory').empty();
@@ -1844,7 +1847,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_area').append(newOption);
                             });
-                            $('#edit_area').val('').trigger('change');
+                            $('#edit_area').val(area).trigger('change');
                         }
                         else{
                             $('#edit_area').empty();
@@ -1912,11 +1915,11 @@
                             }
 
                             if(details.area){
-                                $('#edit_area').val(details.area).trigger('change');
+                                area = details.area;
                             }
 
                             if(details.territory){
-                                $('#edit_territory').val(details.territory).trigger('change');
+                                territory = details.territory;
                             }
 
                             $('#edit_lead_modal_title span').text(lead_id);
