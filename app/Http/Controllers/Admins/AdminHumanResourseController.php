@@ -3503,6 +3503,7 @@ class AdminHumanResourseController extends Controller
                 $employee_leaves->where('employee_leaves.employee_type_id', 1);
             }
         }*/
+//        dd(session()->all());
         $find_manager = AdminDepartment::where('department_head_id', auth::user()->id)->first();
         $department_head = "";
         if (!empty($find_manager)) {
@@ -3590,25 +3591,28 @@ class AdminHumanResourseController extends Controller
                     ->where('leave_status', 1)->count();
                 return $leave_count;
             })
-            ->addColumn("action", function ($employee) {
-                if (in_array($employee->status_id, [1, 2, 3])) {
+            ->addColumn("action", function ($employee) use ($department_head) {
+                if (in_array($employee->status_id, [1, 2])) {
                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions')) || in_array(706, session('permissions'))) {
+
                         $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                         //todo:HOD
-                        if ((($employee->status_id == 1) && in_array(session('id'),[3,69,372,500,8,70,32,497,57,12,760,897,577])) || (session('role_id') == 1 && $employee->status_id == 1)) {
+                        if ((($employee->status_id == 1) && (auth()->id() == $employee->department_head) && (in_array(706, session('permissions')))) || (session('role_id') == 1 && $employee->status_id == 1)) {
                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
                         }
                         //todo:HOD end
 
                         if (session('role_id') == 1 || (in_array(614, session('permissions')))) {
-                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit '.$employee->status_id.' &nbsp; '.auth()->id().' '.$employee->department_head.'</div></button>';
                         }
-                        if (($employee->status_id == 2) && (session('role_id') == 1 || in_array(615, session('permissions')))) {
+
+                        if ((($employee->status_id == 2 && in_array(615, session('permissions'))) &&    (auth()->id() == $employee->department_head)) || (session('role_id') == 1 && $employee->status_id == 2)) {
+
                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                         }
@@ -3617,7 +3621,17 @@ class AdminHumanResourseController extends Controller
                 </div>
               </div>
             ';
-                        return $dropdown;
+//                        $hr = AdminDepartment::find(10);
+//                        if($hr->department_head_id == auth()->id())
+//                        {
+//                            return $dropdown;
+//                        }
+//                        else
+                            if(empty($department_head) || !in_array($employee->status_id, [2,3])) {
+                            return $dropdown;
+                        }else{
+                            return '';
+                        }
                     } else {
                         return '';
                     }
