@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Product;
 use App\Http\Models\PickupType;
+use App\Http\Models\Referral;
 use App\Http\Models\Segment;
 use App\Http\Models\SubCategorySegment;
 
@@ -146,7 +147,9 @@ class RegisterController extends Controller
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
-                'sub_segments' => 'required'
+                'sub_segments' => 'required',
+                'referral' => ''
+                
             ]);
         }else{
             return Validator::make($data, [
@@ -189,7 +192,9 @@ class RegisterController extends Controller
                 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
-                'cycle_of_invoicing' => 'required'
+                'cycle_of_invoicing' => 'required',
+                'referral' => ''
+
             ]);
         }
 
@@ -355,7 +360,12 @@ class RegisterController extends Controller
                 $territory_id = null;
             }
         }
-
+        $referral = Referral::where('name',$data['referral'])->get()->first();
+        if($referral){
+            $referral_id = $referral->id;
+        }else{
+            $referral_id = null;
+        }
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -379,6 +389,7 @@ class RegisterController extends Controller
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
             'sub_segment_id' => $data['sub_segments'],
+            'referral_id' => $referral_id,
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
             'territory_id' =>  $territory_id
@@ -724,6 +735,21 @@ class RegisterController extends Controller
             return response()->json(['status' => 0, 'sub_segments' => $sub_segments]);
         }else{
             return response()->json(['status' => 1]);
+        }
+    }
+
+
+    public function referral_valid(Request $request){
+        if ($request->filled('referral')) {
+            $referral = Referral::where('name', $request->input('referral'))->where('status',1);
+
+            if ($referral->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'false';
         }
     }
 

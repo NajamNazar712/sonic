@@ -75,7 +75,7 @@ class ShopifyController extends Controller
 
     }
 
-    static public function invoice_generate($user_id, $order, $invoice){
+    static public function invoice_generate($user_id, $order, $invoice, $shipment){
 
         if(!empty($order)){
             $user = User::find($user_id)->name;
@@ -180,6 +180,28 @@ class ShopifyController extends Controller
                                         <td>Rs.'. $item['price'] .'</td>
                                     </tr>';
                         }
+                    $consignee_name = '';
+                    $consignee_address = '';
+                    $consignee_phone = '';
+                    if(isset($order['consignee_name']) && !empty($order['consignee_name'])){
+                        $consignee_name = $order['consignee_name'];
+                    }
+                    else{
+                        $consignee_name = $shipment->consignee_name;
+                    }
+                    if(isset($order['consignee_address']) && !empty($order['consignee_address'])){
+                        $consignee_address = $order['consignee_address'];
+                    }
+                    else{
+                        $consignee_address = $shipment->consignee_address;
+                    }
+
+                    if(isset($order['consignee_phone']) && !empty($order['consignee_phone'])){
+                        $consignee_phone = $order['consignee_phone'];
+                    }
+                    else{
+                        $consignee_phone = $shipment->consignee_phone_number_1;
+                    }
 
     $html .='                </tbody>
                             </table>
@@ -218,9 +240,9 @@ class ShopifyController extends Controller
                          </div>   
                          <div>
                              <div class="border p-2">
-                                <h3 class="">'. $order['consignee_name'] .'</h3>
-                                <p>'. $order['consignee_address'] .'</p>
-                                <p class="mb-0">Phone: '. $order['consignee_phone'] .'</p>
+                                <h3 class="">'. $consignee_name .'</h3>
+                                <p>'. $consignee_address .'</p>
+                                <p class="mb-0">Phone: '. $consignee_phone .'</p>
                             </div>
                         </div>
                             

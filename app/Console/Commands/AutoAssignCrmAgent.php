@@ -55,9 +55,9 @@ class AutoAssignCrmAgent extends Command
         $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                                     ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
                                     ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
-                                    ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id','crm_requests.case_nature_type_id as case_nature_type_id')
+                                    ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id','crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.agent_id as agent_id')
                                     ->where('crm_requests.agent_id','=',Null)
-                                    ->where('crm_requests.case_nature_id','<>',3)
+                                    ->where('crm_requests.case_nature_id','!=',3)
                                     ->get();
         foreach ($crm_requests as $value) {
             if($value->case_nature_id == 4){

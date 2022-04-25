@@ -125,12 +125,7 @@
                 url: '{{ route('admin.update_one_time_profile.check') }}',
                 method: 'GET'
             }).done(function (data) {
-                    if (data.status == 1) {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    } else if(data.status == 0) {
+                    if(data.status == 0) {
                         $('#EditOneTimeProfileModal').modal('show');
                     }
                 });

@@ -32,6 +32,9 @@ class Shipment extends Model
 	public function consignee_city() {
 		return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
 	}
+    public function destination_city() {
+        return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
+    }
 
 	public function user() {
 		return $this->belongsTo('App\Http\Models\Shipper\User');

@@ -155,7 +155,7 @@
                 allowClear:true,
                 dropdownParent: $('#addLocationModal')
             });
-            $('#editLocationForm #city').select2({
+            $('#editLocationForm #edit_city').select2({
                 width: '100%',
                 placeholder: 'Select City',
                 dropdownParent: $('#editLocationModal')
