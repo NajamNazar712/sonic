@@ -11454,7 +11454,7 @@ class RiderAPIController extends Controller
             }
 
             $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
-                ->whereDate('attendance_date', $attendance_date)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
                 ->where('employee_type', 2);
             $rider_attendance_action = new EmployeeAttendanceActionLog();
             if ($rider_attendance->exists()) {
