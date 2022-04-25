@@ -1813,7 +1813,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_territory').append(newOption);
                             });
-                            $('#edit_territory').val('').trigger('change');
+                            $('#edit_territory').val(territory).trigger('change');
 
                         } else {
                             $('#edit_territory').empty();
@@ -1847,7 +1847,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_area').append(newOption);
                             });
-                            $('#edit_area').val('').trigger('change');
+                            $('#edit_area').val(area).trigger('change');
                         }
                         else{
                             $('#edit_area').empty();
@@ -1915,11 +1915,11 @@
                             }
 
                             if(details.area_id){
-                                $('#edit_area').val(details.area_id).trigger('change');
+                                area = details.area_id;
                             }
 
                             if(details.territory_id){
-                                $('#edit_territory').val(details.territory_id).trigger('change');
+                                territory = details.territory_id;
                             }
 
                             $('#edit_lead_modal_title span').text(lead_id);
@@ -1928,6 +1928,8 @@
                             $('#edit_lead_form #edit_email').val(details.email_address);
                             $('#edit_lead_form #edit_brand').val(details.brand);
                             $('#edit_lead_form #edit_company').val(details.company);
+                            $('#edit_lead_form #edit_territory').trigger('change');
+                            $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 
 
