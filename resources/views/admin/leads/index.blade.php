@@ -513,7 +513,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="territory_area_id" id="edit_area" class="form-control select2">
+                                    <select name="territory_area_id" id="edit_area" class="form-control select2" data-rule-required="true"  data-msg-required="Area is required">
                                     </select>
                                 </div>
                             </div>
@@ -1831,11 +1831,12 @@
                         url: '{!! route('cod.area') !!}',
                         method: 'POST',
                         data: {
-                            'territory_id': territory_id,
+                            'id': territory_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                     .done(function (data) {
+
                         if (data.status == 0) {
 
                             $('#edit_area').empty();
@@ -1906,6 +1907,10 @@
                             var details = data.details;
                             lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company]).node().id = lead_id;
                             lead_table.draw(true);
+                            if(details.city_id){
+                                $('#edit_city').val(details.city_id).trigger('change');
+                            }
+
                             $('#edit_lead_modal_title span').text(lead_id);
                             $('input#edit_lead_id').val(lead_id);
                             $('#edit_lead_modal').modal('show');
@@ -1935,18 +1940,42 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    var lead_id = $('#edit_lead_id').val();
+                    swal({
+                        text: 'Are you sure, you want to edit this lead?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            var lead_id = $('#edit_lead_id').val();
 
-                    if (lead_id != null) {
-                        blockPagePermanently();
-                        form.submit();
-                    } else {
-                        var error = 'Invalid Lead ID!';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
+                            if (lead_id != null) {
+                                blockPagePermanently();
+                                form.submit();
+                            } else {
+                                var error = 'Invalid Lead ID!';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                    });
                 }
             });
         });

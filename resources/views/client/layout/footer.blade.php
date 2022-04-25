@@ -27,6 +27,45 @@
     });
   </script>
 @endif
+@php
+    $visit = \App\DailyVisit::where('shipper_id',session('user_id'))->where('rated',0);
+@endphp
+@if($visit->exists())
+<style>
+    .feedback {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .feedback .item {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .feedback .radio {
+        display: none;
+    }
+    .feedback .radio ~ span {
+        font-size: 3rem;
+        filter: grayscale(100);
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .feedback .radio:checked ~ span {
+        filter: grayscale(0);
+        font-size: 4rem;
+    }
+    .feedback .radio:hover ~ span {
+        filter: grayscale(0);
+        font-size: 4rem;
+    }
+</style>
+@endif
 
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
@@ -166,6 +205,32 @@
 
             }
         });
+        @endif
+
+
+
+        @if($visit->exists())
+            @php
+                $visit = $visit->first();
+            @endphp
+            $("#DailyVisitRateModal").modal('show');
+            $('.item label').tooltip({
+                placement : 'top'
+            });
+            $("#skip_daily_visit_btn").on('click',function (e){
+                $("#DailyVisitRateModal #DailyVisitRateForm #action_id").val(1);
+                $("#DailyVisitRateModal #DailyVisitRateForm").submit();
+            });
+
+            $("#rate_daily_visit_btn").on('click',function (e){
+                if(!$("#DailyVisitRateForm .feedback .radio").is(':checked'))
+                {
+                    toastr.error("Please Select Rating", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+                $("#DailyVisitRateModal #DailyVisitRateForm #action_id").val(2);
+                $("#DailyVisitRateModal #DailyVisitRateForm").submit();
+            });
         @endif
     });
 </script>

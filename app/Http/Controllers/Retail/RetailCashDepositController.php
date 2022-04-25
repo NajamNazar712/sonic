@@ -8,6 +8,7 @@ use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -319,5 +320,19 @@ class RetailCashDepositController extends Controller
                 </html>
             ';
         return $html;
+    }
+
+    public function finalize_rncc(Request $request){
+        $date = Carbon::today()->toDateString();
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id())->where('finalize', 0);
+        if($cash_deposit->exists()){
+            $cash_deposit = $cash_deposit->first();
+            $cash_deposit->finalize = 1;
+            $cash_deposit->save();
+            
+            return response()->json(['status' => 0, 'success' => 'RNCC Finalized ']);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'Shipments not found!']);
+        }
     }
 }

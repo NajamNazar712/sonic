@@ -11,6 +11,8 @@ use App\Http\Models\HR\Employee;
 |
 */
 
+Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->name('payment_details');
+
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
@@ -35,6 +37,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
     Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
+    Route::post('rate/daily_visit','Shippers\ShipperDashboardController@rate_daily_visit')->name('rate_daily_visit');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -1141,6 +1144,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
                 Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
+                //HBL Konnect
+                Route::post('transactions/information','Admins\DeliveryController@hbl_konnect_transactions_information')->name('transactions.information');
+                //HBL Konnect
 
             });
             Route::prefix('retail')->name('retail.')->group(function(){
@@ -1787,6 +1793,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
         Route::post('track_v2', 'Admins\AdminTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
+        Route::post('rider_unresponsive_status', 'Admins\AdminTrackingController@rider_unresponsive_status')->name('rider_unresponsive_status');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
         Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
@@ -2317,6 +2324,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@sales_person_performance_index')->name('index');
             Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
+        });
+        Route::prefix('rider_unresponsive_report')->name('rider_unresponsive_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@rider_unresponsive_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rider_unresponsive_report_list')->name('list');
         });
 
         Route::prefix('fake_status')->name('fake_status.')->group(function (){
@@ -3884,6 +3895,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print','Retail\RetailCashDepositController@print')->name('print');
+        Route::post('finalize_rncc','Retail\RetailCashDepositController@finalize_rncc')->name('finalize_rncc');
+        
     });
 
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {

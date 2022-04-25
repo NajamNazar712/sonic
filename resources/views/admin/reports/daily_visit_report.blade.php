@@ -13,7 +13,7 @@
                 @include('admin.inc.messages')
                 <form id="search_form" class="form-inline mb-2 justify-content-center" novalidate="novalidate">
                     <div class="row justify-content-center">
-                        <div class="col-4 mb-1">
+                        <div class="col-6 mb-1">
                             <fieldset class="form-group">
                                 <select name="team_member" id="team_member" class="form-control select2">
                                     @foreach($admins as $admin)
@@ -23,8 +23,18 @@
                             </fieldset>
                         </div>
 
+                        <div class="col-6 mb-1">
+                            <fieldset class="form-group">
+                                <select name="rating" id="rating" class="form-control select2">
+                                    @foreach($ratings as $rating)
+                                        <option value="{{$rating->id}}">{{$rating->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
                         <!--  Date wise Div  -->
-                        <div class="col-4 mb-1">
+                        <div class="col-5 mb-1">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -35,7 +45,7 @@
                             </div>
                         </div>
 
-                        <div class="col-4 mb-1">
+                        <div class="col-5 mb-1">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -75,6 +85,8 @@
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Photo of Location</th>
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
+                        <th class="border-primary border-darken-1">Shipper Rating</th>
+                        <th class="border-primary border-darken-1">Shipper Feedback</th>
                     </tr>
                     </thead>
                 </table>
@@ -142,6 +154,9 @@
             width: auto !important;
             text-align: left;
         }
+        td.rating_code {
+            font-size: 2em !important;
+        }
     </style>
 @endsection
 
@@ -159,6 +174,12 @@
             /*   --- dropdown  ----    */
             $('#team_member').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Team Member',
+                width:'100%',
+                allowClear:true
+            });
+
+            $('#rating').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Rating',
                 width:'100%',
                 allowClear:true
             });
@@ -224,6 +245,8 @@
                             head.push('Email Address');
                             head.push('Lead Status');
                             head.push('Meeting Feedback');
+                            head.push('Shipper Rating');
+                            head.push('Shipper Feedback');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -238,6 +261,8 @@
                                 row.push(values.email);
                                 row.push(values.lead_status);
                                 row.push(values.feedback);
+                                row.push(values.rating_text);
+                                row.push(values.rating_comment);
                                 body.push(row);
                             });
                         },
@@ -271,6 +296,7 @@
                     url: '{{ route('admin.reports.daily_visit.list') }}',
                     data:function (d){
                         d.team_member = $('#team_member').val();
+                        d.rating = $('#rating').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -292,6 +318,8 @@
                     { data:'location' ,name: 'location', class: 'align-middle location', sortable: false, orderable: false, searchable: false},
                     { data:'l_photo' ,name: 'l_photo', class: 'align-middle l_photo', sortable: false, orderable: false, searchable: false},
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
+                    { data:'rating' ,name: 'rate.name', class: 'align-middle rating_code'},
+                    { data:'rating_comment' ,name: 'daily_visits.comment', class: 'align-middle rating_comment'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
