@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class SubstitutePermissions extends Seeder
+class CrmRequestSubstituteAccountRestriction extends Seeder
 {
     /**
      * Run the database seeds.
