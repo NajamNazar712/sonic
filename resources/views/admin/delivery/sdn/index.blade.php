@@ -1017,7 +1017,7 @@
                         orderable: false,
                         searchable: false
                     },
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function (row, data, index) {

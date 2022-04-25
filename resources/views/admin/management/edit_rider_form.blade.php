@@ -97,7 +97,14 @@
                         @endforeach
                     </select>
                 </fieldset>
-            </div> <div class="col">
+            </div>
+            
+            <div class="col" id="incentive_amount_div">
+                <fieldset class="form-group">
+                    <input type="text" name="incentive_amount" id="incentive_amount_input" class="form-control decimal" value="{{$rider->incentive_amount}}" maxlength="6" placeholder="Enter Incentive Amount" data-rule-required="true" data-msg-required="Incentive Amount is required">
+                </fieldset>
+            </div>
+             <div class="col">
                 <fieldset class="form-group">
                     <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
 
@@ -186,19 +193,32 @@
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);
         @endif
+
+        @if($rider->incentive_amount == null)
+            $('#incentive_amount_div').addClass('d-none');
+        @endif
         $('#editRiderForm .select2').select2({
             dropdownParent: $("#editRiderForm")
         });
         var category_id = {{$rider->rider_category_id}};
         $('#category_list').val(category_id).trigger('change');
-        @if($rider->rider_main_category_id != null)
-        var main_category_id = {{$rider->rider_main_category_id}};
-        $('#main_category_list').val(main_category_id).trigger('change');
-        @else
+
         $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Rider Main Category',
             dropdownParent: $("#editRiderForm")
-        });
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                console.log(id);
+                if(id == 1){
+                    $('#incentive_amount_div').removeClass('d-none');
+                }else{
+                    $('#incentive_amount_div').addClass('d-none');
+                }
+            });
+        @if($rider->rider_main_category_id != null)
+        var main_category_id = {{$rider->rider_main_category_id}};
+        $('#main_category_list').val(main_category_id).trigger('change');
+        
         @endif
 
         $("input[name='pin']").inputmask({
@@ -208,6 +228,15 @@
             'rightAlign': false,
             'mask':"9999"
         });
+        $('#incentive_amount_input').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0,
+                'max': 1000000
+            });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         //$('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');

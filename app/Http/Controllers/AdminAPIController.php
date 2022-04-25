@@ -4884,12 +4884,13 @@ class AdminAPIController extends Controller
                     }
                     $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
                     if($retail_shipment->exists()){
-                        if ($dense_weight < $volume_weight) {
-                            $actual_weight = $volume_weight;
-                        } else {
-                            $actual_weight = $dense_weight;
-                        }
+//                        if ($dense_weight < $volume_weight) {
+//                            $actual_weight = $volume_weight;
+//                        } else {
+//                            $actual_weight = $dense_weight;
+//                        }
                         $retail_flag = true;
+                        $dws_charges_status = 1;
                     }
                     else{
                         $retail_flag = false;

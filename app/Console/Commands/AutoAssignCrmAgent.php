@@ -57,7 +57,7 @@ class AutoAssignCrmAgent extends Command
                                     ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
                                     ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id','crm_requests.case_nature_type_id as case_nature_type_id')
                                     ->where('crm_requests.agent_id','=',Null)
-                                    ->where('crm_requests.case_nature_id','<>',3)
+                                    ->where('crm_requests.case_nature_id','!=',3)
                                     ->get();
         foreach ($crm_requests as $value) {
             if($value->case_nature_id == 4){
