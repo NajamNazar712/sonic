@@ -753,9 +753,11 @@ class LeadManagementController extends Controller
 
             if($lead->territory_id){
                 $details['territory'] = Territory::find($lead->territory_id)->name;
+                $details['territory_id'] = $lead->territory_id;
             }
             if($lead->territory_area_id){
                 $details['area'] = AreaTerritory::find($lead->territory_area_id)->name;
+                $details['area_id'] = $lead->territory_area_id;
             }
 
             $details['phone_number'] = $lead->phone_number;

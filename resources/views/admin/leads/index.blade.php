@@ -1813,7 +1813,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_territory').append(newOption);
                             });
-                            $('#edit_territory').val(territory).trigger('change');
+                            $('#edit_territory').val('').trigger('change');
 
                         } else {
                             $('#edit_territory').empty();
@@ -1847,7 +1847,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_area').append(newOption);
                             });
-                            $('#edit_area').val(area).trigger('change');
+                            $('#edit_area').val('').trigger('change');
                         }
                         else{
                             $('#edit_area').empty();
@@ -1914,12 +1914,12 @@
                                 $('#edit_city').val(details.city_id).trigger('change');
                             }
 
-                            if(details.area){
-                                area = details.area;
+                            if(details.area_id){
+                                $('#edit_area').val(details.area_id).trigger('change');
                             }
 
-                            if(details.territory){
-                                territory = details.territory;
+                            if(details.territory_id){
+                                $('#edit_territory').val(details.territory_id).trigger('change');
                             }
 
                             $('#edit_lead_modal_title span').text(lead_id);
