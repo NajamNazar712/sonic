@@ -282,7 +282,12 @@
                                             </div>
                                         </div>
                                         @endif
-
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Sub Department <span class="text-danger">*</span></label>
+                                                <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
+                                            </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
@@ -309,6 +314,15 @@
                                         </div>
                                         @endif
 
+                                        @if($employee->employee_type_id == 2)
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Fuel (Ltrs) <span class="text-danger">*</span></label>
+                                                    <input type="text" id="fuel" data-rule-required="true"  data-msg-required="Fuel is required" class="form-control" value="{{$employee->fuel}}" name="fuel" data-rule-number="true" data-msg-number="Fuel should not be Greater than 10000">
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Working Shift<span class="text-danger">*</span></label>
@@ -329,6 +343,43 @@
                                                     </span>
                                                 </div>
                                                 <input type="text" name="joining_date" data-rule-required="true" data-msg-required="Joining Date is required" data-value="{{$employee->joining_date != null ? $employee->joining_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Employee Nature<span class="text-danger">*</span></label>
+                                                <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($employee_natures as $employee_nature)
+                                                        <option value="{{$employee_nature->id}}">{{$employee_nature->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-none" id="replacement_info_div">
+                                        <h4 class="form-section">Replacement Info</h4>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Replacement Employee<span class="text-danger">*</span></label>
+                                                <select name="replacement_employee_id" id="replacement_employee_list" data-rule-required="true"  data-msg-required="Replacement Employee is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($replacement_employees as $replacement_employee)
+                                                        <option value="{{$replacement_employee->id}}">{{$replacement_employee->trax_id}} | {{$replacement_employee->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label>Last Working Day<span class="text-danger">*</span></label>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="replacement_last_working_day" data-rule-required="true" data-msg-required="This Field is required" data-value="{{$employee->replacement_last_working_day != null ? $employee->replacement_last_working_day : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="replacement_last_working_day" placeholder="Last Working Day">
                                             </div>
                                         </div>
                                     </div>
@@ -2075,6 +2126,16 @@
                 'rightAlign': false,
             });
 
+            $('#profile-form #fuel').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 10000.00
+            });
+
             var cnic_issue_date = $('#profile-form #cnic_issue_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -2157,6 +2218,17 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
+                max: today,
+            });
+
+
+            var replacement_last_working_day = $('#profile-form #replacement_last_working_day').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
                 max: today,
             });
 
@@ -2281,6 +2353,26 @@
             });
             $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
 
+            $("#employee_nature_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Employee Nature",
+                width:'100%',
+            }).
+            bind('change', function () {
+                if(this.value == 2){
+                    $("#replacement_info_div").removeClass("d-none");
+                }
+                else {
+                    $("#replacement_info_div").addClass("d-none");
+                }
+            });
+            $("#employee_nature_list").val("{{$employee->employee_nature_id ?? ''}}").trigger('change');
+
+            $("#replacement_employee_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Replacement Employee",
+                width:'100%',
+            });
+            $("#replacement_employee_list").val("{{$employee->replacement_employee_id ?? ''}}").trigger('change');
+
             $("#place_of_birth").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Place of Birth",
                 width:'100%',
@@ -2316,6 +2408,9 @@
                 placeholder: "Select Department",
                 width:'100%',
             });
+            @if($employee->employee_nature_id == 2)
+            $("#replacement_info_div").removeClass("d-none");
+            @endif
             @if($employee->employee_type_id == 2)
             $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
             $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');

@@ -14,6 +14,10 @@ use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
+use App\Http\Models\Admin\RetailPickupNoteStatus;
 use Auth;
 
 class RetailCancelShipmentsController extends Controller
@@ -108,6 +112,17 @@ class RetailCancelShipmentsController extends Controller
                         $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
                         $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
                         $parcel_receiving->save();
+                    }
+                    $retail_pickup_note_shipments = RetailPickupNoteShipment::where('shipment_id',$shipment->id);
+                    if($retail_pickup_note_shipments->exists()){
+                        $retail_pickup_note_shipments = $retail_pickup_note_shipments->latest()->first();
+                        $retail_pickup_note_id = $retail_pickup_note_shipments->retail_pickup_note_id;
+                        $retail_pickup_note_shipments->delete();
+
+                        $retail_pickup_note = RetailPickupNote::find($retail_pickup_note_id);
+                        $retail_pickup_note->shipments = $retail_pickup_note->shipments - 1;
+                        $retail_pickup_note->amount = $retail_pickup_note->amount - $total_deductable_amount;
+                        $retail_pickup_note->save();
                     }
 
                 }

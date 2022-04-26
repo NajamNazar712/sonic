@@ -156,7 +156,7 @@
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
-										<th class="border-primary border-darken-1">Total Deductable</th>
+										<th class="border-primary border-darken-1">Total Deductible</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -164,6 +164,7 @@
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
+{{--										<th class="border-primary border-darken-1">Aging</th>--}}
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -180,6 +181,43 @@
 											</button>
 										</div>
 										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="modal fade" id="view_status_history_modal" role="dialog" aria-labelledby="view_status_history_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="view_status_history_title"></h4>&nbsp;&nbsp;
+											<b><span style="font-size: 19px;" id="view_status_history_id"></span></b>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+											<div class="modal-body">
+												<table class="table table-striped" id="view_status_history">
+													<thead>
+													<tr>
+														<th>S.No#</th>
+{{--														<th>Shipment ID</th>--}}
+														<th>Payment Status</th>
+														<th>Updated At</th>
+														<th>Updated By</th>
+{{--														<th>Attempts</th>--}}
+													</tr>
+													</thead>
+													<tbody>
+
+													</tbody>
+												</table>
+											</div>
 										</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -498,6 +536,9 @@
                             head.push('Done Datetime');
                             head.push('Company Bank');
                             head.push('Status');
+							// head.push('Updated At');
+							// head.push('Updated By');
+							// head.push('Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -526,6 +567,9 @@
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
                                 row.push(values.status);
+								// row.push(values.updated_at);
+								// row.push(values.updated_by);
+								// row.push(values.aging);
 
 
                                 body.push(row);
@@ -714,8 +758,8 @@
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-				pageLength: 50,
+				lengthMenu: [[10,50, 100, 500, 1000, -1], [10,50, 100, 500, 1000, 'All']],
+				pageLength: 10,
 				pagingType: 'full_numbers',
 				processing: true,
                 language: {
@@ -764,6 +808,7 @@
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
+					// {data:'aging', name: 'aging', class: 'align-middle text-center aging'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -1069,6 +1114,50 @@
 						}
 					});
 				}
+				// todo view status history
+				else if ($(this).hasClass('view_status_history')) {
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.view_status_history') !!}',
+						method: 'GET',
+						data: {
+							'id': id
+						}
+					})
+					.done(function(data) {
+						var result = JSON.parse(data);
+						var count = JSON.parse(data).length;
+						$('#view_status_history_modal').modal('show');
+						$('#view_status_history tbody ').html('');
+						$('#view_status_history_modal #view_status_history_title').html('Status History');
+						$('#view_status_history_id').text(`(${id})`);
+
+
+						var sc = 1;
+						$.each(result.payment_id,function(index, value){
+							// console.log(result.payment_id);
+
+							if (result.status[index] == 2) {
+								$('#view_status_history tbody ').append(`
+							<tr>
+							<td>${sc++}</td>
+
+							<td>${result.payment_status[index]}</td>
+							<td>${result.status_updated_at[index]}</td>
+							<td>${result.admin[index]}</td>
+							</tr>`)
+							} else {
+								$('#view_status_history tbody ').html('');
+							}
+							if (result.status == 0) {
+								toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+							if (result.status == 1) {
+								toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+						});
+					});
+				}
+				// todo view status history end
 				else if ($(this).hasClass('export_to_excel')) {
 					window.open('{!! route('admin.finance.done_payments.export_to_excel') !!}?id=' + id, '_blank');
 				}

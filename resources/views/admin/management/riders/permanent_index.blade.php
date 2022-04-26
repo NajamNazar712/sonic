@@ -29,6 +29,7 @@
                                 <th class="border-primary border-darken-1">Address</th>
                                 <th class="border-primary border-darken-1">Route</th>
                                 <th class="border-primary border-darken-1">Main Category</th>
+                                <th class="border-primary border-darken-1">Incentive Amount</th>
                                 <th class="border-primary border-darken-1">Sub-Category</th>
                                 <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Created By</th>
@@ -144,6 +145,7 @@
                             head.push('Address');
                             head.push('Route');
                             head.push('Main Category');
+                            head.push('Incentive Amount');
                             head.push('Sub-Category');
                             head.push('Status');
                             head.push('Created By');
@@ -166,6 +168,7 @@
                                 row.push(values.address);
                                 row.push(values.route);
                                 row.push(values.main_category);
+                                row.push(values.incentive_amount);
                                 row.push(values.category);
                                 row.push(values.status);
                                 row.push(values.created_by);
@@ -304,6 +307,7 @@
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'main_category', name: 'rider_main_categories.id', class: 'align-middle text-center main_category'},
+                    {data: 'incentive_amount', name: 'riders.incentive_amount', class: 'align-middle text-center incentive_amount'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},

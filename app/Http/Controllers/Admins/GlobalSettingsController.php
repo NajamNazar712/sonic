@@ -4989,9 +4989,9 @@ class GlobalSettingsController extends Controller
 
         $agent_id = $crm_agent_data->admin_id;
         $zone_id = $crm_agent_data->zone_id;
-        // $case_nature_id = $crm_agent_data->case_nature_id;
+        $case_nature_id = $crm_agent_data->case_nature_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'crm_agent_id'=> $crm_agent_id]);
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'crm_agent_id'=> $crm_agent_id ,'case_nature_id'=> $case_nature_id]);
 
     }
 
@@ -5007,7 +5007,7 @@ class GlobalSettingsController extends Controller
 
         $crm_agent_data->admin_id = $request->admin_id;
         $crm_agent_data->zone_id = $request->zone_id;
-        // $crm_agent_data->case_nature_id = $request->case_nature_id;
+        $crm_agent_data->case_nature_id = $request->case_nature_id;
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
 
@@ -5572,10 +5572,10 @@ public function sales_incentive()
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
         ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
-        ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
         ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
         ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
-        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5625,6 +5625,33 @@ public function sales_incentive()
                 return $roles->city_name;
             }
             
+        })
+        ->editColumn('service', function($roles) {
+            if($roles->service == '' || $roles->service == null){
+                return '0';
+            }else{
+                return $roles->service;
+            }
+
+        })
+        ->editColumn('service2', function($roles) {
+
+            if($roles->service2 == '' || $roles->service2 == null){
+                return 'All Services';
+            }else{
+                return $roles->service2;
+            }
+
+        })
+
+        ->editColumn('territory_name', function($roles) {
+
+            if($roles->territory_name == '' || $roles->territory_name == null){
+                return 'All Territories';
+            }else{
+                return $roles->territory_name;
+            }
+
         });
 
     return $datatables->make(true);
@@ -6544,6 +6571,30 @@ public function sales_incentive()
             return response()->json(['status' => 1, 'success' => 'Referral Enabled!']);
 
         } 
+    }
+
+    public function rider_deactivation_cron_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 525);
+
+        $settings = GlobalSettings::whereIn('type', ['rider_deactivation_cron_days', 'rider_deactivation_cron_status'])->get();
+
+        return view('admin.settings.rider_deactivation_cron')->with('settings', $settings);
+    }
+
+    public function rider_deactivation_cron_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 526);
+
+        $settings = GlobalSettings::where('type', 'rider_deactivation_cron_days')->first();
+        $settings->setting_value = $request->deactivation_days;
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'rider_deactivation_cron_status')->first();
+        $settings->setting_value = ($request->cron_status) ? 1 : 0;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 
     

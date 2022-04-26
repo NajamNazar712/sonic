@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
@@ -1646,6 +1647,31 @@ class ShipperDashboardController extends Controller
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
+    }
+
+    public function rate_daily_visit (Request $request)
+    {
+        $visit = DailyVisit::where('id',$request->daily_visit_id)->where('shipper_id',session('user_id'));
+        if($visit->doesntExist())
+        {
+            return back()->with(['error'=>'Invalid Request!!']);
+        }
+        $visit = $visit->first();
+        if($visit->rated == 1)
+        {
+            return back()->with(['error'=>'Visit Already Been Rated.']);
+        }
+
+        if($request->action == 2)
+        {
+            $visit->rating_id = $request->rating;
+            $visit->comment = $request->comment;
+        }
+
+        $visit->rated = 1;
+        $visit->save();
+
+        return back()->with(['success'=>'Visit Rated Successfully']);
     }
 
     

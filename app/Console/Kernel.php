@@ -135,6 +135,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
+        $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -319,8 +320,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
         $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
 
-        $schedule->command('website:leads')->hourly()->runInBackground();
-        $schedule->command('website:pamleads')->hourly()->runInBackground();
+        $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
+//        $schedule->command('website:pamleads')->hourly()->runInBackground();
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
@@ -336,7 +337,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
 
-        $settings = GlobalSettings::where('type', 'dhl_sync_time_1');
+        /*$settings = GlobalSettings::where('type', 'dhl_sync_time_1');
         if ($settings->exists()) {
             $settings = $settings->first();
             $time_1 = $settings->setting_value . ':00';
@@ -347,7 +348,7 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
             $time_2 = $settings->setting_value . ':00';
             $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
-        }
+        }*/
 
         $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();

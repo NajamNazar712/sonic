@@ -59,6 +59,7 @@
                             @endforeach
                         </select>
                     </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
@@ -97,6 +98,7 @@
                             @endforeach
                         </select>
                     </div>
+                    <input type="hidden" id="edit_case_nature_id" name="case_nature_id">
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
@@ -133,7 +135,7 @@
                 // $("agent_id").select2('val', '')
                 $('#agent_id').val('').trigger('change.select2');
                 $('#zone_id').val('').trigger('change.select2');
-                $('#case_nature_id').val('').trigger('change.select2');
+                // $('#case_nature_id').val('').trigger('change.select2');
             });
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -147,12 +149,12 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#case_nature_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Case Nature",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
-            });
+            // $('#case_nature_id').prepend('<option selected></option>').select2({
+            //     width:'100%',
+            //     placeholder:"Select Case Nature",
+            //     allowClear:true,
+            //     dropdownParent:$('#crm_agent_assign')
+            // });
 
             $('#edit_agent_id').select2({
                 width:'100%',
@@ -164,11 +166,11 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
-            $('#edit_case_nature_id').select2({
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
+            // $('#edit_case_nature_id').select2({
+            //     width:'100%',
+            //     allowClear:true,
+            //     dropdownParent:$('#crm_agent_edit')
+            // });
             
 
             var table = $('#datatable').DataTable({
@@ -280,7 +282,11 @@
                 }).done(function (data) {
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_zone_id').val(data.zone_id).change();
-                    $('#edit_case_nature_id').val(data.case_nature_id).change();
+                    if(data.case_nature_id != 4){
+                        $('#edit_case_nature_id').val(null).change();
+                    }else{
+                        $('#edit_case_nature_id').val(data.case_nature_id).change();
+                    }
                     $('#crm_agent_id').val(data.crm_agent_id);
                     
                     $('#EditAgentModal').modal('show');

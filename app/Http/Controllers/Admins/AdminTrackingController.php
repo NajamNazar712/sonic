@@ -37,6 +37,7 @@ use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\RiderDelivery;
+use App\Http\Models\RiderUnresponsiveStatus;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
@@ -527,6 +528,7 @@ class AdminTrackingController extends Controller
 
         $information = array();
 
+        $information['id'] = $rider->id;
         $information['name'] = $rider->name;
         $information['phone_number'] = $rider->phone;
         $information['city'] = $rider->city->name;
@@ -539,6 +541,33 @@ class AdminTrackingController extends Controller
 
 
         return $information;
+    }
+
+    public function rider_unresponsive_status(Request $request)
+    {
+        if(!$request->has('type') || !$request->has('id'))
+        {
+            return response()->json(['status'=>0,'error'=>'Invalid Request']);
+        }
+
+        if(Rider::where('id',$request->id)->doesntExist())
+        {
+            return response()->json(['status'=>0,'error'=>'Rider Doesn\'t Exist.']);
+        }
+
+        $note_id = null;
+        if($request->note != 'undefined')
+        {
+            $note_id = $request->note;
+        }
+        $data = new RiderUnresponsiveStatus();
+        $data->rider_id = $request->id;
+        $data->admin_id = Auth::id();
+        $data->status = $request->type;
+        $data->note_id = $note_id;
+        $data->save();
+
+        return response()->json(['status'=>1]);
     }
 
     public function cargo_consignment_details(Request $request)
@@ -1140,7 +1169,12 @@ class AdminTrackingController extends Controller
                                         if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
                                             $rider = Rider::find($journey->reference_2_id);
                                             if ($rider) {
-                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                                $note = "";
+                                                if($journey->reference_1_id)
+                                                {
+                                                    $note = $journey->reference_1_id;
+                                                }
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '" data-showRiderRespone="1" data-note="'.$note.'">' . $rider->name . '</button>';
                                             }
 
                                         } else {
@@ -1165,7 +1199,7 @@ class AdminTrackingController extends Controller
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
-                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
