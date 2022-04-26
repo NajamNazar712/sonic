@@ -389,8 +389,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
 
         $cron = DB::table('global_settings')->where('type','rcp_sms_cron_time')->select('text')->first();
-//        $cron_time = isset($cron->seting_value) ? $cron->seting_value : "12:00";
-        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron)->runInBackground();
+        $cron_time = isset($cron->text) ? $cron->text : "12:00";
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
     }
     /**
