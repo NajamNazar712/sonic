@@ -513,7 +513,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="territory_area_id" id="edit_area" class="form-control select2" data-rule-required="true"  data-msg-required="Area is required">
+                                    <select name="territory_area_id" id="edit_area" class="form-control select2">
                                     </select>
                                 </div>
                             </div>
