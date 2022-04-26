@@ -315,6 +315,7 @@ class APIController extends Controller
 
     public function pickup_address_add(Request $request)
     {
+//        dd($request);
         $user_id = $request->user_id;
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -336,6 +337,7 @@ class APIController extends Controller
             'email_address' => ['required', 'email'],
             'address' => ['required', 'between:1,190'],
             'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+            'brand_name' => ['string'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -365,7 +367,8 @@ class APIController extends Controller
             $email_address = $request->input('email_address');
             $address = $request->input('address');
             $city_id = $request->input('city_id');
-
+            $brand_name = $request->input('brand_name');
+//dd($brand_name);
             $pickup_address = new UserShippingInfo();
 
             $pickup_address->user_id = $user_id;
@@ -375,6 +378,7 @@ class APIController extends Controller
             $pickup_address->email = $email_address;
             $pickup_address->pickup_address = $address;
             $pickup_address->city_id = $city_id;
+            $pickup_address->pickup_brand_name = $brand_name;
 
             $pickup_address->save();
 
@@ -2699,7 +2703,7 @@ class APIController extends Controller
                     $air_waybill .= ShipperShipmentBookController::air_waybill(4, $user_id, [$shipment->id]);
 
                     if (!empty($request->orders[$shipment->tracking_number]) && $invoice) {
-                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting);
+                        $air_waybill .= ShopifyController::invoice_generate($user_id, $request->orders[$shipment->tracking_number], $shop_invoice_setting, $shipment);
                     }
                     $valid = true;
                 }

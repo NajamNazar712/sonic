@@ -12,6 +12,102 @@
 			<div class="card-body">
 				@include('admin.inc.messages')
 
+				{{--DATE RANGE FILTER FOR INVOICES--}}
+
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="invoice_from"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="invoice_from" placeholder="Invoicing Date From">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="invoice_to"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="invoice_to" placeholder="Invoicing Date To">
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group input-group" style="margin-top: -20px ">
+								<button type="button" id="search_filter_btn"
+										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+											class="la la-search" style="margin-right: 10px"></i> Search
+								</button>
+							</div>
+						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
+					</div>
+				</div>
+				{{--END--}}
+
+				{{--DATE RANGE FILTER FOR GENERATION--}}
+
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="generation_from"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="generation_from" placeholder="Generation Date From">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="generation_to"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="generation_to" placeholder="Generation Date To">
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group input-group" style="margin-top: -20px ">
+								<button type="button" id="search_filter_btn_generation"
+										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+											class="la la-search" style="margin-right: 10px"></i> Search
+								</button>
+							</div>
+						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn_generation"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
+					</div>
+				</div>
+				{{--END--}}
+
 				<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 					<thead>
 					<tr role="row" class="bg-primary white">
@@ -194,7 +290,105 @@
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
+    {{--   Invoices Script	--}}
 	<script>
+		var booking_from_date = $('#invoice_from').pickadate({
+			firstDay: 1,
+			clear: '',
+			max: '{{ Carbon\Carbon::now() }}',
+			// format: 'dd mmmm, yyyy',
+			format: 'yyyy-mm-dd',
+			selectYears: true,
+			selectMonths: true,
+			formatSubmit: 'yyyy-mm-dd 00:00:00',
+			hiddenSuffix: '_formatted',
+			onSet: function (context) {
+				if (context.select) {
+					$('#invoice_to').pickadate('picker').set('min', $('#invoice_from').pickadate('picker').get('select'));
+				}
+			}
+		});
+		var booking_to_date = $('#invoice_to').pickadate({
+			firstDay: 1,
+			clear: '',
+			max: '{{ Carbon\Carbon::now() }}',
+			// format: 'dd mmmm, yyyy',
+			format: 'yyyy-mm-dd',
+			selectYears: true,
+			selectMonths: true,
+			formatSubmit: 'yyyy-mm-dd 23:59:59',
+			hiddenSuffix: '_formatted',
+			onSet: function (context) {
+				if (context.select) {
+					$('#invoice_from').pickadate('picker').set('max', $('#invoice_to').pickadate('picker').get('select'));
+				}
+			}
+		});
+
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder:'Search',
+				width:'100%',
+				allowClear:false,
+			});
+	</script>
+    {{--	END   --}}
+
+    {{-- GENERATION SCRIPT	--}}
+
+	<script>
+		var booking_from_date = $('#generation_from').pickadate({
+			firstDay: 1,
+			clear: '',
+			max: '{{ Carbon\Carbon::now() }}',
+			// format: 'dd mmmm, yyyy',
+			format: 'yyyy-mm-dd',
+			selectYears: true,
+			selectMonths: true,
+			formatSubmit: 'yyyy-mm-dd 00:00:00',
+			hiddenSuffix: '_formatted',
+			onSet: function (context) {
+				if (context.select) {
+					$('#generation_to').pickadate('picker').set('min', $('#generation_from').pickadate('picker').get('select'));
+				}
+			}
+		});
+		var booking_to_date = $('#generation_to').pickadate({
+			firstDay: 1,
+			clear: '',
+			max: '{{ Carbon\Carbon::now() }}',
+			// format: 'dd mmmm, yyyy',
+			format: 'yyyy-mm-dd',
+			selectYears: true,
+			selectMonths: true,
+			formatSubmit: 'yyyy-mm-dd 23:59:59',
+			hiddenSuffix: '_formatted',
+			onSet: function (context) {
+				if (context.select) {
+					$('#generation_from').pickadate('picker').set('max', $('#generation_to').pickadate('picker').get('select'));
+				}
+			}
+		});
+
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder:'Search',
+				width:'100%',
+				allowClear:false
+			});
+
+    </script>
+			{{--  END	--}}
+
+
+
+		<script>
 		$(document).ready(function() {
 			$('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
                 placeholder: 'Select Company Bank',
@@ -231,7 +425,7 @@
 				}
 			});
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+           jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
                     var params = table.ajax.params();
@@ -239,8 +433,15 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.invoices.list') }}',
-                        data: params,
+						url: '{{ route('admin.finance.invoices.list') }}',
+						data: function (d) {
+						d.invoice_from = $('#invoice_from').val();
+						d.invoice_to = $('#invoice_to').val();
+						d.generation_from = $('#generation_from').val();
+						d.generation_to = $('#generation_to').val();
+					},
+
+							data: params,
                         success: function (result) {
                             head = [];
 
@@ -453,7 +654,17 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
-				ajax: '{{ route('admin.finance.invoices.list') }}',
+				{{--ajax: '{{ route('admin.finance.invoices.list') }}',--}}
+				ajax:{
+					url: '{{ route('admin.finance.invoices.list') }}',
+					data: function (d) {
+						d.invoice_from = $('#invoice_from').val();
+						d.invoice_to = $('#invoice_to').val();
+						d.generation_from = $('#generation_from').val();
+						d.generation_to = $('#generation_to').val();
+
+					}
+				},
 				rowId: 'id',
 				order: [[9, 'desc']],
 				columns: [
@@ -1082,9 +1293,26 @@
 					}
 				}
 			});
-
-
-
+			$('#search_filter_btn').on('click',function () {
+				table.draw(true);
 			});
+
+			$('#search_filter_btn_generation').on('click',function () {
+				table.draw(true);
+			});
+
+			$('#refresh_filter_btn').click(function(){
+				$('#invoice_from').val('');
+				$('#invoice_to').val('');
+				table.draw();
+			});
+
+			$('#refresh_filter_btn_generation').click(function(){
+				$('#generation_from').val('');
+				$('#generation_to').val('');
+				table.draw();
+			});
+
+		});
 	</script>
 @endsection

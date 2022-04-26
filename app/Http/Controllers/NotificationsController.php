@@ -8484,15 +8484,6 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     foreach ($datas as $data) {
-                        $data_set = Rider::find($data->id);
-                        $data_set->status = 0;
-                        $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
-                        if($employee_directory->exists()){
-                            $employee_directory = $employee_directory->first();
-                            $employee_directory->status_id = 2;
-                            $employee_directory->save();
-                        }
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';

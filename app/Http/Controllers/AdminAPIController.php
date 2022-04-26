@@ -40,6 +40,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -56,6 +57,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -64,7 +66,9 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
+use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
@@ -73,10 +77,12 @@ use App\Http\Models\Product;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\V2Pickup\DwsPickupNote;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -87,13 +93,12 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WMS\WmsCourierOrders;
 use App\Http\Models\WMS\WmsOrderProcess;
 use App\Http\Models\WMS\WmsPendingPicking;
-use App\Http\Models\WMS\WmsPendingPickingShipments;
 use App\Http\Models\WMS\WmsPicklist;
 use App\Http\Models\WMS\WmsPicklistItem;
 use App\Http\Models\WMS\WmsProductBarcode;
-use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -103,6 +108,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Password;
 
 class AdminAPIController extends Controller
@@ -3416,19 +3422,43 @@ class AdminAPIController extends Controller
         $admins = Admin::find($admin_id);
         if($admins){
             $response = array();
-            $employee_shift = EmployeeShift::where('id', $admins->shift_id);
+            $admin_shift = EmployeeShift::where('id', $admins->shift_id);
+            if ($admin_shift->exists()) {
+                $admin_shift = $admin_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+                if ($shift_time->lt(Carbon::now())) {
+                    $date = Carbon::now()->format("Y-m-d");
+                } else{
+                    if(Carbon::now()->format("l") == "Monday"){
+                        $date = Carbon::now()->subDays(2)->format("Y-m-d");
+                    }
+                    else{
+                        $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                    }
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                        ->where('employee_type', 1)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
+                    if($last_action_log->exists()){
+                        $last_action_log = $last_action_log->first();
+                        if($last_action_log->action_id == 2){
+                            $date = Carbon::now()->format("Y-m-d");
+                        }
+                    }
+
+                }
+            }
             $response["status"] = 0;
-            if ($employee_shift->exists()){
-                $employee_shift = $employee_shift->first();
-                $response["shift_name"] = $employee_shift->name;
-                $response["start_time"] = $employee_shift->start_time;
-                $response["end_time"] = $employee_shift->end_time;
+            if ($admin_shift->exists()){
+                $admin_shift = $admin_shift->first();
+                $response["shift_name"] = $admin_shift->name;
+                $response["start_time"] = $admin_shift->start_time;
+                $response["end_time"] = $admin_shift->end_time;
             }
             else{
                 $response["shift_name"] = "default";
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
             }
+            $response["last_action_date"] = $date;
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
@@ -5190,7 +5220,7 @@ class AdminAPIController extends Controller
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
                         $file = $request->file('image_name');
-                        $filename = 'image_name' . $date . '.' . $file->extension();
+                        $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
@@ -5315,7 +5345,7 @@ class AdminAPIController extends Controller
                 $datum["year"] = Carbon::parse($date)->format("Y");
                 $attendance = EmployeeAttendance::where('employee_id', $admin_id)
                     ->where('employee_type', 1)
-                    ->whereDate('attendance_date', $date);
+                    ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if ($shift_exists == 1) {
@@ -6468,7 +6498,7 @@ class AdminAPIController extends Controller
             $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp', 'wms_picklist_items.pending_picking_id', '=', 'wpp.id')
                 ->where('wms_picklist_items.picklist_id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
 
-            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
+            $product = WmsProductBarcode::where('picklist_id', $request->picklist_id)->where('status', 3)->whereIn('product_id',$product_ids)->where(function ($query) use($barcode) {
                 $query->where('barcode', '=', $barcode)
                     ->orWhere('id', '=', $barcode);
             });
@@ -6483,93 +6513,6 @@ class AdminAPIController extends Controller
     }
 
     public function pick_list_receive12(Request $request)
-    {
-        $rules = [
-            'picklist_id' => ['required'],
-            'barcode_list' => ['required'],
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $admin_id = $request->admin_id;
-            $picklist_id = (int)$request->picklist_id;
-            $picklist = WmsPicklist::find($picklist_id);
-            if ($picklist) {
-                if ($picklist->status == 0) {
-                    $scanned_barcodes = array();
-                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
-                    $shipment_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
-                    $courier_order_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
-                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 2]);
-                    WmsCourierOrders::whereIn('id', $courier_order_ids)->update(['status' => 3]);
-                    $picklist->status = 1;
-                    $picklist->save();
-                    if ($request->has('barcode_list')) {
-                        $barcode_lists = json_decode($request->barcode_list, true);
-                        foreach ($barcode_lists as $barcode_list) {
-                            array_push($scanned_barcodes,$barcode_list['barcode']);
-                        }
-                    }
-                    foreach ($picklist->items as $item) {
-                        $item->status = 1;
-                        $item->save();
-                    }
-                    foreach ($shipment_ids as $shipment_id) {
-                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment_id)->where('courier_id', 1)->get();
-                        foreach ($shipment_products as $shipment_product) {
-                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
-                                ->where('wms_product_barcodes.status', 3)
-                                ->whereIn('id', $scanned_barcodes)
-                                ->where('product_id', $shipment_product->product_id)
-                                ->take($shipment_product->quantity);
-                            if ($product_barcodes->exists()) {
-                                $product_barcodes = $product_barcodes->get();
-                                foreach ($product_barcodes as $product_barcode) {
-                                    $product_barcode->shipment_id = $shipment_id;
-                                    $product_barcode->courier_id = 1;
-                                    $product_barcode->picklist_id = $picklist_id;
-                                    $product_barcode->save();
-                                }
-                            }
-                        }
-                    }
-                    foreach ($courier_order_ids as $courier_order_id) {
-                        $courier_products = WmsShipmentProduct::where('shipment_id', $courier_order_id)->where('courier_id', 2)->get();
-                        foreach ($courier_products as $courier_product) {
-                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
-                                ->where('wms_product_barcodes.status', 3)
-                                ->WhereIn('id', $scanned_barcodes)
-                                ->where('product_id', $courier_product->product_id)
-                                ->take($courier_product->quantity);
-                            if ($product_barcodes->exists()) {
-                                $product_barcodes = $product_barcodes->get();
-                                foreach ($product_barcodes as $product_barcode) {
-                                    $product_barcode->shipment_id = $shipment_id;
-                                    $product_barcode->courier_id = 2;
-                                    $product_barcode->picklist_id = $picklist_id;
-                                    $product_barcode->save();
-                                }
-                            }
-                        }
-                    }
-                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
-                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
-                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Picklist already updated']);
-                }
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Picklist']);
-            }
-        }
-    }
-
-    public function pick_list_receive(Request $request)
     {
         $rules = [
             'picklist_id' => ['required'],
@@ -6608,6 +6551,46 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function pick_list_receive(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required'],
+            'barcode_list' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $picklist_id = $request->picklist_id;
+            $picklist = WmsPicklist::find($picklist_id);
+            $admin_id = $request->admin_id;
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
+                    $shipment_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
+                    $courier_order_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 8]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=', 7)->update(['status' => 3]);
+                    $picklist->status = 1;
+                    $picklist->save();
+                    foreach ($picklist->items as $item) {
+                        $item->status = 1;
+                        $item->save();
+                    }
+                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
+                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
+                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
+                } else {
+                    return response()->json(['status' => 0, 'message' => 'Picklist already updated']);
+                }
+
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Picklist not found!']);
+            }
+        }
+    }
+
     public function check_bolt_version(Request $request)
     {
         $admin_id = $request->admin_id;
@@ -6639,7 +6622,19 @@ class AdminAPIController extends Controller
     public function daily_visit_index()
     {
         $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
-        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses]);
+        $shippers = User::where('status', 3)->get(['id', 'name']);
+        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses, 'shippers' => $shippers]);
+    }
+
+    public function shipper_details(Request $request){
+
+        $shipper_detail = User::where('status', 3)->where('id', $request->shipper_id)->select('name','poc','address','email','phone');
+        if($shipper_detail){
+            $shipper_detail = $shipper_detail->get();
+            return response()->json(['status' => 0, 'shipper_detail' => $shipper_detail]);
+        }else {
+            return response()->json(['status' => 1, 'message' => "Invalid Shipper!"]);
+        }
     }
 
     public function daily_visit_store(Request $request)
@@ -6656,6 +6651,7 @@ class AdminAPIController extends Controller
             'longitude' => ['required'],
             'business_card_image' => ['required'],
             'location_image' => ['required'],
+            'shipper_id' => ['nullable', 'integer'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -6664,6 +6660,7 @@ class AdminAPIController extends Controller
         }else{
             try{
                 $daily_visit = new DailyVisit();
+                $daily_visit->shipper_id = $request->shipper_id;
                 $daily_visit->company_name = str_replace('"',"",$request->company_name);
                 $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
                 $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
@@ -6771,6 +6768,159 @@ class AdminAPIController extends Controller
             }
         }else{
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+
+    }
+
+    public function store_dws_image(Request $request){
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')],
+            'picture' => ['required', 'mimes:png,jpeg,jpg']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(false);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_details = ShipmentDetail::where('shipment_id', $shipment->id);
+            if($shipment_details->exists()){
+                $shipment_details = $shipment_details->first();
+                if($shipment_details->dws_status == 1 && $shipment_details->dws_image == null){
+                    $date = Carbon::now()->format('Y_m_d');
+                    $file = $request->file('picture');
+                    $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
+                    $directory = 'dws_images';
+                    $picture_path = $directory . '/' . $filename;
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                    $shipment_details->dws_image = $picture_path;
+                    $shipment_details->save();
+                    return response()->json(true);
+                }
+                return response()->json(false);
+            }
+            return response()->json(false);
+        }
+    }
+
+    public function signup_data(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $designation = EmployeeDesignation::where('status', 1)->select('id', 'name', 'department_id')->get();
+        $domicile = EmployeeDomicile::select('id', 'name')->get();
+        $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
+        $nationality = EmployeeNationality::select('id', 'name')->get();
+        $religion = EmployeeReligion::select('id', 'name')->get();
+        $gender = EmployeeGender::select('id', 'name')->get();
+        $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $department = AdminDepartment::select('id', 'name')->get();
+        $hub = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $relationships = EmployeeRelationship::select('id', 'name')->get();
+        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
+        $banks = BanksList::select('id', 'name')->where('status', 1)->get();
+        $rider_type = RiderType::select('id', 'name')->get();
+        $staff_categories = StaffCategory::select('id', 'name')->get();
+        $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
+        $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
+        $shift_data = array();
+        foreach($shifts as $shift){
+            $datum = array();
+            $datum['id'] = $shift->id;
+            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
+            $shift_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+    }
+
+    public function mark_attendance_v3(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
+                if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
+                    $attendance_date = $attendance_date->addDays(1);
+                }
+            }
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
+            if ($request->action == 1) {
+                if($admin_attendance->clock_in_datetime == null){
+                    $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                    $admin_attendance->clock_in_latitude = $request->latitude;
+                    $admin_attendance->clock_in_longitude = $request->longitude;
+                    $admin_attendance->clock_in_location = $location_status;
+                    $admin_attendance->save();
+                }
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+            elseif ($request->action == 2) {
+                $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)->orderBy('id', 'DESC')->where('action_id', 1)->first();
+                $attendance_date = $last_clockin_action->attendance_date;
+
+                $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
         }
 
     }

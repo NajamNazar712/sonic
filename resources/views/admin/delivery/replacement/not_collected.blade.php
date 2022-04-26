@@ -31,6 +31,44 @@
         </div>
     </div>
 
+    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" method="POST" novalidate="novalidate">
+                        <div class="form-group">
+                            @if($return_confirm_reasons)
+                                <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                                    @foreach($return_confirm_reasons as $reason)
+                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary update_return_confirm">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -102,7 +140,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 {{--    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>--}}
 {{--    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>--}}
-{{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -111,6 +149,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Reason'
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -162,6 +204,20 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        text: 'Return Confirm',
+                        className: 'btn btn-primary confirm',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows !== ''){
+                                $('#ReturnConfirmReasonModal').modal('show');
+
+                            }else{
+                                var error = "Not selected any shipments!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
                     {
                         text: 'Re-Attempt',
                         className: 'btn btn-primary re_attempt',
@@ -217,7 +273,7 @@
                                             else {
                                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                             }
-
+                                            table.button('.confirm').disable();
                                             table.button('.re_attempt').disable();
                                             table.button('.regular_re_attempt').disable();
 
@@ -232,7 +288,8 @@
                                 }
                             });
                         }
-                    },{
+                    },
+                    {
                         text: 'Re-Attempt (Regular)',
                         className: 'btn btn-primary regular_re_attempt',
                         enabled: false,
@@ -288,6 +345,7 @@
                                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                             }
 
+                                            table.button('.confirm').disable();
                                             table.button('.re_attempt').disable();
                                             table.button('.regular_re_attempt').disable();
 
@@ -323,12 +381,14 @@
                                         selected_rows.push(id);
                                     }
 
+                                    table.button('.confirm').enable();
                                     table.button('.re_attempt').enable();
                                     table.button('.regular_re_attempt').enable();
                                 }
                             });
                         }
-                    }, {
+                    },
+                    {
                         extend: 'selectNone',
                         text: 'Select None',
                         className: 'select_none',
@@ -351,6 +411,7 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.re_attempt').disable();
+                                        table.button('.confirm').disable();
                                         table.button('.regular_re_attempt').disable();
                                     }
                                 }
@@ -460,10 +521,12 @@
                         }
 
                         if (selected_rows.length > 0) {
+                            table.button('.confirm').enable();
                             table.button('.re_attempt').enable();
                             table.button('.regular_re_attempt').enable();
                         }
                         else {
+                            table.button('.confirm').disable();
                             table.button('.re_attempt').disable();
                             table.button('.regular_re_attempt').disable();
                         }
@@ -472,6 +535,89 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#update_return_reason_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var return_reason_select = $('#return_reason_select').val();
+                    var remarks = $('#return_reason_shipment_remarks').val();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                if ($(row.node()).hasClass('selected')) {
+                                    var id = parseInt(row.id());
+                                }
+                            });
+
+                            $.ajax({
+                                url:"{{route('admin.return.confirm.status')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_ids':selected_rows,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': 'confirm',
+                                    'remark': remarks,
+                                    'return_reason_select': return_reason_select
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+                                table.rows().deselect();
+                                selected_rows = [];
+                                table.button('.confirm').disable();
+                                table.button('.re_attempt').disable();
+                                table.button('.regular_re_attempt').disable();
+                                $('#return_reason_shipment_remarks').val('');
+                                $('#return_reason_select').val(null).trigger('change');
+                                $('button.update_return_confirm').attr('disabled', false);
+                                $('#ReturnConfirmReasonModal').modal('hide');
+                            });
+                        }
+                    });
+
+                }
+            });
+
+            $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
+                $('#return_reason_shipment_remarks').val('');
+                $('#return_reason_select').val(null).trigger('change');
+            })
 
 
         });

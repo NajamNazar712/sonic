@@ -3149,6 +3149,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_confirmation_pending_sms_setting')->name('rcp_sms.')->group(function () {
             Route::get('','Admins\GlobalSettingsController@rcp_sms_index')->name('index');
             Route::post('update','Admins\GlobalSettingsController@rcp_sms_update')->name('update');
+
+
+//            Route::get('','Admins\GlobalSettingsController@rcp_sms_cron_index')->name('cron_index');
+//            Route::post('update','Admins\GlobalSettingsController@rcp_sms_cron_update')->name('cron_update');
         });
 
         Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {
@@ -3171,6 +3175,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider_shipment_attempt')->name('rider_shipment_attempt.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
+        });
+
+        Route::prefix('rider_deactivation_cron')->name('rider_deactivation_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_deactivation_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_deactivation_cron_store')->name('store');
         });
 
         Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
@@ -3652,6 +3661,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('required_info', 'Admins\AdminHumanResourseController@employee_directory_required_info')->name('required_info');
+            Route::post('approve_individual', 'Admins\AdminHumanResourseController@employee_directory_approve_individual')->name('approve_individual');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');

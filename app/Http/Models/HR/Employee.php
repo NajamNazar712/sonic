@@ -70,5 +70,13 @@ class Employee extends Model
     {
         return $this->belongsTo(EmployeeShift::class,'shift_id','id');
     }
+    public function employee_nature()
+    {
+        return $this->belongsTo(EmployeeNature::class,'employee_nature_id','id');
+    }
+    public function replacement_employee()
+    {
+        return $this->belongsTo(Employee::class,'replacement_employee_id','id');
+    }
 
 }

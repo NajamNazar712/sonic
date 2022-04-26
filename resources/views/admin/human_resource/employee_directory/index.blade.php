@@ -57,7 +57,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
+{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
@@ -111,6 +111,22 @@
                                     <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                                 </div>
                             </div>
+                        <div class="row">
+                                <div class="col d-none" id="joining_date_group">
+                                    <label>Joining Date<span class="text-danger">*</span></label>
+                                    <fieldset class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                        </div>
+                                        <input type="text" name="joining_date" data-rule-required="true"
+                                               data-msg-required="This Field is required"
+                                               class="form-control bg-primary border-primary white rounded-right pickadate"
+                                               id="joining_date" placeholder="Joining Date">
+                                    </fieldset>
+                                </div>
+                            </div>
                         <div id="unEditableFields">
                             <div class="row">
                                 <div class="col-4">
@@ -149,7 +165,7 @@
 
                             <input type="hidden" name="employee_id" id="employee_id">
                             <div>
-                                <div class="row mb-2">
+                                <div class="row">
                                 <div class="col">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="rider_name" id="rider_name"
@@ -183,7 +199,7 @@
                             </div>
                             </div>
 
-                            <div class="row mb-2">
+                            <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
                                     <textarea name="address" class="form-control" placeholder="Address" id="address"
@@ -358,6 +374,128 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="employeeRequiredInfoModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="employeeRequiredInfoModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Employee Required Info</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('admin.human_resource.employee_directory.approve_individual')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveStaffForm" novalidate="novalidate">
+                    <div class="modal-body text-left">
+                        <div class="row mb-2">
+                            {{csrf_field()}}
+                            <input type="hidden" name="employee_id" id="employee_id" value="">
+                                <div class="col"  id="employee_nature_list_group">
+                                <div class="form-group">
+                                    <label>Employee Nature<span class="text-danger">*</span></label>
+                                    <select name="employee_nature_id" id="employee_nature_list" data-rule-required="true"  data-msg-required="Employee Nature is required" class="select2 form-control" style="width: 100%">
+                                        @foreach($employee_natures as $employee_nature)
+                                            <option value="{{$employee_nature->id}}">{{$employee_nature->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                                <div class="col" id="sub_department_group">
+                                <div class="form-group" >
+                                    <label>Sub Department <span class="text-danger">*</span></label>
+                                    <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" name="sub_department" >
+                                </div>
+                            </div>
+                                <div class="col" id="joining_date_group">
+                                <label>Joining Date<span class="text-danger">*</span></label>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                    </div>
+                                    <input type="text" name="joining_date" data-rule-required="true"
+                                           data-msg-required="This Field is required"
+                                           class="form-control bg-primary border-primary white rounded-right pickadate"
+                                           id="joining_date" placeholder="Joining Date">
+                                </div>
+                            </div>
+                        </div>
+                            <div class="d-none row mb-2" id="replacement_info_div">
+                                <div class="col-md-12">
+                                    <h4 class="form-section">Replacement Info</h4>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Replacement Employee<span class="text-danger">*</span></label>
+                                        <select name="replacement_employee_id" id="replacement_employee_list" data-rule-required="true"  data-msg-required="Replacement Employee is required" class="select2 form-control " style="width: 100%">
+                                            @foreach($replacement_employees as $replacement_employee)
+                                                <option value="{{$replacement_employee->id}}">{{$replacement_employee->trax_id}} | {{$replacement_employee->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Last Working Day<span class="text-danger">*</span></label>
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                        </div>
+                                        <input type="text" name="replacement_last_working_day" data-rule-required="true" data-msg-required="This Field is required" class="form-control bg-primary border-primary white rounded-right pickadate" id="replacement_last_working_day" placeholder="Last Working Day">
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="RiderRequiredInfoModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="RiderRequiredInfoModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Employee Required Info</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('admin.human_resource.employee_directory.approve_individual')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveRiderForm" novalidate="novalidate">
+                    <div class="modal-body text-left">
+                            {{csrf_field()}}
+                            <input type="hidden" name="employee_id" id="employee_id" value="">
+                            <div class="col-md-12">
+                                <label>Joining Date<span class="text-danger">*</span></label>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                    </div>
+                                    <input type="text" name="joining_date" data-rule-required="true"
+                                           data-msg-required="This Field is required"
+                                           class="form-control bg-primary border-primary white rounded-right pickadate"
+                                           id="joining_date" placeholder="Joining Date">
+                                </div>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-left" id="designationChangeLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
             <div class="modal-content" style="width: 60%!important;">
@@ -421,6 +559,44 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="rejoinStaffModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="rejoinStaffModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Rejoin Employee</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('admin.human_resource.employee_directory.rejoin')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="rejoinStaffForm" novalidate="novalidate">
+                    <div class="modal-body text-left">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="col-md-12">
+                            <label>Joining Date<span class="text-danger">*</span></label>
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                </div>
+                                <input type="text" name="joining_date" data-rule-required="true"
+                                       data-msg-required="This Field is required"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="joining_date" placeholder="Joining Date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -446,6 +622,8 @@
 
 
     <script type="text/javascript">
+        var today = new Date();
+        today.setHours(0,0,0,0);
         $(document).ready(function () {
             let route_id;
             var elm = document.getElementById("edit_ccd_rider_checkbox");
@@ -559,6 +737,86 @@
                 }else{
                     $('#new_route_div').addClass('d-none');
                 }
+            });
+
+            $("#employee_nature_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Employee Nature",
+                width:'100%',
+                dropdownParent: $('#employeeRequiredInfoModal')
+            }).
+            bind('change', function () {
+                if(this.value == 2){
+                    $("#replacement_info_div").removeClass("d-none");
+                }
+                else {
+                    $("#replacement_info_div").addClass("d-none");
+                }
+            });
+
+            $("#replacement_employee_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Replacement Employee",
+                width:'100%',
+                dropdownParent: $('#employeeRequiredInfoModal')
+            });
+
+            var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            var joining_date = $('#approveStaffForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#approveRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#editRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#editRiderForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
+            });
+
+            $('#rejoinStaffForm #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                max: today,
             });
 
             var search_date_to = $('#search_form #search_date_to').pickadate({
@@ -763,12 +1021,19 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Employee Directory',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(652, session('permissions')))
                     {
                         text: 'Approve',
-                        className: 'btn btn-primary bulk_approve',
+                        className: 'btn btn-primary bulk_approve d-none',
                         enabled: false,
-                        action: function (e, dt, node, config) {swal({
+                        action: function (e, dt, node, config) {
+                            swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes Approve Employee!',
                             icon: 'warning',
@@ -832,7 +1097,7 @@
                     },
                     {
                         text: 'Reject',
-                        className: 'btn btn-danger bulk_reject',
+                        className: 'btn btn-danger bulk_reject d-none',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
@@ -901,7 +1166,7 @@
                     {
                         extend: 'selectAll',
                         text: 'Select All',
-                        className: 'select_all',
+                        className: 'select_all d-none',
                         action : function(e) {
                             e.preventDefault();
 
@@ -927,7 +1192,7 @@
                     }, {
                         extend: 'selectNone',
                         text: 'Select None',
-                        className: 'select_none',
+                        className: 'select_none d-none',
                         action : function(e) {
                             e.preventDefault();
 
@@ -952,12 +1217,6 @@
                                 }
                             });
                         }
-                    },
-                    {
-                        extend: 'excel',
-                        title: 'Employee Directory',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
                 select: {
@@ -986,7 +1245,7 @@
                 order: [[18, 'desc']],
                 rowId: 'employee_id',
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
@@ -1010,10 +1269,10 @@
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
-                    $('td:eq(0)', row).addClass('select-checkbox');
+                    // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1173,7 +1432,6 @@
                     table.button('.bulk_reject').disable();
                 }
             });
-
             $('body').on('click', '.approve', function (e) {
                 var id = $(this).data('target-id');
                 swal({
@@ -1197,7 +1455,8 @@
                     closeOnClickOutside: false,
                     closeOnEsc: false,
                     dangerMode: true
-                }).then(function (confirm) {
+                }).
+                then(function (confirm) {
                     if (confirm) {
                         swal({
                             title: 'Please Wait!',
@@ -1209,21 +1468,49 @@
                         });
 
                         $.ajax({
-                            url: '{!! route('admin.human_resource.employee_directory.approve') !!}',
+                            url: '{!! route('admin.human_resource.employee_directory.required_info') !!}',
                             method: 'POST',
                             data: {
-                                'employee_ids[]': id,
+                                'employee_id': id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
                             .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
+                                if(data.status == 2){
+                                    if(!data.joining_date){
+                                        $('#approveStaffForm #joining_date_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #joining_date_group').addClass('d-none');
+                                    }
+
+                                    if(!data.employee_nature){
+                                        $('#approveStaffForm #employee_nature_list_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #employee_nature_list_group').addClass('d-none');
+                                    }
+
+                                    if(!data.sub_department){
+                                        $('#approveStaffForm #sub_department_group').removeClass('d-none');
+                                    }else{
+                                        $('#approveStaffForm #sub_department_group').addClass('d-none');
+                                    }
+
+                                    $('#approveStaffForm #employee_id').val(data.employee_id);
+
+                                    $('#employeeRequiredInfoModal').modal('show');
+                                }
+                                else if(data.status == 3){
+                                    $('#approveRiderForm #employee_id').val(data.employee_id);
+                                    $('#RiderRequiredInfoModal').modal('show');
+                                }
+                                else if(data.status == 1) {
                                     toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                else if(data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
@@ -1244,63 +1531,8 @@
                 var id = $(this).data('target-id');
                 var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
                 if(employee_type == 1) {
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes To Rejoin Employee!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Employee is being Rejoin',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-
-                            $.ajax({
-                                url: '{!! route('admin.human_resource.employee_directory.rejoin') !!}',
-                                method: 'POST',
-                                data: {
-                                    'employee_id': id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function (data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                    swal.close();
-                                    table.draw('false');
-                                });
-                        }
-                    });
+                    $("#rejoinStaffForm #employee_id").val(id);
+                    $("#rejoinStaffModal").modal("show");
                 }
                 else{
                     edit_Rider_function(this,true);
@@ -1475,11 +1707,13 @@
                 {
                     $('#editRiderModal .modal-title').text("Rejoin Rider");
                     $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
+                    $('#editRiderModal #joining_date_group').removeClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
                 }
                 else{
                     $('#editRiderModal .modal-title').text("Update Rider");
                     $('#editRiderModal .modal-footer #confirmAction').text("Update Rider");
+                    $('#editRiderModal #joining_date_group').addClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("");
                 }
                 $('#editRiderModal').modal('show');
@@ -1522,6 +1756,33 @@
                 $('#category').val(null).trigger('change');
 
 
+            });
+
+            $('body').on('hidden.bs.modal', '#rejoinStaffModal', function () {
+                $('#rejoinStaffForm #employee_id').val('');
+                $('#rejoinStaffForm #joining_date').val('');
+            });
+
+            $("#rejoinStaffForm").validate({
+
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    $('#rejoinStaffForm input,#rejoinStaffForm textarea,#rejoinStaffForm select').removeAttr('disabled');
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Employee is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
             });
 
             $('body').on('hidden.bs.modal', '#UpdatePinModal', function () {
@@ -1868,6 +2129,19 @@
                 $('#convertRiderForm #designation').val('').trigger('change');
             });
 
+            $('body').on('hidden.bs.modal', '#employeeRequiredInfoModal', function () {
+                $('#approveStaffForm #employee_id').val('');
+                $('#approveStaffForm #joining_date').val('');
+                $('#approveStaffForm #replacement_last_working_day').val('');
+                $('#approveStaffForm #replacement_employee_list').val('').trigger('change')
+                $('#approveStaffForm #employee_nature_list').val('').trigger('change')
+            });
+
+            $('body').on('hidden.bs.modal', '#RiderRequiredInfoModal', function () {
+                $('#approveRiderForm #employee_id').val('');
+                $('#approveRiderForm #joining_date').val('');
+            });
+
             $("#convertRiderForm").validate({
                 errorClass: "danger",
                 errorPlacement: function (error, element) {
@@ -1900,6 +2174,92 @@
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Converting Rider To Staff!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
+            $("#approveStaffForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Approve Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Employee is being Approved',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
+            $("#approveRiderForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Approve Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Employee is being Approved',
                                 icon: 'info',
                                 buttons: false,
                                 closeOnClickOutside: false,
