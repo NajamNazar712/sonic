@@ -318,7 +318,7 @@
                     }
                 },
                  rowId: 'retail_pickup_note_id',
-                order: [[8, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                      {data: 'retail_pickup_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

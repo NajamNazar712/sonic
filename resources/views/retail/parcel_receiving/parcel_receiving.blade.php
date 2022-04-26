@@ -44,7 +44,7 @@
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Total CN Number Used</th>
-                                <th class="border-primary border-darken-1">Retail Note</th>
+                                <th class="border-primary border-darken-1">Performa #</th>
                                 <th class="border-primary border-darken-1">Trax/Franchise</th>
                                 <th class="border-primary border-darken-1">Booking Code</th>
                                 <th class="border-primary border-darken-1">Cash</th>
@@ -151,7 +151,7 @@
 
                             head.push('S.No');
                             head.push('Total CN Number Used');
-                            head.push('Retail Note');
+                            head.push('Performa #');
                             head.push('Trax Center/Franchise');
                             head.push('Booking Code');
                             head.push('Cash');
