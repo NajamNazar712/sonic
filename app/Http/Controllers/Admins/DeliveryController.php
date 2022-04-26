@@ -6781,7 +6781,9 @@ class DeliveryController extends Controller
     public function replacement_not_collected_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 326);
-        return view('admin.delivery.replacement.not_collected');
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.delivery.replacement.not_collected')->with(['return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function replacement_not_collected_list(Request $request)

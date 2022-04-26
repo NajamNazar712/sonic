@@ -28,6 +28,11 @@ class UpdateDailyVisitsTableAddNewColumns extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('daily_visits', function (Blueprint $table) {
+            $table->dropColumn('shipper_id');
+            $table->dropColumn('rating_id');
+            $table->dropColumn('comment');
+            $table->dropColumn('rated');
+        });
     }
 }

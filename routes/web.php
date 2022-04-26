@@ -11,6 +11,8 @@ use App\Http\Models\HR\Employee;
 |
 */
 
+Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->name('payment_details');
+
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
@@ -3171,6 +3173,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+        Route::prefix('rider_deactivation_cron')->name('rider_deactivation_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_deactivation_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_deactivation_cron_store')->name('store');
+        });
+
         Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@bolt_update_version_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@bolt_update_version_store')->name('store');
@@ -3650,6 +3657,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
+            Route::post('required_info', 'Admins\AdminHumanResourseController@employee_directory_required_info')->name('required_info');
+            Route::post('approve_individual', 'Admins\AdminHumanResourseController@employee_directory_approve_individual')->name('approve_individual');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');
@@ -3893,6 +3902,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print','Retail\RetailCashDepositController@print')->name('print');
+        Route::post('finalize_rncc','Retail\RetailCashDepositController@finalize_rncc')->name('finalize_rncc');
+        
     });
 
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {

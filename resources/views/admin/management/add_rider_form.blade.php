@@ -84,6 +84,11 @@
                 </select>
             </fieldset>
         </div>
+        <div class="col" id="incentive_amount_div">
+            <fieldset class="form-group">
+                <input type="text" name="incentive_amount" id="incentive_amount_input" class="form-control decimal" maxlength="6" placeholder="Enter Incentive Amount" data-rule-required="true" data-msg-required="Incentive Amount is required">
+            </fieldset>
+        </div>
         <div class="col">
             <fieldset class="form-group">
                 <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
@@ -170,6 +175,8 @@
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);
         @endif
+        $('#incentive_amount_div').addClass('d-none');
+
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select City',
             dropdownParent: $("#addRiderForm")
@@ -189,7 +196,14 @@
         $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Rider Main Category',
             dropdownParent: $("#addRiderForm")
-        });
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 1){
+                    $('#incentive_amount_div').removeClass('d-none');
+                }else{
+                    $('#incentive_amount_div').addClass('d-none');
+                }
+            });
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Shift',
             dropdownParent: $("#addRiderForm")
@@ -207,6 +221,16 @@
             'rightAlign': false,
             'mask':"9999"
         });
+
+        $('#incentive_amount_input').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0,
+                'max': 1000000
+            });
         $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
 
 

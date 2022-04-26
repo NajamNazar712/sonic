@@ -47,7 +47,7 @@ class CRMCount extends Command
                 $from = Carbon::yesterday()->hour(17)->minute(31); // yesterday +1
                 $new_launced = CrmRequest::join('crm_request_status_histories as crmsh','crmsh.crm_request_id','=','crm_requests.id')
                                 ->where('crm_requests.case_nature_id','<>',4)
-                                ->where('crmsh.status_id',1)
+                                ->whereIn('crmsh.status_id',[1,5])
                                 ->whereBetween('crmsh.created_at', [$from,$to])
                                 ->count();
         
@@ -81,7 +81,7 @@ class CRMCount extends Command
                 $from = Carbon::yesterday()->hour(17)->minute(31);
                 $new_launced = CrmRequest::join('crm_request_status_histories as crmsh','crmsh.crm_request_id','=','crm_requests.id')
                                 ->where('crm_requests.case_nature_id','<>',4)
-                                ->where('crmsh.status_id',1)
+                                ->whereIn('crmsh.status_id',[1,5])
                                 ->whereBetween('crmsh.created_at', [$from,$to])
                                 ->count();
         
