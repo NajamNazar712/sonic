@@ -521,10 +521,12 @@ class LeadManagementController extends Controller
                 $lead->updated_by = Auth::id();
                 $lead->save();
 
-                if ($status == 9) {
-                    NotificationsController::send(113, $lead);
-                } elseif ($status == 2) {
-                    LeadTaggingController::notification_unresponsive($lead->id);
+                if($lead->sale_person_id != NULL){
+                    if ($status == 9) {
+                        NotificationsController::send(113, $lead);
+                    } elseif ($status == 2) {
+                        LeadTaggingController::notification_unresponsive($lead->id);
+                    }
                 }
 
                 return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
@@ -549,35 +551,31 @@ class LeadManagementController extends Controller
             foreach ($lead_ids as $lead) {
                 $lead = Lead::find($lead);
                 if ($lead) {
-                    if ($lead->sale_person_id != null) {
-                        $lead_log = new LeadLog();
-                        $lead_log->lead_id = $lead->id;
-                        $lead_log->prev_status_id = $lead->status_id;
-                        $lead_log->status_id = $status;
-                        $lead_log->reason = $reason;
-                        $lead_log->sale_person_id = $lead->sale_person_id;
-                        if ($lead->reference_person_id == NULL) {
-                            $lead_log->reference_person_id = Auth::id();
-                        } else {
-                            $lead_log->reference_person_id = $lead->reference_person_id;
-                        }
-                        $lead_log->updated_by = Auth::id();
-                        $lead_log->save();
-                            $lead->status_id = $status;
-                            $lead->reason = $reason;
-                            $lead->updated_by = Auth::id();
-                            $lead->save();
-
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = $status;
+                    $lead_log->reason = $reason;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    if ($lead->reference_person_id == NULL) {
+                        $lead_log->reference_person_id = Auth::id();
+                    } else {
+                        $lead_log->reference_person_id = $lead->reference_person_id;
+                    }
+                    $lead_log->updated_by = Auth::id();
+                    $lead_log->save();
+                    $lead->status_id = $status;
+                    $lead->reason = $reason;
+                    $lead->updated_by = Auth::id();
+                    $lead->save();
+                    if($lead->sale_person_id != NULL){
                         if ($status == 9) {
                             NotificationsController::send(113, $lead);
                         } elseif ($status == 2) {
                             LeadTaggingController::notification_unresponsive($lead->id);
                         }
-
-//                        return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
-                    } else {
-                        return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
                     }
+
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Lead not found!']);
                 }
