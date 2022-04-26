@@ -6124,9 +6124,10 @@ public function sales_incentive()
     public function rcp_sms_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),508);
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+        $time = GlobalSettings::where('type','rcp_sms_cron_time')->first();
 //        $data = DB::table('rcp_sms_cron_time')->get();
 //        $data = GlobalSettings::where('type','rcp_sms_cron_time')->first();
-        return view('admin.settings.return.rcp_sms',compact('setting', 'data'));
+        return view('admin.settings.return.rcp_sms',compact('setting', 'data','time'));
     }
 
     public function rcp_sms_update(Request $request){

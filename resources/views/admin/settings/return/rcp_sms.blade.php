@@ -84,7 +84,8 @@
                                                   </span>
                                                 </div>
                                                 <div class="form">
-                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">
+                                                    <label><input type="time" id="time" value="{{$time->text}}" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
+{{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
                                                 </div>
                                             </div>
                                         </div>
@@ -115,6 +116,10 @@
 
         span.input-group-text.bg-primary.bg-darken-2.border-primary.white.rounded-left span {
             padding: 0 19px 0 11px;
+        }
+
+        span.input-group-text.bg-primary.bg-darken-2.border-primary.white.rounded-left {
+            margin: 0px -2px 7px 0px;
         }
     </style>
 @endsection
