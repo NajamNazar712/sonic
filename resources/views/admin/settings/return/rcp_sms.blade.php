@@ -37,67 +37,20 @@
                                             </div>
                                         </div>
                                     </div>
-
-<<<<<<< HEAD
-                                    {{--      Time Cron    --}}
-{{--                                    <div class="row">--}}
-{{--                                        <div class="form-group input-group">--}}
-{{--                                            <div class="input-group-prepend">--}}
-{{--                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                  <span class="">Time</span>--}}
-{{--                                              </span>--}}
-{{--                                            </div>--}}
-{{--                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{isset($val->$cut_off_time_from) ? $val->$cut_off_time_from : ''}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">--}}
-{{--                                            <select name="cut_off_time_from" class="form-control">--}}
-{{--                                                @foreach($data as $val)--}}
-{{--                                                    @if($val->name == "TAT Cut-Off Time From")--}}
-{{--                                                      <option value="{{$val->setting_value}}">{{$val->setting_value}}</option>--}}
-{{--                                                    @endif--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-
-
-{{--                                    <div class="row">--}}
-{{--                                        <div class="form-group input-group">--}}
-{{--                                            <div class="input-group-prepend">--}}
-{{--                                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                  <span class="">Time</span>--}}
-{{--                                              </span>--}}
-{{--                                            </div>--}}
-{{--                                            <input type="text" name="cut_off_time_from" class="form-control bg-primary border-primary white rounded-right pickatime cut_off_time_from" value="{{isset($val->$cut_off_time_from) ? $val->$cut_off_time_from : ''}}" id="cut_off_time_from" placeholder="Cut-Off Time From*" data-rule-required="true" data-msg-required="Cut-Off Time From is required">--}}
-{{--                                            <select name="cut_off_time_from" class="form-control">--}}
-{{--                                                @foreach($data as $val)--}}
-{{--                                                    @if($val->name == "TAT Cut-Off Time From")--}}
-{{--                                                        <option value="{{$val->setting_value}}">{{$val->setting_value}}</option>--}}
-{{--                                                    @endif--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-
-                                        <div class="row">
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
+                                    <div class="row">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
                                                   <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                       <span class="">Time</span>
                                                   </span>
-                                                </div>
-                                                <div class="form">
-                                                    <label><input type="time" id="time" value="{{$time->text}}" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
-{{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
-                                                </div>
+                                            </div>
+                                            <div class="form">
+                                                <label><input type="time" id="time" value="{{$time->text}}" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
+                                                {{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
                                             </div>
                                         </div>
-
-
-                                    {{--      End      --}}
-
-                                        <button type="submit" class="btn btn-primary">Update</button>
-=======
+                                    </div>
                                     <button type="submit" class="btn btn-primary">Update</button>
->>>>>>> sprint_92
                                 </form>
                             </div>
                         </div>
