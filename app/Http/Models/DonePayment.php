@@ -10,8 +10,16 @@ class DonePayment extends Model
 		return $this->hasMany('App\Http\Models\DonePaymentShipment');
 	}
 
-	public function shipper() {
-		return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+    }
+
+	public function VisionSoftCodPaymentClear() {
+
+        return $this->belongsTo('App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear', 'id', 'payment_id')
+            ->where('status',1)
+            ->orderBy('id','desc');
 	}
 
     public function done_payment_calculation(){
@@ -28,4 +36,21 @@ class DonePayment extends Model
     public function payment_status() {
         return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'status', 'id');
     }
+
+    public function shipment_payment_journey_last_status_two() {
+        return $this->hasOne('App\Http\Models\ShipmentsPaymentJourney', 'payment_id', 'id')
+            ->where('status_id',1)
+            ->latest();
+//            ->limit(1);
+    }
+
+
+    public function shipment_payment_journey() {
+        return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney', 'payment_id', 'id')->groupBy('shipment_id')
+            ->orderBy('shipment_id', 'DESC');
+    }
+
+
+
+
 }

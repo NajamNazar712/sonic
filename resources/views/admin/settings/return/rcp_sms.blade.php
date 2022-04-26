@@ -38,6 +38,7 @@
                                         </div>
                                     </div>
 
+<<<<<<< HEAD
                                     {{--      Time Cron    --}}
 {{--                                    <div class="row">--}}
 {{--                                        <div class="form-group input-group">--}}
@@ -94,6 +95,9 @@
                                     {{--      End      --}}
 
                                         <button type="submit" class="btn btn-primary">Update</button>
+=======
+                                    <button type="submit" class="btn btn-primary">Update</button>
+>>>>>>> sprint_92
                                 </form>
                             </div>
                         </div>

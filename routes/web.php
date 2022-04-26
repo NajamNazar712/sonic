@@ -1980,6 +1980,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
             Route::get('generate_report_to_email', 'Admins\AdminFinanceController@done_payments_generate_report_to_email')->name('generate_report_to_email');
             Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
+            Route::get('view_status_history', 'Admins\AdminFinanceController@view_status_history')->name('view_status_history');
         });
 
         Route::prefix('invoices')->name('invoices.')->group(function () {
