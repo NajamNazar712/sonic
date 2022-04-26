@@ -65,7 +65,7 @@
                                     <fieldset class="form-group">
                                         <select name="case_nature_select" id="case_nature_select" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
                                             @foreach($case_nature as $nature)
-                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                                    <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
