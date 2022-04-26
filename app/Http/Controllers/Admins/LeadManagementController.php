@@ -502,36 +502,32 @@ class LeadManagementController extends Controller
 
         if ($status != NULL) {
             if ($lead) {
-                if ($lead->sale_person_id != null) {
-                    $lead_log = new LeadLog();
-                    $lead_log->lead_id = $lead->id;
-                    $lead_log->prev_status_id = $lead->status_id;
-                    $lead_log->status_id = $status;
-                    $lead_log->reason = $reason;
-                    $lead_log->sale_person_id = $lead->sale_person_id;
-                    if ($lead->reference_person_id == NULL) {
-                        $lead_log->reference_person_id = Auth::id();
-                    } else {
-                        $lead_log->reference_person_id = $lead->reference_person_id;
-                    }
-                    $lead_log->updated_by = Auth::id();
-                    $lead_log->save();
-
-                    $lead->status_id = $status;
-                    $lead->reason = $reason;
-                    $lead->updated_by = Auth::id();
-                    $lead->save();
-
-                    if ($status == 9) {
-                        NotificationsController::send(113, $lead);
-                    } elseif ($status == 2) {
-                        LeadTaggingController::notification_unresponsive($lead->id);
-                    }
-
-                    return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
+                $lead_log = new LeadLog();
+                $lead_log->lead_id = $lead->id;
+                $lead_log->prev_status_id = $lead->status_id;
+                $lead_log->status_id = $status;
+                $lead_log->reason = $reason;
+                $lead_log->sale_person_id = $lead->sale_person_id;
+                if ($lead->reference_person_id == NULL) {
+                    $lead_log->reference_person_id = Auth::id();
                 } else {
-                    return response()->json(['status' => 0, 'error' => 'Sale Person Not Selected!']);
+                    $lead_log->reference_person_id = $lead->reference_person_id;
                 }
+                $lead_log->updated_by = Auth::id();
+                $lead_log->save();
+
+                $lead->status_id = $status;
+                $lead->reason = $reason;
+                $lead->updated_by = Auth::id();
+                $lead->save();
+
+                if ($status == 9) {
+                    NotificationsController::send(113, $lead);
+                } elseif ($status == 2) {
+                    LeadTaggingController::notification_unresponsive($lead->id);
+                }
+
+                return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
             } else {
                 return response()->json(['status' => 0, 'error' => 'Lead not found!']);
             }
@@ -747,17 +743,21 @@ class LeadManagementController extends Controller
         if($lead_id){
             $details = array();
             $details['city'] = '';
+            $details['city_id'] = NULL;
             $details['territory'] = '';
             $details['area'] = '';
             if($lead->city_id){
                 $details['city'] = $lead->city->name;
+                $details['city_id'] = $lead->city_id;
             }
 
             if($lead->territory_id){
                 $details['territory'] = Territory::find($lead->territory_id)->name;
+                $details['territory_id'] = $lead->territory_id;
             }
             if($lead->territory_area_id){
                 $details['area'] = AreaTerritory::find($lead->territory_area_id)->name;
+                $details['area_id'] = $lead->territory_area_id;
             }
 
             $details['phone_number'] = $lead->phone_number;
@@ -784,8 +784,10 @@ class LeadManagementController extends Controller
                 $lead->email_address = $request->email_address;
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
+                $lead->status_id = 15;
                 $lead->save();
 
+                LeadTaggingController::auto_tagging($lead->id,386);
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');

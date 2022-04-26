@@ -69,6 +69,7 @@
                         <th class="border-primary border-darken-1">Breadth (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Height (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">DWS Image</th>
                     </tr>
                     </thead>
                 </table>
@@ -178,10 +179,6 @@
                     }
                 },
             });
-
-           
-
-
 
             var today = '{{ Carbon\Carbon::today() }}';
             var next_month = '{{ Carbon\Carbon::today()->addMonths(1) }}';
@@ -317,6 +314,7 @@
                     {data: 'width', name: 'width', class: 'align-middle width'},
                     {data: 'height', name: 'height', class: 'align-middle height'},
                     {data: 'date', name: 'date', class: 'align-middle date'},
+                    {data: 'dws_image', name: 'dws_image', class: 'align-middle dws_image', searchable: false, orderable: false},
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -333,6 +331,11 @@
             $('#search_filter_btn').on('click',function () {
                table.button('.excel').enable();
                table.draw();
+            });
+
+            $('body').on('click','.dws_image button',function () {
+                var link = $(this).attr('data-link');
+                window.open(link, "_blank")
             });
 
 

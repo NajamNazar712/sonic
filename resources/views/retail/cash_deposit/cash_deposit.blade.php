@@ -184,6 +184,60 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
+                        text: 'Finalize RNCC',
+                        className: 'btn btn-primary finalize_rncc',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                                swal({
+                                    text: 'Are you sure, you want to Finalize RNCC?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('retail.cash_deposit.finalize_rncc') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function (data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                    print(data.parcel_receiving_id);
+                                                } else {
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                                }
+
+                                                table.draw('false');
+                                            });
+                                    }
+                                });
+                        }
+                    },
+                    {
                         extend: 'excel',
                         title: 'Cash Deposit',
                         className: 'btn btn-primary',

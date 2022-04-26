@@ -741,7 +741,7 @@ class RegisterController extends Controller
 
     public function referral_valid(Request $request){
         if ($request->filled('referral')) {
-            $referral = Referral::where('name', $request->input('referral'));
+            $referral = Referral::where('name', $request->input('referral'))->where('status',1);
 
             if ($referral->exists()) {
                 return 'true';
