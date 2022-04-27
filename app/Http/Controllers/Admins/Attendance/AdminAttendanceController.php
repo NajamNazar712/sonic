@@ -534,6 +534,9 @@ class AdminAttendanceController extends Controller
                 }
 
             }
+            else{
+                $attendance_date = Carbon::now()->format("Y-m-d");
+            }
             $clock_in = 0;
             $clock_out = 0;
             $attendance = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
