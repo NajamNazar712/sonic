@@ -27,10 +27,8 @@
     });
   </script>
 @endif
-@php
-    $visit = \App\DailyVisit::where('shipper_id',session('user_id'))->where('rated',0);
-@endphp
-@if($visit->exists())
+
+
 <style>
     .feedback {
         display: flex;
@@ -65,7 +63,7 @@
         font-size: 4rem;
     }
 </style>
-@endif
+
 
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
@@ -209,10 +207,7 @@
 
 
 
-        @if($visit->exists())
-            @php
-                $visit = $visit->first();
-            @endphp
+        @if(isset($visit) && $visit)
             $("#DailyVisitRateModal").modal('show');
             $('.item label').tooltip({
                 placement : 'top'
