@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 
+use App\DailyVisit;
 use App\Http\Models\Admin\AdminsScreenList;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -25,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
 
         view()->composer('*', function ($view) {
             $search_sonic = NULL;
+            $visit = NULL;
             if (Auth::guard('admin')->check()) {
                 $settings = GlobalSettings::where('type', 'admin_ticker');
                 if(session('role_id') !== 1){
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
             }
             else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
                 $settings = GlobalSettings::where('type', 'shipper_ticker');
+                $visit = DailyVisit::where('shipper_id',session('user_id'))->where('rated',0);
             }
             else {
                 $settings = NULL;
@@ -65,6 +68,13 @@ class AppServiceProvider extends ServiceProvider
                     $view->with('search_sonic', $pages_list);
                 }
             }
+            if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
+                if ($visit && $visit->exists()){
+                    $visit = $visit->first();
+                    $view->with('visit', $visit);
+                }
+            }
+
         });
     }
 

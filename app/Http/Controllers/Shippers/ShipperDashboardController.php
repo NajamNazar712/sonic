@@ -213,25 +213,26 @@ class ShipperDashboardController extends Controller
 
 //        DASHBOARD ORDER DETAILS
 
-        $permission = session()->get('permissions');
+        $permission = session('permissions');
 
         $case_nature = CrmRequestCaseNature::get();
 
-        foreach($case_nature  as $nature) {
+        if(session('user_type') !== 1){
+            foreach($case_nature as $nature) {
+                if (in_array(16,$permission) && ($nature->id == 1)) {
+                    $row[] = $nature;
+                }
 
-            if (in_array(16,$permission) && ($nature->id == 1)) {
+                elseif (in_array(17,$permission) && ($nature->id == 2)) {
+                    $row[] = $nature;
+                }
 
-                $row[] = $nature;
+                elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
+                    $row[] = $nature;
+                }
+
             }
-
-            elseif (in_array(17,$permission) && ($nature->id == 2)) {
-
-                $row[] = $nature;
-            }
-
-            elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
-                $row[] = $nature;
-            }
+            $case_nature = $row;
         }
 
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
@@ -240,8 +241,8 @@ class ShipperDashboardController extends Controller
 
 //        END
 
-//        dd($payment_module);
-      return view('client.dashboard')->with(['case_nature' => $row,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
+
+      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
     }
     public function orders_list(Request $request) {
          if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {

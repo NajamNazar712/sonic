@@ -27,45 +27,10 @@
     });
   </script>
 @endif
-@php
-    $visit = \App\DailyVisit::where('shipper_id',session('user_id'))->where('rated',0);
-@endphp
-@if($visit->exists())
-<style>
-    .feedback {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-    }
-    .feedback .item {
-        width: 90px;
-        height: 90px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        user-select: none;
-    }
-    .feedback .radio {
-        display: none;
-    }
-    .feedback .radio ~ span {
-        font-size: 3rem;
-        filter: grayscale(100);
-        cursor: pointer;
-        transition: 0.3s;
-    }
 
-    .feedback .radio:checked ~ span {
-        filter: grayscale(0);
-        font-size: 4rem;
-    }
-    .feedback .radio:hover ~ span {
-        filter: grayscale(0);
-        font-size: 4rem;
-    }
-</style>
-@endif
+
+
+
 
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
@@ -81,7 +46,7 @@
             s1.charset='UTF-8';
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);
-        })();            
+        })();
 
         $('body #app_content').on('click', function () {
             if($('#sidebar_menu').hasClass('is-active')){
@@ -209,10 +174,7 @@
 
 
 
-        @if($visit->exists())
-            @php
-                $visit = $visit->first();
-            @endphp
+        @if(isset($visit) && $visit)
             $("#DailyVisitRateModal").modal('show');
             $('.item label').tooltip({
                 placement : 'top'
