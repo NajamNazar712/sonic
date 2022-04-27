@@ -15,13 +15,11 @@ class UpdateModulePermissionForRiderDeactivationCronSettingSeeder extends Seeder
             array('id' => 707, 'name' => 'Rider Deactivation Cron Setting', 'module_id' => 14),
         ));
 
-        /*DB::table('admin_role_module_permissions')->insert(array(
-            array('permission_id' => 707, 'role_id' => 46),
-            array('permission_id' => 707, 'role_id' => 23),
-            array('permission_id' => 707, 'role_id' => 9),
-            array('permission_id' => 707, 'role_id' => 8),
-            array('permission_id' => 707, 'role_id' => 15),
-        ));*/
+        DB::table('admin_role_module_permissions')->insert(array(
+            array('permission_id' => 707, 'role_id' => 70),
+            array('permission_id' => 707, 'role_id' => 69),
+            array('permission_id' => 707, 'role_id' => 63),
+        ));
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 525, 'screen_name' => 'Rider Deactivation Cron Settings', 'action'=> 'View'),
