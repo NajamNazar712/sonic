@@ -29,40 +29,7 @@
 @endif
 
 
-<style>
-    .feedback {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-    }
-    .feedback .item {
-        width: 90px;
-        height: 90px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        user-select: none;
-    }
-    .feedback .radio {
-        display: none;
-    }
-    .feedback .radio ~ span {
-        font-size: 3rem;
-        filter: grayscale(100);
-        cursor: pointer;
-        transition: 0.3s;
-    }
 
-    .feedback .radio:checked ~ span {
-        filter: grayscale(0);
-        font-size: 4rem;
-    }
-    .feedback .radio:hover ~ span {
-        filter: grayscale(0);
-        font-size: 4rem;
-    }
-</style>
 
 
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
@@ -79,7 +46,7 @@
             s1.charset='UTF-8';
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);
-        })();            
+        })();
 
         $('body #app_content').on('click', function () {
             if($('#sidebar_menu').hasClass('is-active')){

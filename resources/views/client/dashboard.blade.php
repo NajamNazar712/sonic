@@ -689,7 +689,7 @@
                                 row.push(values.payment_status);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.consignee_name);                           
+                                row.push(values.consignee_name);
                                 row.push(values.phone);
                                 row.push(values.consignee_address);
                                 row.push(values.amount);

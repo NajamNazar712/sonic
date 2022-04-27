@@ -107,14 +107,9 @@
     </div>
 @endif
 
-@php
-    $visit = \App\DailyVisit::where('shipper_id',session('user_id'))->where('rated',0);
-@endphp
 
-@if($visit->exists())
-    @php
-        $visit = $visit->first();
-    @endphp
+
+@if(isset($visit) && $visit)
 
     <div class="modal fade" id="DailyVisitRateModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="DailyVisitRateModal"
          aria-hidden="true">
