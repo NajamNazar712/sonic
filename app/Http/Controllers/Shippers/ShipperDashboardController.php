@@ -213,7 +213,7 @@ class ShipperDashboardController extends Controller
 
 //        DASHBOARD ORDER DETAILS
 
-        $permission = session()->get('permissions');
+        $permission = session('permissions');
 
         $case_nature = CrmRequestCaseNature::get();
 
