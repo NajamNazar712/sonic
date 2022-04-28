@@ -37,7 +37,7 @@ class ShipperTrackingController extends Controller
         $permission = session('permissions');
 
         $case_nature = CrmRequestCaseNature::get();
-
+        $row = array();
         if(session('user_type') !== 1){
             foreach($case_nature as $nature) {
                 if (in_array(16,$permission) && ($nature->id == 1)) {
