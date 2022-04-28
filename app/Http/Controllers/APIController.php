@@ -2320,27 +2320,19 @@ class APIController extends Controller
                     if ($shipment->shipper_status_id == 52) {
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
                     }
-                    if (!$shipment->packaging_material_request) {
-                        if ($shipment->shipper_status_id == 12) {
-                            $shipment->shipper_status_id = 20;
-                            $shipment->consignee_status_id = 20;
-                            $shipment->save();
-                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentChargesController::return ($shipment->id);
 
-                            AdminFinanceController::add_payment($shipment->id, 1);
-                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
-                            return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
-                        }
-                    } else {
-                        $shipment->shipper_status_id = 17;
-                        $shipment->consignee_status_id = 17;
+                    if ($shipment->shipper_status_id == 12) {
+                        $shipment->shipper_status_id = 20;
+                        $shipment->consignee_status_id = 20;
                         $shipment->save();
                         $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
-                        return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Cancelled"]);
+                        ShipmentChargesController::return ($shipment->id);
+
+                        AdminFinanceController::add_payment($shipment->id, 1);
+                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
+                        return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
                     }
 
                 } else {
@@ -4117,7 +4109,7 @@ class APIController extends Controller
                         $remark = null;
                     }
                     if ($shipment->shipper_status_id == 12) {
-                        if (!$shipment->packaging_material_request) {
+//                        if (!$shipment->packaging_material_request) {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                             ShipmentChargesController::return ($shipment->id);
@@ -4126,13 +4118,13 @@ class APIController extends Controller
 
                             AdminFinanceController::add_payment($shipment->id, 1);
                             ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
-                        } else {
-                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, $remark, $user_id, null);
-                            //                NotificationsController::send(15, 0, $request->shipment_id);
-                            //                NotificationsController::send(16, 0, $request->shipment_id);
-                        }
+//                        } else {
+//                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+//                            ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, $remark, $user_id, null);
+//                            //                NotificationsController::send(15, 0, $request->shipment_id);
+//                            //                NotificationsController::send(16, 0, $request->shipment_id);
+//                        }
                         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
                         if ($return_assign_shipment->exists()) {
                             $return_assign_shipment = $return_assign_shipment->latest()->first();

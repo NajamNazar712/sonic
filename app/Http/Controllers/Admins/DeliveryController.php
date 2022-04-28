@@ -3161,14 +3161,16 @@ class DeliveryController extends Controller
 
                                                 } else {
                                                     if ($parcel->packaging_material_charges != null) {
-                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-
-                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-
-                                                        if ($verification == 1) {
-                                                            NotificationsController::send(15, 0, $shipment);
-                                                            NotificationsController::send(16, 0, $shipment);
-                                                        }
+                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//
+//                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//
+//                                                        if ($verification == 1) {
+//                                                            NotificationsController::send(15, 0, $shipment);
+//                                                            NotificationsController::send(16, 0, $shipment);
+//                                                        }
                                                     }
 
                                                 }
