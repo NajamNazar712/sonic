@@ -6008,7 +6008,7 @@ class AdminAPIController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
 
         if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
             $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
@@ -6033,7 +6033,24 @@ class AdminAPIController extends Controller
         if($leads->exists()){
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
-            return response()->json(['status' => 0, 'data' => $leads, 'cities' => $cities, 'lead_status' => $lead_statuses]);
+            $data = array();
+            foreach ($leads as $lead){
+                $datum = array();
+                $datum["lead_id"] = $lead->lead_id;
+                $datum["contact_person"] = $lead->contact_person;
+                $datum["phone_number"] = $lead->phone_number;
+                $datum["email_address"] = $lead->email_address;
+                $datum["requested_date"] = $lead->requested_date;
+                $datum["message"] = ($lead->message != null) ? $lead->message : "";
+                $datum["status"] = $lead->status;
+                $datum["status_id"] = $lead->status_id;
+                $datum["city"] = $lead->city;
+                $datum["service"] = $lead->service;
+                $datum["brand"] = $lead->brand;
+                $datum["sale_person"] = ($lead->sale_person != null) ? $lead->sale_person : "";
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }else{
             return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }
