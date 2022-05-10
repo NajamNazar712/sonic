@@ -52,6 +52,10 @@ class LeadTaggingController extends Controller
             $query->where('zone_id', '=', '0')
             ->where('service_id', $lead->service_id)
             ->where('status', 1);
+        })->orWhere(function ($query) use ($lead){
+            $query->where('zone_id', '=', '0')
+            ->where('service_id', '0')
+            ->where('status', 1);
         });
 
 
