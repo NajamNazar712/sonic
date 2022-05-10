@@ -6027,7 +6027,7 @@ class DeliveryController extends Controller
     {
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status', '>', 1)->get();
+        $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', '>', 1)->get();
         $shipments = array();
         if ($delivery_note_shipments->count() != 0) {
             foreach ($delivery_note_shipments as $delivery_note_shipment) {
