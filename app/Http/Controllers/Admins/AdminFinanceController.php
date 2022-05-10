@@ -10116,6 +10116,19 @@ class AdminFinanceController extends Controller
             ->filterColumn('account_type', function ($query, $keyword) {
                 $query->where('invoices.account_type', $keyword);
             })
+            ->filterColumn('payment_type', function ($query, $keyword) {
+
+                $keyword = strtolower($keyword);
+                if($keyword == 'done'){
+                    $query->where('invoices.payment_type', 1);
+                }
+                else if($keyword == 'make'){
+                    $query->where('invoices.payment_type', 0);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('action', function ($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
                 $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
