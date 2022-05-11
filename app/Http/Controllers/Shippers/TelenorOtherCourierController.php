@@ -95,21 +95,19 @@ class TelenorOtherCourierController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                     if (empty($errors['Row #' . $row_id])) {
-                        $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number']);
                         if (!empty(trim($row['tracking_number'])) || !empty(trim($row['consignee_number'] )) || !empty(trim($row['status'] ))) {
                             if (empty($tracking_ids)) {
-                                if(!$courier->exists()) {
-                                    $tracking_ids[] = $row['tracking_number'];
-                                    $tracking_id_row[$row['tracking_number']] = $row_id;
-                                }
+
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+
                             } else {
                                 if (in_array($row['tracking_number'], $tracking_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
                                 } else {
-                                    if(!$courier->exists()) {
-                                        $tracking_ids[] = $row['tracking_number'];
-                                        $tracking_id_row[$row['tracking_number']] = $row_id;
-                                    }
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+
                                 }
                             }
                         }
@@ -130,11 +128,14 @@ class TelenorOtherCourierController extends Controller
                         $consignee_number = trim($row['consignee_number']);
                         $status = $row['status'];
 
-                        $shipment_details = new TelenorOtherCouriers();
-                        $shipment_details->tracking_number = $tracking;
-                        $shipment_details->consignee_number = $consignee_number;
-                        $shipment_details->status = $status;
-                        $shipment_details->save();
+                        $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number']);
+                        if(!$courier->exists()) {
+                            $shipment_details = new TelenorOtherCouriers();
+                            $shipment_details->tracking_number = $tracking;
+                            $shipment_details->consignee_number = $consignee_number;
+                            $shipment_details->status = $status;
+                            $shipment_details->save();
+                        }
 
                     }
 
