@@ -95,17 +95,21 @@ class TelenorOtherCourierController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                     if (empty($errors['Row #' . $row_id])) {
+                        $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number']);
                         if (!empty(trim($row['tracking_number'])) || !empty(trim($row['consignee_number'] )) || !empty(trim($row['status'] ))) {
                             if (empty($tracking_ids)) {
-
-                                $tracking_ids[] = $row['tracking_number'];
-                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                                if(!$courier->exists()) {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                }
                             } else {
                                 if (in_array($row['tracking_number'], $tracking_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
                                 } else {
-                                    $tracking_ids[] = $row['tracking_number'];
-                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                    if(!$courier->exists()) {
+                                        $tracking_ids[] = $row['tracking_number'];
+                                        $tracking_id_row[$row['tracking_number']] = $row_id;
+                                    }
                                 }
                             }
                         }
@@ -131,6 +135,7 @@ class TelenorOtherCourierController extends Controller
                         $shipment_details->consignee_number = $consignee_number;
                         $shipment_details->status = $status;
                         $shipment_details->save();
+
                     }
 
                     $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
