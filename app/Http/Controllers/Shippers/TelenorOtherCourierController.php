@@ -125,8 +125,11 @@ class TelenorOtherCourierController extends Controller
 
                     foreach ($rows as $key => $row) {
 
-                        $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number']);
+                        $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number'])->where('status',$row['status']);
                         if(!$courier->exists()) {
+
+                            TelenorOtherCouriers::where('tracking_number',$row['tracking_number'])->delete();
+
                             $row_id = $key + 2;
                             $tracking = trim($row['tracking_number']);
                             $consignee_number = trim($row['consignee_number']);
