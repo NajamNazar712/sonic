@@ -3285,6 +3285,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
 
         });
+
+        Route::prefix('lost_shipment_shippers')->name('lost_shipment_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lost_shipment_shippers_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lost_shipment_shippers_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lost_shipment_shippers_add')->name('add');
+            Route::post('delete', 'Admins\GlobalSettingsController@lost_shipment_shippers_delete')->name('delete');
+
+        });
+        Route::prefix('lost_shipment_admins')->name('lost_shipment_admins.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lost_shipment_admins_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lost_shipment_admins_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lost_shipment_admins_add')->name('add');
+            Route::post('delete', 'Admins\GlobalSettingsController@lost_shipment_admins_delete')->name('delete');
+
+        });
+
 	});
 
 
