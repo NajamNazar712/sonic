@@ -2749,7 +2749,7 @@ class APIController extends Controller
             $details = array();
 
             foreach ($user_ids as $user_id) {
-                if($user_id == 5982){
+                if($user_id == 3324){
                     $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
                     if($telenor_other_shipments->exists()) {
                         $telenor_other_shipments = $telenor_other_shipments->get();
@@ -2894,7 +2894,7 @@ class APIController extends Controller
             $details = array();
 
             foreach ($user_ids as $user_id) {
-                if($user_id == 5982){
+                if($user_id == 3324){
                     $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
                     if($telenor_other_shipments->exists()) {
                         $telenor_other_shipments = $telenor_other_shipments->get();
