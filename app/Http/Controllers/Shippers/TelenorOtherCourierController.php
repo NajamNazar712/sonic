@@ -121,29 +121,39 @@ class TelenorOtherCourierController extends Controller
                 if (empty($errors)) {
                     $tracking_numbers = array();
                     $shipment_ids = array();
+                    $courier_errors = array();
 
                     foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $tracking = trim($row['tracking_number']);
-                        $consignee_number = trim($row['consignee_number']);
-                        $status = $row['status'];
 
                         $courier = TelenorOtherCouriers::where('tracking_number',$row['tracking_number']);
                         if(!$courier->exists()) {
+                            $row_id = $key + 2;
+                            $tracking = trim($row['tracking_number']);
+                            $consignee_number = trim($row['consignee_number']);
+                            $status = $row['status'];
+
                             $shipment_details = new TelenorOtherCouriers();
                             $shipment_details->tracking_number = $tracking;
                             $shipment_details->consignee_number = $consignee_number;
                             $shipment_details->status = $status;
                             $shipment_details->save();
                         }
-
+                        else{
+                            $courier_errors[] =  $row['tracking_number'];
+                         }
                     }
 
-                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                        return $row . ': ' . $tracking_number;
-                    }, array_keys($tracking_numbers), $tracking_numbers));
+                    if(count($courier_errors) == 0) {
 
-                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipments Added:']);
+                        $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                            return $row . ': ' . $tracking_number;
+                        }, array_keys($tracking_numbers), $tracking_numbers));
+
+                        return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipments Added:']);
+                    }
+                    else{
+                        return redirect()->back()->with('error', 'Shipments already exists');
+                    }
                 } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);
