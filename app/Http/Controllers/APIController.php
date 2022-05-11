@@ -23,6 +23,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\TelenorOtherCouriers;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
@@ -2748,94 +2749,115 @@ class APIController extends Controller
             $details = array();
 
             foreach ($user_ids as $user_id) {
-                $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+                if($user_id == 5982){
+                    $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+                    if($telenor_other_shipments->exists()) {
+                        $telenor_other_shipments = $telenor_other_shipments->get();
+                        foreach ($telenor_other_shipments as $shipment){
+                            $detail = array();
 
-                foreach ($shipments as $shipment) {
-                    $detail = array();
+                            $detail['tracking_number'] = $shipment->tracking_number;
+                            $detail['order_id'] = $shipment->consignee_number;
+                            $detail['status'] = $shipment->status;
+                            $detail['created_at'] = $shipment->consignee_number;
+                            $detail['updated_at'] = $shipment->consignee_number;
 
-                    $detail['tracking_number'] = $shipment->tracking_number;
+                            $details[] = $detail;
 
-                    $detail['order_id'] = $shipment->order_id;
-
-                    $shipper = $shipment->user;
-
-                    $detail['shipper']['name'] = $shipper->name;
-
-                    $pickup = $shipment->pickup_address;
-
-                    $detail['pickup']['origin'] = $pickup->city->name;
-
-                    if ($type == 0) {
-                        $detail['shipper']['account_number'] = $shipper->id;
-                        $detail['shipper']['phone_number_1'] = $shipper->phone;
-                        $detail['shipper']['phone_number_2'] = $shipper->phone2;
-                        $detail['shipper']['email'] = $shipper->email;
-                        $detail['shipper']['city'] = $shipper->city->name;
-
-                        $detail['pickup']['person_of_contact'] = $pickup->poc;
-                        $detail['pickup']['phone_number'] = $pickup->phone;
-                        $detail['pickup']['email'] = $pickup->email;
-                        $detail['pickup']['address'] = $pickup->pickup_address;
-                    }
-
-                    $detail['consignee']['name'] = $shipment->consignee_name;
-                    $detail['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                    $detail['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                    $detail['consignee']['destination'] = $shipment->consignee_city->name;
-                    $detail['consignee']['address'] = $shipment->consignee_address;
-
-                    foreach ($shipment->items as $item) {
-                        $item_details = array();
-
-                        $item_details['order_id'] = $shipment->order_id;
-                        $item_details['product_type'] = $item->product->product_name;
-                        $item_details['description'] = $item->description;
-                        $item_details['quantity'] = $item->quantity;
-
-                        $detail['order_information']['items'][] = $item_details;
-                    }
-
-                    if ($type == 0) {
-                        $detail['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
-                        $detail['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
-                        $detail['order_information']['amount'] = $shipment->amount;
-                        $detail['order_information']['instructions'] = $shipment->special_instructions;
-                    }
-
-                    if ($type == 0) {
-                        foreach ($shipment->shipment_journey as $journey) {
-                            if ($journey->verification) {
-                                $journey_details = array();
-
-                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                                $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                                $journey_details['status'] = $journey->shipment_status_shipper->name;
-
-                                $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
-
-                                $detail['tracking_history'][] = $journey_details;
-                            }
                         }
-                    } else {
-                        foreach ($shipment->shipment_journey as $journey) {
-                            if ($journey->consignee_status_id != null) {
+                    }
+                }
+                else {
+                    $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+                    foreach ($shipments as $shipment) {
+                        $detail = array();
+
+                        $detail['tracking_number'] = $shipment->tracking_number;
+
+                        $detail['order_id'] = $shipment->order_id;
+
+                        $shipper = $shipment->user;
+
+                        $detail['shipper']['name'] = $shipper->name;
+
+                        $pickup = $shipment->pickup_address;
+
+                        $detail['pickup']['origin'] = $pickup->city->name;
+
+                        if ($type == 0) {
+                            $detail['shipper']['account_number'] = $shipper->id;
+                            $detail['shipper']['phone_number_1'] = $shipper->phone;
+                            $detail['shipper']['phone_number_2'] = $shipper->phone2;
+                            $detail['shipper']['email'] = $shipper->email;
+                            $detail['shipper']['city'] = $shipper->city->name;
+
+                            $detail['pickup']['person_of_contact'] = $pickup->poc;
+                            $detail['pickup']['phone_number'] = $pickup->phone;
+                            $detail['pickup']['email'] = $pickup->email;
+                            $detail['pickup']['address'] = $pickup->pickup_address;
+                        }
+
+                        $detail['consignee']['name'] = $shipment->consignee_name;
+                        $detail['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $detail['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $detail['consignee']['destination'] = $shipment->consignee_city->name;
+                        $detail['consignee']['address'] = $shipment->consignee_address;
+
+                        foreach ($shipment->items as $item) {
+                            $item_details = array();
+
+                            $item_details['order_id'] = $shipment->order_id;
+                            $item_details['product_type'] = $item->product->product_name;
+                            $item_details['description'] = $item->description;
+                            $item_details['quantity'] = $item->quantity;
+
+                            $detail['order_information']['items'][] = $item_details;
+                        }
+
+                        if ($type == 0) {
+                            $detail['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $detail['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                            $detail['order_information']['amount'] = $shipment->amount;
+                            $detail['order_information']['instructions'] = $shipment->special_instructions;
+                        }
+
+                        if ($type == 0) {
+                            foreach ($shipment->shipment_journey as $journey) {
                                 if ($journey->verification) {
                                     $journey_details = array();
 
                                     $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
                                     $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                                    $journey_details['status'] = $journey->shipment_status_consignee->name;
+                                    $journey_details['status'] = $journey->shipment_status_shipper->name;
 
                                     $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
 
                                     $detail['tracking_history'][] = $journey_details;
                                 }
                             }
-                        }
-                    }
+                        } else {
+                            foreach ($shipment->shipment_journey as $journey) {
+                                if ($journey->consignee_status_id != null) {
+                                    if ($journey->verification) {
+                                        $journey_details = array();
 
-                    $details[] = $detail;
+                                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                                        $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                                        $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+                                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                                        $detail['tracking_history'][] = $journey_details;
+                                    }
+                                }
+                            }
+                        }
+
+                        $details[] = $detail;
+                    }
                 }
+
+
             }
 
             if (!empty($details)) {
@@ -2872,57 +2894,75 @@ class APIController extends Controller
             $details = array();
 
             foreach ($user_ids as $user_id) {
-                $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
+                if($user_id == 5982){
+                    $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+                    if($telenor_other_shipments->exists()) {
+                        $telenor_other_shipments = $telenor_other_shipments->get();
+                        foreach ($telenor_other_shipments as $shipment){
+                            $detail = array();
 
-                foreach ($shipments as $shipment) {
-                    $detail = array();
+                            $detail['tracking_number'] = $shipment->tracking_number;
+                            $detail['order_id'] = $shipment->consignee_number;
+                            $detail['status'] = $shipment->status;
+                            $detail['created_at'] = $shipment->consignee_number;
+                            $detail['updated_at'] = $shipment->consignee_number;
 
-                    $detail['origin'] = $shipment->pickup_address->city->name;
-                    $detail['destination'] = $shipment->consignee_city->name;
+                            $details[] = $detail;
 
-                    if ($type == 0) {
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-
-                        if ($shipment_journey) {
-                            $current_status = $shipment_journey->shipment_status_shipper->name;
-                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
-
-                            if ($shipment_journey->status_reason_id) {
-                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
-                            }
-                            else {
-                                $reason = null;
-                            }
-                        } else {
-                            $current_status = $shipment->status_shipper->name;
-                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
-                            $reason = null;
-                        }
-                    } else {
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-
-                        if ($shipment_journey) {
-                            $current_status = $shipment_journey->shipment_status_consignee->name;
-                            $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
-                            if ($shipment_journey->status_reason_id) {
-                                $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
-                            }
-                            else {
-                                $reason = null;
-                            }
-                        } else {
-                            $current_status = $shipment->status_consignee->name;
-                            $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
-                            $reason = null;
                         }
                     }
+                }
+                else {
+                    $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
 
-                    $detail['tracking_number'] = $shipment->tracking_number;
-                    $detail['status'] = $current_status;
-                    $detail['reason'] = $reason;
-                    $detail['current_status_datetime'] = $current_status_datetime;
+                    foreach ($shipments as $shipment) {
+                        $detail = array();
 
-                    $details[] = $detail;
+                        $detail['origin'] = $shipment->pickup_address->city->name;
+                        $detail['destination'] = $shipment->consignee_city->name;
+
+                        if ($type == 0) {
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+                            if ($shipment_journey) {
+                                $current_status = $shipment_journey->shipment_status_shipper->name;
+                                $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+
+                                if ($shipment_journey->status_reason_id) {
+                                    $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                                } else {
+                                    $reason = null;
+                                }
+                            } else {
+                                $current_status = $shipment->status_shipper->name;
+                                $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                                $reason = null;
+                            }
+                        } else {
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
+
+                            if ($shipment_journey) {
+                                $current_status = $shipment_journey->shipment_status_consignee->name;
+                                $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
+                                if ($shipment_journey->status_reason_id) {
+                                    $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
+                                } else {
+                                    $reason = null;
+                                }
+                            } else {
+                                $current_status = $shipment->status_consignee->name;
+                                $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
+                                $reason = null;
+                            }
+                        }
+
+                        $detail['tracking_number'] = $shipment->tracking_number;
+                        $detail['status'] = $current_status;
+                        $detail['reason'] = $reason;
+                        $detail['current_status_datetime'] = $current_status_datetime;
+
+                        $details[] = $detail;
+                    }
                 }
             }
 
