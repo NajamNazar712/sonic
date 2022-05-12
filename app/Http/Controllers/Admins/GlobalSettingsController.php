@@ -6626,6 +6626,9 @@ public function sales_incentive()
     }
 
     public function lost_shipment_shippers_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),527);
+        
         $shippers = User::where('status',3)->get();
 
         return view('admin.settings.lost_shipment_shippers',compact('shippers'));
@@ -6685,6 +6688,8 @@ public function sales_incentive()
 
 
     public function lost_shipment_admins_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),528);
+
         $admins = Admin::where('status',1)->get();
 
         return view('admin.settings.lost_shipment_admins',compact('admins'));
