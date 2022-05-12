@@ -92,6 +92,13 @@ class LostShipmentsController extends Controller
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
 
+            $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+            if($check_lost_shipments_admins->exists()){
+                $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
+                $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
+
+            }
+
             return Datatables::of($shipments)
                 ->editColumn('tracking_number_link', function ($shipments) {
                     $route = route('admin.tracking.index');
