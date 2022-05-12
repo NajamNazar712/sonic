@@ -73,6 +73,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\LostShipmentAdmin;
 use App\Http\Models\Admin\LostShipmentShipper;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
