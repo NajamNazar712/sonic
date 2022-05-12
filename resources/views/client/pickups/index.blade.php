@@ -485,7 +485,7 @@
                     {
                         text: 'Complain',
                         className: 'btn btn-danger complain',
-                        enabled: false,
+                        enabled: true,
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
                                 $('#AddRequestModal').modal('show');

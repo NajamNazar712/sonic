@@ -292,7 +292,6 @@ class ShipperDashboardController extends Controller
             }
         }
 
-
         $datatable = Datatables::of($shipments)
             ->setTotalRecords($count)
             ->editColumn('tracking_number', function ($shipments) {

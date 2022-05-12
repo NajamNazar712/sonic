@@ -29,7 +29,7 @@ class RetailCashDepositController extends Controller
 
     public function list(Request $request){
         $cash_deposit = RetailCashDeposit::join('retail_users as ru', 'ru.id', '=', 'retail_cash_deposits.retail_user_id')
-            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id', 'retail_cash_deposits.status as status')
+            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.id as cash_deposit_id', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id', 'retail_cash_deposits.status as status')
         ->where('retail_cash_deposits.retail_user_id', Auth::id());
         $datatable = Datatables::of($cash_deposit)
             ->addColumn('shipments_button', function ($data) {
@@ -50,7 +50,28 @@ class RetailCashDepositController extends Controller
                 }
             })
             ->editColumn('total_cash', function ($data) {
-                return number_format(ROUND($data->total_cash, 0, PHP_ROUND_HALF_DOWN));
+
+                $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);
+                $cash_deposit_shipments = $cash_deposit->shipments;
+        
+
+                $shipping_mode_data = array();
+                $cash_deposit_total_cash = 0;
+                foreach ($cash_deposit_shipments as $cash_deposit_shipment){
+                    if(!in_array($cash_deposit_shipment->shipment->shipper_status_id, [17, 25]) ){
+                        if(array_key_exists($cash_deposit_shipment->shipping_mode_id, $shipping_mode_data)){
+                            $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] + $cash_deposit_shipment->retail_shipment->total_charges;
+                        }
+                        else{
+                            $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['name'] = $cash_deposit_shipment->shipping_mode->name;
+                            $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $cash_deposit_shipment->retail_shipment->total_charges;
+                        }
+                    }
+                }
+                foreach ($shipping_mode_data as $data){
+                    $cash_deposit_total_cash += $data['total_cash'];
+                }
+                return number_format(ROUND($cash_deposit_total_cash, 0, PHP_ROUND_HALF_DOWN));
             })
             ->addColumn('booking_code', function ($data) {
                 return str_pad($data->employee_id, 6, '0', STR_PAD_LEFT);
@@ -287,7 +308,7 @@ class RetailCashDepositController extends Controller
                                         </tbody>
                                     </table>
                                     <div class="m-1">
-                                        <p><b>IT IS CERTIFIED THAT THE MENTIONED CASH COLLECTION OF PKR ' . number_format(ROUND($cash_deposit->total_cash, 0, PHP_ROUND_HALF_DOWN)) . ' HAS BEEN MADE.</b></p>
+                                        <p><b>IT IS CERTIFIED THAT THE MENTIONED CASH COLLECTION OF PKR ' . number_format(ROUND($cash_deposit_total_cash, 0, PHP_ROUND_HALF_DOWN)) . ' HAS BEEN MADE.</b></p>
                                     </div>
                             </div>';
 
