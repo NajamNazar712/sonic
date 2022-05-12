@@ -1586,7 +1586,7 @@ class AdminFinanceController extends Controller
 
                 $shipment = Shipment::find($shipment_id);
                 $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
-                if(!$lost_shipment_shipper->exists()){
+                if($lost_shipment_shipper->exists()){
                     if ($shipment->shipment_type == 1) {
                         $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                         if ($journey) {
