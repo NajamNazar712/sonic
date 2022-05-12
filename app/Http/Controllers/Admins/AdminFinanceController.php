@@ -1060,11 +1060,7 @@ class AdminFinanceController extends Controller
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
                         if ($shipment->recovery_status != 7 && $shipment->recovery_status != 11) {
-                            $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
-                            if(!$lost_shipment_shipper->exists()){
                                 $dropdown .= $resolve_button;
-                            }
-    
                         }
                     }
 
@@ -1076,10 +1072,7 @@ class AdminFinanceController extends Controller
 
                     if (($difference <= 2 && in_array(56, session('permissions'))) || session('role_id') == 1 || in_array(346, session('permissions'))) {
 
-                        $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
-                        if(!$lost_shipment_shipper->exists()){
                             $dropdown .= $adjust_in_payment_button;
-                        }
                     
                     }
 
