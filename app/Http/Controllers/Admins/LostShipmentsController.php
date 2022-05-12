@@ -175,7 +175,7 @@ class LostShipmentsController extends Controller
                 $parcel = Shipment::find($shipment);
                 if($parcel->shipper_status_id == 18) {
                     
-                    $lost_shipments_shippers = LostShipmentShipper::whereIn('user_id',$parcel->user_id);
+                    $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
                     if($lost_shipments_shippers->exists()){
 
                         $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
@@ -216,12 +216,12 @@ class LostShipmentsController extends Controller
 
         $shipment_ids = $request->shipment_ids;
 
-
-            foreach ($shipment_ids as $shipment){
+        foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 if($parcel->shipper_status_id == 18) {
 
-                    $lost_shipments_shippers = LostShipmentShipper::whereIn('user_id',$parcel->user_id);
+                    $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
+
                     if($lost_shipments_shippers->exists()){
 
                         $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
