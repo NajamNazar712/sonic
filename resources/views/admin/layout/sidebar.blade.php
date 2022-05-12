@@ -759,7 +759,7 @@
                                     <li><a class="menu-item" href="{{route('admin.settings.lost_shipment_shippers.index')}}">Lost Shipments Shippers</a></li>
                                 @endif
                                 @if (session('role_id') == 1 || in_array(710, session('permissions')))
-                                    <li><a class="menu-item" href="{{route('admin.settings.lost_shipment_admins.index')}}">Lost Shipments Users</a></li>
+                                    <li><a class="menu-item" href="{{route('admin.settings.lost_shipment_admins.index')}}">Lost Shipments Admins</a></li>
                                 @endif
                             </ul>
                         </li>

@@ -43,7 +43,7 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <select name="shipper_id" id="shipper_id" class="form-control select2" data-rule-required="true" data-msg-required="Shipper ID is required">
+                        <select name="shipper_id" id="shipper_id" class="form-control select2" data-rule-required="true" data-msg-required="Shipper Name is required">
                             @foreach($shippers as $shipper)
                                 <option value="{{ $shipper->id }}" > {{ $shipper->name }} </option>
                             @endforeach

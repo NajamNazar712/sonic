@@ -36,14 +36,14 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Add User</h4>
+                    <h4 class="modal-title" id="">Add Admin</h4>
                 </div>
                 <form method="post" id="add_admin" action="{{route('admin.settings.lost_shipment_admins.add')}}">
                     @csrf
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <select name="admin_id" id="admin_id" class="form-control select2" data-rule-required="true" data-msg-required="Shipper ID is required">
+                        <select name="admin_id" id="admin_id" class="form-control select2" data-rule-required="true" data-msg-required="Admin Name is required">
                             @foreach($admins as $admin)
                                 <option value="{{ $admin->id }}" > {{ $admin->name }} </option>
                             @endforeach
@@ -89,7 +89,7 @@
            
             $('#admin_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select User",
+                placeholder:"Select Admin",
                 allowClear:true,
                 dropdownParent:$('#add_admin')
             });
