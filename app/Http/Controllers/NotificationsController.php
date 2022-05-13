@@ -9152,8 +9152,8 @@ class NotificationsController extends Controller
                         $body = str_replace('[updated_at]', $detail['updated_at'], $body);
                     }
                     $link =  url('payment_details'.'/'.base64_encode($detail['done_payment_id']).'/'.base64_encode("$user_id"));
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
+                    if (strpos($body, '[status_link]') !== FALSE) {
+                        $body = str_replace('[status_link]', $link, $body);
                     }
 
                     $to = $detail['phone'];
