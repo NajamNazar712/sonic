@@ -808,14 +808,19 @@
                 var destination = '';
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
-                if(shipping_mode_id == 1){
-                    destination = $('#domestic_overland_destination').val();
-                }
-                else if (shipping_mode_id == 2){
-                    destination = $('#domestic_destination').val();
+                if(business_category == 1){
+                    if(shipping_mode_id == 1){
+                        destination = $('#domestic_overland_destination').val();
+                    }
+                    else if (shipping_mode_id == 2){
+                        destination = $('#domestic_destination').val();
+                    }
+                    else{
+                        destination = $('#domestic_destination').val();
+                    }
                 }
                 else{
-                    destination = $('#domestic_destination').val();
+                    destination = $('#international_destination').val();
                 }
                 
                 var weight = $('#weight').val();
