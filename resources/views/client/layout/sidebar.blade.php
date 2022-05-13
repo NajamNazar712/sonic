@@ -46,9 +46,9 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
-                        @if(session('user_id') == 3324)
-                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>
-                        @endif
+{{--                        @if(session('user_id') == 3324)--}}
+{{--                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>--}}
+{{--                        @endif--}}
                         @if(session('shipper_origin_change') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.origin.index') }}">Origin Change</a></li>
                         @endif

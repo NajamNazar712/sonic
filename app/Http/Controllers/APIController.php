@@ -2838,23 +2838,23 @@ class APIController extends Controller
                     $details[] = $detail;
                 }
 
-                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
-                if($telenor_other_shipments->exists() && $user_id == 3324){
-
-                    $telenor_other_shipments = $telenor_other_shipments->get();
-                    foreach ($telenor_other_shipments as $shipment){
-
-                        $detail = array();
-
-                        $detail['tracking_number'] = $shipment->tracking_number;
-                        $detail['order_id'] = $shipment->consignee_number;
-                        $detail['status'] = $shipment->status;
-                        $detail['created_at'] = $shipment->consignee_number;
-                        $detail['updated_at'] = $shipment->consignee_number;
-
-                        $details[] = $detail;
-                    }
-                }
+//                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+//                if($telenor_other_shipments->exists() && $user_id == 3324){
+//
+//                    $telenor_other_shipments = $telenor_other_shipments->get();
+//                    foreach ($telenor_other_shipments as $shipment){
+//
+//                        $detail = array();
+//
+//                        $detail['tracking_number'] = $shipment->tracking_number;
+//                        $detail['order_id'] = $shipment->consignee_number;
+//                        $detail['status'] = $shipment->status;
+//                        $detail['created_at'] = $shipment->consignee_number;
+//                        $detail['updated_at'] = $shipment->consignee_number;
+//
+//                        $details[] = $detail;
+//                    }
+//                }
             }
 
             if (!empty($details)) {
@@ -2888,7 +2888,7 @@ class APIController extends Controller
             $order_id = $request->order_id;
             $type = $request->type;
 
-            $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+//            $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
             $details = array();
 
             foreach ($user_ids as $user_id) {
@@ -2944,23 +2944,23 @@ class APIController extends Controller
                     $details[] = $detail;
                 }
 
-                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
-                if($telenor_other_shipments->exists() && $user_id == 3324){
-
-                    $telenor_other_shipments = $telenor_other_shipments->get();
-                    foreach ($telenor_other_shipments as $shipment){
-
-                        $detail = array();
-
-                        $detail['tracking_number'] = $shipment->tracking_number;
-                        $detail['order_id'] = $shipment->consignee_number;
-                        $detail['status'] = $shipment->status;
-                        $detail['created_at'] = $shipment->consignee_number;
-                        $detail['updated_at'] = $shipment->consignee_number;
-
-                        $details[] = $detail;
-                    }
-                }
+//                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+//                if($telenor_other_shipments->exists() && $user_id == 3324){
+//
+//                    $telenor_other_shipments = $telenor_other_shipments->get();
+//                    foreach ($telenor_other_shipments as $shipment){
+//
+//                        $detail = array();
+//
+//                        $detail['tracking_number'] = $shipment->tracking_number;
+//                        $detail['order_id'] = $shipment->consignee_number;
+//                        $detail['status'] = $shipment->status;
+//                        $detail['created_at'] = $shipment->consignee_number;
+//                        $detail['updated_at'] = $shipment->consignee_number;
+//
+//                        $details[] = $detail;
+//                    }
+//                }
             }
 
 
