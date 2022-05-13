@@ -8716,7 +8716,7 @@ class NotificationsController extends Controller
 
                     $data = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
                         ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-                        ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.cnic as cnic', 'employees.phone_number as phone_number', 'employees.employee_type_id as employee_type_id', 'd.name as designation', 'ad.name as department_name')
+                        ->select('employees.id as id','employees.trax_id as trax_id', 'employees.name as name', 'employees.cnic as cnic', 'employees.phone_number as phone_number', 'employees.employee_type_id as employee_type_id', 'd.name as designation', 'ad.name as department_name')
                         ->wherein('employees.id', $getdata)->get();
 
                     $is_sent = false;
