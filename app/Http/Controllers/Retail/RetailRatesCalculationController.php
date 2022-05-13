@@ -24,6 +24,7 @@ class RetailRatesCalculationController extends Controller
         $charges_with_discount = 0;
         $remaining_weight = 0;
         $multiplier = 1;
+       
         if($business_category_id == 1){
             $destination_city = City::find($destination_id);
             $pickup_city = City::find($pickup_city_id);
@@ -161,11 +162,13 @@ class RetailRatesCalculationController extends Controller
                 $consignee_city = City::find($destination_id);
                 $zone_id = $consignee_city->zone_id;
                 $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
-                $zone = $international_zone->zone_name;
-                $zone_id = 'zone_'.$zone;
-                $charges = $weight_charge[$zone_id];
-                $discount_amount = $charges * $discount;
-                $charges_with_discount = $charges - $discount_amount;
+                if($international_zone){
+                    $zone = $international_zone->zone_name;
+                    $zone_id = 'zone_'.$zone;
+                    $charges = $weight_charge[$zone_id];
+                    $discount_amount = $charges * $discount;
+                    $charges_with_discount = $charges - $discount_amount;
+                }
             }
         }
         $rates['charges'] = $charges;

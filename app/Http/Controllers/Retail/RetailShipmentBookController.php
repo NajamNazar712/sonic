@@ -237,6 +237,9 @@ class RetailShipmentBookController extends Controller
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight);
 
+        if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
+            return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
+        }
 
         /*  $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
           $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));*/
