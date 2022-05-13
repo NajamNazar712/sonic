@@ -20,7 +20,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Table ID</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Type</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
@@ -333,7 +333,8 @@
 				rowId: 'id',
 				order: [[3, 'desc']],
 				columns: [
-					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					//{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'id', name: 'notifications.id', class: 'align-middle id'},
 					{data: 'name', name: 'notifications.name', class: 'align-middle name'},
 					{data: 'type', name: 'nt.id', class: 'align-middle type'},
 					{data: 'updated_at', name: 'notifications.updated_at', class: 'align-middle updated_at'},
@@ -344,7 +345,7 @@
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

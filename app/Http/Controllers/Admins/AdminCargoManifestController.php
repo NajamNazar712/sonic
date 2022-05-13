@@ -33,6 +33,7 @@ use App\Http\Models\ManifestBagLostShipment;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
@@ -2752,12 +2753,38 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_shipments_store(Request $request)
     {
+
         $shipment_status_array = [3, 21, 26, 32, 49];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
+        $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
         $shipment_ids_array = array();
         $short_received_shipments_array = array();
         $shipments_already_marked_received_array = array();
+//        todo : open box-work
+        if (count($open_box_ids) > 0) {
+
+            foreach ($shipment_ids as $index => $shipment) {
+                if (in_array($shipment, $open_box_ids)) {
+
+                    $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                    if ($shipment_detail) {
+                        $shipment_detail->is_open = 1;
+                        $shipment_detail->save();
+                    }
+
+                    $shipment_data = Shipment::find($shipment);
+                    $shipment_data->open_box = 1;
+                    $shipment_data->save();
+
+                ShipmentOpenBoxJourneyController::add($shipment, 2, Auth::id());
+                }
+
+            }
+
+        }
+//        todo : open box-work end
+
         foreach ($shipment_ids as $shipment_id) {
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/
             ;

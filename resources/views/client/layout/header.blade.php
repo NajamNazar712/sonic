@@ -18,7 +18,40 @@ rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/menu/menu-types/vertical-overlay-menu.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/colors/palette-gradient.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
+<style>
+    .feedback {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .feedback .item {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .feedback .radio {
+        display: none;
+    }
+    .feedback .radio ~ span {
+        font-size: 3rem;
+        filter: grayscale(100);
+        cursor: pointer;
+        transition: 0.3s;
+    }
 
+    .feedback .radio:checked ~ span {
+        filter: grayscale(0);
+        font-size: 4rem;
+    }
+    .feedback .radio:hover ~ span {
+        filter: grayscale(0);
+        font-size: 4rem;
+    }
+</style>
 @yield('css')
 
 <link rel="stylesheet" type="text/css" href="{{asset('css/custom.css')}}">

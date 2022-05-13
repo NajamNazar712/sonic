@@ -3161,14 +3161,16 @@ class DeliveryController extends Controller
 
                                                 } else {
                                                     if ($parcel->packaging_material_charges != null) {
-                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-
-                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-
-                                                        if ($verification == 1) {
-                                                            NotificationsController::send(15, 0, $shipment);
-                                                            NotificationsController::send(16, 0, $shipment);
-                                                        }
+                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//
+//                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//
+//                                                        if ($verification == 1) {
+//                                                            NotificationsController::send(15, 0, $shipment);
+//                                                            NotificationsController::send(16, 0, $shipment);
+//                                                        }
                                                     }
 
                                                 }
@@ -6781,7 +6783,9 @@ class DeliveryController extends Controller
     public function replacement_not_collected_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 326);
-        return view('admin.delivery.replacement.not_collected');
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.delivery.replacement.not_collected')->with(['return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function replacement_not_collected_list(Request $request)

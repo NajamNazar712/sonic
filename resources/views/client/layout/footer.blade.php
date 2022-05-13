@@ -28,6 +28,10 @@
   </script>
 @endif
 
+
+
+
+
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
 @endif
@@ -42,7 +46,7 @@
             s1.charset='UTF-8';
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);
-        })();            
+        })();
 
         $('body #app_content').on('click', function () {
             if($('#sidebar_menu').hasClass('is-active')){
@@ -166,6 +170,29 @@
 
             }
         });
+        @endif
+
+
+
+        @if(isset($visit) && $visit)
+            $("#DailyVisitRateModal").modal('show');
+            $('.item label').tooltip({
+                placement : 'top'
+            });
+            $("#skip_daily_visit_btn").on('click',function (e){
+                $("#DailyVisitRateModal #DailyVisitRateForm #action_id").val(1);
+                $("#DailyVisitRateModal #DailyVisitRateForm").submit();
+            });
+
+            $("#rate_daily_visit_btn").on('click',function (e){
+                if(!$("#DailyVisitRateForm .feedback .radio").is(':checked'))
+                {
+                    toastr.error("Please Select Rating", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+                $("#DailyVisitRateModal #DailyVisitRateForm #action_id").val(2);
+                $("#DailyVisitRateModal #DailyVisitRateForm").submit();
+            });
         @endif
     });
 </script>

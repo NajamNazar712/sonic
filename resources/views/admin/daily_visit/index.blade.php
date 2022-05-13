@@ -17,19 +17,26 @@
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
                         <div class="col form-group">
-                            <input type="text" name="company_name" class="form-control" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
+                            <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{ $shipper->id }}" data-company_name="{{$shipper->name}}" data-customer_name="{{$shipper->poc}}" data-customer_address="{{$shipper->address}}" data-phone_no="{{$shipper->phone}}" data-email_address="{{$shipper->email}}">{{ $shipper->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col form-group">
-                            <input type="text" name="customer_name" class="form-control" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
+                            <input type="text" name="company_name" id="company_name" class="form-control special_inputs" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <textarea name="customer_address" class="form-control" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="6"></textarea>
+                            <input type="text" name="customer_name" id="customer_name" class="form-control special_inputs" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <input type="text" name="phone_no" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                            <textarea name="customer_address" id="customer_address" class="form-control special_inputs" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="6"></textarea>
                         </div>
                         <div class="col form-group">
-                            <input type="email" name="email_address" placeholder="Email Address*" class="form-control" data-rule-required="true" data-msg-required="Email Address is required">
+                            <input type="text" name="phone_no" id="phone_no" class="form-control phone_number special_inputs" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                        </div>
+                        <div class="col form-group">
+                            <input type="email" name="email_address" id="email_address" placeholder="Email Address*" class="form-control special_inputs" data-rule-required="true" data-msg-required="Email Address is required">
                         </div>
                         <div class="col form-group">
                             <select name="lead_status" class="select2" id="lead_status" data-rule-required="true" data-msg-required="Lead Status is required">
@@ -101,6 +108,36 @@
             $('#lead_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Lead Status*'
+            });
+
+            $('#shipper').prepend('<option value="" selected="selected"></option><option value="0">Other</option>').select2({
+                width: '100%',
+                placeholder: 'Select Shipper*'
+            }).bind('change',function () {
+                var id = $(this).val();
+                if(id != 0)
+                {
+                    var company_name = $(this).find(':selected').attr('data-company_name');
+                    var customer_name = $(this).find(':selected').attr('data-customer_name');
+                    var customer_address = $(this).find(':selected').attr('data-customer_address');
+                    var phone_no = $(this).find(':selected').attr('data-phone_no');
+                    var email_address = $(this).find(':selected').attr('data-email_address');
+
+                    $(".special_inputs").attr('readonly',true);
+                    $("#company_name").val(company_name);
+                    $("#customer_name").val(customer_name);
+                    $("#customer_address").val(customer_address);
+                    $("#phone_no").val(phone_no);
+                    $("#email_address").val(email_address);
+                }
+                else{
+                    $(".special_inputs").attr('readonly',false);
+                    $("#company_name").val('');
+                    $("#customer_name").val('');
+                    $("#customer_address").val('');
+                    $("#phone_no").val('');
+                    $("#email_address").val('');
+                }
             });
 
             $('.phone_number').inputmask({

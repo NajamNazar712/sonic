@@ -64,6 +64,7 @@
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
+                                    <th class="border-primary border-darken-1">Open Box</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -72,6 +73,7 @@
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
+                                <input type="hidden" name="open_box_ids" class="open_box_ids" id="open_box_ids">
 
                                 <div class="form-group ml-1">
                                     <button type="submit" name="receive" class="btn btn-primary receive" value="Confirm" disabled="disabled">Receive</button>
@@ -173,7 +175,8 @@
                     {name: 'consignee', class: 'align-middle consignee', orderable: false, searchable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'shipping_mode', class: 'align-middle shipping_mode', orderable: false, searchable: false},
-                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false}
+                    {name: 'service_type', class: 'align-middle service_type', orderable: false, searchable: false},
+                    {name: 'open_box', class: 'align-middle open_box', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
@@ -216,14 +219,27 @@
                         })
                             .done(function(data) {
                                 if (data.status == 0) {
+
                                     id = data.details.id;
 
                                     var index = $.inArray(id, shipment_ids);
 
+                                    if(data.is_open_box==1){
+                                        var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                    }else{
+
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    }
+
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
 
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type
+                                            ,open_box
+                                        ])
+                                            .node().id = data.details.id;
+                                        // var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -302,8 +318,19 @@
                 e.preventDefault();
 
                 var form = this;
+                open_box_ids = [];
+                table.rows().every(function (index) {
+                    var node = $(this.node());
+                    if (node.find('td.open_box input').is(':checked')) {
+                        open_box_ids.push(parseInt(node.attr('id')));
+                    }
+                });
 
                 $('#receive_form input.shipment_ids').val(shipment_ids);
+                $('#receive_form input#open_box_ids').val(open_box_ids);
+
+
+
                 var html = 'Are you sure, you want to confirm Shipment(s) as received?';
 
                 content = document.createElement('div');

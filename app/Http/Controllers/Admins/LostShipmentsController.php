@@ -171,17 +171,17 @@ class LostShipmentsController extends Controller
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 if($parcel->shipper_status_id == 18) {
-                    if (!$parcel->packaging_material_request) {
+//                    if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         ShipmentChargesController::return ($shipment);
                         ShipmentsJourneyController::add($shipment, 20, 20, $request->reason, NULL, NULL, Auth::id());
 
                         AdminFinanceController::add_payment($shipment, 1);
-                    } else {
-
-                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
-                    }
+//                    } else {
+//
+//                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+//                    }
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];

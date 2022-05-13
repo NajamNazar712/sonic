@@ -499,7 +499,7 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
-                    { data:'cash_amount' ,name: 'cash_amount', class: 'align-middle cash_amount'},
+                    { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {

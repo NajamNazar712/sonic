@@ -599,6 +599,9 @@ class Permission
             'reports.pickup_history_cn_wise.index' => 679,
             'reports.pickup_history_cn_wise.list' => 679,
 
+            'reports.rider_unresponsive_report.index' => 705,
+            'reports.rider_unresponsive_report.list' => 705,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
@@ -925,6 +928,14 @@ class Permission
 
             'settings.return_reason_mandatory.index' => 684,
             'settings.return_reason_mandatory.list' => 684,
+
+            'settings.rider_deactivation_cron.index' => 707,
+            'settings.rider_deactivation_cron.store' => 707,
+
+            'settings.rider_shipment_attempt.index' => 562,
+            'settings.rider_shipment_attempt.store' => 562,
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 

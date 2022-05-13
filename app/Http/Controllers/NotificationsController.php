@@ -42,6 +42,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\RetailDonePayment;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Runner;
@@ -2544,9 +2545,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.saleem@trax.pk', 'mursaleen.rafiq@trax.pk', 'balaj.khan@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.saleem@trax.pk', 'mursaleen.rafiq@trax.pk', 'balaj.khan@trax.pk'];
 
-                    $bcc = ['muhammad.waqas@trax.pk', 'anum.khan@trax.pk'];
+                    $bcc = ['muhammad.waqas@trax.pk', 'anum.khan@trax.pk', 'danish.zahid@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
@@ -5752,8 +5753,10 @@ class NotificationsController extends Controller
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
+                        $to[] = 'arbab.alam@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8065,8 +8068,10 @@ class NotificationsController extends Controller
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
+                        $to[] = 'arbab.alam@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8479,15 +8484,6 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     foreach ($datas as $data) {
-                        $data_set = Rider::find($data->id);
-                        $data_set->status = 0;
-                        $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
-                        if($employee_directory->exists()){
-                            $employee_directory = $employee_directory->first();
-                            $employee_directory->status_id = 2;
-                            $employee_directory->save();
-                        }
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
@@ -9134,18 +9130,31 @@ class NotificationsController extends Controller
 				else if ($id == 172) {
                     $name = $reference_1_id;
                     $phone_number = $reference_2_id;
+                    $payment_id = $reference_3_id;
+                    $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
+                        ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
+                        ->where('retail_done_payments.id',$payment_id)
+                        ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id')->first();
+//                   dd($payment->payable);
+
+                    $payable = number_format(ROUND($payment->payable - $payment->charges, 0, PHP_ROUND_HALF_DOWN));
+                    $adjustment = $payment->adjustment;
+                    $total_amaount = $payment->total_amount;
+                    $tracking_no = $payment->tracking_number;
+                    $user_id = $payment->user_id;
+
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $name, $body);
                     }
                     if (strpos($body, '[total_amount]') !== FALSE) {
-                        $body = str_replace('[total_amount]', $reference_3_id, $body);
+                        $body = str_replace('[total_amount]', $total_amaount, $body);
                     }
                     if (strpos($body, '[updated_at]') !== FALSE) {
                         $body = str_replace('[updated_at]', $reference_4_id, $body);
                     }
-                    $link ='https://sonic.pk/cod/finance/payments';
-                    if (strpos($body, '[status_link]') !== FALSE) {
-                        $body = str_replace('[status_link]', $link, $body);
+                    $link =  url('payment_details'.'/'.base64_encode("$payment_id").'/'.base64_encode("$user_id"));
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
                     }
 
                     $to = $phone_number;
@@ -9186,6 +9195,76 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
 
+                }
+                else if($id == 175){
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+                    $to = [$reference_1_id];
+
+                    self::email($subject, $body, $to);
+                }
+				else if ($id == 176) {
+                    $flag = true;
+                    $crm_comment_id = $reference_2_id;
+                    $crm_comment = CrmComments::find($crm_comment_id);
+                    if($crm_comment){
+                        $crm_request = CrmRequest::find($crm_comment->crm_request_id);
+                        if($crm_request){
+                            $type = $reference_1_id;
+                            if($type == 1){
+                                    $shipper =  User::find($crm_request->shipper_id);
+                                    if($shipper){
+                                        $name = $shipper->name;
+                                        $phone_number = $shipper->phone;
+                                    }
+                                    else{
+                                        $flag = false;
+                                    }
+                            }else if ($type == 2){
+                                if($crm_request->shipment_id != null){
+                                    $shipment = Shipment::find($crm_request->shipment_id);
+                                    if($shipment){
+                                        $name = $shipment->consignee_name;
+                                        $phone_number = $shipment->consignee_phone_number_1;
+                                    }
+                                    else{
+                                        $flag = false;
+                                    }
+                                }
+                                else{
+                                    $flag = false;
+                                }
+                            }
+                            else{
+                                $flag = false;
+                            }
+                        }
+                        else{
+                            $flag = false;
+                        }
+                    }
+                    else{
+                        $flag = false;
+                    }
+                    if($flag){
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $name, $body);
+                        }
+                        if (strpos($body, '[crm_request_id]') !== FALSE) {
+                            $body = str_replace('[crm_request_id]', str_pad($crm_request->id, 6, '0', STR_PAD_LEFT), $body);
+                        }
+                        if (strpos($body, '[comment]') !== FALSE) {
+                            $body = str_replace('[comment]', $crm_comment->comment, $body);
+                        }
+
+                        $to = $phone_number;
+                        self::sms($body, $to);
+                    }
                 }
             }
         }

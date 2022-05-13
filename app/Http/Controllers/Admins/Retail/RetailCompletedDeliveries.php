@@ -17,6 +17,7 @@ use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Datatables;
 use Auth;
+
 class RetailCompletedDeliveries extends Controller
 {
     public function __construct() {

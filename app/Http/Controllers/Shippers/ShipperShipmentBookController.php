@@ -5040,9 +5040,12 @@ class ShipperShipmentBookController extends Controller
                             }
                             $row['business_category_id'] = 1;
                             if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] == 1;
+                                $row['payment_mode_id'] = 1;
                             }
-
+                            if (!isset($row['payment_mode_id'])) {
+                                $rows[$key]['payment_mode_id'] = 1;
+                                $row['payment_mode_id'] = 1;
+                            }
                             if ($row['payment_mode_id'] == 4) {
                                 $row['amount'] = 0;
                             }

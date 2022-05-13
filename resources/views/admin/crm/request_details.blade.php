@@ -325,7 +325,7 @@
                                                         @foreach($comments as $comment)
                                                             @if($comment->comment_by == 0)
                                                                 <div id="chat_{{$comment->id}}"
-                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }} {{($comment->comment_type == 2)? 'rider':'' }} ">
+                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }} {{($comment->comment_type == 2)? 'rider':'' }} {{($comment->comment_type == 3)? 'consignee':'' }} ">
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
@@ -432,9 +432,10 @@
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
+
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -459,6 +460,14 @@
                                                                         <span class="">Shipper</span>
                                                                     </button>
                                                                 </fieldset>
+                                                                <fieldset
+                                                                        class="form-group position-relative has-icon-left mb-1 ml-2">
+                                                                    <button id="chat_send" type="button"
+                                                                            class="btn btn-block btn-outline-teal chat_send" to="3">
+                                                                        <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                        <span class="">Consignee</span>
+                                                                    </button>
+                                                                </fieldset>
                                                             @endif
                                                             <fieldset
                                                                     class="form-group has-icon-left ml-2">
@@ -469,6 +478,12 @@
                                                                 </button>
                                                             </fieldset>
 
+                                                            <fieldset class="form-group has-icon-left m-0 mb-1 ml-2" style="float: right;">
+                                                                <div class="form-group">
+                                                                    <label for="sms_check" class="font-medium-2 text-bold-600 mr-1">Send SMS</label>
+                                                                    <input type="checkbox" name="sms_check" id="sms_check" class="switchery sms_check" data-size="sm" data-switchery="true">
+                                                                </div>
+                                                            </fieldset>
                                                         </div>
                                                     </form>
                                                     @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
@@ -526,7 +541,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -546,9 +561,17 @@
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
+                                                                        class="btn btn-block btn-outline-teal chat_send" to="0">
                                                                     <i class="la la-paper-plane-o d-lg-none"></i>
                                                                     <span class="">Shipper</span>
+                                                                </button>
+                                                            </fieldset>
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left m-0">
+                                                                <button id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-cyan chat_send" to="3">
+                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Consignee</span>
                                                                 </button>
                                                             </fieldset>
                                                             @endif
@@ -559,6 +582,13 @@
                                                                             class="la la-paper-plane-o d-lg-none"></i>
                                                                     <span class="">Rider</span>
                                                                 </button>
+                                                            </fieldset>
+
+                                                            <fieldset class="form-group has-icon-left m-0 mb-1 ml-2" style="float: right;">
+                                                                <div class="form-group">
+                                                                    <label for="sms_check" class="font-medium-2 text-bold-600 mr-1">Send SMS</label>
+                                                                    <input type="checkbox" name="sms_check" id="sms_check" class="switchery sms_check" data-size="sm" data-switchery="true">
+                                                                </div>
                                                             </fieldset>
                                                         </div>
                                                         @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
@@ -1302,6 +1332,14 @@
         .chat-application .chats .admin.rider .chat-body .chat-content:before {
             border-left-color: #18374A;
         }
+        .chat-application .chats .admin.consignee .chat-content {
+            color: #ffffff;
+            background-color: #008080;
+        }
+
+        .chat-application .chats .admin.consignee .chat-body .chat-content:before {
+            border-left-color: #008080;
+        }
 
         .feedback {
             display: flex;
@@ -1743,11 +1781,21 @@
                     email_check = false;
                 }
 
+                var sms_check = '';
+                if($('#sms_check').is(":checked")){
+                    sms_check = true;
+                }
+                else{
+                    sms_check = false;
+                }
+
 
                 if (internal_switch == 1) {
                     internal_class = 'internal';
                 }else if(internal_switch === 2){
                     internal_class = 'rider';
+                } else if(internal_switch === 3){
+                    internal_class = 'consignee';
                 } else {
                     internal_class = '';
                 }
@@ -1767,7 +1815,8 @@
                             'comment': comment,
                             'request_id': request_id,
                             'internal_switch': internal_switch,
-                            'email_check': email_check
+                            'email_check': email_check,
+                            'sms_check': sms_check
                         }
                     }).done(function (data) {
                         if (data.status) {
@@ -1781,6 +1830,8 @@
                             if (internal_switch == 1) {
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }else if(internal_switch == 2){
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                            }else if(internal_switch == 3){
                                 var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
                                 var last_comment = data.last_comment_id;
@@ -1827,11 +1878,12 @@
                             var name = data.name;
                             if (user == 0) {
                                 if (data.comment.comment_type == 0) {
-
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 1) {
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                }else{
+                                } else if(data.comment.comment_type == 3) {
+                                    var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                } else{
                                     var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);

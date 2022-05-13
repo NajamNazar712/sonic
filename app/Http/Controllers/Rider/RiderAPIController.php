@@ -53,6 +53,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
@@ -4512,6 +4513,8 @@ class RiderAPIController extends Controller
         $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
+        $employee_nature = EmployeeNature::select('id', 'name')->get();
+        $replacement_employees = Employee::select('id', 'trax_id', 'name')->where('employee_type_id', 2)->whereNotNull('trax_id')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -4519,7 +4522,15 @@ class RiderAPIController extends Controller
             $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
             $shift_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+
+        $replacement_employee_data = array();
+        foreach($replacement_employees as $replacement_employee){
+            $datum = array();
+            $datum['id'] = $replacement_employee->id;
+            $datum['name'] = $replacement_employee->trax_id.' | '.$replacement_employee->name;
+            $replacement_employee_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
     }
 
     public function rider_signup_v2(Request $request)
@@ -9694,6 +9705,29 @@ class RiderAPIController extends Controller
         if($riders){
             $response = array();
             $employee_shift = EmployeeShift::where('id', $riders->shift_id);
+            if ($employee_shift->exists()) {
+                $employee_shift = $employee_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $employee_shift->start_time);
+                if ($shift_time->lt(Carbon::now())) {
+                    $date = Carbon::now()->format("Y-m-d");
+                } else{
+                    if(Carbon::now()->format("l") == "Monday"){
+                        $date = Carbon::now()->subDays(2)->format("Y-m-d");
+                    }
+                    else{
+                        $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                    }
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                        ->where('employee_type', 2)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
+                    if($last_action_log->exists()){
+                        $last_action_log = $last_action_log->first();
+                        if($last_action_log->action_id == 2){
+                            $date = Carbon::now()->format("Y-m-d");
+                        }
+                    }
+
+                }
+            }
             $response["status"] = 0;
             if ($employee_shift->exists()){
                 $employee_shift = $employee_shift->first();
@@ -9706,6 +9740,7 @@ class RiderAPIController extends Controller
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
             }
+            $response["last_action_date"] = $date;
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
@@ -10517,12 +10552,21 @@ class RiderAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'fuel' => ['nullable'],
+                'employee_nature_id' => ['nullable',  'integer', 'digits_between:1,10', 'exists:employee_natures,id'],
+                'sub_department' => ['nullable'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
                 'branch_name' => ['nullable'],
                 'iban' => ['nullable'],
+
+                //replacementInfo
+                'replacement_employee_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+                'replacement_last_working_day' => ['nullable'],
+
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -10543,19 +10587,6 @@ class RiderAPIController extends Controller
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
-                //Check RiderRequest Already Exist
-//                if ($rider_request->exists()) {
-//                    $rider_request = $rider_request->first();
-//                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "Phone Number & CNIC Already Exists";
-//
-//                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
-//                        $message = "Phone Number Already Exist";
-//
-//                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "CNIC Already Exist";
-//                    }
-//                } else
                 if ($employee->exists()) {
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
@@ -10612,6 +10643,11 @@ class RiderAPIController extends Controller
                             $employee_request->rider_sub_category = $request->rider_sub_category;
                             $employee_request->rider_type_id = $request->rider_type_id;
                             $employee_request->department_id = 6;
+                            $employee_request->fuel = $request->fuel;
+                            $employee_request->replacement_employee_id = $request->replacement_employee_id;
+                            $employee_request->replacement_last_working_day = $request->replacement_last_working_day;
+                            $employee_request->employee_nature_id = $request->employee_nature_id;
+                            $employee_request->sub_department = $request->sub_department;
                             $employee_request->save();
 
                             if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
@@ -10942,7 +10978,7 @@ class RiderAPIController extends Controller
                 $datum["year"] = Carbon::parse($date)->format("Y");
                 $attendance = EmployeeAttendance::where('employee_id', $rider_id)
                     ->where('employee_type', 2)
-                    ->whereDate('attendance_date', $date);
+                    ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if ($shift_exists == 1) {
@@ -11601,6 +11637,95 @@ class RiderAPIController extends Controller
             }
         }else{
             return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
+        }
+
+    }
+
+    public function mark_attendance_v3(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                ->where('employee_type', 2)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
+                if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
+                    $attendance_date = $attendance_date->addDays(1);
+                }
+            }
+
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
+                ->where('employee_type', 2);
+            $rider_attendance_action = new EmployeeAttendanceActionLog();
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->first();
+            } else {
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider_id;
+                $rider_attendance->employee_type = 2;
+                $rider_attendance->attendance_date = $attendance_date;
+            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
+            if ($request->action == 1) {
+                if($rider_attendance->clock_in_datetime == null){
+                    $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                    $rider_attendance->clock_in_latitude = $request->latitude;
+                    $rider_attendance->clock_in_longitude = $request->longitude;
+                    $rider_attendance->clock_in_location = $location_status;
+                    $rider_attendance->save();
+                }
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+            elseif ($request->action == 2) {
+                $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)->orderBy('id', 'DESC')->where('action_id', 1)->first();
+                $attendance_date = $last_clockin_action->attendance_date;
+
+                $rider_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance->clock_out_latitude = $request->latitude;
+                $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->clock_out_location = $location_status;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
         }
 
     }

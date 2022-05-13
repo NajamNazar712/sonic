@@ -164,7 +164,7 @@
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Aging</th>
+{{--										<th class="border-primary border-darken-1">Aging</th>--}}
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -538,7 +538,7 @@
                             head.push('Status');
 							// head.push('Updated At');
 							// head.push('Updated By');
-							head.push('Aging');
+							// head.push('Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -569,7 +569,7 @@
                                 row.push(values.status);
 								// row.push(values.updated_at);
 								// row.push(values.updated_by);
-								row.push(values.aging);
+								// row.push(values.aging);
 
 
                                 body.push(row);
@@ -808,7 +808,7 @@
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
-					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
+					// {data:'aging', name: 'aging', class: 'align-middle text-center aging'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {

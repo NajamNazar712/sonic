@@ -6,6 +6,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalesIncentiveDate;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use DB;
 
 class Kernel extends ConsoleKernel
 {
@@ -135,6 +136,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
+        $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -336,7 +338,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
 
-        $settings = GlobalSettings::where('type', 'dhl_sync_time_1');
+        /*$settings = GlobalSettings::where('type', 'dhl_sync_time_1');
         if ($settings->exists()) {
             $settings = $settings->first();
             $time_1 = $settings->setting_value . ':00';
@@ -347,7 +349,7 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
             $time_2 = $settings->setting_value . ':00';
             $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
-        }
+        }*/
 
         $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
@@ -386,7 +388,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:autohighaging')->dailyAt('09:00')->runInBackground();
         $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
         $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
-        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
+
+        $cron = DB::table('global_settings')->where('type','rcp_sms_cron_time')->select('text')->first();
+        $cron_time = isset($cron->text) ? $cron->text : "12:00";
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
     }
     /**
