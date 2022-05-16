@@ -245,6 +245,8 @@ class V2AdminPickupsController extends Controller
             })
             ->addColumn('action', function ($reminder_request) {
                 $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
+                
+                $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
                     if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
                         $dropdown = "
@@ -254,6 +256,11 @@ class V2AdminPickupsController extends Controller
 
                         if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                             $dropdown .= $reminder_button;
+                        }
+
+                        if ($reminder_request->reverse_pickup == 1) {
+                            $dropdown .= $remarks_button;
+
                         }
 
                         $dropdown .= "
@@ -292,6 +299,9 @@ class V2AdminPickupsController extends Controller
                     return $pickup_requests->brand_name;
                 }
 
+            })
+            ->addColumn('all_remarks',function ($pickup_requests){
+                    return '<button class="btn btn-sm btn-outline-info align-middle all_remarks_btn" rel="' . $pickup_requests->id . '"><span class="align-middle">View Remarks</span></button>';
             });
             if($legend_filter = $request->get('legend_filter')){
                 if($legend_filter==8){
@@ -3253,5 +3263,87 @@ class V2AdminPickupsController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function add_remarks(Request $request){
+        $pickup_req = V2PickupRequest::find($request->v2_pickup_req_id);
+        if($pickup_req){
+            $pickup_req->remarks = $request->add_remark;
+            $pickup_req->save();
+            return redirect()->back()->with('success', 'Remarks Added');
+
+        }else{
+            return redirect()->back()->with('error', 'Pickup Request Not Found!');
+
+        }
+    }
+
+    public function all_remarks(Request $request){
+
+        $v2_pickup_request = V2PickupRequest::find($request->pickup_req_id);
+        if($v2_pickup_request){
+
+        $trax_reason = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('reason_id');
+        if ($attempts->exists()) {
+            $reason_ids = $attempts->pluck('reason_id')->toArray();
+            if (count($reason_ids) > 0) {
+                foreach ($reason_ids as $reason_id) {
+                    $trax_reason .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
+                }
+            }
+        }
+        $trax_remarks = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('trax_remarks');
+        if ($attempts->exists()) {
+            $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
+            if (count($trax_remarks_rows) > 0) {
+                foreach ($trax_remarks_rows as $remark) {
+                    $trax_remarks .= $remark . ',' . PHP_EOL;
+                }
+            }
+        }
+
+        $shipper_remarks = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('shipper_remarks');
+        if ($attempts->exists()) {
+            $shipper_remarks_rows = $attempts->pluck('shipper_remarks')->toArray();
+            if (count($shipper_remarks_rows) > 0) {
+                foreach ($shipper_remarks_rows as $remark) {
+                    $shipper_remarks .= $remark . ',' . PHP_EOL;
+                }
+            }
+        }
+
+        $pickup_req = V2PickupRequest::leftJoin('v2_rider_pickups as vpr', function ($join) {
+                            $join->on('vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
+                                ->where('vpr.id', '=',
+                                    DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
+                        })->select('vpr.rider_remarks as rider_remarks')
+                        ->where('v2_pickup_requests.id',$request->pickup_req_id);
+        $rider_remarks = '';
+        if($pickup_req->exists()){
+            $rider_remarks = $pickup_req->get()->first()->rider_remarks;
+
+        }
+        $data = [];
+        $data['trax_reason'] = $trax_reason;
+        $data['trax_remarks'] = $trax_remarks;
+        $data['shipper_remarks'] = $shipper_remarks;
+        $data['rider_remarks'] = $rider_remarks;
+        $data['remarks'] = $v2_pickup_request->remarks;
+    }else{
+        $data = [];
+        $data['trax_reason'] = '';
+        $data['trax_remarks'] = '';
+        $data['shipper_remarks'] = '';
+        $data['rider_remarks'] = ''; 
+        $data['remarks'] = ''; 
+    }
+    return response()->json(['status' => 0, 'remarks' => $data]);
+
+
+
+
     }
 }
