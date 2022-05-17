@@ -3270,6 +3270,9 @@ class V2AdminPickupsController extends Controller
         if($pickup_req){
             $pickup_req->remarks = $request->add_remark;
             $pickup_req->save();
+
+            NotificationsController::send(177, $request->v2_pickup_req_id);
+
             return redirect()->back()->with('success', 'Remarks Added');
 
         }else{

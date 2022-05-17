@@ -9266,6 +9266,106 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                     }
                 }
+                else if ($id == 177) {
+                    $pickup_req = V2PickupRequest::find($reference_1_id);
+
+                    $pikup_shipment_id = V2PickupRequestShipment::where('pickup_request_id',$reference_1_id)->get()->first();
+
+                    $shipment = Shipment::find($pikup_shipment_id->shipment_id);
+                    
+                    
+                    $sales_person = SalePersonTag::where('user_id', $shipment->user_id)->where('status', 0)->first();
+
+                    $shipper = User::find($shipment->user_id);
+
+                    $sale_person_detail = Admin::find($sales_person->admin_id);
+                    if($sale_person_detail){
+
+                        if (strpos($subject, '[sales_person]') !== FALSE) {
+                            $subject = str_replace('[sales_person]', $sale_person_detail->name, $subject);
+                        }
+
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        }
+                        
+                        $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+
+                        if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                            $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                        }
+
+                        if (strpos($body, '[remarks]') !== FALSE) {
+                            $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                        }
+
+                        self::email($subject, $body, $sale_person_detail->email);
+                        
+
+                    
+                    }
+                    
+                    $sales_tier_tag = SaleTierTag::where('user_id',$shipment->user_id);
+
+                   
+
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first()->kam;
+                        if($sales_tier_tag){
+
+                            $kam = Admin::find($sales_tier_tag);
+                            if($kam){
+                                if (strpos($subject, '[sales_person]') !== FALSE) {
+                                    $subject = str_replace('[sales_person]', $kam->name, $subject);
+                                }
+        
+                                if (strpos($body, '[shipper_name]') !== FALSE) {
+                                    $body = str_replace('[shipper_name]', $shipper->name, $body);
+                                }
+                                
+                                $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+        
+                                if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                                    $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                                }
+        
+                                if (strpos($body, '[remarks]') !== FALSE) {
+                                    $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                                }
+
+                                self::email($subject, $body, $kam->email);
+
+
+                            }
+
+                        }
+                    }
+                    
+
+                    if (strpos($subject, '[nsa]') !== FALSE) {
+                        $subject = str_replace('[nsa]', $reference_2_id, $subject);
+                    }
+
+                    if (strpos($body, '[nsa]') !== FALSE) {
+                        $body = str_replace('[nsa]', $reference_2_id, $body);
+                    }
+
+                    if (strpos($subject, '[tracking_number]') !== FALSE) {
+                        $subject = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $subject);
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $nsa_shipment->tracking_number, $body);
+                    }
+
+                    if (ShipperNotificationEmail::where('user_id', $nsa_shipment->user_id)->exists()) {
+                        $to = ShipperNotificationEmail::where('user_id', $nsa_shipment->user_id)->whereNotNull('email')->pluck('email')->toArray();
+                    } else {
+                        $to = $nsa_shipment->user->email;
+                    }
+
+                    self::email($subject, $body, $to);
+                }
             }
         }
     }
