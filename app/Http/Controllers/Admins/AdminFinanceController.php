@@ -915,6 +915,13 @@ class AdminFinanceController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+            if($check_lost_shipments_admins->exists()){
+                $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
+                $shipments = $shipments->whereIn('s.user_id', $lost_shipments_shippers_id);
+
+            }
+
         $datatables = Datatables::of($shipments)
             ->setTotalRecords($count)
             ->setRowAttr([
@@ -1139,16 +1146,21 @@ class AdminFinanceController extends Controller
 
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
-
-                $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
-                    if($lost_shipment_shipper->exists()){
-                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
-                    }
+                
                     
                 $shipment->walk_in_status = 1;
 
                 $shipment->save();
             }
+
+            $shipment_resolved = Shipment::find($delivery_note_shipment->shipment_id);
+            if($shipment_resolved){
+                $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment_resolved->user_id);
+                    if($lost_shipment_shipper->exists()){
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                    }
+            }
+
 
             $delivery_note_shipment->status = 7;
 
@@ -1171,18 +1183,21 @@ class AdminFinanceController extends Controller
 
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
-
-                    $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
-                    if(!$lost_shipment_shipper->exists()){
-                        $shipment->walk_in_status = 1;
-    
-                        $shipment->save();
-                    }
+                    $shipment->walk_in_status = 1;
+                    $shipment->save();
                 }
 
-                $delivery_note_shipment->status = 7;
+                $shipment_resolved = Shipment::find($delivery_note_shipment->shipment_id);
+                if($shipment_resolved){
+                    $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment_resolved->user_id);
+                        if(!$lost_shipment_shipper->exists()){
 
-                $delivery_note_shipment->save();
+                            $delivery_note_shipment->status = 7;
+                
+                            $delivery_note_shipment->save();
+                        }
+                }
+
             }
         }
         return ['status' => 0, 'success' => 'Shipments has been marked Resolved'];
