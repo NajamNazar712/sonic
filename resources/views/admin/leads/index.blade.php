@@ -573,6 +573,68 @@
         </div>
     </div>
 
+    {{--    todo bulk status model--}}
+    <div class="modal fade" id="add_bulk_status_modal" role="dialog" aria-labelledby="add_bulk_status_modal_title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Status</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_bulk_status_form" class="form-horizontal mb-1 justify-content-center"
+                          novalidate="novalidate">
+                        <div class="form-group">
+                            <select name="update_lead_bulk_status" id="update_bulk_lead_status"
+                                    class="form-control select2">
+                                @foreach($lead_statuses as $lead_status)
+                                    <option value="{{ $lead_status->id }}"> {{ $lead_status->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div id="div_lead_status_rejected1" class="form-group d-none">
+                            <select name="lead_status_rejected1" id="lead_status_rejected1"
+                                    class="form-control select2">
+                                <option value="1"> Prohibited Items</option>
+                                <option value="2"> Wrong Contact Details</option>
+                                <option value="3"> Duplicate</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_notinterested1" class="form-group d-none">
+                            <select name="lead_status_notinterested1" id="lead_status_notinterested1"
+                                    class="form-control select2">
+                                <option value="4"> A/C Query Call</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_irrelevant1" class="form-group d-none">
+                            <select name="lead_status_irrelevant1" id="lead_status_irrelevant1"
+                                    class="form-control select2">
+                                <option value="5"> Operational Query</option>
+                                <option value="6"> HR Query</option>
+                                <option value="7"> Sales Person Already Assigned</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {{--    todo bulk status model end--}}
+
 
 @endsection
 
