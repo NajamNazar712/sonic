@@ -184,6 +184,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_index')->name('index');
             Route::post('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_store')->name('store');
         });
+
+        Route::prefix('telenor')->name('telenor.')->group(function(){
+            Route::prefix('other_courier')->name('other_courier.')->group(function() {
+                Route::get('', 'Shippers\TelenorOtherCourierController@index')->name('index');
+                Route::post('store', 'Shippers\TelenorOtherCourierController@store')->name('store');
+            });
+        });
+
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){

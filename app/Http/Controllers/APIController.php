@@ -23,6 +23,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\TelenorOtherCouriers;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
@@ -2748,8 +2749,8 @@ class APIController extends Controller
             $details = array();
 
             foreach ($user_ids as $user_id) {
-                $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
 
+                $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
                 foreach ($shipments as $shipment) {
                     $detail = array();
 
@@ -2836,6 +2837,24 @@ class APIController extends Controller
 
                     $details[] = $detail;
                 }
+
+//                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+//                if($telenor_other_shipments->exists() && $user_id == 3324){
+//
+//                    $telenor_other_shipments = $telenor_other_shipments->get();
+//                    foreach ($telenor_other_shipments as $shipment){
+//
+//                        $detail = array();
+//
+//                        $detail['tracking_number'] = $shipment->tracking_number;
+//                        $detail['order_id'] = $shipment->consignee_number;
+//                        $detail['status'] = $shipment->status;
+//                        $detail['created_at'] = $shipment->consignee_number;
+//                        $detail['updated_at'] = $shipment->consignee_number;
+//
+//                        $details[] = $detail;
+//                    }
+//                }
             }
 
             if (!empty($details)) {
@@ -2869,9 +2888,11 @@ class APIController extends Controller
             $order_id = $request->order_id;
             $type = $request->type;
 
+//            $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
             $details = array();
 
             foreach ($user_ids as $user_id) {
+
                 $shipments = Shipment::where('user_id', $user_id)->where('order_id', $order_id)->get();
 
                 foreach ($shipments as $shipment) {
@@ -2889,8 +2910,7 @@ class APIController extends Controller
 
                             if ($shipment_journey->status_reason_id) {
                                 $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
-                            }
-                            else {
+                            } else {
                                 $reason = null;
                             }
                         } else {
@@ -2906,8 +2926,7 @@ class APIController extends Controller
                             $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
                             if ($shipment_journey->status_reason_id) {
                                 $reason = ShipmentStatusReason::find($shipment_journey->status_reason_id)->name;
-                            }
-                            else {
+                            } else {
                                 $reason = null;
                             }
                         } else {
@@ -2924,7 +2943,26 @@ class APIController extends Controller
 
                     $details[] = $detail;
                 }
+
+//                $telenor_other_shipments = TelenorOtherCouriers::where('consignee_number', $order_id);
+//                if($telenor_other_shipments->exists() && $user_id == 3324){
+//
+//                    $telenor_other_shipments = $telenor_other_shipments->get();
+//                    foreach ($telenor_other_shipments as $shipment){
+//
+//                        $detail = array();
+//
+//                        $detail['tracking_number'] = $shipment->tracking_number;
+//                        $detail['order_id'] = $shipment->consignee_number;
+//                        $detail['status'] = $shipment->status;
+//                        $detail['created_at'] = $shipment->consignee_number;
+//                        $detail['updated_at'] = $shipment->consignee_number;
+//
+//                        $details[] = $detail;
+//                    }
+//                }
             }
+
 
             if (!empty($details)) {
                 return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Order ID #' . $order_id, 'details' => $details]);
@@ -4771,6 +4809,8 @@ class APIController extends Controller
     public function hbl_konnect_transactions(Request $request)
     {
         $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
 
         if ($environment == 'production') {
@@ -4790,14 +4830,55 @@ class APIController extends Controller
             $rules = [
                 'delivery_note_id' => ['required', 'integer', Rule::exists('delivery_notes', 'id')],
                 'amount' => ['required', 'numeric', 'min:0'],
-                'transaction_id' => ['required', 'integer'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
 
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error){
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if($error == 'delivery note id is Required.'){
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if($error == 'delivery note id must be an Integer.'){
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if($error == 'Given delivery note id is of Invalid ID.'){
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                    if($error == 'Collection Amount is Required.'){
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                    }
+                    if($error == 'Collection Amount must be a Number.'){
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                    }
+                    if($error == 'The Collection Amount must be at least 0.'){
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                    }
+                    if($error == 'transaction id is Required.'){
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                    }
+                    if($error == 'transaction id must be an Integer.'){
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                    }
+                    if($error == 'The transaction id must be at least 0.'){
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             }
             else {
                 $transaction_id = $request->transaction_id;
@@ -4841,12 +4922,14 @@ class APIController extends Controller
             }
         }
         else{
-            return ['status' => 1, 'message' => 'Access Denied!'];
+            return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
     public function hbl_konnect_delivery_note_information(Request $request)
     {
         $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
 
         if ($environment == 'production') {
@@ -4871,7 +4954,24 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error){
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if($error == 'delivery note id is Required.'){
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if($error == 'delivery note id must be an Integer.'){
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if($error == 'Given delivery note id is of Invalid ID.'){
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             }
             else {
                 $delivery_note_id = $request->delivery_note_id;
@@ -4894,7 +4994,7 @@ class APIController extends Controller
             }
         }
         else{
-            return ['status' => 1, 'message' => 'Access Denied!'];
+            return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
 

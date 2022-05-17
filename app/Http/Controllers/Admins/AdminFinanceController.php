@@ -13211,6 +13211,7 @@ class AdminFinanceController extends Controller
                 $name = "";
                 $phone = "";
                 $amount = 0;
+                $detail=array();
                 if(isset($done_payment->shipper->shipper_name)){
                     $name = $done_payment->shipper->shipper_name;
                     $phone = $done_payment->shipper->shipper_phone_no;
@@ -13219,8 +13220,11 @@ class AdminFinanceController extends Controller
                     $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
 
 //                    $done_payment_id = str_pad($done_payment_id, 6, '0', STR_PAD_LEFT);
-
-                    NotificationsController::send(172, $name, $phone,$done_payment_id,$updated_at);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
+                    $detail['name'] = $name;
+                    $detail['phone'] = $phone;
+                    $detail['updated_at'] = $updated_at;
+                    $detail['done_payment_id'] = $done_payment_id;
+                    NotificationsController::send(172,$detail);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
                 }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();

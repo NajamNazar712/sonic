@@ -27,11 +27,35 @@ class ShipperPickupController extends Controller
 
     public function pickup_index()
     {
+
+        $permission = session('permissions');
+
         $case_nature = CrmRequestCaseNature::get();
+        $row = array();
+        if(session('user_type') !== 1){
+            foreach($case_nature as $nature) {
+                if (in_array(16,$permission) && ($nature->id == 1)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(17,$permission) && ($nature->id == 2)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
+                    $row[] = $nature;
+                }
+
+            }
+            $case_nature = $row;
+        }
+//        dd($case_nature);
+
+//        $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        return view('client.pickups.index')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+        return view('client.pickups.index')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'case_permission'=>$permission]);
     }
 
     public function pickup_list()

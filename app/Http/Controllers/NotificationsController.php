@@ -223,7 +223,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL,$reference_3_id = NULL,$reference_4_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
         $notification = Notification::find($id);
 
@@ -8716,7 +8716,7 @@ class NotificationsController extends Controller
 
                     $data = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
                         ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-                        ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.cnic as cnic', 'employees.phone_number as phone_number', 'employees.employee_type_id as employee_type_id', 'd.name as designation', 'ad.name as department_name')
+                        ->select('employees.id as id','employees.trax_id as trax_id', 'employees.name as name', 'employees.cnic as cnic', 'employees.phone_number as phone_number', 'employees.employee_type_id as employee_type_id', 'd.name as designation', 'ad.name as department_name')
                         ->wherein('employees.id', $getdata)->get();
 
                     $is_sent = false;
@@ -9128,12 +9128,11 @@ class NotificationsController extends Controller
                     self::sms($body, $to);
                 }
 				else if ($id == 172) {
-                    $name = $reference_1_id;
-                    $phone_number = $reference_2_id;
-                    $payment_id = $reference_3_id;
+                    $detail = $reference_1_id;
+
                     $payment = RetailDonePayment::leftjoin('retail_done_payment_shipments as rdps','rdps.retail_done_payment_id','=','retail_done_payments.id')
                         ->leftjoin('retail_done_payment_calculations as rdpc','rdpc.retail_done_payment_id','=','retail_done_payments.id')
-                        ->where('retail_done_payments.id',$payment_id)
+                        ->where('retail_done_payments.id',$detail['done_payment_id'])
                         ->select('rdpc.amount as total_amount','rdpc.payable as payable','retail_done_payments.ibft_charges as charges','rdpc.adjustment as adjustment','rdps.shipment_id as tracking_number','retail_done_payments.user_id as user_id')->first();
 //                   dd($payment->payable);
 
@@ -9144,20 +9143,21 @@ class NotificationsController extends Controller
                     $user_id = $payment->user_id;
 
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $name, $body);
+                        $body = str_replace('[shipper_name]', $detail['name'], $body);
                     }
                     if (strpos($body, '[total_amount]') !== FALSE) {
                         $body = str_replace('[total_amount]', $total_amaount, $body);
                     }
                     if (strpos($body, '[updated_at]') !== FALSE) {
-                        $body = str_replace('[updated_at]', $reference_4_id, $body);
+                        $body = str_replace('[updated_at]', $detail['updated_at'], $body);
                     }
-                    $link =  url('payment_details'.'/'.base64_encode("$payment_id").'/'.base64_encode("$user_id"));
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
+                    $link =  url('payment_details'.'/'.base64_encode($detail['done_payment_id']).'/'.base64_encode("$user_id"));
+                    if (strpos($body, '[status_link]') !== FALSE) {
+                        $body = str_replace('[status_link]', $link, $body);
                     }
 
-                    $to = $phone_number;
+                    $to = $detail['phone'];
+
                     self::sms($body, $to);
                 }                
 				else if ($id == 173) {
