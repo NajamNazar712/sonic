@@ -482,7 +482,7 @@ class ShipperReceivingSheetController extends Controller
 
                 $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
 
-                if ($shipment->booking_type_id != 3) {
+                if ($shipment->booking_type_id != 3 && $shipment->shipper_status_id != 17) {
                     $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
