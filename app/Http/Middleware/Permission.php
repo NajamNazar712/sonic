@@ -1221,6 +1221,11 @@ class Permission
             'settings.referral.index' => 701,
             'settings.referral.list' => 701,
 
+            'settings.lost_shipment_shippers.index' => 708,
+            'settings.lost_shipment_admins.index' => 710,
+
+            
+
             
         ],
 
