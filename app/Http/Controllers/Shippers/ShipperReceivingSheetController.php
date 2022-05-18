@@ -481,9 +481,9 @@ class ShipperReceivingSheetController extends Controller
                 $total_shipments++;
 
                 $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
-
-                if ($shipment->booking_type_id != 3 && $shipment->shipper_status_id != 17) {
-                    $shipment_details_row_start = '
+                if($shipment->shipper_status_id != 17){
+                    if ($shipment->booking_type_id != 3) {
+                        $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
@@ -492,18 +492,18 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                     ';
 
-                    $shipment_details_row_end = '
+                        $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
                             <td>' . $shipment->estimated_weight . '</td>
                             <td>' . $shipment->pieces . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
                     ';
-                }
-                else {
-                    $number_of_items = $shipment->items->count();
+                    }
+                    else {
+                        $number_of_items = $shipment->items->count();
 
-                    $shipment_details_row_start = '
+                        $shipment_details_row_start = '
                           <tr>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $total_shipments . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->tracking_number . '</td>
@@ -512,12 +512,14 @@ class ShipperReceivingSheetController extends Controller
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                     ';
 
-                    $shipment_details_row_end = '
+                        $shipment_details_row_end = '
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->name . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . number_format($shipment->estimated_weight) . '</td>
+                            <td>' . $shipment->pieces . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
                     ';
+                    }
                 }
 
                 if ($shipment->booking_type_id == 1) {
