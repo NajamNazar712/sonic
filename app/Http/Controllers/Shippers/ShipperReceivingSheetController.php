@@ -479,7 +479,7 @@ class ShipperReceivingSheetController extends Controller
 
             foreach ($receiving_sheet_shipments->orderBy('shipment_id')->get() as $receiving_sheet_shipment) {
                 $total_shipments++;
-
+                $shipment_details_row_start = '';
                 $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
                 if($shipment->shipper_status_id != 17){
                     if ($shipment->booking_type_id != 3) {
