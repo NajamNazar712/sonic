@@ -1166,7 +1166,7 @@ class ShipperReceivingSheetController extends Controller
             ->join('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('gul_ahmed_pickup_addresses as gapa', 'usi.id', '=', 'gapa.pickup_address_id')
-            ->select('shipments.tracking_number', 'rs.id AS receiving_sheet', 'shipments.order_id', 'gapa.warehouse_id', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'shipments.estimated_weight', 'shipments.amount')
+            ->select('shipments.tracking_number', 'rs.id AS receiving_sheet', 'shipments.order_id', 'gapa.warehouse_id', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'shipments.estimated_weight', 'shipments.amount', 'usi.pickup_address')
             ->where('shipments.packaging_material_request', 0)
             ->where(function ($query) {
                 $query->whereNull('rs.status')->orWhere('rs.status', 0);
