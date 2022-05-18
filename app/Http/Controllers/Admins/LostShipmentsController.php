@@ -138,12 +138,17 @@ class LostShipmentsController extends Controller
                     }
                 })
                 ->addColumn('aging',function ($shipment){
-                    if(LostShipmentShipper::where('user_id',$shipment->shipper_id)->exists()) {
+                    if(session('role_id') == 1) {
                         return 0;
                     }
-                    else{
-                        $today = Carbon::now();
-                        return $today->diffInDays($shipment->status_date);
+                    else {
+                        if (LostShipmentShipper::where('user_id', $shipment->shipper_id)->exists()) {
+                            return 0;
+                        }
+                        else {
+                            $today = Carbon::now();
+                            return $today->diffInDays($shipment->status_date);
+                        }
                     }
                 })
                 ->filterColumn('u.name', function ($query, $keyword) {
