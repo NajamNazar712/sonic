@@ -128,6 +128,10 @@ class LostShipmentsController extends Controller
                         return $shipment->shipper;
                     }
                 })
+                ->addColumn('aging',function ($shipment){
+                    $today = Carbon::now();
+                    return $today->diffInDays($shipment->status_date);
+                })
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
                         $sub_query->where('shipments.booking_type_id', '!=', 4)
