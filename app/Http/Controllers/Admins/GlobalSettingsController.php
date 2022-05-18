@@ -6745,6 +6745,40 @@ public function sales_incentive()
         return redirect()->back()->with('success', 'User Deleted!');
     }
 
+    public function undelivered_sms_hub_wise(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),529);
+        
+        $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
+        $hubs = City::where('hub', 1)->get();
+
+        $hub_id = null;
+        if($settings){
+            $hub_id =  $settings->setting_value; 
+        }
+
+        return view('admin.settings.undelivered_sms_hub_wise',compact('hub_id','hubs'));
+
+
+    }
+
+    public function undelivered_sms_hub_wise_submit(Request $request){
+        $settings = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->setting_value = $request->hub_id;
+            $settings->save();
+
+        }else{
+            $settings = new GlobalSettings;
+            $settings->setting_value = $request->hub_id;
+            $settings->type = 'undeliverd_sms_hubwise';
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Hub Upadated');
+
+    }
+
     
     
 }

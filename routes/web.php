@@ -3309,6 +3309,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('undelivered_sms_hub_wise')->name('undelivered_sms_hub_wise.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@undelivered_sms_hub_wise')->name('index');
+            Route::post('submit', 'Admins\GlobalSettingsController@undelivered_sms_hub_wise_submit')->name('submit');
+        });
+
+
+
 	});
 
 
