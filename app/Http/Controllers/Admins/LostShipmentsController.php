@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\Admin\LostShipmentShipper;
 
 class LostShipmentsController extends Controller
 {
@@ -88,6 +90,13 @@ class LostShipmentsController extends Controller
 
             if (session('role_id') != 1) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            }
+
+            $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+            if($check_lost_shipments_admins->exists()){
+                $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
+                $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
+
             }
 
             return Datatables::of($shipments)
@@ -169,8 +178,15 @@ class LostShipmentsController extends Controller
 
         $shipment_ids = $request->shipment_ids;
             foreach ($shipment_ids as $shipment){
+                
                 $parcel = Shipment::find($shipment);
                 if($parcel->shipper_status_id == 18) {
+                    
+                    $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
+                    if($lost_shipments_shippers->exists()){
+
+                        $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+                        if($lost_shipments_admins->exists()){
 //                    if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         ShipmentChargesController::return ($shipment);
@@ -182,6 +198,23 @@ class LostShipmentsController extends Controller
 //                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
 //                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
 //                    }
+                        }
+
+                    }else{
+//                    if (!$parcel->packaging_material_request) {
+                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                        ShipmentChargesController::return ($shipment);
+                        ShipmentsJourneyController::add($shipment, 20, 20, $request->reason, NULL, NULL, Auth::id());
+
+                        AdminFinanceController::add_payment($shipment, 1);
+//                    } else {
+//
+//                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+//                    }
+                    }
+
+
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
@@ -190,26 +223,51 @@ class LostShipmentsController extends Controller
 
         $shipment_ids = $request->shipment_ids;
 
-
-            foreach ($shipment_ids as $shipment){
+        foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 if($parcel->shipper_status_id == 18) {
 
-                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
-                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
-                    if($parcel->packaging_material_request == 1) {
-                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
-                        if ($packaging_material_shipment != null) {
-                            $packaging_material_shipment->status_id = 3;
-                            $packaging_material_shipment->save();
+                    $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
 
-                            $packaging_request_history = new PackagingMaterialRequestHistory();
-                            $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
-                            $packaging_request_history->status = 3;
-                            $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
-                            $packaging_request_history->save();
+                    if($lost_shipments_shippers->exists()){
+
+                        $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+                        if($lost_shipments_admins->exists()){
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
+                            ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+                            if($parcel->packaging_material_request == 1) {
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
+                                if ($packaging_material_shipment != null) {
+                                    $packaging_material_shipment->status_id = 3;
+                                    $packaging_material_shipment->save();
+        
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 3;
+                                    $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                            }
+                        }
+                    }else{
+                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
+                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
+                        if($parcel->packaging_material_request == 1) {
+                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
+                            if ($packaging_material_shipment != null) {
+                                $packaging_material_shipment->status_id = 3;
+                                $packaging_material_shipment->save();
+    
+                                $packaging_request_history = new PackagingMaterialRequestHistory();
+                                $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                $packaging_request_history->status = 3;
+                                $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                                $packaging_request_history->save();
+                            }
                         }
                     }
+
+                    
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
