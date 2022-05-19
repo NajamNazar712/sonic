@@ -332,6 +332,44 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Mark Fake Status</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="mark_fake_status_form" action="{{ route('admin.delivery.fake_status.log.store') }}" novalidate="novalidate" method="post">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number</h2>
+                            </div>
+                            <div class="row" id="fake_status_shipment">
+                            </div>
+                            <hr>
+                            <input type="hidden" name="tracking_number" id="fake_status_tracking_number">
+                            <div class="row justify-content-center">
+                                <div class="col-12">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -729,6 +767,9 @@
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
                                 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+                                @if (session('role_id') == 1 || in_array(262, session('permissions')))
+                                    shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 mark_fake_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Mark Fake Status</button>';
+                                @endif
                                 @if (session('role_id') == 1 || in_array(45, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
                                 @endif
@@ -1562,6 +1603,16 @@
                 $('#ReattemptModal').modal('show');
 
             });
+
+            $('#tracking').on('click','.mark_fake_status', function () {
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
+                $('#fake_status_tracking_number').val(tracking);
+                $('#fake_status_shipment').html(tracking_rows);
+                $('#fake_status_remarks').val('');
+                $('#FakeStatusModal').modal('show');
+            });
+
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
@@ -2354,6 +2405,13 @@
                     });
                     
             }
+        });
+
+        $("#mark_fake_status_form").validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
         });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
             $('#add_request_form')[0].reset();
