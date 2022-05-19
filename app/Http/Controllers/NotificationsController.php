@@ -8180,6 +8180,7 @@ class NotificationsController extends Controller
                     $delivery_city_id = $shipment->consignee_city->id;
                     $setting_city_id = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
                     if ($setting_city_id->exists()) {
+                        $setting_city_id = $setting_city_id->first(); 
                         $city_ids =  explode(',', $setting_city_id->text); 
                         if (in_array($delivery_city_id, $city_ids)) {
 
