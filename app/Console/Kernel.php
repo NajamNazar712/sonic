@@ -130,6 +130,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
         // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
+        $schedule->command('inactive_employee:resign_date')->dailyAt('05:00')->runInBackground();
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();

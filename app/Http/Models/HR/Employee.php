@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
-    protected $fillable = ['first_inactive'];
+    protected $fillable = ['first_inactive','is_line_manager','line_manager_id'];
 
     public function medical_infos() {
         return $this->HasMany('App\Http\Models\HR\EmployeeMedicalInformation');
