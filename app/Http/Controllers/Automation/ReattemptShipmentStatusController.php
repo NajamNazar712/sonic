@@ -13,6 +13,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use Illuminate\Support\Facades\Auth;
 
 class ReattemptShipmentStatusController extends Controller
@@ -88,6 +89,11 @@ class ReattemptShipmentStatusController extends Controller
                             NotificationsController::send(16, 0, $shipment_id);
                             $reattempt_percentage->count += 1;
                             $reattempt_percentage->save();
+
+                            $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                            $reattempt_remarks_col->shipment_id = $shipment_id;
+                            $reattempt_remarks_col->remarks = 'Automatic';
+                            $reattempt_remarks_col->save();
                         }
                     }
                 }else{
@@ -148,6 +154,10 @@ class ReattemptShipmentStatusController extends Controller
                             
                             $reattempt_percentage->count += 1;
                             $reattempt_percentage->save();
+                            $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                            $reattempt_remarks_col->shipment_id = $shipment_id;
+                            $reattempt_remarks_col->remarks = 'Automatic';
+                            $reattempt_remarks_col->save();
                         }
                     
                     
