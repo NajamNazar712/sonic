@@ -67,7 +67,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -76,7 +76,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
                                 @foreach($statuses as $status)
@@ -85,7 +85,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_business_category" id="search_business_category" class="form-control select2">
                                 @foreach($business_categories as $bc)
@@ -94,7 +94,18 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="shipping_mode" id="shipping_mode" class="form-control select2" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                                @foreach($shipping_modes as $shipping_mode)
+                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -106,7 +117,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-3 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -118,7 +129,7 @@
                         </div>
 
                     </div>
-                    <div class="col-2">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -128,7 +139,7 @@
                             <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="From">
                         </div>
                     </div>
-                    <div class="col-2">
+                    <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -284,6 +295,11 @@
             $('#sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Sales Person',
+                allowClear:true
+            });
+            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping mode',
+                width:'100%',
                 allowClear:true
             });
             $('#search_business_category').prepend('<option value="" selected="selected"></option>').select2({
@@ -581,6 +597,7 @@
                         d.search_business_category = $('#search_business_category').val();
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
+                        d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
                 order: [[14, 'desc']],

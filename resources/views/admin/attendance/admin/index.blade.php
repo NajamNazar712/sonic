@@ -204,6 +204,7 @@
                                     <th class="border-primary border-darken-1">Employee CNIC</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
+                                    <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
@@ -492,6 +493,7 @@
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},
+                    {data: 'status_name', name: 'es.id', class: 'align-middle emp_status'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.id', class: 'align-middle department'},
                     {data: 'attendance_date', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_date'},

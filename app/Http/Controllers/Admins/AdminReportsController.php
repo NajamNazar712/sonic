@@ -3372,9 +3372,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
-        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories]);
+        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
     }
     public function overall_sales_list(Request $request)
     {
@@ -3493,6 +3493,13 @@ class AdminReportsController extends Controller
             } else {
                 $sales = $sales->whereIn('dc.hub_id', session('hubs'));
             }
+        }
+
+        if ($shipping_mode = $request->get('search_shipping_mode')) {
+                $sales = $sales->leftjoin('pickup_request_received_shipments as prrs', 'prrs.pickup_request_id', '=', 'pr.id')
+                    ->leftjoin('shipments as s', 's.id', '=', 'prrs.shipment_id')
+                    ->where('s.booking_type_id', '=', $shipping_mode)
+                    ->groupBy('pickup_notes.id');
         }
 
         $datatable = Datatables::of($sales)
