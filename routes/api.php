@@ -103,6 +103,7 @@ Route::name('api.')->group(function () {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
         Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
         Route::post('login_v3', 'Rider\RiderAPIController@login_v2')->name('login_v3');
+        Route::post('login_v4', 'Rider\RiderAPIController@login_v4')->name('login_v4');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
@@ -128,6 +129,7 @@ Route::name('api.')->group(function () {
 
 		Route::middleware('RiderAPIToken')->group(function () {
             Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
+            Route::post('validate_otp', 'Rider\RiderAPIController@validate_otp')->name('validate_otp');
             Route::prefix('pickup')->name('pickup.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
                 Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
@@ -217,6 +219,12 @@ Route::name('api.')->group(function () {
                 Route::post('detail_v2', 'Rider\RiderAPIController@attendance_details_v2')->name('detail_v2');
             });
 
+            Route::prefix('adjustment')->name('adjustment.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@adjustment_index')->name('index');
+                Route::post('apply', 'Rider\RiderAPIController@adjustment_apply')->name('apply');
+                Route::get('list', 'Rider\RiderAPIController@employee_adjustment_list')->name('list');
+            });
+
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
             Route::post('rider_incentives_v2', 'Rider\RiderAPIController@rider_incentive_v2')->name('rider_incentives_v2');
             Route::post('rider_incentives_v3', 'Rider\RiderAPIController@rider_incentive_v3')->name('rider_incentives_v3');
@@ -256,9 +264,10 @@ Route::name('api.')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
+        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
+        Route::post('login_v4', 'AdminAPIController@login_v4')->name('login_v4');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
-        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
         Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
@@ -331,6 +340,16 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
+
+            Route::prefix('adjustment')->name('adjustment.')->group(function () {
+                Route::post('index', 'AdminAPIController@adjustment_index')->name('index');
+                Route::post('apply', 'AdminAPIController@adjustment_apply')->name('apply');
+                Route::get('list', 'AdminAPIController@employee_adjustment_list')->name('list');
+                Route::get('approver_list', 'AdminAPIController@approver_adjustment_list')->name('approver_list');
+                Route::post('approve', 'AdminAPIController@adjustment_approve')->name('approve');
+                Route::post('reject', 'AdminAPIController@adjustment_reject')->name('reject');
+            });
+
             Route::prefix('profile')->name('profile.')->group(function () {
                 Route::get('index', 'AdminAPIController@get_profile')->name('index');
                 Route::get('check', 'AdminAPIController@check_profile')->name('check');
@@ -377,6 +396,7 @@ Route::name('api.')->group(function () {
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
         Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
+        Route::post('login_v4', 'Retail\RetailAPIController@login')->name('login_v4');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
