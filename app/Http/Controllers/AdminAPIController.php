@@ -55,6 +55,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeAttendanceAdjusment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
