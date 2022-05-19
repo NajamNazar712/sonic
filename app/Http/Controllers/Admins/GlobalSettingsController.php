@@ -6749,33 +6749,37 @@ public function sales_incentive()
         ActivityTrailController::createActivityTrailLog(Auth::id(),529);
         
         $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
-        $hubs = City::where('hub', 1)->get();
+        $cities = City::where('status', 1)->get();
 
-        $hub_id = null;
+        $city_id = null;
         if($settings){
-            $hub_id =  $settings->setting_value; 
+            $city_id =  explode(',', $settings->text); 
+
         }
 
-        return view('admin.settings.undelivered_sms_hub_wise',compact('hub_id','hubs'));
+        return view('admin.settings.undelivered_sms_hub_wise',compact('city_id','cities'));
 
 
     }
 
     public function undelivered_sms_hub_wise_submit(Request $request){
+        // dump(implode(',', $request->city_id));
+
+        $city_ids = implode(',', $request->city_id);
         $settings = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-            $settings->setting_value = $request->hub_id;
+            $settings->text = $city_ids;
             $settings->save();
 
         }else{
             $settings = new GlobalSettings;
-            $settings->setting_value = $request->hub_id;
+            $settings->text = $city_ids;
             $settings->type = 'undeliverd_sms_hubwise';
             $settings->save();
         }
-        return redirect()->back()->with('success', 'Hub Upadated');
+        return redirect()->back()->with('success', 'Cities Upadated');
 
     }
 

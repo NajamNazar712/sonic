@@ -8177,10 +8177,12 @@ class NotificationsController extends Controller
                     $delivery_note_id = $reference_2_id;
 
                     $shipment = Shipment::find($shipment_id);
-                    $delivery_hub_id = $shipment->consignee_city->hub_id;
-                    $setting_hub_id = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
-                    if ($setting_hub_id->exists()) {
-                        if($setting_hub_id->setting_value == $delivery_hub_id){
+                    $delivery_city_id = $shipment->consignee_city->hub_id;
+                    $setting_city_id = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+                    if ($setting_city_id->exists()) {
+                        $city_ids =  explode(',', $setting_city_id->text); 
+                        if (in_array($delivery_city_id, $city_ids)) {
+
                             $tracking_number = $shipment->tracking_number;
 
                             $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);

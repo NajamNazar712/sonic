@@ -1396,7 +1396,7 @@
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(714, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.undelivered_sms_hub_wise.index')}}">Undelivered SMS Hub Wise</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.undelivered_sms_hub_wise.index')}}">Undelivered SMS City Wise</a></li>
                                     @endif
 
                                     

@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Undelivered SMS Hub Wise')
+@section('title', 'Undelivered SMS City Wise')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Undelivered SMS Hub Wise
+                    Undelivered SMS City Wise
                 </h1>
 
                 <div class="card">
@@ -21,12 +21,23 @@
                                 <div class="col-md-6">
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.undelivered_sms_hub_wise.submit') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
-                                        <div class="col-12 form-group">
+                                        {{-- <div class="col-12 form-group">
                                             <select name="hub_id" id="hub_id" class="form-control select2" >
                                                 @foreach($hubs as $hub)
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
                                             </select>
+                                        </div> --}}
+                                        <div class="form-group">
+                                            <select name="city_id[]" id="cities" multiple class="select2 form-control " style="width: 100%" data-rule-required="true" data-msg-required="City is required">
+                                                @foreach($cities as $city)
+                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" id="selectAll" class="btn btn-success">Select All</button>
+                                            <button type="button" id="unselectAll" class="btn btn-danger">Un-Select All</button>
                                         </div>
 
 
@@ -63,14 +74,25 @@
     <script>
         $(document).ready(function() {
 
-            $('#hub_id').prepend('<option value=""></option>').select2({
-                width:'100%',
-                allowClear:true,
-                placeholder: 'Select Hub'
+            $("#settings_form #selectAll").on('click',function (){
+                $("#settings_form #cities > option").prop("selected","selected");
+                $("#settings_form #cities").trigger("change");
             });
 
-            var ids = @json($hub_id);
-                $('#hub_id').val(ids).trigger('change');
+            $("#settings_form #unselectAll").on('click',function (){
+                $("#settings_form #cities > option").prop("selected","");
+                $("#settings_form #cities").trigger("change");
+            });
+            $("#settings_form #cities").select2({
+                placeholder: "Select Cities",
+                width:'100%',
+                dropdownParent: $("#settings_form")
+            });
+          
+
+            var ids = @json($city_id);
+            console.log(ids);
+                $('#cities').val(ids).trigger('change');
 
             $('#settings_form').validate({
                 errorClass: 'danger',
