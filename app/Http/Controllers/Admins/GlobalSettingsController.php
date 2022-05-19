@@ -6749,7 +6749,7 @@ public function sales_incentive()
         ActivityTrailController::createActivityTrailLog(Auth::id(),529);
         
         $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
-        $cities = City::where('status', 1)->get();
+        $cities = City::where('status', 1)->where('business_category_id',1)->get();
 
         $city_id = null;
         if($settings){
