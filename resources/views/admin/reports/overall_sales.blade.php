@@ -97,7 +97,7 @@
 
                     <div class="col-3">
                         <div class="form-group">
-                            <select name="shipping_mode" id="shipping_mode" class="form-control select2" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                 @foreach($shipping_modes as $shipping_mode)
                                     <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
                                 @endforeach
@@ -297,7 +297,7 @@
                 placeholder: 'Select Sales Person',
                 allowClear:true
             });
-            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping mode',
                 width:'100%',
                 allowClear:true
