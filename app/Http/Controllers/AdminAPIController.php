@@ -7061,7 +7061,7 @@ class AdminAPIController extends Controller
                     }
                 }
                 else {
-                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', 1)->whereDate('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                     }
@@ -7078,8 +7078,8 @@ class AdminAPIController extends Controller
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
                     $message = "Adjustment Request submitted successfully";
-                    /*NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
-                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);*/
+                    NotificationsController::app_notification(17, $admin_id, 1, $leave_request->id);
+                    NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
                 }
                 return response()->json(['status' => 0, 'apply_message' => $message]);
             } else {
@@ -7238,7 +7238,7 @@ class AdminAPIController extends Controller
                     $attendance_action->longitude = $mark_attendance->clock_out_longitude;
                     $attendance_action->save();
                     $employee_leaves->save();
-//                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    NotificationsController::app_notification(17, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return response()->json(['status' => 0, 'message' => "Adjustment request has been approved!"]);
                 }
                 return response()->json(['status' => 1, 'message' => "No Adjustment Found!"]);
@@ -7270,7 +7270,7 @@ class AdminAPIController extends Controller
                     $employee_leaves->rejected_reason = $request->rejection_reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
-//                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    NotificationsController::app_notification(17, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return response()->json(['status' => 0, 'message' => "Adjust request has been rejected!"]);
                 }
                 return response()->json(['status' => 1, 'message' => "No Leave Found!"]);

@@ -11673,8 +11673,8 @@ class RiderAPIController extends Controller
                     $leave_request->date = $request->date;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
-                    /*NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
-                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);*/
+                    NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
+                    NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
                     $message = "Adjustment Request submitted successfully";
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
