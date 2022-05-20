@@ -866,12 +866,76 @@
                                 });
                         }
                     },
+
+                    //--------------------------------------
+
+                    {
+                        text: 'Resolved',
+                        className: 'btn btn-primary resolved',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to Mark as Resolved!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url:"{{route('admin.delivery.sdn.bulk_resolved')}}",
+                                        method:'POST',
+                                        data:{
+                                            'sdn_ids':selected_rowsx,
+                                            '_token':'{{ csrf_token() }}'
+                                        }
+                                    }).done(function (data) {
+                                        if (data.status == 1) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        } else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        selected_rowsx = [];
+
+                                        table.rows().deselect();
+                                        table.draw(true);
+                                        table.button('.resolved').disable();
+                                    });
+                                }
+                            });
+                        }
+                    },
+
+                    //--------------------------------------
+
                     {
                         extend: 'excel',
                         title: 'Station Deposit Notes',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },{
+                    },
+                    {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -896,7 +960,9 @@
                             }
                         });
                     }
-                }, {
+                }
+                ,
+                    {
                     extend: 'selectNone',
                     text: 'Select None',
                     className: 'select_none',
@@ -923,8 +989,8 @@
                             }
                         });
                     }
-                },
-                    'reset'],
+                }
+                , 'reset'],
                     select: {
                         info: false,
                         style: 'multi',
@@ -1315,9 +1381,11 @@
 
                 if (selected_rowsx.length > 0) {
                     table.button('.closed').enable();
+                    table.button('.resolved').enable();
                 }
                 else {
                     table.button('.closed').disable();
+                    table.button('.resolved').disable();
                 }
             });
             $('#datatable tbody').on('click', 'tr td.dncc_link button', function () {

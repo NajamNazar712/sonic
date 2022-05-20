@@ -7981,4 +7981,31 @@ class DeliveryController extends Controller
 
         }
     }
+
+    public function bulk_resolved(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+        $return_id = "";
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                    $station_deposit_note->status = 2;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }else{
+                    $return_id.=  "ID = ".$station_deposit_note->id.", ";
+                }
+            }
+            if(empty($return_id)) {
+                return response()->json(['status' => 1, 'success' => "Station Deposit Notes Status Updated To Resolved"]);
+            }else{
+                return response()->json(['status' => 0, 'error' => "Difference Amount is pending"]);
+            }
+
+        } else {
+            return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
+
+        }
+    }
 }
