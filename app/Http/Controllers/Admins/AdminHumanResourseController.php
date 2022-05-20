@@ -2992,6 +2992,9 @@ class AdminHumanResourseController extends Controller
         if (!in_array(596, session('permissions'))) {
             $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
         }
+        else{
+            $payslips->whereIn('hub_id',session('hubs'));
+        }
 
         $datatable = Datatables::of($payslips)
             ->addColumn('action', function () {
@@ -3113,7 +3116,7 @@ class AdminHumanResourseController extends Controller
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
-            'hub' => ['required', 'between:1,100'],
+            'hub' => ['required', 'between:1,100',Rule::exists('cities','name')],
             'zone' => ['nullable', 'between:1,100'],
             'joining_date' => ['required', 'date_format:Y-m-d'],
             'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
@@ -3237,6 +3240,7 @@ class AdminHumanResourseController extends Controller
                         $payslip->designation = trim($row['designation']);
                         $payslip->department = trim($row['department']);
                         $payslip->hub = trim($row['hub']);
+                        $payslip->hub_id = City::where('name',$row['hub'])->first()->id;
                         $payslip->zone = trim($row['zone']);
                         $payslip->joining_date = trim($row['joining_date']);
                         $payslip->confirmation_date = trim($row['confirmation_date']);
