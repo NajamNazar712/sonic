@@ -53,6 +53,10 @@ class AdminFnfController extends Controller
          ->join('fnf_statuses as fs','fs.id','=','fnf.status_id')
          ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id as status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status','fnf.hod as hod_id','fnf.line_manager as reporting_manager']);
 
+        if(session('role_id') != 1)
+        {
+            $employee = $employee->whereIn('c.hub_id',session('hubs'));
+        }
      $datatables = Datatables::of($employee)
          ->editColumn('fnf_id',function ($fnf) {
             return 'FNF'.$fnf->fnf_id;

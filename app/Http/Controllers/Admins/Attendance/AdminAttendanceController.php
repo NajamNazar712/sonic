@@ -167,6 +167,11 @@ class AdminAttendanceController extends Controller
                         ->orWhere('ad.id', session('department_id'));
                 });
             }
+
+        }
+
+        if(session('role_id') != 1)
+        {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
 
@@ -385,6 +390,10 @@ class AdminAttendanceController extends Controller
                         ->orWhere('ad.id', session('department_id'));
                 });
             }
+        }
+
+        if(session('role_id') != 1)
+        {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
 
