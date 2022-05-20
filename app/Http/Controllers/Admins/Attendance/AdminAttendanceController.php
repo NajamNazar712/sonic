@@ -169,12 +169,7 @@ class AdminAttendanceController extends Controller
             }
 
         }
-
-        if(session('role_id') != 1)
-        {
-            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-        }
-
+        
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {
                 if ($employee->employee_type == 2) {
@@ -391,12 +386,7 @@ class AdminAttendanceController extends Controller
                 });
             }
         }
-
-        if(session('role_id') != 1)
-        {
-            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-        }
-
+        
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $search_from = Carbon::createFromFormat('d F, Y',$request->search_from)->toDateString();

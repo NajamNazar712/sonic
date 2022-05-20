@@ -2851,11 +2851,7 @@ class AdminHumanResourseController extends Controller
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id','cities.hub_id');
-
-        if(session('role_id') != 1)
-        {
-            $incentives = $incentives->whereIn('cities.hub_id', session('hubs'));
-        }
+        
         $datatable = Datatables::of($incentives);
 
         if ($city = $request->get('search_city')) {
