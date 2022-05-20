@@ -4950,6 +4950,11 @@ class DeliveryController extends Controller
                     $dropdown .= $closed_status;
                 }
 
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status != 2){
+                    $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
+                    $dropdown .= $reconcile_to_resolved;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4972,6 +4977,7 @@ class DeliveryController extends Controller
                 if ($result->sdn_type == 1 && $result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions')))) {
                     $dropdown .= $reconcile_to_deposit;
                 }
+
 
                 if ($result->status == 0 && $result->adjusted == 0 && (session('role_id') == 1 || in_array(605, session('permissions')))) {
                     if ($result->sdn_type == 1) {
@@ -5102,6 +5108,8 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
         }
     }
+
+
 
     public function get_petty_cash_statements(Request $request)
     {
@@ -7956,6 +7964,23 @@ class DeliveryController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
+    public function resolved(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                $station_deposit_note->status = 2;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
             }
         } else {
             return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);

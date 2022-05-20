@@ -1783,6 +1783,59 @@
                     });
                 }
             });
+
+            $('body').on('click', '.update_status_resolved', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Mark SDN Resolved!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.delivery.sdn.resolved') !!}',
+                                type: 'POST',
+                                data: {
+                                    'sdn_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status == 1) {
+                                    table.draw(false);
+                                    toastr.success(data.message, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.message, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
             $('body').on('click', '.update_status_closed', function () {
             var id = $(this).parents('tr').attr('id');
             if (id) {
