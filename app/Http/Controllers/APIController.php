@@ -5277,11 +5277,11 @@ class APIController extends Controller
                                     elseif ($complaint_id == 21) {
                                         $rules = [
                                             'product_cost' => ['required', 'integer'],
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
-                                            'damage_product_picture' => ['required', 'image'],
-                                            'product_packaging_picture' => ['required', 'image'],
-                                            'actual_product_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
+                                            'damage_product_picture' => ['required', 'url'],
+                                            'product_packaging_picture' => ['required', 'url'],
+                                            'actual_product_picture' => ['required', 'url'],
                                             'damage_product_price' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5298,7 +5298,7 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price );
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture, $request->damage_product_picture, $request->product_packaging_picture, $request->actual_product_picture, $request->damage_product_price);
                                             }
 
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
@@ -5307,11 +5307,11 @@ class APIController extends Controller
                                     elseif ($complaint_id == 22) {
                                         $rules = [
                                             'product_cost' => ['required', 'integer'],
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
-                                            'missing_product_picture' => ['required', 'image'],
-                                            'product_packaging_picture' => ['required', 'image'],
-                                            'actual_product_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
+                                            'missing_product_picture' => ['required', 'url'],
+                                            'product_packaging_picture' => ['required', 'url'],
+                                            'actual_product_picture' => ['required', 'url'],
                                             'missing_product_price' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5328,15 +5328,15 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), Null, Null, Null, Null, $request->file('missing_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture') , $request->missing_product_price);
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture, Null, Null, Null, Null, $request->missing_product_picture, $request->product_packaging_picture, $request->actual_product_picture , $request->missing_product_price);
                                             }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                         }
                                     }
                                     elseif ($complaint_id == 29 || $complaint_id == 25 || $complaint_id == 24 || $complaint_id == 23) {
                                         $rules = [
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
                                             'product_cost' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5353,7 +5353,7 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture);
                                             }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                             }

@@ -40,73 +40,137 @@ class CRMController extends Controller
         $crm_request->missing_product_price = $missing_product_price;
         $crm_request->save();
         if($product_picture != null){
-            $filename = 'claim_product_' . $crm_request->id . '.png';
-            $file = $product_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->product_picture = $filename;
+            if(is_string($product_picture)){
+                $url = $product_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_product_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_product_' . $crm_request->id . '.png';
+                $file = $product_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->product_picture = $filename;
+            }
         }
         else{
             $crm_request->product_picture = $product_picture;
         }
         if($invoice_picture != null){
-            $filename = 'claim_invoice_' . $crm_request->id . '.png';
-            $file = $invoice_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->invoice_picture = $filename;
+            if(is_string($invoice_picture)){
+                $url = $invoice_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_invoice_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_invoice_' . $crm_request->id . '.png';
+                $file = $invoice_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->invoice_picture = $filename;
+            }
         }
         else{
             $crm_request->invoice_picture = $invoice_picture;
         }
         if($damage_product_picture != null){
-            $filename = 'claim_damage_product_' . $crm_request->id . '.png';
-            $file = $damage_product_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->damage_product_picture = $filename;
+            if(is_string($damage_product_picture)){
+                $url = $damage_product_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_damage_product_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_damage_product_' . $crm_request->id . '.png';
+                $file = $damage_product_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->damage_product_picture = $filename;
+            }
         }
         else{
             $crm_request->damage_product_picture = $damage_product_picture;
         }
         if($product_packaging_picture != null){
-            $filename = 'claim_product_packaging_' . $crm_request->id . '.png';
-            $file = $product_packaging_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->product_packaging_picture = $filename;
+            if(is_string($product_packaging_picture)){
+                $url = $product_packaging_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_product_packaging_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_product_packaging_' . $crm_request->id . '.png';
+                $file = $product_packaging_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->product_packaging_picture = $filename;
+            }
         }
         else{
             $crm_request->product_packaging_picture = $product_packaging_picture;
         }
         if($actual_product_picture != null){
-            $filename = 'claim_actual_product_' . $crm_request->id . '.png';
-            $file = $actual_product_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->actual_product_picture = $filename;
+            if(is_string($actual_product_picture)){
+                $url = $actual_product_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_actual_product_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_actual_product_' . $crm_request->id . '.png';
+                $file = $actual_product_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->actual_product_picture = $filename;
+            }
         }
         else{
             $crm_request->actual_product_picture = $actual_product_picture;
         }
         if($missing_product_picture != null){
-            $filename = 'claim_missing_product_' . $crm_request->id . '.png';
-            $file = $missing_product_picture;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->missing_product_picture = $filename;
+            if(is_string($missing_product_picture)){
+                $url = $missing_product_picture;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_missing_product_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_missing_product_' . $crm_request->id . '.png';
+                $file = $missing_product_picture;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->missing_product_picture = $filename;
+            }
         }
         else{
             $crm_request->missing_product_picture = $missing_product_picture;
         }
         if($product_packaging_picture_for_content_short != null){
-            $filename = 'claim_product_content_short_' . $crm_request->id . '.png';
-            $file = $product_packaging_picture_for_content_short;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->product_packaging_picture_for_content_short = $filename;
+            if(is_string($product_packaging_picture_for_content_short)){
+                $url = $product_packaging_picture_for_content_short;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_product_content_short_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_product_content_short_' . $crm_request->id . '.png';
+                $file = $product_packaging_picture_for_content_short;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->product_packaging_picture_for_content_short = $filename;
+            }
         }
         else{
             $crm_request->product_packaging_picture_for_content_short = $product_packaging_picture_for_content_short;
         }
         if($actual_product_picture_for_content_short != null){
-            $filename = 'claim_actual_content_short_' . $crm_request->id . '.png';
-            $file = $actual_product_picture_for_content_short;
-            Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-            $crm_request->actual_product_picture_for_content_short = $filename;
+            if(is_string($actual_product_picture_for_content_short)){
+                $url = $actual_product_picture_for_content_short;
+                $contents = file_get_contents($url);
+                $filename = 'crm_claims/claim_actual_content_short_' . $crm_request->id . '.png';
+                Storage::disk('public')->put($filename, $contents);
+            }
+            else{
+                $filename = 'claim_actual_content_short_' . $crm_request->id . '.png';
+                $file = $actual_product_picture_for_content_short;
+                Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
+                $crm_request->actual_product_picture_for_content_short = $filename;
+            }
         }
         else{
             $crm_request->actual_product_picture_for_content_short = $actual_product_picture_for_content_short;
