@@ -121,7 +121,7 @@
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'}
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false}
                 ]
             });
 

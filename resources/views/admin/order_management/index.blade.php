@@ -922,7 +922,8 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[12, 'desc']],
+                // order: [[12, 'desc']],
+                ordering: false,
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -939,7 +940,7 @@
                     // {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     // {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     // {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false},
                     {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

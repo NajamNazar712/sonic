@@ -945,7 +945,8 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                // order: [[17, 'desc']],
+                ordering: false,
 
                 columns: [
                     {
@@ -987,7 +988,7 @@
                         class: 'align-middle consignee_address'
                     },
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {
                         data: 'cancellation_remarks',
