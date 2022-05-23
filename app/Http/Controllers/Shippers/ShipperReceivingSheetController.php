@@ -10,6 +10,7 @@ use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\Shipper\ShipperReceivingSheetSetting;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserReceivingSheet;
@@ -26,6 +27,9 @@ use App\Http\Models\GulAhmedPickupAddress;
 
 use Auth;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -1195,5 +1199,195 @@ class ShipperReceivingSheetController extends Controller
         }
 
         return $datatable->make(true);
+    }
+
+    public function shipments_excel_index(){
+        $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
+            $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
+        })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
+
+        return view('client.shipment.receiving_sheet.excel')->with(['pickup_addresses' => $pickup_addresses]);
+    }
+
+    public function shipments_excel_store(Request $request){
+        $user_id = session('user_id');
+        $pickup_address_id = $request->pickup_address;
+        if(!$pickup_address_id){
+            return redirect()->back()->with('error', 'Please select pickup_address');
+        }
+        $names = [
+            'tracking_number' => 'Tracking Number'
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        ];
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id, $pickup_address_id) {
+                $query->where('user_id', $user_id)->where('shipper_status_id', 1)->where('pickup_address_id', $pickup_address_id);
+            })]
+        ];
+
+        $fields = [0 => 'tracking_number'];
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number'];
+        }
+
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if($index == 1){
+                }
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_numbers = array();
+            $row_errors = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+
+            }
+            if(!empty($errors)){
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+                return redirect()->back()->withErrors($errors);
+            }
+            else{
+
+                $shipment_ids = array();
+                foreach($rows as $key => $row){
+                    $shipment = Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 1)->first();
+                    /*if(session('user_type') == 2){
+                        if(session('restriction') == 1){
+                            $sub_check = SubstituteUserShipment::where('substitute_user_id', Auth::id())->where('shipment_id', $shipment->id);
+                            if(!$sub_check->exists()){
+                                $row_errors[] = $shipment->tracking_number . ' is restricted';
+                                continue;
+                            }
+                        }
+                    }*/
+                    if (ReceivingSheetShipment::where('shipment_id', $shipment->id)->exists()) {
+                        $row_errors[] = $shipment->tracking_number . ' is already in a Receiving Sheet';
+                        continue;
+                    }
+
+                    if($shipment->pickup_address_id == $pickup_address_id){
+                        $receiving_sheet = ReceivingSheet::where('pickup_address_id', $pickup_address_id)->where('status', 0);
+                        if($receiving_sheet->exists()){
+                            $receiving_sheet = $receiving_sheet->first();
+                            $receiving_sheet->booked = $receiving_sheet->booked + 1;
+                        }
+                        else{
+                            $receiving_sheet = new ReceivingSheet();
+
+                            $receiving_sheet->user_id = $user_id;
+                            $receiving_sheet->pickup_address_id = $pickup_address_id;
+                            $receiving_sheet->booked = 1;
+                            $receiving_sheet->status = 0;
+                        }
+                        $receiving_sheet->save();
+                        if(session('user_type') == 2){
+                            $substitute_user_receiving_sheet = new SubstituteUserReceivingSheet();
+                            $substitute_user_receiving_sheet->substitute_user_id = Auth::id();
+                            $substitute_user_receiving_sheet->receiving_sheet_id = $receiving_sheet->id;
+                            $substitute_user_receiving_sheet->save();
+                        }
+                        $receiving_sheet_id = $receiving_sheet->id;
+
+                        $receiving_sheet_shipment = new ReceivingSheetShipment();
+
+                        $receiving_sheet_shipment->shipment_id = $shipment->id;
+                        $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+
+                        $receiving_sheet_shipment->save();
+                        $tracking_numbers[] = $shipment->tracking_number;
+                        $shipment_ids[] = $shipment->id;
+
+                    }
+                }
+
+                if ($user_id == 7828) {
+                    $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                    $confirmation_shipments = array();
+
+                    foreach ($shipment_ids as $shipment_id) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $confirmation_shipment = array();
+
+                        $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                        $confirmation_shipment['reference_number'] = $shipment->order_id;
+                        $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                        $confirmation_shipments[] = $confirmation_shipment;
+                    }
+
+                    dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                }
+
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
+
+
+                return redirect()->back()->with(['success' => 'Total ' . count($shipment_ids) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers, 'shipment_errors' => $row_errors]);
+            }
+
+        }
+        else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
     }
 }
