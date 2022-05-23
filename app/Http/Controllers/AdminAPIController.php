@@ -7121,7 +7121,8 @@ class AdminAPIController extends Controller
             if (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
                 $employee_leaves = EmployeeAttendanceAdjusment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
                     ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status', 'employee_attendance_adjusments.employee_id as employee_id', 'employee_attendance_adjusments.employee_type_id as type_id')
-                    ->where('employee_attendance_adjusments.reporter_id', $admin_id);
+                    ->where('employee_attendance_adjusments.reporter_id', $admin_id)
+                    ->where('employee_attendance_adjusments.status', 1);
             } else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
