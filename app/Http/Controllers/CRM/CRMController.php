@@ -50,8 +50,8 @@ class CRMController extends Controller
                 $filename = 'claim_product_' . $crm_request->id . '.png';
                 $file = $product_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->product_picture = $filename;
             }
+            $crm_request->product_picture = $filename;
         }
         else{
             $crm_request->product_picture = $product_picture;
@@ -67,8 +67,8 @@ class CRMController extends Controller
                 $filename = 'claim_invoice_' . $crm_request->id . '.png';
                 $file = $invoice_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->invoice_picture = $filename;
             }
+            $crm_request->invoice_picture = $filename;
         }
         else{
             $crm_request->invoice_picture = $invoice_picture;
@@ -84,8 +84,8 @@ class CRMController extends Controller
                 $filename = 'claim_damage_product_' . $crm_request->id . '.png';
                 $file = $damage_product_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->damage_product_picture = $filename;
             }
+            $crm_request->damage_product_picture = $filename;
         }
         else{
             $crm_request->damage_product_picture = $damage_product_picture;
@@ -101,8 +101,8 @@ class CRMController extends Controller
                 $filename = 'claim_product_packaging_' . $crm_request->id . '.png';
                 $file = $product_packaging_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->product_packaging_picture = $filename;
             }
+            $crm_request->product_packaging_picture = $filename;
         }
         else{
             $crm_request->product_packaging_picture = $product_packaging_picture;
@@ -118,8 +118,8 @@ class CRMController extends Controller
                 $filename = 'claim_actual_product_' . $crm_request->id . '.png';
                 $file = $actual_product_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->actual_product_picture = $filename;
             }
+            $crm_request->actual_product_picture = $filename;
         }
         else{
             $crm_request->actual_product_picture = $actual_product_picture;
@@ -135,8 +135,8 @@ class CRMController extends Controller
                 $filename = 'claim_missing_product_' . $crm_request->id . '.png';
                 $file = $missing_product_picture;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->missing_product_picture = $filename;
             }
+            $crm_request->missing_product_picture = $filename;
         }
         else{
             $crm_request->missing_product_picture = $missing_product_picture;
@@ -152,8 +152,8 @@ class CRMController extends Controller
                 $filename = 'claim_product_content_short_' . $crm_request->id . '.png';
                 $file = $product_packaging_picture_for_content_short;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->product_packaging_picture_for_content_short = $filename;
             }
+            $crm_request->product_packaging_picture_for_content_short = $filename;
         }
         else{
             $crm_request->product_packaging_picture_for_content_short = $product_packaging_picture_for_content_short;
@@ -169,8 +169,8 @@ class CRMController extends Controller
                 $filename = 'claim_actual_content_short_' . $crm_request->id . '.png';
                 $file = $actual_product_picture_for_content_short;
                 Storage::disk('public')->putFileAs('crm_claims', $file, $filename);
-                $crm_request->actual_product_picture_for_content_short = $filename;
             }
+            $crm_request->actual_product_picture_for_content_short = $filename;
         }
         else{
             $crm_request->actual_product_picture_for_content_short = $actual_product_picture_for_content_short;
