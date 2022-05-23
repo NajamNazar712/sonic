@@ -5349,32 +5349,36 @@ class AdminAPIController extends Controller
                     ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if ($shift_exists == 1) {
-                        if ($attendance->clock_in_datetime) {
-                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
-                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
-                            if ($attendance_date == $clock_in_date) {
-                                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
-                                $clock_in = Carbon::parse($attendance->clock_in_datetime);
-                                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
-                                if ($time_diff > 0) {
-                                    $datum["status"] = 2;//Late
+                    if($attendance->leave_status == 2){
+                        $datum["status"] = 4;
+                    }else{
+                        if ($shift_exists == 1) {
+                            if ($attendance->clock_in_datetime) {
+                                $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                                $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                                if ($attendance_date == $clock_in_date) {
+                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                    $clock_in = Carbon::parse($attendance->clock_in_datetime);
+                                    $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                                    if ($time_diff > 0) {
+                                        $datum["status"] = 2;//Late
+                                    } else {
+                                        $datum["status"] = 1;//Present
+                                    }
                                 } else {
-                                    $datum["status"] = 1;//Present
+                                    $datum["status"] = 2;//Late
                                 }
                             } else {
-                                $datum["status"] = 2;//Late
+                                $datum["status"] = 3;//Absent
                             }
-                        } else {
-                            $datum["status"] = 3;//Absent
                         }
-                    }
-                    else {
-                        if ($attendance->clock_in_datetime) {
-                            $datum["status"] = 1;//Present
-                        }
-                        else{
-                            $datum["status"] = 3;//Absent
+                        else {
+                            if ($attendance->clock_in_datetime) {
+                                $datum["status"] = 1;//Present
+                            }
+                            else{
+                                $datum["status"] = 3;//Absent
+                            }
                         }
                     }
                 } else {
