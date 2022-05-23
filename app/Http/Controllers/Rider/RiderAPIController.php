@@ -10345,7 +10345,6 @@ class RiderAPIController extends Controller
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
-                'branch_name' => ['nullable'],
                 'iban' => ['nullable'],
 
                 //replacementInfo
@@ -10436,12 +10435,11 @@ class RiderAPIController extends Controller
                             $employee_request->sub_department = $request->sub_department;
                             $employee_request->save();
 
-                            if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
                                 $employee_bank_info = new EmployeeBankInformation();
                                 $employee_bank_info->employee_id = $employee_request->id;
                                 $employee_bank_info->account_title = $request->account_title;
                                 $employee_bank_info->bank_id = $request->bank_id;
-                                $employee_bank_info->branch_name = $request->branch_name;
                                 $employee_bank_info->iban = $request->iban;
                                 $employee_bank_info->save();
                             }
