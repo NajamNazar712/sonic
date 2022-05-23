@@ -820,7 +820,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
             else {
-                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for Shipper(s) having Segment General Logistics with Sub Segment Express'];
+                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for shipments of General Logistics - Express Shipper(s)'];
             }
         }
         $shipment_item = ShipmentItem::find($request->tracking_number);
@@ -846,7 +846,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
             else{
-                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for Shipper having Segment General Logistics with Sub Segment Express'];
+                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for shipments of General Logistics - Express Shipper(s)'];
             }
 
         }
@@ -872,7 +872,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
             else {
-                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for Shipper having Segment General Logistics with Sub Segment Express'];
+                return ['status' => 1, 'error' => 'Bulk Arrival is only allowed for shipments of General Logistics - Express Shipper(s)'];
             }
         }
 
