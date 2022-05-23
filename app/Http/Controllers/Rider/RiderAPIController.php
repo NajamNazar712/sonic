@@ -11662,7 +11662,7 @@ class RiderAPIController extends Controller
             $department = AdminDepartment::find(6);
             if($department){
                 if ($rider) {
-                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', 1)->whereDate('date', $request->date);
+                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->whereDate('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                     }

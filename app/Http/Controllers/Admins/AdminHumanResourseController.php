@@ -1429,10 +1429,7 @@ class AdminHumanResourseController extends Controller
         }
         $bank_info->employee_id = $employee->id;
         $bank_info->account_title = $request->account_title;
-        $bank_info->branch_code = $request->branch_code;
-        $bank_info->account_no = $request->account_number;
         $bank_info->bank_id = $request->bank_name;
-        $bank_info->branch_name = $request->branch_name;
         $bank_info->iban = $request->iban_number;
         $bank_info->save();
 
