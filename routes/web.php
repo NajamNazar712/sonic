@@ -2847,6 +2847,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
+        });
+
         Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ccd_booking_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
