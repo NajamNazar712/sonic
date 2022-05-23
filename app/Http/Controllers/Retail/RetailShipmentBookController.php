@@ -33,6 +33,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Retail\RetailReference;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -159,10 +160,18 @@ class RetailShipmentBookController extends Controller
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes]);
+
+        $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs]);
     }
 
     public function store(Request $request){
+
+        if($request->ref == 'Others'){
+          $ref = $request->ref_name;
+        }else{
+          $ref = $request->ref;
+        }
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
         $user_id = $shipper_user_id;
@@ -410,6 +419,11 @@ class RetailShipmentBookController extends Controller
 
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+        $retail_reference = new RetailReference;
+        $retail_reference->shipment_id = $shipment_id;
+        $retail_reference->ref = $ref;
+        $retail_reference->save();
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);

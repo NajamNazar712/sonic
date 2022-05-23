@@ -135,6 +135,8 @@
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered Date</th>
                         <th class="border-primary border-darken-1">Booking Staff ID</th>
+                        <th class="border-primary border-darken-1">Reference</th>
+                        
                     </tr>
                     </thead>
                 </table>
@@ -326,6 +328,8 @@
                             head.push('Net Payable');
                             head.push('Delivered Date');
                             head.push('Booking Staff ID');
+                            head.push('Reference');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -357,6 +361,8 @@
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.booked_by_id);
+                                row.push(values.retail_reference);
+                                
 
                                 body.push(row);
                             });
@@ -436,6 +442,8 @@
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'booked_by_id' ,name: 'ru.id', class: 'align-middle booked_by_id'},
+                    { data: 'retail_reference' ,name: 'rref.ref', class: 'align-middle retail_reference'},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

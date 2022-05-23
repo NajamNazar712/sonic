@@ -40,6 +40,18 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <select name="ref" id="ref" class="select2 form-control" data-rule-required="true" data-msg-required="Reference is required">
+                                            @foreach($refs as $ref)
+                                                <option value="{{$ref}}">{{$ref}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="d-none" id="other_ref">
+                                        <div class="form-group">
+                                            <input type="text" name="ref_name" id="ref_name" class="form-control" placeholder="New Reference" data-rule-required="true" data-msg-required="Reference is required">
+                                        </div>
+                                    </div>
                                     <div class="form-group d-none" id="domestic_destination_div">
                                         <select name="domestic_destination" id="domestic_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
                                             @foreach($domestic_cities as $domestic_city)
@@ -382,6 +394,18 @@
                 placeholder:"Select Shipment*",
                 allowClear:true
             });
+            $('#ref').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Where did you hear about us*",
+                allowClear:true
+            }).bind('change', function() {
+                if ($(this).val() === 'Others') {
+                    $('#other_ref').removeClass('d-none');
+                }
+                else{
+                    $('#other_ref').addClass('d-none');
+                }
+            });;
             $('#business_category').select2({
                 width:'100%',
                 placeholder:"Select Shipment Category*"
