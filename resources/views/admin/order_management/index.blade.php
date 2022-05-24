@@ -62,6 +62,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
+                        <th class="border-primary border-darken-1">Shipment ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -922,26 +923,26 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                // order: [[12, 'desc']],
-                ordering: false,
+                order: [[1, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
-                    {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    // {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    // {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    // {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false},
-                    {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode'},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}, orderable: false},
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category', orderable: false},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id', orderable: false},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper', orderable: false},
+                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false},
+                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status', orderable: false},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin', orderable: false},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination', orderable: false},
+                    {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor', orderable: false},
+                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name', orderable: false},
+                    // {data: 'phone', name: 'phone', class: 'align-middle phone', orderable: false},
+                    // {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address', orderable: false},
+                    // {data: 'amount', name: 'shipments.amount', class: 'align-middle amount', orderable: false},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false, orderable: false},
+                    {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode', orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

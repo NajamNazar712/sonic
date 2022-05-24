@@ -42,6 +42,7 @@
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
@@ -108,19 +109,20 @@
                         d.phone_number = $('#track_form .phone_number').val();
                     }
                 },
-                ordering: false,
+                order: [[0, 'desc']],
                 columns: [
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id', orderable: false},
+                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name', orderable: false},
+                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason', orderable: false},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin', orderable: false},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination', orderable: false},
+                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name', orderable: false},
+                    {data: 'phone', name: 'phone', class: 'align-middle phone', orderable: false},
+                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address', orderable: false},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount', orderable: false},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false}
                 ]
             });
