@@ -9017,7 +9017,9 @@ class AdminReportsController extends Controller
                 if ($shipments->picture_path != null) {
                     $exists = Storage::disk('public')->exists($shipments->picture_path);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->picture_path)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9033,7 +9035,9 @@ class AdminReportsController extends Controller
                 if ($shipments->cnic_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->cnic_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->cnic_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9050,7 +9054,9 @@ class AdminReportsController extends Controller
                 if ($shipments->house_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->house_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->house_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9067,7 +9073,9 @@ class AdminReportsController extends Controller
                 if ($shipments->ccd_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->ccd_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->ccd_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9084,7 +9092,9 @@ class AdminReportsController extends Controller
                 if ($shipments->audio_path != null) {
                     $exists = Storage::disk('public')->exists($shipments->audio_path);
                     if ($exists) {
-                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-lg la-file-sound-o align-middle"></i> Listen</button></div>';
+//                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-lg la-file-sound-o align-middle"></i> Listen</button></div>';
+                        $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' .  asset(Storage::url($shipments->audio_path))  . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle"> Listen</span></a>';
+
                     } else {
                         $sound = Storage::disk('s3')->temporaryUrl($shipments->audio_path, now()->addMinutes(5));
                         $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $sound . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle"> Listen</span></a>';
