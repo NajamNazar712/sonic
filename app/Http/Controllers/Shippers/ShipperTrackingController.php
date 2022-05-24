@@ -18,11 +18,13 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
-
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use Auth;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ShipperTrackingController extends Controller
 {
@@ -239,6 +241,25 @@ class ShipperTrackingController extends Controller
                                     $return_note = ReturnNote::find($journey->reference_1_id);
                                     if($return_note && $return_note->actual_date != null){
                                         $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                    }
+                                }
+
+                                if(in_array($journey->shipper_status_id, [1])){
+                                    $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
+                                    if($replacement_image->exists()){
+                                        $replacement_image = $replacement_image->first();
+                                        $journey_details['status'] .= '<button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    }
+                                }
+                                if(in_array($journey->shipper_status_id, [30])){
+                                    $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',30);
+                                    if($replacement_image2->exists()){
+                                        $replacement_image2 = $replacement_image2->first();
+                                        if($replacement_image2->picture_path != null){
+
+                                            $journey_details['status'] .= '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
+
                                     }
                                 }
 
@@ -588,5 +609,6 @@ class ShipperTrackingController extends Controller
 
         return $tracking;
     }
+
 
 }

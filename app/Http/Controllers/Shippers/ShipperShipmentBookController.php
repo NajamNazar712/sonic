@@ -497,7 +497,7 @@ class ShipperShipmentBookController extends Controller
 
     public function store(Request $request) {
         $rules = [
-            'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'replacement_parcel_img' => ['required', 'mimes:png,jpeg,jpg'],
         ];
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
