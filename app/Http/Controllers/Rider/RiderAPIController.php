@@ -8836,6 +8836,7 @@ class RiderAPIController extends Controller
             'cnic_image' => ['nullable', 'image'],
             'house_image' => ['nullable', 'image'],
             'ccd_image' => ['nullable', 'image'],
+            'replacement_image' => ['nullable', 'image'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8944,6 +8945,13 @@ class RiderAPIController extends Controller
                             $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
                             $rider_delivery->house_image = $picture_path;
+                            $rider_delivery->save();
+                        }
+                        if ($request->has('replacement_image')) {
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/replacement_image_' . $rider_delivery->id . '_' . $time . '.png';
+                            Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_image));
+                            $rider_delivery->replacement_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('ccd_image')) {
