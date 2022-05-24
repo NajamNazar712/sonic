@@ -1622,14 +1622,7 @@ class ShipperDashboardController extends Controller
         }
 
         if ($phone_number = $request->get('phone_number')) {
-            $phone_number = str_replace('-', '', $phone_number);
-
-            $phone_number = '%' . $phone_number . '%';
-
-            $datatable->where(function ($sub_query) use ($phone_number) {
-                $sub_query->whereRaw('REPLACE(`shipments`.`consignee_phone_number_1`, "-", "") LIKE ?', [$phone_number])
-                ->orWhereRaw('REPLACE(`shipments`.`consignee_phone_number_2`, "-", "") LIKE ?', [$phone_number]);
-            });
+            $datatable->where('shipments.consignee_phone_number_1', $phone_number);
         }
 
         if ($order_id = $request->get('order_id')) {

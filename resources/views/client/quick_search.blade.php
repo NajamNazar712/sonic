@@ -23,8 +23,8 @@
                                             </div>
 
                                             <div class="form-group col-auto">
-                                                <label>Phone Number (Minimum 10 Characters)</label>
-                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number" data-rule-minlength="10" data-msg-minlength="Minimum 10 Characters">
+                                                <label>Phone Number (Full)</label>
+                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number">
                                             </div>
 
                                             <div class="form-group col-auto">
@@ -87,8 +87,9 @@
                 'rightAlign': false
             });
 
-            $('#track_form .phone_number').inputmask('Regex', {
-                'regex': '[0-9]*'
+            $('#track_form .phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
             });
 
             var table = $('#datatable').DataTable({
