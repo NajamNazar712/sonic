@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Employee Leaves')
+@section('title', 'Employee Attendance Adjustments')
 
 @section('content')
-    <h1>Employee Leaves</h1>
+    <h1>Employee Attendance Adjustments</h1>
 
     <section>
         <div class="row">
@@ -69,20 +69,18 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
-                                    <th class="border-primary border-darken-1">Leave ID</th>
+                                    <th class="border-primary border-darken-1">Adjustment ID</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
-                                    <th class="border-primary border-darken-1">Availed Leaves</th>
+                                    <th class="border-primary border-darken-1">Availed Adjustment</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Leave Purpose</th>
+                                    <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Reject Reason</th>
-                                    <th class="border-primary border-darken-1">Leave From</th>
-                                    <th class="border-primary border-darken-1">Leave TO</th>
-                                    <th class="border-primary border-darken-1">Days</th>
+                                    <th class="border-primary border-darken-1">Date</th>
                                     <th class="border-primary border-darken-1">Request Date</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
@@ -96,136 +94,6 @@
             </div>
         </div>
     </section>
-    <div class="modal fade text-left" id="editLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="editLeaveModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Edit Leave</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editLeaveForm" novalidate="novalidate">
-                        {{csrf_field()}}
-                        <input type="hidden" name="leave_id" id="leave_id" value="">
-                        <div class="row mb-2 justify-content-center">
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_name" class="text-left">Employee Name</label>
-                                    <input type="text" name="name" id="edit_name" class="form-control" readonly>
-                                </div>
-                            </div>
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_trax_id" class="text-left">Employee ID</label>
-                                    <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_designation" class="text-left">Designation</label>
-                                    <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_department" class="text-left">Department</label>
-                                    <input type="text" name="department" id="edit_department" class="form-control" readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
-                                <div class="form-group input-group ">
-                                    <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                                    </div>
-                                    <input type="text" name="from"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <label for="edit_to" class="text-left">To Date</label>
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                                    </div>
-                                    <input type="text" name="to"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="edit_to" placeholder="Leave Date (To)">
-                                </div>
-                            </div>
-                            <div class="col mt-1">
-                                <div class="form-group">
-                                    <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Edit</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade text-left" id="rejectLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="rejectLeaveModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Reject Leave</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.reject')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectLeaveForm" novalidate="novalidate">
-                        {{csrf_field()}}
-                        <input type="hidden" name="leave_id" id="reject_leave_id" value="">
-                        <div class="form-group">
-                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason" rows="6" maxlength="255"></textarea>
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="reject" class="btn btn-primary" value="reject">Reject</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade text-left" id="approveLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="approveLeaveModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Approve Leave</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.leave.approve')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveLeaveForm" novalidate="novalidate">
-                        {{csrf_field()}}
-                        <input type="hidden" name="leave_id" id="approve_leave_id" value="">
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -273,33 +141,6 @@
                 allowClear:true
             });
 
-            var from_date = $('#editLeaveForm #edit_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            var to_date = $('#editLeaveForm #edit_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
-                        $('#editLeaveForm #edit_from').pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
-                    }
-                }
-            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -308,25 +149,23 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resource.leave.list') }}',
+                        url: '{{ route('admin.human_resource.adjustment.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Leave ID');
+                            head.push('Adjustment ID');
                             head.push('Employee ID');
                             head.push('Employee Name');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Employee Type');
                             head.push('CNIC');
-                            head.push('Availed Leaves');
+                            head.push('Availed Adjustment');
                             head.push('Status');
-                            head.push('Leave Purpose');
+                            head.push('Reason');
                             head.push('Reject Reason');
-                            head.push('Leave From');
-                            head.push('Leave To');
-                            head.push('Days');
+                            head.push('Date');
                             head.push('Requested Date');
                             head.push('Updated By');
                             head.push('Updated At');
@@ -334,20 +173,18 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.leave_id);
+                                row.push(values.adjustment_id);
                                 row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.employee_type);
                                 row.push(values.cnic);
-                                row.push(values.leave_count);
+                                row.push(values.adjustment_count);
                                 row.push(values.status);
                                 row.push(values.applied_reason);
                                 row.push(values.reject_reason);
-                                row.push(values.from);
-                                row.push(values.to);
-                                row.push(values.days);
+                                row.push(values.date);
                                 row.push(values.requested);
                                 row.push(values.updated_by);
                                 row.push(values.updated);
@@ -365,7 +202,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Employee Leaves',
+                        title: 'Employee Attendance Adjustments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -381,7 +218,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.human_resource.leave.list') }}',
+                    url: '{{ route('admin.human_resource.adjustment.list') }}',
                     data: function (d) {
 
                         d.search_admin = $('#search_admin').val();
@@ -395,24 +232,21 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
-                    {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
+                    {data: 'adjustment_id', name: 'employee_attendance_adjustments.id', class: 'align-middle adjustment_id'},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'employee_type', name: 'employee_leaves.employee_type_id', class: 'align-middle employee_type'},
+                    {data: 'employee_type', name: 'employee_attendance_adjustments.employee_type_id', class: 'align-middle employee_type'},
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
-                    {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
+                    {data: 'adjustment_count', name: 'ls.name', class: 'align-middle adjustment_count', orderable: false, searchable: false},
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
-                    {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false},
-                    {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false},
-                    {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
-                    {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
-                    {data: 'days', name: '', class: 'align-middle days', orderable: false, searchable: false},
+                    {data: 'applied_reason', name: 'employee_attendance_adjustments.applied_reason', class: 'align-middle applied_reason', orderable: false},
+                    {data: 'reject_reason', name: 'employee_attendance_adjustments.rejected_reason', class: 'align-middle reject_reason', orderable: false},
+                    {data: 'date', name: 'employee_attendance_adjustments.date', class: 'align-middle date'},
                     {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'employee_leaves.updated_at', class: 'align-middle updated'},
-                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -487,110 +321,6 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw(true);
-            });
-
-            $('body').on('click', '.edit', function (e) {
-
-                var id = $(this).data('target-id');
-                var name = table.row($(this).parents('tr')).data().name;
-                var trax_id = table.row($(this).parents('tr')).data().trax_id;
-                var designation = table.row($(this).parents('tr')).data().designation;
-                var department = table.row($(this).parents('tr')).data().department;
-                var from = table.row($(this).parents('tr')).data().from;
-                var to = table.row($(this).parents('tr')).data().to;
-                var reason = table.row($(this).parents('tr')).data().applied_reason;
-                from_date.pickadate('picker').set('select',new Date(from));
-                to_date.pickadate('picker').set('select',new Date(to));
-                from_date.pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
-                $('#leave_id').val(id);
-                $('#edit_name').val(name);
-                $('#edit_trax_id').val(trax_id);
-                $('#edit_department').val(department);
-                $('#edit_designation').val(designation);
-                $('#edit_reason').val(reason);
-                $('#editLeaveModal').modal('show');
-            });
-
-            $('body').on('click', '.reject', function (e) {
-                var id = $(this).data('target-id');
-                $('#reject_leave_id').val(id);
-                $('#rejectLeaveModal').modal('show');
-            });
-
-            $('#rejectLeaveModal').on('hide.bs.modal', function () {
-                $('#reject_leave_id').val('');
-                $('#reject_reason').val('');
-            });
-
-            $("#rejectLeaveForm").validate({
-                errorClass: "danger",
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function (form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Leave is being reject!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-
-            $("#editLeaveForm").validate({
-                errorClass: "danger",
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function (form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Leave is being Updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-
-            $('body').on('click', '.approve', function (e) {
-                var id = $(this).data('target-id');
-                $('#approveLeaveForm #approve_leave_id').val(id);
-                atext = "Select Yes to Approve Request!";
-                swal({
-                    title: 'Are You Sure?',
-                    text: atext,
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $('#approveLeaveForm').submit();
-                    }
-                });
-
             });
         });
     </script>

@@ -3756,6 +3756,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
 
+        Route::prefix('adjustment')->name('leave.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@attendance_adjustment_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@attendance_adjustment_list')->name('list');
+        });
+
         Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');

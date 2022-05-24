@@ -34,6 +34,6 @@ class CreateEmployeeAttendanceAdjusmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_attendance_adjusments');
+        Schema::dropIfExists('employee_attendance_adjustments');
     }
 }
