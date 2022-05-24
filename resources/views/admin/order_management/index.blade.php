@@ -972,43 +972,44 @@
                         var column = this;
                         var header = column.header();
 
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            }else if($(header).is('.status')){
+                                $(drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.service_type')){
+                                $(service_drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.business_category')){
+                                $(business_category).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.payment_status')){
+                                $(payment_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }
+                            else if($(header).is('.payment_mode')){
+                                $(payment_mode).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function() {
+                                        column.search($(this).val(), false, false, true);
+                                }).wrap(td).after(icon);
 
-                        if ($(header).is('.action') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
-                            $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.business_category')){
-                            $(business_category).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.payment_status')){
-                            $(payment_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.payment_mode')){
-                            $(payment_mode).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                    column.search($(this).val(), false, false, true);
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });

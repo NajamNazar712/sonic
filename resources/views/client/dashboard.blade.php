@@ -1047,53 +1047,54 @@
                         var column = this;
                         var header = column.header();
 
-
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_status')) {
-                            $(payment_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_module')) {
-                                $(payment_mode).appendTo($(search))
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            } else if ($(header).is('.status')) {
+                                $(status_select).appendTo($(search))
                                     .on('change', function () {
                                         column.search($(this).val(), false, false, true).draw();
                                     }).wrap(td);
-                        }  else if ($(header).is('.business_category')) {
-                            $(business_category).appendTo($(search))
-                                .on('change', function () {
+                            } else if ($(header).is('.payment_status')) {
+                                $(payment_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.payment_module')) {
+                                    $(payment_mode).appendTo($(search))
+                                        .on('change', function () {
+                                            column.search($(this).val(), false, false, true).draw();
+                                        }).wrap(td);
+                            }  else if ($(header).is('.business_category')) {
+                                $(business_category).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.service_type')) {
+                                $(service_drop_select).appendTo($(search))
+                                    .on('change', function () {
+                                        console.log($(this).val())
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.product_type')) {
+                                $(product_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.booked_by')) {
+                                $(user_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.service_type')) {
-                            $(service_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    console.log($(this).val())
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.product_type')) {
-                            $(product_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.booked_by')) {
-                            $(user_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                                }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });
