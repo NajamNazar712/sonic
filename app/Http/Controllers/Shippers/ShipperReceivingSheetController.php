@@ -1309,7 +1309,7 @@ class ShipperReceivingSheetController extends Controller
                 $receiving_sheet_id = NULL;
                 foreach($rows as $key => $row){
                     $shipment = Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 1)->first();
-                    /*if(session('user_type') == 2){
+                    if(session('user_type') == 2){
                         if(session('restriction') == 1){
                             $sub_check = SubstituteUserShipment::where('substitute_user_id', Auth::id())->where('shipment_id', $shipment->id);
                             if(!$sub_check->exists()){
@@ -1317,7 +1317,7 @@ class ShipperReceivingSheetController extends Controller
                                 continue;
                             }
                         }
-                    }*/
+                    }
                     if (ReceivingSheetShipment::where('shipment_id', $shipment->id)->exists()) {
                         $row_errors[] = $shipment->tracking_number . ' is already in a Receiving Sheet';
                         continue;
