@@ -23,8 +23,8 @@
                                             </div>
 
                                             <div class="form-group col-auto">
-                                                <label>Phone Number (Minimum 10 Characters)</label>
-                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number" data-rule-minlength="10" data-msg-minlength="Minimum 10 Characters">
+                                                <label>Phone Number (Full)</label>
+                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number">
                                             </div>
 
                                             <div class="form-group col-auto">
@@ -42,6 +42,7 @@
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
@@ -72,7 +73,7 @@
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -86,8 +87,9 @@
                 'rightAlign': false
             });
 
-            $('#track_form .phone_number').inputmask('Regex', {
-                'regex': '[0-9]*'
+            $('#track_form .phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
             });
 
             var table = $('#datatable').DataTable({
@@ -108,20 +110,21 @@
                         d.phone_number = $('#track_form .phone_number').val();
                     }
                 },
-                ordering: false,
+                order: [[0, 'desc']],
                 columns: [
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'}
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id', orderable: false},
+                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name', orderable: false},
+                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason', orderable: false},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin', orderable: false},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination', orderable: false},
+                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name', orderable: false},
+                    {data: 'phone', name: 'phone', class: 'align-middle phone', orderable: false},
+                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address', orderable: false},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount', orderable: false},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false}
                 ]
             });
 

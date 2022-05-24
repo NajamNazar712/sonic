@@ -51,6 +51,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S No.</th>
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Business Category</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
@@ -501,7 +502,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
@@ -945,7 +946,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                order: [[2, 'desc']],
 
                 columns: [
                     {
@@ -968,36 +969,40 @@
                             return '';
                         }
                     },
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},
-                    {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by'},
-                    {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number', orderable: false},
+                    {data: 'business_category', name: 'bc.id', class: 'align-middle business_category', orderable: false},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id', orderable: false},
+                    {data: 'user_name', name: 'u.name', class: 'align-middle user_name', orderable: false},
+                    {data: 'booked_by', name: 'shipments.booked_by', class: 'align-middle booked_by', orderable: false},
+                    {data: 'service_type', name: 'bt.id', class: 'align-middle service_type', orderable: false},
+                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason', orderable: false},
+                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status', orderable: false},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin', orderable: false},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination', orderable: false},
+                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name', orderable: false},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {
                         data: 'consignee_address',
                         name: 'shipments.consignee_address',
-                        class: 'align-middle consignee_address'
+                        class: 'align-middle consignee_address',
+                        orderable: false
                     },
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
-                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount', orderable: false},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date', orderable: false, searchable: false},
+                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions', orderable: false},
                     {
                         data: 'cancellation_remarks',
                         name: 'shipments_journey.remarks',
-                        class: 'align-middle cancellation_remarks'
+                        class: 'align-middle cancellation_remarks',
+                        orderable: false
                     },
                     {
                         data: 'payment_module',
                         name: 'shipments.payment_mode_id',
-                        class: 'align-middle payment_module'
+                        class: 'align-middle payment_module',
+                        orderable: false
                     },
                     {
                         data: 'action',
@@ -1042,53 +1047,54 @@
                         var column = this;
                         var header = column.header();
 
-
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_status')) {
-                            $(payment_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_module')) {
-                                $(payment_mode).appendTo($(search))
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            } else if ($(header).is('.status')) {
+                                $(status_select).appendTo($(search))
                                     .on('change', function () {
                                         column.search($(this).val(), false, false, true).draw();
                                     }).wrap(td);
-                        }  else if ($(header).is('.business_category')) {
-                            $(business_category).appendTo($(search))
-                                .on('change', function () {
+                            } else if ($(header).is('.payment_status')) {
+                                $(payment_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.payment_module')) {
+                                    $(payment_mode).appendTo($(search))
+                                        .on('change', function () {
+                                            column.search($(this).val(), false, false, true).draw();
+                                        }).wrap(td);
+                            }  else if ($(header).is('.business_category')) {
+                                $(business_category).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.service_type')) {
+                                $(service_drop_select).appendTo($(search))
+                                    .on('change', function () {
+                                        console.log($(this).val())
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.product_type')) {
+                                $(product_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.booked_by')) {
+                                $(user_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.service_type')) {
-                            $(service_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    console.log($(this).val())
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.product_type')) {
-                            $(product_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.booked_by')) {
-                            $(user_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                                }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });

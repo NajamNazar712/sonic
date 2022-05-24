@@ -303,6 +303,7 @@
                 $('#department_edit').val(department_id).trigger('change');
                 $('#edit_description').val(description);
                 $("#hubs_edit").val(hubs).trigger('change');
+                console.log(hubs);
                 $('#role_dummy').val(role_id);
                 $('#editDesignationModal').modal('show');
             });

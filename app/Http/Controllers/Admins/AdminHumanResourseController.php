@@ -2850,8 +2850,8 @@ class AdminHumanResourseController extends Controller
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type', 'cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
-
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id','cities.hub_id');
+        
         $datatable = Datatables::of($incentives);
 
         if ($city = $request->get('search_city')) {
@@ -2988,9 +2988,12 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary');
+        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary','hub_id');
         if (!in_array(596, session('permissions'))) {
             $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
+        }
+        else{
+            $payslips->whereIn('hub_id',session('hubs'));
         }
 
         $datatable = Datatables::of($payslips)
@@ -3113,7 +3116,7 @@ class AdminHumanResourseController extends Controller
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
-            'hub' => ['required', 'between:1,100'],
+            'hub' => ['required', 'between:1,100',Rule::exists('cities','name')],
             'zone' => ['nullable', 'between:1,100'],
             'joining_date' => ['required', 'date_format:Y-m-d'],
             'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
@@ -3237,6 +3240,7 @@ class AdminHumanResourseController extends Controller
                         $payslip->designation = trim($row['designation']);
                         $payslip->department = trim($row['department']);
                         $payslip->hub = trim($row['hub']);
+                        $payslip->hub_id = City::where('name',$row['hub'])->first()->id;
                         $payslip->zone = trim($row['zone']);
                         $payslip->joining_date = trim($row['joining_date']);
                         $payslip->confirmation_date = trim($row['confirmation_date']);
