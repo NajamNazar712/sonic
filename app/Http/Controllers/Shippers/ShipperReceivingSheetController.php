@@ -1306,6 +1306,7 @@ class ShipperReceivingSheetController extends Controller
             else{
 
                 $shipment_ids = array();
+                $receiving_sheet_id = NULL;
                 foreach($rows as $key => $row){
                     $shipment = Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 1)->first();
                     /*if(session('user_type') == 2){
@@ -1323,27 +1324,33 @@ class ShipperReceivingSheetController extends Controller
                     }
 
                     if($shipment->pickup_address_id == $pickup_address_id){
-                        $receiving_sheet = ReceivingSheet::where('pickup_address_id', $pickup_address_id)->where('status', 0);
-                        if($receiving_sheet->exists()){
-                            $receiving_sheet = $receiving_sheet->first();
-                            $receiving_sheet->booked = $receiving_sheet->booked + 1;
-                        }
-                        else{
+                        if ($receiving_sheet_id == NULL) {
                             $receiving_sheet = new ReceivingSheet();
 
                             $receiving_sheet->user_id = $user_id;
                             $receiving_sheet->pickup_address_id = $pickup_address_id;
                             $receiving_sheet->booked = 1;
                             $receiving_sheet->status = 0;
+
+                            $receiving_sheet->save();
+
+                            $receiving_sheet_id = $receiving_sheet->id;
                         }
-                        $receiving_sheet->save();
+                        else {
+                            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+                            $receiving_sheet->booked = $receiving_sheet->booked + 1;
+
+                            $receiving_sheet->save();
+                        }
+
                         if(session('user_type') == 2){
                             $substitute_user_receiving_sheet = new SubstituteUserReceivingSheet();
                             $substitute_user_receiving_sheet->substitute_user_id = Auth::id();
                             $substitute_user_receiving_sheet->receiving_sheet_id = $receiving_sheet->id;
                             $substitute_user_receiving_sheet->save();
                         }
-                        $receiving_sheet_id = $receiving_sheet->id;
+                        // $receiving_sheet_id = $receiving_sheet->id;
 
                         $receiving_sheet_shipment = new ReceivingSheetShipment();
 
