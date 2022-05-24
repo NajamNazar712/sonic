@@ -8872,8 +8872,8 @@ class RiderAPIController extends Controller
                             $receiver_name = str_replace('"', '', $request->receiver_name);
                             $received_by = $receiver_name;
                         }
-                        if ($request->cnic != "Empty") {
-                            $cnic = str_replace('"', '', $request->cnic);
+                        $cnic = str_replace('"', '', $request->cnic);
+                        if ($cnic != "Empty") {
                             $rider_delivery->cnic = $cnic;
                             $received_by .= ' | ' . $cnic;
                         }
