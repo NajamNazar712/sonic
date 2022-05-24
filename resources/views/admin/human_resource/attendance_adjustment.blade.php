@@ -81,7 +81,7 @@
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Reject Reason</th>
                                     <th class="border-primary border-darken-1">Date</th>
-                                    <th class="border-primary border-darken-1">Request Date</th>
+                                    <th class="border-primary border-darken-1">Request At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                 </tr>
@@ -165,7 +165,7 @@
                             head.push('Reason');
                             head.push('Reject Reason');
                             head.push('Date');
-                            head.push('Requested Date');
+                            head.push('Requested At');
                             head.push('Updated By');
                             head.push('Updated At');
 

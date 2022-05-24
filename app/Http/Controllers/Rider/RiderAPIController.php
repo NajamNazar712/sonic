@@ -8831,6 +8831,7 @@ class RiderAPIController extends Controller
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'receiver_name' => ['nullable', 'string', 'max:255'],
             'cnic' => ['nullable', 'max:255'],
+            'relation' => ['nullable', 'max:255'],
             'picture' => ['nullable', 'image'],
             'cnic_image' => ['nullable', 'image'],
             'house_image' => ['nullable', 'image'],
@@ -8870,9 +8871,12 @@ class RiderAPIController extends Controller
                         if ($request->has('receiver_name')) {
                             $received_by = $request->receiver_name;
                         }
-                        if ($request->has('cnic')) {
+                        if ($request->cnic != "") {
                             $rider_delivery->cnic = $request->cnic;
                             $received_by .= ' | ' . $request->cnic;
+                        }
+                        if($request->relation != ""){
+                            $rider_delivery->relation = $request->relation;
                         }
 
 //                if($request->has('receiver_name')){
