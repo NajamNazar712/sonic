@@ -268,7 +268,6 @@
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">CNIC No.</th>
                             <th class="border-primary border-darken-1">Relation</th>
-                            <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
                             <th class="border-primary border-darken-1">CNIC</th>
                             <th class="border-primary border-darken-1">House</th>
