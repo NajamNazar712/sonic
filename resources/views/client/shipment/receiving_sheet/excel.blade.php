@@ -66,7 +66,7 @@
                                     <div class="col-2">
                                         <div class="form-group text-right">
 
-                                            <a href="{{ asset('file/Trax Receiving Sheet Excel Template.xlsx') }}?v=24_05_2022" class="btn btn-primary btn-lg"><i class="la la-download"></i> Template Download</a>
+                                            <a href="{{ asset('file/Trax Receiving Sheet Excel Template.xlsx') }}?v=24_05_2022" class="btn btn-primary"><i class="la la-download"></i> Template Download</a>
 
                                         </div>
                                     </div>
