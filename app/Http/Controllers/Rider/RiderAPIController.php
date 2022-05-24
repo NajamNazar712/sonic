@@ -11663,24 +11663,29 @@ class RiderAPIController extends Controller
             $rider = Rider::find($rider_id);
             $department = AdminDepartment::find(6);
             if($department){
-                if ($rider) {
-                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->where('date', $request->date);
-                    if ($leave->exists()) {
-                        return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
+                if($department->department_head_id){
+                    if ($rider) {
+                        $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->where('date', $request->date);
+                        if ($leave->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
+                        }
+                        $leave_request = new EmployeeAttendanceAdjustment();
+                        $leave_request->employee_id = $rider_id;
+                        $leave_request->employee_type_id = 2;
+                        $leave_request->reporter_id = $department->department_head_id;
+                        $leave_request->date = $request->date;
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->save();
+                        NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
+                        NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
+                        $message = "Adjustment Request submitted successfully";
+                        return response()->json(['status' => 0, 'apply_message' => $message]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'User Not Found']);
                     }
-                    $leave_request = new EmployeeLeave();
-                    $leave_request->employee_id = $rider_id;
-                    $leave_request->employee_type_id = 2;
-                    $leave_request->reporter_id = $department->department_head_id;
-                    $leave_request->date = $request->date;
-                    $leave_request->applied_reason = $request->reason;
-                    $leave_request->save();
-                    NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
-                    NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
-                    $message = "Adjustment Request submitted successfully";
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'User Not Found']);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'Department Head Not Found']);
                 }
             }else {
                 return response()->json(['status' => 1, 'message' => 'Department Not Found']);
