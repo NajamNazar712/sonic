@@ -9093,6 +9093,22 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
+            })
+
+            ->editColumn('audio_path', function ($shipments) {
+                $audio = '';
+                if ($shipments->audio_path != null) {
+                    $exists = Storage::disk('public')->exists($shipments->audio_path);
+                    if ($exists) {
+                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-lg la-file-sound-o align-middle"></i> Listen</button></div>';
+                    } else {
+                        $sound = Storage::disk('s3')->temporaryUrl($shipments->audio_path, now()->addMinutes(5));
+                        $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $sound . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle"> Listen</span></a>';
+                    }
+                    return $audio;
+                } else {
+                    return '-';
+                }
             });
         return $datatables->make(true);
 

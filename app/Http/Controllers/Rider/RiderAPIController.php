@@ -8877,8 +8877,9 @@ class RiderAPIController extends Controller
                             $rider_delivery->cnic = $cnic;
                             $received_by .= ' | ' . $cnic;
                         }
-                        if($request->relation != ""){
-                            $rider_delivery->relation = $request->relation;
+                        $relation = str_replace('"', '', $request->cnic);
+                        if($relation != "Empty"){
+                            $rider_delivery->relation = $relation;
                         }
 
 //                if($request->has('receiver_name')){
