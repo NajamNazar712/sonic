@@ -84,7 +84,6 @@
                                     <th class="border-primary border-darken-1">Request Date</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
-                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -268,7 +267,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.days') || $(header).is('.leave_count') || $(header).is('.name') || $(header).is('.trax_id') || $(header).is('.cnic')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.name') || $(header).is('.trax_id') || $(header).is('.cnic')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.employee_type')) {
