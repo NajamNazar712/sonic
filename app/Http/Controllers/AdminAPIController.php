@@ -7033,7 +7033,7 @@ class AdminAPIController extends Controller
         $rules = [
             'date' => ['required'],
             'reason' => ['required', 'max:500'],
-            'adjustment_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjusments,id'],
+            'adjustment_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
         ];
 
         $admin_id = $request->admin_id;
@@ -7094,8 +7094,8 @@ class AdminAPIController extends Controller
     public function employee_adjustment_list(Request $request)
     {
         $admin_id = $request->admin_id;
-        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
-            ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status')
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
             ->where('employee_id', $admin_id)
             ->where('employee_type_id', 1);
         if ($employee_leaves->exists()) {
@@ -7123,10 +7123,10 @@ class AdminAPIController extends Controller
         if ($admin) {
             $admin_role = $admin->role_id;
             if (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
-                $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
-                    ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status', 'employee_attendance_adjusments.employee_id as employee_id', 'employee_attendance_adjusments.employee_type_id as type_id')
-                    ->where('employee_attendance_adjusments.reporter_id', $admin_id)
-                    ->where('employee_attendance_adjusments.status', 1);
+                $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+                    ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.employee_type_id as type_id')
+                    ->where('employee_attendance_adjustments.reporter_id', $admin_id)
+                    ->where('employee_attendance_adjustments.status', 1);
             } else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
@@ -7168,7 +7168,7 @@ class AdminAPIController extends Controller
     public function adjustment_approve(Request $request)
     {
         $rules = [
-            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjusments,id'],
+            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
         ];
 
         $admin_id = $request->admin_id;
@@ -7252,7 +7252,7 @@ class AdminAPIController extends Controller
     public function adjustment_reject(Request $request)
     {
         $rules = [
-            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjusments,id'],
+            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
             'rejection_reason' => ['required', 'max:500'],
         ];
 

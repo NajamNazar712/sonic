@@ -11692,8 +11692,8 @@ class RiderAPIController extends Controller
     public function employee_adjustment_list(Request $request)
     {
         $rider_id = $request->rider_id;
-        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
-            ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status')
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
             ->where('employee_id', $rider_id)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
