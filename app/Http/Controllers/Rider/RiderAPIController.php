@@ -40,7 +40,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
-use App\Http\Models\HR\EmployeeAttendanceAdjusment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
@@ -11664,7 +11664,7 @@ class RiderAPIController extends Controller
             $department = AdminDepartment::find(6);
             if($department){
                 if ($rider) {
-                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->where('date', $request->date);
+                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->where('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                     }
@@ -11692,7 +11692,7 @@ class RiderAPIController extends Controller
     public function employee_adjustment_list(Request $request)
     {
         $rider_id = $request->rider_id;
-        $employee_leaves = EmployeeAttendanceAdjusment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
             ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status')
             ->where('employee_id', $rider_id)
             ->where('employee_type_id', 2);

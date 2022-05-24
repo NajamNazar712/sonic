@@ -55,7 +55,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
-use App\Http\Models\HR\EmployeeAttendanceAdjusment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
@@ -6948,7 +6948,7 @@ class AdminAPIController extends Controller
     public function adjustment_index(Request $request)
     {
         if ($request->has('adjustment_id')) {
-            $leave = EmployeeAttendanceAdjusment::find($request->adjustment_id);
+            $leave = EmployeeAttendanceAdjustment::find($request->adjustment_id);
             if ($leave) {
                 if ($leave->employee_type_id == 1) {
                     $admin = Admin::find($leave->employee_id);
@@ -7047,7 +7047,7 @@ class AdminAPIController extends Controller
             $admin = Admin::find($admin_id);
             if ($admin) {
                 if ($request->has('adjustment_id')) {
-                    $leave_request = EmployeeAttendanceAdjusment::where('id', $request->adjustment_id);
+                    $leave_request = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id);
                     if ($leave_request->exists()) {
                         $leave_request = $leave_request->first();
                         $leave_request->date = $request->date;
@@ -7063,11 +7063,11 @@ class AdminAPIController extends Controller
                     }
                 }
                 else {
-                    $leave = EmployeeAttendanceAdjusment::where('employee_id', $admin_id)->where('employee_type_id', 1)->where('status', 1)->where('date', $request->date);
+                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $admin_id)->where('employee_type_id', 1)->where('status', 1)->where('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                     }
-                    $leave_request = new EmployeeAttendanceAdjusment();
+                    $leave_request = new EmployeeAttendanceAdjustment();
                     $leave_request->employee_id = $admin_id;
                     $leave_request->employee_type_id = 1;
                     if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
@@ -7094,7 +7094,7 @@ class AdminAPIController extends Controller
     public function employee_adjustment_list(Request $request)
     {
         $admin_id = $request->admin_id;
-        $employee_leaves = EmployeeAttendanceAdjusment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
             ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status')
             ->where('employee_id', $admin_id)
             ->where('employee_type_id', 1);
@@ -7123,7 +7123,7 @@ class AdminAPIController extends Controller
         if ($admin) {
             $admin_role = $admin->role_id;
             if (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
-                $employee_leaves = EmployeeAttendanceAdjusment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
+                $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjusments.status', '=', 'ls.id')
                     ->select('employee_attendance_adjusments.id as id', 'employee_attendance_adjusments.date as date', 'employee_attendance_adjusments.applied_reason as applied_reason', 'employee_attendance_adjusments.rejected_reason as rejected_reason', 'employee_attendance_adjusments.status as status_id', 'ls.name as status', 'employee_attendance_adjusments.employee_id as employee_id', 'employee_attendance_adjusments.employee_type_id as type_id')
                     ->where('employee_attendance_adjusments.reporter_id', $admin_id)
                     ->where('employee_attendance_adjusments.status', 1);
@@ -7181,7 +7181,7 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::find($admin_id);
             if ($admin) {
-                $employee_leaves = EmployeeAttendanceAdjusment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
+                $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
                     $employee_leaves->status = 2;
@@ -7266,7 +7266,7 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::find($admin_id);
             if ($admin) {
-                $employee_leaves = EmployeeAttendanceAdjusment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
+                $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
                     $employee_leaves->status = 3;

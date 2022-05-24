@@ -13,7 +13,7 @@ class CreateEmployeeAttendanceAdjusmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_attendance_adjusments', function (Blueprint $table) {
+        Schema::create('employee_attendance_adjustments', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('employee_id')->index();
             $table->integer('employee_type_id')->index();

@@ -23,6 +23,7 @@ use App\Http\Models\EmployeeConvertHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
@@ -4124,5 +4125,154 @@ class AdminHumanResourseController extends Controller
         }else{
             return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
         }
+    }
+
+    public function attendance_adjustment_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
+        $users = Admin::where('status', 1)->select('id', 'name')->get();
+        $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $trax_ids = array_merge($trax_id, $rider_trax_id);
+        $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
+        $cnic = array_merge($admin_cnic, $rider_cnic);
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $leave_statuses = LeaveStatus::whereIn('id', [1,2,3])->select('id', 'name')->get();
+        return view('admin.human_resource.attendance_adjustment')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
+    }
+
+    public function attendance_adjustment_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
+        }
+        $employee_leaves = EmployeeAttendanceAdjustment::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
+            ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
+            ->join('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
+            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
+
+
+        $datatable = Datatables::of($employee_leaves)
+            ->editColumn('trax_id', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_trax_id;
+                } else {
+                    return $employee->trax_id;
+                }
+            })
+            ->editColumn('leave_id', function ($employee) {
+                return $employee->leave_id;
+            })
+            ->editColumn('name', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_name;
+                } else {
+                    return $employee->admin_name;
+                }
+            })
+            ->editColumn('employee_type', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return "Staff";
+                }
+            })
+            ->editColumn('designation', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return $employee->designation;
+                }
+            })
+            ->editColumn('department', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Operations";
+                } else {
+                    return $employee->department;
+                }
+            })
+            ->editColumn('cnic', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_cnic;
+                } else {
+                    return $employee->admin_cnic;
+                }
+            })
+            ->editColumn('days', function ($employee) {
+                if($employee->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
+                    return $start_date->diffInDays($end_date) + 1;
+                }else{
+                    return 1;
+                }
+            })
+            ->editColumn('requested', function ($employee) {
+                $date = Carbon::parse($employee->requested_date)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('updated', function ($employee) {
+                $date = Carbon::parse($employee->updated_at)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('leave_count', function ($employee) {
+                $leave_count = EmployeeAttendance::where('employee_type', $employee->employee_type)
+                    ->where('employee_id', $employee->employee_id)
+                    ->where('leave_status', 1)->count();
+                return $leave_count;
+            })
+            ->addColumn("action", function ($employee) {
+                if (in_array($employee->status_id, [1,2,3])) {
+                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
+                        $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        if (session('role_id') == 1 || in_array(614, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        }
+                        if (session('role_id') == 1 || in_array(615, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        }
+
+                        $dropdown .= '
+                </div>
+              </div>
+            ';
+                        return $dropdown;
+                    } else {
+                        return '';
+                    }
+                } else {
+                    return '';
+                }
+
+            });
+        if ($search_admin = $request->get('search_admin')) {
+            $datatable->where('a.id', $search_admin)->where('employee_type_id',1);
+        }
+        if ($search_rider = $request->get('search_rider')) {
+            $datatable->where('r.id', $search_rider)->where('employee_type_id',2);
+        }
+        if ($search_trax_id = $request->get('search_trax_id')) {
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where([['a.trax_id', $search_trax_id],['employee_type_id',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type_id',2]]);
+            });
+        }
+        if ($search_cnic = $request->get('search_cnic')) {
+            $datatable->where(function($q) use ($search_cnic){
+                $q->where([['a.cnic', $search_cnic],['employee_type_id',1]])
+                    ->orWhere([['r.cnic', $search_cnic],['employee_type_id',2]]);
+            });
+        }
+        return $datatable->make(true);
     }
 }

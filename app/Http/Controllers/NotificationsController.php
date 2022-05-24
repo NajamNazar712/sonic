@@ -38,7 +38,7 @@ use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeAttendanceAdjusment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
@@ -9577,7 +9577,7 @@ class NotificationsController extends Controller
                     }else{
                         $user = Rider::find($employee_id);
                     }
-                    $leave = EmployeeAttendanceAdjusment::find($reference1_id);
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
                     if($user && $leave){
                         if($leave->status == 1){
                             $status = "Submitted";
@@ -9595,7 +9595,7 @@ class NotificationsController extends Controller
                     }
                 }
                 else if ($id == 18) {
-                    $leave = EmployeeAttendanceAdjusment::find($reference1_id);
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
                     if($leave){
                         if($leave->employee_type_id == 1){
                             $user = Admin::find($leave->employee_id);
