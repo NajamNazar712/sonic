@@ -3752,6 +3752,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('roles', 'Admins\AdminHumanResourseController@designation_roles')->name('roles');
             Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
+            Route::post('hub/update', 'Admins\AdminHumanResourseController@designation_hub_update')->name('hub.update');
         });
         Route::prefix('department')->name('department.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@department_index')->name('index');
