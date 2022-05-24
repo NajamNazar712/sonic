@@ -8832,11 +8832,11 @@ class RiderAPIController extends Controller
             'receiver_name' => ['nullable', 'string', 'max:255'],
             'cnic' => ['nullable', 'max:255'],
             'relation' => ['nullable', 'max:255'],
-            'picture' => ['nullable', 'image'],
-            'cnic_image' => ['nullable', 'image'],
-            'house_image' => ['nullable', 'image'],
-            'ccd_image' => ['nullable', 'image'],
-            'replacement_image' => ['nullable', 'image'],
+            'picture' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'cnic_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'house_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'ccd_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'replacement_image' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8878,7 +8878,7 @@ class RiderAPIController extends Controller
                             $rider_delivery->cnic = $cnic;
                             $received_by .= ' | ' . $cnic;
                         }
-                        $relation = str_replace('"', '', $request->cnic);
+                        $relation = str_replace('"', '', $request->relation);
                         if($relation != "Empty"){
                             $rider_delivery->relation = $relation;
                         }
