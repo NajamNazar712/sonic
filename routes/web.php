@@ -3716,6 +3716,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_rider_to_staff')->name('convert');
             });
 
+            Route::post('get_line_managers','Admins\AdminHumanResourseController@get_line_managers')->name('get_line_managers');
+            Route::post('update_line_manager','Admins\AdminHumanResourseController@update_line_manager')->name('update_line_manager');
         });
 
         Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
@@ -3816,6 +3818,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{/update', 'Admins\AdminFnfController@update_fnf_request')->name('update_fnf_request');
             Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
             Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
+            Route::post('reopen','Admins\AdminFnfController@reopen')->name('reopen');
+            Route::post('get_reopen_sections','Admins\AdminFnfController@get_reopen_sections')->name('get_reopen_sections');
         });
 
         Route::prefix('payslip')->name('payslip.')->group(function () {
