@@ -2850,7 +2850,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
-            Route::get('test', 'Admins\AdminFinanceController@generate_reimbursement_invoice')->name('test');
+//            Route::get('test', 'Admins\AdminFinanceController@generate_reimbursement_invoice')->name('test');//todo:for debugging the function.
         });
 
         Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
