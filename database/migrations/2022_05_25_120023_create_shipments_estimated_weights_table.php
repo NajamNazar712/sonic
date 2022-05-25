@@ -15,6 +15,7 @@ class CreateShipmentsEstimatedWeightsTable extends Migration
     {
         Schema::create('shipments_estimated_weights', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipment_id')->index();
             $table->decimal('estimated_weight', 8, 2);
             $table->decimal('actual_weight', 8, 2);
             $table->decimal('length', 8, 2)->nullable()->default(NULL);

@@ -953,6 +953,7 @@ class V2AdminPickupsController extends Controller
 
                         if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
                             $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
                             $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
                             $shipment_estimated_weight->actual_weight= $actual_weight;
                             if (empty($request->weight)) {
@@ -1482,6 +1483,7 @@ class V2AdminPickupsController extends Controller
 
                         if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
                             $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
                             $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
                             $shipment_estimated_weight->actual_weight= $actual_weight;
                             if (empty($request->weight)) {
