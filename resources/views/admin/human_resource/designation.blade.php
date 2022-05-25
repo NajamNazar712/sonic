@@ -423,13 +423,12 @@
                 $.each(hubs_array,function (i,v){
                     hubs.push(v['hub_id']);
                 });
-                $('#designation_id').val(id);
-                $('#edit_name').val(name);
-                $('#department_edit').val(department_id).trigger('change');
-                $('#edit_description').val(description);
-                $("#hubs_edit").val(hubs).trigger('change');
-                console.log(hubs);
-                $('#role_dummy').val(role_id);
+                $('#editDesignationForm #designation_id').val(id);
+                $('#editDesignationForm #edit_name').val(name);
+                $('#editDesignationForm #department_edit').val(department_id).trigger('change');
+                $('#editDesignationForm #edit_description').val(description);
+                $("#editDesignationForm #hubs_edit").val(hubs).trigger('change');
+                $('#editDesignationForm #role_dummy').val(role_id);
                 $('#editDesignationModal').modal('show');
             });
 
