@@ -220,7 +220,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 386,501,551,682], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27, 124, 386,501,545, 546,547,551,554,557,556, 559,564], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-truck"></i>Supply Chain</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(376, session('permissions')))
@@ -235,7 +235,7 @@
                     
 
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([545, 546,547,551, 559,564], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([545, 546,547,551,554,557,556, 559,564], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Cargo Vehicle Manifest</span></a>
                                 <ul class="menu-content">
                                     <li class=" nav-item"><a href="#"><span class="menu-title">Bag</span></a>

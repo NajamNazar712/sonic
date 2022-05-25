@@ -403,6 +403,7 @@
                             head.push('Employee CNIC');
                             head.push('Hub');
                             head.push('Employee Type');
+                            head.push('Employee Status');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
@@ -421,6 +422,7 @@
                                 row.push(values.cnic);
                                 row.push(values.city_name);
                                 row.push(values.employee_type);
+                                row.push(values.status_name);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.attendance_date);

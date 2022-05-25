@@ -17,6 +17,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -716,7 +717,7 @@ class V2AdminPickupsController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             $user = $shipment->user;
-            if($user->sub_segment_id == 2){
+            if(TRUE || $user->sub_segment_id == 2){
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -827,7 +828,7 @@ class V2AdminPickupsController extends Controller
         if ($shipment_item) {
             $shipment = Shipment::find($shipment_item->shipment_id);
             $user = $shipment->user;
-            if($user->sub_segment_id == 2) {
+            if(TRUE || $user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -856,7 +857,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_pieces->shipment_id);
 
             $user = $shipment->user;
-            if($user->sub_segment_id == 2) {
+            if(TRUE || $user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
@@ -946,6 +947,26 @@ class V2AdminPickupsController extends Controller
                             $shipment->height = $request->height;
                         } else {
                             $actual_weight = $request->weight;
+                        }
+
+                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
+                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                            $shipment_estimated_weight->actual_weight= $actual_weight;
+                            if (empty($request->weight)) {
+                                $shipment_estimated_weight->length = $request->length;
+                                $shipment_estimated_weight->breadth = $request->breadth;
+                                $shipment_estimated_weight->height = $request->height;
+                            }
+                            $shipment_estimated_weight->save();
+                            $actual_weight = $shipment->estimated_weight;
+
+                            $shipment->length = NULL;
+                            $shipment->breadth = NULL;
+                            $shipment->height = NULL;
                         }
                     }
                     if ($shipment->booking_type_id == 4) {
@@ -1457,7 +1478,27 @@ class V2AdminPickupsController extends Controller
                         } else {
                             $actual_weight = $request->weight;
                         }
-                        
+
+                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
+                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                            $shipment_estimated_weight->actual_weight= $actual_weight;
+                            if (empty($request->weight)) {
+                                $shipment_estimated_weight->length = $request->length;
+                                $shipment_estimated_weight->breadth = $request->breadth;
+                                $shipment_estimated_weight->height = $request->height;
+                            }
+                            $shipment_estimated_weight->save();
+
+                            $actual_weight = $shipment->estimated_weight;
+
+                            $shipment->length = NULL;
+                            $shipment->breadth = NULL;
+                            $shipment->height = NULL;
+                        }
                     }
                     if ($shipment->booking_type_id == 4) {
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
