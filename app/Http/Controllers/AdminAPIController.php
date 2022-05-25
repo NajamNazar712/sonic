@@ -7063,7 +7063,7 @@ class AdminAPIController extends Controller
                     }
                 }
                 else {
-                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $admin_id)->where('employee_type_id', 1)->where('status', 1)->where('date', $request->date);
+                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                     }
@@ -7274,7 +7274,7 @@ class AdminAPIController extends Controller
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
                     NotificationsController::app_notification(17, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                    return response()->json(['status' => 0, 'message' => "Adjust request has been rejected!"]);
+                    return response()->json(['status' => 0, 'message' => "Adjustment request has been rejected!"]);
                 }
                 return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
             }
@@ -7368,6 +7368,46 @@ class AdminAPIController extends Controller
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
+        }
+    }
+
+    public function admin_attachments_check(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $data = array();
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+                $data["cv"] = ($attachments->cv != NULL) ? 1 : 0;
+                $data["cnic"] = ($attachments->cnic != NULL) ? 1 : 0;
+                $data["photo"] = ($attachments->photo != NULL) ? 1 : 0;
+                $data["academic"] = ($attachments->academic != NULL) ? 1 : 0;
+                $data["experience"] = ($attachments->experience != NULL) ? 1 : 0;
+                $data["last_pay_slip"] = ($attachments->last_pay_slip != NULL) ? 1 : 0;
+                $data["nikkah_nama"] = ($attachments->nikkah_nama != NULL) ? 1 : 0;
+                $data["cnic_spouse"] = ($attachments->cnic_spouse != NULL) ? 1 : 0;
+                $data["child_b_form"] = ($attachments->child_b_form != NULL) ? 1 : 0;
+                $data["cnic_nominee"] = ($attachments->cnic_nominee != NULL) ? 1 : 0;
+                $data["utility_bill"] = ($attachments->utility_bill != NULL) ? 1 : 0;
+                $data["affidavit"] = ($attachments->affidavit != NULL) ? 1 : 0;
+                $data["cheque"] = ($attachments->cheque != NULL) ? 1 : 0;
+
+                return response()->json(['status' => 0, "data" => $data]);
+            } else {
+                return response()->json(['status' => 1, "message" => "Attachment Not Found!"]);
             }
         }
     }

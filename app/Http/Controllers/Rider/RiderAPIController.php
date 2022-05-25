@@ -11680,7 +11680,7 @@ class RiderAPIController extends Controller
             if($department){
                 if($department->department_head_id){
                     if ($rider) {
-                        $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->where('status', 1)->where('date', $request->date);
+                        $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2])->where('date', $request->date);
                         if ($leave->exists()) {
                             return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
                         }
@@ -11732,6 +11732,46 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'response' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "No Adjustment Found!"]);
+    }
+
+    public function rider_attachments_check(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $data = array();
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+                $data["cv"] = ($attachments->cv != NULL) ? 1 : 0;
+                $data["cnic"] = ($attachments->cnic != NULL) ? 1 : 0;
+                $data["photo"] = ($attachments->photo != NULL) ? 1 : 0;
+                $data["academic"] = ($attachments->academic != NULL) ? 1 : 0;
+                $data["experience"] = ($attachments->experience != NULL) ? 1 : 0;
+                $data["last_pay_slip"] = ($attachments->last_pay_slip != NULL) ? 1 : 0;
+                $data["nikkah_nama"] = ($attachments->nikkah_nama != NULL) ? 1 : 0;
+                $data["cnic_spouse"] = ($attachments->cnic_spouse != NULL) ? 1 : 0;
+                $data["child_b_form"] = ($attachments->child_b_form != NULL) ? 1 : 0;
+                $data["cnic_nominee"] = ($attachments->cnic_nominee != NULL) ? 1 : 0;
+                $data["utility_bill"] = ($attachments->utility_bill != NULL) ? 1 : 0;
+                $data["affidavit"] = ($attachments->affidavit != NULL) ? 1 : 0;
+                $data["cheque"] = ($attachments->cheque != NULL) ? 1 : 0;
+
+                return response()->json(['status' => 0, "data" => $data]);
+            } else {
+                return response()->json(['status' => 1, "message" => "Attachment Not Found!"]);
+            }
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
