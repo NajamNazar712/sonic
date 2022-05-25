@@ -1209,9 +1209,9 @@ class AdminTrackingController extends Controller
                                 $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',30);
                                 if($replacement_image2->exists()){
                                     $replacement_image2 = $replacement_image2->first();
-                                    if($replacement_image2->picture_path != null){
+                                    if($replacement_image2->replacement_image != null){
 
-                                        $journey_details['status'] .= '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        $journey_details['status'] .= '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
                                     }
 
                                 }
