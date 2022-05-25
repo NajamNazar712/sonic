@@ -947,6 +947,16 @@ class V2AdminPickupsController extends Controller
                         } else {
                             $actual_weight = $request->weight;
                         }
+
+                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $actual_weight = $shipment->estimated_weight;
+
+                            $shipment->length = NULL;
+                            $shipment->breadth = NULL;
+                            $shipment->height = NULL;
+                        }
                     }
                     if ($shipment->booking_type_id == 4) {
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
@@ -1457,7 +1467,16 @@ class V2AdminPickupsController extends Controller
                         } else {
                             $actual_weight = $request->weight;
                         }
-                        
+
+                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $actual_weight = $shipment->estimated_weight;
+
+                            $shipment->length = NULL;
+                            $shipment->breadth = NULL;
+                            $shipment->height = NULL;
+                        }
                     }
                     if ($shipment->booking_type_id == 4) {
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);

@@ -4930,6 +4930,16 @@ class AdminAPIController extends Controller
                                         $shipment->height = $request->dimension_h;
                                     }
                                 }
+
+                                $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                                    $actual_weight = $shipment->estimated_weight;
+
+                                    $shipment->length = NULL;
+                                    $shipment->breadth = NULL;
+                                    $shipment->height = NULL;
+                                }
                             } else {
                                 // insert High status
                                 DwsWeightCharges::create([
@@ -4950,6 +4960,16 @@ class AdminAPIController extends Controller
                                     $actual_weight = $dense_weight;
                                 }
                                 $dws_charges_status = 1;
+
+                                $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                                    $actual_weight = $shipment->estimated_weight;
+
+                                    $shipment->length = NULL;
+                                    $shipment->breadth = NULL;
+                                    $shipment->height = NULL;
+                                }
 
                                 // insert High status end
 
