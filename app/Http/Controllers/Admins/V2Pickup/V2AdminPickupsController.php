@@ -17,6 +17,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
@@ -951,6 +952,16 @@ class V2AdminPickupsController extends Controller
                         $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
                         if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
+                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                            $shipment_estimated_weight->actual_weight= $actual_weight;
+                            if (empty($request->weight)) {
+                                $shipment_estimated_weight->length = $request->length;
+                                $shipment_estimated_weight->breadth = $request->breadth;
+                                $shipment_estimated_weight->height = $request->height;
+                            }
+                            $shipment_estimated_weight->save();
                             $actual_weight = $shipment->estimated_weight;
 
                             $shipment->length = NULL;
@@ -1471,6 +1482,17 @@ class V2AdminPickupsController extends Controller
                         $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
                         if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                            $shipment_estimated_weight->shipment_id = $shipment->id;
+                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                            $shipment_estimated_weight->actual_weight= $actual_weight;
+                            if (empty($request->weight)) {
+                                $shipment_estimated_weight->length = $request->length;
+                                $shipment_estimated_weight->breadth = $request->breadth;
+                                $shipment_estimated_weight->height = $request->height;
+                            }
+                            $shipment_estimated_weight->save();
+
                             $actual_weight = $shipment->estimated_weight;
 
                             $shipment->length = NULL;
