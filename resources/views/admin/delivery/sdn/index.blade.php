@@ -1020,7 +1020,9 @@
                 rowId: 'sdn_id',
                 order: [[2, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1 serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false ,class:'text-center align-middle select p-1 serial_number',searchable: false, targets: 0, render: function (data, type, row) {
+                            return '';
+                        }},
 
                     {
                         orderable: false,
@@ -1088,6 +1090,16 @@
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
+
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                    if (data.status != 'Resolved') {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }
 
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
