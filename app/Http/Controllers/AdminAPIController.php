@@ -4936,7 +4936,13 @@ class AdminAPIController extends Controller
 
                                 if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
-                                    $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                    $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                    if($shipment_estimated_weight->exists()){
+                                        $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                    }
+                                    else{
+                                        $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                    }
                                     $shipment_estimated_weight->shipment_id = $shipment->id;
                                     $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
                                     $shipment_estimated_weight->actual_weight= $actual_weight;
@@ -4944,6 +4950,11 @@ class AdminAPIController extends Controller
                                         $shipment_estimated_weight->length = $request->dimension_l;
                                         $shipment_estimated_weight->breadth = $request->dimension_w;
                                         $shipment_estimated_weight->height = $request->dimension_h;
+                                    }
+                                    else{
+                                        $shipment_estimated_weight->length = null;
+                                        $shipment_estimated_weight->breadth = null;
+                                        $shipment_estimated_weight->height = null;
                                     }
                                     $shipment_estimated_weight->save();
 
@@ -4978,7 +4989,13 @@ class AdminAPIController extends Controller
 
                                 if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
-                                    $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                    $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                    if($shipment_estimated_weight->exists()){
+                                        $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                    }
+                                    else{
+                                        $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                    }
                                     $shipment_estimated_weight->shipment_id = $shipment->id;
                                     $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
                                     $shipment_estimated_weight->actual_weight= $actual_weight;
@@ -4986,6 +5003,11 @@ class AdminAPIController extends Controller
                                         $shipment_estimated_weight->length = $request->dimension_l;
                                         $shipment_estimated_weight->breadth = $request->dimension_w;
                                         $shipment_estimated_weight->height = $request->dimension_h;
+                                    }
+                                    else{
+                                        $shipment_estimated_weight->length = null;
+                                        $shipment_estimated_weight->breadth = null;
+                                        $shipment_estimated_weight->height = null;
                                     }
                                     $shipment_estimated_weight->save();
 
