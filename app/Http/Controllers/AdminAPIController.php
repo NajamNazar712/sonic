@@ -5585,6 +5585,7 @@ class AdminAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'line_manager_id' => ['nullable',  'integer', 'digits_between:1,10'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
@@ -5676,6 +5677,7 @@ class AdminAPIController extends Controller
                         $employee_request->mother_name = $request->mother_name;
                         $employee_request->shift_id = $request->shift_id;
                         $employee_request->staff_category_id = $request->staff_category_id;
+                        $employee_request->line_manager_id = $request->line_manager_id;
                         $employee_request->save();
 
                         if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){

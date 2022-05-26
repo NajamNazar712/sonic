@@ -10354,7 +10354,8 @@ class RiderAPIController extends Controller
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'fuel' => ['nullable'],
-                'employee_nature_id' => ['nullable',  'integer', 'digits_between:1,10', 'exists:employee_natures,id'],
+                'employee_nature_id' => ['nullable',  'integer', 'digits_between:1,10'],
+                'line_manager_id' => ['nullable',  'integer', 'digits_between:1,10'],
                 'sub_department' => ['nullable'],
 
                 //BankInformation
@@ -10448,6 +10449,7 @@ class RiderAPIController extends Controller
                             $employee_request->replacement_last_working_day = $request->replacement_last_working_day;
                             $employee_request->employee_nature_id = $request->employee_nature_id;
                             $employee_request->sub_department = $request->sub_department;
+                            $employee_request->line_manager_id = $request->line_manager_id;
                             $employee_request->save();
 
                             if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
