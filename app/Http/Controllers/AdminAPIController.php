@@ -7419,7 +7419,6 @@ class AdminAPIController extends Controller
         $rules = [
             //Attachments
             'department_id' => ['required', 'integer', 'digits_between:1,10'],
-            'city_id' => ['required', 'integer', 'digits_between:1,10'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
