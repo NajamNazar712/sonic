@@ -11795,10 +11795,19 @@ class RiderAPIController extends Controller
                 ->where('is_line_manager', 1)
                 ->where('employees.city_id', $request->city_id)
                 ->where('department_id', 6)
-                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
-                ->get();
-
-            return response()->json(['status' => 0, 'line_managers' => $line_managers]);
+                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
+            if($line_managers->exists()){
+                $line_managers = $line_managers->get();
+                $data = array();
+                foreach ($line_managers as $line_manager){
+                    $datum = array();
+                    $datum["id"] = $line_manager->id;
+                    $datum["name"] = $line_manager->name." "."(".$line_manager->trax_id. " | ".$line_manager->hub.")";
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'line_managers' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
 
     }
