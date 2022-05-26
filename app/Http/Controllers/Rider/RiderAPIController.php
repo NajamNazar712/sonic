@@ -11780,7 +11780,6 @@ class RiderAPIController extends Controller
     {
         $rules = [
             //Attachments
-            'department_id' => ['required', 'integer', 'digits_between:1,10'],
             'city_id' => ['required', 'integer', 'digits_between:1,10'],
         ];
 
@@ -11795,7 +11794,7 @@ class RiderAPIController extends Controller
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
                 ->where('employees.city_id', $request->city_id)
-                ->where('department_id', $request->department_id)
+                ->where('department_id', 6)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
                 ->get();
 
