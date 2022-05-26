@@ -19,7 +19,7 @@ class UpdateModeulePermissionForAttandanceAdjustmentPermissonSeeder extends Seed
             array('id' => 717, 'name' => 'Employee Attendance Adjustment - View', 'module_id' => 28),
         ));
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Report > Return Revert Log', 'url'=>'admin.reports.revert.index', 'permission_id' => 653));
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Human Resource > Employee Attendance Adjustments', 'url'=>'admin.human_resource.adjustment.index', 'permission_id' => 717));
 
     }
 }

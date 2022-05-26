@@ -4156,7 +4156,7 @@ class AdminHumanResourseController extends Controller
 
     public function attendance_adjustment_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 533);
         $users = Admin::where('status', 1)->select('id', 'name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
@@ -4172,7 +4172,7 @@ class AdminHumanResourseController extends Controller
     public function attendance_adjustment_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 534);
         }
         $employee_leaves = EmployeeAttendanceAdjustment::leftjoin('admins as a', 'a.id', 'employee_attendance_adjustments.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_attendance_adjustments.updated_by')
