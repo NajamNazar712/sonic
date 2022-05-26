@@ -126,6 +126,7 @@ Route::name('api.')->group(function () {
             Route::post('attachment_view', 'Rider\RiderAPIController@rider_attachments_view')->name('attachment_view');
             Route::post('attachment_delete', 'Rider\RiderAPIController@rider_attachments_delete')->name('attachment_delete');
             Route::post('attachment_check', 'Rider\RiderAPIController@rider_attachments_check')->name('attachment_check');
+            Route::post('get_line_managers', 'Rider\RiderAPIController@get_line_managers')->name('get_line_managers');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
@@ -289,6 +290,7 @@ Route::name('api.')->group(function () {
             Route::post('attachment_view', 'AdminAPIController@admin_attachments_view')->name('attachment_view');
             Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
             Route::post('attachment_check', 'AdminAPIController@admin_attachments_check')->name('attachment_check');
+            Route::post('get_line_managers', 'AdminAPIController@get_line_managers')->name('get_line_managers');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {

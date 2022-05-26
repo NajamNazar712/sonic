@@ -11774,6 +11774,34 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function get_line_managers(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'department_id' => ['required', 'integer', 'digits_between:1,10'],
+            'city_id' => ['required', 'integer', 'digits_between:1,10'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+                ->leftjoin('cities as h', 'h.id', 'c.hub_id')
+                ->where('is_line_manager', 1)
+                ->where('employees.city_id', $request->city_id)
+                ->where('department_id', $request->department_id)
+                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
+                ->get();
+
+            return response()->json(['status' => 0, 'line_managers' => $line_managers]);
+        }
+
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
