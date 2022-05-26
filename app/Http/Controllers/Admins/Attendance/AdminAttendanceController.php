@@ -152,9 +152,11 @@ class AdminAttendanceController extends Controller
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
             ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
-            ->join('employees as employees', 'a.trax_id', 'employees.trax_id')
-            ->join('employee_statuses as es', 'es.id', 'employees.status_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift', 'employees.status_id as status_id','es.name as status_name','c.hub_id');
+            ->leftjoin('employees as employees', 'a.trax_id', 'employees.trax_id')
+            ->leftjoin('employees as rider_employees', 'r.trax_id', 'employees.trax_id')
+            ->leftjoin('employee_statuses as es', 'es.id', 'employees.status_id')
+            ->leftjoin('employee_statuses as rider_es', 'es.id', 'rider_employees.status_id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift', 'employees.status_id as status_id', 'rider_employees.status_id as rider_status_id','es.name as status_name','rider_es.name as rider_status_name','c.hub_id');
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
             if(session('department_id') != 6){
@@ -189,6 +191,13 @@ class AdminAttendanceController extends Controller
                     return $employee->rider_shift;
                 } else {
                     return $employee->admin_shift;
+                }
+            })
+            ->editColumn('status_name', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_status_name;
+                } else {
+                    return $employee->status_name;
                 }
             })
             ->editColumn('clock_in', function ($employee) {
