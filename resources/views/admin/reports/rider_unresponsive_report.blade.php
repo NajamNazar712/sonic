@@ -157,6 +157,7 @@
                             head = [];
                             head.push('S. No.');
                             head.push('Rider');
+                            head.push('City');
                             head.push('DN/RN');
                             head.push('Updated By');
                             head.push('Time & Date');
@@ -165,6 +166,7 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.rider);
+                                row.push(values.city_name);
                                 row.push(values.display_note_id);
                                 row.push(values.admin);
                                 row.push(values.created_at);
