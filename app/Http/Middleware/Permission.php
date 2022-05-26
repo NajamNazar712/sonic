@@ -1085,6 +1085,9 @@ class Permission
 
             'human_resource.reporting_location.index' => 478,
             'human_resource.reporting_location.list' => 478,
+
+            'human_resource.designation.hub.update' => 718,
+
             'human_resource.designation.index' => 481,
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,

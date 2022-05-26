@@ -2630,6 +2630,27 @@ class AdminHumanResourseController extends Controller
             ->make(true);
     }
 
+    public function designation_hub_update(Request $request){
+        $designation_ids =explode(',' , $request->ids);
+        foreach($designation_ids as $id){
+
+            foreach($request->input('hub_id') as $hub_id) {
+                $designation_hub_exist = EmployeeDesignationHub::where('designation_id',$id)->where('hub_id',$hub_id)->first();
+
+                if(!$designation_hub_exist)
+                {
+                    $designation_hub = new EmployeeDesignationHub();
+
+                    $designation_hub->hub_id = $hub_id;
+                    $designation_hub->designation_id = $id;
+
+                    $designation_hub->save();
+                }
+            }
+        }
+        return redirect()->back()->with(['status'=>1,'success'=>"Hubs has been Assigned successfully!"]);
+    }
+
     public function designation_status(Request $request)
     {
         $id = $request->id;

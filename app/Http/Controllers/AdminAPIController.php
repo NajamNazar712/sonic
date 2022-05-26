@@ -4934,7 +4934,7 @@ class AdminAPIController extends Controller
 
                                 $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
-                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
                                     $shipment_estimated_weight = new ShipmentsEstimatedWeight();
                                     $shipment_estimated_weight->shipment_id = $shipment->id;
@@ -4976,7 +4976,7 @@ class AdminAPIController extends Controller
 
                                 $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
-                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference < 5) {
+                                if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
                                     $shipment_estimated_weight = new ShipmentsEstimatedWeight();
                                     $shipment_estimated_weight->shipment_id = $shipment->id;
