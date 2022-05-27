@@ -174,14 +174,14 @@ class AdminAttendanceController extends Controller
 
         }
 
-        if(session('role_id') != 1)
-        {
-//            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-            $attendances->where(function($query){
-                $query->whereIn('c.hub_id', session('hubs'))
-                    ->orWhereIn('rc.hub_id', session('hubs'));
-            });
-        }
+//        if(session('role_id') != 1)
+//        {
+////            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+//            $attendances->where(function($query){
+//                $query->whereIn('c.hub_id', session('hubs'))
+//                    ->orWhereIn('rc.hub_id', session('hubs'));
+//            });
+//        }
         
         
         $datatable = Datatables::of($attendances)
