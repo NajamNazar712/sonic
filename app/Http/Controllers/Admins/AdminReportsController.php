@@ -10449,7 +10449,8 @@ class AdminReportsController extends Controller
         $data = DB::connection('reports')->table('rider_unresponsive_statuses')
             ->leftjoin('riders as r','r.id','=','rider_unresponsive_statuses.rider_id')
             ->leftjoin('admins as a','a.id','=','rider_unresponsive_statuses.admin_id')
-            ->select('r.name as rider','a.name as admin','rider_unresponsive_statuses.status as status','rider_unresponsive_statuses.created_at','rider_unresponsive_statuses.note_id');
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->select('r.name as rider','a.name as admin','rider_unresponsive_statuses.status as status','rider_unresponsive_statuses.created_at','rider_unresponsive_statuses.note_id','c.name as city_name');
 
         $datatable = Datatables::of($data)
             ->addColumn('display_status', function ($data) {
@@ -10462,11 +10463,9 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('display_note_id', function ($data) {
-                if($data->note_id == null)
-                {
+                if ($data->note_id == null) {
                     return "-";
-                }
-                else{
+                } else {
                     return str_pad($data->note_id, 6, '0', STR_PAD_LEFT);
                 }
             });
