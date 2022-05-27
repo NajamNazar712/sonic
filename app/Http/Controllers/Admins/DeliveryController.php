@@ -7978,7 +7978,7 @@ class DeliveryController extends Controller
                 $station_deposit_note->status = 2;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
-                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Resolved']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
             }
