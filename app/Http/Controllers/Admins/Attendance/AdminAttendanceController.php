@@ -174,7 +174,11 @@ class AdminAttendanceController extends Controller
 
         if(session('role_id') != 1)
         {
-            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+//            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+            $attendances->where(function($query){
+                $query->whereIn('c.hub_id', session('hubs'))
+                    ->orWhereIn('rc.hub_id', session('hubs'));
+            });
         }
         
         
@@ -382,6 +386,7 @@ class AdminAttendanceController extends Controller
         $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
+            ->leftjoin('cities as rc','rc.id','=','r.city_id')
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
@@ -404,7 +409,11 @@ class AdminAttendanceController extends Controller
 
         if(session('role_id') != 1)
         {
-            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+           /* $attendances = $attendances->whereIn('c.hub_id', session('hubs'));*/
+            $attendances->where(function($query){
+                $query->whereIn('c.hub_id', session('hubs'))
+                    ->orWhereIn('rc.hub_id', session('hubs'));
+            });
         }
         
 
