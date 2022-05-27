@@ -1051,6 +1051,7 @@ class GlobalSettingsController extends Controller
 
                     $shipping_modes = ShippingMode::all();
                     $users = User::whereIn('id', $request->shippers)->select('id', 'account_type_id')->get();
+                    dd($users);
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
