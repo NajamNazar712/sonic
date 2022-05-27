@@ -915,8 +915,8 @@ class AdminFinanceController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
-        $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
-        if ($check_lost_shipments_admins->exists()) {
+        $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+        if($check_lost_shipments_admins->exists()){
             $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
             $shipments = $shipments->whereIn('s.user_id', $lost_shipments_shippers_id);
 
@@ -1154,9 +1154,9 @@ class AdminFinanceController extends Controller
             }
 
             $shipment_resolved = Shipment::find($delivery_note_shipment->shipment_id);
-            if ($shipment_resolved) {
-                $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment_resolved->user_id);
-                if ($lost_shipment_shipper->exists()) {
+            if($shipment_resolved){
+                $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment_resolved->user_id);
+                if($lost_shipment_shipper->exists()){
                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
                 }
             }
@@ -1188,9 +1188,9 @@ class AdminFinanceController extends Controller
                 }
 
                 $shipment_resolved = Shipment::find($delivery_note_shipment->shipment_id);
-                if ($shipment_resolved) {
-                    $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment_resolved->user_id);
-                    if (!$lost_shipment_shipper->exists()) {
+                if($shipment_resolved){
+                    $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment_resolved->user_id);
+                    if(!$lost_shipment_shipper->exists()){
 
                         $delivery_note_shipment->status = 7;
 
@@ -1594,10 +1594,10 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
-                $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
-                if ($lost_shipment_shipper->exists()) {
-                    $lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
-                    if ($lost_shipments_admins->exists()) {
+                $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
+                if($lost_shipment_shipper->exists()){
+                    $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+                    if($lost_shipments_admins->exists()){
                         if ($shipment->shipment_type == 1) {
                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                             if ($journey) {
@@ -1887,7 +1887,7 @@ class AdminFinanceController extends Controller
                         }
                     }
 
-                } else {
+                }else{
                     if ($shipment->shipment_type == 1) {
                         $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                         if ($journey) {
@@ -2195,10 +2195,10 @@ class AdminFinanceController extends Controller
             $delivery_note_shipment = $delivery_note_shipment->first();
 
             $shipment = Shipment::find($request->id);
-            $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
-            if ($lost_shipment_shipper->exists()) {
-                $lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
-                if ($lost_shipments_admins->exists()) {
+            $lost_shipment_shipper = LostShipmentShipper::where('user_id',$shipment->user_id);
+            if($lost_shipment_shipper->exists()){
+                $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+                if($lost_shipments_admins->exists()){
                     if ($shipment->shipment_type == 1) {
                         $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                         if ($journey) {
@@ -2500,7 +2500,7 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-            } else {
+            }else{
                 if ($shipment->shipment_type == 1) {
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                     if ($journey) {
@@ -2801,6 +2801,7 @@ class AdminFinanceController extends Controller
 
                 }
             }
+
 
 
         } else {
@@ -3709,12 +3710,14 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->shipment_id = $shipment_id;
                             $pending_payment_shipment->type = $type;
                             $pending_payment_shipment->amount = $amount;
-                            if ($crs) {
+                            if ($crs)
+                            {
                                 $pending_payment_shipment->charges = $charges;
                                 $pending_payment_shipment->gst = $gst;
                                 $pending_payment_shipment->wht = $wht;
                                 $pending_payment_shipment->payable = $payable;
-                            } else {
+                            }
+                            else{
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
                                 $pending_payment_shipment->wht = 0;
@@ -3723,10 +3726,11 @@ class AdminFinanceController extends Controller
 
                             $pending_payment_shipment->save();
 
-                            if ($crs) {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
-                            } else {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0);
+                            if($crs) {
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable,$wht);
+                            }
+                            else{
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount,0);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -4287,7 +4291,7 @@ class AdminFinanceController extends Controller
 
                         if ($total_shipments == 0) {
                             $payment->delete();
-                            //for retail only 
+                            //for retail only
                             RetailPendingPaymentCalculation::where('retail_pending_payment_id', $payment->id)->delete();
 
                         } else {
@@ -4354,7 +4358,7 @@ class AdminFinanceController extends Controller
                         $pending_payment_shipment->payable = $payable;
 
                         $pending_payment_shipment->save();
-                        //for retail only 
+                        //for retail only
 
                         self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $payable, 0, 1);
 
@@ -5616,6 +5620,7 @@ class AdminFinanceController extends Controller
         }
 
 
+
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
             ->addColumn('id_padded', function ($done_payment) {
@@ -6845,15 +6850,14 @@ class AdminFinanceController extends Controller
         $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
-
             $generate = FALSE;
+
 
             $user_id = $user->id;
 
             $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1);
 
             if ($user_banking_information->exists()) {
-
                 $user_banking_information = $user_banking_information->first();
                 /* if ($user_banking_information->generation_date == $current_date->day) {
                      $generate = TRUE;
@@ -6895,13 +6899,11 @@ class AdminFinanceController extends Controller
 
 
                 if ($generate) {
-
                     $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
                         $query->where('user_id', $user_id);
                     });
 
                     if ($pending_invoice_shipments->exists()) {
-
                         $invoice = new Invoice();
 
                         $invoice->user_id = $user_id;
@@ -6925,74 +6927,49 @@ class AdminFinanceController extends Controller
                         $total_charges = 0;
                         $total_gst = 0;
                         $total_invoice_amount = 0;
-                        $count = 0;
-
-
-                        $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
-                        $array = explode(",", $returned_shipper->text);
 
                         foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
+                            $invoice_shipment = new InvoiceShipment();
 
-                            $check_status = true;
-                            if (in_array($user_id, $array)) {
-                                $shipment_id = $pending_invoice_shipment->shipment_id;
-                                $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
-                                $status = $shipment_status_ids->shipper_status_id;
+                            $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+                            $invoice_shipment->type = $pending_invoice_shipment->type;
+                            $invoice_shipment->charges = $pending_invoice_shipment->charges;
+                            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+                            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
-                                if (($status != 14) && ($status != 25)) {
-                                    $check_status = false;
-                                }
+                            $invoice_shipment->save();
+
+                            $total_shipments++;
+
+                            if ($pending_invoice_shipment->type == 0) {
+                                $total_delivered_shipments++;
+                            } else if ($pending_invoice_shipment->type == 1) {
+                                $total_returned_shipments++;
+                            } else {
+                                $total_adjusted_shipments++;
                             }
 
-                            if ($check_status) {
+                            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
-                                $count += 1;
+                            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+                            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+                            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
 
-                                $invoice_shipment = new InvoiceShipment();
-
-                                $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
-                                $invoice_shipment->invoice_id = $invoice_id;
-                                $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
-                                $invoice_shipment->type = $pending_invoice_shipment->type;
-                                $invoice_shipment->charges = $pending_invoice_shipment->charges;
-                                $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                                $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
-
-                                $invoice_shipment->save();
-
-                                $total_shipments++;
-
-                                if ($pending_invoice_shipment->type == 0) {
-                                    $total_delivered_shipments++;
-                                } else if ($pending_invoice_shipment->type == 1) {
-                                    $total_returned_shipments++;
-                                } else {
-                                    $total_adjusted_shipments++;
-                                }
-
-                                self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
-
-                                $total_charges = $total_charges + $pending_invoice_shipment->charges;
-                                $total_gst = $total_gst + $pending_invoice_shipment->gst;
-                                $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
-
-                                $pending_invoice_shipment->delete();
-
-                            }
+                            $pending_invoice_shipment->delete();
                         }
-                        if ($count < 1) {
-                            $invoice->delete();
-                        } else {
-                            $invoice->invoice_number = $invoice_number;
-                            $invoice->total_shipments = $total_shipments;
-                            $invoice->total_delivered_shipments = $total_delivered_shipments;
-                            $invoice->total_returned_shipments = $total_returned_shipments;
-                            $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                            $invoice->total_charges = $total_charges;
-                            $invoice->total_gst = $total_gst;
-                            $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                            $invoice->save();
+                        $invoice->invoice_number = $invoice_number;
+                        $invoice->total_shipments = $total_shipments;
+                        $invoice->total_delivered_shipments = $total_delivered_shipments;
+                        $invoice->total_returned_shipments = $total_returned_shipments;
+                        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                        $invoice->total_charges = $total_charges;
+                        $invoice->total_gst = $total_gst;
+                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                        $invoice->save();
 
 //                        if( $invoice->total_invoice_amount < 50000){
 //                            $users = User::find($user_id);
@@ -7001,8 +6978,7 @@ class AdminFinanceController extends Controller
 //                            $users->save();
 //                        }
 
-                            NotificationsController::send(27, $invoice_id);
-                        }
+                        NotificationsController::send(27, $invoice_id);
                     }
                 }
 
@@ -7121,24 +7097,21 @@ class AdminFinanceController extends Controller
         $current_date_string = $current_date->toDateTimeString();
         $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateTimeString();
         $billing_period_to_date = Carbon::now()->subMonth()->endOfMonth()->endOfDay()->toDateTimeString();
+
         $users = User::where('account_type_id', 1)->get();
 
         foreach ($users as $user) {
-
             $user_id = $user->id;
 
             $pending_payments = PendingPayment::where('user_id', $user_id)->whereBetween('created_at', [$billing_period_from_date, $billing_period_to_date]);
 
             if ($pending_payments->exists()) {
-
                 $invoice_for_reimbursement = InvoiceForReimbursement::where('user_id', $user_id)->where('payment_type', 0)->where('from_date', $billing_period_from_date)->where('to_date', $billing_period_to_date);
                 $generate = TRUE;
 
                 if ($invoice_for_reimbursement->exists()) {
-
                     $invoice = $invoice_for_reimbursement->first();
                     if ($invoice->to_show == 0) {
-
                         $invoice->to_show = 1;
                         $invoice->invoicing_date = $billing_period_to_date;
                         $invoice->created_at = $current_date_string;
@@ -7147,7 +7120,6 @@ class AdminFinanceController extends Controller
 
                         $invoice_number = $invoice->invoice_number;
                     } else {
-
                         $generate = FALSE;
                     }
                 } else {
@@ -7166,73 +7138,41 @@ class AdminFinanceController extends Controller
 
                 }
 
-                $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
-                $array = explode(",", $returned_shipper->text);
-
                 if ($generate) {
-
                     $invoice_id = $invoice->id;
                     $total_charges = 0;
                     $total_gst = 0;
                     $total_invoice_amount = 0;
-                    $count = 0;
 
                     $pending_payments = $pending_payments->get();
-
                     foreach ($pending_payments as $pending_payment) {
-
                         $calculation = $pending_payment->pending_payment_calculation;
                         $total_charges = $total_charges + $calculation->charges;
                         $total_gst = $total_gst + $calculation->gst;
-
                         $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
 
                         foreach ($pending_payment->pending_payment_shipments as $shipment) {
+                            $invoice_shipment = new ReimbursementInvoiceShipment();
 
-                            $check_status = true;
-                            if (in_array($user_id, $array)) {
+                            $invoice_shipment->created_at = $shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $shipment->shipment_id;
+                            $invoice_shipment->type = $shipment->type;
+                            $invoice_shipment->charges = $shipment->charges;
+                            $invoice_shipment->gst = $shipment->gst;
+                            $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
 
-                                $shipment_id = $shipment->shipment_id;
-                                $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
-                                $status = $shipment_status_ids->shipper_status_id;
-                                if (($status != 14) && ($status != 25)) {
-                                    $check_status = false;
-                                }
-                            }
+                            $invoice_shipment->save();
 
-                            if ($check_status) {
-                                $count += 1;
-
-                                $invoice_shipment = new ReimbursementInvoiceShipment();
-
-                                $invoice_shipment->created_at = $shipment->created_at;
-                                $invoice_shipment->invoice_id = $invoice_id;
-                                $invoice_shipment->shipment_id = $shipment->shipment_id;
-                                $invoice_shipment->type = $shipment->type;
-                                $invoice_shipment->charges = $shipment->charges;
-                                $invoice_shipment->gst = $shipment->gst;
-                                $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
-
-                                $invoice_shipment->save();
-                            }
-                            else
-                            {
-                                $total_charges -= $shipment->charges;
-                                $total_gst -= $shipment->gst;
-                                $total_invoice_amount -= $shipment->charges + $shipment->gst;
-                            }
                         }
                     }
-                    if ($count < 1) {
-                        $invoice->delete();
-                    } else {
-                        $invoice->invoice_number = $invoice_number;
-                        $invoice->total_charges = $total_charges;
-                        $invoice->total_gst = $total_gst;
-                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                        $invoice->save();
-                    }
+                    $invoice->invoice_number = $invoice_number;
+                    $invoice->total_charges = $total_charges;
+                    $invoice->total_gst = $total_gst;
+                    $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                    $invoice->save();
                 }
             }
 
@@ -7271,12 +7211,10 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($generate) {
-
                     $invoice_id = $invoice->id;
                     $total_charges = 0;
                     $total_gst = 0;
                     $total_invoice_amount = 0;
-                    $count = 0;
 
                     $done_payments = $done_payments->get();
                     foreach ($done_payments as $done_payment) {
@@ -7286,49 +7224,27 @@ class AdminFinanceController extends Controller
                         $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
 
                         foreach ($done_payment->done_payment_shipments as $shipment) {
+                            $invoice_shipment = new ReimbursementInvoiceShipment();
 
-                            $check_status = true;
-                            if (in_array($user_id, $array)) {
+                            $invoice_shipment->created_at = $shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $shipment->shipment_id;
+                            $invoice_shipment->type = $shipment->type;
+                            $invoice_shipment->charges = $shipment->charges;
+                            $invoice_shipment->gst = $shipment->gst;
+                            $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
 
-                                $shipment_id = $shipment->shipment_id;
-                                $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
-                                $status = $shipment_status_ids->shipper_status_id;
-                                if (($status != 14) && ($status != 25)) {
-                                    $check_status = false;
-                                }
-                            }
-                            if ($check_status) {
-                                $count += 1;
+                            $invoice_shipment->save();
 
-                                $invoice_shipment = new ReimbursementInvoiceShipment();
-
-                                $invoice_shipment->created_at = $shipment->created_at;
-                                $invoice_shipment->invoice_id = $invoice_id;
-                                $invoice_shipment->shipment_id = $shipment->shipment_id;
-                                $invoice_shipment->type = $shipment->type;
-                                $invoice_shipment->charges = $shipment->charges;
-                                $invoice_shipment->gst = $shipment->gst;
-                                $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
-
-                                $invoice_shipment->save();
-                            }
-                            else
-                            {
-                                $total_charges -= $shipment->charges;
-                                $total_gst -= $shipment->gst;
-                                $total_invoice_amount -= $shipment->charges + $shipment->gst;
-                            }
                         }
                     }
-                    if ($count < 1) {
-                        $invoice->delete();
-                    } else {
+
                     $invoice->invoice_number = $invoice_number;
                     $invoice->total_charges = $total_charges;
                     $invoice->total_gst = $total_gst;
                     $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                    $invoice->save();}
+                    $invoice->save();
                 }
             }
         }
@@ -10099,7 +10015,7 @@ class AdminFinanceController extends Controller
                                             <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
                                             <td>' . round($sst_amount) . '</td>
                                             <td>' . number_format($total_amount_with_sst) . '</td>
-                                          
+
                                         </tr>';
 
                             }*/
@@ -10836,11 +10752,13 @@ class AdminFinanceController extends Controller
             ->filterColumn('payment_type', function ($query, $keyword) {
 
                 $keyword = strtolower($keyword);
-                if ($keyword == 'done') {
+                if($keyword == 'done'){
                     $query->where('invoices.payment_type', 1);
-                } else if ($keyword == 'make') {
+                }
+                else if($keyword == 'make'){
                     $query->where('invoices.payment_type', 0);
-                } else {
+                }
+                else {
                     $query->whereRaw('false');
                 }
             })
@@ -10898,6 +10816,7 @@ class AdminFinanceController extends Controller
             $datatables->whereBetween('invoices.created_at', [$from, $to]);
 
         }
+
 
 
         return $datatables->make(true);
@@ -13292,8 +13211,8 @@ class AdminFinanceController extends Controller
                 $name = "";
                 $phone = "";
                 $amount = 0;
-                $detail = array();
-                if (isset($done_payment->shipper->shipper_name)) {
+                $detail=array();
+                if(isset($done_payment->shipper->shipper_name)){
                     $name = $done_payment->shipper->shipper_name;
                     $phone = $done_payment->shipper->shipper_phone_no;
                     $updated_at = $done_payment->updated_at;
@@ -13305,7 +13224,7 @@ class AdminFinanceController extends Controller
                     $detail['phone'] = $phone;
                     $detail['updated_at'] = $updated_at;
                     $detail['done_payment_id'] = $done_payment_id;
-                    NotificationsController::send(172, $detail);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
+                    NotificationsController::send(172,$detail);//payment ki id bhejni h amount ki jagah baqi send k function k andar s hi fetching krlnga
                 }
 
                 /*$payment_clear = new VisionSoftCodPaymentClear();
@@ -13500,10 +13419,10 @@ class AdminFinanceController extends Controller
                                     $detail = array();
 
                                     $detail['name'] = $done_payment->shipper->shipper_name;;
-                                    $detail['phone'] = $done_payment->shipper->shipper_phone_no;
-                                    $detail['updated_at'] = $done_payment->updated_at;
+                                    $detail['phone'] =  $done_payment->shipper->shipper_phone_no;
+                                    $detail['updated_at'] =  $done_payment->updated_at;
                                     $detail['done_payment_id'] = $done_payment_id;
-                                    NotificationsController::send(172, $detail);
+                                    NotificationsController::send(172,$detail);
                                 }
                             }
                         }
