@@ -143,13 +143,27 @@ class AdminAttendanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),116);
         }
         $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
-            ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
-            ->leftjoin('employee_designations as ed','ed.id','a.designation_id')
+            ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id');
+            if(session('role_id') != 1)
+            {
+                $attendances = $attendances->leftJoin('cities as c', function ($join) {
+                    $join->on('c.id', 'a.default_hub_id')
+                        ->whereIn('c.hub_id', session('hubs'));
+                });
+                $attendances = $attendances->leftJoin('cities as rc', function ($join) {
+                    $join->on('rc.id', 'r.city_id')
+                        ->whereIn('rc.hub_id', session('hubs'));
+                });
+            }
+            else{
+                $attendances = $attendances->leftjoin('cities as c', 'c.id', 'a.default_hub_id');
+                $attendances = $attendances->leftjoin('cities as rc', 'rc.id', 'r.city_id');
+            }
+
+        $attendances = $attendances->leftjoin('employee_designations as ed','ed.id','a.designation_id')
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
-            ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
-            ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
-            ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id');
+         $attendances = $attendances->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
             ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
             ->leftjoin('employees as employees', 'a.trax_id', 'employees.trax_id')
@@ -177,7 +191,7 @@ class AdminAttendanceController extends Controller
 //            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
             $attendances->where(function($query){
                 $query->whereIn('c.hub_id', session('hubs'))
-                    ->whereIn('rc.hub_id', session('hubs'));
+                    ->orWhereIn('rc.hub_id', session('hubs'));
             });
         }
         
