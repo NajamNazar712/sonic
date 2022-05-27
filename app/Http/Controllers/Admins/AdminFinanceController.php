@@ -7121,24 +7121,21 @@ class AdminFinanceController extends Controller
         $current_date_string = $current_date->toDateTimeString();
         $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateTimeString();
         $billing_period_to_date = Carbon::now()->subMonth()->endOfMonth()->endOfDay()->toDateTimeString();
+
         $users = User::where('account_type_id', 1)->get();
 
         foreach ($users as $user) {
-
             $user_id = $user->id;
 
             $pending_payments = PendingPayment::where('user_id', $user_id)->whereBetween('created_at', [$billing_period_from_date, $billing_period_to_date]);
 
             if ($pending_payments->exists()) {
-
                 $invoice_for_reimbursement = InvoiceForReimbursement::where('user_id', $user_id)->where('payment_type', 0)->where('from_date', $billing_period_from_date)->where('to_date', $billing_period_to_date);
                 $generate = TRUE;
 
                 if ($invoice_for_reimbursement->exists()) {
-
                     $invoice = $invoice_for_reimbursement->first();
                     if ($invoice->to_show == 0) {
-
                         $invoice->to_show = 1;
                         $invoice->invoicing_date = $billing_period_to_date;
                         $invoice->created_at = $current_date_string;
@@ -7147,7 +7144,6 @@ class AdminFinanceController extends Controller
 
                         $invoice_number = $invoice->invoice_number;
                     } else {
-
                         $generate = FALSE;
                     }
                 } else {
@@ -7166,73 +7162,41 @@ class AdminFinanceController extends Controller
 
                 }
 
-                $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
-                $array = explode(",", $returned_shipper->text);
-
                 if ($generate) {
-
                     $invoice_id = $invoice->id;
                     $total_charges = 0;
                     $total_gst = 0;
                     $total_invoice_amount = 0;
-                    $count = 0;
 
                     $pending_payments = $pending_payments->get();
-
                     foreach ($pending_payments as $pending_payment) {
-
                         $calculation = $pending_payment->pending_payment_calculation;
                         $total_charges = $total_charges + $calculation->charges;
                         $total_gst = $total_gst + $calculation->gst;
-
                         $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
 
                         foreach ($pending_payment->pending_payment_shipments as $shipment) {
+                            $invoice_shipment = new ReimbursementInvoiceShipment();
 
-                            $check_status = true;
-                            if (in_array($user_id, $array)) {
+                            $invoice_shipment->created_at = $shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $shipment->shipment_id;
+                            $invoice_shipment->type = $shipment->type;
+                            $invoice_shipment->charges = $shipment->charges;
+                            $invoice_shipment->gst = $shipment->gst;
+                            $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
 
-                                $shipment_id = $shipment->shipment_id;
-                                $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
-                                $status = $shipment_status_ids->shipper_status_id;
-                                if (($status != 14) && ($status != 25)) {
-                                    $check_status = false;
-                                }
-                            }
+                            $invoice_shipment->save();
 
-                            if ($check_status) {
-                                $count += 1;
-
-                                $invoice_shipment = new ReimbursementInvoiceShipment();
-
-                                $invoice_shipment->created_at = $shipment->created_at;
-                                $invoice_shipment->invoice_id = $invoice_id;
-                                $invoice_shipment->shipment_id = $shipment->shipment_id;
-                                $invoice_shipment->type = $shipment->type;
-                                $invoice_shipment->charges = $shipment->charges;
-                                $invoice_shipment->gst = $shipment->gst;
-                                $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
-
-                                $invoice_shipment->save();
-                            }
-                            else
-                            {
-                                $total_charges -= $shipment->charges;
-                                $total_gst -= $shipment->gst;
-                                $total_invoice_amount -= $shipment->charges + $shipment->gst;
-                            }
                         }
                     }
-                    if ($count < 1) {
-                        $invoice->delete();
-                    } else {
-                        $invoice->invoice_number = $invoice_number;
-                        $invoice->total_charges = $total_charges;
-                        $invoice->total_gst = $total_gst;
-                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                        $invoice->save();
-                    }
+                    $invoice->invoice_number = $invoice_number;
+                    $invoice->total_charges = $total_charges;
+                    $invoice->total_gst = $total_gst;
+                    $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                    $invoice->save();
                 }
             }
 
@@ -7271,12 +7235,10 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($generate) {
-
                     $invoice_id = $invoice->id;
                     $total_charges = 0;
                     $total_gst = 0;
                     $total_invoice_amount = 0;
-                    $count = 0;
 
                     $done_payments = $done_payments->get();
                     foreach ($done_payments as $done_payment) {
@@ -7286,49 +7248,27 @@ class AdminFinanceController extends Controller
                         $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
 
                         foreach ($done_payment->done_payment_shipments as $shipment) {
+                            $invoice_shipment = new ReimbursementInvoiceShipment();
 
-                            $check_status = true;
-                            if (in_array($user_id, $array)) {
+                            $invoice_shipment->created_at = $shipment->created_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $shipment->shipment_id;
+                            $invoice_shipment->type = $shipment->type;
+                            $invoice_shipment->charges = $shipment->charges;
+                            $invoice_shipment->gst = $shipment->gst;
+                            $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
 
-                                $shipment_id = $shipment->shipment_id;
-                                $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
-                                $status = $shipment_status_ids->shipper_status_id;
-                                if (($status != 14) && ($status != 25)) {
-                                    $check_status = false;
-                                }
-                            }
-                            if ($check_status) {
-                                $count += 1;
+                            $invoice_shipment->save();
 
-                                $invoice_shipment = new ReimbursementInvoiceShipment();
-
-                                $invoice_shipment->created_at = $shipment->created_at;
-                                $invoice_shipment->invoice_id = $invoice_id;
-                                $invoice_shipment->shipment_id = $shipment->shipment_id;
-                                $invoice_shipment->type = $shipment->type;
-                                $invoice_shipment->charges = $shipment->charges;
-                                $invoice_shipment->gst = $shipment->gst;
-                                $invoice_shipment->invoice_amount = $shipment->charges + $shipment->gst;
-
-                                $invoice_shipment->save();
-                            }
-                            else
-                            {
-                                $total_charges -= $shipment->charges;
-                                $total_gst -= $shipment->gst;
-                                $total_invoice_amount -= $shipment->charges + $shipment->gst;
-                            }
                         }
                     }
-                    if ($count < 1) {
-                        $invoice->delete();
-                    } else {
-                        $invoice->invoice_number = $invoice_number;
-                        $invoice->total_charges = $total_charges;
-                        $invoice->total_gst = $total_gst;
-                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
-                        $invoice->save();}
+                    $invoice->invoice_number = $invoice_number;
+                    $invoice->total_charges = $total_charges;
+                    $invoice->total_gst = $total_gst;
+                    $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                    $invoice->save();
                 }
             }
         }

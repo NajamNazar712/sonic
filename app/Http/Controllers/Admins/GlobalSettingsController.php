@@ -1929,7 +1929,7 @@ class GlobalSettingsController extends Controller
     public function invoice_against_return_delivered_shipper_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),532);
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $shippers = User::where('account_type_id','!=',1)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper');
         $tags = array();
         if ($settings->exists()) {

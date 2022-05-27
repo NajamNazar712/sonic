@@ -57,7 +57,7 @@
     $(document).ready(function() {
 
         $('#shippers_select').select2({
-            placeholder:'Shippers',
+            placeholder:'Enter Shippers',
             width:'100%',
             allowClear:true
         }).bind('select2:select', function () {
