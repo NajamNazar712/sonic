@@ -177,7 +177,7 @@ class AdminAttendanceController extends Controller
 //            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
             $attendances->where(function($query){
                 $query->whereIn('c.hub_id', session('hubs'))
-                    ->orWhereIn('rc.hub_id', session('hubs'));
+                    ->whereIn('rc.hub_id', session('hubs'));
             });
         }
         
