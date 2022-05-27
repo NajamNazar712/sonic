@@ -11793,7 +11793,7 @@ class RiderAPIController extends Controller
             $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
-                ->where('employees.city_id', $request->city_id)
+                ->where('c.hub_id', $request->city_id)
                 ->where('department_id', 6)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
             if($line_managers->exists()){
