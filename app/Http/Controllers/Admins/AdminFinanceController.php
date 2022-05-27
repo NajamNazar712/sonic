@@ -6939,7 +6939,7 @@ class AdminFinanceController extends Controller
                                 $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
                                 $status = $shipment_status_ids->shipper_status_id;
 
-                                if (($status != 14) && ($status != 25) && ($status != 30) && ($status != 31) && ($status != 36) && ($status != 38)) {
+                                if (($status != 14) && ($status != 25)) {
                                     $check_status = false;
                                 }
                             }
