@@ -204,7 +204,7 @@
                                     <th class="border-primary border-darken-1">Employee CNIC</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
-{{--                                    <th class="border-primary border-darken-1">Employee Status</th>--}}
+                                    <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
@@ -403,7 +403,7 @@
                             head.push('Employee CNIC');
                             head.push('Hub');
                             head.push('Employee Type');
-                            // head.push('Employee Status');
+                            head.push('Employee Status');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
@@ -422,7 +422,7 @@
                                 row.push(values.cnic);
                                 row.push(values.city_name);
                                 row.push(values.employee_type);
-                                // row.push(values.status_name);
+                                row.push(values.status_name);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.attendance_date);
@@ -495,7 +495,7 @@
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},
-                    // {data: 'status_name', name: 'es.name', class: 'align-middle status_name'},
+                    {data: 'status_name', name: 'es.name', class: 'align-middle status_name'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.id', class: 'align-middle department'},
                     {data: 'attendance_date', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_date'},
