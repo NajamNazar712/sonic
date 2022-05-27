@@ -938,7 +938,7 @@ class GlobalSettingsController extends Controller
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+                $users = User::where('status', 3)->get();
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1050,8 +1050,7 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->select('id', 'account_type_id')->get();
-                    dd($users);
+                    $users = User::whereIn('id', $request->shippers)->get();
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
@@ -1082,7 +1081,6 @@ class GlobalSettingsController extends Controller
                                     if ($fuel_surcharge->exists()) {
                                         $fuel_surcharge = $fuel_surcharge->first();
 
-                                        dd($fuel_surcharge);
                                         if ($rate_status->fuel_charges == 1) {
                                             $update_fuel_surcharge = $fuel_surcharge->fuel_surcharge + $fuel_factor;
                                         } else {
