@@ -6925,7 +6925,7 @@ class AdminFinanceController extends Controller
                         $total_charges = 0;
                         $total_gst = 0;
                         $total_invoice_amount = 0;
-                        $count = 0;
+                        $shipment_count = 0;
 
 
                         $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
@@ -6939,14 +6939,14 @@ class AdminFinanceController extends Controller
                                 $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
                                 $status = $shipment_status_ids->shipper_status_id;
 
-                                if (($status != 14) && ($status != 25)) {
+                                if (($status != 14) && ($status != 25) && ($status != 30) && ($status != 31) && ($status != 36) && ($status != 38)) {
                                     $check_status = false;
                                 }
                             }
 
                             if ($check_status) {
 
-                                $count += 1;
+                                $shipment_count += 1;
 
                                 $invoice_shipment = new InvoiceShipment();
 
@@ -6980,7 +6980,7 @@ class AdminFinanceController extends Controller
 
                             }
                         }
-                        if ($count < 1) {
+                        if ($shipment_count < 1) {
                             $invoice->delete();
                         } else {
                             $invoice->invoice_number = $invoice_number;
