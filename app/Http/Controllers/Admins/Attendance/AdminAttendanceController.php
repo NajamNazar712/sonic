@@ -142,35 +142,35 @@ class AdminAttendanceController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),116);
         }
-        $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
-            ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id');
+        $admins_attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
+            ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
+            ->leftjoin('employee_designations as ed','ed.id','a.designation_id')
+            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
+            ->leftjoin('employees as employees', 'a.trax_id', 'employees.trax_id')
+            ->leftjoin('employee_statuses as es', 'es.id', 'employees.status_id')
+        ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'aes.name as admin_shift', 'employees.status_id as status_id','es.name as status_name','c.hub_id');
         if(session('role_id') != 1)
         {
-            $attendances = $attendances->leftJoin('cities as c', function ($join) {
-                $join->on('c.id', 'a.default_hub_id')
-                    ->whereIn('c.hub_id', session('hubs'));
-            });
-            $attendances = $attendances->leftJoin('cities as rc', function ($join) {
-                $join->on('rc.id', 'r.city_id')
-                    ->whereIn('rc.hub_id', session('hubs'));
+            $admins_attendances->where(function($query){
+                $query->whereIn('c.hub_id', session('hubs'));
             });
         }
-        else{
-            $attendances = $attendances->leftjoin('cities as c', 'c.id', 'a.default_hub_id');
-            $attendances = $attendances->leftjoin('cities as rc', 'rc.id', 'r.city_id');
-        }
-
-        $attendances = $attendances->leftjoin('employee_designations as ed','ed.id','a.designation_id')
-            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id');
-        $attendances = $attendances->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
+        $attendances = EmployeeAttendance::leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
+            ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
+            ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
-            ->leftjoin('employees as employees', 'a.trax_id', 'employees.trax_id')
             ->leftjoin('employees as rider_employees', 'r.trax_id', 'rider_employees.trax_id')
-            ->leftjoin('employee_statuses as es', 'es.id', 'employees.status_id')
             ->leftjoin('employee_statuses as rider_es', 'rider_es.id', 'rider_employees.status_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift', 'employees.status_id as status_id', 'rider_employees.status_id as rider_status_id','es.name as status_name','rider_es.name as rider_status_name','c.hub_id');
+            ->select('r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'res.name as rider_shift', 'rider_employees.status_id as rider_status_id','rider_es.name as rider_status_name')
+        ->union($admins_attendances);
+        if(session('role_id') != 1)
+        {
+            $admins_attendances->where(function($query){
+                $query->whereIn('rc.hub_id', session('hubs'));
+            });
+        }
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
             if(session('department_id') != 6){
@@ -185,15 +185,6 @@ class AdminAttendanceController extends Controller
             }
 
         }
-
-//        if(session('role_id') != 1)
-//        {
-////            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-//            $attendances->where(function($query){
-//                $query->whereIn('c.hub_id', session('hubs'))
-//                    ->orWhereIn('rc.hub_id', session('hubs'));
-//            });
-//        }
         
         
         $datatable = Datatables::of($attendances)
