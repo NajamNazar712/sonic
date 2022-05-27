@@ -11794,7 +11794,10 @@ class RiderAPIController extends Controller
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
                 ->where('department_id', 6)
-                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
+                ->get();
+            return response()->json(['status' => 0, 'line_managers' => $line_managers]);
+
+//                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
             if($line_managers->exists()){
                 $line_managers = $line_managers->get();
                 $data = array();
