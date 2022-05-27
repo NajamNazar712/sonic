@@ -984,6 +984,7 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge->fuel_surcharge = 0;
                                     }
                                     $fuel_surcharge->save();
+                                    dd($fuel_surcharge);
 
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge_history = new HistoryFuelSurcharge();
