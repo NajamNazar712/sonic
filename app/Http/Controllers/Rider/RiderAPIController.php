@@ -11790,10 +11790,12 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $hub_id = City::where('id', $request->city_id)->select('hub_id')->first();
             $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
                 ->where('department_id', 6)
+                ->where('employees.city_id', $hub_id->hub_id)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
             if($line_managers->exists()){
                 $line_managers = $line_managers->get();
