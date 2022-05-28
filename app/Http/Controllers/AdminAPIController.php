@@ -4932,7 +4932,7 @@ class AdminAPIController extends Controller
                                     }
                                 }
 
-                                $not_include_shippers = [12412];
+                                $not_include_shippers = [6693, 12412];
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
@@ -4988,7 +4988,7 @@ class AdminAPIController extends Controller
                                 }
                                 $dws_charges_status = 1;
 
-                                $not_include_shippers = [12412];
+                                $not_include_shippers = [6693, 12412];
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 

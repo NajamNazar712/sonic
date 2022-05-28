@@ -949,7 +949,7 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
-                        $not_include_shippers = [12412];
+                        $not_include_shippers = [6693, 12412];
                         if (!in_array($shipment->user_id, $not_include_shippers)) {
                             $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
@@ -1493,7 +1493,7 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
-                        $not_include_shippers = [12412];
+                        $not_include_shippers = [6693, 12412];
                         if (!in_array($shipment->user_id, $not_include_shippers)) {
                             $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
