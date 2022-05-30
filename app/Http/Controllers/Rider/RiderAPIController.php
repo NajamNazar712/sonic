@@ -9489,6 +9489,7 @@ class RiderAPIController extends Controller
         $riders = Rider::find($rider_id);
         if($riders){
             $response = array();
+            $date = '-';
             $employee_shift = EmployeeShift::where('id', $riders->shift_id);
             if ($employee_shift->exists()) {
                 $employee_shift = $employee_shift->first();
