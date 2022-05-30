@@ -1230,7 +1230,7 @@ class AdminHumanResourseController extends Controller
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
             ->where('is_line_manager', 1)
-            ->where('department_id', $employee->department_id)
+            ->whereIn('department_id', [$employee->department_id,5])
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
@@ -4171,7 +4171,7 @@ class AdminHumanResourseController extends Controller
             $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
-                ->where('department_id', $line_manager->department_id)
+                ->whereIn('department_id', [$line_manager->department_id,5])
                 ->where('employees.id', '!=', $line_manager->id)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
                 ->get();
@@ -4189,9 +4189,19 @@ class AdminHumanResourseController extends Controller
             'new_line_manager_id' => 'required',
         ]);
 
+        $info = '';
+        $special_case = Employee::where('line_manager_id',$request->line_manager_id)->where('id',$request->new_line_manager_id);
+        if($special_case->exists())
+        {
+            $special_case = $special_case->first();
+            $special_case->line_manager_id = null;
+            $special_case->update();
+
+            $info = "Employee with Trax Id ".$special_case->trax_id." can not be assigned as self Line Manager. Please update it manually";
+        }
         Employee::where('line_manager_id', $request->line_manager_id)
             ->update(['line_manager_id' => $request->new_line_manager_id]);
 
-        return back()->with(['success' => 'Line Manager Updated Successfully']);
+        return back()->with(['success' => 'Line Manager Updated Successfully','info' => $info ]);
     }
 }
