@@ -426,7 +426,7 @@
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No">';
                 var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks">';
 
-                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf|msg" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx, msg or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf|msg" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx, msg or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -882,7 +882,7 @@
                 if(reference_document != ''){
                     upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document +'" target="_blank">View</a></button><input type="hidden" name="image_'+ rows_count +'" value="'+reference_document+'">';
                 }
-                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed"  data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."';
+                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf|msg" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx, msg or png allowed"  data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."';
                 if(reference_document == ''){
                     upload_image += ' data-rule-required="true" data-msg-required="Reference Document is required"';
                 }
@@ -894,7 +894,7 @@
                 if(reference_document_2 != ''){
                     upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document_2 +'" target="_blank">View</a></button><input type="hidden" name="image_2_'+ rows_count +'" value="'+reference_document_2+'">';
                 }
-                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."';
+                upload_image += '<input class="form-control form-control-sm" type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf|msg" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx, msg or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."';
 
                 upload_image += '  value="'+reference_document_2+'" value=""></div>';
 
