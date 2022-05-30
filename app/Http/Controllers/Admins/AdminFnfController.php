@@ -131,15 +131,13 @@ class AdminFnfController extends Controller
         if(session('role_id') != 1)
         {
             $employee->where('department_id',session('department_id'));
-        }
-        $employee = $employee->select('trax_id')->get();
-
-        if(session('department_id') == 1){
             $departments = AdminDepartment::get();
         }
         else{
             $departments = AdminDepartment::where('id',session('department'))->get();
         }
+        $employee = $employee->select('trax_id')->get();
+
         $designations = EmployeeDesignation::where('status',1)->get();
         $employee_statuses = EmployeeStatus::all();
         return view('admin.human_resource.fnf.add',compact('departments','employee_statuses','employee','designations'));
