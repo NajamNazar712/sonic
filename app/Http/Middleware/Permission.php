@@ -1112,6 +1112,7 @@ class Permission
             'human_resource.fnf.hr.index' => 576,
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
+            'human_resource.fnf.reopen' => 713,
 
             'human_resource.employee_shifts.index' => 592,
             'human_resource.employee_shifts.list' => 592,

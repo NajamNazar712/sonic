@@ -8222,19 +8222,19 @@ class NotificationsController extends Controller
                         if ($admin->exists()) {
                             $admin = $admin->first();
                             if ($admin->trax_id == 'Trax01099') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/it_support';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/it_support');
                             } else if ($admin->trax_id == 'Trax04484') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/finance';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/finance');
                             } else if ($admin->trax_id == 'Trax00043') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/cs';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/cs');
                             } else if ($admin->trax_id === 'Trax02533') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hr';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/hr');
                             } else if ($admin->trax_id === 'Trax03840') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/administration';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/administration');
                             } else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/rm';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/rm');
                             } else if ($admin->trax_id === $fnf->department_head->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hod_approval';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/hod_approval');
                             }
 
                             $link = '<a href=' . $route . '>' . $route . '</a>';
