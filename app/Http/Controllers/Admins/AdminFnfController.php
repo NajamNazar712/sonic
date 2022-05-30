@@ -431,8 +431,11 @@ class AdminFnfController extends Controller
 
         $fnf_id = $request->fnf_id;
         if($fnf_id){
-            $line_manager = Admin::where('email',$request->line_manager);
-            $hod = Admin::where('email',$request->hod);
+            $line_manager = Employee::where('official_email',$request->line_manager)->where('employee_type_id',1);
+
+            $hod = Employee::where('official_email',$request->hod)->where('employee_type_id',1);
+
+
             if($line_manager->exists()){
                 $line_manager = $line_manager->first();
             }
@@ -444,7 +447,7 @@ class AdminFnfController extends Controller
                 $hod = $hod->first();
             }
             else{
-                return redirect()->back()->with('error','No Line Manager Found for the given email');
+                return redirect()->back()->with('error','No HOD Found for the given email');
             }
 
             $fnf = FnfSectionEmployee::where('id',$fnf_id)->first();
