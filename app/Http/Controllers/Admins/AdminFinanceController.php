@@ -6838,6 +6838,7 @@ class AdminFinanceController extends Controller
             $due_date_days = 7;
         }
 
+
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
         // dd($current_date_string);
@@ -6927,7 +6928,6 @@ class AdminFinanceController extends Controller
                         $total_invoice_amount = 0;
                         $shipment_count = 0;
 
-
                         $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')->select('text')->first();
                         $array = explode(",", $returned_shipper->text);
 
@@ -6935,6 +6935,7 @@ class AdminFinanceController extends Controller
 
                             $check_status = true;
                             if (in_array($user_id, $array)) {
+
                                 $shipment_id = $pending_invoice_shipment->shipment_id;
                                 $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)->select('shipper_status_id')->latest()->first();
                                 $status = $shipment_status_ids->shipper_status_id;
