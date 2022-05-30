@@ -172,14 +172,14 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="row border-dashed">
+                                      {{--  <div class="row border-dashed">
                                             <div class="form-group col-6">
                                                 <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
                                             </div>
                                             <div class="form-group col-6">
                                                 <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control fuel_decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
-                                        </div>
+                                        </div>--}}
                                     </div>
                                 </div>
                                 <div id="external_info" class="ml-1 col border">
@@ -207,10 +207,10 @@
 {{--                                    </div>--}}
                                     <div class="col pt-5">
                                         <div class="form-group">
-                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control" placeholder="Charges" disabled>
+                                            <input type="text" name="charges" id="charges" class="form-control" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
+                                            <input type="text" name="discount" id="discount" class="form-control" placeholder="Discount" disabled>
                                         </div>
                                         <div class="form-group">
                                             <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
@@ -767,11 +767,11 @@
                         $('#consignee_name').val('');
                         $('#consignee_cnic').val('');
                         $('#consignee_address').val('');
-                        $('#weight_charges').val('');
+                        //$('#weight_charges').val('');
                         // $('#cash_handling_charges').val('');
-                        $('#fuel_surcharge').val('');
-                        $('#total_charges_without_gst').val('');
-                        $('#gst').val('');
+                        //$('#fuel_surcharge').val('');
+                        $('#charges').val('');
+                        $('#discount').val('');
                         $('#total_charges').val('');
                         $('#insurance_amount').val('');
                         $('#cod').val('');
@@ -823,30 +823,82 @@
                 }
             });
             var city_id = null;
-            $('#calculate_rates').on('click', function () {
-                if($('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
-                    var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
-                    // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
-                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val().replace(/,/g, ''));
+            var trax_box = null;
+            var length = null;
+            var breadth = null;
+            var height = null;
 
-                    // var total_charges_without_gst = weight_charges + cash_handling_charges + fuel_surcharge;
-                    var total_charges_without_gst = weight_charges + fuel_surcharge;
+            $('#calculate_rates').on('click', function () {
+                var destination = '';
+                var shipping_mode_id = $('#shipping_mode').val();
+                var business_category = $('#business_category').val();
+                if(business_category == 1){
+                    if(shipping_mode_id == 1){
+                        destination = $('#domestic_overland_destination').val();
+                    }
+                    else if (shipping_mode_id == 2){
+                        destination = $('#domestic_destination').val();
+                    }
+                    else{
+                        destination = $('#domestic_destination').val();
+                    }
+                }
+                else{
+                    destination = $('#international_destination').val();
+                }
+                
+                var weight = $('#weight').val();
+                var trax_box = $('#trax_box').val();
+                 length = $('#length').val();
+                 breadth = $('#breadth').val();
+                 height = $('#height').val();
+
+                if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
+                    if(shipping_mode_id == 5 && trax_box == ''){
+                        var error = 'Trax Box field is required';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',
                         method: 'POST',
                         data: {
-                            'total_charges_without_gst': total_charges_without_gst,
+                            'shipping_mode_id': shipping_mode_id,
+                            'business_category_id': business_category,
+                            'consignee_city_id': destination,
+                            'weight': weight,
+                            'trax_box': trax_box,
+                            'length': length,
+                            'breadth': breadth,
+                            'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
+                            var total_charges = '';
                             if(data.status){
-                                $('#total_charges_without_gst').val(data.details.total_charges_without_gst);
-                                $('#gst').val(data.details.gst);
-                                $('#total_charges').val(data.details.total_charges);
+                                $('#charges').val(data.details.charges);
+                                $('#discount').val(data.details.discount_amount);
+                                if(shipping_mode_id == 3){
+                                   total_charges = data.details.charges_with_discount + (+$('#cod').val());
+                                }
+                                else{
+                                    total_charges = data.details.charges_with_discount;
+                                }
+                                $('#total_charges').val(total_charges);
                             }
                         });
                 }
+                else{
+                    var error = 'Shipping Mode,Business Category,Destination and Weight/Volumetric weight should not be empty';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+
             });
 
             $('#print').on('click', function () {
