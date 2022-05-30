@@ -33,7 +33,7 @@
                                         <div class="input-group">
                                             <label class="m-1"><b>Count</b></label>
                                             <div class="form-group">
-                                                <input type="text" class="form-control" name="sms_count"  placeholder="SMS Count" required data-rule-required="true" data-msg-required="This field is required" value=" {{$setting->text}}">
+                                                <input type="text" class="form-control" name="sms_count"  placeholder="SMS Count" required data-rule-required="true" data-msg-required="This field is required" value=" @if(isset($setting->text)){{$setting->text}} @endif">
                                             </div>
                                         </div>
                                     </div>
@@ -45,7 +45,7 @@
                                                   </span>
                                             </div>
                                             <div class="form">
-                                                <label><input type="time" id="time" value="{{$time->text}}" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
+                                                <label><input type="time" id="time" value="@if(isset($time->text)){{$time->text}} @endif" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
                                                 {{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
                                             </div>
                                         </div>
