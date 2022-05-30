@@ -60,6 +60,7 @@ use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -4181,6 +4182,10 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_attendance_adjustments.employee_id')
             ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendance_adjustments.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.id as adjustment_id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.created_at as requested_date', 'employee_attendance_adjustments.updated_at as updated_at', 'u.name as updated_by', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as reject_reason');
+
+        if(!in_array(session('role_id'), [58, 70, 63])) {
+            $employee_leaves = $employee_leaves->where('employee_attendance_adjustments.reporter_id', Auth::id());
+        }
 
 
         $datatable = Datatables::of($employee_leaves)
