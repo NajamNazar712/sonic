@@ -38,7 +38,7 @@ class ReattemptShipmentStatusController extends Controller
                             $check_count = $check_count->first();
                             $count_limit = $check_count->setting_value;
                         }
-                        if($count_limit < $reattempt_percentage->count){
+                        if($count_limit > $reattempt_percentage->count){
                             $settings = GlobalSettings::where('type', 'reattempt_percentage');
                             $percentage_limit = 60;
                             
@@ -103,7 +103,7 @@ class ReattemptShipmentStatusController extends Controller
                             $check_count = $check_count->first();
                             $count_limit = $check_count->setting_value;
                         }
-                        if($count_limit < $reattempt_percentage->count){
+                        if($count_limit > $reattempt_percentage->count){
                             $settings = GlobalSettings::where('type', 'reattempt_percentage');
                             $percentage_limit = 60;
                             if ($settings->exists()) {
