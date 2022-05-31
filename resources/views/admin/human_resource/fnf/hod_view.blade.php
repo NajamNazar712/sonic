@@ -357,7 +357,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
                                         @if($fnf->manager && $fnf->customer_experience &&  $fnf->administration &&  $fnf->it_support  && $fnf->finance )
-                                            @if($fnf->manager->status_id == 2 && $fnf->customer_experience->status_id == 2 &&  $fnf->administration->status_id == 2 &&  $fnf->it_support->status_id == 2  && $fnf->finance->status_id == 2 && ($approval == Null || $approval->status_id == 3))
+                                            @if($fnf->manager->status_id == 2 && $fnf->customer_experience->status_id == 2 &&  $fnf->administration->status_id == 2 &&  $fnf->it_support->status_id == 2  && $fnf->finance->status_id == 2 && ($approval == Null || $approval->status_id == 3 || $approval->status_id == 1))
                                              <button type="button" id="approve" class="btn btn-success">Approve</button>
                                             @endif
                                             @if(($approval == Null) || ($approval != Null && $approval->status_id !=2 && $approval->status_id !=3) )

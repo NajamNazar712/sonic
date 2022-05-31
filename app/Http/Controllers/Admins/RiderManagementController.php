@@ -1380,7 +1380,7 @@ class RiderManagementController extends Controller
 
                     $riders_incentive = new RidersIncentive();
                     $riders_incentive->rider_id = $rider->id;
-                    $riders_incentive->date = Carbon::now();
+                    $riders_incentive->date = $date;
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
                     
                     $riders_incentive->pickup_incentive = $incentive_amount; //$incentive_amount

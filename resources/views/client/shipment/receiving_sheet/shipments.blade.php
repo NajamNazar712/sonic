@@ -55,6 +55,7 @@
 										<th class="border-primary border-darken-1">Receiving Sheet</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Warehouse/Store ID</th>
+										<th class="border-primary border-darken-1">Pickup Address</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Estimated Weight</th>
@@ -138,6 +139,7 @@
                             head.push('Receiving Sheet');
                             head.push('Order ID');
                             head.push('Warehouse/Store ID');
+                            head.push('Pickup Address');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Estimated Weight');
@@ -152,6 +154,7 @@
                                 row.push(values.receiving_sheet);
                                 row.push(values.order_id);
                                 row.push(values.warehouse_id);
+                                row.push(values.pickup_address);
                                 row.push(values.origin_city);
                                 row.push(values.destination_city);
                                 row.push(values.estimated_weight);
@@ -204,6 +207,7 @@
 					{data: 'receiving_sheet', name: 'rs.id', class: 'align-middle receiving_sheet p-1'},
 					{data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
 					{data: 'warehouse_id', name: 'gapa.warehouse_id', class: 'align-middle warehouse_id'},
+					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
 					{data: 'estimated_weight', name: 'shipments.estimated_weight', class: 'align-middle estimated_weight'},

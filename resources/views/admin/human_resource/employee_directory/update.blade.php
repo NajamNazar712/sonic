@@ -346,6 +346,34 @@
                                             </div>
                                         </div>
 
+                                        @if($employee->employee_type_id == 1)
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Make Line Manager</label><br>
+                                                    <input type="checkbox" name="is_line_manager"
+                                                           {{$employee->is_line_manager ? 'checked' : ''}} id="is_line_manager"
+                                                           class="switchery is_line_manager" data-size="xs"
+                                                           data-switchery="true">
+                                                </div>
+                                            </div>
+
+                                        @endif
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Line Manager<span class="text-danger">*</span></label>
+                                                <select name="line_manager_id" id="line_manager_id"
+                                                        data-rule-required="true"
+                                                        data-msg-required="Line Manager is required"
+                                                        class="select2 form-control " style="width: 100%">
+                                                    @foreach($line_managers as $line_manager)
+                                                        <option value="{{$line_manager->id}}">{{$line_manager->name}}
+                                                            ({{$line_manager->trax_id}} | {{$line_manager->hub}})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Employee Nature<span class="text-danger">*</span></label>
@@ -2278,6 +2306,12 @@
                 placeholder: "Select Staff Category",
                 width:'100%',
             });
+
+            $("#line_manager_id").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Line Manager",
+                    width:'100%',
+            });
+            $("#line_manager_id").val("{{$employee->line_manager_id ?? ''}}").trigger('change');
 
             $("#zone").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Zone",

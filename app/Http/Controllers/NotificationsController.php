@@ -72,6 +72,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -8176,38 +8177,80 @@ class NotificationsController extends Controller
                     $delivery_note_id = $reference_2_id;
 
                     $shipment = Shipment::find($shipment_id);
+                    $delivery_city_id = $shipment->consignee_city->id;
+                    $setting_city_id = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+                    if ($setting_city_id->exists()) {
+                        $setting_city_id = $setting_city_id->first(); 
+                        $city_ids =  explode(',', $setting_city_id->text); 
+                        if (in_array($delivery_city_id, $city_ids)) {
 
-                    $tracking_number = $shipment->tracking_number;
+                            $tracking_number = $shipment->tracking_number;
 
-                    $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
-                    $reason = '';
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                            $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
+                            $reason = '';
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
-                    if ($shipment_journey) {
-                        $current_status = $shipment_journey->shipment_status_consignee->name;
-                        if ($shipment_journey->status_reason_id) {
-                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                            if ($shipment_journey) {
+                                $current_status = $shipment_journey->shipment_status_consignee->name;
+                                if ($shipment_journey->status_reason_id) {
+                                    $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                                }
+                            } else {
+                                $current_status = $shipment->status_consignee->name;
+                            }
+
+
+                            if (strpos($body, '[tracking_number]') !== FALSE) {
+                                $body = str_replace('[tracking_number]', $tracking_number, $body);
+                            }
+                            if (strpos($body, '[status]') !== FALSE) {
+                                $body = str_replace('[status]', $current_status, $body);
+                            }
+                            if (strpos($body, '[reason]') !== FALSE) {
+                                $body = str_replace('[reason]', $reason, $body);
+                            }
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+                            $to = $shipment->consignee_phone_number_1;
+                            self::bot_sms($body, $to);
                         }
-                    } else {
-                        $current_status = $shipment->status_consignee->name;
-                    }
+
+                    }else{
+                        $tracking_number = $shipment->tracking_number;
+
+                        $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
+                        $reason = '';
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+
+                        if ($shipment_journey) {
+                            $current_status = $shipment_journey->shipment_status_consignee->name;
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                            }
+                        } else {
+                            $current_status = $shipment->status_consignee->name;
+                        }
 
 
-                    if (strpos($body, '[tracking_number]') !== FALSE) {
-                        $body = str_replace('[tracking_number]', $tracking_number, $body);
-                    }
-                    if (strpos($body, '[status]') !== FALSE) {
-                        $body = str_replace('[status]', $current_status, $body);
-                    }
-                    if (strpos($body, '[reason]') !== FALSE) {
-                        $body = str_replace('[reason]', $reason, $body);
-                    }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $current_status, $body);
+                        }
+                        if (strpos($body, '[reason]') !== FALSE) {
+                            $body = str_replace('[reason]', $reason, $body);
+                        }
 
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::bot_sms($body, $to);
                     }
-                    $to = $shipment->consignee_phone_number_1;
-                    self::bot_sms($body, $to);
+                    
                 } else if ($id == 146) {
 
                     $fnf_id = $reference_1_id;
@@ -8222,19 +8265,19 @@ class NotificationsController extends Controller
                         if ($admin->exists()) {
                             $admin = $admin->first();
                             if ($admin->trax_id == 'Trax01099') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/it_support';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/it_support');
                             } else if ($admin->trax_id == 'Trax04484') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/finance';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/finance');
                             } else if ($admin->trax_id == 'Trax00043') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/cs';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/cs');
                             } else if ($admin->trax_id === 'Trax02533') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hr';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/hr');
                             } else if ($admin->trax_id === 'Trax03840') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/administration';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/administration');
                             } else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/rm';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/rm');
                             } else if ($admin->trax_id === $fnf->department_head->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hod_approval';
+                                $route = url('admin/human_resource/fnf/' . $fnf_id . '/hod_approval');
                             }
 
                             $link = '<a href=' . $route . '>' . $route . '</a>';
@@ -8498,7 +8541,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk','ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -9265,6 +9308,80 @@ class NotificationsController extends Controller
                         $to = $phone_number;
                         self::sms($body, $to);
                     }
+                }
+                else if ($id == 177) {
+                    $pickup_req = V2PickupRequest::find($reference_1_id);
+
+                    $pikup_shipment_id = V2PickupRequestShipment::where('pickup_request_id',$reference_1_id)->get()->first();
+
+                    $shipment = Shipment::find($pikup_shipment_id->shipment_id);
+                    
+                    
+                    $sales_person = SalePersonTag::where('user_id', $shipment->user_id)->where('status', 0)->first();
+
+                    $shipper = User::find($shipment->user_id);
+
+                    $sale_person_detail = Admin::find($sales_person->admin_id);
+                    if($sale_person_detail){
+
+                        
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        }
+                        
+                        $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+
+                        if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                            $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                        }
+
+                        if (strpos($body, '[remarks]') !== FALSE) {
+                            $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                        }
+
+                        self::email($subject, $body, $sale_person_detail->email);
+                        
+
+                    
+                    }
+                    
+                    $sales_tier_tag = SaleTierTag::where('user_id',$shipment->user_id);
+
+                   
+
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first()->kam;
+                        if($sales_tier_tag){
+
+                            $kam = Admin::find($sales_tier_tag);
+                            if($kam){
+                                if (strpos($subject, '[sales_person]') !== FALSE) {
+                                    $subject = str_replace('[sales_person]', $kam->name, $subject);
+                                }
+        
+                                if (strpos($body, '[shipper_name]') !== FALSE) {
+                                    $body = str_replace('[shipper_name]', $shipper->name, $body);
+                                }
+                                
+                                $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+        
+                                if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                                    $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                                }
+        
+                                if (strpos($body, '[remarks]') !== FALSE) {
+                                    $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                                }
+
+                                self::email($subject, $body, $kam->email);
+
+
+                            }
+
+                        }
+                    }
+                    
+
                 }
             }
         }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -23,6 +22,8 @@ use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
 use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\Admin\LostShipmentShipper;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
@@ -932,12 +933,14 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
+        $exclude_ids = [3216, 167, 3050, 15809, 8062, 3903, 952, 13580, 1698, 7759, 15376, 602, 6585, 10497, 1577, 7308, 12412, 4697, 3285, 2539, 3008, 3175, 9129, 6109, 1799, 2930, 620, 415, 12360, 3719, 7335, 1807, 4707, 3324, 15019];
+
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+                $users = User::where('status', 3)->whereNotIn('id', $exclude_ids)->get();
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1049,7 +1052,7 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->select('id', 'account_type_id')->get();
+                    $users = User::whereIn('id', $request->shippers)->whereNotIn('id', $exclude_ids)->get();
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
@@ -1924,6 +1927,43 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
 
+    }
+    public function invoice_against_return_delivered_shipper_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),532);
+        $shippers = User::where('account_type_id','!=',1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper');
+        $tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $tags = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.invoice_against_return_delivered_shipper')->with(['shippers' => $shippers, 'tags' => $tags]);
+    }
+    public function invoice_against_return_delivered_shipper_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'invoice_against_return_delivered_shipper';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
 
     public function ccd_booking_index()
@@ -6673,6 +6713,164 @@ public function sales_incentive()
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function lost_shipment_shippers_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),527);
+        
+        $shippers = User::where('status',3)->get();
+
+        return view('admin.settings.lost_shipment_shippers',compact('shippers'));
+    }
+
+
+    public function lost_shipment_shippers_list(Request $request){
+
+        $shippers = LostShipmentShipper::join('users as u','u.id','=','lost_shipment_shippers.user_id')
+                    ->select('u.name as shipper_name','lost_shipment_shippers.id');
+        $datatables = Datatables::of($shippers)
+                    ->addColumn('action', function($shippers) {
+                        if (session('role_id') == 1 || in_array(709, session('permissions'))) {
+                                $dropdown = '<div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                ';
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                                
+                                $dropdown .='</div>
+                              </div>
+                      ';
+            
+                      return $dropdown;
+                           
+                        }
+                        else {
+                            return '';
+                        }
+                    });
+            
+                return $datatables->make(true);
+    }
+
+    public function lost_shipment_shippers_add(Request $request){
+        $check_shipper = LostShipmentShipper::where('user_id',$request->shipper_id);
+            
+            if(!$check_shipper->exists()){
+                $lost_shipment_shipper = new LostShipmentShipper();
+                $lost_shipment_shipper->user_id = $request->shipper_id;
+                $lost_shipment_shipper->save();
+    
+                return redirect()->back()->with('success', 'Shipper Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'Shipper already exist');
+            }
+    }
+
+    public function lost_shipment_shippers_delete(Request $request){
+        LostShipmentShipper::find($request->id)->delete();
+        return redirect()->back()->with('success', 'Shipper Deleted!');
+    }
+
+
+
+
+    public function lost_shipment_admins_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),528);
+
+        $admins = Admin::where('status',1)->get();
+
+        return view('admin.settings.lost_shipment_admins',compact('admins'));
+    }
+
+
+    public function lost_shipment_admins_list(Request $request){
+
+        $admins = LostShipmentAdmin::join('admins as ad','ad.id','=','lost_shipment_admins.admin_id')
+                    ->select('ad.name as admin_name','lost_shipment_admins.id');
+        $datatables = Datatables::of($admins)
+                    ->addColumn('action', function($admins) {
+                        if (session('role_id') == 1 || in_array(711, session('permissions'))) {
+                                $dropdown = '<div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                ';
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                                
+                                $dropdown .='</div>
+                              </div>
+                      ';
+            
+                      return $dropdown;
+                           
+                        }
+                        else {
+                            return '';
+                        }
+                    });
+            
+                return $datatables->make(true);
+    }
+
+    public function lost_shipment_admins_add(Request $request){
+        $check_admin = LostShipmentAdmin::where('admin_id',$request->admin_id);
+            
+            if(!$check_admin->exists()){
+                $lost_shipment_admin = new LostShipmentAdmin();
+                $lost_shipment_admin->admin_id = $request->admin_id;
+                $lost_shipment_admin->save();
+    
+                return redirect()->back()->with('success', 'User Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'User already exist');
+            }
+    }
+
+    public function lost_shipment_admins_delete(Request $request){
+        LostShipmentAdmin::find($request->id)->delete();
+        return redirect()->back()->with('success', 'User Deleted!');
+    }
+
+    public function undelivered_sms_hub_wise(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),529);
+        
+        $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
+        $cities = City::where('status', 1)->where('business_category_id',1)->get();
+
+        $city_id = null;
+        if($settings){
+            $city_id =  explode(',', $settings->text); 
+
+        }
+
+        return view('admin.settings.undelivered_sms_hub_wise',compact('city_id','cities'));
+
+
+    }
+
+    public function undelivered_sms_hub_wise_submit(Request $request){
+        // dump(implode(',', $request->city_id));
+
+        $city_ids = implode(',', $request->city_id);
+        $settings = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->text = $city_ids;
+            $settings->save();
+
+        }else{
+            $settings = new GlobalSettings;
+            $settings->text = $city_ids;
+            $settings->type = 'undeliverd_sms_hubwise';
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Cities Upadated');
+
     }
 
     

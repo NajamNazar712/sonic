@@ -62,6 +62,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
+                        <th class="border-primary border-darken-1">Shipment ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -343,7 +344,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
@@ -922,9 +923,10 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[12, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -933,7 +935,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     // {data: 'phone', name: 'phone', class: 'align-middle phone'},
@@ -970,43 +972,44 @@
                         var column = this;
                         var header = column.header();
 
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            }else if($(header).is('.status')){
+                                $(drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.service_type')){
+                                $(service_drop_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.business_category')){
+                                $(business_category).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }else if($(header).is('.payment_status')){
+                                $(payment_select).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }
+                            else if($(header).is('.payment_mode')){
+                                $(payment_mode).appendTo($(search))
+                                    .on( 'change', function () {
+                                        column.search($(this).val(), false, false, true);
+                                    } ).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function() {
+                                        column.search($(this).val(), false, false, true);
+                                }).wrap(td).after(icon);
 
-                        if ($(header).is('.action') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
-                            $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.business_category')){
-                            $(business_category).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }else if($(header).is('.payment_status')){
-                            $(payment_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.payment_mode')){
-                            $(payment_mode).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true);
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                    column.search($(this).val(), false, false, true);
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });
