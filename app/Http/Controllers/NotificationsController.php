@@ -8542,7 +8542,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk','ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -9309,6 +9309,80 @@ class NotificationsController extends Controller
                         $to = $phone_number;
                         self::sms($body, $to);
                     }
+                }
+                else if ($id == 177) {
+                    $pickup_req = V2PickupRequest::find($reference_1_id);
+
+                    $pikup_shipment_id = V2PickupRequestShipment::where('pickup_request_id',$reference_1_id)->get()->first();
+
+                    $shipment = Shipment::find($pikup_shipment_id->shipment_id);
+                    
+                    
+                    $sales_person = SalePersonTag::where('user_id', $shipment->user_id)->where('status', 0)->first();
+
+                    $shipper = User::find($shipment->user_id);
+
+                    $sale_person_detail = Admin::find($sales_person->admin_id);
+                    if($sale_person_detail){
+
+                        
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        }
+                        
+                        $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+
+                        if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                            $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                        }
+
+                        if (strpos($body, '[remarks]') !== FALSE) {
+                            $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                        }
+
+                        self::email($subject, $body, $sale_person_detail->email);
+                        
+
+                    
+                    }
+                    
+                    $sales_tier_tag = SaleTierTag::where('user_id',$shipment->user_id);
+
+                   
+
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first()->kam;
+                        if($sales_tier_tag){
+
+                            $kam = Admin::find($sales_tier_tag);
+                            if($kam){
+                                if (strpos($subject, '[sales_person]') !== FALSE) {
+                                    $subject = str_replace('[sales_person]', $kam->name, $subject);
+                                }
+        
+                                if (strpos($body, '[shipper_name]') !== FALSE) {
+                                    $body = str_replace('[shipper_name]', $shipper->name, $body);
+                                }
+                                
+                                $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+        
+                                if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                                    $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                                }
+        
+                                if (strpos($body, '[remarks]') !== FALSE) {
+                                    $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                                }
+
+                                self::email($subject, $body, $kam->email);
+
+
+                            }
+
+                        }
+                    }
+                    
+
                 }
             }
         }

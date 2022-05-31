@@ -960,6 +960,7 @@
                         }
                     },
                     {
+                        orderable: false,
                         searchable: false,
                         name: 'serial_number',
                         class: 'align-middle serial_number',

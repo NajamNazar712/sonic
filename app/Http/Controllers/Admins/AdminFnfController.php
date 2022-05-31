@@ -52,10 +52,16 @@ class AdminFnfController extends Controller
          ->join('fnf_statuses as fs','fs.id','=','fnf.status_id')
          ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id as status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status','fnf.hod as hod_id','fnf.line_manager as reporting_manager','c.hub_id']);
 
-        if(session('role_id') != 1)
-        {
-            $employee = $employee->whereIn('c.hub_id',session('hubs'));
-        }
+    if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 69 && session('role_id') != 70)
+    {
+        $employee->where('d.id',session('department_id'));
+    }
+
+	if(session('role_id') != 1)
+    {
+        $employee = $employee->whereIn('c.hub_id',session('hubs'));
+    }
+
      $datatables = Datatables::of($employee)
          ->editColumn('fnf_id',function ($fnf) {
             return 'FNF'.$fnf->fnf_id;
@@ -126,13 +132,17 @@ class AdminFnfController extends Controller
 
     public function add(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),421);
-        $employee = Employee::whereNotNull('trax_id')->where('department_id',session('department_id'))->select('trax_id')->get();
-        if(session('department_id') == 1){
+        $employee = Employee::whereNotNull('trax_id');
+        if(session('role_id') != 1)
+        {
+            $employee->where('department_id',session('department_id'));
             $departments = AdminDepartment::get();
         }
         else{
             $departments = AdminDepartment::where('id',session('department'))->get();
         }
+        $employee = $employee->select('trax_id')->get();
+
         $designations = EmployeeDesignation::where('status',1)->get();
         $employee_statuses = EmployeeStatus::all();
         return view('admin.human_resource.fnf.add',compact('departments','employee_statuses','employee','designations'));
@@ -426,8 +436,11 @@ class AdminFnfController extends Controller
 
         $fnf_id = $request->fnf_id;
         if($fnf_id){
-            $line_manager = Admin::where('email',$request->line_manager);
-            $hod = Admin::where('email',$request->hod);
+            $line_manager = Employee::where('official_email',$request->line_manager)->where('employee_type_id',1);
+
+            $hod = Employee::where('official_email',$request->hod)->where('employee_type_id',1);
+
+
             if($line_manager->exists()){
                 $line_manager = $line_manager->first();
             }
@@ -439,7 +452,7 @@ class AdminFnfController extends Controller
                 $hod = $hod->first();
             }
             else{
-                return redirect()->back()->with('error','No Line Manager Found for the given email');
+                return redirect()->back()->with('error','No HOD Found for the given email');
             }
 
             $fnf = FnfSectionEmployee::where('id',$fnf_id)->first();

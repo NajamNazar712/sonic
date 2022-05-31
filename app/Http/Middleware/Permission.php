@@ -1231,9 +1231,8 @@ class Permission
             'settings.lost_shipment_shippers.index' => 708,
             'settings.lost_shipment_admins.index' => 710,
 
-            'settings.undelivered_sms_hub_wise.index' => 714,
-
-
+            'settings.invoice_against_return_delivered_shipper.index' => 716,
+			'settings.undelivered_sms_hub_wise.index' => 714,
             
 
             

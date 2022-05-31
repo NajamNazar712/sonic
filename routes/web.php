@@ -1057,6 +1057,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
             Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+            Route::post('add_remarks', 'Admins\V2Pickup\V2AdminPickupsController@add_remarks')->name('add_remarks');
+            Route::post('all_remarks', 'Admins\V2Pickup\V2AdminPickupsController@all_remarks')->name('all_remarks');
+            
 
         });
     // Receiving Sheet Rout
@@ -2851,6 +2854,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('foc_account')->name('foc_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@foc_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
+        });
+
+        Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
+//            Route::get('test', 'Admins\AdminFinanceController@generate_invoice')->name('test');//todo:for debugging the function only.
         });
 
         Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {

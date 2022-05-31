@@ -740,6 +740,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['name','crm_request_id','comment'];
         }
+		else if ($id == 177)
+        {
+            $details['fields'] = ['sales_person','shipper_name','pickup_request_no','remarks'];
+        }
 		return $details;
     }
 

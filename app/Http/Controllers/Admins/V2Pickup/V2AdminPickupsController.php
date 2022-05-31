@@ -127,7 +127,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -246,6 +246,8 @@ class V2AdminPickupsController extends Controller
             })
             ->addColumn('action', function ($reminder_request) {
                 $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
+                
+                $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
                     if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
                         $dropdown = "
@@ -255,6 +257,12 @@ class V2AdminPickupsController extends Controller
 
                         if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                             $dropdown .= $reminder_button;
+                        }
+
+                        if ($reminder_request->reverse_pickup == 1 && $reminder_request->rev_remarks == null) {
+
+                            $dropdown .= $remarks_button;
+
                         }
 
                         $dropdown .= "
@@ -293,6 +301,9 @@ class V2AdminPickupsController extends Controller
                     return $pickup_requests->brand_name;
                 }
 
+            })
+            ->addColumn('all_remarks',function ($pickup_requests){
+                    return '<button class="btn btn-sm btn-outline-info align-middle all_remarks_btn" rel="' . $pickup_requests->id . '"><span class="align-middle">View Remarks</span></button>';
             });
             if($legend_filter = $request->get('legend_filter')){
                 if($legend_filter==8){
@@ -949,24 +960,38 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
-                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+                        $not_include_shippers = [6693, 12412];
+                        if (!in_array($shipment->user_id, $not_include_shippers)) {
+                            $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
-                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
-                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
-                            $shipment_estimated_weight->shipment_id = $shipment->id;
-                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
-                            $shipment_estimated_weight->actual_weight= $actual_weight;
-                            if (empty($request->weight)) {
-                                $shipment_estimated_weight->length = $request->length;
-                                $shipment_estimated_weight->breadth = $request->breadth;
-                                $shipment_estimated_weight->height = $request->height;
+                            if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+                                $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                if($shipment_estimated_weight->exists()){
+                                    $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                }
+                                else{
+                                    $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                }
+                                $shipment_estimated_weight->shipment_id = $shipment->id;
+                                $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                $shipment_estimated_weight->actual_weight= $actual_weight;
+                                if (empty($request->weight)) {
+                                    $shipment_estimated_weight->length = $request->length;
+                                    $shipment_estimated_weight->breadth = $request->breadth;
+                                    $shipment_estimated_weight->height = $request->height;
+                                }
+                                else{
+                                    $shipment_estimated_weight->length = null;
+                                    $shipment_estimated_weight->breadth = null;
+                                    $shipment_estimated_weight->height = null;
+                                }
+                                $shipment_estimated_weight->save();
+                                $actual_weight = $shipment->estimated_weight;
+
+                                $shipment->length = NULL;
+                                $shipment->breadth = NULL;
+                                $shipment->height = NULL;
                             }
-                            $shipment_estimated_weight->save();
-                            $actual_weight = $shipment->estimated_weight;
-
-                            $shipment->length = NULL;
-                            $shipment->breadth = NULL;
-                            $shipment->height = NULL;
                         }
                     }
                     if ($shipment->booking_type_id == 4) {
@@ -1479,25 +1504,40 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
-                        $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+                        $not_include_shippers = [6693, 12412];
+                        if (!in_array($shipment->user_id, $not_include_shippers)) {
+                            $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
-                        if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
-                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
-                            $shipment_estimated_weight->shipment_id = $shipment->id;
-                            $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
-                            $shipment_estimated_weight->actual_weight= $actual_weight;
-                            if (empty($request->weight)) {
-                                $shipment_estimated_weight->length = $request->length;
-                                $shipment_estimated_weight->breadth = $request->breadth;
-                                $shipment_estimated_weight->height = $request->height;
+                            if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+
+                                $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                if($shipment_estimated_weight->exists()){
+                                    $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                }
+                                else{
+                                    $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                }
+                                $shipment_estimated_weight->shipment_id = $shipment->id;
+                                $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                $shipment_estimated_weight->actual_weight= $actual_weight;
+                                if (empty($request->weight)) {
+                                    $shipment_estimated_weight->length = $request->length;
+                                    $shipment_estimated_weight->breadth = $request->breadth;
+                                    $shipment_estimated_weight->height = $request->height;
+                                }
+                                else{
+                                    $shipment_estimated_weight->length = null;
+                                    $shipment_estimated_weight->breadth = null;
+                                    $shipment_estimated_weight->height = null;
+                                }
+                                $shipment_estimated_weight->save();
+
+                                $actual_weight = $shipment->estimated_weight;
+
+                                $shipment->length = NULL;
+                                $shipment->breadth = NULL;
+                                $shipment->height = NULL;
                             }
-                            $shipment_estimated_weight->save();
-
-                            $actual_weight = $shipment->estimated_weight;
-
-                            $shipment->length = NULL;
-                            $shipment->breadth = NULL;
-                            $shipment->height = NULL;
                         }
                     }
                     if ($shipment->booking_type_id == 4) {
@@ -3314,5 +3354,94 @@ class V2AdminPickupsController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function add_remarks(Request $request){
+        $pickup_req = V2PickupRequest::find($request->v2_pickup_req_id);
+        if($pickup_req){
+            $pickup_req->remarks = $request->add_remark;
+            $pickup_req->save();
+
+            NotificationsController::send(177, $request->v2_pickup_req_id);
+
+            return redirect()->back()->with('success', 'Remarks Added');
+
+        }else{
+            return redirect()->back()->with('error', 'Pickup Request Not Found!');
+
+        }
+    }
+
+    public function all_remarks(Request $request){
+
+        $v2_pickup_request = V2PickupRequest::find($request->pickup_req_id);
+        if($v2_pickup_request){
+
+        $trax_reason = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('reason_id');
+        if ($attempts->exists()) {
+            $reason_ids = $attempts->pluck('reason_id')->toArray();
+            if (count($reason_ids) > 0) {
+                foreach ($reason_ids as $reason_id) {
+                    $trax_reason .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
+                }
+            }
+        }
+        $trax_remarks = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('trax_remarks');
+        if ($attempts->exists()) {
+            $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
+            if (count($trax_remarks_rows) > 0) {
+                foreach ($trax_remarks_rows as $remark) {
+                    $trax_remarks .= $remark . ',' . PHP_EOL;
+                }
+            }
+        }
+
+        $shipper_remarks = '';
+        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('shipper_remarks');
+        if ($attempts->exists()) {
+            $shipper_remarks_rows = $attempts->pluck('shipper_remarks')->toArray();
+            if (count($shipper_remarks_rows) > 0) {
+                foreach ($shipper_remarks_rows as $remark) {
+                    $shipper_remarks .= $remark . ',' . PHP_EOL;
+                }
+            }
+        }
+
+        $pickup_req = V2PickupRequest::leftJoin('v2_rider_pickups as vpr', function ($join) {
+                            $join->on('vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
+                                ->where('vpr.id', '=',
+                                    DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
+                        })->select('vpr.rider_remarks as rider_remarks')
+                        ->where('v2_pickup_requests.id',$request->pickup_req_id);
+        $rider_remarks = '';
+        if($pickup_req->exists()){
+            $rider_remarks = $pickup_req->get()->first()->rider_remarks;
+
+        }
+        $data = [];
+        $data['trax_reason'] = $trax_reason;
+        $data['trax_remarks'] = $trax_remarks;
+        $data['shipper_remarks'] = $shipper_remarks;
+        $data['rider_remarks'] = $rider_remarks;
+        $data['remarks'] = $v2_pickup_request->remarks; 
+        $data['reverse_pickup'] = $v2_pickup_request->reverse_pickup;
+
+    }else{
+        $data = [];
+        $data['trax_reason'] = '';
+        $data['trax_remarks'] = '';
+        $data['shipper_remarks'] = '';
+        $data['rider_remarks'] = ''; 
+        $data['remarks'] = ''; 
+        $data['reverse_pickup'] = '';
+
+    }
+    return response()->json(['status' => 0, 'remarks' => $data]);
+
+
+
+
     }
 }

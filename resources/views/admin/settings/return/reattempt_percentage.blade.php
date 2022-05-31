@@ -30,6 +30,16 @@
                                             </div>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                            <input type="text" name="reattempt_count" class="form-control reattempt_count" placeholder="Re-Attempt Count*" data-rule-required="true" data-msg-required="Re-Attempt Count is required" value="{{ $count }}" data-rule-min="0" data-msg-min="Re-Attempt Count can not be less than 0" data-rule-max="100" data-msg-min="Re-Attempt Count can not be more than 100">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="checkbox" name="on_default" id="on_default" class="switchery on_default" data-size="xs" data-switchery="true" {{ ($switch == 1) ? 'checked' : '' }}>
+                                        </div>
+
+
 
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -53,7 +63,22 @@
 
     <script>
         $(document).ready(function() {
+
+            @if($switch ==0)
+                $('.reattempt_count').prop('disabled', true);
+                $('.reattempt_percentage').prop('disabled', true);
+            @endif
+
+
+            
+
             $('#settings_form input.reattempt_percentage').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#settings_form input.reattempt_count').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -66,6 +91,25 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
+
+
+            $('.on_default').on('change',function(){
+                console.log($(this).val());
+                var wid = $(this).attr('id');
+                var wswitch = document.querySelector('#'+wid);
+                console.log(wswitch.checked);
+                if (wswitch.checked === true) {
+
+                    $('.reattempt_count').prop('disabled', false);
+                    $('.reattempt_percentage').prop('disabled', false);
+
+                } else if (wswitch.checked === false) {
+                    $('.reattempt_count').prop('disabled', true);
+                    $('.reattempt_percentage').prop('disabled', true);
+                }
+            });
+
+
         });
     </script>
 @endsection
