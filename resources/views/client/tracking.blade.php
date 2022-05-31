@@ -1195,6 +1195,17 @@
                 $('#request_id').val('').trigger('change');
                 $('#receiving_sheet_div').addClass('d-none');
             });
+
+
+            $('#tracking').on('click', '.replacement_booked_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
+            $('#tracking').on('click', '.replacement_collected_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
 		});
 	</script>
 @endsection

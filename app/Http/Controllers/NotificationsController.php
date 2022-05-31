@@ -38,6 +38,7 @@ use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
@@ -9683,6 +9684,49 @@ class NotificationsController extends Controller
                         }
                         if (strpos($body, '[shipper_names]') !== FALSE) {
                             $body = str_replace('[shipper_names]', $shipper_name, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 17) {
+                    if($employee_type == 1){
+                        $user = Admin::find($employee_id);
+                    }else{
+                        $user = Rider::find($employee_id);
+                    }
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
+                    if($user && $leave){
+                        if($leave->status == 1){
+                            $status = "Submitted";
+                        }else{
+                            $leave_status = LeaveStatus::find($leave->status);
+                            $status = $leave_status->name;
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $leave->date, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 18) {
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $leave->date, $body);
                         }
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }

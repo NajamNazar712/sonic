@@ -535,6 +535,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
     });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -3778,6 +3779,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
             Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
+        });
+
+        Route::prefix('adjustment')->name('adjustment.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@attendance_adjustment_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@attendance_adjustment_list')->name('list');
         });
 
         Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {

@@ -303,9 +303,9 @@
 												<div class="form-group input-group">
 													<input type="text" name="replacement_item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
 												</div>
-												<label class="d-block">Replacement Parcel Image</label>
+												<label class="d-block">Replacement Parcel Image*</label>
 												<div class="form-group input-group">
-													<input class="form-control text-center replacement_parcel_img" type="file" name="replacement_parcel_img" id="replacement_parcel_img" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+													<input class="form-control text-center replacement_parcel_img" type="file" name="replacement_parcel_img" id="replacement_parcel_img" data-rule-required="true" data-msg-required="Replacement Image is Required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
 												</div>
 											</div>
 										</div>

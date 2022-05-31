@@ -1120,6 +1120,9 @@ class Permission
             'human_resource.employee_shifts.index' => 592,
             'human_resource.employee_shifts.list' => 592,
 
+            'human_resource.adjustment.index' => 717,
+            'human_resource.adjustment.list' => 717,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,

@@ -5574,21 +5574,72 @@ public function sales_incentive()
             $percentage = $settings->setting_value;
         }
 
-        return view('admin.settings.return.reattempt_percentage')->with(['percentage' => $percentage]);
+        $settings = GlobalSettings::where('type', 'reattempt_count');
+        $count = '';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $count = $settings->setting_value;
+        }
+        
+        $settings = GlobalSettings::where('type', 'reattempt_flag');
+        $switch = 1;
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $switch = $settings->setting_value;
+        }
+
+        return view('admin.settings.return.reattempt_percentage')->with(['percentage' => $percentage, 'count' => $count, 'switch' => $switch]);
     }
 
     public function reattempt_percentage_store(Request $request)
     {
-        $settings = GlobalSettings::where('type', 'reattempt_percentage');
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        } else {
-            $settings = new GlobalSettings();
-            $settings->type = 'reattempt_percentage';
-        }
-        $settings->setting_value = $request->reattempt_percentage;
+        if($request->has('on_default')){
 
-        $settings->save();
+            $settings = GlobalSettings::where('type', 'reattempt_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_percentage';
+            }
+            $settings->setting_value = $request->reattempt_percentage;
+    
+            $settings->save();
+
+            $settings = GlobalSettings::where('type', 'reattempt_count');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_count';
+            }
+            $settings->setting_value = $request->reattempt_count;
+    
+            $settings->save();
+
+
+            $settings = GlobalSettings::where('type', 'reattempt_flag');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_flag';
+            }
+            $settings->setting_value = 1;
+    
+            $settings->save();
+        }else{
+            $settings = GlobalSettings::where('type', 'reattempt_flag');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_flag';
+            }
+            $settings->setting_value = 0;
+    
+            $settings->save();
+        }
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -6167,7 +6218,7 @@ public function sales_incentive()
         $time = GlobalSettings::where('type','rcp_sms_cron_time')->first();
 //        $data = DB::table('rcp_sms_cron_time')->get();
 //        $data = GlobalSettings::where('type','rcp_sms_cron_time')->first();
-        return view('admin.settings.return.rcp_sms',compact('setting', 'data','time'));
+        return view('admin.settings.return.rcp_sms',compact('setting','time'));
     }
 
     public function rcp_sms_update(Request $request){
