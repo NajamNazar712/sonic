@@ -3377,6 +3377,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //CMC Routes
     Route::prefix('crm')->name('crm.')->group(function () {
+        Route::post('tag/get_admin','Admins\AdminCRMController@get_admins')->name('tag.get_admins');
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
 //            Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
