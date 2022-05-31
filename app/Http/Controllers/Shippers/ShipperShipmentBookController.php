@@ -1181,12 +1181,21 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
-                      
                     </style>
                   </head>
                   <body>
                     <div>
             ';
+
+            if ($user_id == 12412) {
+                $html .= '
+                    <style>
+                        .end_of_air_waybill {
+                            page-break-after: always;
+                        }
+                    </style>
+                ';
+            }
 
             if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
@@ -1829,7 +1838,7 @@ class ShipperShipmentBookController extends Controller
 
                     if ($type != 'pdf') {
                         $table_end .= '
-                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
                     }
@@ -1988,7 +1997,7 @@ class ShipperShipmentBookController extends Controller
 </tr>
                               ';
                             $shipment_pieces .= '</tbody></table>
-                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                         }
@@ -2152,7 +2161,7 @@ class ShipperShipmentBookController extends Controller
                                 </tbody>
                                 </table>
                                 </div>
-                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                                <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
 
@@ -2225,7 +2234,7 @@ class ShipperShipmentBookController extends Controller
                                 </tbody>
                                 </table>
                                 </div>
-                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                                <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                             $shipment_details .= $distribution_delivery_performa;

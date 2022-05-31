@@ -6745,6 +6745,44 @@ public function sales_incentive()
         return redirect()->back()->with('success', 'User Deleted!');
     }
 
+    public function undelivered_sms_hub_wise(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),529);
+        
+        $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
+        $cities = City::where('status', 1)->where('business_category_id',1)->get();
+
+        $city_id = null;
+        if($settings){
+            $city_id =  explode(',', $settings->text); 
+
+        }
+
+        return view('admin.settings.undelivered_sms_hub_wise',compact('city_id','cities'));
+
+
+    }
+
+    public function undelivered_sms_hub_wise_submit(Request $request){
+        // dump(implode(',', $request->city_id));
+
+        $city_ids = implode(',', $request->city_id);
+        $settings = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->text = $city_ids;
+            $settings->save();
+
+        }else{
+            $settings = new GlobalSettings;
+            $settings->text = $city_ids;
+            $settings->type = 'undeliverd_sms_hubwise';
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Cities Upadated');
+
+    }
+
     
     
 }

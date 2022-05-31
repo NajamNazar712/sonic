@@ -330,6 +330,15 @@
         }
         getLocation();
 
+        var input = document.getElementById("retail_login_form");
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("login_button").click();
+            }
+        });
+
+
     });
 </script>
 </body>
