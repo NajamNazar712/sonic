@@ -72,6 +72,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -8176,38 +8177,80 @@ class NotificationsController extends Controller
                     $delivery_note_id = $reference_2_id;
 
                     $shipment = Shipment::find($shipment_id);
+                    $delivery_city_id = $shipment->consignee_city->id;
+                    $setting_city_id = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+                    if ($setting_city_id->exists()) {
+                        $setting_city_id = $setting_city_id->first(); 
+                        $city_ids =  explode(',', $setting_city_id->text); 
+                        if (in_array($delivery_city_id, $city_ids)) {
 
-                    $tracking_number = $shipment->tracking_number;
+                            $tracking_number = $shipment->tracking_number;
 
-                    $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
-                    $reason = '';
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                            $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
+                            $reason = '';
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
-                    if ($shipment_journey) {
-                        $current_status = $shipment_journey->shipment_status_consignee->name;
-                        if ($shipment_journey->status_reason_id) {
-                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                            if ($shipment_journey) {
+                                $current_status = $shipment_journey->shipment_status_consignee->name;
+                                if ($shipment_journey->status_reason_id) {
+                                    $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                                }
+                            } else {
+                                $current_status = $shipment->status_consignee->name;
+                            }
+
+
+                            if (strpos($body, '[tracking_number]') !== FALSE) {
+                                $body = str_replace('[tracking_number]', $tracking_number, $body);
+                            }
+                            if (strpos($body, '[status]') !== FALSE) {
+                                $body = str_replace('[status]', $current_status, $body);
+                            }
+                            if (strpos($body, '[reason]') !== FALSE) {
+                                $body = str_replace('[reason]', $reason, $body);
+                            }
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+                            $to = $shipment->consignee_phone_number_1;
+                            self::bot_sms($body, $to);
                         }
-                    } else {
-                        $current_status = $shipment->status_consignee->name;
-                    }
+
+                    }else{
+                        $tracking_number = $shipment->tracking_number;
+
+                        $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
+                        $reason = '';
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+
+                        if ($shipment_journey) {
+                            $current_status = $shipment_journey->shipment_status_consignee->name;
+                            if ($shipment_journey->status_reason_id) {
+                                $reason = ' ' . $shipment_journey->shipment_status_reason->name;
+                            }
+                        } else {
+                            $current_status = $shipment->status_consignee->name;
+                        }
 
 
-                    if (strpos($body, '[tracking_number]') !== FALSE) {
-                        $body = str_replace('[tracking_number]', $tracking_number, $body);
-                    }
-                    if (strpos($body, '[status]') !== FALSE) {
-                        $body = str_replace('[status]', $current_status, $body);
-                    }
-                    if (strpos($body, '[reason]') !== FALSE) {
-                        $body = str_replace('[reason]', $reason, $body);
-                    }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking_number, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $current_status, $body);
+                        }
+                        if (strpos($body, '[reason]') !== FALSE) {
+                            $body = str_replace('[reason]', $reason, $body);
+                        }
 
-                    if (strpos($body, '[link]') !== FALSE) {
-                        $body = str_replace('[link]', $link, $body);
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::bot_sms($body, $to);
                     }
-                    $to = $shipment->consignee_phone_number_1;
-                    self::bot_sms($body, $to);
+                    
                 } else if ($id == 146) {
 
                     $fnf_id = $reference_1_id;
@@ -8498,7 +8541,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk','ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
