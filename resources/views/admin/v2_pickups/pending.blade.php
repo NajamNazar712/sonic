@@ -1198,7 +1198,10 @@
                         $('#trax_remarks_td').html(data.remarks.trax_remarks);
                         $('#remarks_td').html(data.remarks.remarks);
                         $('#AllRemarksModal').modal('show');
-
+                        if(!data.remarks.reverse_pickup){
+                            
+                            $("#remarks_td").parent().css({"display": "none"});
+                        }
                         /* var shipments = '';
                         if (data.booked) {
                             $.each(data.booked, function(index, tracking_numbers) {

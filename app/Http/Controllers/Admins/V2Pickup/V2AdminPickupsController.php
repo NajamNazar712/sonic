@@ -126,7 +126,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -258,7 +258,8 @@ class V2AdminPickupsController extends Controller
                             $dropdown .= $reminder_button;
                         }
 
-                        if ($reminder_request->reverse_pickup == 1) {
+                        if ($reminder_request->reverse_pickup == 1 && $reminder_request->rev_remarks == null) {
+
                             $dropdown .= $remarks_button;
 
                         }
@@ -3334,7 +3335,9 @@ class V2AdminPickupsController extends Controller
         $data['trax_remarks'] = $trax_remarks;
         $data['shipper_remarks'] = $shipper_remarks;
         $data['rider_remarks'] = $rider_remarks;
-        $data['remarks'] = $v2_pickup_request->remarks;
+        $data['remarks'] = $v2_pickup_request->remarks; 
+        $data['reverse_pickup'] = $v2_pickup_request->reverse_pickup;
+
     }else{
         $data = [];
         $data['trax_reason'] = '';
@@ -3342,6 +3345,8 @@ class V2AdminPickupsController extends Controller
         $data['shipper_remarks'] = '';
         $data['rider_remarks'] = ''; 
         $data['remarks'] = ''; 
+        $data['reverse_pickup'] = '';
+
     }
     return response()->json(['status' => 0, 'remarks' => $data]);
 
