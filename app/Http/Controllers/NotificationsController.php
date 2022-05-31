@@ -9281,10 +9281,7 @@ class NotificationsController extends Controller
                     $sale_person_detail = Admin::find($sales_person->admin_id);
                     if($sale_person_detail){
 
-                        if (strpos($subject, '[sales_person]') !== FALSE) {
-                            $subject = str_replace('[sales_person]', $sale_person_detail->name, $subject);
-                        }
-
+                        
                         if (strpos($body, '[shipper_name]') !== FALSE) {
                             $body = str_replace('[shipper_name]', $shipper->name, $body);
                         }

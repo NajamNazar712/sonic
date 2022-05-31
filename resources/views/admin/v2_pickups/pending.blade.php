@@ -312,7 +312,7 @@
                         @csrf
                         <input type="hidden" id="add_remarks_pickup_note_id" name="v2_pickup_req_id">
                         <div class="form-group ml-1">
-                            <input type="text"  name="add_remark"  id="add_remark" class="form-control" data-rule-required="true"  data-msg-required="Remarks is required">
+                            <input type="text"  name="add_remark"  id="add_remark" class="form-control" data-rule-required="true"  data-msg-required="Remarks is required" placeholder="Add Remarks*">
 
                         </div>
 
@@ -342,7 +342,8 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <table class="table" id="all_remarks_tabel">
+                    <table class="table table-bordered" id="all_remarks_tabel">
+                        <tbody>
                             <tr>
                                 <td>Rider Remarks:</td>
                                 <td id="rider_remarks_td"></td>
@@ -360,9 +361,11 @@
                                 <td id="trax_remarks_td"></td>
                             </tr>
                             <tr>
-                                <td>Remarks:</td>
+                                <td>Reverse Pickup Remarks:</td>
                                 <td id="remarks_td"></td>
                             </tr>
+                        </tbody>
+                            
                     </table>
 
                 </div>
@@ -1096,7 +1099,6 @@
             $('body').on('click','.addRemarks',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
-                console.log(row_id);
                 $('#AddRemarksModal').modal('show');
                 $('#add_remarks_pickup_note_id').val(row_id);
 
@@ -1153,7 +1155,9 @@
                     });
                 } */
             });
-
+            $('#AddRemarksModal').on('hidden.bs.modal', function () {
+               $('#add_remark').val('');
+            });
             $( "#add_remarks_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
