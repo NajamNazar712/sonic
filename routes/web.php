@@ -149,6 +149,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 Route::get('', 'Shippers\ShipperReceivingSheetController@shipments_index')->name('index');
                 Route::get('list', 'Shippers\ShipperReceivingSheetController@shipments_list')->name('list');
             });
+
+            Route::prefix('excel')->name('excel.')->group(function () {
+                Route::get('', 'Shippers\ShipperReceivingSheetController@shipments_excel_index')->name('index');
+                Route::post('store', 'Shippers\ShipperReceivingSheetController@shipments_excel_store')->name('store');
+            });
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
@@ -3309,6 +3314,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('undelivered_sms_hub_wise')->name('undelivered_sms_hub_wise.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@undelivered_sms_hub_wise')->name('index');
+            Route::post('submit', 'Admins\GlobalSettingsController@undelivered_sms_hub_wise_submit')->name('submit');
+        });
+
+
+
 	});
 
 
@@ -3740,6 +3752,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('roles', 'Admins\AdminHumanResourseController@designation_roles')->name('roles');
             Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
+            Route::post('hub/update', 'Admins\AdminHumanResourseController@designation_hub_update')->name('hub.update');
         });
         Route::prefix('department')->name('department.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@department_index')->name('index');

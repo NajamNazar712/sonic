@@ -51,6 +51,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S No.</th>
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Business Category</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
@@ -501,7 +502,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
@@ -945,7 +946,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                order: [[2, 'desc']],
 
                 columns: [
                     {
@@ -959,7 +960,6 @@
                         }
                     },
                     {
-                        orderable: false,
                         searchable: false,
                         name: 'serial_number',
                         class: 'align-middle serial_number',
@@ -968,6 +968,7 @@
                             return '';
                         }
                     },
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -1042,53 +1043,54 @@
                         var column = this;
                         var header = column.header();
 
-
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_status')) {
-                            $(payment_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_module')) {
-                                $(payment_mode).appendTo($(search))
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            } else if ($(header).is('.status')) {
+                                $(status_select).appendTo($(search))
                                     .on('change', function () {
                                         column.search($(this).val(), false, false, true).draw();
                                     }).wrap(td);
-                        }  else if ($(header).is('.business_category')) {
-                            $(business_category).appendTo($(search))
-                                .on('change', function () {
+                            } else if ($(header).is('.payment_status')) {
+                                $(payment_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.payment_module')) {
+                                    $(payment_mode).appendTo($(search))
+                                        .on('change', function () {
+                                            column.search($(this).val(), false, false, true).draw();
+                                        }).wrap(td);
+                            }  else if ($(header).is('.business_category')) {
+                                $(business_category).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.service_type')) {
+                                $(service_drop_select).appendTo($(search))
+                                    .on('change', function () {
+                                        console.log($(this).val())
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.product_type')) {
+                                $(product_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.booked_by')) {
+                                $(user_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.service_type')) {
-                            $(service_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    console.log($(this).val())
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.product_type')) {
-                            $(product_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.booked_by')) {
-                            $(user_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                                }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });
