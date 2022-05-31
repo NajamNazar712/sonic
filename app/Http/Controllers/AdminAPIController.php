@@ -41,6 +41,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\RiderType;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -4930,6 +4931,42 @@ class AdminAPIController extends Controller
                                         $shipment->height = $request->dimension_h;
                                     }
                                 }
+
+                                $not_include_shippers = [6693, 12412];
+                                if (!in_array($shipment->user_id, $not_include_shippers)) {
+                                    $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                    if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+
+                                        $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                        if($shipment_estimated_weight->exists()){
+                                            $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                        }
+                                        else{
+                                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                        }
+                                        $shipment_estimated_weight->shipment_id = $shipment->id;
+                                        $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        if ($volume_weight) {
+                                            $shipment_estimated_weight->length = $request->dimension_l;
+                                            $shipment_estimated_weight->breadth = $request->dimension_w;
+                                            $shipment_estimated_weight->height = $request->dimension_h;
+                                        }
+                                        else{
+                                            $shipment_estimated_weight->length = null;
+                                            $shipment_estimated_weight->breadth = null;
+                                            $shipment_estimated_weight->height = null;
+                                        }
+                                        $shipment_estimated_weight->save();
+
+                                        $actual_weight = $shipment->estimated_weight;
+
+                                        $shipment->length = NULL;
+                                        $shipment->breadth = NULL;
+                                        $shipment->height = NULL;
+                                    }
+                                }
                             } else {
                                 // insert High status
                                 DwsWeightCharges::create([
@@ -4950,6 +4987,42 @@ class AdminAPIController extends Controller
                                     $actual_weight = $dense_weight;
                                 }
                                 $dws_charges_status = 1;
+
+                                $not_include_shippers = [6693, 12412];
+                                if (!in_array($shipment->user_id, $not_include_shippers)) {
+                                    $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                    if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+
+                                        $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                        if($shipment_estimated_weight->exists()){
+                                            $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                        }
+                                        else{
+                                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                        }
+                                        $shipment_estimated_weight->shipment_id = $shipment->id;
+                                        $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        if ($volume_weight) {
+                                            $shipment_estimated_weight->length = $request->dimension_l;
+                                            $shipment_estimated_weight->breadth = $request->dimension_w;
+                                            $shipment_estimated_weight->height = $request->dimension_h;
+                                        }
+                                        else{
+                                            $shipment_estimated_weight->length = null;
+                                            $shipment_estimated_weight->breadth = null;
+                                            $shipment_estimated_weight->height = null;
+                                        }
+                                        $shipment_estimated_weight->save();
+
+                                        $actual_weight = $shipment->estimated_weight;
+
+                                        $shipment->length = NULL;
+                                        $shipment->breadth = NULL;
+                                        $shipment->height = NULL;
+                                    }
+                                }
 
                                 // insert High status end
 

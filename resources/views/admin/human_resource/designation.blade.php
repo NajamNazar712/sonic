@@ -17,6 +17,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Designation ID</th>
                                     <th class="border-primary border-darken-1">Designation Name</th>
@@ -33,6 +34,35 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="addDesignationHubModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="addDesignationHubModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Add Designation Hub</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.designation.hub.update')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="addDesignationHubForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                            <input type="hidden" name="ids" id="designation_id">
+                            <div class="form-group">
+                                <select name="hub_id[]" id="hubs" multiple class="select2 form-control" data-rule-required="true" data-msg-required="Atleast One Hub is required" style="width: 100%">
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade text-left" id="addDesignationModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="addDesignationModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -195,9 +225,74 @@
                     return {body: body, header: head};
                 }
             });
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.add_designation_hub').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.add_designation_hub').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(718, session('permissions')))
+                    {
+                        text: 'Add Designation Hubs',
+                        className: 'btn btn-primary add_designation_hub',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            $('#addDesignationHubModal #addDesignationHubForm #designation_id').val(selected_rows);
+                            $('#addDesignationHubModal').modal('show');
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(482, session('permissions')))
                     {
                         text: 'Add Designation',
@@ -214,6 +309,12 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -228,6 +329,7 @@
                 order: [[1, 'desc']],
                 rowId: 'id',
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     {data: 'code', name: 'employee_designations.code', class: 'align-middle code'},
@@ -240,7 +342,10 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -281,6 +386,26 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.add_designation_hub').enable();
+                }
+                else {
+                    table.button('.add_designation_hub').disable();
+                }
+            });
+
             $('#addDesignationModal').on('hide.bs.modal', function () {
                 $('#name').val('');
                 $('#department').val('').trigger('change');
@@ -298,12 +423,12 @@
                 $.each(hubs_array,function (i,v){
                     hubs.push(v['hub_id']);
                 });
-                $('#designation_id').val(id);
-                $('#edit_name').val(name);
-                $('#department_edit').val(department_id).trigger('change');
-                $('#edit_description').val(description);
-                $("#hubs_edit").val(hubs).trigger('change');
-                $('#role_dummy').val(role_id);
+                $('#editDesignationForm #designation_id').val(id);
+                $('#editDesignationForm #edit_name').val(name);
+                $('#editDesignationForm #department_edit').val(department_id).trigger('change');
+                $('#editDesignationForm #edit_description').val(description);
+                $("#editDesignationForm #hubs_edit").val(hubs).trigger('change');
+                $('#editDesignationForm #role_dummy').val(role_id);
                 $('#editDesignationModal').modal('show');
             });
 
@@ -437,6 +562,13 @@
                 dropdownParent: $("#addDesignationForm")
             });
 
+            $("#addDesignationHubForm #hubs").select2({
+                placeholder: "Select Hubs",
+                width:'100%',
+                dropdownParent: $("#addDesignationHubForm")
+            });
+
+
             @if(session('role_id') == 1)
             $("#addDesignationForm #hubs").select2({
                 placeholder: "Select Hubs",
@@ -568,6 +700,25 @@
                     swal({
                         title: 'Please Wait!',
                         text: 'Designation is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+            $( "#addDesignationHubForm" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Multiple Hub has been assigned!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

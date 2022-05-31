@@ -386,8 +386,9 @@ class AdminHumanResourseController extends Controller
         $staff_categories = StaffCategory::all();
         $employee_zones = Zone::where('status',1)->where('business_category_id',1)->get(['id', 'name']);
         $employee_natures = EmployeeNature::select('id', 'name')->get();
+        $line_managers = Employee::leftjoin('cities as c','c.id','employees.city_id')->leftjoin('cities as h','h.id','c.hub_id')->where('is_line_manager',1)->select(['employees.name','employees.trax_id','employees.id','h.name as hub'])->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', 1)->whereNotNull('trax_id')->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones, 'employee_natures' => $employee_natures, 'replacement_employees' => $replacement_employees]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories,'employee_zones' => $employee_zones, 'employee_natures' => $employee_natures, 'replacement_employees' => $replacement_employees,'line_managers'=>$line_managers]);
     }
 
     public function employee_directory_list(Request $request)
@@ -396,6 +397,7 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
+            ->leftjoin('employees as lm','lm.id','employees.line_manager_id')
             ->join('employee_genders as eg', 'eg.id', '=', 'employees.employee_gender_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
             ->leftjoin('admins as staff', 'staff.trax_id', '=', 'employees.trax_id')
@@ -410,9 +412,12 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_main_categories as rmc','rmc.id','=','employees.rider_main_category')
             ->leftjoin('employee_designations as ed','ed.id','=','employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->leftjoin('employee_bank_informations as eb', 'eb.employee_id', '=', 'employees.id')
+            ->leftjoin('employee_bank_informations as eb', function ($join){
+                $join->on('eb.employee_id', '=', 'employees.id')
+                    ->where('eb.id', '=', DB::raw('(select max(id) from employee_bank_informations where employee_bank_informations.employee_id = employees.id)'));
+            })
             ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -422,7 +427,19 @@ class AdminHumanResourseController extends Controller
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
         }
 
+        if ($line_manager = $request->get('search_line_manager')) {
+            $employees = $employees->where('employees.line_manager_id',$line_manager);
+        }
+
         $datatable =  Datatables::of($employees)
+            ->setRowAttr([
+                'class' => function ($employee) {
+                    if($employee->is_line_manager == 1)
+                    {
+                        return "is_line_manager";
+                    }
+                },
+            ])
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->employee_id, 6, '0', STR_PAD_LEFT);
             })
@@ -1210,7 +1227,14 @@ class AdminHumanResourseController extends Controller
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees'));
+        $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+            ->leftjoin('cities as h', 'h.id', 'c.hub_id')
+            ->where('is_line_manager', 1)
+            ->whereIn('department_id', [$employee->department_id,5])
+            ->where('trax_id', '!=', $employee->trax_id)
+            ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
+            ->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees','line_managers'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
@@ -1275,6 +1299,9 @@ class AdminHumanResourseController extends Controller
             $employee->replacement_employee_id = $request->replacement_employee_id;
             $employee->replacement_last_working_day = $request->replacement_last_working_day_formatted;
         }
+
+        $employee->is_line_manager = $request->has('is_line_manager') ? 1 : 0;
+        $employee->line_manager_id = $request->line_manager_id;
         $employee->fuel = $request->fuel;
         $employee->employee_nature_id = $request->employee_nature_id;
         $employee->sub_department = $request->sub_department;
@@ -2630,6 +2657,27 @@ class AdminHumanResourseController extends Controller
             ->make(true);
     }
 
+    public function designation_hub_update(Request $request){
+        $designation_ids =explode(',' , $request->ids);
+        foreach($designation_ids as $id){
+
+            foreach($request->input('hub_id') as $hub_id) {
+                $designation_hub_exist = EmployeeDesignationHub::where('designation_id',$id)->where('hub_id',$hub_id)->first();
+
+                if(!$designation_hub_exist)
+                {
+                    $designation_hub = new EmployeeDesignationHub();
+
+                    $designation_hub->hub_id = $hub_id;
+                    $designation_hub->designation_id = $id;
+
+                    $designation_hub->save();
+                }
+            }
+        }
+        return redirect()->back()->with(['status'=>1,'success'=>"Hubs has been Assigned successfully!"]);
+    }
+
     public function designation_status(Request $request)
     {
         $id = $request->id;
@@ -2850,8 +2898,8 @@ class AdminHumanResourseController extends Controller
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type', 'cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
-
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id','cities.hub_id');
+        
         $datatable = Datatables::of($incentives);
 
         if ($city = $request->get('search_city')) {
@@ -2988,9 +3036,12 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary');
+        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary','hub_id');
         if (!in_array(596, session('permissions'))) {
             $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
+        }
+        else{
+            $payslips->whereIn('hub_id',session('hubs'));
         }
 
         $datatable = Datatables::of($payslips)
@@ -3113,7 +3164,7 @@ class AdminHumanResourseController extends Controller
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
-            'hub' => ['required', 'between:1,100'],
+            'hub' => ['required', 'between:1,100',Rule::exists('cities','name')],
             'zone' => ['nullable', 'between:1,100'],
             'joining_date' => ['required', 'date_format:Y-m-d'],
             'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
@@ -3237,6 +3288,7 @@ class AdminHumanResourseController extends Controller
                         $payslip->designation = trim($row['designation']);
                         $payslip->department = trim($row['department']);
                         $payslip->hub = trim($row['hub']);
+                        $payslip->hub_id = City::where('name',$row['hub'])->first()->id;
                         $payslip->zone = trim($row['zone']);
                         $payslip->joining_date = trim($row['joining_date']);
                         $payslip->confirmation_date = trim($row['confirmation_date']);
@@ -4127,5 +4179,54 @@ class AdminHumanResourseController extends Controller
         }else{
             return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
         }
+    }
+
+    public function get_line_managers(Request $request)
+    {
+        if (!$request->has('line_manager_id')) {
+            return response()->json(['status' => 1, 'error' => 'Line Manager is Required']);
+        }
+
+        if ($request->line_manager_id != '') {
+            $line_manager = Employee::find($request->line_manager_id);
+            if (!$line_manager) {
+                return response()->json(['status' => 1, 'error' => 'Invalid Line Manager']);
+            }
+
+            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+                ->leftjoin('cities as h', 'h.id', 'c.hub_id')
+                ->where('is_line_manager', 1)
+                ->whereIn('department_id', [$line_manager->department_id,5])
+                ->where('employees.id', '!=', $line_manager->id)
+                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
+                ->get();
+        } else {
+            $line_managers = [];
+        }
+        return response()->json(['status' => 0, 'line_managers' => $line_managers]);
+
+    }
+
+    public function update_line_manager(Request $request)
+    {
+        $request->validate([
+            'line_manager_id' => 'required',
+            'new_line_manager_id' => 'required',
+        ]);
+
+        $info = '';
+        $special_case = Employee::where('line_manager_id',$request->line_manager_id)->where('id',$request->new_line_manager_id);
+        if($special_case->exists())
+        {
+            $special_case = $special_case->first();
+            $special_case->line_manager_id = null;
+            $special_case->update();
+
+            $info = "Employee with Trax Id ".$special_case->trax_id." can not be assigned as self Line Manager. Please update it manually";
+        }
+        Employee::where('line_manager_id', $request->line_manager_id)
+            ->update(['line_manager_id' => $request->new_line_manager_id]);
+
+        return back()->with(['success' => 'Line Manager Updated Successfully','info' => $info ]);
     }
 }

@@ -4809,6 +4809,8 @@ class APIController extends Controller
     public function hbl_konnect_transactions(Request $request)
     {
         $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
 
         if ($environment == 'production') {
@@ -4828,14 +4830,55 @@ class APIController extends Controller
             $rules = [
                 'delivery_note_id' => ['required', 'integer', Rule::exists('delivery_notes', 'id')],
                 'amount' => ['required', 'numeric', 'min:0'],
-                'transaction_id' => ['required', 'integer'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
 
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error){
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if($error == 'delivery note id is Required.'){
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if($error == 'delivery note id must be an Integer.'){
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if($error == 'Given delivery note id is of Invalid ID.'){
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                    if($error == 'Collection Amount is Required.'){
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                    }
+                    if($error == 'Collection Amount must be a Number.'){
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                    }
+                    if($error == 'The Collection Amount must be at least 0.'){
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                    }
+                    if($error == 'transaction id is Required.'){
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                    }
+                    if($error == 'transaction id must be an Integer.'){
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                    }
+                    if($error == 'The transaction id must be at least 0.'){
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             }
             else {
                 $transaction_id = $request->transaction_id;
@@ -4879,12 +4922,14 @@ class APIController extends Controller
             }
         }
         else{
-            return ['status' => 1, 'message' => 'Access Denied!'];
+            return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
     public function hbl_konnect_delivery_note_information(Request $request)
     {
         $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
 
         if ($environment == 'production') {
@@ -4909,7 +4954,24 @@ class APIController extends Controller
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error){
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if($error == 'delivery note id is Required.'){
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if($error == 'delivery note id must be an Integer.'){
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if($error == 'Given delivery note id is of Invalid ID.'){
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             }
             else {
                 $delivery_note_id = $request->delivery_note_id;
@@ -4932,7 +4994,7 @@ class APIController extends Controller
             }
         }
         else{
-            return ['status' => 1, 'message' => 'Access Denied!'];
+            return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
 
@@ -5215,11 +5277,11 @@ class APIController extends Controller
                                     elseif ($complaint_id == 21) {
                                         $rules = [
                                             'product_cost' => ['required', 'integer'],
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
-                                            'damage_product_picture' => ['required', 'image'],
-                                            'product_packaging_picture' => ['required', 'image'],
-                                            'actual_product_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
+                                            'damage_product_picture' => ['required', 'url'],
+                                            'product_packaging_picture' => ['required', 'url'],
+                                            'actual_product_picture' => ['required', 'url'],
                                             'damage_product_price' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5236,7 +5298,7 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price );
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture, $request->damage_product_picture, $request->product_packaging_picture, $request->actual_product_picture, $request->damage_product_price);
                                             }
 
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
@@ -5245,11 +5307,11 @@ class APIController extends Controller
                                     elseif ($complaint_id == 22) {
                                         $rules = [
                                             'product_cost' => ['required', 'integer'],
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
-                                            'missing_product_picture' => ['required', 'image'],
-                                            'product_packaging_picture' => ['required', 'image'],
-                                            'actual_product_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
+                                            'missing_product_picture' => ['required', 'url'],
+                                            'product_packaging_picture' => ['required', 'url'],
+                                            'actual_product_picture' => ['required', 'url'],
                                             'missing_product_price' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5266,15 +5328,15 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), Null, Null, Null, Null, $request->file('missing_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture') , $request->missing_product_price);
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture, Null, Null, Null, Null, $request->missing_product_picture, $request->product_packaging_picture, $request->actual_product_picture , $request->missing_product_price);
                                             }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                         }
                                     }
                                     elseif ($complaint_id == 29 || $complaint_id == 25 || $complaint_id == 24 || $complaint_id == 23) {
                                         $rules = [
-                                            'product_picture' => ['required', 'image'],
-                                            'invoice_picture' => ['required', 'image'],
+                                            'product_picture' => ['required', 'url'],
+                                            'invoice_picture' => ['required', 'url'],
                                             'product_cost' => ['required', 'integer'],
                                             'description' => ['required'],
 
@@ -5291,7 +5353,7 @@ class APIController extends Controller
                                                 return response()->json(['status' => 1, 'message' => 'Same Request already against given Tracking Number exists!']);
                                             }
                                             else{
-                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->product_picture, $request->invoice_picture);
                                             }
                                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                                             }

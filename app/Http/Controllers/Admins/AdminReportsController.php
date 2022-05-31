@@ -3372,9 +3372,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
-        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories]);
+        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
     }
     public function overall_sales_list(Request $request)
     {
@@ -3462,7 +3462,7 @@ class AdminReportsController extends Controller
         ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
         ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
         ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
-        ->select('invoices.invoice_number','r.name as ridername','ssr.name as reason','sjr.remarks as remark','p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number','usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type','rc.name as return_city',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
+        ->select('invoices.invoice_number','r.name as ridername','ssr.name as reason','sjr.remarks as remark','p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','sm.id as shipping_mode_id','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number','usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type','rc.name as return_city',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
         ->whereNotIn('shipments.shipper_status_id',[1,17])
         ->whereNotIn('u.id', [8761, 9358])
         ->whereBetween('sj.created_at', [$from,$to]);
@@ -3680,6 +3680,9 @@ class AdminReportsController extends Controller
         }
         if ($search_shippers = $request->get('search_shippers')) {
             $datatable->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', '=', $mode);
         }
         if ($origin = $request->get('search_origin')) {
             $datatable->where('oc.id', '=', $origin);
@@ -9017,7 +9020,9 @@ class AdminReportsController extends Controller
                 if ($shipments->picture_path != null) {
                     $exists = Storage::disk('public')->exists($shipments->picture_path);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->picture_path)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9033,7 +9038,9 @@ class AdminReportsController extends Controller
                 if ($shipments->cnic_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->cnic_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->cnic_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9050,7 +9057,9 @@ class AdminReportsController extends Controller
                 if ($shipments->house_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->house_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->house_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9067,7 +9076,9 @@ class AdminReportsController extends Controller
                 if ($shipments->ccd_image != null) {
                     $exists = Storage::disk('public')->exists($shipments->ccd_image);
                     if ($exists) {
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+//                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset(Storage::url($shipments->ccd_image)) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -9084,7 +9095,9 @@ class AdminReportsController extends Controller
                 if ($shipments->audio_path != null) {
                     $exists = Storage::disk('public')->exists($shipments->audio_path);
                     if ($exists) {
-                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-lg la-file-sound-o align-middle"></i> Listen</button></div>';
+//                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-lg la-file-sound-o align-middle"></i> Listen</button></div>';
+                        $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' .  asset(Storage::url($shipments->audio_path))  . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle"> Listen</span></a>';
+
                     } else {
                         $sound = Storage::disk('s3')->temporaryUrl($shipments->audio_path, now()->addMinutes(5));
                         $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $sound . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle"> Listen</span></a>';
@@ -10449,7 +10462,8 @@ class AdminReportsController extends Controller
         $data = DB::connection('reports')->table('rider_unresponsive_statuses')
             ->leftjoin('riders as r','r.id','=','rider_unresponsive_statuses.rider_id')
             ->leftjoin('admins as a','a.id','=','rider_unresponsive_statuses.admin_id')
-            ->select('r.name as rider','a.name as admin','rider_unresponsive_statuses.status as status','rider_unresponsive_statuses.created_at','rider_unresponsive_statuses.note_id');
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->select('r.name as rider','a.name as admin','rider_unresponsive_statuses.status as status','rider_unresponsive_statuses.created_at','rider_unresponsive_statuses.note_id','c.name as city_name');
 
         $datatable = Datatables::of($data)
             ->addColumn('display_status', function ($data) {
@@ -10462,11 +10476,9 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('display_note_id', function ($data) {
-                if($data->note_id == null)
-                {
+                if ($data->note_id == null) {
                     return "-";
-                }
-                else{
+                } else {
                     return str_pad($data->note_id, 6, '0', STR_PAD_LEFT);
                 }
             });
