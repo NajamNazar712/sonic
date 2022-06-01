@@ -653,7 +653,19 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_index(){
-        return view('admin.otp.admin');
+        $settings = GlobalSettings::where('type','admin_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "admin_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        return view('admin.otp.admin')->with(['setting'=>$settings]);
     }
 
     public function admin_otp_list(Request $request){
@@ -666,6 +678,24 @@ class UserManagementController extends Controller
         }
         $datatable = Datatables::of($admins);
         return $datatable->make(true);
+    }
+
+    public function admin_otp_update(Request $request)
+    {
+        $settings = GlobalSettings::where('type','admin_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->type = "admin_otp";
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        $settings->setting_value = $request->has('admin_otp_toggle') ? 1 : 0;
+        $settings->save();
+
+        return back()->with(['success'=>"Admin OTP Updated Successfully"]);
     }
 
 
