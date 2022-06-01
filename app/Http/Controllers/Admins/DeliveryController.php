@@ -6708,13 +6708,15 @@ class DeliveryController extends Controller
 
                     $shipment->save();
 
+                    $status_reason_id = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',12)->orderBy('id','desc')->pluck('status_reason_id')->first();
+
                     $new_intercept_request = InterceptReBookRequest::where('shipment_id', $shipment_id)->update([
                         'status' => 2,
                         'updated_by' => Auth::id(),
                         'updated_by_date' => Carbon::now()
                     ]);
 
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, $remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, $status_reason_id, $remarks, NULL, Auth::id());
                 }
             }
 

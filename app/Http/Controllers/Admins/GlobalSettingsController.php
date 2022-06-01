@@ -933,12 +933,14 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
+        $exclude_ids = [3216, 167, 3050, 15809, 8062, 3903, 952, 13580, 1698, 7759, 15376, 602, 6585, 10497, 1577, 7308, 12412, 4697, 3285, 2539, 3008, 3175, 9129, 6109, 1799, 2930, 620, 415, 12360, 3719, 7335, 1807, 4707, 3324, 15019];
+
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->select('id', 'account_type_id')->get();
+                $users = User::where('status', 3)->whereNotIn('id', $exclude_ids)->get();
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1050,7 +1052,7 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->select('id', 'account_type_id')->get();
+                    $users = User::whereIn('id', $request->shippers)->whereNotIn('id', $exclude_ids)->get();
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
@@ -1925,6 +1927,43 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
 
+    }
+    public function invoice_against_return_delivered_shipper_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),532);
+        $shippers = User::where('account_type_id','!=',1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper');
+        $tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $tags = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.invoice_against_return_delivered_shipper')->with(['shippers' => $shippers, 'tags' => $tags]);
+    }
+    public function invoice_against_return_delivered_shipper_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'invoice_against_return_delivered_shipper';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
 
     public function ccd_booking_index()
@@ -5535,21 +5574,72 @@ public function sales_incentive()
             $percentage = $settings->setting_value;
         }
 
-        return view('admin.settings.return.reattempt_percentage')->with(['percentage' => $percentage]);
+        $settings = GlobalSettings::where('type', 'reattempt_count');
+        $count = '';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $count = $settings->setting_value;
+        }
+        
+        $settings = GlobalSettings::where('type', 'reattempt_flag');
+        $switch = 1;
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $switch = $settings->setting_value;
+        }
+
+        return view('admin.settings.return.reattempt_percentage')->with(['percentage' => $percentage, 'count' => $count, 'switch' => $switch]);
     }
 
     public function reattempt_percentage_store(Request $request)
     {
-        $settings = GlobalSettings::where('type', 'reattempt_percentage');
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        } else {
-            $settings = new GlobalSettings();
-            $settings->type = 'reattempt_percentage';
-        }
-        $settings->setting_value = $request->reattempt_percentage;
+        if($request->has('on_default')){
 
-        $settings->save();
+            $settings = GlobalSettings::where('type', 'reattempt_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_percentage';
+            }
+            $settings->setting_value = $request->reattempt_percentage;
+    
+            $settings->save();
+
+            $settings = GlobalSettings::where('type', 'reattempt_count');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_count';
+            }
+            $settings->setting_value = $request->reattempt_count;
+    
+            $settings->save();
+
+
+            $settings = GlobalSettings::where('type', 'reattempt_flag');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_flag';
+            }
+            $settings->setting_value = 1;
+    
+            $settings->save();
+        }else{
+            $settings = GlobalSettings::where('type', 'reattempt_flag');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'reattempt_flag';
+            }
+            $settings->setting_value = 0;
+    
+            $settings->save();
+        }
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -6128,7 +6218,7 @@ public function sales_incentive()
         $time = GlobalSettings::where('type','rcp_sms_cron_time')->first();
 //        $data = DB::table('rcp_sms_cron_time')->get();
 //        $data = GlobalSettings::where('type','rcp_sms_cron_time')->first();
-        return view('admin.settings.return.rcp_sms',compact('setting', 'data','time'));
+        return view('admin.settings.return.rcp_sms',compact('setting','time'));
     }
 
     public function rcp_sms_update(Request $request){
@@ -6743,6 +6833,44 @@ public function sales_incentive()
     public function lost_shipment_admins_delete(Request $request){
         LostShipmentAdmin::find($request->id)->delete();
         return redirect()->back()->with('success', 'User Deleted!');
+    }
+
+    public function undelivered_sms_hub_wise(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),529);
+        
+        $settings = GlobalSettings::where('type', '=', 'undeliverd_sms_hubwise')->first();
+        $cities = City::where('status', 1)->where('business_category_id',1)->get();
+
+        $city_id = null;
+        if($settings){
+            $city_id =  explode(',', $settings->text); 
+
+        }
+
+        return view('admin.settings.undelivered_sms_hub_wise',compact('city_id','cities'));
+
+
+    }
+
+    public function undelivered_sms_hub_wise_submit(Request $request){
+        // dump(implode(',', $request->city_id));
+
+        $city_ids = implode(',', $request->city_id);
+        $settings = GlobalSettings::where('type', 'undeliverd_sms_hubwise');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->text = $city_ids;
+            $settings->save();
+
+        }else{
+            $settings = new GlobalSettings;
+            $settings->text = $city_ids;
+            $settings->type = 'undeliverd_sms_hubwise';
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Cities Upadated');
+
     }
 
     
