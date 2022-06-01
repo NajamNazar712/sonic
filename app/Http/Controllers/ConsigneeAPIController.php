@@ -131,7 +131,7 @@ class ConsigneeAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'otp' => ['required']
+            'otp' => ['required', 'digits:4']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -141,7 +141,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_otp = ConsigneeOtp::where('phone_number', $request->phone_number);
             if ($consignee_otp->exists()) {
                 $consignee_otp = $consignee_otp->first();
                 if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
