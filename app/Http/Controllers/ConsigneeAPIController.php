@@ -141,10 +141,10 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_otp = ConsigneeOtp::where('phone_number', $request->phone_number);
+            $consignee_otp = ConsigneeOtp::where('phone_number', $request->phone_number)->orderBy('id', 'DESC');
             if ($consignee_otp->exists()) {
                 $consignee_otp = $consignee_otp->first();
-                if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
+                if (Hash::check($request->otp, $consignee_otp->otp)) {
                     return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
