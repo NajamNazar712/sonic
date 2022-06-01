@@ -131,7 +131,7 @@ class ConsigneeAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'otp' => ['required', 'digits:4']
+            'otp' => ['required']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
