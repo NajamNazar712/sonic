@@ -19,6 +19,13 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-3">
+                        <select name="search_hub" id="search_hub" class="form-control select2">
+                            @foreach($hubs as $hub)
+                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
 
@@ -137,6 +144,13 @@
         }).bind('change', function() {
             table.draw();
         });
+        $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Hub',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -222,6 +236,7 @@
                 url: '{{ route('admin.delivery.pending.list') }}',
                 data: function (d) {
                     d.search_shipping_mode = $('#search_shipping_mode').val();
+                    d.search_hub = $('#search_hub').val();
                 }
             },
             rowId: 'shId',

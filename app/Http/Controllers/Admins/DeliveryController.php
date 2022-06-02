@@ -120,8 +120,9 @@ class DeliveryController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
+        $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $service_type = BookingType::all();
-        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs]);
     }
 
     public function pending_list(Request $request)
@@ -172,6 +173,10 @@ class DeliveryController extends Controller
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        if ($hub = $request->get('search_hub')) {
+            $shipments = $shipments->where('h.id', '=', $hub);
         }
 
         $datatables = Datatables::of($shipments)
