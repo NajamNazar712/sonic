@@ -127,6 +127,39 @@ class ConsigneeAPIController extends Controller
         }
     }
 
+    public function consignee_forget_pin_otp(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_user->exists()) {
+                $otp_pin = rand(1000, 9999);
+                $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                if ($consignee_otp->exists()) {
+                    $consignee_otp = $consignee_otp->first();
+                } else {
+                    $consignee_otp = new ConsigneeOtp();
+                    $consignee_otp->phone_number = $request->input('phone_number');
+                }
+                $consignee_otp->otp = bcrypt($otp_pin);
+                $consignee_otp->save();
+                NotificationsController::trax_otp_verification($request->input('phone_number'), $otp_pin);
+                return response()->json(['status' => 0, 'message' => 'OTP has been sent to your registered number']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Given Phone Number is not Present!']);
+            }
+        }
+    }
+
     public function consignee_otp_verification(Request $request)
     {
         $rules = [
