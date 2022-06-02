@@ -37,16 +37,17 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                      <span class="">Time</span>
-                                                  </span>
-                                            </div>
-                                            <div class="form">
-                                                <label><input type="time" id="time" value="{{$time->text}}" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
-                                                {{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
+                                    <div class="row justify-content-center">
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                <span class="">Time*</span>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <input type="text" name="time" class="form-control bg-primary border-primary white pickatime time" id="time" value="{{$time->text}}" placeholder="Time*" data-rule-required="true" data-msg-required="Time To is required">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -62,6 +63,7 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
@@ -88,14 +90,13 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.time.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.cut_off_time_from').pickatime({
-                clear: '',
-                format: 'h:i A',
-            });
-            $('.cut_off_time_to').pickatime({
+            $('.time').pickatime({
                 clear: '',
                 format: 'h:i A',
             });
