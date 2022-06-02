@@ -1663,7 +1663,7 @@ class ShipperShipmentBookController extends Controller
 
                     $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="3">' . ($shipment->packaging_material_request == 1) ? $shipment->packaging_material->poc : $shipment->consignee_address . '</td>
+                                <td colspan="3">' . $shipment->consignee_address . '</td>
                               </tr>
                               <tr>
                         ';
