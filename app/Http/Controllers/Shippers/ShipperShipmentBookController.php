@@ -910,7 +910,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $now = Carbon::now()->format('H:i:s');
-                    
+
                     if ($now > $cutofftime) {
                         NotificationsController::send(152, $shipment_id);
                         NotificationsController::send(153, $shipment_id);
@@ -979,7 +979,7 @@ class ShipperShipmentBookController extends Controller
                     $shipment_parcel_image->picture_path = $picture_path;
                     $shipment_parcel_image->save();
                 }
-                   
+
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
@@ -1663,7 +1663,7 @@ class ShipperShipmentBookController extends Controller
 
                     $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="3">' . $shipment->consignee_address . '</td>
+                                <td colspan="3">' . ($shipment->packaging_material_request == 1) ? $shipment->packaging_material->poc : $shipment->consignee_address . '</td>
                               </tr>
                               <tr>
                         ';
