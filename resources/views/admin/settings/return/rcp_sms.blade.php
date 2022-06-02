@@ -20,7 +20,7 @@
                             <div class="row justify-content-center">
                                 <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.rcp_sms.update') }}" novalidate="novalidate">
                                     {{ csrf_field() }}
-                                    <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check">
+                                    <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check" value="@if(isset($setting->setting_value) && $setting->setting_value == 1) 1 @else 0 @endif">
                                     <div class="row">
                                         <div class="input-group ml-1">
                                             <label class="mr-2"><b>On/Off</b></label>
@@ -99,10 +99,7 @@
                 clear: '',
                 format: 'h:i A',
             });
-        </script>
 
-        <script>
-        $(document).ready(function() {
             $('#settings_form input.reattempt_percentage').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
