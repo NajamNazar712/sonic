@@ -6130,11 +6130,10 @@ public function sales_incentive()
         $time = GlobalSettings::where('type','rcp_sms_cron_time')->first();
 //        $data = DB::table('rcp_sms_cron_time')->get();
 //        $data = GlobalSettings::where('type','rcp_sms_cron_time')->first();
-        return view('admin.settings.return.rcp_sms',compact('setting', 'data','time'));
+        return view('admin.settings.return.rcp_sms')->with(['setting' => $setting, 'time' => $time]);
     }
 
     public function rcp_sms_update(Request $request){
-//        dd($request->time);
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $time = GlobalSettings::where('type','rcp_sms_cron_time')->first();
         $setting->setting_value = $request->toggle_check;
