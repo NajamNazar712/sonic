@@ -173,7 +173,9 @@ class ShipperDashboardController extends Controller
                 $shipper_payment = null;
             }*/
             $shipper_payment = null;
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+
+            $rcp_percent = 10;
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment,'rcp_percent'=>$rcp_percent]);
         }
     }
     public function opt_verify(Request $request){
