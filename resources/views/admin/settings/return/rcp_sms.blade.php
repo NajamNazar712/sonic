@@ -20,7 +20,7 @@
                             <div class="row justify-content-center">
                                 <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.rcp_sms.update') }}" novalidate="novalidate">
                                     {{ csrf_field() }}
-                                    <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check" value="@if(isset($setting->setting_value) && $setting->setting_value == 1) 1 @else 0 @endif">
+                                    <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check">
                                     <div class="row">
                                         <div class="input-group ml-1">
                                             <label class="mr-2"><b>On/Off</b></label>
@@ -113,7 +113,11 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
-
+            @if(isset($setting->setting_value) && $setting->setting_value == 1)
+                $('#toggle_check').val(1);
+            @else
+                $('#toggle_check').val(0);
+            @endif
             $("#count_toggle").on('change', function(){
                 if($("#count_toggle").is(":checked")){
                     $('#toggle_check').val(1);
