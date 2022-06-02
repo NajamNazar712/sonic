@@ -23,6 +23,7 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
+use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
@@ -1627,9 +1628,22 @@ class ShipperShipmentBookController extends Controller
                                 <td colspan="2" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
                     ';
                     }
+                    if($shipment->packaging_material_request == 1){
+                        $packaging_material_shipment = PackagingMaterialRequest::where('shipment_id', $shipment->id);
+                        if($packaging_material_shipment->exists()){
+                            $packaging_material_shipment = $packaging_material_shipment->first();
+                            $consignee_name = $packaging_material_shipment->poc;
+                        }
+                        else{
+                            $consignee_name = $shipment->consignee_name;
+                        }
+                    }
+                    else{
+                        $consignee_name = $shipment->consignee_name;
+                    }
                     $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Name</strong></td>
-                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                                <td colspan="3">' . $consignee_name . '</td>
                               </tr>
 
                               <tr>
