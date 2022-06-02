@@ -332,7 +332,7 @@ class ShipperAPIController extends Controller
         if ($nature_id == 3) {
             if ($shipment_id != null) {
                 if ($description == null) {
-                    return response()->json(['status' => 0, 'message' => 'Description Not Entered!']);
+                    return response()->json(['status' => 1, 'message' => 'Description Not Entered!']);
                 }
                 $shipment = Shipment::find($shipment_id);
                 if ($shipment) {
@@ -342,10 +342,10 @@ class ShipperAPIController extends Controller
                         return response()->json(['status' => 0, 'message' => 'Feedback successfully added']);
                     } else {
                         $tracking_no = $shipment->tracking_number;
-                        return response()->json(['status' => 0, 'message' => 'Feedback already entered for the following Shipment! ' . $tracking_no]);
+                        return response()->json(['status' => 1, 'message' => 'Feedback already entered for the following Shipment! ' . $tracking_no]);
                     }
                 }
-                return response()->json(['status' => 1, 'message' => 'Shipment not exists']);
+                return response()->json(['status' => 1, 'message' => 'Shipment not Found!']);
             }
             return response()->json(['status' => 1, 'message' => 'Shipment not provided']);
         }
@@ -363,7 +363,7 @@ class ShipperAPIController extends Controller
                                 if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
                                     if (in_array($complaint_id, [11, 12, 13])) {
                                         $tracking_no = $shipment->tracking_number;
-                                        return response()->json(['status' => 0, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
+                                        return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
                                     } else {
                                         CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                     }
@@ -373,7 +373,7 @@ class ShipperAPIController extends Controller
                             }
                         } else {
                             $tracking_no = $shipment->tracking_number;
-                            return response()->json(['status' => 0, 'message' => 'Request/Complaint already lodged for the following Shipment! ' . $tracking_no]);
+                            return response()->json(['status' => 1, 'message' => 'Request/Complaint already lodged for the following Shipment! ' . $tracking_no]);
                         }
                     } else {
 
@@ -391,7 +391,7 @@ class ShipperAPIController extends Controller
                             if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
                                 if (in_array($complaint_id, [11, 12, 13])) {
                                     $tracking_no = $shipment->tracking_number;
-                                    return response()->json(['status' => 0, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
+                                    return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
                                 } else {
                                     CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                 }
