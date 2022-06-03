@@ -440,6 +440,7 @@
                                'allowPlus': false
                            });
 
+                        $('#cargo_consignment form input.seal_number').focus();
                            $('#cargo_consignment form input.seal_number').on('change', function () {
                                var seal = this.value;
                                if (seal.length != 12 && seal.length != 13 && seal.length != 6 && seal.length != 7 && seal.length != 14 && seal.length != 15) {

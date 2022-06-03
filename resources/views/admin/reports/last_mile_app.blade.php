@@ -266,6 +266,8 @@
                             <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
+                            <th class="border-primary border-darken-1">CNIC No.</th>
+                            <th class="border-primary border-darken-1">Relation</th>
                             <th class="border-primary border-darken-1">POD</th>
                             <th class="border-primary border-darken-1">CNIC</th>
                             <th class="border-primary border-darken-1">House</th>
@@ -737,6 +739,8 @@
                             { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                            { data:'cnic' ,name: 'rider_deliveries.cnic', class: 'align-middle cnic'},
+                            { data:'relation' ,name: 'rider_deliveries.relation', class: 'align-middle relation'},
                             { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
                             { data:'cnic_image' ,name: 'cnic_image', class: 'align-middle cnic_image',orderable: false, searchable: false},
                             { data:'house_image' ,name: 'house_image', class: 'align-middle house_image',orderable: false, searchable: false},

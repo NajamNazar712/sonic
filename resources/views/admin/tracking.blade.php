@@ -312,7 +312,7 @@
                                     <div class="col-12 d-none" id="reattempt_charges">
                                         <fieldset class="form-group">
                                             <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" maxlength="6" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
-                                        </fieldset>  
+                                        </fieldset>
                                     </div>
                                     <div class="col-12">
                                         <fieldset class="form-group">
@@ -2432,6 +2432,16 @@
             $('#receiving_sheet_div').addClass('d-none');
 
         });
+
+        $('#tracking').on('click', '.replacement_booked_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
+            $('#tracking').on('click', '.replacement_collected_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
 
 				{{--$.ajax({--}}
 				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}

@@ -20,7 +20,6 @@ use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use phpDocumentor\Reflection\Types\Nullable;
 use Yajra\Datatables\Datatables;
 
 class AdminFnfController extends Controller
@@ -53,22 +52,31 @@ class AdminFnfController extends Controller
          ->join('fnf_statuses as fs','fs.id','=','fnf.status_id')
          ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id as status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status','fnf.hod as hod_id','fnf.line_manager as reporting_manager','c.hub_id']);
 
-        if(session('role_id') != 1)
-        {
-            $employee = $employee->whereIn('c.hub_id',session('hubs'));
-        }
+    if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 69 && session('role_id') != 70)
+    {
+        $employee->where('d.id',session('department_id'));
+    }
+
+	if(session('role_id') != 1)
+    {
+        $employee = $employee->whereIn('c.hub_id',session('hubs'));
+    }
+
      $datatables = Datatables::of($employee)
          ->editColumn('fnf_id',function ($fnf) {
             return 'FNF'.$fnf->fnf_id;
          })
          ->addColumn("actions", function ($result) {
-             if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578], session('permissions'))) !== 0) {
+             if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578,713], session('permissions'))) !== 0) {
                  $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
+                 if ((session('role_id') == 1 || in_array(713, session('permissions'))) && $result->status_id != 4) {
+                     $dropdown .= '<button type="button" class="dropdown-item reopen_fnf" data-target-id=' . $result->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-repeat"></i></div><div class="col-9 offset-1">Reopen FNF</div></button>';
+                 }
                  if (session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(570, session('permissions'))) {
                      $dropdown .= '<button type="button" class="dropdown-item rm_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reporting Manager View</div></button>';
 
@@ -124,13 +132,17 @@ class AdminFnfController extends Controller
 
     public function add(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),421);
-        $employee = Employee::whereNotNull('trax_id')->select('trax_id')->get();
-        if(session('department_id') == 1){
+        $employee = Employee::whereNotNull('trax_id');
+        if(session('role_id') != 1)
+        {
+            $employee->where('department_id',session('department_id'));
             $departments = AdminDepartment::get();
         }
         else{
             $departments = AdminDepartment::where('id',session('department'))->get();
         }
+        $employee = $employee->select('trax_id')->get();
+
         $designations = EmployeeDesignation::where('status',1)->get();
         $employee_statuses = EmployeeStatus::all();
         return view('admin.human_resource.fnf.add',compact('departments','employee_statuses','employee','designations'));
@@ -170,14 +182,15 @@ class AdminFnfController extends Controller
             $fnf->employee_id = $employee->id;
             $fnf->line_manager = $line_manager->id;
             $fnf->hod = $hod->id;
-            $fnf->joining_date = $request->joining_date_formatted;
-            $fnf->resign_date = $request->resign_date_formatted;
-            $fnf->resign_date = $request->resign_date_formatted;
+            $fnf->joining_date = $request->joining_date;
+            $fnf->resign_date = $request->resign_date;
+            $fnf->last_working_date  = $request->last_working_date;
             $fnf->created_by = Auth::id();
             $fnf->status_id = 1;
             $fnf->save();
 
-            $employee->joining_date = $request->joining_date_formatted;
+            $employee->joining_date = $request->joining_date;
+            $employee->last_working_date = $request->last_working_date;
             $employee->save();
             $line_manager_trax_id = Employee::find($fnf->line_manager)->trax_id;
             $hod_trax_id = Employee::find($fnf->hod)->trax_id;
@@ -197,7 +210,12 @@ class AdminFnfController extends Controller
             $data['department'] =  $employee->department_id;
             $data['city'] =  $employee->city->name;
             $data['joining_date'] =  $employee->joining_date;
-            
+            if ($employee->line_manager_id != null) {
+                $line_manager = Employee::find($employee->line_manager_id);
+                $data['line_manager_email'] = $line_manager->official_email;
+            } else {
+                $data['line_manager_email'] = '';
+            }
             return response()->json(['status' => 1, 'data' => $data]);
         }
         else{
@@ -418,8 +436,11 @@ class AdminFnfController extends Controller
 
         $fnf_id = $request->fnf_id;
         if($fnf_id){
-            $line_manager = Admin::where('email',$request->line_manager);
-            $hod = Admin::where('email',$request->hod);
+            $line_manager = Employee::where('official_email',$request->line_manager)->where('employee_type_id',1);
+
+            $hod = Employee::where('official_email',$request->hod)->where('employee_type_id',1);
+
+
             if($line_manager->exists()){
                 $line_manager = $line_manager->first();
             }
@@ -431,7 +452,7 @@ class AdminFnfController extends Controller
                 $hod = $hod->first();
             }
             else{
-                return redirect()->back()->with('error','No Line Manager Found for the given email');
+                return redirect()->back()->with('error','No HOD Found for the given email');
             }
 
             $fnf = FnfSectionEmployee::where('id',$fnf_id)->first();
@@ -602,8 +623,8 @@ class AdminFnfController extends Controller
 
        $fnf_id = $request->fnf_id;
        if($fnf_id) {
-           $line_manager = Admin::where('email', $request->line_manager);
-           $hod = Admin::where('email', $request->hod);
+           $line_manager = Employee::where('official_email',$request->line_manager)->where('employee_type_id',1);
+           $hod = Employee::where('official_email',$request->hod)->where('employee_type_id',1);
            if ($line_manager->exists()) {
                $line_manager = $line_manager->first();
            } else {
@@ -613,7 +634,7 @@ class AdminFnfController extends Controller
            if ($hod->exists()) {
                $hod = $hod->first();
            } else {
-               return redirect()->back()->with('error', 'No Line Manager Found for the given email');
+               return redirect()->back()->with('error', 'No HOD Found for the given email');
            }
 
            $hr = FnfSectionHr::where('fnf_id',$fnf_id)->first();
@@ -871,7 +892,7 @@ class AdminFnfController extends Controller
                                             if($fnf->manager){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->manager->comments.'</td>';
+                                                <td>'.$fnf->manager->status->name.'</td><td>'.$fnf->manager->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -884,7 +905,7 @@ class AdminFnfController extends Controller
                                             if($fnf->customer_experience){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->customer_experience->comments.'</td>';
+                                                <td>'.$fnf->customer_experience->status->name.'</td><td>'.$fnf->customer_experience->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -897,7 +918,7 @@ class AdminFnfController extends Controller
                                             if($fnf->administration){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->administration->comments.'</td>';
+                                                <td>'.$fnf->administration->status->name.'</td><td>'.$fnf->administration->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -910,7 +931,7 @@ class AdminFnfController extends Controller
                                             if($fnf->it_support){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->it_support->comments.'</td>';
+                                                <td>'.$fnf->it_support->status->name.'</td><td>'.$fnf->it_support->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -923,7 +944,7 @@ class AdminFnfController extends Controller
                                             if($fnf->finance){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->finance->comments.'</td>';
+                                                <td>'.$fnf->finance->status->name.'</td><td>'.$fnf->finance->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -936,7 +957,7 @@ class AdminFnfController extends Controller
                                             if($fnf->hod_approval){
 
                                                 $html .='
-                                                <td>Inprocess</td><td>'.$fnf->hod_approval->comments.'</td>';
+                                                <td>'.$fnf->hod_approval->status->name.'</td><td>'.$fnf->hod_approval->comments.'</td>';
                                             }else{
                                                 $html .='
                                                 <td>Pending</td><td></td>';
@@ -966,6 +987,163 @@ class AdminFnfController extends Controller
             </html>
         ';
     return $html;
+        }
+    }
+
+
+    public function reopen(Request $request)
+    {
+        $fnf = FnfSectionEmployee::find($request->fnf_id);
+
+        if ($fnf->status_id == 1) {
+            $fnf_id = $fnf->id;
+
+            if ($request->has('reporting_manager')) {
+                $data = FnfSectionReportingManager::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 1);
+                }
+            }
+
+            if ($request->has('customer_experience')) {
+                $data = FnfSectionCustomerExperience::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 2);
+                }
+            }
+
+            if ($request->has('administration')) {
+                $data = FnfSectionAdministration::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 3);
+                }
+            }
+
+            if ($request->has('it_support')) {
+                $data = FnfSectionItSupport::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 4);
+                }
+            }
+
+            if ($request->has('finance')) {
+                $data = FnfSectionFinance::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 5);
+                }
+            }
+
+            if ($request->has('hod')) {
+                $data = FnfSectionHod::where('fnf_id', $fnf_id)->first();
+                if ($data) {
+                    $data->status_id = 1;
+                    $data->update();
+                    $this::AddFnfStatusJourney($fnf_id, 1, Auth::id(), 6);
+                }
+            }
+
+            return back()->with(['success' => 'Fnf Reopened Successfully']);
+        } else {
+            return back()->with(['error' => 'Fnf Already Completed']);
+        }
+    }
+
+    public function get_reopen_sections(Request $request)
+    {
+        $html = "";
+        $data = FnfSectionReportingManager::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= '
+                                <div class="form-group">
+                                    <label for="reporting_manager">Reporting Manager</label><br>
+                                    <input type="checkbox" name="reporting_manager" id="reporting_manager" class="reporting_manager section_type" data-size="xs" data-switchery="true">
+                                </div>
+                            ';
+            }
+        }
+
+        $data = FnfSectionAdministration::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= ' 
+                                <div class="form-group">
+                                    <label for="administration">Administration</label><br>
+                                    <input type="checkbox" name="administration" id="administration" class="administration section_type" data-size="xs" data-switchery="true" data-rule-required="true">
+
+                                </div>
+                            ';
+            }
+        }
+
+        $data = FnfSectionItSupport::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= ' 
+                                <div class="form-group">
+                                    <label for="it_support">IT Support</label><br>
+                                    <input type="checkbox" name="it_support" id="it_support" class="it_support section_type" data-size="xs" data-switchery="true">
+                                </div>
+                            ';
+            }
+        }
+
+        $data = FnfSectionFinance::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= '
+                                <div class="form-group">
+                                    <label for="finance">Finance</label><br>
+                                    <input type="checkbox" name="finance" id="finance" class="finance section_type" data-size="xs" data-switchery="true">
+                                </div>
+                            ';
+            }
+        }
+
+        $data = FnfSectionCustomerExperience::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= '
+                                <div class="form-group">
+                                    <label for="customer_experience">Customer Experience</label><br>
+                                    <input type="checkbox" name="customer_experience" id="customer_experience" class="customer_experience section_type" data-size="xs" data-switchery="true">
+                                </div>
+                            ';
+            }
+        }
+
+        $data = FnfSectionHod::where('fnf_id', $request->id);
+        if ($data->exists()) {
+            $data = $data->first();
+            if ($data->status_id == 2) {
+                $html .= '
+                                <div class="form-group">
+                                    <label for="hod">HOD</label><br>
+                                    <input type="checkbox" name="hod" id="hod" class="hod section_type" data-size="xs" data-switchery="true">
+                                </div>
+                            ';
+            }
+        }
+
+        if ($html != '') {
+            return response()->json(['status' => 0, 'html' => $html]);
+        } else {
+            return response()->json(['status' => 1]);
         }
     }
 }

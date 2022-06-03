@@ -524,96 +524,96 @@ class ShipperReceivingSheetController extends Controller
                           </tr>
                     ';
                     }
-                }
 
-                if ($shipment->booking_type_id == 1) {
-                    $shipment_details .= $shipment_details_row_start;
+                    if ($shipment->booking_type_id == 1) {
+                        $shipment_details .= $shipment_details_row_start;
 
-                    $item = $shipment->items->first();
-
-                    $shipment_details .= '
-                            <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>';
-                    if($item_description_flag){
-                        $shipment_details .= '<td>' . $item->description . '</td>';
-                    }
-                    $shipment_details .='
-                             <td>' . $item->quantity . '</td>
-                    ';
-
-                    $shipment_details .= $shipment_details_row_end;
-                }
-                else if ($shipment->booking_type_id == 2) {
-                    $shipment_details .= $shipment_details_row_start;
-
-                    $item = $shipment->items()->where('type', 0)->first();
-
-                    $shipment_details .= '
-                            <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>';
-                    if($item_description_flag){
-                        $shipment_details .= '<td>' . $item->description . '</td>';
-                    }
-                    $shipment_details .='
-                             <td>' . $item->quantity . '</td>
-                    ';
-
-                    $shipment_details .= $shipment_details_row_end;
-                }
-                else if ($shipment->booking_type_id == 3) {
-                    $first = TRUE;
-
-                    foreach ($shipment->items as $item) {
-                        if ($first) {
-                            $shipment_details .= $shipment_details_row_start;
-                        }
-                        else {
-                            $shipment_details .= '
-                          <tr>
-                            ';
-                        }
+                        $item = $shipment->items->first();
 
                         $shipment_details .= '
-                            <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>';
-                            if($item_description_flag){
-                                $shipment_details .= '<td>' . $item->description . '</td>';
+                                <td>' . $item->product->product_name . '</td>
+                                <td>' . $item->created_at . '</td>';
+                        if($item_description_flag){
+                            $shipment_details .= '<td>' . $item->description . '</td>';
+                        }
+                        $shipment_details .='
+                                 <td>' . $item->quantity . '</td>
+                        ';
+
+                        $shipment_details .= $shipment_details_row_end;
+                    }
+                    else if ($shipment->booking_type_id == 2) {
+                        $shipment_details .= $shipment_details_row_start;
+
+                        $item = $shipment->items()->where('type', 0)->first();
+
+                        $shipment_details .= '
+                                <td>' . $item->product->product_name . '</td>
+                                <td>' . $item->created_at . '</td>';
+                        if($item_description_flag){
+                            $shipment_details .= '<td>' . $item->description . '</td>';
+                        }
+                        $shipment_details .='
+                                 <td>' . $item->quantity . '</td>
+                        ';
+
+                        $shipment_details .= $shipment_details_row_end;
+                    }
+                    else if ($shipment->booking_type_id == 3) {
+                        $first = TRUE;
+
+                        foreach ($shipment->items as $item) {
+                            if ($first) {
+                                $shipment_details .= $shipment_details_row_start;
                             }
-                            $shipment_details .='
-                                     <td>' . $item->quantity . '</td>
-                            ';
+                            else {
+                                $shipment_details .= '
+                              <tr>
+                                ';
+                            }
 
-                        if ($first) {
-                            $shipment_details .= $shipment_details_row_end;
-                        }
-                        else {
                             $shipment_details .= '
-                          </tr>
-                            ';
+                                <td>' . $item->product->product_name . '</td>
+                                <td>' . $item->created_at . '</td>';
+                                if($item_description_flag){
+                                    $shipment_details .= '<td>' . $item->description . '</td>';
+                                }
+                                $shipment_details .='
+                                         <td>' . $item->quantity . '</td>
+                                ';
+
+                            if ($first) {
+                                $shipment_details .= $shipment_details_row_end;
+                            }
+                            else {
+                                $shipment_details .= '
+                              </tr>
+                                ';
+                            }
+
+                            $first = FALSE;
                         }
-
-                        $first = FALSE;
                     }
-                }
-                else {
-                    $shipment_details .= $shipment_details_row_start;
+                    else {
+                        $shipment_details .= $shipment_details_row_start;
 
-                    $item = $shipment->items->first();
+                        $item = $shipment->items->first();
 
-                    $shipment_details .= '
-                            <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>';
-                    if($item_description_flag){
-                        $shipment_details .= '<td>' . $item->description . '</td>';
+                        $shipment_details .= '
+                                <td>' . $item->product->product_name . '</td>
+                                <td>' . $item->created_at . '</td>';
+                        if($item_description_flag){
+                            $shipment_details .= '<td>' . $item->description . '</td>';
+                        }
+                        $shipment_details .='
+                                 <td>' . $item->quantity . '</td>
+                        ';
+
+                        $shipment_details .= $shipment_details_row_end;
                     }
-                    $shipment_details .='
-                             <td>' . $item->quantity . '</td>
-                    ';
 
-                    $shipment_details .= $shipment_details_row_end;
+                    $total_cod += $shipment->amount;
                 }
-
-                $total_cod += $shipment->amount;
             }
 
             $shipment_details .= '

@@ -16,11 +16,19 @@
                                 @include('client.inc.messages')
                                 <div class="col mt-2">
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="form-group">
-                                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                                        </div>
 
-                                        <div class="col-4">
+                                        <div class="col-3">
+                                           <div class="form-group">
+                                               <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                           </div>
+                                       </div>
+
+                                        <div class="col-auto">
+                                            <div class="form-group">
+                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number (Full)">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -30,7 +38,7 @@
                                                 <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
                                             </div>
                                         </div>
-                                        <div class="col-4">
+                                        <div class="col-3">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,7 +49,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group col-md-5 mt-2 justify-content-center">
+                                        <div class="form-group col-md-3 mt-2 justify-content-center">
                                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         </div>
                                     </form>
@@ -517,6 +525,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('#track_form .phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -943,6 +957,7 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
+                        d.phone_number = $('input[name="phone_number"]').val();
                     }
                 },
                 rowId: 'shipment_id',
@@ -960,6 +975,7 @@
                         }
                     },
                     {
+                        orderable: false,
                         searchable: false,
                         name: 'serial_number',
                         class: 'align-middle serial_number',
@@ -1519,8 +1535,9 @@
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
                 var booking_from_date = $('#track_form #booking_from_date').val();
                 var booking_to_date = $('#track_form #booking_to_date').val();
+                var phone_number = $('#track_form .phone_number').val();
 
-                if (tracking_numbers != ''  || (booking_from_date != '' && booking_to_date != '')) {
+                if (tracking_numbers != ''  || (booking_from_date != '' && booking_to_date != '' || phone_number != '' )) {
                     table.draw();
                 }
 

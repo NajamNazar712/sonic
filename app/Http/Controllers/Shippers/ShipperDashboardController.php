@@ -422,6 +422,10 @@ class ShipperDashboardController extends Controller
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
             }
+
+            if ($phone_number = $request->get('phone_number')) {
+                $datatable->where('shipments.consignee_phone_number_1', $phone_number);
+            }
             if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
                 $from = $request->get('booking_from_date');
                 $to = $request->get('booking_to_date');

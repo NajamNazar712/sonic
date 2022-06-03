@@ -54,6 +54,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">DN/RN</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Time & Date</th>
@@ -156,6 +157,7 @@
                             head = [];
                             head.push('S. No.');
                             head.push('Rider');
+                            head.push('City');
                             head.push('DN/RN');
                             head.push('Updated By');
                             head.push('Time & Date');
@@ -164,6 +166,7 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.rider);
+                                row.push(values.city_name);
                                 row.push(values.display_note_id);
                                 row.push(values.admin);
                                 row.push(values.created_at);
@@ -205,10 +208,11 @@
                         d.search_status = $('#search_status').val();
                     }
                 },
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
+                    { data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
                     { data:'display_note_id' ,name: 'rider_unresponsive_statuses.note_id', class: 'align-middle display_note_id'},
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
                     { data:'created_at' ,name: 'rider_unresponsive_statuses.created_at', class: 'align-middle created_at'},
