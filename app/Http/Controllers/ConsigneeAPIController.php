@@ -89,11 +89,17 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment_info = Shipment::where('tracking_number', $request->tracking_no)
+            $shipment_infos = Shipment::where('tracking_number', $request->tracking_no)
                 ->select('consignee_name', 'consignee_address', 'consignee_phone_number_1 as phone_number');
-            if ($shipment_info->exists()) {
-                $shipment_info = $shipment_info->get();
-                return response()->json(['status' => 0, 'consignee_info' => $shipment_info]);
+            if ($shipment_infos->exists()) {
+                $shipment_infos = $shipment_infos->get();
+                $data = array();
+                foreach ($shipment_infos as $shipment_info){
+                    $data["consignee_name"] = $shipment_info->consignee_name;
+                    $data["consignee_address"] = $shipment_info->consignee_address;
+                    $data["phone_number"] = $shipment_info->phone_number;
+                }
+                return response()->json(['status' => 0, 'consignee_info' => $data]);
             }
             return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
         }
