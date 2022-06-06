@@ -97,7 +97,7 @@ class ConsigneeAPIController extends Controller
                 foreach ($shipment_infos as $shipment_info){
                     $data["consignee_name"] = $shipment_info->consignee_name;
                     $data["consignee_address"] = $shipment_info->consignee_address;
-                    $data["phone_number"] = substr_replace($shipment_info->phone_number, '-', 4, 0);
+                    $data["phone_number"] = str_replace("-", "",$shipment_info->phone_number);
                 }
                 return response()->json(['status' => 0, 'consignee_info' => $data]);
             }
