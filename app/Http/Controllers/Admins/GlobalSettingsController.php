@@ -933,14 +933,12 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
-        $include_ids = [9008, 2234, 14814, 15270, 12895, 13503, 3216, 167, 17363, 9412, 7581, 2059, 3050, 15809, 16173, 12510, 8594, 7138, 8723, 5039, 16697, 8062, 8779, 3903, 952, 1319, 13580, 1698, 17494, 8617, 7759, 15376, 16123, 11142, 602, 6585, 15615, 1734, 10772, 10873, 13060, 5779, 10497, 2152, 16940, 9761, 375, 890, 7828, 1577, 7308, 12412, 6693, 12968, 4697, 8419, 11740, 2634, 3285, 12683, 13878, 2254, 2539, 5863, 8020, 8867, 12659, 17214, 3008, 9592, 10881, 2915, 14976, 3175, 9129, 15151, 15150, 6109, 1799, 15630, 2930, 620, 415, 6803, 15431, 7762, 7002, 12360, 17583, 5018, 1356, 3719, 7335, 1807, 17023, 2511, 3540, 9093, 4707, 3324, 9067, 1348, 12800, 15019, 17215, 8268, 12240, 258, 16326, 17282, 10764, 6386, 2790, 592];
-
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->whereIn('id', $include_ids)->get();
+                $users = User::where('status', 3)->get();
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1052,7 +1050,7 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+                    $users = User::whereIn('id', $request->shippers)->get();
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
