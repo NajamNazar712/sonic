@@ -222,8 +222,8 @@ class ConsigneeAPIController extends Controller
                 $consignee_info->phone_number_1 = substr_replace($request->input('phone_number'), '-', 4, 0);
                 $consignee_info->api_token = $api_token;
                 $consignee_info->save();
-                $information = ['message' => 'Account has been created', 'api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
-                return response()->json(['status' => 0, 'information' => $information]);
+                $information = ['api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
+                return response()->json(['status' => 0, 'message' => 'Account has been created', 'information' => $information]);
 
             }
         }
