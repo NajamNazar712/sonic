@@ -198,7 +198,7 @@ class ConsigneeAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'digits:4'],
             'name' => ['required'],
             'address' => ['required'],
         ];
