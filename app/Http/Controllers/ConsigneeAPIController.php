@@ -197,7 +197,7 @@ class ConsigneeAPIController extends Controller
     public function consignee_signup(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'digits:4'],
             'name' => ['required'],
             'address' => ['required'],
@@ -210,7 +210,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
@@ -219,7 +219,7 @@ class ConsigneeAPIController extends Controller
                 $consignee_info->name = $request->name;
                 $consignee_info->address = $request->address;
                 $consignee_info->pin = bcrypt($request->pin);
-                $consignee_info->phone_number_1 = $request->phone_number;
+                $consignee_info->phone_number_1 = substr_replace($request->input('phone_number'), '-', 4, 0);
                 $consignee_info->api_token = $api_token;
                 $consignee_info->save();
                 $information = ['message' => 'Account has been created', 'api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
