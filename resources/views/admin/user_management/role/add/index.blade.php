@@ -60,13 +60,6 @@
 												@if($module->id != 18)
 													@if ($loop->first)
 														<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
-															@foreach($module->permissions as $permission)
-																<fieldset class="d-inline-block m-1">
-																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}">
-																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
-																</fieldset>
-															@endforeach
-
 															<div class="row">
 																<div class="col-12">
 																	<div class=" text-center mt-2">
@@ -75,23 +68,34 @@
 																	</div>
 																</div>
 															</div>
-														</div>
-													@else
-														<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+
 															@foreach($module->permissions as $permission)
 																<fieldset class="d-inline-block m-1">
 																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}">
 																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
 																</fieldset>
 															@endforeach
-																<div class="row">
-																	<div class="col-12">
-																		<div class=" text-center mt-2">
-																			<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
-																			<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
-																		</div>
+
+
+														</div>
+													@else
+														<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+															<div class="row">
+																<div class="col-12">
+																	<div class=" text-center mt-2">
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
 																	</div>
 																</div>
+															</div>
+
+															@foreach($module->permissions as $permission)
+																<fieldset class="d-inline-block m-1">
+																	<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}">
+																	<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+																</fieldset>
+															@endforeach
+
 														</div>
 													@endif
 												@endif

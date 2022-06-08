@@ -143,7 +143,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Edit Warehouse</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Update Warehouse</button>
                     </div>
                 </form>
             </div>

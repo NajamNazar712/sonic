@@ -64,6 +64,16 @@
 												@if($module->id != 18)
 													@if ($loop->first)
 														<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+
+															<div class="row">
+																<div class="col-12">
+																	<div class=" text-center mt-2">
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
+																	</div>
+																</div>
+															</div>
+
 															@foreach($module->permissions as $permission)
 																@if($permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
 																	<fieldset class="d-inline-block m-1">
@@ -77,17 +87,20 @@
 																@endif
 															@endforeach
 
-																<div class="row">
-																	<div class="col-12">
-																		<div class=" text-center mt-2">
-																			<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
-																			<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
-																		</div>
-																	</div>
-																</div>
+
 														</div>
 													@else
 														<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+
+															<div class="row">
+																<div class="col-12">
+																	<div class=" text-center mt-2">
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
+																	</div>
+																</div>
+															</div>
+															
 															@foreach($module->permissions as $permission)
 																@if($permission->id != 179 && $permission->id != 180 && $permission->id != 181 && $permission->id != 182 && $permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
 																	<fieldset class="d-inline-block m-1">
@@ -101,14 +114,7 @@
 																@endif
 															@endforeach
 
-																<div class="row">
-																	<div class="col-12">
-																		<div class=" text-center mt-2">
-																			<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
-																			<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
-																		</div>
-																	</div>
-																</div>
+
 														</div>
 													@endif
 												@endif
