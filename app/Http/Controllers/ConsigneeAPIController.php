@@ -564,7 +564,7 @@ class ConsigneeAPIController extends Controller
     public function update_pin(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
         ];
 
@@ -575,12 +575,12 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1',substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $consignee_info->pin = bcrypt($request->pin);
                 $consignee_info->save();
-                return response()->json(['status' => 0, 'Update_pin_message' => 'PIN Updated Successfully']);
+                return response()->json(['status' => 0, 'message' => 'PIN Updated Successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
