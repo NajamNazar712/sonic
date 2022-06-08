@@ -273,6 +273,14 @@
                     {
                         var html = "There are Shipments that are not scanned from delivery note number# "+delivery_note;
 
+                        var dtrows = $('#datatable').DataTable().rows().count();
+
+                        if(dtrows == 0)
+                        {
+                            toastr.error("Please Scan at least 1(one) tracking number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return;
+                        }
+                        
                         jQuery.grep(all_tracking_numbers, function(el) {
                             if (jQuery.inArray(el, tracking_numbers) == -1) html += "</br>"+el;
                         });
