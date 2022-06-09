@@ -57,7 +57,7 @@ function drawBackground(options) {
     var i = 0;
 
     options.ctx.globalAlpha = 0.2;
-    options.ctx.fillStyle = "rgb(0,0,0)";
+    options.ctx.fillStyle = "rgb(100, 160, 210)";
 
     // Draw semi-transparent circles
     for (i = 170; i < 180; i++) {
@@ -217,6 +217,7 @@ function drawTextMarkers(options) {
     // Font styling
     options.ctx.font = 'italic 10px sans-serif';
     options.ctx.textBaseline = 'top';
+    options.ctx.fillStyle = "rgb(255, 255, 255)";
 
     options.ctx.beginPath();
 
