@@ -215,8 +215,9 @@ function drawTextMarkers(options) {
     applyDefaultContextSettings(options);
 
     // Font styling
-    options.ctx.font = 'italic 14px sans-serif';
+    options.ctx.font = 'italic bold 16px sans-serif';
     options.ctx.textBaseline = 'top';
+    options.ctx.globalAlpha = 1;
     options.ctx.fillStyle = "rgb(255, 255, 255)";
 
     options.ctx.beginPath();
@@ -224,28 +225,29 @@ function drawTextMarkers(options) {
     // Tick every 20 (small ticks)
     for (iTick = 10; iTick < 180; iTick += 16) {
 
-        innerTickX = gaugeOptions.radius - (Math.cos(degToRad(iTick)) * gaugeOptions.radius);
-        innerTickY = gaugeOptions.radius - (Math.sin(degToRad(iTick)) * gaugeOptions.radius);
+        newRadius = gaugeOptions.radius + 7
+        innerTickX = newRadius - (Math.cos(degToRad(iTick)) * newRadius);
+        innerTickY = newRadius - (Math.sin(degToRad(iTick)) * newRadius);
 
         // Some cludging to center the values (TODO: Improve)
         if (iTick <= 10) {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY + 5);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY + 5);
         } else if (iTick < 50) {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX - 5,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY + 5);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX - 5,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY + 5);
         } else if (iTick < 90) {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY);
         } else if (iTick === 90) {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX + 4,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX + 5,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY);
         } else if (iTick < 145) {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX + 10,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX + 10,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY);
         } else {
-            options.ctx.fillText(iTickToPrint, (options.center.X - gaugeOptions.radius - 12) + innerTickX + 15,
-                (gaugeOptions.center.Y - gaugeOptions.radius - 12) + innerTickY + 5);
+            options.ctx.fillText(iTickToPrint, (options.center.X - newRadius - 12) + innerTickX + 15,
+                (gaugeOptions.center.Y - newRadius - 12) + innerTickY + 5);
         }
 
         // MPH increase by 10 every 20 degrees
