@@ -102,17 +102,6 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-content" aria-expanded="true">
-            <div class="card-body text-center">
-                <div class="row justify-content-center" id="graphs">
-                    <canvas id="chart"  width="440" height="220">Canvas not available.</canvas>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
     @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
         <div class="modal fade" id="PasswordModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="PasswordModal"
              aria-hidden="true" style="top:30%;">
@@ -210,7 +199,6 @@
 @section('js')
 
     <script src="{{asset('app-assets/vendors/js/charts/chartjs/chart.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/charts/speedometer.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -277,7 +265,6 @@
             });
             @endif
 
-            draw("chart",{{$rcp_percent}});
             {{--@if($shipper_payments != null)
                 var myChart = echarts.init(document.getElementById('funnel-plot'));
 

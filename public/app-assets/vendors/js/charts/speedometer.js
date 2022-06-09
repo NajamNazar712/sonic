@@ -215,7 +215,7 @@ function drawTextMarkers(options) {
     applyDefaultContextSettings(options);
 
     // Font styling
-    options.ctx.font = 'italic 10px sans-serif';
+    options.ctx.font = 'italic 14px sans-serif';
     options.ctx.textBaseline = 'top';
     options.ctx.fillStyle = "rgb(255, 255, 255)";
 
