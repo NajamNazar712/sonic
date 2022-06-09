@@ -8,7 +8,7 @@
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
-            <div class="card-header">
+            <div class="card-header text-center">
                 <h2>Re-Attempt to Delivery Success Ratio</h2>
             </div>
             <div class="card-body text-center">
