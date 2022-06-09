@@ -703,7 +703,7 @@ class AdminPackagingMaterialController extends Controller
 
 //                    $this->add_product_location($shipment->id, $product->id, $item->quantity, $trax_address->id, 1);
 
-                    $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
+                    $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('hub_id', $warehouse_hub_id)->where('status', 0)->first();
                     if($existing_pending_picking){
                         $new_quantity = $existing_pending_picking->quantity + $item->quantity;
                         $existing_pending_picking->quantity = $new_quantity;
@@ -718,6 +718,7 @@ class AdminPackagingMaterialController extends Controller
                     else{
                         $pending_picking = new WmsPendingPicking();
                         $pending_picking->product_id = $product->id;
+                        $pending_picking->hub_id = $warehouse_hub_id;
                         $pending_picking->quantity = $item->quantity;
                         $pending_picking->save();
 
