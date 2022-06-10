@@ -250,7 +250,7 @@ class ConsigneeAPIController extends Controller
                         $information = array();
                         $information['name'] = $consignee_user->name;
                         $information['consignee_id'] = $consignee_user->id;
-                        $information['phone_number'] = $consignee_user->phone_number_1;
+                        $information['phone_number'] = substr_replace($consignee_user->phone_number_1, '-', 4, 0);
                         if ($consignee_user->api_token) {
                             $information['api_token'] = $consignee_user->api_token;
                         }
@@ -469,7 +469,7 @@ class ConsigneeAPIController extends Controller
     {
         $consignee_id = $request->consignee_id;
         $rules = [
-            'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'phone_number_updated' => ['required'],
             'pin' => ['nullable', 'integer', 'digits:4'],
             'name' => ['nullable'],
@@ -489,13 +489,13 @@ class ConsigneeAPIController extends Controller
                     $consignee_info->name = $request->name;
                 }
                 if ($request->has('phone_number') && $request->phone_number_updated == 1) {
-                    $consignee_info->phone_number_2 = $request->phone_number;
+                    $consignee_info->phone_number_2 = substr_replace($request->phone_number, '-', 4, 0);
                 }
                 if ($request->has('pin')) {
                     $consignee_info->pin = bcrypt($request->pin);
                 }
                 $consignee_info->save();
-                return response()->json(['status' => 0, 'profile_message' => 'Profile Updated Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Profile Updated Successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
