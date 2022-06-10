@@ -329,7 +329,7 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
-                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $consignee_shipment->id)->latest('delivery_note_id')->first();
+                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $consignee_shipment->id)->orderby('delivery_note_id','DESC')->first();
                     $delivery_note = $delivery_note_shipment->delivery_note;
                     $rider = $delivery_note->rider;
                     $datum['rider_name'] = $rider->name;
