@@ -16,6 +16,7 @@ use App\Http\Models\ShipperShipmentsSubscription;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 
