@@ -36,20 +36,21 @@
                                                 <input type="text" class="form-control" name="sms_count"  placeholder="SMS Count" required data-rule-required="true" data-msg-required="This field is required" value=" @if(isset($setting->text)){{$setting->text}} @endif">
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                                  <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                      <span class="">Time</span>
-                                                  </span>
-                                            </div>
-                                            <div class="form">
-                                                <label><input type="time" id="time" value="@if(isset($time->text)){{$time->text}} @endif" name="time" class="form-control bg-primary border-primary white rounded-right"></label>
-                                                {{--                                                    <input type="time" id="time" name="time" class="form-control bg-primary border-primary white rounded-right">--}}
+                                    </div><div class="row justify-content-center">
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                <span class="">Time*</span>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <input type="text" name="time" class="form-control bg-primary border-primary white pickatime time" id="time" value="{{$time->text}}" placeholder="Time*" data-rule-required="true" data-msg-required="Time To is required">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
                                     <button type="submit" class="btn btn-primary">Update</button>
                                 </form>
                             </div>
@@ -62,6 +63,7 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
@@ -87,22 +89,18 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.time.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.cut_off_time_from').pickatime({
+            $('.time').pickatime({
                 clear: '',
                 format: 'h:i A',
             });
-            $('.cut_off_time_to').pickatime({
-                clear: '',
-                format: 'h:i A',
-            });
-        </script>
 
-        <script>
-        $(document).ready(function() {
             $('#settings_form input.reattempt_percentage').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -116,7 +114,11 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
-
+            @if(isset($setting->setting_value) && $setting->setting_value == 1)
+                $('#toggle_check').val(1);
+            @else
+                $('#toggle_check').val(0);
+            @endif
             $("#count_toggle").on('change', function(){
                 if($("#count_toggle").is(":checked")){
                     $('#toggle_check').val(1);
