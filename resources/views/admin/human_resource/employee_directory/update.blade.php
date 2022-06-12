@@ -572,12 +572,6 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Branch Name<span class="text-danger">*</span></label>
-                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label>IBAN Number<span class="text-danger">*</span></label>
                                                 <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
                                             </div>

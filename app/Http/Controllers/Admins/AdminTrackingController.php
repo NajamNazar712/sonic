@@ -53,6 +53,7 @@ use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\DwsDetail;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
@@ -1169,6 +1170,7 @@ class AdminTrackingController extends Controller
                                     } else {
                                         $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
                                     }
+                                    
 
                                     if ($journey->reference_2_id) {
                                         if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
@@ -1200,7 +1202,25 @@ class AdminTrackingController extends Controller
                                 $user = $user . $machine_name;
 
                             }
+                            if(in_array($journey->shipper_status_id, [1])){
 
+                                $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
+                                if($replacement_image->exists()){
+                                    $replacement_image = $replacement_image->first();
+                                    $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                }
+                            }
+                            if(in_array($journey->shipper_status_id, [30])){
+                                $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',14);
+                                if($replacement_image2->exists()){
+                                    $replacement_image2 = $replacement_image2->first();
+                                    if($replacement_image2->replacement_image != null){
+
+                                        $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    }
+
+                                }
+                            }
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;

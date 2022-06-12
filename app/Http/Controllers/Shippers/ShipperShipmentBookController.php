@@ -1629,7 +1629,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Name</strong></td>
-                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                                <td colspan="3">' . $shipment->packaging_material_request ? $shipment->packaging_material : $shipment->consignee_name . '</td>
                               </tr>
 
                               <tr>

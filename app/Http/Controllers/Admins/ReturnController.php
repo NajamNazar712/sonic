@@ -65,6 +65,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Models\Admin\ReturnRevertLog;
 
 class ReturnController extends Controller
@@ -261,6 +262,17 @@ class ReturnController extends Controller
                 $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100">'.$shipments->remarks.'</textarea>';
                 return $remark;
             })
+            ->addColumn('reattemp_status_remarks',function ($shipments){
+                $reattempt_remarks_col = ReattemptShipmentStatusRemarks::where('shipment_id',$shipments->shId);
+                if($reattempt_remarks_col->exists()){
+                    $reattempt_remarks_col = $reattempt_remarks_col->get()->latest();
+                    return $reattempt_remarks_col->remarks;
+                }else{
+                    return "-";
+
+                }
+            })
+            
             ->addColumn('confirmation_on',function ($result){
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
@@ -313,6 +325,7 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+
 			->addColumn('consolidation', function($shipments){
                 $consolidations = DeliveryController::check_consolidation($shipments->shId);
                 $consol = '';
@@ -584,6 +597,11 @@ class ReturnController extends Controller
                    }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
+
+                    $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                    $reattempt_remarks_col->shipment_id = $shipment;
+                    $reattempt_remarks_col->remarks = 'Manual';
+                    $reattempt_remarks_col->save();
                 }
 
             }
@@ -716,6 +734,10 @@ class ReturnController extends Controller
 
                     NotificationsController::send(15, 0, $request->shipment_id);
                     NotificationsController::send(16, 0, $request->shipment_id);
+                    $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                    $reattempt_remarks_col->shipment_id = $request->shipment_id;
+                    $reattempt_remarks_col->remarks = 'Manual';
+                    $reattempt_remarks_col->save();
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];

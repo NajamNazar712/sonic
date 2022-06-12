@@ -1120,6 +1120,9 @@ class Permission
             'human_resource.employee_shifts.index' => 592,
             'human_resource.employee_shifts.list' => 592,
 
+            'human_resource.adjustment.index' => 717,
+            'human_resource.adjustment.list' => 717,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
@@ -1160,6 +1163,13 @@ class Permission
 
 			'admin_otp.index' => 527,
             'admin_otp.list' => 527,
+
+            'admin_otp.update' => 722,
+
+            'rider_otp.index' => 720,
+            'rider_otp.list' => 720,
+
+            'rider_otp.update' => 721,
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
