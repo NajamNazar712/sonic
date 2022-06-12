@@ -2433,6 +2433,16 @@
 
         });
 
+        $('#tracking').on('click', '.replacement_booked_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
+            $('#tracking').on('click', '.replacement_collected_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
 				{{--$.ajax({--}}
 				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}
 				{{--method: 'POST',--}}

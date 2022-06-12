@@ -38,6 +38,7 @@ use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
@@ -9309,6 +9310,80 @@ class NotificationsController extends Controller
                         self::sms($body, $to);
                     }
                 }
+                else if ($id == 177) {
+                    $pickup_req = V2PickupRequest::find($reference_1_id);
+
+                    $pikup_shipment_id = V2PickupRequestShipment::where('pickup_request_id',$reference_1_id)->get()->first();
+
+                    $shipment = Shipment::find($pikup_shipment_id->shipment_id);
+                    
+                    
+                    $sales_person = SalePersonTag::where('user_id', $shipment->user_id)->where('status', 0)->first();
+
+                    $shipper = User::find($shipment->user_id);
+
+                    $sale_person_detail = Admin::find($sales_person->admin_id);
+                    if($sale_person_detail){
+
+                        
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
+                        }
+                        
+                        $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+
+                        if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                            $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                        }
+
+                        if (strpos($body, '[remarks]') !== FALSE) {
+                            $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                        }
+
+                        self::email($subject, $body, $sale_person_detail->email);
+                        
+
+                    
+                    }
+                    
+                    $sales_tier_tag = SaleTierTag::where('user_id',$shipment->user_id);
+
+                   
+
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first()->kam;
+                        if($sales_tier_tag){
+
+                            $kam = Admin::find($sales_tier_tag);
+                            if($kam){
+                                if (strpos($subject, '[sales_person]') !== FALSE) {
+                                    $subject = str_replace('[sales_person]', $kam->name, $subject);
+                                }
+        
+                                if (strpos($body, '[shipper_name]') !== FALSE) {
+                                    $body = str_replace('[shipper_name]', $shipper->name, $body);
+                                }
+                                
+                                $pickup_req_no = str_pad($pickup_req->id, 6, '0', STR_PAD_LEFT);
+        
+                                if (strpos($body, '[pickup_request_no]') !== FALSE) {
+                                    $body = str_replace('[pickup_request_no]', $pickup_req_no, $body);
+                                }
+        
+                                if (strpos($body, '[remarks]') !== FALSE) {
+                                    $body = str_replace('[remarks]', $pickup_req->remarks, $body);
+                                }
+
+                                self::email($subject, $body, $kam->email);
+
+
+                            }
+
+                        }
+                    }
+                    
+
+                }
             }
         }
     }
@@ -9609,6 +9684,49 @@ class NotificationsController extends Controller
                         }
                         if (strpos($body, '[shipper_names]') !== FALSE) {
                             $body = str_replace('[shipper_names]', $shipper_name, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 17) {
+                    if($employee_type == 1){
+                        $user = Admin::find($employee_id);
+                    }else{
+                        $user = Rider::find($employee_id);
+                    }
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
+                    if($user && $leave){
+                        if($leave->status == 1){
+                            $status = "Submitted";
+                        }else{
+                            $leave_status = LeaveStatus::find($leave->status);
+                            $status = $leave_status->name;
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $leave->date, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 18) {
+                    $leave = EmployeeAttendanceAdjustment::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $leave->date, $body);
                         }
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }

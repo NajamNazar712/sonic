@@ -1392,6 +1392,49 @@ class RiderManagementController extends Controller
         }
     }
 
+    public function rider_otp_index(){
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "rider_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
 
+        return view('admin.otp.rider')->with(['setting'=>$settings]);
+    }
+
+    public function rider_otp_list(Request $request){
+        $riders = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
+            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp', 'riders.last_login_attempt')
+            ->where('riders.status', 1)
+            ->whereNotNull('riders.otp');
+
+        $datatable = Datatables::of($riders);
+        return $datatable->make(true);
+    }
+
+
+    public function rider_otp_update(Request $request)
+    {
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->type = "rider_otp";
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        $settings->setting_value = $request->has('rider_otp_toggle') ? 1 : 0;
+        $settings->save();
+
+        return back()->with(['success'=>"Rider OTP Updated Successfully"]);
+    }
 
 }

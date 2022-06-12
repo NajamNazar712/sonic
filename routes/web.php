@@ -535,6 +535,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
     });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -1056,6 +1057,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
             Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+            Route::post('add_remarks', 'Admins\V2Pickup\V2AdminPickupsController@add_remarks')->name('add_remarks');
+            Route::post('all_remarks', 'Admins\V2Pickup\V2AdminPickupsController@all_remarks')->name('all_remarks');
+            
 
         });
     // Receiving Sheet Rout
@@ -1254,7 +1258,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
             Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
             Route::post('closed','Admins\DeliveryController@closed')->name('closed');
+            Route::post('resolved','Admins\DeliveryController@resolved')->name('resolved');
             Route::post('bulk_closed','Admins\DeliveryController@bulk_closed')->name('bulk_closed');
+            Route::post('bulk_resolved','Admins\DeliveryController@bulk_resolved')->name('bulk_resolved');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
@@ -3377,6 +3383,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //CMC Routes
     Route::prefix('crm')->name('crm.')->group(function () {
+        Route::post('tag/get_admin','Admins\AdminCRMController@get_admins')->name('tag.get_admins');
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
 //            Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
@@ -3777,6 +3784,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
 
+        Route::prefix('adjustment')->name('adjustment.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@attendance_adjustment_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@attendance_adjustment_list')->name('list');
+        });
+
         Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
@@ -3866,6 +3878,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
+        Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
+    });
+    Route::prefix('rider_otp')->name('rider_otp.')->group(function () {
+        Route::get('', 'Admins\RiderManagementController@rider_otp_index')->name('index');
+        Route::get('list', 'Admins\RiderManagementController@rider_otp_list')->name('list');
+        Route::post('update', 'Admins\RiderManagementController@rider_otp_update')->name('update');
     });
     Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
