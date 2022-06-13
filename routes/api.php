@@ -456,6 +456,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('rcp')->name('rcp.')->group(function () {
                 Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+                Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
             });
         });
 

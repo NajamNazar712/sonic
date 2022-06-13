@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\City;
@@ -9,6 +11,8 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -16,6 +20,7 @@ use App\Http\Models\ShipperShipmentsSubscription;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -592,5 +597,59 @@ class ShipperAPIController extends Controller
 
             })
             ->make(true);*/
+    }
+
+    public function mark_return_confirm(Request $request)
+    {
+        $rules = [
+            'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $parcel = Shipment::find($request->shipment_id);
+            $shipper_id = $request->shipper_id;
+            if ($parcel) {
+                if (!in_array($parcel->shipper_status_id, [20, 52])) {
+
+                    if (!$parcel->packaging_material_request) {
+                        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                        $shipment_history = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+                        ShipmentChargesController::return($request->shipment_id);
+
+                        AdminFinanceController::add_payment($request->shipment_id, 1);
+                        ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, $shipper_id, NULL);
+
+                    } else {
+                        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+                        $shipment_history = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+                        ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, NULL, $shipper_id, NULL);
+                    }
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                    if ($return_assign_shipment->exists()) {
+                        $return_assign_shipment = $return_assign_shipment->latest()->first();
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 2;
+                        $return_assign_log->assigned_by = $shipper_id;
+                        $return_assign_log->save();
+                    }
+
+                    return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
+
+                }
+                return response()->json(['status' => 1, 'message' => "Status already marked"]);
+            }
+            return response()->json(['status' => 1, 'message' => "Invalid Shipment"]);
+        }
+
     }
 }
