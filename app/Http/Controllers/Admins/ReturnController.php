@@ -265,11 +265,10 @@ class ReturnController extends Controller
             ->addColumn('reattemp_status_remarks',function ($shipments){
                 $reattempt_remarks_col = ReattemptShipmentStatusRemarks::where('shipment_id',$shipments->shId);
                 if($reattempt_remarks_col->exists()){
-                    $reattempt_remarks_col = $reattempt_remarks_col->get()->latest();
+                    $reattempt_remarks_col = $reattempt_remarks_col->orderBy('id', 'desc')->first();
                     return $reattempt_remarks_col->remarks;
                 }else{
                     return "-";
-
                 }
             })
             

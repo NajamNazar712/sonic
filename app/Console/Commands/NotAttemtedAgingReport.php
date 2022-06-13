@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
-use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -40,7 +40,16 @@ class NotAttemtedAgingReport extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
-        $response = AdminReportsEmailController::not_attempted_aging($date);
+        $sixtyEight_notification = Notification::find(68);
+        $sixtyNine_notification = Notification::find(69);
+        $seventy_notification = Notification::find(70);
+        if ($sixtyEight_notification || $sixtyNine_notification || $seventy_notification) {
+            if ($sixtyEight_notification->status == 1 || $sixtyNine_notification->status == 1 || $seventy_notification->status == 1) {
+                $date = Carbon::today()->format('Y-m-d');
+                $response = AdminReportsEmailController::not_attempted_aging($date);
+            }
+
+        }
+
     }
 }

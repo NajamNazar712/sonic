@@ -145,6 +145,6 @@ class Shipment extends Model
 	}
 
     public function packaging_material() {
-        return $this->hasOne('App\Http\Models\PackagingMaterialRequest', 'id', 'shipment_id');
+        return $this->belongsTo('App\Http\Models\PackagingMaterialRequest', 'id', 'shipment_id');
     }
 }

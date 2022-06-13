@@ -1201,7 +1201,7 @@ class RiderManagementController extends Controller
 
                 $delivery_date = $date_to;
                 $delivery_date = Carbon::parse($delivery_date)->toDateString();
-                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->whereIn('status', [0,1]);
+                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereBetween('pending_for_verification_at', [$date_from, $date_to])->whereIn('status', [0,1]);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
