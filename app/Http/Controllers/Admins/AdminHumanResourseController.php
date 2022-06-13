@@ -934,6 +934,7 @@ class AdminHumanResourseController extends Controller
             $rider->dummy_pin = $request->pin;
             $rider->created_by = Auth::id();
             $rider->trax_id = $trax_id;
+            $rider->employee_id = $employee->id;
             $rider->shift_id = $request->shift_id;
             if($request->rider_type == 1) {
                 $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
