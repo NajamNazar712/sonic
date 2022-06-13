@@ -50,6 +50,8 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <input type="hidden" id="filter_line_manager" value="0">
                                         <div class="col-4 mt-1">
                                             <div class="form-group">
                                                 <button type="button" id="search_filter_btn"
@@ -83,7 +85,7 @@
                                                 <table class="table mb-0">
                                                     <tbody>
                                                     <tr style="background-color: yellow; color:#010a10;">
-                                                        <td class="align-middle">Line Manager</td>
+                                                        <td class="align-middle" id="filter_line_manager_btn">Line Manager</td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -1396,6 +1398,7 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_line_manager = $('#search_line_manager').val();
+                        d.filter_line_manager = $('#filter_line_manager').val();
                     }
                 },
                 order: [[18, 'desc']],
@@ -1566,6 +1569,11 @@
 
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $("#filter_line_manager_btn").on('click',function (){
+                $("#filter_line_manager").val(1);
+                table.draw();
             });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {

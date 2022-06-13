@@ -641,11 +641,10 @@ class AdminTrackingController extends Controller
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
 
-                    //                    yahan p join lgana h shipment and delivery note shipment ka our delivery note id uthaleni h
                     $delivery_note_shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
                         ->select('delivery_note_shipments.delivery_note_id as delivery_note_id')
                         ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
-                        ->orderBy('delivery_note_shipments.shipment_id', 'desc');
+                        ->orderBy('delivery_note_shipments.delivery_note_id', 'desc');
                     if($delivery_note_shipment->exists()){
                         $delivery_note_shipment = $delivery_note_shipment->first();
                         $dn = str_pad($delivery_note_shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
