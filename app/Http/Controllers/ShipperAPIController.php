@@ -750,7 +750,7 @@ class ShipperAPIController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-                return response()->json(['status' => 0, 'message', 'Shipment Found!', 'shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return response()->json(['status' => 0, 'message' => 'Shipment Found!', 'shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
             }
             return response()->json(['status' => 1, 'message', 'Shipment not found!']);
         }
