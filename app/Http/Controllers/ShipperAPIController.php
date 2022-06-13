@@ -652,4 +652,60 @@ class ShipperAPIController extends Controller
         }
 
     }
+
+    public function mark_reattempt(Request $request){
+        $rules = [
+            'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $parcel = Shipment::find($request->shipment_id);
+            $shipper_id = $request->shipper_id;
+            if ($parcel) {
+                if ($parcel->shipper_status_id != 52) {
+                    if ($parcel->shipper_status_id == 12) {
+                        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+
+                        $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
+                        if ($last_reason->exists()) {
+                            $last_reason = $last_reason->first();
+                            $last_reason_id = $last_reason->status_reason_id;
+                        } else {
+                            $last_reason_id = NULL;
+                        }
+                        ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, $shipper_id, NULL, NULL);
+
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                        if ($return_assign_shipment) {
+                            $return_assign_shipment->status = 0;
+                            $return_assign_shipment->save();
+
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 5;
+                            $return_assign_log->assigned_by = $shipper_id;
+                            $return_assign_log->save();
+                        }
+
+                        if ($journey) {
+                            NotificationsController::send(33, $request->shipment_id);
+                        }
+
+                        return response()->json(['status' => 0, 'message' => "Shipment has been requested for Re-Attempt"]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Status is already marked"]);
+                    }
+                }
+                return response()->json(['status' => 1, 'message' => "Status is already marked"]);
+            }
+            return response()->json(['status' => 1, 'message' => "Invalid Shipment"]);
+        }
+    }
 }
