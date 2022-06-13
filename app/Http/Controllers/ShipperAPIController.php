@@ -760,7 +760,16 @@ class ShipperAPIController extends Controller
     public function intercept_re_book_submit(Request $request)
     {
         $rules = [
-            'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id']
+            'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id'],
+            'consignee_city' => ['required', 'digits_between:1,10', 'exists:cities,id'],
+            'consignee_name' => ['required'],
+            'consignee_address' => ['required'],
+            'consignee_phone_number_1' => ['required'],
+            'consignee_phone_number_2' => ['nullable'],
+            'consignee_email' => ['required', 'email'],
+            'amount' => ['required'],
+            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'consignee' => ['required'], //1 for different //2 for same
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -773,7 +782,7 @@ class ShipperAPIController extends Controller
             $s_amount = str_replace(",", "", $request->amount);
             $amount = intval($s_amount);
             $shipment = Shipment::find($request->shipment_id);
-            $user_id = session('user_id');
+            $user_id = $request->shipper_id;
             $intercept_type = $request->consignee;
 
             $shipment_status = $shipment->status_shipper->name;
@@ -781,8 +790,9 @@ class ShipperAPIController extends Controller
             if ($shipment['shipper_status_id'] == 12) {
                 if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                     if ($shipment['intercepted'] == 1) {
-                        return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
-                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']]);
+                    }
+                    else {
                         $s_amount = str_replace(",", "", "$request->amount");
                         $amount = (int)$s_amount;
                         if ($intercept_type == 1){
@@ -798,7 +808,7 @@ class ShipperAPIController extends Controller
                                 'shipper_id' => $user_id,
                                 'status' => 0,
                                 'intercept_type' => $intercept_type,
-                                'admin_id' => Auth::id()
+                                'admin_id' => NULL
                             ]);
                             $shipment->consignee_status_id = 54;
                             $shipment->shipper_status_id = 54;
@@ -808,7 +818,6 @@ class ShipperAPIController extends Controller
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                         }
                         else{
-
                             InterceptReBookRequestHistory::create([
                                 'shipment_id' =>$request->shipment_id,
                                 'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -851,15 +860,14 @@ class ShipperAPIController extends Controller
                             }
 
                         }
-
-
-                        return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
+                        return response()->json(['status' => 0,'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
                     }
-                } else {
-                    return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']]);
                 }
             } else {
-                return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
+                return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']]);
             }
         }
     }
