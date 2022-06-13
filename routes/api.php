@@ -458,6 +458,10 @@ Route::name('api.')->group(function () {
                 Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
                 Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
                 Route::post('mark_reattempt', 'ShipperAPIController@mark_reattempt')->name('mark_reattempt');
+                Route::prefix('intercept')->name('intercept.')->group(function () {
+                    Route::post('index', 'ShipperAPIController@intercept_re_book_index')->name('index');
+                    Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
+                });
             });
         });
 

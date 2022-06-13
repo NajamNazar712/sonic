@@ -490,7 +490,7 @@ class ConsigneeAPIController extends Controller
                 if ($request->has('phone_number') && $request->phone_number_updated == 1) {
                     $consignee_info->phone_number_2 = substr_replace($request->phone_number, '-', 4, 0);
                 }
-                if ($request->has('pin')) {
+                if ($request->pin) {
                     $consignee_info->pin = bcrypt($request->pin);
                 }
                 $consignee_info->save();
