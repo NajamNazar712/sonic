@@ -453,6 +453,10 @@ Route::name('api.')->group(function () {
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
                 Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
             });
+
+            Route::prefix('rcp')->name('rcp.')->group(function () {
+                Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+            });
         });
 
     });

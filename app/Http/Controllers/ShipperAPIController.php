@@ -8,19 +8,14 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
 use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 
@@ -110,8 +105,7 @@ class ShipperAPIController extends Controller
                     $information['phone_number'] = $shipper->phone;
                     if ($shipper->api_token) {
                         $information['api_token'] = $shipper->api_token;
-                    }
-                    else {
+                    } else {
                         $api_token = uniqid(base64_encode(str_random(60)));
 
                         $shipper->api_token = $api_token;
@@ -257,13 +251,14 @@ class ShipperAPIController extends Controller
         }
     }
 
-    public function shipper_subscription_list(Request $request){
+    public function shipper_subscription_list(Request $request)
+    {
         $shipper_id = $request->shipper_id;
         $subscription_list = ShipperShipmentsSubscription::join('shipments as s', 's.id', '=', 'shipper_shipments_subscriptions.shipment_id')
             ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
             ->where('shipper_shipments_subscriptions.shipper_id', $shipper_id)
             ->select('s.id as shipment_id', 'ss.name as shipment_status', 's.tracking_number as tracking_no');
-        if($subscription_list->exists()){
+        if ($subscription_list->exists()) {
             $subscription_list = $subscription_list->get();
             return response()->json(['status' => 0, 'information' => $subscription_list]);
         }
@@ -285,7 +280,7 @@ class ShipperAPIController extends Controller
         } else {
             $shipper_id = $request->shipper_id;
             ShipperShipmentsSubscription::where('shipper_id', $shipper_id)
-                ->where('shipment_id',$request->shipment_id)->delete();
+                ->where('shipment_id', $request->shipment_id)->delete();
             return response()->json(['status' => 0, 'msg' => 'Subscription Remove Successfully']);
         }
     }
@@ -307,11 +302,12 @@ class ShipperAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 
-    public function add_request_index(Request $request){
+    public function add_request_index(Request $request)
+    {
         $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
         return response()->json(['status' => 0, 'case_nature' => $case_nature, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
     }
 
@@ -348,8 +344,7 @@ class ShipperAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Shipment not Found!']);
             }
             return response()->json(['status' => 1, 'message' => 'Shipment not provided']);
-        }
-        //Other Requests
+        } //Other Requests
         else {
             if (!empty($shipment_id)) {
                 $shipment = Shipment::find($shipment_id);
@@ -407,17 +402,18 @@ class ShipperAPIController extends Controller
         }
     }
 
-    public function lost_claim(Request $request){
+    public function lost_claim(Request $request)
+    {
         $shipment = Shipment::find($request->shipment_id);
-        if($shipment){
+        if ($shipment) {
             $receiving_sheet_id = -1;
-            if($shipment->receiving_sheet_shipment){
+            if ($shipment->receiving_sheet_shipment) {
                 $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-                return response()->json(['status' => 0,'receiving_sheet'=>[['id'=>strval($receiving_sheet_id)]]]);
+                return response()->json(['status' => 0, 'receiving_sheet' => [['id' => strval($receiving_sheet_id)]]]);
             }
-            return response()->json(['status' => 0,'receiving_sheet'=>[['id'=>strval($receiving_sheet_id)]], 'error_message'=>'Receiving Sheet does not exists']);
+            return response()->json(['status' => 0, 'receiving_sheet' => [['id' => strval($receiving_sheet_id)]], 'error_message' => 'Receiving Sheet does not exists']);
         }
-        return response()->json(['status' => 1,'message'=>'No Shipments Found']);
+        return response()->json(['status' => 1, 'message' => 'No Shipments Found']);
     }
 
     public function test(Request $request)
@@ -431,5 +427,169 @@ class ShipperAPIController extends Controller
             ->where('cm.status_id', 1)
             ->where('mb.status', 0);
         return response()->json(['status' => 1, 'data' => $fleet->get()]);
+    }
+
+    public function confirmation_pending_list(Request $request)
+    {
+
+        $rules = [
+            'shipper_id' => ['required', 'digits_between:1,10', 'exists:users,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+                ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+                ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+                ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+                ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+                ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+                ->leftJoin('shipments_journey', function ($join) {
+                    $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                        ->where('shipments_journey.created_at', '=',
+                            DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) {
+                    $join->on('sj.shipment_id', '=', 'shipments.id')
+                        ->where('sj.created_at', '=',
+                            DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                })
+                ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+                ->leftjoin('consolidation_shipments as consolidations', function ($join) {
+                    $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                        ->where('consolidations.consolidation_id', '=',
+                            DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+                })
+                ->select('shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'u.name as shipper', 'u.phone as shipper_phone1', 'u.phone2 as shipper_phone2', 'oc.name as origin', 'dc.name as destination', 'shipments.order_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'ssr.id as reason_id', 'ssr.name as reason', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as last_status_date', 'sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted', 'shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
+                ->where('shipments.shipper_status_id', DB::raw(12))
+                ->where('shipments.user_id', $request->shipper_id)
+                ->groupBy('shipments.id');
+
+            if ($shipments->exists()) {
+                $shipments = $shipments->get();
+                return response()->json(['status' => 0, 'data' => $shipments, 'message' => 'Shipments Found!']);
+
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipments Found']);
+            }
+        }
+
+
+        /*return Datatables::of($shipments)
+            ->setRowAttr([
+                'class' => function ($shipments) {
+                    if ($shipments->reason_id == 12) {
+                        return 'nsa_osa_reason';
+                    }
+                },
+                'consolidation_id' => function ($shipments) {
+                    if ($shipments->consolidation_id != null) {
+                        return $shipments->consolidation_id;
+                    } else {
+                        return '';
+                    }
+                }
+            ])
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('consignee_phone', function ($shipments) {
+                return '<button type="button" class="btn btn-sm btn-outline-info align-middle consignee_info_label" rel="'. $shipments->consignee_phone_number_1 .'"><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' . $shipments->consignee_phone_number_1 . '|' . $shipments->consignee_phone_number_2 .'</span></button>';
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100" >'.$shipments->remarks.'</textarea>';
+                return $remark;
+            })
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+            ->editColumn('arrival',function($shipments){
+                if($shipments->arrival){
+                    return $shipments->arrival;
+                }else{
+                    return " - ";
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('consolidation', function ($shipments) {
+                $consolidations = ShipperReturnController::check_consolidation($shipments->shId);
+                $consol = '';
+                if ($consolidations) {
+                    $consol = $consolidations['order'] . '/' . $consolidations['count'];
+                } else {
+                    $consol = '-';
+                }
+                return $consol;
+            })
+            ->addColumn('consolidated_id', function ($shipments) {
+                if ($shipments->consolidation_id) {
+                    return $shipments->consolidation_id;
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn("action", function ($result) {
+                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
+                $reattempt_button = '<a href="javascript:void(0);" class="dropdown-item returnReattemptStatus"><i class="ft-plus-circle primary"></i> Re-Attempt Request</a>';
+                $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
+                $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
+
+                $dropdown = "
+                        <div class='btn-group'>
+                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
+                if (!$result->consolidation_id) {
+                    if($result->shipper_status_id != 52){
+                        $dropdown .= $confirm_button;
+                        $dropdown .= $reattempt_button;
+                    }
+                    if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
+                        $dropdown .= $intercept;
+                    }
+                }
+
+
+
+                if($result->reason_id == 12){
+                    $dropdown .= $self_collection_button;
+                }
+
+
+                $dropdown .= "
+                            </div>
+                        </div>
+                    ";
+
+                return $dropdown;
+
+            })
+            ->make(true);*/
     }
 }
