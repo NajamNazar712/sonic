@@ -3727,6 +3727,12 @@ class APIController extends Controller
             'device_token' => ['required'],
         ];
 
+        //type_id
+        /*
+        1- Admin
+        2- Rider
+        3- Shipper
+        4- Consignee*/
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);

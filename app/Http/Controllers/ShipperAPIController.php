@@ -6,25 +6,36 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Fleet;
+use App\Http\Models\Admin\FtlRequest;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\BookingType;
+use App\Http\Models\ChargesModes;
 use App\Http\Models\City;
+use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\DeliveryType;
+use App\Http\Models\DistributionProduct;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\PaymentMode;
+use App\Http\Models\Product;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
+use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -659,7 +670,8 @@ class ShipperAPIController extends Controller
 
     }
 
-    public function mark_reattempt(Request $request){
+    public function mark_reattempt(Request $request)
+    {
         $rules = [
             'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id']
         ];
@@ -715,7 +727,8 @@ class ShipperAPIController extends Controller
         }
     }
 
-    public function intercept_re_book_index(Request $request){
+    public function intercept_re_book_index(Request $request)
+    {
         $rules = [
             'shipment_id' => ['required', 'digits_between:1,10', 'exists:shipments,id']
         ];
@@ -791,10 +804,9 @@ class ShipperAPIController extends Controller
                 if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != substr_replace($request->consignee_phone_number_1, '-', 4, 0) || $shipment->consignee_phone_number_2 != ($request->consignee_phone_number_2) ? substr_replace($request->consignee_phone_number_2, '-', 4, 0) : NULL || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
                     if ($shipment['intercepted'] == 1) {
                         return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']]);
-                    }
-                    else {
+                    } else {
                         $amount = intval($request->amount);
-                        if ($intercept_type == 1){
+                        if ($intercept_type == 1) {
                             InterceptReBookRequest::create([
                                 'shipment_id' => $request->shipment_id,
                                 'consignee_city_id' => $request->consignee_city,
@@ -815,10 +827,9 @@ class ShipperAPIController extends Controller
                             $shipment->save();
 
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
-                        }
-                        else{
+                        } else {
                             InterceptReBookRequestHistory::create([
-                                'shipment_id' =>$request->shipment_id,
+                                'shipment_id' => $request->shipment_id,
                                 'old_consignee_city_id' => $shipment->consignee_city_id,
                                 'new_consignee_city_id' => $request->consignee_city,
                                 'old_consignee_name' => $shipment->consignee_name,
@@ -842,12 +853,12 @@ class ShipperAPIController extends Controller
 
                             ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
-                            if($request->hasFile('replacement_parcel_image')){
+                            if ($request->hasFile('replacement_parcel_image')) {
                                 $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
-                                if($shipment_parcel_image->exists()){
+                                if ($shipment_parcel_image->exists()) {
                                     $shipment_parcel_image = $shipment_parcel_image->first();
                                     Storage::disk('public')->delete($shipment_parcel_image->picture_path);
-                                }else{
+                                } else {
                                     $shipment_parcel_image = new ShipmentReplacementParcelImage();
                                     $shipment_parcel_image->shipment_id = $request->shipment_id;
                                 }
@@ -859,15 +870,68 @@ class ShipperAPIController extends Controller
                             }
 
                         }
-                        return response()->json(['status' => 0,'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
+                        return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
                     }
-                }
-                else {
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']]);
             }
         }
+    }
+
+    public function corporate_index(Request $request)
+    {
+        $user_id = $request->shipper_id;
+        $date = Carbon::today();
+        $booking_types = BookingType::whereNotIn('id', [4])->get();
+        $user = User::with('shipping.city')->find(session('user_id'));
+        $multi_piece = $user->multipiece_status;
+        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        } else {
+            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        $products = Product::orderBy('product_name')->get();
+        $distribution_products = DistributionProduct::orderBy('name')->get();
+        $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+        if ($ccd_booking->exists()) {
+            $ccd_booking = $ccd_booking->first();
+            $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+            if (!in_array($user_id, $ccd_account_tags)) {
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+            } else {
+                $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+            }
+        } else {
+            $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        }
+        $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', $user_id)->pluck('shipping_mode_id')->toArray();
+        $delivery_type = DeliveryType::orderBy('delivery_type')->get();
+        $charges_modes = ChargesModes::whereIn('id', [3])->get();
+        $check = NonServiceArea::pluck('name')->toArray();
+        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
+        if ($air_waybill->exists()) {
+            $air_waybill = $air_waybill->first();
+        } else {
+            $air_waybill = null;
+        }
+        $approve_ftl_requests = FtlRequest::where('shipper_id', $user_id)->where('status_id', 3)->get();
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array($user_id, $omni_accounts)) {
+                    $omni_user = 1;
+                }
+            }
+        }
+        return response()->json(['booking_types' => $booking_types, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user]);
     }
 }
