@@ -431,6 +431,11 @@ class AdminHumanResourseController extends Controller
         if ($line_manager = $request->get('search_line_manager')) {
             $employees = $employees->where('employees.line_manager_id',$line_manager);
         }
+        if ($filter_line_manager = $request->get('filter_line_manager')) {
+            if($filter_line_manager == 1) {
+                $employees = $employees->where('employees.is_line_manager', 1);
+            }
+        }
 
         $datatable =  Datatables::of($employees)
             ->setRowAttr([
