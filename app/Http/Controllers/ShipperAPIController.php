@@ -135,8 +135,8 @@ class ShipperAPIController extends Controller
                         $shipper->save();
 
                         $information['api_token'] = $api_token;
-                        $information['account_type'] = $shipper->account_type_id;
                     }
+                    $information['account_type'] = $shipper->account_type_id;
                     return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
