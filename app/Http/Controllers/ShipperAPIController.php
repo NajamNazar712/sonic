@@ -886,7 +886,7 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $date = Carbon::today();
         $booking_types = BookingType::whereNotIn('id', [4])->get();
-        $user = User::with('shipping.city')->find(session('user_id'));
+        $user = User::with('shipping.city')->find($user_id);
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
