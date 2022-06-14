@@ -787,8 +787,7 @@ class ShipperAPIController extends Controller
             $shipment_status = $shipment->status_shipper->name;
 
             if ($shipment->shipper_status_id == 12) {
-                if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $request->consignee_phone_number_1 || $shipment->consignee_phone_number_2 != $request->consignee_phone_number_2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
-                    dd($shipment);
+                if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != substr_replace($request->consignee_phone_number_1, '-', 4, 0) || $shipment->consignee_phone_number_2 != substr_replace($request->consignee_phone_number_2, '-', 4, 0) || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
                     if ($shipment['intercepted'] == 1) {
                         return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']]);
                     }
@@ -800,8 +799,8 @@ class ShipperAPIController extends Controller
                                 'consignee_city_id' => $request->consignee_city,
                                 'consignee_name' => $request->consignee_name,
                                 'consignee_address' => $request->consignee_address,
-                                'consignee_phone_number_1' => $request->consignee_phone_number_1,
-                                'consignee_phone_number_2' => $request->consignee_phone_number_2,
+                                'consignee_phone_number_1' => substr_replace($request->consignee_phone_number_1, '-', 4, 0),
+                                'consignee_phone_number_2' => substr_replace($request->consignee_phone_number_2, '-', 4, 0),
                                 'consignee_email' => $request->consignee_email,
                                 'amount' => $amount,
                                 'shipper_id' => $user_id,
@@ -826,9 +825,9 @@ class ShipperAPIController extends Controller
                                 'old_consignee_address' => $shipment->consignee_address,
                                 'new_consignee_address' => $request->consignee_address,
                                 'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
-                                'new_consignee_phone_number_1' => $request->consignee_phone_number_1,
+                                'new_consignee_phone_number_1' => substr_replace($request->consignee_phone_number_1, '-', 4, 0),
                                 'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
-                                'new_consignee_phone_number_2' => $request->consignee_phone_number_2,
+                                'new_consignee_phone_number_2' => substr_replace($request->consignee_phone_number_2, '-', 4, 0),
                                 'old_consignee_email' => $shipment->consignee_email,
                                 'new_consignee_email' => $request->consignee_email,
                                 'old_amount' => $shipment->amount,
