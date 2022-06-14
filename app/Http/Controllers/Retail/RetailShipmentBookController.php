@@ -44,6 +44,7 @@ use Yajra\Datatables\Datatables;
 use Validator;
 use Illuminate\Validation\Rule;
 use DNS2D;
+use App\Http\Models\RetailRequestCity;
 
 class RetailShipmentBookController extends Controller
 {
@@ -1893,5 +1894,32 @@ class RetailShipmentBookController extends Controller
         else {
             return redirect()->back()->with('error', 'No Shipments in File');
         }
+    }
+    public function add_city_req(Request $request){
+      $city_name = '';
+      if($request->city_domestic == null){
+        if($request->city_international == 'other'){
+          $city_name = $request->other_cities_international;
+        }else{
+          $city_name = $request->city_international;
+
+        }
+      }else{
+        if($request->city_domestic == 'other'){
+          $city_name = $request->other_city_domestic;
+        }else{
+          $city_name = $request->city_domestic;
+
+        }
+      }
+      RetailRequestCity::create([
+        'added_by' => Auth::id(),
+        'business_category_id' => $request->city_business_category,
+        'shipping_mode_id' => $request->city_shipping_mode,
+        'city_name' => $city_name,
+      ]);
+
+      return response()->json(['status' => 1, 'success' => 'City Request Added']);
+
     }
 }

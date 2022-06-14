@@ -185,6 +185,12 @@
                                 <div id="external_info" class="ml-1 col border">
                                     <div class="col pt-5 mt-2 mb-3">
                                         <div class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">City Request</label>
+                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-success" >ADD</a>
+                                        </div>
+                                    </div>
+                                    <div class="col mt-2 mb-3">
+                                        <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Bulk Shipment</label>
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
                                         </div>
@@ -276,6 +282,71 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="AddCityReqModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddCityReqModal"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Add City Request</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="add_city_req_form" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                        <select name="city_shipping_mode" id="city_shipping_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Service Type is required">
+                            @foreach($shipping_modes as $shipping_mode)
+                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                            @endforeach
+                        </select>
+                       </div>
+
+                       <div class="col-12 form-group">
+                            <select name="city_business_category" id="city_business_category" class="select2 form-control" data-rule-required="true" data-msg-required="City Category is required">
+                                @foreach($business_categories as $business_category)
+                                    <option value="{{$business_category->id}}">{{$business_category->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_domestic">
+                            <select name="city_domestic" id="city_domestic" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                @foreach($domestic_cities as $domestic_city)
+                                    <option value="{{$domestic_city->name}}">{{$domestic_city->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 d-none" id="other_city_domestics">
+                            <div class="form-group">
+                                <input type="text" name="other_city_domestic" id="other_city_domestic" class="form-control" placeholder="New City" data-rule-required="true" data-msg-required="City is required">
+                            </div>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_international">
+                            <select name="city_international" id="city_international" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                @foreach($international_cities as $international_city)
+                                    <option value="{{$international_city->name}}">{{$international_city->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 d-none" id="other_cities_internationals">
+                            <div class="form-group">
+                                <input type="text" name="other_cities_international" id="other_cities_international" class="form-control" placeholder="New City Type" data-rule-required="true" data-msg-required="City is required">
+                            </div>
+                        </div>
+                   </div>
+                   
+                   
+               </div>
+               <div class="modal-footer">
+                   <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                   <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
 
 @endsection
 @section('css')
@@ -405,7 +476,7 @@
                 else{
                     $('#other_ref').addClass('d-none');
                 }
-            });;
+            });
             $('#business_category').select2({
                 width:'100%',
                 placeholder:"Select Shipment Category*"
@@ -906,6 +977,116 @@
                     print(shipment_ids);
                 }
             });
+            
+
+            $("#add_city_req").on('click', function(){
+                $('#AddCityReqModal').modal('show');
+            });
+
+            $('#city_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipping Modes*"
+            });
+            $('#city_business_category').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select City Category*"
+            }).bind('change',function(){
+                var id = parseInt($(this).val());
+                // var shipping_mode = parseInt($("#shipping_mode").val());
+                console.log(id);
+                if(id == 1){
+
+                    $('#cities_domestic').removeClass('d-none');
+                    $('#cities_international').addClass('d-none');
+                }else if(id == 2){
+                    $('#cities_domestic').addClass('d-none');
+                    $('#cities_international').removeClass('d-none');
+                }
+
+                
+            });
+            $('#city_domestic').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width:'100%',
+                placeholder:"Select City*"
+            }).bind('change', function() {
+                console.log($(this).val());
+                if ($(this).val() === 'other') {
+                    $('#other_city_domestics').removeClass('d-none');
+                }
+                else{
+                    $('#other_city_domestics').addClass('d-none');
+                }
+            });
+            $('#city_international').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width:'100%',
+                placeholder:"Select City*"
+            }).bind('change', function() {
+                console.log($(this).val());
+
+                if ($(this).val() === 'other') {
+                    $('#other_cities_internationals').removeClass('d-none');
+                }
+                else{
+                    $('#other_cities_internationals').addClass('d-none');
+                }
+            });
+
+            $('#add_city_req_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                    url: '{!! route('retail.shipment.book.add_city_req') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'city_shipping_mode': $('select[name="city_shipping_mode"]').val(),
+                        'city_business_category': $('select[name="city_business_category"]').val(),
+                        'city_domestic': $('select[name="city_domestic"]').val(),
+                        'other_city_domestic': $('input[name="other_city_domestic"]').val(),
+                        'city_international': $('select[name="city_international"]').val(),
+                        'other_cities_international': $('input[name="other_cities_international"]').val()
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            UnblockPagePermanently();
+
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                            $('#AddCityReqModal').modal('hide');
+                            $('#city_shipping_mode').val('').trigger('change.select2');
+                            $('#city_business_category').val('').trigger('change.select2');
+
+                            $('#city_domestic').val('').trigger('change.select2');
+                            $('#other_city_domestic').val('');
+                            $('#city_international').val('').trigger('change.select2');
+                            $('#other_cities_international').val('');
+                        }
+                    });
+                }
+            });
+
+            $('#AddCityReqModal').on('hidden.bs.modal', function () {
+                
+                $('#city_shipping_mode').val('').trigger('change.select2');
+                $('#city_business_category').val('').trigger('change.select2');
+
+                $('#city_domestic').val('').trigger('change.select2');
+                $('#other_city_domestic').val('');
+                $('#city_international').val('').trigger('change.select2');
+                $('#other_cities_international').val('');
+                
+            });
+           
         });
     </script>
 @endsection

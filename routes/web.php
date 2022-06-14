@@ -3933,6 +3933,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
             Route::get('/excel', 'Retail\RetailShipmentBookController@excel_index')->name('excel');
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
+            Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
+            
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
