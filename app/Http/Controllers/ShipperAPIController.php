@@ -124,6 +124,7 @@ class ShipperAPIController extends Controller
                         $shipper->save();
 
                         $information['api_token'] = $api_token;
+                        $information['account_type'] = $shipper->account_type_id;
                     }
                     return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
                 } else {
@@ -769,7 +770,7 @@ class ShipperAPIController extends Controller
             'consignee_email' => ['nullable', 'email'],
             'amount' => ['required'],
             'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
-            'consignee' => ['required'], //1 for different //2 for same
+            'consignee' => ['required'], //1 for different consignee //2 for same consignee
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
