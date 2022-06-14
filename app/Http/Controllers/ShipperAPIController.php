@@ -766,7 +766,7 @@ class ShipperAPIController extends Controller
             'consignee_address' => ['required'],
             'consignee_phone_number_1' => ['required'],
             'consignee_phone_number_2' => ['nullable'],
-            'consignee_email' => ['required', 'email'],
+            'consignee_email' => ['nullable', 'email'],
             'amount' => ['required'],
             'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
             'consignee' => ['required'], //1 for different //2 for same
@@ -779,8 +779,7 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $s_amount = str_replace(",", "", $request->amount);
-            $amount = intval($s_amount);
+            $amount = intval($request->amount);
             $shipment = Shipment::find($request->shipment_id);
             $user_id = $request->shipper_id;
             $intercept_type = $request->consignee;
@@ -793,8 +792,7 @@ class ShipperAPIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']]);
                     }
                     else {
-                        $s_amount = str_replace(",", "", "$request->amount");
-                        $amount = (int)$s_amount;
+                        $amount = intval($request->amount);
                         if ($intercept_type == 1){
                             InterceptReBookRequest::create([
                                 'shipment_id' => $request->shipment_id,
