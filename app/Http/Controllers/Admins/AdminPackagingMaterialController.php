@@ -1335,7 +1335,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
