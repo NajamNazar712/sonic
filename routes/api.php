@@ -464,6 +464,8 @@ Route::name('api.')->group(function () {
                 });
             });
 
+            Route::get('get_booking_types', 'ShipperAPIController@booking_types')->name('get_booking_types');
+
             Route::prefix('corporate')->name('corporate.')->group(function () {
                 Route::get('index', 'ShipperAPIController@corporate_index')->name('index');
 //                Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
