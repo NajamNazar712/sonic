@@ -557,7 +557,7 @@ class ConsigneeAPIController extends Controller
             $notifiction_history = $notifiction_history->get();
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
-        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+        return response()->json(['status' => 1, 'message' => "No Notification Found"]);
     }
 
     public function update_pin(Request $request)

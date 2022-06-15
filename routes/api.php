@@ -468,6 +468,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'ShipperAPIController@corporate_index')->name('index');
 //                Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
             });
+            Route::prefix('reimbursement')->name('corporate.')->group(function () {
+                Route::get('index', 'ShipperAPIController@reimbursement_index')->name('index');
+//                Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
+            });
         });
 
     });

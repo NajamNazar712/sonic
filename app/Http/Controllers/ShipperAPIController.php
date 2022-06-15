@@ -285,7 +285,7 @@ class ShipperAPIController extends Controller
             $subscription_list = $subscription_list->get();
             return response()->json(['status' => 0, 'information' => $subscription_list]);
         }
-        return response()->json(['status' => 1, 'message' => "No Subscription Shipment Found"]);
+        return response()->json(['status' => 1, 'message' => "No Shipment Found"]);
     }
 
     public function shipper_subscription_delete(Request $request)
@@ -322,7 +322,7 @@ class ShipperAPIController extends Controller
             $notifiction_history = $notifiction_history->get();
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
-        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+        return response()->json(['status' => 1, 'message' => "No Notification Found"]);
     }
 
     public function add_request_index(Request $request)
@@ -933,5 +933,56 @@ class ShipperAPIController extends Controller
             }
         }
         return response()->json(['booking_types' => $booking_types, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user]);
+    }
+
+    public function reimbursement_index(Request $request)
+    {
+        $date = Carbon::today();
+        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
+        $user = User::with('shipping.city')->find(session('user_id'));
+        $multi_piece = $user->multipiece_status;
+        $user_id = $request->shipper_id;
+        $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
+            $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        } else {
+            $consignee_cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        }
+        $products = Product::orderBy('product_name')->get();
+        $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+        if ($ccd_booking->exists()) {
+            $ccd_booking = $ccd_booking->first();
+            $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+            if (!in_array($user_id, $ccd_account_tags)) {
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+            } else {
+                $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+            }
+        } else {
+            $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        }
+        $check = NonServiceArea::pluck('name')->toArray();
+        $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        $air_waybill = ShipperAirWaybillSettings::where('user_id', $user_id);
+        if ($air_waybill->exists()) {
+            $air_waybill = $air_waybill->first();
+        } else {
+            $air_waybill = null;
+        }
+
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array($user_id, $omni_accounts)) {
+                    $omni_user = 1;
+                }
+            }
+        }
+
+        return response()->json(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
     }
 }
