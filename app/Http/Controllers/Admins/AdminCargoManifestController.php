@@ -2815,6 +2815,22 @@ class AdminCargoManifestController extends Controller
                         } else {
                             $shipper_status_id = 4;
                             $consignee_status_id = 4;
+
+                            $consignee_city = $shipment->consignee_city_id;
+
+                            $city_id = City::where('id', $consignee_city)->select('id')->first();
+
+                            if ($city_id->exists()) {
+                                if ($city_id == '202' && $city_id == '223') {
+                                    NotificationsController::send(75, $shipment_id, $shipment->consignee_address);
+                                } else {
+                                    NotificationsController::send(7575, $shipment_id);
+                                    echo "K";
+                                    die();
+                                }
+                            }
+                            echo "here";
+                            die();
                         }
                     } else {
                         if ($shipment->booking_type_id == 1) {
@@ -2840,7 +2856,6 @@ class AdminCargoManifestController extends Controller
                             $consignee_status_id = 22;
                         }
                     }
-
                     $shipment->shipper_status_id = $shipper_status_id;
                     $shipment->consignee_status_id = $consignee_status_id;
                     $shipment->save();
@@ -2917,6 +2932,8 @@ class AdminCargoManifestController extends Controller
 
         $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
         if ($bag_shipments->exists()) {
+            echo "here6";
+            die();
             $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
