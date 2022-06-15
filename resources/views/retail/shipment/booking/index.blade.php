@@ -138,6 +138,9 @@
                                         <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
                                     <div class="form-group col-6">
+                                        <a href="javascript:void(0);" id="auto_fetch" class="btn btn-sm btn-outline-success sm" disabled="disabled">Auto Fetch</a>
+                                    </div>
+                                    <div class="form-group col-6">
                                         <input type="text" name="consignee_name" id="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                                     </div>
                                     <div class="form-group col-6">
@@ -186,10 +189,10 @@
                                     <div class="col pt-5 mt-2 mb-3">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">City Request</label>
-                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-success" >ADD</a>
+                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-outline-success" >ADD</a>
                                         </div>
                                     </div>
-                                    <div class="col mt-2 mb-3">
+                                    <div class="col mt-2 mb-1">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Bulk Shipment</label>
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
@@ -284,7 +287,7 @@
     </div>
     <div class="modal fade text-left" id="AddCityReqModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddCityReqModal"
     aria-hidden="true">
-   <div class="modal-dialog modal-lg" role="document">
+   <div class="modal-dialog modal-sm" role="document">
        <div class="modal-content">
            <div class="modal-header bg-primary white">
                <h4 class="modal-title white">Add City Request</h4>
@@ -342,6 +345,36 @@
                <div class="modal-footer">
                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                    <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
+
+<div class="modal fade text-left" id="AutoFetchConsignee" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchConsignee"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Consignee Details</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="auto_fetch_consignee" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                    <div class="col-12 form-group">
+                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
+                    </div>
+                       <div class="col-12 form-group">
+                            <table class="table" id="consignee_table">
+
+                            </table>
+                       </div>
+                   </div>
                </div>
            </form>
        </div>
@@ -1030,7 +1063,6 @@
                     $('#other_cities_internationals').addClass('d-none');
                 }
             });
-
             $('#add_city_req_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1086,6 +1118,70 @@
                 $('#other_cities_international').val('');
                 
             });
+
+        
+
+            $('#auto_fetch').on('click', function(){
+                if($('input[name="consignee_phone_no"]').val().match(/\d/g) != null){
+					var length = $('input[name="consignee_phone_no"]').val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
+				if(length == 11){
+					$.ajax({
+                    url: '{!! route('retail.shipment.book.consignee_info') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'phone': $('input[name="consignee_phone_no"]').val(),
+                        
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            toastr.error(data.message, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                        }else{
+                            if(data.blacklist == 0){
+                                $('#black_listed_employee').addClass('d-none');
+                            }else{
+                                $('#black_listed_employee').removeClass('d-none');
+                            }
+                            console.log(data);
+                            $('#AutoFetchConsignee').modal('show');
+                            var html = '';
+                            $.each(data.consignee, function (index, details) {
+                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-succes btn-sm auto_fetch_btn"><i class="ft-check"></i></a></td>';
+                                    html +='<td>'+details.name+'</td>';
+                                    html +='<td>'+details.address+'</td></tr>';
+                                });
+                                $('#consignee_table').html(html);   
+                                $('.auto_fetch_btn').on('click', function(){
+                                    var name = $(this).parent().next().html();
+                                    var address = $(this).parent().next().next().html();
+
+                                    $('#consignee_name').val(name);
+                                    $('#consignee_address').val(address);
+                                    $('#AutoFetchConsignee').modal('hide');
+
+                                });
+                        }
+                      
+                    });
+				}
+                
+            });
+
+            $('#AutoFetchConsignee').on('hidden.bs.modal', function () {
+                $('#consignee_table').html('');   
+
+            });
+
+
+
            
         });
     </script>

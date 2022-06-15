@@ -3934,6 +3934,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::get('/excel', 'Retail\RetailShipmentBookController@excel_index')->name('excel');
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
             Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
+            Route::post('/consignee_info', 'Retail\RetailShipmentBookController@consignee_info')->name('consignee_info');
+            
             
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');

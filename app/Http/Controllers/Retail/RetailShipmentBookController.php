@@ -35,6 +35,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Retail\RetailReference;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Blacklist\ConsigneeInformationLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -1920,6 +1925,28 @@ class RetailShipmentBookController extends Controller
       ]);
 
       return response()->json(['status' => 1, 'success' => 'City Request Added']);
+
+    }
+
+    public function consignee_info(Request $request){
+      // $phone = $request->phone;
+      $phone = substr_replace($request->phone, '-', 4, 0);
+        $message = '';
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if ($consignee_information->exists()) {
+          $consignee_information = $consignee_information->first();
+          $consignee_info = ConsigneeInformationLog::where('consignee_information_id',$consignee_information->id)->get();
+                
+                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+                if ($blacklist->exists()) {
+                  
+                  return response()->json(['status' => 0, 'consignee' => $consignee_info, 'blacklist'=> 1]);
+                }else{
+                  
+                  return response()->json(['status' => 0, 'consignee' => $consignee_info, 'blacklist'=> 0]);
+                }
+        }
+        return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
 
     }
 }
