@@ -902,9 +902,9 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $date = Carbon::today();
         $user = User::find($user_id);
-        $user_shipping_address = UserShippingInfo::join('city as c', 'c.id', '=', 'user_shipping_infos.city_id')
+        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_id', $user_id)->where('status', 1)
-            ->select('user_shipping_infos.*', 'c.name')
+            ->select('user_shipping_infos.*', 'c.name as city_name')
             ->get();
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
