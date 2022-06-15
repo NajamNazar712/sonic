@@ -2825,12 +2825,8 @@ class AdminCargoManifestController extends Controller
                                     NotificationsController::send(75, $shipment_id, $shipment->consignee_address);
                                 } else {
                                     NotificationsController::send(7575, $shipment_id);
-                                    echo "K";
-                                    die();
                                 }
                             }
-                            echo "here";
-                            die();
                         }
                     } else {
                         if ($shipment->booking_type_id == 1) {
