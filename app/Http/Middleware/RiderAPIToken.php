@@ -26,7 +26,13 @@ class RiderAPIToken
                 $rider = $rider->first();
 
                 if ($rider->status) {
-                    $request->request->add(['rider_id' => $rider->id]);
+                    $employee = Employee::where('trax_id',$rider->trax_id)->whereNotNull('trax_id')->first();
+                    $employee_id = null;
+                    if($employee)
+                    {
+                        $employee_id = $employee->id;
+                    }
+                    $request->request->add(['rider_id' => $rider->id,'employee_id' => $employee_id]);
 
                     return $next($request);
                 }

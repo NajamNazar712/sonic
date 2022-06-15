@@ -25,7 +25,13 @@ class AdminAPIToken
                 $admin = $admin->first();
 
                 if ($admin->status) {
-                    $request->request->add(['admin_id' => $admin->id]);
+                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id')->first();
+                    $employee_id = null;
+                    if($employee)
+                    {
+                        $employee_id = $employee->id;
+                    }
+                    $request->request->add(['admin_id' => $admin->id,'employee_id' => $employee_id,'admin_role_id'=>$admin->role_id]);
 
                     return $next($request);
                 }
