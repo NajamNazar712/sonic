@@ -903,6 +903,12 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user = User::find($user_id);
         $user_shipping_address = UserShippingInfo::with('city')->where('user_id', $user_id)->where('status', 1)->get();
+
+        $user_shipping_address = $user_shipping_address->map(function ($user_shipping_address) {
+            $user_shipping_address->city = $user_shipping_address->city->name;
+            return $user_shipping_address;
+        });
+
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
