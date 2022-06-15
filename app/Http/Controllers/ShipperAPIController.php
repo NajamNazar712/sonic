@@ -12,7 +12,10 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\BookingType;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\City;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDeliveryTypeStatus;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -23,6 +26,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
+use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
@@ -33,6 +37,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperShipmentsSubscription;
+use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use Carbon\Carbon;
@@ -882,14 +887,15 @@ class ShipperAPIController extends Controller
         }
     }
 
-    public function booking_types(Request $request){
+    public function booking_types(Request $request)
+    {
         $shipper = User::find($request->shipper_id);
-        if($shipper){
-            if($shipper->account_type_id == 1){
-                $booking_types = BookingType::whereNotIn('id', [4,6])->get();
-            } elseif ($shipper->account_type_id == 2){
+        if ($shipper) {
+            if ($shipper->account_type_id == 1) {
+                $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
+            } elseif ($shipper->account_type_id == 2) {
                 $booking_types = BookingType::whereNotIn('id', [4])->get();
-            } else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Account Type']);
             }
             return response()->json(['status' => 0, 'message' => 'Booking Types Found!', 'booking_types' => $booking_types]);
@@ -902,7 +908,7 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $date = Carbon::today();
         $user = User::find($user_id);
-        $booking_types = BookingType::where('id','!=', 4)->get();
+        $booking_types = BookingType::where('id', '!=', 4)->get();
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
             ->select('user_shipping_infos.*', 'c.name as city_name')
@@ -952,7 +958,60 @@ class ShipperAPIController extends Controller
                 }
             }
         }
-        return response()->json(['status' => 0,'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+    }
+
+    public function corporate_shipping_modes(Request $request)
+    {
+        $rules = [
+            'service_type_id' => ['required', 'digits_between:1,10'],
+            'pickup_city_id' => ['required', 'digits_between:1,10', 'exists:cities,id'],
+            'consignee_city_id' => ['required', 'digits_between:1,10', 'exists:cities,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $user_id = $request->shipper_id;
+            $corporate_rate_type_id = User::find($user_id)->corporate_rate_type_id;
+            if ($corporate_rate_type_id != 3) {
+                $shipper_shipping_modes = CorporateRateStatus::where('user_id', $user_id)->where('status', 1);
+                $user = User::where('id', $user_id)->first();
+            } else {
+                $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', $user_id)->where('status', 1);
+                $user = User::where('id', $user_id)->first();
+            }
+
+            if ($shipper_shipping_modes->exists()) {
+                $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
+
+                if ($city_shipping_modes->exists()) {
+                    $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                    if ($request->pickup_city_id != $request->consignee_city_id) {
+                        $city_shipping_modes = array_diff($city_shipping_modes, [4]);
+                    }
+
+                    if (!empty($city_shipping_modes)) {
+                        $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+
+                        return response()->json(['status' => 0, 'message' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes, 'default_shipping_mode' => $user['default_shipping_mode']]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No Shipping Modes Enabled for Selected Service Type and Consignee City']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipping Modes has been Enabled for you']);
+            }
+        }
     }
 
     public function reimbursement_index(Request $request)
@@ -960,7 +1019,7 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user_id = $request->shipper_id;
         $user = User::find($user_id);
-        $booking_types = BookingType::whereNotIn('id', [4,6])->get();
+        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
             ->select('user_shipping_infos.*', 'c.name as city_name')
@@ -1007,6 +1066,53 @@ class ShipperAPIController extends Controller
             }
         }
 
-        return response()->json(['status' => 0,'shipping_address' => $user_shipping_address, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+    }
+
+    public function reimbursement_shipping_modes(Request $request)
+    {
+        $rules = [
+            'service_type_id' => ['required', 'digits_between:1,10'],
+            'pickup_city_id' => ['required', 'digits_between:1,10', 'exists:cities,id'],
+            'consignee_city_id' => ['required', 'digits_between:1,10', 'exists:cities,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $user_id = $request->shipper_id;
+            $shipper_shipping_modes = RateStatus::where('user_id', $user_id)->where('status', 1);
+            $user = User::where('id', $user_id)->first();
+
+            if ($shipper_shipping_modes->exists()) {
+                $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
+
+                if ($city_shipping_modes->exists()) {
+                    $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+                    if ($request->pickup_city_id != $request->consignee_city_id) {
+                        $city_shipping_modes = array_diff($city_shipping_modes, [4]);
+                    }
+
+                    if (!empty($city_shipping_modes)) {
+                        $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+
+                        return response()->json(['status' => 0, 'message' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes, 'default_shipping_mode' => $user['default_shipping_mode']]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No Shipping Modes Enabled for Selected Service Type and Consignee City']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipping Modes has been Enabled for you']);
+            }
+        }
     }
 }
