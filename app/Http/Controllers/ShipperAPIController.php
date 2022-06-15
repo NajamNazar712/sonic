@@ -903,7 +903,7 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user = User::find($user_id);
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)->get();
+            ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)->get();
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
@@ -958,7 +958,7 @@ class ShipperAPIController extends Controller
         $user_id = $request->shipper_id;
         $user = User::find($user_id);
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
-            ->where('user_shipping_infos.user_id', $user_id)->get();
+            ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)->get();
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
