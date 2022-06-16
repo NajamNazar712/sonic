@@ -552,7 +552,8 @@ class APIController extends Controller
                     })];
                 }
             }
-        } else {
+        }
+        else {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);

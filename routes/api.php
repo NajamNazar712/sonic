@@ -472,7 +472,7 @@ Route::name('api.')->group(function () {
                 Route::post('shipping_modes', 'ShipperAPIController@corporate_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
-            Route::prefix('reimbursement')->name('corporate.')->group(function () {
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
                 Route::get('index', 'ShipperAPIController@reimbursement_index')->name('index');
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
