@@ -188,7 +188,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at']);
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers) as remaining')]);
 
         $datatable = Datatables::of($handover_list)
 
@@ -199,6 +199,16 @@ class AdminShipmentHandoverController extends Controller
             else {
                 return 0;
             }
+            })
+            ->addColumn('remaining_shipment_count', function($handover_list) {
+
+                if ($handover_list->shipment_count != 0) {
+                    $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $remaining  . '</button>';
+                }
+                else {
+                    return 0;
+                }
             });
 
             if ($tracking_number = $request->get('search_tracking')) {
@@ -587,4 +597,21 @@ class AdminShipmentHandoverController extends Controller
          }
          return redirect()->back()->with(['status'=>0,'error'=>"Responsible not found!"]);
     }
+
+    public function handover_shipments_remaining(Request $request){
+        $handover_id = $request->input('id');
+        $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->where('status',1)->get();
+        $shipments = array();
+        if($handover_shipments->count() != 0){
+            foreach ($handover_shipments as $handover_shipment){
+                $shipment = Shipment::find($handover_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Handover Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+
 }

@@ -33,9 +33,10 @@
                         <th class="border-primary border-darken-1">From</th>
                         <th class="border-primary border-darken-1">To</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Shipment(s)</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Shipment(s)</th>
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Remaining Shipment(s)</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received At</th>
                     </tr>
@@ -189,9 +190,10 @@
                             head.push('From');
                             head.push('To');
                             head.push('Hub');
-                            head.push('Shipment(s)');
                             head.push('Status');
+                            head.push('Shipment(s)');
                             head.push('Received Shipment(s)');
+                            head.push('Remaining Shipment(s)');
                             head.push('Received By');
                             head.push('Received At');
                             $.each(result.data, function(index, values) {
@@ -203,9 +205,10 @@
                                 row.push(values.from);
                                 row.push(values.to);
                                 row.push(values.hub);
-                                row.push(values.total_shipments);
                                 row.push(values.status);
+                                row.push(values.total_shipments);
                                 row.push(values.received_shipments);
+                                row.push(values.remaining);
                                 row.push(values.received_by);
                                 row.push(values.received_at);
 
@@ -414,9 +417,10 @@
                     {data: 'from', name: 'hr.name', class: 'align-middle from'},
                     {data: 'to', name: 'hor.name', class: 'align-middle to'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
-                    {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
+                    {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
+                    {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count'},
                     {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
                 ],
@@ -473,6 +477,35 @@
 
                 $.ajax({
                     url: '{!! route('admin.handover.list.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments .modal-body').html(shipments);
+
+
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.remaining_shipment_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments .modal-body').html('');
+                $('#shipments').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.handover.list.remaining') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
