@@ -958,7 +958,8 @@ class ShipperAPIController extends Controller
                 }
             }
         }
-        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types]);
+        $ftl_collection_type = [['id' => 1, 'type' => 'Invoice'],['id' => 2, 'type' => 'Cash']];
+        return response()->json(['status' => 0, 'shipping_address' => $user_shipping_address, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user, 'booking_types' => $booking_types, 'ftl_collection_type' => $ftl_collection_type]);
     }
 
     public function corporate_shipping_modes(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
@@ -607,7 +609,10 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email']
+                'substitute_user_email' => ['nullable', 'filled', 'email'],
+
+                'ftl_collection_type' => ['required_if:service_type_id,6', 'nullable', 'integer', 'digits_between:1,10'],
+                'approve_freight_request' => ['required_if:service_type_id,6', 'nullable', 'integer', 'digits_between:1,10'],
 
             ];
 
@@ -785,7 +790,8 @@ class APIController extends Controller
                 if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
                 }
-            } else {
+            }
+            else {
                 $pickup_consignee_city = City::find($request->input('consignee_city_id'));
                 if (!$pickup_consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
@@ -868,7 +874,8 @@ class APIController extends Controller
                 $payment_mode_id = 1;
                 $self_collection = false;
                 $delivery_type_id = 1;
-            } else {
+            }
+            else {
                 $pickup_address_id = $request->input('pickup_address_id');
                 $consignee_city_id = $request->input('consignee_city_id');
 
@@ -1195,6 +1202,12 @@ class APIController extends Controller
                         $blacklist_message = $blacklist_setting->message;
                     }
                 }
+            }
+
+            if ($service_type_id == 6) {
+                $ftl_request_id = $request->approve_freight_request;
+                FtlRequest::where('id', $ftl_request_id)->update(['shipment_id' => $shipment_id, 'status_id' => 5, 'collection_type' => $request->ftl_collection_type]);
+                FTLController::FTLRequestStatusHistory($ftl_request_id, 5, $user_id);
             }
 
             if ($msg_string != null && $blacklist_message == null) {
