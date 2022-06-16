@@ -266,12 +266,12 @@
 
         });
         $('#login_button').on('click', function () {
-            @if(isset($setting->setting_value) && $setting->setting_value == 0)
-                $('#admin_login_form').submit();
-            @else
             var phone_check = $('#phone_number').valid();
             var pin_check = $('#pin').valid();
             if(phone_check && pin_check){
+                @if(isset($setting->setting_value) && $setting->setting_value == 0)
+                $('#admin_login_form').submit();
+                @else
                 phone_number = $('#phone_number').val();
                 pin = $('#pin').val();
                 $.ajax({
@@ -299,13 +299,13 @@
         });
 
         $('#admin_login_form input').keypress(function () {
-            @if(isset($setting->setting_value) && $setting->setting_value == 0)
-            $('#admin_login_form').submit();
-            @else
             if(event.keyCode == 13){
                 var phone_check = $('#phone_number').valid();
                 var pin_check = $('#pin').valid();
                 if(phone_check && pin_check){
+                    @if(isset($setting->setting_value) && $setting->setting_value == 0)
+                        $('#admin_login_form').submit();
+                    @else
                     phone_number = $('#phone_number').val();
                     pin = $('#pin').val();
                     $.ajax({
