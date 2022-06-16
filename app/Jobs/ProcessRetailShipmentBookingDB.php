@@ -56,7 +56,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $consignee_email_address = NULL;
         $order_id = $this->booking['order_id'];
         $package_type = FALSE;
-        $special_instructions = NULL;
+        $special_instructions = $this->booking['special_instruction'];
         $city_id = City::where('name', $this->booking['destination'])->first()->id;
 
         $shipping_mode_check = $this->booking['shipping_mode_id'];

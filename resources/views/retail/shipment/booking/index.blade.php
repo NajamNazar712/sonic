@@ -184,6 +184,9 @@
                                             </div>
                                         </div>--}}
                                     </div>
+                                    <div class="form-group">
+                                        <textarea id="special_instructions" name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
+                                    </div>
                                 </div>
                                 <div id="external_info" class="ml-1 col border">
                                     <div class="col pt-5 mt-2 mb-3">
@@ -881,7 +884,9 @@
                         $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
-
+                        $('#insurance_offered').val('').trigger('change');
+                        $('#special_instructions').val('');
+                        
                     $('#book_button').val(1);
                     $('#book').attr('disabled', false);
                }
@@ -1154,7 +1159,7 @@
                             $('#AutoFetchConsignee').modal('show');
                             var html = '';
                             $.each(data.consignee, function (index, details) {
-                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-succes btn-sm auto_fetch_btn"><i class="ft-check"></i></a></td>';
+                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-success btn-sm auto_fetch_btn"><i class="ft-check"></i></a></td>';
                                     html +='<td>'+details.name+'</td>';
                                     html +='<td>'+details.address+'</td></tr>';
                                 });

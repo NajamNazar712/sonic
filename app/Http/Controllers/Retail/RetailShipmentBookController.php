@@ -202,7 +202,7 @@ class RetailShipmentBookController extends Controller
         $consignee_email_address = NULL;
         $order_id = $request->input('order_id');
         $package_type = FALSE;
-        $special_instructions = NULL;
+        $special_instructions = $request->special_instructions;
         $business_category_id = $request->input('business_category');
 
 
@@ -1694,6 +1694,7 @@ class RetailShipmentBookController extends Controller
             'iban_number' => 'IBAN Number',
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
+            'special_instruction' => 'Special Instruction',
         ];
 
         $messages = [
@@ -1743,7 +1744,9 @@ class RetailShipmentBookController extends Controller
             'fuel_surcharge' => ['required', 'numeric'],
             'iban_number' => ['nullable', 'between:1,50'],
             'account_number' => ['nullable', 'numeric'],
-            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
+            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
+            'special_instruction' => ['nullable', 'between:1,190'],
+            
         ];
 
         if($file = $request->file('shipments')) {
@@ -1753,7 +1756,7 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id'];
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id', 27 => 'special_instruction'];
             if (count($spreadsheet[0]) != 27){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
