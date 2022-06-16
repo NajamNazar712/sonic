@@ -497,7 +497,7 @@ class APIController extends Controller
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
-                'package_type' => ['required_if:service_type_id,3', 'boolean'],
+                'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
