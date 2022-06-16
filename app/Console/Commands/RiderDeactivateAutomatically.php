@@ -67,6 +67,7 @@ class RiderDeactivateAutomatically extends Command
                 $return_notes  = ReturnNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
                 $wms_pickup_run  = WmsPickupRun::whereBetween('created_at', [$date_week_age, $today])->pluck('wms_rider_id')->toArray();
                 $rider_attendance = EmployeeAttendance::where('employee_type', 2)->whereBetween('attendance_date', [$date_week_age, $today])->whereNotNull('clock_in_datetime')->pluck('employee_id')->toArray();
+                $rider_attendance = Rider::whereIn('employee_id',$rider_attendance)->pluck('id')->toArray();
                 $rider_active = array_unique(array_merge($deliveries, $v2_pickups, $return_notes, $wms_pickup_run, $rider_attendance));
                 $data = array_diff($rider_ids, $rider_active);
                 if ($data != null){
