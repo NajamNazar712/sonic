@@ -911,6 +911,7 @@ class ShipperAPIController extends Controller
         $booking_types = BookingType::where('id', '!=', 4)->get();
         $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
             ->where('user_shipping_infos.user_id', $user_id)->where('user_shipping_infos.status', 1)
+            ->where('user_shipping_infos.hidden', 0)
             ->select('user_shipping_infos.*', 'c.name as city_name')
             ->get();
         $multi_piece = $user->multipiece_status;
