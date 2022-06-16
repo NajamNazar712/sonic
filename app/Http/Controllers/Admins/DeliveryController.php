@@ -1883,6 +1883,28 @@ class DeliveryController extends Controller
                 }
 
             })
+            ->addColumn('cnic', function ($deliveries) {
+                if($deliveries->amount > 0)
+                {
+                    return '-';
+                }
+                else
+                {
+                    $cnic = '<input class="form-control form-control-sm" name="cnic" placeholder="Enter CNIC" value="">';
+                    return $cnic;
+                }
+            })
+            ->addColumn('relation', function ($deliveries) {
+                if($deliveries->amount > 0)
+                {
+                    return '-';
+                }
+                else
+                {
+                    $relation = '<input class="form-control form-control-sm" name="relation" placeholder="Father,Brother" value=" ">';
+                    return $relation;
+                }
+            })
             ->addColumn('action', function ($deliveries) {
                 return " <span class='dropdown'>
                     <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
