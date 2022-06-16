@@ -270,32 +270,33 @@
             var pin_check = $('#pin').valid();
             if(phone_check && pin_check){
                 @if(isset($setting->setting_value) && $setting->setting_value == 0)
-                $('#admin_login_form').submit();
+                    $('#admin_login_form').submit();
                 @else
-                phone_number = $('#phone_number').val();
-                pin = $('#pin').val();
-                $.ajax({
-                    url: '{!! route('admin.login.credentials') !!}',
-                    method: 'POST',
-                    data: {
-                        'phone_number': phone_number,
-                        'pin': pin,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        $('#OtpModal').modal('show');
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                });
+                    phone_number = $('#phone_number').val();
+                    pin = $('#pin').val();
+                    $.ajax({
+                        url: '{!! route('admin.login.credentials') !!}',
+                        method: 'POST',
+                        data: {
+                            'phone_number': phone_number,
+                            'pin': pin,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#OtpModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+
+                @endif
             }
             else{
                 $('#phone_number-error').addClass('danger');
                 $('#pin-error').addClass('danger');
             }
 
-            @endif
         });
 
         $('#admin_login_form input').keypress(function () {
@@ -323,13 +324,14 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
+
+                    @endif
                 }
                 else{
                     $('#phone_number-error').addClass('danger');
                     $('#pin-error').addClass('danger');
                 }
             }
-            @endif
         });
         $('#OtpModal').on('shown.bs.modal', function () {
             $('#otp_input').focus();
