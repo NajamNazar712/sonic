@@ -450,6 +450,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
+        $employee_id = $request->employee_id;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -460,8 +461,7 @@ class AdminAPIController extends Controller
 
             $location_status = 0;
             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('admins as a', 'e.id', 'a.employee_id')
-                ->where('a.id', $admin_id);
+                ->where('e.id', $employee_id);
             if($reporting_location->exists()){
                 $reporting_location = $reporting_location->first();
                 $reporting_location->radius;

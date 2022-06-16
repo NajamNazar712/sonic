@@ -50,7 +50,7 @@ class AttendanceMark extends Command
         $admins = Admin::where('status', '!=', 0);
         if($admins->exists())
         {
-            $admins = $admins->pluck('id')->toArray();
+            $admins = $admins->pluck('employee_id')->toArray();
 
             $admins_with_attendance = EmployeeAttendance::whereDate('attendance_date',$yesterday)->whereIn('employee_id',$admins)->where('employee_type', 1)->pluck('employee_id')->toArray();
             $new_admins = array_diff($admins,$admins_with_attendance);
@@ -100,7 +100,7 @@ class AttendanceMark extends Command
         $riders = Rider::where('status', 1);
         if($riders->exists())
         {
-            $riders = $riders->pluck('id')->toArray();
+            $riders = $riders->pluck('employee_id')->toArray();
 
             $riders_with_attendance = EmployeeAttendance::whereDate('attendance_date',$yesterday)->whereIn('employee_id',$riders)->where('employee_type', 2)->pluck('employee_id')->toArray();
             $new_riders = array_diff($riders,$riders_with_attendance);
@@ -154,7 +154,7 @@ class AttendanceMark extends Command
         $rider_attendance = EmployeeAttendance::whereDate('attendance_date', $today)->where('employee_type', 2);
         if ($admin_attendance->exists()) {
             $admin_ids = $admin_attendance->pluck('employee_id')->toArray();
-            $admins = Admin::whereNotIn('id', $admin_ids)->where('status', '!=', 0);
+            $admins = Admin::whereNotIn('employee_id', $admin_ids)->where('status', '!=', 0);
         }
         else {
             $admins = Admin::where('status', '!=', 0);
@@ -166,7 +166,7 @@ class AttendanceMark extends Command
             foreach ($admins as $admin)
             {
                 $attendance = new EmployeeAttendance();
-                $attendance->employee_id = $admin->id;
+                $attendance->employee_id = $admin->employee_id;
                 $attendance->employee_type = 1;
                 $attendance->attendance_date = $today;
                 $attendance->save();
@@ -175,7 +175,7 @@ class AttendanceMark extends Command
 
         if ($rider_attendance->exists()) {
             $rider_ids = $rider_attendance->pluck('employee_id')->toArray();
-            $riders = Rider::whereNotIn('id', $rider_ids)->where('status', 1);
+            $riders = Rider::whereNotIn('employee_id', $rider_ids)->where('status', 1);
         }
         else {
             $riders = Rider::where('status', 1);
@@ -187,7 +187,7 @@ class AttendanceMark extends Command
             foreach ($riders as $rider)
             {
                 $attendance = new EmployeeAttendance();
-                $attendance->employee_id = $rider->id;
+                $attendance->employee_id = $rider->employee_id;
                 $attendance->employee_type = 2;
                 $attendance->attendance_date = $today;
                 $attendance->save();

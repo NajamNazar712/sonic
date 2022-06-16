@@ -4,6 +4,9 @@ use Illuminate\Database\Seeder;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 
 class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
 {
@@ -14,7 +17,7 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
      */
     public function run()
     {
-        foreach (DB::table('employee_leaves')->get() as $emp)
+        foreach (EmployeeLeave::all() as $emp)
         {
             if($emp->employee_type_id == 1)
             {
@@ -32,36 +35,12 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 {
                     $employee = $employee->first();
                     $emp->employee_id = $employee->id;
-                    $emp->save();
+                    $emp->update();
                 }
             }
         }
 
-        foreach (DB::table('employee_attendances')->get() as $emp)
-        {
-            dd($emp);
-            if($emp->employee_type == 1)
-            {
-                $user = Admin::find($emp->employee_id);
-            }
-            else if($emp->employee_type == 2){
-                $user = Rider::find($emp->employee_id);
-            }
-
-            if($user)
-            {
-                $trax_id = $user->trax_id;
-                $employee = Employee::where('trax_id',$trax_id)->whereNotNull('trax_id');
-                if($employee->exists())
-                {
-                    $employee = $employee->first();
-                    $emp->employee_id = $employee->id;
-                    $emp->save();
-                }
-            }
-        }
-
-        foreach (DB::table('employee_attendance_action_logs')->get() as $emp)
+        foreach (EmployeeAttendance::all() as $emp)
         {
             if($emp->employee_type == 1)
             {
@@ -79,7 +58,30 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 {
                     $employee = $employee->first();
                     $emp->employee_id = $employee->id;
-                    $emp->save();
+                    $emp->update();
+                }
+            }
+        }
+
+        foreach (EmployeeAttendanceActionLog::all() as $emp)
+        {
+            if($emp->employee_type == 1)
+            {
+                $user = Admin::find($emp->employee_id);
+            }
+            else if($emp->employee_type == 2){
+                $user = Rider::find($emp->employee_id);
+            }
+
+            if($user)
+            {
+                $trax_id = $user->trax_id;
+                $employee = Employee::where('trax_id',$trax_id)->whereNotNull('trax_id');
+                if($employee->exists())
+                {
+                    $employee = $employee->first();
+                    $emp->employee_id = $employee->id;
+                    $emp->update();
                 }
             }
         }
