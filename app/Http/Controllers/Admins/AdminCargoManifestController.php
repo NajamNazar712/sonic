@@ -32,6 +32,7 @@ use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\ManifestBagLostShipment;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\SelfCollectionCities;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiece;
@@ -2818,13 +2819,13 @@ class AdminCargoManifestController extends Controller
 
                             $consignee_city = $shipment->consignee_city_id;
 
-                            $city_id = City::where('id', $consignee_city)->select('id')->first();
+                            $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id')->first();
 
                             if ($city_id->exists()) {
-                                if ($city_id == '202' && $city_id == '223') {
-                                    NotificationsController::send(75, $shipment_id, $shipment->consignee_address);
+                                if ($city_id->city_id == '202' || $city_id->city_id == '223') {
+                                    NotificationsController::send(178, $shipment_id);
                                 } else {
-                                    NotificationsController::send(7575, $shipment_id);
+                                    NotificationsController::send(75, $shipment_id, $city_id->address);
                                 }
                             }
                         }

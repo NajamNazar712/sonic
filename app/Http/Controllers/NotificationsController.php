@@ -5390,7 +5390,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 75) {
+                }
+                else if ($id == 75) {
                     $shipment = Shipment::find($reference_1_id);
                     $address = $reference_2_id;
                     if ($shipment) {
@@ -9384,7 +9385,7 @@ class NotificationsController extends Controller
                     
 
                 }
-                else if ($id == 7575) {
+                else if ($id == 178) {
 
                     $shipment = Shipment::find($reference_1_id);
 //                    dd($shipment);
