@@ -1014,6 +1014,32 @@ class ShipperAPIController extends Controller
         }
     }
 
+    public function get_ftl_info(Request $request)
+    {
+        $rules = [
+            'ftl_id' => ['required', 'digits_between:1,10', 'exists:ftl_requests,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id;
+            $ftl_request = FtlRequest::where('id', $request->ftl_id)->where('shipper_id', $shipper_id);
+            if($ftl_request->exists()){
+                $ftl_request = $ftl_request->first();
+                $data = array('origin_id' => $ftl_request->origin_id, 'destination_id' => $ftl_request->destination_id, 'weight' => $ftl_request->weight, 'quantity' => $ftl_request->quantity, 'total_charges' => $ftl_request->total_charges);
+                return response()->json(['status' => 0, 'message'=> "FTL Found",'data' => $data]);
+            } else{
+                return response()->json(['status' => 1, 'message' => "No FTL Found!"]);
+            }
+
+        }
+    }
+
     public function reimbursement_index(Request $request)
     {
         $date = Carbon::today();

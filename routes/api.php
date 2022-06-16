@@ -468,6 +468,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('corporate')->name('corporate.')->group(function () {
                 Route::get('index', 'ShipperAPIController@corporate_index')->name('index');
+                Route::get('ftl_info', 'ShipperAPIController@get_ftl_info')->name('ftl_info');
                 Route::post('shipping_modes', 'ShipperAPIController@corporate_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
