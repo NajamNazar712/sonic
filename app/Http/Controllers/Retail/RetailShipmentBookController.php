@@ -24,6 +24,7 @@ use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
+use App\Http\Models\RetailInternationalShippingMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -160,6 +161,7 @@ class RetailShipmentBookController extends Controller
         $products = Product::all();
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
+        $retail_international_shipping_modes =  RetailInternationalShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
@@ -169,7 +171,7 @@ class RetailShipmentBookController extends Controller
         $banks = BanksList::all();
 
         $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes]);
     }
 
     public function store(Request $request){

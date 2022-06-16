@@ -464,6 +464,10 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var shipping_modes = @json($shipping_modes);
+            var international_shipping_modes = @json($retail_international_shipping_modes);
+            
             function print(ids){
                 $.ajax({
                     url: '{!! route('retail.shipment.book.slip') !!}',
@@ -518,6 +522,7 @@
                 placeholder:"Select Shipment Category*"
             }).bind('change',function(){
                 var id = parseInt($(this).val());
+                console.log(id);
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
@@ -525,11 +530,29 @@
                     $('#domestic_overland_destination_div').addClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     $('#international_destination_div').removeClass('d-none');
+                    
+
+                    $('#shipping_mode').empty();
+                    $.each(international_shipping_modes, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                        $('#shipping_mode').append(newOption);
+                    });
+
+
                 }
                 else{
+
+                    $('#shipping_mode').empty();
+                    $.each(shipping_modes, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                        $('#shipping_mode').append(newOption);
+                    });
+
+                    
+
                     if(shipping_mode == 1)
                     {
-                        alert(1);
+
                         $('#domestic_overland_destination_div').removeClass('d-none');
                         $('#domestic_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
@@ -995,6 +1018,14 @@
                                 }
                                 else{
                                     total_charges = data.details.charges_with_discount;
+                                }
+
+                                if(total_charges == 0 ){
+                                    var error = 'No charges set for the given kg-range/No zone found';
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
                                 }
                                 $('#total_charges').val(total_charges);
                             }
