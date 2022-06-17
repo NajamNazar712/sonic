@@ -393,6 +393,9 @@ class APIController extends Controller
 
     public function shipment_book(Request $request)
     {
+        /********************************NOTE********************************/
+        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+
         $user_id = $request->user_id;
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -612,8 +615,8 @@ class APIController extends Controller
                 'open_shipment' => ['nullable', 'boolean'],
                 'substitute_user_email' => ['nullable', 'filled', 'email'],
 
-                'ftl_collection_type' => ['required_if:service_type_id,6', 'nullable', 'integer', 'digits_between:1,10'],
-                'approve_freight_request' => ['required_if:service_type_id,6', 'nullable', 'integer', 'digits_between:1,10'],
+                'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
+                'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
 
             ];
 
