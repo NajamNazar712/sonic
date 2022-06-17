@@ -40,7 +40,7 @@ class RetailRatesCalculationController extends Controller
                         }
                     }
                     if($remaining_weight > 0){
-                        $additional_weight = $remaining_weight/$weight_charges->kg_range;
+                        $additional_weight = $remaining_weight;
                         $round_additional_weight = round($additional_weight);
                         if($additional_weight > $round_additional_weight){
                             $round_additional_weight = $round_additional_weight + $weight_charges->kg_range;
@@ -130,7 +130,7 @@ class RetailRatesCalculationController extends Controller
                     }
 
                     if($remaining_weight > 0){
-                        $additional_weight = $remaining_weight/$weight_charges->kg_range;
+                        $additional_weight = $remaining_weight;
                         $round_additional_weight = round($additional_weight);
                         if($additional_weight > $round_additional_weight){
                             $round_additional_weight = $round_additional_weight + $weight_charges->kg_range;
