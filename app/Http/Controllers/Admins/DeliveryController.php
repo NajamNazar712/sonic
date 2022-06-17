@@ -2259,7 +2259,8 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit(Request $request)
     {
-        dd($request->cnic,$request->relation);
+        $consignee_cnic =  $request->cnic;
+        $consignee_relation =  $request->relation;
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
 
@@ -2283,7 +2284,7 @@ class DeliveryController extends Controller
                 }
             }
 
-            foreach ($shipments as $shipment) {
+            foreach ($shipments as $key=>$shipment) {
                 $consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment);
                 if (!$consolidation_shipments->exists()) {
                     $statusId = "reason_drop.$shipment";
@@ -2406,7 +2407,7 @@ class DeliveryController extends Controller
                     }
 
                 }
-
+                Shipment::where('id', $shipment)->update(['consignee_cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','consignee_relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
