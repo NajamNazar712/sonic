@@ -33,7 +33,18 @@ class AdminLoginController extends Controller
     }
 
     public function showLoginForm(){
-        return view('admin.login');
+        $settings = GlobalSettings::where('type','admin_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "admin_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
+        return view('admin.login')->with(['setting'=>$settings]);
     }
     public function login(Request $request){
         //validate the form

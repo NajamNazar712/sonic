@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\ShipmentStatusReason;
@@ -41,7 +42,16 @@ class ShipperReturnController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        return view('client.return.confirmation_pending')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
+        $rcp_percent = ReattemptPercentageForShipper::where('user_id',session('user_id'));
+        if($rcp_percent->exists())
+        {
+            $rcp_percent = $rcp_percent->first();
+            $rcp_percent = $rcp_percent->percentage;
+        }
+        else{
+            $rcp_percent = 0;
+        }
+        return view('client.return.confirmation_pending')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type,'rcp_percent'=>$rcp_percent]);
     }
     public function confirmation_pending_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')

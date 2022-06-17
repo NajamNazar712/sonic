@@ -3383,6 +3383,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //CMC Routes
     Route::prefix('crm')->name('crm.')->group(function () {
+        Route::post('tag/get_admin','Admins\AdminCRMController@get_admins')->name('tag.get_admins');
         Route::prefix('request')->name('request.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_request')->name('add');
 //            Route::post('get_request', 'Admins\AdminCRMController@get_request_info')->name('get_request');
@@ -3877,6 +3878,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
+        Route::post('update', 'Admins\UserManagementController@admin_otp_update')->name('update');
+    });
+    Route::prefix('rider_otp')->name('rider_otp.')->group(function () {
+        Route::get('', 'Admins\RiderManagementController@rider_otp_index')->name('index');
+        Route::get('list', 'Admins\RiderManagementController@rider_otp_list')->name('list');
+        Route::post('update', 'Admins\RiderManagementController@rider_otp_update')->name('update');
     });
     Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');

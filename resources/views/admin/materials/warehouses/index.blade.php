@@ -50,6 +50,14 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class=" text-center mt-2">
+                                <button type="button" id="addselectAll"  class="btn btn-primary" >Select All</button>
+                                <button type="button" id="addunselectAll"  class="btn btn-primary">Unselect All</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="fulfillment_hubs form-group">
                         <h3 class="pl-1">Fulfilment Cities</h3>
                         @foreach($fulfilment_hubs as $hub)
@@ -117,6 +125,14 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class=" text-center mt-2">
+                                    <button type="button" id="editselectAll"  class="btn btn-primary" >Select All</button>
+                                    <button type="button" id="editunselectAll"  class="btn btn-primary">Unselect All</button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="fulfillment_hubs form-group">
                             <h3 class="pl-1">Fulfilment Cities</h3>
                             <div id="fulfilment_city_div">
@@ -127,7 +143,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Edit Warehouse</button>
+                        <button id="AddWarehouseBtn" type="submit" class="btn btn-info">Update Warehouse</button>
                     </div>
                 </form>
             </div>
@@ -611,6 +627,25 @@
             });
 
 
+            $("#addselectAll").on('click',function (){
+                $("#warehouse_add_form .city").prop('checked',true);
+                $("#warehouse_add_form .city").iCheck('update');
+            });
+
+            $("#addunselectAll").on('click',function (){
+                $("#warehouse_add_form .city").prop('checked',false);
+                $("#warehouse_add_form .city").iCheck('update');
+            });
+
+            $("#editselectAll").on('click',function (){
+                $("#warehouse_edit_form .city").prop('checked',true);
+                $("#warehouse_edit_form .city").iCheck('update');
+            });
+
+            $("#editunselectAll").on('click',function (){
+                $("#warehouse_edit_form .city").prop('checked',false);
+                $("#warehouse_edit_form .city").iCheck('update');
+            });
 
         });
 
