@@ -3624,13 +3624,13 @@ class APIController extends Controller
                             } else {
                                 $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $current_status['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_event = array();
 
                                 $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $transit_event['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_events[] = $transit_event;
                             }
