@@ -37,13 +37,18 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->consignee_status_id = $consignee_status_id;
       $shipment_journey->status_reason_id = $status_reason_id;
       $shipment_journey->remarks = $remarks;
-      $shipment_journey->status_sub_reason_id = $remarks_id;
       $shipment_journey->user_id = $user_id;
       $shipment_journey->admin_id = $admin_id;
       $shipment_journey->rider_id = $rider_id;
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
+
+      
+
+      if($remarks_id != null){
+          $shipment_journey->status_sub_reason_id = $remarks_id;
+      }
 
       if($user_id != null){
           $city_id = User::find($user_id)->city_id;
