@@ -2259,6 +2259,7 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit(Request $request)
     {
+        dd($request->cnic,$request->relation);
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
 
