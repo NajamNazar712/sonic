@@ -9452,7 +9452,7 @@ class NotificationsController extends Controller
         }
 
         $to = $phone_number;
-        self::sms($body, $to);
+        self::sms($body, $to, 1);
     }
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
