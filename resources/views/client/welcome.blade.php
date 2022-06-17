@@ -98,6 +98,7 @@
                     @endif--}}
                     </div>
                 </div>
+
         </div>
     </div>
 
@@ -130,8 +131,74 @@
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+    <style>
+        .gauge{
+            height: 85px;
+            overflow: hidden;
+            position: relative;
+            width: 170px;
+        }
+        .gauge .arc{
+            background-image:
+                    radial-gradient(#fff 0, #fff 60%, transparent 60%),
+                    conic-gradient(red 0, orange 135deg, #ccc 135deg, #ccc 180deg, #fff 180deg, #fff 360deg);
+            background-position: center center, center center;
+            background-repeat: no-repeat;
+            background-size: 100% 100%, 100% 100%;
+            border-radius: 50%;
+            border-style: none;
+            height: 170px;
+            position: relative;
+            transform: rotate(-90deg);
+            width: 100%;
+        }
+        .gauge .pointer{
+            background: #fff;
+            border: 1px solid #000;
+            border-radius: 5px;
+            bottom: 0;
+            content: '';
+            height: 6px;
+            left: 0;
+            position: absolute;
+            transform: rotate(135deg) translateX(2px) translateY(-6px);
+            transform-origin: 85px 0;
+            width: 20px;
+            z-index: 5;
+        }
+        .gauge .mask::before,
+        .gauge .mask::after{
+            background-image: radial-gradient(transparent 0, transparent 50%, #fff 50%, #fff 100%);
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0% 100%);
+            content: '';
+            height: 18px;
+            position: absolute;
+            width: 18px;
+        }
+        .gauge .mask::before{
+            left: -2px;
+            bottom: 0;
+        }
+        .gauge .mask::after{
+            bottom: 0;
+            right: -2px;
+        }
+        .gauge .label{
+            bottom: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            left: 0;
+            line-height: 26px;
+            position: absolute;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
 @endsection
 @section('js')
+
+    <script src="{{asset('app-assets/vendors/js/charts/chartjs/chart.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -197,6 +264,7 @@
 
             });
             @endif
+
             {{--@if($shipper_payments != null)
                 var myChart = echarts.init(document.getElementById('funnel-plot'));
 
@@ -264,6 +332,8 @@
                 });
             });
             @endif--}}
+
+        });
     </script>
 
 @endsection

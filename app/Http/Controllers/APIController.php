@@ -1818,20 +1818,26 @@ class APIController extends Controller
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-            if ($shipment->shipper_status_id == 1) {
-                $shipment->shipper_status_id = 17;
-                $shipment->consignee_status_id = 17;
-
-                $shipment->save();
-
-                V2AdminPickupsController::cancel($shipment->id);
-
-                ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
-
-                return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+            if($shipment->warehouse == 1){
+                return response()->json(['status' => 1, 'message' => 'Warehouse Shipment\'s can\'t be cancelled through Sonic.']);
             }
+            else{
+                if ($shipment->shipper_status_id == 1) {
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+
+                    $shipment->save();
+
+                    V2AdminPickupsController::cancel($shipment->id);
+
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
+
+                    return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+                }
+            }
+
         }
     }
 

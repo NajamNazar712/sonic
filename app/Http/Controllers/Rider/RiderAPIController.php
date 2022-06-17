@@ -11774,6 +11774,7 @@ class RiderAPIController extends Controller
                         if ($environment == 'production' || $environment == 'staging') {
                             $otp = mt_rand(100000, 999999);
                             $rider->otp = $otp;
+                            $rider->last_login_attempt = Carbon::now();
                             $rider->save();
                             $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
                             NotificationsController::send(138, $rider, $data);

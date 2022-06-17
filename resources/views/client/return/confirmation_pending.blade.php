@@ -8,6 +8,19 @@
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
+            <div class="card-header text-center">
+                <h2>Re-Attempt to Delivery Success Ratio</h2>
+            </div>
+            <div class="card-body text-center">
+                <div class="row justify-content-center" id="graphs">
+                    <canvas id="chart"  width="440" height="220">Canvas not available.</canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('client.inc.messages')
 
@@ -144,6 +157,8 @@
 @endsection
 
 @section('js')
+
+    <script src="{{asset('app-assets/vendors/js/charts/speedometer.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
@@ -1153,6 +1168,7 @@
                 }
             });
 
+            draw("chart",{{$rcp_percent}});
 
         });
     </script>
