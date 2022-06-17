@@ -1613,11 +1613,12 @@ class AdminInternationalRatesController extends Controller
                     $updated = 0;
                     $created = 0;
                     $not_updated = 0;
+                    $shipping_mode_id = 1;
+                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $shipping_mode_id = 1;
                         $zone_1 = trim($row['zone_1']);
                         $zone_2 = trim($row['zone_2']);
                         $zone_3 = trim($row['zone_3']);
@@ -1630,23 +1631,6 @@ class AdminInternationalRatesController extends Controller
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
 
-                        $standard_rate = InternationalStandardRetailRates::where('range_up', $range_up)->where('range_down', $range_down)->where('shipping_mode_id',$shipping_mode_id);
-                        if ($standard_rate->exists()) {
-                            $standard_rate = $standard_rate->first();
-                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
-                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
-                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
-                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
-                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
-                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
-                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
-                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
-                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
-                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
-                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
-                            $standard_rate->save();
-                            $updated++;
-                        } else {
                             $standard_rate = new InternationalStandardRetailRates();
                             $standard_rate->range_up = $range_up;
                             $standard_rate->range_down = $range_down;
@@ -1664,7 +1648,7 @@ class AdminInternationalRatesController extends Controller
                             $standard_rate->zone_11 = $zone_11;
                             $standard_rate->save();
                             $created++;
-                        }
+                        
 
                     }
                     $error_msg = '';
@@ -1771,11 +1755,12 @@ class AdminInternationalRatesController extends Controller
                     $updated = 0;
                     $created = 0;
                     $not_updated = 0;
+                    $shipping_mode_id = 2;
+                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $shipping_mode_id = 2;
                         $zone_1 = trim($row['zone_1']);
                         $zone_2 = trim($row['zone_2']);
                         $zone_3 = trim($row['zone_3']);
@@ -1788,41 +1773,23 @@ class AdminInternationalRatesController extends Controller
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
 
-                        $standard_rate = InternationalStandardRetailRates::where('range_up', $range_up)->where('range_down', $range_down)->where('shipping_mode_id',$shipping_mode_id);
-                        if ($standard_rate->exists()) {
-                            $standard_rate = $standard_rate->first();
-                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
-                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
-                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
-                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
-                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
-                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
-                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
-                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
-                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
-                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
-                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
-                            $standard_rate->save();
-                            $updated++;
-                        } else {
-                            $standard_rate = new InternationalStandardRetailRates();
-                            $standard_rate->range_up = $range_up;
-                            $standard_rate->range_down = $range_down;
-                            $standard_rate->shipping_mode_id = $shipping_mode_id;
-                            $standard_rate->zone_1 = $zone_1;
-                            $standard_rate->zone_2 = $zone_2;
-                            $standard_rate->zone_3 = $zone_3;
-                            $standard_rate->zone_4 = $zone_4;
-                            $standard_rate->zone_5 = $zone_5;
-                            $standard_rate->zone_6 = $zone_6;
-                            $standard_rate->zone_7 = $zone_7;
-                            $standard_rate->zone_8 = $zone_8;
-                            $standard_rate->zone_9 = $zone_9;
-                            $standard_rate->zone_10 = $zone_10;
-                            $standard_rate->zone_11 = $zone_11;
-                            $standard_rate->save();
-                            $created++;
-                        }
+                        $standard_rate = new InternationalStandardRetailRates();
+                        $standard_rate->range_up = $range_up;
+                        $standard_rate->range_down = $range_down;
+                        $standard_rate->shipping_mode_id = $shipping_mode_id;
+                        $standard_rate->zone_1 = $zone_1;
+                        $standard_rate->zone_2 = $zone_2;
+                        $standard_rate->zone_3 = $zone_3;
+                        $standard_rate->zone_4 = $zone_4;
+                        $standard_rate->zone_5 = $zone_5;
+                        $standard_rate->zone_6 = $zone_6;
+                        $standard_rate->zone_7 = $zone_7;
+                        $standard_rate->zone_8 = $zone_8;
+                        $standard_rate->zone_9 = $zone_9;
+                        $standard_rate->zone_10 = $zone_10;
+                        $standard_rate->zone_11 = $zone_11;
+                        $standard_rate->save();
+                        $created++;
 
                     }
                     $error_msg = '';
@@ -1929,11 +1896,14 @@ class AdminInternationalRatesController extends Controller
                     $updated = 0;
                     $created = 0;
                     $not_updated = 0;
+
+                    $shipping_mode_id = 3;
+                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
+
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
                         $range_down = trim($row['range_down']);
-                        $shipping_mode_id = 3;
                         $zone_1 = trim($row['zone_1']);
                         $zone_2 = trim($row['zone_2']);
                         $zone_3 = trim($row['zone_3']);
@@ -1946,41 +1916,23 @@ class AdminInternationalRatesController extends Controller
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
 
-                        $standard_rate = InternationalStandardRetailRates::where('range_up', $range_up)->where('range_down', $range_down)->where('shipping_mode_id',$shipping_mode_id);
-                        if ($standard_rate->exists()) {
-                            $standard_rate = $standard_rate->first();
-                            $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
-                            $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
-                            $standard_rate->zone_3 = ($zone_3 != null) ? $zone_3 : 0;
-                            $standard_rate->zone_4 = ($zone_4 != null) ? $zone_4 : 0;
-                            $standard_rate->zone_5 = ($zone_5 != null) ? $zone_5 : 0;
-                            $standard_rate->zone_6 = ($zone_6 != null) ? $zone_6 : 0;
-                            $standard_rate->zone_7 = ($zone_7 != null) ? $zone_7 : 0;
-                            $standard_rate->zone_8 = ($zone_8 != null) ? $zone_8 : 0;
-                            $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
-                            $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
-                            $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
-                            $standard_rate->save();
-                            $updated++;
-                        } else {
-                            $standard_rate = new InternationalStandardRetailRates();
-                            $standard_rate->range_up = $range_up;
-                            $standard_rate->range_down = $range_down;
-                            $standard_rate->shipping_mode_id = $shipping_mode_id;
-                            $standard_rate->zone_1 = $zone_1;
-                            $standard_rate->zone_2 = $zone_2;
-                            $standard_rate->zone_3 = $zone_3;
-                            $standard_rate->zone_4 = $zone_4;
-                            $standard_rate->zone_5 = $zone_5;
-                            $standard_rate->zone_6 = $zone_6;
-                            $standard_rate->zone_7 = $zone_7;
-                            $standard_rate->zone_8 = $zone_8;
-                            $standard_rate->zone_9 = $zone_9;
-                            $standard_rate->zone_10 = $zone_10;
-                            $standard_rate->zone_11 = $zone_11;
-                            $standard_rate->save();
-                            $created++;
-                        }
+                        $standard_rate = new InternationalStandardRetailRates();
+                        $standard_rate->range_up = $range_up;
+                        $standard_rate->range_down = $range_down;
+                        $standard_rate->shipping_mode_id = $shipping_mode_id;
+                        $standard_rate->zone_1 = $zone_1;
+                        $standard_rate->zone_2 = $zone_2;
+                        $standard_rate->zone_3 = $zone_3;
+                        $standard_rate->zone_4 = $zone_4;
+                        $standard_rate->zone_5 = $zone_5;
+                        $standard_rate->zone_6 = $zone_6;
+                        $standard_rate->zone_7 = $zone_7;
+                        $standard_rate->zone_8 = $zone_8;
+                        $standard_rate->zone_9 = $zone_9;
+                        $standard_rate->zone_10 = $zone_10;
+                        $standard_rate->zone_11 = $zone_11;
+                        $standard_rate->save();
+                        $created++;
 
                     }
                     $error_msg = '';

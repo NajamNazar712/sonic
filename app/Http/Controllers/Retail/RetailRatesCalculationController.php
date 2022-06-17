@@ -178,6 +178,7 @@ class RetailRatesCalculationController extends Controller
                 $consignee_city = City::find($destination_id);
                 $zone_id = $consignee_city->zone_id;
                 $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+
                 if($international_zone){
                     $zone = $international_zone->zone_name;
                     $zone_id = 'zone_'.$zone;
