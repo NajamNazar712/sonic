@@ -3757,8 +3757,8 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
             $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
-
             if ($employee_device_token->exists()) {
                 $employee_device_token = $employee_device_token->first();
             } else {

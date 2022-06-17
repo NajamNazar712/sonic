@@ -10,6 +10,7 @@ use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
@@ -184,6 +185,11 @@ class ConsigneeAPIController extends Controller
             if ($consignee_otp->exists()) {
                 $consignee_otp = $consignee_otp->first();
                 if (Hash::check($request->otp, $consignee_otp->otp)) {
+                    $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($consignee_user->exists()) {
+                        $consignee_user = $consignee_user->first();
+                        EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $consignee_user->id)->delete();
+                    }
                     return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);

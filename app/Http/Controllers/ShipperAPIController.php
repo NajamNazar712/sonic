@@ -21,6 +21,7 @@ use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
@@ -143,6 +144,7 @@ class ShipperAPIController extends Controller
                         $information['api_token'] = $api_token;
                     }
                     $information['account_type'] = $shipper->account_type_id;
+                    EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$shipper->id)->delete();
                     return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
