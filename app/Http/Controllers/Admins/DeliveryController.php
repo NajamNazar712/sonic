@@ -2407,7 +2407,7 @@ class DeliveryController extends Controller
                     }
 
                 }
-                Shipment::where('id', $shipment)->update(['consignee_cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','consignee_relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
+                ShipmentsJourney::where('shipment_id', $shipment)->update(['cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
