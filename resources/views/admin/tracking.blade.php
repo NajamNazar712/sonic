@@ -312,7 +312,7 @@
                                     <div class="col-12 d-none" id="reattempt_charges">
                                         <fieldset class="form-group">
                                             <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" maxlength="6" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
-                                        </fieldset>  
+                                        </fieldset>
                                     </div>
                                     <div class="col-12">
                                         <fieldset class="form-group">
@@ -324,6 +324,44 @@
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button id="btnReattempt" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Mark Fake Status</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="mark_fake_status_form" action="{{ route('admin.delivery.fake_status.log.store') }}" novalidate="novalidate" method="post">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number</h2>
+                            </div>
+                            <div class="row" id="fake_status_shipment">
+                            </div>
+                            <hr>
+                            <input type="hidden" name="tracking_number" id="fake_status_tracking_number">
+                            <div class="row justify-content-center">
+                                <div class="col-12">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
                                 </div>
                             </div>
                         </div>
@@ -729,6 +767,9 @@
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
                                 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+                                @if (session('role_id') == 1 || in_array(262, session('permissions')))
+                                    shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 mark_fake_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Mark Fake Status</button>';
+                                @endif
                                 @if (session('role_id') == 1 || in_array(45, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
                                 @endif
@@ -1562,6 +1603,16 @@
                 $('#ReattemptModal').modal('show');
 
             });
+
+            $('#tracking').on('click','.mark_fake_status', function () {
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
+                $('#fake_status_tracking_number').val(tracking);
+                $('#fake_status_shipment').html(tracking_rows);
+                $('#fake_status_remarks').val('');
+                $('#FakeStatusModal').modal('show');
+            });
+
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
@@ -1593,6 +1644,8 @@
             });
             $('#tracking').on('click', '.rider_information', function () {
                 id = $(this).attr('data-id');
+                var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
+                var note = $(this).attr('data-note');
 
                 $.ajax({
                     url: '{!! route('admin.tracking.rider_information') !!}',
@@ -1610,6 +1663,9 @@
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
                         details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+                        if(showRiderResponseBtn != undefined) {
+                            details += '<tr data-id="' + data.id + '" data-note="'+note+'"><td class="align-middle text-center"><button type="button" class="btn btn-warning btnRiderResponsiveStatus" data-type="1">Unresponsive</button></td><td class="align-middle text-center"><button type="button" class="btn btn-danger btnRiderResponsiveStatus" data-type="2">Powered Off</button></td></tr>';
+                        }
 
                         details += '</tbody></table>';
 
@@ -1617,6 +1673,64 @@
 
                         $('#rider_information').modal('show');
                     });
+            });
+
+            $('body').on('click', '.btnRiderResponsiveStatus', function () {
+                var text = $(this).html();
+                var type = $(this).attr('data-type');
+                var id = $(this).closest('tr').attr('data-id');
+                var note = $(this).closest('tr').attr('data-note');
+                console.log(type,id);
+                swal({
+                    text: 'Are you sure, you want to Mark Rider '+text+'?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.tracking.rider_unresponsive_status') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': id,
+                                'type': type,
+                                'note': note,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                        .done(function (data) {
+                            if(data.status == 1)
+                            {
+                                toastr.success("Rider Marked as "+text, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
+                });
+
             });
 
             $('#tracking').on('click', '.cargo_note_print', function () {
@@ -2292,6 +2406,13 @@
                     
             }
         });
+
+        $("#mark_fake_status_form").validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+        });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
             $('#add_request_form')[0].reset();
             $('#case_nature_complaints').val('').trigger('change');
@@ -2311,6 +2432,16 @@
             $('#receiving_sheet_div').addClass('d-none');
 
         });
+
+        $('#tracking').on('click', '.replacement_booked_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
+            $('#tracking').on('click', '.replacement_collected_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
 
 				{{--$.ajax({--}}
 				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}

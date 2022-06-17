@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
-    protected $fillable = ['first_inactive'];
+    protected $fillable = ['first_inactive','is_line_manager','line_manager_id'];
 
     public function medical_infos() {
         return $this->HasMany('App\Http\Models\HR\EmployeeMedicalInformation');
@@ -69,6 +69,14 @@ class Employee extends Model
     public function shift()
     {
         return $this->belongsTo(EmployeeShift::class,'shift_id','id');
+    }
+    public function employee_nature()
+    {
+        return $this->belongsTo(EmployeeNature::class,'employee_nature_id','id');
+    }
+    public function replacement_employee()
+    {
+        return $this->belongsTo(Employee::class,'replacement_employee_id','id');
     }
 
 }

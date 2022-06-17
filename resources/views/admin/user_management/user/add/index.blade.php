@@ -114,7 +114,6 @@
 										<div class=" text-center mt-2">
 											<button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
 											<button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
-											</di>
 										</div>
 									</div>
 

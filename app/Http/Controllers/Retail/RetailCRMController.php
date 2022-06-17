@@ -347,6 +347,25 @@ class RetailCRMController extends Controller
                     $tagged_name = Admin::find($tagged['tagged_id'])->name;
                 }
             }
+
+            $tagged_kae = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 4)->get()->first();
+            if($tagged_kae){
+                $tagged_kae_name = Admin::find($tagged_kae->tagged_id)->name;
+            }else{
+                $tagged_kae_name = '';
+            }
+            $tagged_operation = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 5)->get()->first();
+            if($tagged_operation){
+                $tagged_operation_name = Admin::find($tagged_operation->tagged_id);
+                if($tagged_operation_name){
+                    $tagged_operation_name = $tagged_operation_name->name;
+                }else{
+                    $tagged_operation_name = '';
+                }
+            }else{
+                $tagged_operation_name = '';
+            }
+
             $escalation_tagged = CrmRequestEscalationTagging::where('crm_request_id', $crm_request['id'])
                 ->where('role_id', session('role_id'))
                 ->where(function ($sub_sub_query) {
@@ -435,7 +454,7 @@ class RetailCRMController extends Controller
 
             $crm_images_count = $crm_request->images->count();
 
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count]);
+            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }

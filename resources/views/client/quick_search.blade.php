@@ -23,8 +23,8 @@
                                             </div>
 
                                             <div class="form-group col-auto">
-                                                <label>Phone Number (Minimum 10 Characters)</label>
-                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number" data-rule-minlength="10" data-msg-minlength="Minimum 10 Characters">
+                                                <label>Phone Number (Full)</label>
+                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number">
                                             </div>
 
                                             <div class="form-group col-auto">
@@ -42,6 +42,7 @@
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
@@ -72,7 +73,7 @@
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -86,8 +87,9 @@
                 'rightAlign': false
             });
 
-            $('#track_form .phone_number').inputmask('Regex', {
-                'regex': '[0-9]*'
+            $('#track_form .phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
             });
 
             var table = $('#datatable').DataTable({
@@ -108,8 +110,9 @@
                         d.phone_number = $('#track_form .phone_number').val();
                     }
                 },
-                ordering: false,
+                order: [[0, 'desc']],
                 columns: [
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'user_name', name: 'u.name', class: 'align-middle user_name'},

@@ -328,7 +328,7 @@ class Permission
             'delivery.replacement.logs.index' => 208,
             'delivery.replacement.logs.list' => 208,
             'delivery.fake_status.log.index' => 262,
-            'delivery.fake_status.log.list' => 262,
+            'delivery.fake_status.log.store' => 262,
             'delivery.cash_collection.retail.index' => 423,
             'delivery.completed.retail.index' => 424,
             'delivery.signature.index' => 441,
@@ -598,6 +598,9 @@ class Permission
 
             'reports.pickup_history_cn_wise.index' => 679,
             'reports.pickup_history_cn_wise.list' => 679,
+
+            'reports.rider_unresponsive_report.index' => 705,
+            'reports.rider_unresponsive_report.list' => 705,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -925,6 +928,14 @@ class Permission
 
             'settings.return_reason_mandatory.index' => 684,
             'settings.return_reason_mandatory.list' => 684,
+
+            'settings.rider_deactivation_cron.index' => 707,
+            'settings.rider_deactivation_cron.store' => 707,
+
+            'settings.rider_shipment_attempt.index' => 562,
+            'settings.rider_shipment_attempt.store' => 562,
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -1074,6 +1085,9 @@ class Permission
 
             'human_resource.reporting_location.index' => 478,
             'human_resource.reporting_location.list' => 478,
+
+            'human_resource.designation.hub.update' => 718,
+
             'human_resource.designation.index' => 481,
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
@@ -1101,9 +1115,13 @@ class Permission
             'human_resource.fnf.hr.index' => 576,
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
+            'human_resource.fnf.reopen' => 713,
 
             'human_resource.employee_shifts.index' => 592,
             'human_resource.employee_shifts.list' => 592,
+
+            'human_resource.adjustment.index' => 717,
+            'human_resource.adjustment.list' => 717,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,
@@ -1145,6 +1163,13 @@ class Permission
 
 			'admin_otp.index' => 527,
             'admin_otp.list' => 527,
+
+            'admin_otp.update' => 722,
+
+            'rider_otp.index' => 720,
+            'rider_otp.list' => 720,
+
+            'rider_otp.update' => 721,
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
@@ -1209,6 +1234,13 @@ class Permission
 
             'settings.referral.index' => 701,
             'settings.referral.list' => 701,
+
+            'settings.lost_shipment_shippers.index' => 708,
+            'settings.lost_shipment_admins.index' => 710,
+
+            'settings.invoice_against_return_delivered_shipper.index' => 716,
+			'settings.undelivered_sms_hub_wise.index' => 714,
+            
 
             
         ],

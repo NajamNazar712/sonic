@@ -805,11 +805,27 @@
                                 <div class="col-8">
                                     <fieldset class="form-group">
                                         <div class="d-none" id="admin_tag_div">
-                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
-                                                @foreach($admins as $admin)
-                                                    <option value="{{$admin->id}}"> {{$admin->name}} </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="">
+                                                <select id="admin_tag_department"
+                                                        class="form-control  select2">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select id="admin_tag_hub"
+                                                        class="form-control select2">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select name="tag_admin" id="tag_admin" class="form-control select2">
+
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="d-none" id="department_tag_div">
                                             <div class="">
@@ -1523,16 +1539,50 @@
                 dropdownParent: $('#tagModal')
             });
 
-            $("#tag_department").prepend('<option value="" selected></option>').select2({
+            $("#tag_department , #admin_tag_department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
                 width: '100%',
                 dropdownParent: $('#tagModal')
             });
 
-            $("#tag_hub").prepend('<option value="" selected></option>').select2({
+            $("#tag_hub , #admin_tag_hub").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Hub",
                 width: '100%',
                 dropdownParent: $('#tagModal')
+            });
+
+            $("#admin_tag_department , #admin_tag_hub").on('change',function (){
+                let dept = $("#admin_tag_department").val();
+                let hub = $("#admin_tag_hub").val();
+
+                if(dept != "" && hub != "")
+                {
+                    $.ajax({
+                        url: '{!! route('admin.crm.tag.get_admins') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub': hub,
+                            'dept': dept,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 0) {
+                                $("#tag_admin").html("<option value='' selected></option>");
+                                $.each(data.admins,function (i,admin) {
+                                    $("#tag_admin").append("<option value='"+admin.id+"'>"+admin.name+"</option>");
+                                });
+
+                                $("#tag_admin").trigger('change');
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
             });
 
             $("#tag_type").prepend('<option value="" selected></option>').select2({
@@ -1620,6 +1670,8 @@
             });
             $('#tagModal').on('hide.bs.modal', function (e) {
                 $('#tag_type').val('').trigger('change');
+                $('#admin_tag_hub').val('').trigger('change');
+                $('#admin_tag_department').val('').trigger('change');
                 $('#admin_tag_div').addClass('d-none');
                 $('#department_tag_div').addClass('d-none');
             });
@@ -1878,14 +1930,13 @@
                             var name = data.name;
                             if (user == 0) {
                                 if (data.comment.comment_type == 0) {
-
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 1) {
                                     var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                }else if(data.comment.comment_type == 2) {
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                }else{
+                                } else if(data.comment.comment_type == 3) {
                                     var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                } else{
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);
 

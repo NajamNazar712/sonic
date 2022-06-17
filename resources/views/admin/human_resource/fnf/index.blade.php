@@ -52,6 +52,33 @@
         </div>
     </section>
 
+    <div class="modal fade text-left" id="reopenFnfModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="reopenFnfModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Reopen FNF</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.fnf.reopen')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="reopenFnfForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="fnf_id" id="fnf_id">
+                        <div class="" id="reopenFnfFormBody">
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary">Reopen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -210,7 +237,7 @@
                     },
                     'reset'
                 ],
-                scrollX: true, scrollY: '500px',
+                scrollX: true, scrollY: '700px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -405,6 +432,51 @@
                     var route = '{!! route('admin.human_resource.fnf.fnf_history_index', ':id') !!}';
                     route = route.replace(':id', fnf_id);
                     window.location = route;
+                }
+            });
+
+            $('#datatable tbody').on('click', '.reopen_fnf', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('reopen_fnf')) {
+                    $("#reopenFnfForm #fnf_id").val(fnf_id);
+                    $.ajax({
+                        url: "{{route('admin.human_resource.fnf.get_reopen_sections')}}",
+                        method: 'POST',
+                        data: {
+                            'id': fnf_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 0) {
+                            $("#reopenFnfForm #reopenFnfFormBody").html(data.html);
+                            $("#reopenFnfModal").modal('show');
+                        } else if (data.status == 1) {
+                            toastr.error("No Department Approved Their Request", 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
+
+            $("#reopenFnfForm").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!$(".section_type:checkbox:checked").length > 0) {
+                        toastr.error("Please Select Atleast One", 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
+                    form.submit();
                 }
             });
 

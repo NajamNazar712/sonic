@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -172,6 +174,8 @@ class ShipperDashboardController extends Controller
                 $shipper_payment = null;
             }*/
             $shipper_payment = null;
+
+
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }
@@ -195,6 +199,7 @@ class ShipperDashboardController extends Controller
     }
 
     public function orders_index() {
+//        dd(session()->all());
         $should_not_show_status = array(32,33,34,35,36,37,38,46);
         $cities = City::where('status',1)->select('id','name')->get();
         $dispute_types = DisputeType::whereIn('id',[5,9])->get();
@@ -202,14 +207,45 @@ class ShipperDashboardController extends Controller
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
+//        $case_nature = CrmRequestCaseNature::get();
+//        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+//        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
+//        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $business_categories = BusinessCategory::all();
+        $payment_module = PaymentMode::all();
+
+//        DASHBOARD ORDER DETAILS
+
+        $permission = session('permissions');
+
         $case_nature = CrmRequestCaseNature::get();
+        $row = array();
+        if(session('user_type') !== 1){
+            foreach($case_nature as $nature) {
+                if (in_array(16,$permission) && ($nature->id == 1)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(17,$permission) && ($nature->id == 2)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
+                    $row[] = $nature;
+                }
+
+            }
+            $case_nature = $row;
+        }
+
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-        $business_categories = BusinessCategory::all();
-        $payment_module = PaymentMode::all();
-//        dd($payment_module);
-      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
+
+//        END
+
+
+      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
     }
     public function orders_list(Request $request) {
          if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
@@ -258,7 +294,6 @@ class ShipperDashboardController extends Controller
                 });
             }
         }
-
 
         $datatable = Datatables::of($shipments)
             ->setTotalRecords($count)
@@ -390,11 +425,16 @@ class ShipperDashboardController extends Controller
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
             }
+
+            if ($phone_number = $request->get('phone_number')) {
+                $datatable->where('shipments.consignee_phone_number_1', $phone_number);
+            }
             if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
                 $from = $request->get('booking_from_date');
                 $to = $request->get('booking_to_date');
                 $datatable->whereBetween('shipments.created_at', [$from,$to]);
             }
+
             return $datatable->make(true);
     }
     public function order_cancel(Request $request){
@@ -1549,7 +1589,7 @@ class ShipperDashboardController extends Controller
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select(['u.name as user_name','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','ssr.name as reason'])
+            ->select(['u.name as user_name','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','ssr.name as reason', 'shipments.id as shipment_id'])
             ->where('shipments.id', '>=', $starting_id);
 
         $shipments = $shipments->where(function ($query) {
@@ -1589,14 +1629,7 @@ class ShipperDashboardController extends Controller
         }
 
         if ($phone_number = $request->get('phone_number')) {
-            $phone_number = str_replace('-', '', $phone_number);
-
-            $phone_number = '%' . $phone_number . '%';
-
-            $datatable->where(function ($sub_query) use ($phone_number) {
-                $sub_query->whereRaw('REPLACE(`shipments`.`consignee_phone_number_1`, "-", "") LIKE ?', [$phone_number])
-                ->orWhereRaw('REPLACE(`shipments`.`consignee_phone_number_2`, "-", "") LIKE ?', [$phone_number]);
-            });
+            $datatable->where('shipments.consignee_phone_number_1', $phone_number);
         }
 
         if ($order_id = $request->get('order_id')) {
@@ -1646,6 +1679,31 @@ class ShipperDashboardController extends Controller
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
+    }
+
+    public function rate_daily_visit (Request $request)
+    {
+        $visit = DailyVisit::where('id',$request->daily_visit_id)->where('shipper_id',session('user_id'));
+        if($visit->doesntExist())
+        {
+            return back()->with(['error'=>'Invalid Request!!']);
+        }
+        $visit = $visit->first();
+        if($visit->rated == 1)
+        {
+            return back()->with(['error'=>'Visit Already Been Rated.']);
+        }
+
+        if($request->action == 2)
+        {
+            $visit->rating_id = $request->rating;
+            $visit->comment = $request->comment;
+        }
+
+        $visit->rated = 1;
+        $visit->save();
+
+        return back()->with(['success'=>'Visit Rated Successfully']);
     }
 
     

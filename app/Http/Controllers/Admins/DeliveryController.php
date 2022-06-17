@@ -19,6 +19,9 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -117,8 +120,9 @@ class DeliveryController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
+        $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $service_type = BookingType::all();
-        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs]);
     }
 
     public function pending_list(Request $request)
@@ -169,6 +173,10 @@ class DeliveryController extends Controller
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        if ($hub = $request->get('search_hub')) {
+            $shipments = $shipments->where('h.id', '=', $hub);
         }
 
         $datatables = Datatables::of($shipments)
@@ -1507,6 +1515,19 @@ class DeliveryController extends Controller
             }
             $category = $rider->rider_category->name;
             $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
+
+            //HBL Konnect Integration
+            $hbl_transactions_amount = 0;
+            $hbl_transactions_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $request->id);
+            if($hbl_transactions_delivery_note->exists()){
+                $hbl_transactions_delivery_note = $hbl_transactions_delivery_note->first();
+                $hbl_transactions_amount = $hbl_transactions_delivery_note->transactions_amount;
+                $cash_amount = $hbl_transactions_delivery_note->cash_amount;
+            }
+            else{
+                $cash_amount = $delivery_note->recived_cod_amount;
+            }
+            //HBL Konnect Integration
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1519,7 +1540,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                            <td colspan="2" rowspan="9" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1543,6 +1564,14 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Collection Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>HBL Transactions Amount</strong></td>
+                            <td>Rs ' . number_format($hbl_transactions_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Cash Amount</strong></td>
+                            <td>Rs ' . number_format($cash_amount) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
@@ -3137,14 +3166,16 @@ class DeliveryController extends Controller
 
                                                 } else {
                                                     if ($parcel->packaging_material_charges != null) {
-                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-
-                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-
-                                                        if ($verification == 1) {
-                                                            NotificationsController::send(15, 0, $shipment);
-                                                            NotificationsController::send(16, 0, $shipment);
-                                                        }
+                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//                                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+//
+//                                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+//
+//                                                        if ($verification == 1) {
+//                                                            NotificationsController::send(15, 0, $shipment);
+//                                                            NotificationsController::send(16, 0, $shipment);
+//                                                        }
                                                     }
 
                                                 }
@@ -4108,7 +4139,8 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone'])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
@@ -4123,6 +4155,22 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
+            })
+            ->editColumn('transactions_amount', function ($shipment) {
+                if($shipment->transactions_amount != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('cash_amount', function ($shipment) {
+                if($shipment->cash_amount != null){
+                    return number_format($shipment->cash_amount);
+                }
+                else{
+                    return number_format($shipment->amount);
+                }
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -4238,6 +4286,29 @@ class DeliveryController extends Controller
 
 
     }
+
+    //HBL Konnect Information
+    public function hbl_konnect_transactions_information(Request $request)
+    {
+        $delivery_note_id = $request->delivery_note_id;
+        $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $delivery_note_id);
+        if($hbl_konnect_transactions->exists()){
+            $hbl_konnect_transactions = $hbl_konnect_transactions->get();
+            $details = array();
+            foreach ($hbl_konnect_transactions as $key => $hbl_konnect_transaction){
+                $details[$key]['transaction_id'] = $hbl_konnect_transaction->transaction_id;
+                $details[$key]['amount'] = $hbl_konnect_transaction->amount;
+                $details[$key]['deposited_at'] = Carbon::parse($hbl_konnect_transaction->created_at)->toDateTimeString();
+            }
+            return response()->json(['status' => 1, 'details' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Transactions not found!']);
+        }
+
+
+    }
+    //HBL Konnect Information
 
     public function completed_deliveries_index()
     {
@@ -4884,6 +4955,11 @@ class DeliveryController extends Controller
                     $dropdown .= $closed_status;
                 }
 
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status != 2){
+                    $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
+                    $dropdown .= $reconcile_to_resolved;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4906,6 +4982,7 @@ class DeliveryController extends Controller
                 if ($result->sdn_type == 1 && $result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions')))) {
                     $dropdown .= $reconcile_to_deposit;
                 }
+
 
                 if ($result->status == 0 && $result->adjusted == 0 && (session('role_id') == 1 || in_array(605, session('permissions')))) {
                     if ($result->sdn_type == 1) {
@@ -5036,6 +5113,8 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
         }
     }
+
+
 
     public function get_petty_cash_statements(Request $request)
     {
@@ -6634,13 +6713,15 @@ class DeliveryController extends Controller
 
                     $shipment->save();
 
+                    $status_reason_id = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',12)->orderBy('id','desc')->pluck('status_reason_id')->first();
+
                     $new_intercept_request = InterceptReBookRequest::where('shipment_id', $shipment_id)->update([
                         'status' => 2,
                         'updated_by' => Auth::id(),
                         'updated_by_date' => Carbon::now()
                     ]);
 
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, $remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, $status_reason_id, $remarks, NULL, Auth::id());
                 }
             }
 
@@ -6717,7 +6798,9 @@ class DeliveryController extends Controller
     public function replacement_not_collected_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 326);
-        return view('admin.delivery.replacement.not_collected');
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.delivery.replacement.not_collected')->with(['return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function replacement_not_collected_list(Request $request)
@@ -7894,19 +7977,67 @@ class DeliveryController extends Controller
         }
     }
 
+    public function resolved(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                $station_deposit_note->status = 2;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Resolved']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
     public function bulk_closed(Request $request){
         $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
 
         if ($station_deposit_notes->exists()) {
             $station_deposit_notes = $station_deposit_notes->get();
             foreach($station_deposit_notes as $station_deposit_note){
-                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
-                    $station_deposit_note->status = 3;
-                    $station_deposit_note->closed_at = Carbon::now();
-                    $station_deposit_note->save();
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0)
+                {
+                    if($station_deposit_note->status == 1) {
+                        $station_deposit_note->status = 3;
+                        $station_deposit_note->closed_at = Carbon::now();
+                        $station_deposit_note->save();
+                        return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+                    }else{
+                        return response()->json(['status'=> 0,'error'=>"Status Should Be Deposited First"]);
+                    }
+                }
+                else{
+                    return response()->json(['status'=> 0,'error'=>"Difference Amount is pending"]);
                 }
             }
-            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+        }
+    }
+
+    public function bulk_resolved(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+        $return_id = "";
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                    $station_deposit_note->status = 2;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }else{
+                    $return_id.=  "ID = ".$station_deposit_note->id.", ";
+                }
+            }
+            if(empty($return_id)) {
+                return response()->json(['status' => 1, 'success' => "Station Deposit Notes Status Updated To Resolved"]);
+            }else{
+                return response()->json(['status' => 0, 'error' => "Difference Amount is pending"]);
+            }
 
         } else {
             return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);

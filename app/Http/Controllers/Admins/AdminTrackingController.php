@@ -37,6 +37,7 @@ use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\RiderDelivery;
+use App\Http\Models\RiderUnresponsiveStatus;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
@@ -52,6 +53,7 @@ use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\DwsDetail;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
@@ -527,6 +529,7 @@ class AdminTrackingController extends Controller
 
         $information = array();
 
+        $information['id'] = $rider->id;
         $information['name'] = $rider->name;
         $information['phone_number'] = $rider->phone;
         $information['city'] = $rider->city->name;
@@ -539,6 +542,33 @@ class AdminTrackingController extends Controller
 
 
         return $information;
+    }
+
+    public function rider_unresponsive_status(Request $request)
+    {
+        if(!$request->has('type') || !$request->has('id'))
+        {
+            return response()->json(['status'=>0,'error'=>'Invalid Request']);
+        }
+
+        if(Rider::where('id',$request->id)->doesntExist())
+        {
+            return response()->json(['status'=>0,'error'=>'Rider Doesn\'t Exist.']);
+        }
+
+        $note_id = null;
+        if($request->note != 'undefined')
+        {
+            $note_id = $request->note;
+        }
+        $data = new RiderUnresponsiveStatus();
+        $data->rider_id = $request->id;
+        $data->admin_id = Auth::id();
+        $data->status = $request->type;
+        $data->note_id = $note_id;
+        $data->save();
+
+        return response()->json(['status'=>1]);
     }
 
     public function cargo_consignment_details(Request $request)
@@ -611,11 +641,10 @@ class AdminTrackingController extends Controller
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
 
-                    //                    yahan p join lgana h shipment and delivery note shipment ka our delivery note id uthaleni h
                     $delivery_note_shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
                         ->select('delivery_note_shipments.delivery_note_id as delivery_note_id')
                         ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
-                        ->orderBy('delivery_note_shipments.shipment_id', 'desc');
+                        ->orderBy('delivery_note_shipments.delivery_note_id', 'desc');
                     if($delivery_note_shipment->exists()){
                         $delivery_note_shipment = $delivery_note_shipment->first();
                         $dn = str_pad($delivery_note_shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
@@ -998,6 +1027,9 @@ class AdminTrackingController extends Controller
                                         $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
                                         if ($exists) {
                                             $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }else {
+                                            $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
                                         }
                                     }
                                     if ($rider_delivery->audio_path != null) {
@@ -1010,15 +1042,13 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
-                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                        if ($exists) {
-                                            $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
-                                        }
+                                        $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
                                     }
                                 } else {
                                     $journey_details['image_audio_location'] = '-';
                                 }
-                            } else if (in_array($journey->shipment_status_shipper->id, [47, 24, 48, 60, 25, 31, 38])) {
+                            }
+                            else if (in_array($journey->shipment_status_shipper->id, [47, 24, 48, 60, 25, 31, 38])) {
                                 $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
                                 if ($rider_return_deliveries->exists()) {
                                     $rider_return_deliveries = $rider_return_deliveries->get()->first();
@@ -1026,6 +1056,10 @@ class AdminTrackingController extends Controller
                                         $exists = Storage::disk('public')->exists($rider_return_deliveries->picture_path);
                                         if ($exists) {
                                             $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
+                                        else {
+                                            $image = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->picture_path, now()->addMinutes(5));
+                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
                                         }
                                     }
                                     if ($rider_return_deliveries->audio_path != null) {
@@ -1135,12 +1169,18 @@ class AdminTrackingController extends Controller
                                     } else {
                                         $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
                                     }
+                                    
 
                                     if ($journey->reference_2_id) {
                                         if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
                                             $rider = Rider::find($journey->reference_2_id);
                                             if ($rider) {
-                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                                $note = "";
+                                                if($journey->reference_1_id)
+                                                {
+                                                    $note = $journey->reference_1_id;
+                                                }
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '" data-showRiderRespone="1" data-note="'.$note.'">' . $rider->name . '</button>';
                                             }
 
                                         } else {
@@ -1161,23 +1201,29 @@ class AdminTrackingController extends Controller
                                 $user = $user . $machine_name;
 
                             }
+                            if(in_array($journey->shipper_status_id, [1])){
 
-
-                            if (isset($journey->admin->city->name)) {
-                                $cityy = $journey->admin->city->name;
-                            }else if(isset($journey->user->city2->name)){
-                                $cityy = $journey->user->city2->name;
-                            }else if($journey->rider->city->name){
-                                $cityy = $journey->rider->city->name;
+                                $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
+                                if($replacement_image->exists()){
+                                    $replacement_image = $replacement_image->first();
+                                    $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                }
                             }
+                            if(in_array($journey->shipper_status_id, [30])){
+                                $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',14);
+                                if($replacement_image2->exists()){
+                                    $replacement_image2 = $replacement_image2->first();
+                                    if($replacement_image2->replacement_image != null){
 
+                                        $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    }
 
-//                            ($journey->city_id) ? $journey->city->name : '';
-
+                                }
+                            }
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
-                            $journey_details['city'] = $cityy;
+                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
                             $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';

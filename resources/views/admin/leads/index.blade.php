@@ -573,6 +573,68 @@
         </div>
     </div>
 
+    {{--    todo bulk status model--}}
+    <div class="modal fade" id="add_bulk_status_modal" role="dialog" aria-labelledby="add_bulk_status_modal_title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Status</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_bulk_status_form" class="form-horizontal mb-1 justify-content-center"
+                          novalidate="novalidate">
+                        <div class="form-group">
+                            <select name="update_lead_bulk_status" id="update_bulk_lead_status"
+                                    class="form-control select2">
+                                @foreach($lead_statuses as $lead_status)
+                                    <option value="{{ $lead_status->id }}"> {{ $lead_status->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div id="div_lead_status_rejected1" class="form-group d-none">
+                            <select name="lead_status_rejected1" id="lead_status_rejected1"
+                                    class="form-control select2">
+                                <option value="1"> Prohibited Items</option>
+                                <option value="2"> Wrong Contact Details</option>
+                                <option value="3"> Duplicate</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_notinterested1" class="form-group d-none">
+                            <select name="lead_status_notinterested1" id="lead_status_notinterested1"
+                                    class="form-control select2">
+                                <option value="4"> A/C Query Call</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_irrelevant1" class="form-group d-none">
+                            <select name="lead_status_irrelevant1" id="lead_status_irrelevant1"
+                                    class="form-control select2">
+                                <option value="5"> Operational Query</option>
+                                <option value="6"> HR Query</option>
+                                <option value="7"> Sales Person Already Assigned</option>
+                                <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {{--    todo bulk status model end--}}
+
 
 @endsection
 
@@ -775,6 +837,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var area = '';
+            var territory = '';
+
             $("#search_origin").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Origin",
                 width: '100%'
@@ -1810,7 +1875,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_territory').append(newOption);
                             });
-                            $('#edit_territory').val('').trigger('change');
+                            $('#edit_territory').val(territory).trigger('change');
 
                         } else {
                             $('#edit_territory').empty();
@@ -1831,11 +1896,12 @@
                         url: '{!! route('cod.area') !!}',
                         method: 'POST',
                         data: {
-                            'territory_id': territory_id,
+                            'id': territory_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                     .done(function (data) {
+
                         if (data.status == 0) {
 
                             $('#edit_area').empty();
@@ -1843,7 +1909,7 @@
                                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                 $('#edit_area').append(newOption);
                             });
-                            $('#edit_area').val('').trigger('change');
+                            $('#edit_area').val(area).trigger('change');
                         }
                         else{
                             $('#edit_area').empty();
@@ -1906,8 +1972,26 @@
                             var details = data.details;
                             lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company]).node().id = lead_id;
                             lead_table.draw(true);
+                            if(details.city_id){
+                                $('#edit_city').val(details.city_id).trigger('change');
+                            }
+
+                            if(details.area_id){
+                                area = details.area_id;
+                            }
+
+                            if(details.territory_id){
+                                territory = details.territory_id;
+                            }
+
                             $('#edit_lead_modal_title span').text(lead_id);
-                            $('input#edit_lead_id').val(lead_id);
+                            $('#edit_lead_form #edit_lead_id').val(lead_id);
+                            $('#edit_lead_form #edit_phone_number').val(details.phone_number);
+                            $('#edit_lead_form #edit_email').val(details.email_address);
+                            $('#edit_lead_form #edit_brand').val(details.brand);
+                            $('#edit_lead_form #edit_company').val(details.company);
+                            $('#edit_lead_form #edit_territory').trigger('change');
+                            $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 
 
@@ -1935,18 +2019,42 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    var lead_id = $('#edit_lead_id').val();
+                    swal({
+                        text: 'Are you sure, you want to edit this lead?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            var lead_id = $('#edit_lead_id').val();
 
-                    if (lead_id != null) {
-                        blockPagePermanently();
-                        form.submit();
-                    } else {
-                        var error = 'Invalid Lead ID!';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
+                            if (lead_id != null) {
+                                blockPagePermanently();
+                                form.submit();
+                            } else {
+                                var error = 'Invalid Lead ID!';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                    });
                 }
             });
         });

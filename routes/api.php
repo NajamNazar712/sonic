@@ -103,6 +103,7 @@ Route::name('api.')->group(function () {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
         Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
         Route::post('login_v3', 'Rider\RiderAPIController@login_v2')->name('login_v3');
+        Route::post('login_v4', 'Rider\RiderAPIController@login_v4')->name('login_v4');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
@@ -124,10 +125,13 @@ Route::name('api.')->group(function () {
             Route::post('attachment_store_v2', 'Rider\RiderAPIController@rider_attachments_store_v2')->name('attachment_store_v2');
             Route::post('attachment_view', 'Rider\RiderAPIController@rider_attachments_view')->name('attachment_view');
             Route::post('attachment_delete', 'Rider\RiderAPIController@rider_attachments_delete')->name('attachment_delete');
+            Route::post('attachment_check', 'Rider\RiderAPIController@rider_attachments_check')->name('attachment_check');
+            Route::post('get_line_managers', 'Rider\RiderAPIController@get_line_managers')->name('get_line_managers');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
             Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
+            Route::post('validate_otp', 'Rider\RiderAPIController@validate_otp')->name('validate_otp');
             Route::prefix('pickup')->name('pickup.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
                 Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
@@ -213,7 +217,14 @@ Route::name('api.')->group(function () {
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
                 Route::post('mark_v2', 'Rider\RiderAPIController@mark_attendance_v2')->name('mark_v2');
+                Route::post('mark_v3', 'Rider\RiderAPIController@mark_attendance_v3')->name('mark_v3');
                 Route::post('detail_v2', 'Rider\RiderAPIController@attendance_details_v2')->name('detail_v2');
+            });
+
+            Route::prefix('adjustment')->name('adjustment.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@adjustment_index')->name('index');
+                Route::post('apply', 'Rider\RiderAPIController@adjustment_apply')->name('apply');
+                Route::get('list', 'Rider\RiderAPIController@employee_adjustment_list')->name('list');
             });
 
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
@@ -255,9 +266,10 @@ Route::name('api.')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
+        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
+        Route::post('login_v4', 'AdminAPIController@login_v4')->name('login_v4');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
-        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
         Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
@@ -265,7 +277,7 @@ Route::name('api.')->group(function () {
         Route::get('logout', 'AdminAPIController@logout')->name('logout');
         Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
         Route::prefix('register_request')->name('register_request.')->group(function () {
-            Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::get('signup_data', 'AdminAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::prefix('store_v3')->name('store_v3.')->group(function () {
                 Route::post('required_details', 'AdminAPIController@signup_required_details')->name('required_details');
@@ -277,6 +289,8 @@ Route::name('api.')->group(function () {
             Route::post('attachment_store_v2', 'AdminAPIController@admin_attachments_store_v2')->name('attachment_store_v2');
             Route::post('attachment_view', 'AdminAPIController@admin_attachments_view')->name('attachment_view');
             Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
+            Route::post('attachment_check', 'AdminAPIController@admin_attachments_check')->name('attachment_check');
+            Route::post('get_line_managers', 'AdminAPIController@get_line_managers')->name('get_line_managers');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
@@ -294,6 +308,7 @@ Route::name('api.')->group(function () {
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
+                Route::post('mark_v3', 'AdminAPIController@mark_attendance_v3')->name('mark_v3');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
                 Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
                 Route::get('flutter_detail', 'AdminAPIController@flutter_attendance_details')->name('flutter_detail');
@@ -329,6 +344,16 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
+
+            Route::prefix('adjustment')->name('adjustment.')->group(function () {
+                Route::post('index', 'AdminAPIController@adjustment_index')->name('index');
+                Route::post('apply', 'AdminAPIController@adjustment_apply')->name('apply');
+                Route::get('list', 'AdminAPIController@employee_adjustment_list')->name('list');
+                Route::get('approver_list', 'AdminAPIController@approver_adjustment_list')->name('approver_list');
+                Route::post('approve', 'AdminAPIController@adjustment_approve')->name('approve');
+                Route::post('reject', 'AdminAPIController@adjustment_reject')->name('reject');
+            });
+
             Route::prefix('profile')->name('profile.')->group(function () {
                 Route::get('index', 'AdminAPIController@get_profile')->name('index');
                 Route::get('check', 'AdminAPIController@check_profile')->name('check');
@@ -342,6 +367,7 @@ Route::name('api.')->group(function () {
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
+            Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
             Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
             Route::post('trax_directory_v2', 'AdminAPIController@trax_directory_v2')->name('trax_directory_v2');
 
@@ -363,6 +389,7 @@ Route::name('api.')->group(function () {
             Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
                 Route::get('index', 'AdminAPIController@daily_visit_index')->name('index');
                 Route::post('store', 'AdminAPIController@daily_visit_store')->name('store');
+                Route::post('shipper_details', 'AdminAPIController@shipper_details')->name('shipper_details');
                 Route::any('report', 'AdminAPIController@daily_visit_report')->name('report');
             });
 
@@ -373,6 +400,7 @@ Route::name('api.')->group(function () {
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
         Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
+        Route::post('login_v4', 'Retail\RetailAPIController@login')->name('login_v4');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
@@ -438,6 +466,17 @@ Route::name('api.')->group(function () {
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
-
+    //Hbl Konnect
+    Route::prefix('banking')->name('banking.')->group(function () {
+        Route::prefix('hbl_konnect')->name('hbl_konnect.')->group(function () {
+            Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
+            Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+        });
+        Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
+            Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
+            Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+        });
+    });
+    //Hbl Konnect
     
 });

@@ -109,6 +109,24 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="reference">Last Working Date:</label>
+                                                <div class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                                    </div>
+                                                    <input type="text" name="last_working_date"
+                                                           class="form-control bg-primary border-primary white rounded-right pickadate"
+                                                           id="last_working_date" placeholder="Last Working Date"
+                                                           data-rule-required="true"
+                                                           data-msg-required="Last Working Date is required">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row mb-5">
                                         <div class="col-md-6">
@@ -117,7 +135,7 @@
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required">
+                                                    <input type="email" id="line_manager" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required">
                                                 </div>
                                             </div>
                                         </div>
@@ -201,6 +219,7 @@
                           $('#department_id').val(data.data.department).trigger('change');
                           $('#city').val(data.data.city);
                           $('#joining_date').val(data.data.joining_date);
+                          $('#line_manager').val(data.data.line_manager_email);
                           
                        }
                        else{
@@ -243,6 +262,22 @@
                     $('.picker').css('position','relative');
                 },
                 onSet: function(context) {
+
+                }
+            });
+
+            var last_working_date = $('#last_working_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function () {
+                    $('.picker').css('position', 'relative');
+                },
+                onSet: function (context) {
 
                 }
             });

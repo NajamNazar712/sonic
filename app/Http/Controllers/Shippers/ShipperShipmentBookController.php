@@ -23,6 +23,7 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
+use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
@@ -910,7 +911,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $now = Carbon::now()->format('H:i:s');
-                    
+
                     if ($now > $cutofftime) {
                         NotificationsController::send(152, $shipment_id);
                         NotificationsController::send(153, $shipment_id);
@@ -979,7 +980,7 @@ class ShipperShipmentBookController extends Controller
                     $shipment_parcel_image->picture_path = $picture_path;
                     $shipment_parcel_image->save();
                 }
-                   
+
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
@@ -1181,12 +1182,21 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
-                      
                     </style>
                   </head>
                   <body>
                     <div>
             ';
+
+            if ($user_id == 12412) {
+                $html .= '
+                    <style>
+                        .end_of_air_waybill {
+                            page-break-after: always;
+                        }
+                    </style>
+                ';
+            }
 
             if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
@@ -1618,9 +1628,22 @@ class ShipperShipmentBookController extends Controller
                                 <td colspan="2" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
                     ';
                     }
+                    if($shipment->packaging_material_request == 1){
+                        $packaging_material_shipment = PackagingMaterialRequest::where('shipment_id', $shipment->id);
+                        if($packaging_material_shipment->exists()){
+                            $packaging_material_shipment = $packaging_material_shipment->first();
+                            $consignee_name = $packaging_material_shipment->poc;
+                        }
+                        else{
+                            $consignee_name = $shipment->consignee_name;
+                        }
+                    }
+                    else{
+                        $consignee_name = $shipment->consignee_name;
+                    }
                     $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Name</strong></td>
-                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                                <td colspan="3">' . $consignee_name . '</td>
                               </tr>
 
                               <tr>
@@ -1829,7 +1852,7 @@ class ShipperShipmentBookController extends Controller
 
                     if ($type != 'pdf') {
                         $table_end .= '
-                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
                     }
@@ -1988,7 +2011,7 @@ class ShipperShipmentBookController extends Controller
 </tr>
                               ';
                             $shipment_pieces .= '</tbody></table>
-                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                         }
@@ -2152,7 +2175,7 @@ class ShipperShipmentBookController extends Controller
                                 </tbody>
                                 </table>
                                 </div>
-                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                                <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
 
@@ -2225,7 +2248,7 @@ class ShipperShipmentBookController extends Controller
                                 </tbody>
                                 </table>
                                 </div>
-                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                                <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                             $shipment_details .= $distribution_delivery_performa;
@@ -2292,6 +2315,7 @@ class ShipperShipmentBookController extends Controller
 
         return $html;
     }
+
 
 
     public function print_air_waybill(Request $request)
@@ -5040,9 +5064,12 @@ class ShipperShipmentBookController extends Controller
                             }
                             $row['business_category_id'] = 1;
                             if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] == 1;
+                                $row['payment_mode_id'] = 1;
                             }
-
+                            if (!isset($row['payment_mode_id'])) {
+                                $rows[$key]['payment_mode_id'] = 1;
+                                $row['payment_mode_id'] = 1;
+                            }
                             if ($row['payment_mode_id'] == 4) {
                                 $row['amount'] = 0;
                             }

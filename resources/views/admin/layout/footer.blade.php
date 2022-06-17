@@ -100,72 +100,75 @@
 {{--            }--}}
 {{--        });--}}
 {{--        @endif--}}
+        @php($environment = env('APP_ENV'))
+        @if ($environment != 'local')
+            function getLocation() {
+              swal({
+                  text: 'Please Wait!',
+                  icon: 'info',
+                  buttons: false,
+                  closeOnClickOutside: false,
+                  closeOnEsc: false
+              });
 
-        function getLocation() {
-          swal({
-              text: 'Please Wait!',
-              icon: 'info',
-              buttons: false,
-              closeOnClickOutside: false,
-              closeOnEsc: false
-          });
-
-          setTimeout(function() {
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(locationSuccess, locationFail);
+              setTimeout(function() {
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(locationSuccess, locationFail);
+                }
+                else {
+                  locationFail();
+                }
+              }, 250);
             }
-            else {
-              locationFail();
+
+            function check_profile() {
+                $.ajax({
+                    url: '{{ route('admin.update_one_time_profile.check') }}',
+                    method: 'GET'
+                }).done(function (data) {
+                        if(data.status == 0) {
+                            $('#EditOneTimeProfileModal').modal('show');
+                        }
+                    });
             }
-          }, 250);
-        }
 
-        function check_profile() {
-            $.ajax({
-                url: '{{ route('admin.update_one_time_profile.check') }}',
-                method: 'GET'
-            }).done(function (data) {
-                    if(data.status == 0) {
-                        $('#EditOneTimeProfileModal').modal('show');
-                    }
-                });
-        }
+            function locationSuccess(position) {
+              $.ajax({
+                  url: '{{ route('admin.save_coordinates') }}',
+                  method: 'POST',
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                  },
+                  data: {
+                    'longitude': position.coords.longitude,
+                    'latitude': position.coords.latitude
+                  }
+              });
 
-        function locationSuccess(position) {
-          $.ajax({
-              url: '{{ route('admin.save_coordinates') }}',
-              method: 'POST',
-              headers: {
-                  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-              },
-              data: {
-                'longitude': position.coords.longitude,
-                'latitude': position.coords.latitude
-              }
-          });
+              $('#LocationDeniedModal').modal('hide');
+              swal.close();
+              @if(!Illuminate\Support\Facades\Route::is('admin.update_one_time_profile.index'))
+              check_profile();
+              @endif
+            }
 
-          $('#LocationDeniedModal').modal('hide');
-          swal.close();
-          @if(!Illuminate\Support\Facades\Route::is('admin.update_one_time_profile.index'))
-          check_profile();
-          @endif
-        }
+            function locationFail() {
+              swal.close();
+              $('#LocationDeniedModal').modal('show');
+            }
 
-        function locationFail() {
-          swal.close();
-          $('#LocationDeniedModal').modal('show');
-        }
+            $('#EditOneTimeProfileModal form button').bind('click', function() {
+                $('#EditOneTimeProfileModal').modal('hide');
+                window.location.href = "{{route("admin.update_one_time_profile.index")}}";
+            });
 
-        $('#EditOneTimeProfileModal form button').bind('click', function() {
-            $('#EditOneTimeProfileModal').modal('hide');
-            window.location.href = "{{route("admin.update_one_time_profile.index")}}";
-        });
+            $('#LocationDeniedModal form button').bind('click', function() {
+                getLocation();
+            });
 
-        $('#LocationDeniedModal form button').bind('click', function() {
             getLocation();
-        });
 
-        getLocation();
+        @endif
     });
 </script>
   @yield('js')

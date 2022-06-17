@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailParcelReceiving;
@@ -14,6 +15,10 @@ use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
+use App\Http\Models\Admin\RetailPickupNoteStatus;
 use Auth;
 
 class RetailCancelShipmentsController extends Controller
@@ -62,7 +67,9 @@ class RetailCancelShipmentsController extends Controller
     public function cancelled_shipments_store(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
         $shipments_count = count($shipment_ids);
-
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $shipper_user_id = $setting->setting_value;
+        $user_id = $shipper_user_id;
         if($shipments_count > 0){
 
             $shipments = Shipment::where('shipper_status_id', 1)->whereIn('id', $shipment_ids);
@@ -74,8 +81,10 @@ class RetailCancelShipmentsController extends Controller
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
                     $shipment->save();
-
-                    ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, NULL, NULL, Auth::id());
+                    $setting = GlobalSettings::where('type', 'retail_store')->first();
+                    $shipper_user_id = $setting->setting_value;
+                    $user_id = $shipper_user_id;
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, NULL, $user_id, null);
 
                     ShipmentsPickupJourneyController::add($shipment->id, 4);
                     V2AdminPickupsController::cancel($shipment->id);
@@ -108,6 +117,17 @@ class RetailCancelShipmentsController extends Controller
                         $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
                         $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
                         $parcel_receiving->save();
+                    }
+                    $retail_pickup_note_shipments = RetailPickupNoteShipment::where('shipment_id',$shipment->id);
+                    if($retail_pickup_note_shipments->exists()){
+                        $retail_pickup_note_shipments = $retail_pickup_note_shipments->latest()->first();
+                        $retail_pickup_note_id = $retail_pickup_note_shipments->retail_pickup_note_id;
+                        $retail_pickup_note_shipments->delete();
+
+                        $retail_pickup_note = RetailPickupNote::find($retail_pickup_note_id);
+                        $retail_pickup_note->shipments = $retail_pickup_note->shipments - 1;
+                        $retail_pickup_note->amount = $retail_pickup_note->amount - $total_deductable_amount;
+                        $retail_pickup_note->save();
                     }
 
                 }

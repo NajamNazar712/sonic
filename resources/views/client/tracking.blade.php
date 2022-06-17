@@ -65,7 +65,7 @@
                                     <fieldset class="form-group">
                                         <select name="case_nature_select" id="case_nature_select" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
                                             @foreach($case_nature as $nature)
-                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                                    <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
@@ -1194,6 +1194,17 @@
                 $('#claim_product_cost').val('');
                 $('#request_id').val('').trigger('change');
                 $('#receiving_sheet_div').addClass('d-none');
+            });
+
+
+            $('#tracking').on('click', '.replacement_booked_image', function () {
+                window.open($(this).data('link'), '_blank');
+
+            });
+
+            $('#tracking').on('click', '.replacement_collected_image', function () {
+                window.open($(this).data('link'), '_blank');
+
             });
 		});
 	</script>

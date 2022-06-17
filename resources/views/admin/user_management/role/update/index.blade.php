@@ -64,33 +64,57 @@
 												@if($module->id != 18)
 													@if ($loop->first)
 														<div class="tab-pane fade show active" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+
+															<div class="row">
+																<div class="col-12">
+																	<div class=" text-center mt-2">
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
+																	</div>
+																</div>
+															</div>
+
 															@foreach($module->permissions as $permission)
 																@if($permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
 																	<fieldset class="d-inline-block m-1">
 																		@if (in_array($permission->id, $permissions))
-																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
+																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
 																		@else
-																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}">
 																		@endif
 																		<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
 																	</fieldset>
 																@endif
 															@endforeach
+
+
 														</div>
 													@else
 														<div class="tab-pane fade" id="module_{{ $module->id }}_tabpanel" role="tabpanel" aria-labelledby="module_{{ $module->id }}_tab">
+
+															<div class="row">
+																<div class="col-12">
+																	<div class=" text-center mt-2">
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
+																	</div>
+																</div>
+															</div>
+															
 															@foreach($module->permissions as $permission)
 																@if($permission->id != 179 && $permission->id != 180 && $permission->id != 181 && $permission->id != 182 && $permission->id != 183 && $permission->id != 184 && $permission->id != 185 && $permission->id != 186 && $permission->id != 187)
 																	<fieldset class="d-inline-block m-1">
 																		@if (in_array($permission->id, $permissions))
-																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
+																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">
 																		@else
-																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+																			<input type="checkbox" id="permission_{{ $permission->id }}" class="permission perm_check_{{$module->id}}" name="permission_ids[]" value="{{ $permission->id }}">
 																		@endif
 																		<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
 																	</fieldset>
 																@endif
 															@endforeach
+
+
 														</div>
 													@endif
 												@endif
@@ -168,6 +192,18 @@
 
 					form.submit();
 				}
+			});
+
+			$(".selectAll").on('click',function (){
+				let module_id = $(this).attr('data-module_id');
+				$(".perm_check_"+module_id).prop('checked',true);
+				$(".perm_check_"+module_id).iCheck('update');
+			});
+
+			$(".unselectAll").on('click',function (){
+				let module_id = $(this).attr('data-module_id');
+				$(".perm_check_"+module_id).prop('checked',false);
+				$(".perm_check_"+module_id).iCheck('update');
 			});
 		});
 	</script>

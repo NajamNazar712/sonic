@@ -141,10 +141,11 @@
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Trax Reason</th>
+                                    {{-- <th class="border-primary border-darken-1">Trax Reason</th>
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
                                     <th class="border-primary border-darken-1">Shipper Remark(s)</th>
-                                    <th class="border-primary border-darken-1">Rider Remark(s)</th>
+                                    <th class="border-primary border-darken-1">Rider Remark(s)</th> --}}
+                                    <th class="border-primary border-darken-1">All Remarks</th>
                                     <th class="border-primary border-darken-1">Rider Status</th>
                                     <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
@@ -289,6 +290,83 @@
 
                         </div>
                     </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form method="post" id="add_remarks_form" action="{{ route('admin.v2_pickups.pending.add_remarks') }}" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        @csrf
+                        <input type="hidden" id="add_remarks_pickup_note_id" name="v2_pickup_req_id">
+                        <div class="form-group ml-1">
+                            <input type="text"  name="add_remark"  id="add_remark" class="form-control" data-rule-required="true"  data-msg-required="Remarks is required" placeholder="Add Remarks*">
+
+                        </div>
+
+
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary" >Add</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="AllRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AllRemarksModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">All Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <table class="table table-bordered" id="all_remarks_tabel">
+                        <tbody>
+                            <tr>
+                                <td>Rider Remarks:</td>
+                                <td id="rider_remarks_td"></td>
+                            </tr>
+                            <tr>                                
+                                <td>Shipper Remarks:</td>
+                                <td id="shipper_remarks_td"></td>
+                            </tr>
+                            <tr>
+                                <td>Trax Reason:</td>
+                                <td id="trax_reason_td"></td>
+                            </tr>
+                            <tr>
+                                <td>Trax Remarks:</td>
+                                <td id="trax_remarks_td"></td>
+                            </tr>
+                            <tr>
+                                <td>Reverse Pickup Remarks:</td>
+                                <td id="remarks_td"></td>
+                            </tr>
+                        </tbody>
+                            
+                    </table>
 
                 </div>
 
@@ -648,10 +726,16 @@
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
                 {data: 'pickup_status', name: 'prs.id', class: 'align-middle pickup_status'},
-                {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},
+                
+                /* {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},
                 {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
                 {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
                 {data: 'rider_remarks', name: 'vpr.rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
+                 */
+                
+                {data: 'all_remarks', name: 'vpn.pickup_note_id', class: 'align-middle all_remarks'},
+                
+                
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
@@ -681,7 +765,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action') || $(header).is('.aging') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
+                    if ($(header).is('.action') || $(header).is('.aging') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))
@@ -910,11 +994,15 @@
             {{--        }--}}
             {{--    });--}}
             {{--});--}}
+
             $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
                 var pickup_note_id = parseInt($(this).attr('rel'));
 
                 print(pickup_note_id);
             });
+
+
+            
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.v2_pickups.pending.print') !!}',
@@ -1007,8 +1095,123 @@
                     });
                 }
             });
+
+            $('body').on('click','.addRemarks',function () {
+                var action = $(this).data('action');
+                var row_id = $(this).parents('tr').attr('id');
+                $('#AddRemarksModal').modal('show');
+                $('#add_remarks_pickup_note_id').val(row_id);
+
+               /* if(action === 'reattempt'){
+                   var atext = 'Select Yes to put Reminder!';
+                } */
+
+                /* if(row_id != '' && action === 'reminder'){
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Do you want to set reminder for this pickup request?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.v2_pickups.pending.status.reminder.update')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+
+                            });
+                        }
+                    });
+                } */
+            });
+            $('#AddRemarksModal').on('hidden.bs.modal', function () {
+               $('#add_remark').val('');
+            });
+            $( "#add_remarks_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
+                
+                });
+
+
             $('#search_filter_btn').on('click',function () {
                table.draw(true);
+            });
+
+            $('#datatable tbody').on('click', 'tr td.all_remarks button.all_remarks_btn', function() {
+                var pickup_req_id = parseInt($(this).attr('rel'));
+
+
+                console.log(pickup_req_id);
+
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.all_remarks') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_req_id': pickup_req_id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        console.log(data.remarks);
+
+                        $('#rider_remarks_td').html(data.remarks.rider_remarks);
+                        $('#shipper_remarks_td').html(data.remarks.shipper_remarks);
+                        $('#trax_reason_td').html(data.remarks.trax_reason);
+                        $('#trax_remarks_td').html(data.remarks.trax_remarks);
+                        $('#remarks_td').html(data.remarks.remarks);
+                        $('#AllRemarksModal').modal('show');
+                        if(!data.remarks.reverse_pickup){
+                            
+                            $("#remarks_td").parent().css({"display": "none"});
+                        }
+                        /* var shipments = '';
+                        if (data.booked) {
+                            $.each(data.booked, function(index, tracking_numbers) {
+                                shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+                        }
+                        $('#bookings_modal .modal-body').html(shipments); */
+                    }
+                });
+                /* print(pickup_note_id); */
             });
         });
     </script>

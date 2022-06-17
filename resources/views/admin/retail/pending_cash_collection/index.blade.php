@@ -41,6 +41,8 @@
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
                             <th class="border-primary border-darken-1">RNCC Amount</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            
 {{--                            <th class="border-primary border-darken-1">Action</th>--}}
                         </tr>
                         </thead>
@@ -112,6 +114,7 @@
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('RNCC Amount');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -126,6 +129,7 @@
                                 row.push(values.assignee);
                                 row.push(values.assigned_at);
                                 row.push(values.amount);
+                                row.push(values.rcd_status);
 
                                 body.push(row);
                             });
@@ -314,27 +318,31 @@
                     }
                 },
                  rowId: 'retail_pickup_note_id',
-                order: [[9, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                      {data: 'retail_pickup_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'retail_pickup_note_id',name:'retail_pickup_notes.id', class: 'text-center align-middle retail_pickup_note_id'},
+                    {data: 'retail_pickup_note_id',name:'retail_cash_deposits.id', class: 'text-center align-middle retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     // { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
                     { data:'store' ,name: 'store', class: 'align-middle store text-center', orderable: false, searchable: false},
-                    { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
+                    { data:'count' ,name: 'rpn.shipments', class: 'align-middle count text-center'},
                     { data:'code' ,name: 'code', class: 'align-middle code text-center', orderable: false, searchable: false},
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
-                    { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time text-center'},
-                    { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
+                    { data:'time' ,name: 'rpn.assigned_at', class: 'align-middle time text-center'},
+                    { data:'amount' ,name: 'retail_cash_deposits.total_cash', class: 'align-middle amount'},
+                    { data:'rcd_status' ,name: 'retail_cash_deposits.status', class: 'align-middle rcd_status'},
                     // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
+                    
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
+                    }
+                    if(data.rcd_status != "Pending"){
+                        $('td:eq(0)', row).removeClass('select-checkbox');
                     }
                 },
                 initComplete: function() {
@@ -348,7 +356,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.store') || $(header).is('.code')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.store') || $(header).is('.code') || $(header).is('.rcd_status')) {
                             $(td).appendTo($(search));
                         }
                         else {

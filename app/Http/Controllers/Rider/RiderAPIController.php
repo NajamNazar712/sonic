@@ -40,6 +40,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
@@ -51,6 +52,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
@@ -4510,6 +4512,8 @@ class RiderAPIController extends Controller
         $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
+        $employee_nature = EmployeeNature::select('id', 'name')->get();
+        $replacement_employees = Employee::select('id', 'trax_id', 'name')->where('employee_type_id', 2)->whereNotNull('trax_id')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -4517,7 +4521,15 @@ class RiderAPIController extends Controller
             $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
             $shift_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+
+        $replacement_employee_data = array();
+        foreach($replacement_employees as $replacement_employee){
+            $datum = array();
+            $datum['id'] = $replacement_employee->id;
+            $datum['name'] = $replacement_employee->trax_id.' | '.$replacement_employee->name;
+            $replacement_employee_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
     }
 
     public function rider_signup_v2(Request $request)
@@ -8819,10 +8831,12 @@ class RiderAPIController extends Controller
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'receiver_name' => ['nullable', 'string', 'max:255'],
             'cnic' => ['nullable', 'max:255'],
-            'picture' => ['nullable', 'image'],
-            'cnic_image' => ['nullable', 'image'],
-            'house_image' => ['nullable', 'image'],
-            'ccd_image' => ['nullable', 'image'],
+            'relation' => ['nullable', 'max:255'],
+            'picture' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'cnic_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'house_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'ccd_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'replacement_image' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8856,11 +8870,17 @@ class RiderAPIController extends Controller
                         $rider_delivery->delivered_status = 1;
                         $received_by = NULL;
                         if ($request->has('receiver_name')) {
-                            $received_by = $request->receiver_name;
+                            $receiver_name = str_replace('"', '', $request->receiver_name);
+                            $received_by = $receiver_name;
                         }
-                        if ($request->has('cnic')) {
-                            $rider_delivery->cnic = $request->cnic;
-                            $received_by .= ' | ' . $request->cnic;
+                        $cnic = str_replace('"', '', $request->cnic);
+                        if ($cnic != "Empty") {
+                            $rider_delivery->cnic = $cnic;
+                            $received_by .= ' | ' . $cnic;
+                        }
+                        $relation = str_replace('"', '', $request->relation);
+                        if($relation != "Empty"){
+                            $rider_delivery->relation = $relation;
                         }
 
 //                if($request->has('receiver_name')){
@@ -8925,6 +8945,13 @@ class RiderAPIController extends Controller
                             $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
                             $rider_delivery->house_image = $picture_path;
+                            $rider_delivery->save();
+                        }
+                        if ($request->has('replacement_image')) {
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/replacement_image_' . $rider_delivery->id . '_' . $time . '.png';
+                            Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_image));
+                            $rider_delivery->replacement_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('ccd_image')) {
@@ -9478,7 +9505,31 @@ class RiderAPIController extends Controller
         $riders = Rider::find($rider_id);
         if($riders){
             $response = array();
+            $date = '-';
             $employee_shift = EmployeeShift::where('id', $riders->shift_id);
+            if ($employee_shift->exists()) {
+                $employee_shift = $employee_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $employee_shift->start_time);
+                if ($shift_time->lt(Carbon::now())) {
+                    $date = Carbon::now()->format("Y-m-d");
+                } else{
+                    if(Carbon::now()->format("l") == "Monday"){
+                        $date = Carbon::now()->subDays(2)->format("Y-m-d");
+                    }
+                    else{
+                        $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                    }
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                        ->where('employee_type', 2)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
+                    if($last_action_log->exists()){
+                        $last_action_log = $last_action_log->first();
+                        if($last_action_log->action_id == 2){
+                            $date = Carbon::now()->format("Y-m-d");
+                        }
+                    }
+
+                }
+            }
             $response["status"] = 0;
             if ($employee_shift->exists()){
                 $employee_shift = $employee_shift->first();
@@ -9491,6 +9542,7 @@ class RiderAPIController extends Controller
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
             }
+            $response["last_action_date"] = $date;
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
@@ -10302,12 +10354,21 @@ class RiderAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'fuel' => ['nullable'],
+                'employee_nature_id' => ['nullable',  'integer', 'digits_between:1,10'],
+                'line_manager_id' => ['nullable',  'integer', 'digits_between:1,10'],
+                'sub_department' => ['nullable'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
-                'branch_name' => ['nullable'],
                 'iban' => ['nullable'],
+
+                //replacementInfo
+                'replacement_employee_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+                'replacement_last_working_day' => ['nullable'],
+
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -10328,19 +10389,6 @@ class RiderAPIController extends Controller
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
-                //Check RiderRequest Already Exist
-//                if ($rider_request->exists()) {
-//                    $rider_request = $rider_request->first();
-//                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "Phone Number & CNIC Already Exists";
-//
-//                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
-//                        $message = "Phone Number Already Exist";
-//
-//                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
-//                        $message = "CNIC Already Exist";
-//                    }
-//                } else
                 if ($employee->exists()) {
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
@@ -10397,14 +10445,19 @@ class RiderAPIController extends Controller
                             $employee_request->rider_sub_category = $request->rider_sub_category;
                             $employee_request->rider_type_id = $request->rider_type_id;
                             $employee_request->department_id = 6;
+                            $employee_request->fuel = $request->fuel;
+                            $employee_request->replacement_employee_id = $request->replacement_employee_id;
+                            $employee_request->replacement_last_working_day = $request->replacement_last_working_day;
+                            $employee_request->employee_nature_id = $request->employee_nature_id;
+                            $employee_request->sub_department = $request->sub_department;
+                            $employee_request->line_manager_id = $request->line_manager_id;
                             $employee_request->save();
 
-                            if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
                                 $employee_bank_info = new EmployeeBankInformation();
                                 $employee_bank_info->employee_id = $employee_request->id;
                                 $employee_bank_info->account_title = $request->account_title;
                                 $employee_bank_info->bank_id = $request->bank_id;
-                                $employee_bank_info->branch_name = $request->branch_name;
                                 $employee_bank_info->iban = $request->iban;
                                 $employee_bank_info->save();
                             }
@@ -10727,35 +10780,39 @@ class RiderAPIController extends Controller
                 $datum["year"] = Carbon::parse($date)->format("Y");
                 $attendance = EmployeeAttendance::where('employee_id', $rider_id)
                     ->where('employee_type', 2)
-                    ->whereDate('attendance_date', $date);
+                    ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if ($shift_exists == 1) {
-                        if ($attendance->clock_in_datetime) {
-                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
-                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
-                            if ($attendance_date == $clock_in_date) {
-                                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
-                                $clock_in = Carbon::parse($attendance->clock_in_datetime);
-                                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
-                                if ($time_diff > 0) {
-                                    $datum["status"] = 2;//Late
+                    if($attendance->leave_status == 2){
+                        $datum["status"] = 4;
+                    }else{
+                        if ($shift_exists == 1) {
+                            if ($attendance->clock_in_datetime) {
+                                $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                                $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                                if ($attendance_date == $clock_in_date) {
+                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                    $clock_in = Carbon::parse($attendance->clock_in_datetime);
+                                    $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                                    if ($time_diff > 0) {
+                                        $datum["status"] = 2;//Late
+                                    } else {
+                                        $datum["status"] = 1;//Present
+                                    }
                                 } else {
-                                    $datum["status"] = 1;//Present
+                                    $datum["status"] = 2;//Late
                                 }
                             } else {
-                                $datum["status"] = 2;//Late
+                                $datum["status"] = 3;//Absent
                             }
-                        } else {
-                            $datum["status"] = 3;//Absent
                         }
-                    }
-                    else {
-                        if ($attendance->clock_in_datetime) {
-                            $datum["status"] = 1;//Present
-                        }
-                        else{
-                            $datum["status"] = 3;//Absent
+                        else {
+                            if ($attendance->clock_in_datetime) {
+                                $datum["status"] = 1;//Present
+                            }
+                            else{
+                                $datum["status"] = 3;//Absent
+                            }
                         }
                     }
                 } else {
@@ -11386,6 +11443,374 @@ class RiderAPIController extends Controller
             }
         }else{
             return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
+        }
+
+    }
+
+    public function mark_attendance_v3(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                ->where('employee_type', 2)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
+                if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
+                    $attendance_date = $attendance_date->addDays(1);
+                }
+            }
+
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
+                ->where('employee_type', 2);
+            $rider_attendance_action = new EmployeeAttendanceActionLog();
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->first();
+            } else {
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider_id;
+                $rider_attendance->employee_type = 2;
+                $rider_attendance->attendance_date = $attendance_date;
+            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
+            if ($request->action == 1) {
+                if($rider_attendance->clock_in_datetime == null){
+                    $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                    $rider_attendance->clock_in_latitude = $request->latitude;
+                    $rider_attendance->clock_in_longitude = $request->longitude;
+                    $rider_attendance->clock_in_location = $location_status;
+                    $rider_attendance->save();
+                }
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+            elseif ($request->action == 2) {
+                $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)->orderBy('id', 'DESC')->where('action_id', 1)->first();
+                $attendance_date = $last_clockin_action->attendance_date;
+
+                $rider_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance->clock_out_latitude = $request->latitude;
+                $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->clock_out_location = $location_status;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function login_v4(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if ($rider->status) {
+                    if (Hash::check($request->input('pin'), $rider->pin)) {
+                        $environment = config('app.env');
+                        if ($environment == 'production' || $environment == 'staging') {
+                            $otp = mt_rand(100000, 999999);
+                            $rider->otp = $otp;
+                            $rider->last_login_attempt = Carbon::now();
+                            $rider->save();
+                            $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
+                            NotificationsController::send(138, $rider, $data);
+                        }
+                        if ($rider->api_token) {
+                            $api_token = $rider->api_token;
+                        } else {
+                            $api_token = uniqid(base64_encode(str_random(60)));
+                            $rider->api_token = $api_token;
+                        }
+                        $rider->save();
+                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                    }else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
+        }
+    }
+
+    public function validate_otp(Request $request){
+        $rules = [
+            'otp' => ['required', 'integer', 'digits:6'],
+            'device_token' => ['nullable']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if ($rider->otp == $request->otp) {
+                $information = array();
+
+                $information['name'] = $rider->name;
+                $information['phone'] = $rider->phone;
+                $information['cnic'] = $rider->cnic;
+                $information['address'] = $rider->address;
+                $information['role'] = 'rider';
+                $information['api_token'] = $rider->api_token;
+                $information['cargo_user'] = 0;
+
+                if($request->has('device_token')){
+                    EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                    EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
+                    $employee_device_token = new EmployeeDeviceToken();
+                    $employee_device_token->employee_id = $rider->id;
+                    $employee_device_token->employee_type_id = 2;
+                    $employee_device_token->device_token = $request->get('device_token');
+                    $employee_device_token->save();
+                }
+
+                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                    ->join('riders as r', 'e.id', 'r.employee_id')
+                    ->where('r.id', $rider->id);
+                if ($reporting_location->exists()) {
+                    $reporting_location = $reporting_location->first();
+                    $information['distance'] = $reporting_location->radius;
+                    $information['lat'] = $reporting_location->lat;
+                    $information['long'] = $reporting_location->long;
+                }else{
+                    $information['distance'] = 0;
+                    $information['lat'] = 0;
+                    $information['long'] = 0;
+                }
+                return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+            }
+        }
+    }
+
+    public function adjustment_index(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        $department = AdminDepartment::find(6);
+        if($department){
+            if(!$department->department_head_id){
+                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+            }
+            if($rider){
+                $data = array();
+                $data['trax_id'] = $rider->trax_id;
+                $data['name'] = $rider->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $department->department_head->email;
+                $data['approver_name'] = $department->department_head->name;
+                $data['user_type'] = 0;
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "Rider not found"]);
+        }
+        return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+    }
+
+    public function adjustment_apply(Request $request)
+    {
+        $rules = [
+            'date' => ['required'],
+            'reason' => ['required', 'max:500'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::find($rider_id);
+            $department = AdminDepartment::find(6);
+            if($department){
+                if($department->department_head_id){
+                    if ($rider) {
+                        $leave = EmployeeAttendanceAdjustment::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2])->where('date', $request->date);
+                        if ($leave->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
+                        }
+                        $leave_request = new EmployeeAttendanceAdjustment();
+                        $leave_request->employee_id = $rider_id;
+                        $leave_request->employee_type_id = 2;
+                        $leave_request->reporter_id = $department->department_head_id;
+                        $leave_request->date = $request->date;
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->save();
+                        NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
+                        NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
+                        $message = "Adjustment Request submitted successfully";
+                        return response()->json(['status' => 0, 'apply_message' => $message]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'User Not Found']);
+                    }
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'Department Head Not Found']);
+                }
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Department Not Found']);
+            }
+        }
+
+    }
+
+    public function employee_adjustment_list(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
+            ->where('employee_id', $rider_id)
+            ->where('employee_type_id', 2);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['date'] = $employee_leave->date;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Adjustment Found!"]);
+    }
+
+    public function rider_attachments_check(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $data = array();
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+                $data["cv"] = ($attachments->cv != NULL) ? 1 : 0;
+                $data["cnic"] = ($attachments->cnic != NULL) ? 1 : 0;
+                $data["photo"] = ($attachments->photo != NULL) ? 1 : 0;
+                $data["academic"] = ($attachments->academic != NULL) ? 1 : 0;
+                $data["experience"] = ($attachments->experience != NULL) ? 1 : 0;
+                $data["last_pay_slip"] = ($attachments->last_pay_slip != NULL) ? 1 : 0;
+                $data["nikkah_nama"] = ($attachments->nikkah_nama != NULL) ? 1 : 0;
+                $data["cnic_spouse"] = ($attachments->cnic_spouse != NULL) ? 1 : 0;
+                $data["child_b_form"] = ($attachments->child_b_form != NULL) ? 1 : 0;
+                $data["cnic_nominee"] = ($attachments->cnic_nominee != NULL) ? 1 : 0;
+                $data["utility_bill"] = ($attachments->utility_bill != NULL) ? 1 : 0;
+                $data["affidavit"] = ($attachments->affidavit != NULL) ? 1 : 0;
+                $data["cheque"] = ($attachments->cheque != NULL) ? 1 : 0;
+
+                return response()->json(['status' => 0, "data" => $data]);
+            } else {
+                return response()->json(['status' => 1, "message" => "Attachment Not Found!"]);
+            }
+        }
+    }
+
+    public function get_line_managers(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'city_id' => ['required', 'integer', 'digits_between:1,10'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $hub_id = City::where('id', $request->city_id)->select('hub_id')->first();
+            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+                ->leftjoin('cities as h', 'h.id', 'c.hub_id')
+                ->where('is_line_manager', 1)
+                ->where('department_id', 6)
+                ->where('employees.city_id', $hub_id->hub_id)
+                ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
+            if($line_managers->exists()){
+                $line_managers = $line_managers->get();
+                $data = array();
+                foreach ($line_managers as $line_manager){
+                    $datum = array();
+                    $datum["id"] = $line_manager->id;
+                    $datum["name"] = $line_manager->name." "."(".$line_manager->trax_id. " | ".$line_manager->hub.")";
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'line_managers' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
 
     }

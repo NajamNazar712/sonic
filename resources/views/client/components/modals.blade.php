@@ -106,3 +106,41 @@
         </div>
     </div>
 @endif
+
+
+
+@if(isset($visit) && $visit)
+
+    <div class="modal fade" id="DailyVisitRateModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="DailyVisitRateModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white text-center">
+                    <h4 class="modal-title white">Please Rate Visit Of Our Salesperson</h4>
+                </div>
+                <form action="{{route('cod.rate_daily_visit')}}" method="post" id="DailyVisitRateForm">
+                    @csrf
+                    <div class="modal-body  text-center">
+                        <div class="feedback">
+                            @foreach(\App\Http\Models\CRM\CrmRequestRating::all() as $rating)
+                                    <div class="item">
+                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                            <input class="radio" type="radio" name="rating" id="{{ $rating->id }}" value="{{ $rating->id }}">
+                                            <span>{{$rating->code}}</span>
+                                        </label>
+                                    </div>
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="daily_visit_id" value="{{$visit->id}}">
+                        <input type="hidden" name="action" id="action_id" value="">
+                        <textarea name="comment" class="form-control" id="comment" cols="30" rows="5" placeholder="Enter Comment"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button tabindex="-1" type="button" id="skip_daily_visit_btn" class="btn btn-primary ml-1">Skip</button>
+                        <button tabindex="-1" type="button" id="rate_daily_visit_btn" class="btn btn-success ml-1">Rate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif

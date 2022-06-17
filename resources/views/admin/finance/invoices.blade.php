@@ -12,6 +12,102 @@
 			<div class="card-body">
 				@include('admin.inc.messages')
 
+				{{--DATE RANGE FILTER FOR INVOICES--}}
+
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="invoice_from"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="invoice_from" placeholder="Invoicing Date From">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="invoice_to"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="invoice_to" placeholder="Invoicing Date To">
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group input-group" style="margin-top: -20px ">
+								<button type="button" id="search_filter_btn"
+										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+											class="la la-search" style="margin-right: 10px"></i> Search
+								</button>
+							</div>
+						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
+					</div>
+				</div>
+				{{--END--}}
+
+				{{--DATE RANGE FILTER FOR GENERATION--}}
+
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="generation_from"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="generation_from" placeholder="Generation Date From">
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group input-group">
+								<div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+								</div>
+								<input type="text" name="generation_to"
+									   class="form-control bg-primary border-primary white rounded-right"
+									   id="generation_to" placeholder="Generation Date To">
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group input-group" style="margin-top: -20px ">
+								<button type="button" id="search_filter_btn_generation"
+										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+											class="la la-search" style="margin-right: 10px"></i> Search
+								</button>
+							</div>
+						</div>
+{{--						<div class="col-md-2">--}}
+{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
+{{--								<button type="button" id="refresh_filter_btn_generation"--}}
+{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
+{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
+{{--								</button>--}}
+{{--							</div>--}}
+{{--						</div>--}}
+					</div>
+				</div>
+				{{--END--}}
+
 				<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 					<thead>
 					<tr role="row" class="bg-primary white">
@@ -194,12 +290,92 @@
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
+
 	<script>
-		$(document).ready(function() {
+
+		$(document).ready(function () {
+			$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Search',
+				width: '100%',
+				allowClear: false,
+			});
+
+			var booking_from_date = $('#invoice_from').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#invoice_to').pickadate('picker').set('min', $('#invoice_from').pickadate('picker').get('select'));
+					}
+				}
+			});
+			var booking_to_date = $('#invoice_to').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 23:59:59',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#invoice_from').pickadate('picker').set('max', $('#invoice_to').pickadate('picker').get('select'));
+					}
+				}
+			});
+
+			var booking_from_date = $('#generation_from').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#generation_to').pickadate('picker').set('min', $('#generation_from').pickadate('picker').get('select'));
+					}
+				}
+			});
+			var booking_to_date = $('#generation_to').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 23:59:59',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#generation_from').pickadate('picker').set('max', $('#generation_to').pickadate('picker').get('select'));
+					}
+				}
+			});
+
+			$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Search',
+				width: '100%',
+				allowClear: false
+			});
+
 			$('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
-                placeholder: 'Select Company Bank',
-                width:'100%'
-            }).bind('change', function() {
+				placeholder: 'Select Company Bank',
+				width:'100%'
+			}).bind('change', function() {
 				if ($(this).hasClass('danger')) {
 					$(this).valid();
 				}
@@ -231,84 +407,91 @@
 				}
 			});
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.invoices.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
+			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+				if ( this.context.length ) {
+					body = [];
+					var params = table.ajax.params();
+					params.start = 0;
+					params.length = -1;
+					params.excel = true;
+					var jsonResult = $.ajax({
+						url: '{{ route('admin.finance.invoices.list') }}',
+						data: function (d) {
+							d.invoice_from = $('#invoice_from').val();
+							d.invoice_to = $('#invoice_to').val();
+							d.generation_from = $('#generation_from').val();
+							d.generation_to = $('#generation_to').val();
+						},
 
-                            head.push('S.No');
-                            head.push('Account Type');
-                            head.push('Invoice No.');
-                            head.push('Shipper');
-                            head.push('City');
-                            head.push('Total Charges');
-                            head.push('Total GST');
-                            head.push('Total Invoice Amount');
-                            head.push('Generation Date');
+						data: params,
+						success: function (result) {
+							head = [];
+
+							head.push('S.No');
+							head.push('Account Type');
+							head.push('Invoice No.');
+							head.push('Shipper');
+							head.push('City');
+							head.push('Total Charges');
+							head.push('Total GST');
+							head.push('Total Invoice Amount');
+							head.push('Generation Date');
 							head.push('Invoicing Date');
 							head.push('Invoicing Cycle');
-                            head.push('Aging');
-                            head.push('Due Date');
-                            head.push('Overdue By');
+							head.push('Aging');
+							head.push('Due Date');
+							head.push('Overdue By');
 							head.push('Corporate Invoicing Type');
-                            head.push('Received Date');
-                            head.push('Company Bank');
-                            head.push('Status');
-                            head.push('Deposit Date');
+							head.push('Received Date');
+							head.push('Company Bank');
+							head.push('Status');
+							head.push('Deposit Date');
 							head.push('Received Amount');
 							head.push('Tax Amount');
-                            head.push('Payment Type');
+							head.push('Payment Type');
 
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+							$.each(result.data, function(index, values) {
+								row = [];
 
-                                row.push(index + 1);
-                                row.push(values.account);
-                                row.push(values.invoice_number);
-                                row.push(values.shipper);
-                                row.push(values.city);
-                                row.push(values.total_charges);
-                                row.push(values.total_gst);
-                                row.push(values.total_invoice_amount);
-                                row.push(values.created_at);
+								row.push(index + 1);
+								row.push(values.account);
+								row.push(values.invoice_number);
+								row.push(values.shipper);
+								row.push(values.city);
+								row.push(values.total_charges);
+								row.push(values.total_gst);
+								row.push(values.total_invoice_amount);
+								row.push(values.created_at);
 								row.push(values.invoicing_date);
 								row.push(values.invoicing_cycle);
-                                row.push(values.aging);
-                                row.push(values.due_date);
-                                row.push(values.overdue_by);
-                                row.push(values.invoice_type);
-                                row.push(values.received_date);
-                                row.push(values.company_bank);
-                                row.push(values.status);
-                                row.push(values.deposit_date);
-                                row.push(values.received_amount);
-                                row.push(values.tax_amount);
-                                row.push(values.payment_type);
+								row.push(values.aging);
+								row.push(values.due_date);
+								row.push(values.overdue_by);
+								row.push(values.invoice_type);
+								row.push(values.received_date);
+								row.push(values.company_bank);
+								row.push(values.status);
+								row.push(values.deposit_date);
+								row.push(values.received_amount);
+								row.push(values.tax_amount);
+								row.push(values.payment_type);
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+								body.push(row);
+							});
+						},
+						async: false
+					});
 
-                    return {body: body, header: head};
-                }
-            });
+					return {body: body, header: head};
+				}
+			});
 
-            var selected_rows = [];
+			var selected_rows = [];
 			var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-					@if ((session('role_id') == 1 || in_array(122, session('permissions'))))
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				buttons: [
+						@if ((session('role_id') == 1 || in_array(122, session('permissions'))))
 					{
 						text: '<i class="ft-plus-circle"></i> Mark as Received',
 						className: 'btn btn-primary mark_as_received_all_btn',
@@ -376,7 +559,7 @@
 
 						}
 					},
-					@endif
+						@endif
 					{
 						extend: 'selectAll',
 						text: 'Select All',
@@ -437,7 +620,7 @@
 						className: 'btn btn-primary',
 						text: '<i class="la la-file-excel-o"></i> Excel',
 					},
-				'reset'],
+					'reset'],
 				scrollX: true, scrollY: '500px',
 				select: {
 					info: false,
@@ -449,11 +632,21 @@
 				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
-                language: {
-                    processing: data_table_loader
-                },
+				language: {
+					processing: data_table_loader
+				},
 				serverSide: true,
-				ajax: '{{ route('admin.finance.invoices.list') }}',
+				{{--ajax: '{{ route('admin.finance.invoices.list') }}',--}}
+				ajax:{
+					url: '{{ route('admin.finance.invoices.list') }}',
+					data: function (d) {
+						d.invoice_from = $('#invoice_from').val();
+						d.invoice_to = $('#invoice_to').val();
+						d.generation_from = $('#generation_from').val();
+						d.generation_to = $('#generation_to').val();
+
+					}
+				},
 				rowId: 'id',
 				order: [[9, 'desc']],
 				columns: [
@@ -505,7 +698,7 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
+					var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
 					var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 					var account_type_select = '<select name="account_type_select" id="account_type_select" class="select2 form-control">'+
 							'<option value="1">Reimbursement Account</option>' +
@@ -536,17 +729,17 @@
 									}).wrap(td);
 						}
 						else if ($(header).is('.company_bank')) {
-                            $(company_bank_select).appendTo($(search))
-							.on('change', function() {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td);
-                        }
-                        else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                            .on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
-                        }
+							$(company_bank_select).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}
+						else if ($(header).is('.status')) {
+							$(status_select).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}
 						/*else if ($(header).is('.account')) {
 							$(account).appendTo($(search))
 									.on('change', function() {
@@ -572,19 +765,19 @@
 					});
 
 					var company_banks = $.map({!! $company_banks !!}, function (obj) {
-                        obj.id = obj.name;
-                        obj.text = obj.name;
+						obj.id = obj.name;
+						obj.text = obj.name;
 
-                        return obj;
-                    });
+						return obj;
+					});
 
-                    $('#company_bank_select').prepend('<option value="" selected></option>').select2({
-                        data: company_banks,
-                        placeholder: 'Select Company Bank',
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+					$('#company_bank_select').prepend('<option value="" selected></option>').select2({
+						data: company_banks,
+						placeholder: 'Select Company Bank',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 
 					$('#account_type_select').prepend('<option value="" selected></option>').select2({
 						placeholder: 'Select Account Type',
@@ -608,20 +801,20 @@
 						dropdownCssClass: 'form-control-sm p-0'
 					});
 
-                    var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
-                        obj.id = obj.name;
-                        obj.text = obj.name;
+					var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
+						obj.id = obj.name;
+						obj.text = obj.name;
 
-                        return obj;
-                    });
+						return obj;
+					});
 
-                    $('#status_select').prepend('<option value="" selected></option>').select2({
-                        data: statuses,
-                        placeholder: 'Select Status',
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+					$('#status_select').prepend('<option value="" selected></option>').select2({
+						data: statuses,
+						placeholder: 'Select Status',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 
 					this.api().table().columns.adjust();
 				}
@@ -637,8 +830,8 @@
 
 
 			$('#datatable tbody').on('click', 'tr td.invoice_number_btn button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                var account = table.row($(this).parents('tr')).data().account_type;
+				var id = parseInt($(this).parents('tr').attr('id'));
+				var account = table.row($(this).parents('tr')).data().account_type;
 
 				var url ='';
 				if(account == 2){
@@ -648,8 +841,8 @@
 					url = '{!! route('admin.finance.invoices.reimbursement.invoices_print') !!}';
 				}
 
-                if (id) {
-                    $.ajax({
+				if (id) {
+					$.ajax({
 						url: url,
 						method: 'POST',
 						data: {
@@ -657,62 +850,26 @@
 							'id': id
 						}
 					})
-					.done(function(data) {
-						var tab = window.open('', '_blank');
+							.done(function(data) {
+								var tab = window.open('', '_blank');
 
-						if(!tab) {
-							swal({
-								title: 'Popup Blocker Enabled!',
-								text: 'Please add this site to your exception list.',
-								icon: 'error',
-								closeOnClickOutside: false,
-								closeOnEsc: false
+								if(!tab) {
+									swal({
+										title: 'Popup Blocker Enabled!',
+										text: 'Please add this site to your exception list.',
+										icon: 'error',
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+								}
+								else {
+									tab.document.write(data);
+									tab.document.close();
+									tab.focus();
+								}
 							});
-						}
-						else {
-							tab.document.write(data);
-							tab.document.close();
-							tab.focus();
-						}
-					});
-                }
-            });
-
-           /* $('#datatable tbody').on('contextmenu', 'tr td.invoice_number_btn button', function(e) {
-                e.preventDefault();
-
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('admin.finance.invoices.reimbursement.detail_print') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                            'header': true
-                        }
-                    })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-                }
-            });*/
+				}
+			});
 
 			$('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));
@@ -734,7 +891,7 @@
 				}
 			});
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 				var account_type = parseInt(table.row($(this).parents('tr')).data().account_type);
 
@@ -756,16 +913,16 @@
 							'id': id
 						}
 					})
-					.done(function(data) {
-						if (data.status == 0) {
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-						}
+							.done(function(data) {
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 
-						table.draw('false');
-					});
+								table.draw('false');
+							});
 				}
 				else if ($(this).hasClass('mark_as_received')) {
 					$('#mark_as_received form input.id').val(id);
@@ -803,24 +960,24 @@
 							'account_type':account_type,
 						}
 					})
-					.done(function(data) {
-						var tab = window.open('', '_blank');
+							.done(function(data) {
+								var tab = window.open('', '_blank');
 
-						if(!tab) {
-							swal({
-								title: 'Popup Blocker Enabled!',
-								text: 'Please add this site to your exception list.',
-								icon: 'error',
-								closeOnClickOutside: false,
-								closeOnEsc: false
+								if(!tab) {
+									swal({
+										title: 'Popup Blocker Enabled!',
+										text: 'Please add this site to your exception list.',
+										icon: 'error',
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+								}
+								else {
+									tab.document.write(data);
+									tab.document.close();
+									tab.focus();
+								}
 							});
-						}
-						else {
-							tab.document.write(data);
-							tab.document.close();
-							tab.focus();
-						}
-					});
 				}
 				else if ($(this).hasClass('print_gst_wise')) {
 					$.ajax({
@@ -832,24 +989,24 @@
 							'account_type':account_type,
 						}
 					})
-					.done(function(data) {
-						var tab = window.open('', '_blank');
+							.done(function(data) {
+								var tab = window.open('', '_blank');
 
-						if(!tab) {
-							swal({
-								title: 'Popup Blocker Enabled!',
-								text: 'Please add this site to your exception list.',
-								icon: 'error',
-								closeOnClickOutside: false,
-								closeOnEsc: false
+								if(!tab) {
+									swal({
+										title: 'Popup Blocker Enabled!',
+										text: 'Please add this site to your exception list.',
+										icon: 'error',
+										closeOnClickOutside: false,
+										closeOnEsc: false
+									});
+								}
+								else {
+									tab.document.write(data);
+									tab.document.close();
+									tab.focus();
+								}
 							});
-						}
-						else {
-							tab.document.write(data);
-							tab.document.close();
-							tab.focus();
-						}
-					});
 				}
 			});
 
@@ -1082,9 +1239,27 @@
 					}
 				}
 			});
-
-
-
+			$('#search_filter_btn').on('click',function () {
+				table.draw(true);
 			});
+
+			$('#search_filter_btn_generation').on('click',function () {
+				table.draw(true);
+			});
+
+			$('#refresh_filter_btn').click(function(){
+				$('#invoice_from').val('');
+				$('#invoice_to').val('');
+				table.draw();
+			});
+
+			$('#refresh_filter_btn_generation').click(function(){
+				$('#generation_from').val('');
+				$('#generation_to').val('');
+				table.draw();
+			});
+			
+		});
+
 	</script>
 @endsection

@@ -35,6 +35,7 @@
                                 <ul class="menu-content">
                                     <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
                                     <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.excel.index') }}">Excel</a></li>
                                     <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
                                     <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
                                 </ul>
@@ -46,6 +47,9 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+{{--                        @if(session('user_id') == 3324)--}}
+{{--                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>--}}
+{{--                        @endif--}}
                         @if(session('shipper_origin_change') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.origin.index') }}">Origin Change</a></li>
                         @endif

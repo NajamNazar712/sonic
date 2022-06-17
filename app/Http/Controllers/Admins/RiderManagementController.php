@@ -68,7 +68,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive','riders.incentive_amount')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -174,6 +174,7 @@ class RiderManagementController extends Controller
         return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function addRiderDetails(Request $request){
+
         $type = $request->rider_type;
         $validations = [
             'city_id'=>'required|numeric',
@@ -242,6 +243,7 @@ class RiderManagementController extends Controller
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
             'shift_id' => 1,
+            'incentive_amount' => $request->incentive_amount,
         ]);
         if($rider){
             $employee = new Employee();
@@ -323,6 +325,7 @@ class RiderManagementController extends Controller
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
+        $rider->incentive_amount = $request->incentive_amount;
         $rider->shift_id = 1;
 
         $rider->rider_category_id = $request->rider_category;
@@ -1027,7 +1030,7 @@ class RiderManagementController extends Controller
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 06:00A');
         $next_day = Carbon::parse($date)->addDay(1);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
-        $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
+        $riders = Rider::where('status', 1)->select('id', 'rider_category_id','incentive_amount')->get();
         if(count($riders) > 0){
             foreach ($riders as $rider){
                 $rider_category_id = $rider->rider_category_id;
@@ -1198,7 +1201,7 @@ class RiderManagementController extends Controller
 
                 $delivery_date = $date_to;
                 $delivery_date = Carbon::parse($delivery_date)->toDateString();
-                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->whereIn('status', [0,1]);
+                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereBetween('pending_for_verification_at', [$date_from, $date_to])->whereIn('status', [0,1]);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
@@ -1366,13 +1369,21 @@ class RiderManagementController extends Controller
                     }
 
                 }
-
                 if($pickup_incentive > 0 || $delivery_incentive > 0){
+                    $incentive_amount = 0;
+                    if($pickup_shipments_count){
+
+                        if($rider->incentive_amount != null){
+                            $incentive_amount = ($rider->incentive_amount)*$pickup_shipments_count;
+                        }
+                    }
+
                     $riders_incentive = new RidersIncentive();
                     $riders_incentive->rider_id = $rider->id;
-                    $riders_incentive->date = Carbon::now();
+                    $riders_incentive->date = $date;
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
-                    $riders_incentive->pickup_incentive = $pickup_incentive;
+                    
+                    $riders_incentive->pickup_incentive = $incentive_amount; //$incentive_amount
                     $riders_incentive->delivery_shipments = $delivered_shipment_count;
                     $riders_incentive->delivery_incentive = $delivery_incentive;
                     $riders_incentive->save();
@@ -1381,6 +1392,49 @@ class RiderManagementController extends Controller
         }
     }
 
+    public function rider_otp_index(){
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "rider_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
 
+        return view('admin.otp.rider')->with(['setting'=>$settings]);
+    }
+
+    public function rider_otp_list(Request $request){
+        $riders = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
+            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp', 'riders.last_login_attempt')
+            ->where('riders.status', 1)
+            ->whereNotNull('riders.otp');
+
+        $datatable = Datatables::of($riders);
+        return $datatable->make(true);
+    }
+
+
+    public function rider_otp_update(Request $request)
+    {
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->type = "rider_otp";
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        $settings->setting_value = $request->has('rider_otp_toggle') ? 1 : 0;
+        $settings->save();
+
+        return back()->with(['success'=>"Rider OTP Updated Successfully"]);
+    }
 
 }

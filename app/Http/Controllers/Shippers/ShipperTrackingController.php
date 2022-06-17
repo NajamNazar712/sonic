@@ -12,16 +12,19 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
+use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
-
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use Auth;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ShipperTrackingController extends Controller
 {
@@ -32,12 +35,34 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
+//        dd(session()->all());
+        $permission = session('permissions');
 
         $case_nature = CrmRequestCaseNature::get();
+        $row = array();
+        if(session('user_type') !== 1){
+            foreach($case_nature as $nature) {
+                if (in_array(16,$permission) && ($nature->id == 1)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(17,$permission) && ($nature->id == 2)) {
+                    $row[] = $nature;
+                }
+
+                elseif (in_array(18,$permission) && ($nature->id == 3 || $nature->id == 4)) {
+                    $row[] = $nature;
+                }
+
+            }
+            $case_nature = $row;
+        }
+
+
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-      return view('client.tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
+      return view('client.tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims,'case_permission'=>$permission]);
     }
 
     public function track(Request $request) {
@@ -216,6 +241,25 @@ class ShipperTrackingController extends Controller
                                     $return_note = ReturnNote::find($journey->reference_1_id);
                                     if($return_note && $return_note->actual_date != null){
                                         $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                    }
+                                }
+
+                                if(in_array($journey->shipper_status_id, [1])){
+                                    $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
+                                    if($replacement_image->exists()){
+                                        $replacement_image = $replacement_image->first();
+                                        $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    }
+                                }
+                                if(in_array($journey->shipper_status_id, [30])){
+                                    $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',14);
+                                    if($replacement_image2->exists()){
+                                        $replacement_image2 = $replacement_image2->first();
+                                        if($replacement_image2->replacement_image != null){
+
+                                            $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
+
                                     }
                                 }
 
@@ -565,5 +609,6 @@ class ShipperTrackingController extends Controller
 
         return $tracking;
     }
+
 
 }

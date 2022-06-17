@@ -40,6 +40,8 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\RiderType;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -54,8 +56,10 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -64,7 +68,9 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
+use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
@@ -73,10 +79,12 @@ use App\Http\Models\Product;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\V2Pickup\DwsPickupNote;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -87,13 +95,12 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WMS\WmsCourierOrders;
 use App\Http\Models\WMS\WmsOrderProcess;
 use App\Http\Models\WMS\WmsPendingPicking;
-use App\Http\Models\WMS\WmsPendingPickingShipments;
 use App\Http\Models\WMS\WmsPicklist;
 use App\Http\Models\WMS\WmsPicklistItem;
 use App\Http\Models\WMS\WmsProductBarcode;
-use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -103,6 +110,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Password;
 
 class AdminAPIController extends Controller
@@ -3416,19 +3424,43 @@ class AdminAPIController extends Controller
         $admins = Admin::find($admin_id);
         if($admins){
             $response = array();
-            $employee_shift = EmployeeShift::where('id', $admins->shift_id);
+            $admin_shift = EmployeeShift::where('id', $admins->shift_id);
+            if ($admin_shift->exists()) {
+                $admin_shift = $admin_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+                if ($shift_time->lt(Carbon::now())) {
+                    $date = Carbon::now()->format("Y-m-d");
+                } else{
+                    if(Carbon::now()->format("l") == "Monday"){
+                        $date = Carbon::now()->subDays(2)->format("Y-m-d");
+                    }
+                    else{
+                        $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                    }
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                        ->where('employee_type', 1)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
+                    if($last_action_log->exists()){
+                        $last_action_log = $last_action_log->first();
+                        if($last_action_log->action_id == 2){
+                            $date = Carbon::now()->format("Y-m-d");
+                        }
+                    }
+
+                }
+            }
             $response["status"] = 0;
-            if ($employee_shift->exists()){
-                $employee_shift = $employee_shift->first();
-                $response["shift_name"] = $employee_shift->name;
-                $response["start_time"] = $employee_shift->start_time;
-                $response["end_time"] = $employee_shift->end_time;
+            if ($admin_shift->exists()){
+                $admin_shift = $admin_shift->first();
+                $response["shift_name"] = $admin_shift->name;
+                $response["start_time"] = $admin_shift->start_time;
+                $response["end_time"] = $admin_shift->end_time;
             }
             else{
                 $response["shift_name"] = "default";
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
             }
+            $response["last_action_date"] = $date;
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
@@ -4854,12 +4886,13 @@ class AdminAPIController extends Controller
                     }
                     $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
                     if($retail_shipment->exists()){
-                        if ($dense_weight < $volume_weight) {
-                            $actual_weight = $volume_weight;
-                        } else {
-                            $actual_weight = $dense_weight;
-                        }
+//                        if ($dense_weight < $volume_weight) {
+//                            $actual_weight = $volume_weight;
+//                        } else {
+//                            $actual_weight = $dense_weight;
+//                        }
                         $retail_flag = true;
+                        $dws_charges_status = 1;
                     }
                     else{
                         $retail_flag = false;
@@ -4899,6 +4932,42 @@ class AdminAPIController extends Controller
                                         $shipment->height = $request->dimension_h;
                                     }
                                 }
+
+                                $not_include_shippers = [6693, 12412];
+                                if (!in_array($shipment->user_id, $not_include_shippers)) {
+                                    $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                    if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+
+                                        $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                        if($shipment_estimated_weight->exists()){
+                                            $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                        }
+                                        else{
+                                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                        }
+                                        $shipment_estimated_weight->shipment_id = $shipment->id;
+                                        $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        if ($volume_weight) {
+                                            $shipment_estimated_weight->length = $request->dimension_l;
+                                            $shipment_estimated_weight->breadth = $request->dimension_w;
+                                            $shipment_estimated_weight->height = $request->dimension_h;
+                                        }
+                                        else{
+                                            $shipment_estimated_weight->length = null;
+                                            $shipment_estimated_weight->breadth = null;
+                                            $shipment_estimated_weight->height = null;
+                                        }
+                                        $shipment_estimated_weight->save();
+
+                                        $actual_weight = $shipment->estimated_weight;
+
+                                        $shipment->length = NULL;
+                                        $shipment->breadth = NULL;
+                                        $shipment->height = NULL;
+                                    }
+                                }
                             } else {
                                 // insert High status
                                 DwsWeightCharges::create([
@@ -4919,6 +4988,42 @@ class AdminAPIController extends Controller
                                     $actual_weight = $dense_weight;
                                 }
                                 $dws_charges_status = 1;
+
+                                $not_include_shippers = [6693, 12412];
+                                if (!in_array($shipment->user_id, $not_include_shippers)) {
+                                    $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                                    if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+
+                                        $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                        if($shipment_estimated_weight->exists()){
+                                            $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                        }
+                                        else{
+                                            $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                        }
+                                        $shipment_estimated_weight->shipment_id = $shipment->id;
+                                        $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        if ($volume_weight) {
+                                            $shipment_estimated_weight->length = $request->dimension_l;
+                                            $shipment_estimated_weight->breadth = $request->dimension_w;
+                                            $shipment_estimated_weight->height = $request->dimension_h;
+                                        }
+                                        else{
+                                            $shipment_estimated_weight->length = null;
+                                            $shipment_estimated_weight->breadth = null;
+                                            $shipment_estimated_weight->height = null;
+                                        }
+                                        $shipment_estimated_weight->save();
+
+                                        $actual_weight = $shipment->estimated_weight;
+
+                                        $shipment->length = NULL;
+                                        $shipment->breadth = NULL;
+                                        $shipment->height = NULL;
+                                    }
+                                }
 
                                 // insert High status end
 
@@ -5189,7 +5294,7 @@ class AdminAPIController extends Controller
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
                         $file = $request->file('image_name');
-                        $filename = 'image_name' . $date . '.' . $file->extension();
+                        $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
@@ -5314,35 +5419,39 @@ class AdminAPIController extends Controller
                 $datum["year"] = Carbon::parse($date)->format("Y");
                 $attendance = EmployeeAttendance::where('employee_id', $admin_id)
                     ->where('employee_type', 1)
-                    ->whereDate('attendance_date', $date);
+                    ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if ($shift_exists == 1) {
-                        if ($attendance->clock_in_datetime) {
-                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
-                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
-                            if ($attendance_date == $clock_in_date) {
-                                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
-                                $clock_in = Carbon::parse($attendance->clock_in_datetime);
-                                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
-                                if ($time_diff > 0) {
-                                    $datum["status"] = 2;//Late
+                    if($attendance->leave_status == 2){
+                        $datum["status"] = 4;
+                    }else{
+                        if ($shift_exists == 1) {
+                            if ($attendance->clock_in_datetime) {
+                                $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                                $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                                if ($attendance_date == $clock_in_date) {
+                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                    $clock_in = Carbon::parse($attendance->clock_in_datetime);
+                                    $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                                    if ($time_diff > 0) {
+                                        $datum["status"] = 2;//Late
+                                    } else {
+                                        $datum["status"] = 1;//Present
+                                    }
                                 } else {
-                                    $datum["status"] = 1;//Present
+                                    $datum["status"] = 2;//Late
                                 }
                             } else {
-                                $datum["status"] = 2;//Late
+                                $datum["status"] = 3;//Absent
                             }
-                        } else {
-                            $datum["status"] = 3;//Absent
                         }
-                    }
-                    else {
-                        if ($attendance->clock_in_datetime) {
-                            $datum["status"] = 1;//Present
-                        }
-                        else{
-                            $datum["status"] = 3;//Absent
+                        else {
+                            if ($attendance->clock_in_datetime) {
+                                $datum["status"] = 1;//Present
+                            }
+                            else{
+                                $datum["status"] = 3;//Absent
+                            }
                         }
                     }
                 } else {
@@ -5549,11 +5658,11 @@ class AdminAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'line_manager_id' => ['nullable',  'integer', 'digits_between:1,10'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
-                'branch_name' => ['nullable'],
                 'iban' => ['nullable'],
             ];
             $response = ['status' => 1];
@@ -5641,14 +5750,14 @@ class AdminAPIController extends Controller
                         $employee_request->mother_name = $request->mother_name;
                         $employee_request->shift_id = $request->shift_id;
                         $employee_request->staff_category_id = $request->staff_category_id;
+                        $employee_request->line_manager_id = $request->line_manager_id;
                         $employee_request->save();
 
-                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                        if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
                             $employee_bank_info = new EmployeeBankInformation();
                             $employee_bank_info->employee_id = $employee_request->id;
                             $employee_bank_info->account_title = $request->account_title;
                             $employee_bank_info->bank_id = $request->bank_id;
-                            $employee_bank_info->branch_name = $request->branch_name;
                             $employee_bank_info->iban = $request->iban;
                             $employee_bank_info->save();
                         }
@@ -5977,7 +6086,7 @@ class AdminAPIController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
 
         if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
             $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
@@ -6002,7 +6111,24 @@ class AdminAPIController extends Controller
         if($leads->exists()){
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
-            return response()->json(['status' => 0, 'data' => $leads, 'cities' => $cities, 'lead_status' => $lead_statuses]);
+            $data = array();
+            foreach ($leads as $lead){
+                $datum = array();
+                $datum["lead_id"] = $lead->lead_id;
+                $datum["contact_person"] = $lead->contact_person;
+                $datum["phone_number"] = $lead->phone_number;
+                $datum["email_address"] = $lead->email_address;
+                $datum["requested_date"] = $lead->requested_date;
+                $datum["message"] = ($lead->message != null) ? $lead->message : "";
+                $datum["status"] = $lead->status;
+                $datum["status_id"] = $lead->status_id;
+                $datum["city"] = $lead->city;
+                $datum["service"] = $lead->service;
+                $datum["brand"] = $lead->brand;
+                $datum["sale_person"] = ($lead->sale_person != null) ? $lead->sale_person : "";
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }else{
             return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }
@@ -6467,7 +6593,7 @@ class AdminAPIController extends Controller
             $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp', 'wms_picklist_items.pending_picking_id', '=', 'wpp.id')
                 ->where('wms_picklist_items.picklist_id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
 
-            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
+            $product = WmsProductBarcode::where('picklist_id', $request->picklist_id)->where('status', 3)->whereIn('product_id',$product_ids)->where(function ($query) use($barcode) {
                 $query->where('barcode', '=', $barcode)
                     ->orWhere('id', '=', $barcode);
             });
@@ -6482,93 +6608,6 @@ class AdminAPIController extends Controller
     }
 
     public function pick_list_receive12(Request $request)
-    {
-        $rules = [
-            'picklist_id' => ['required'],
-            'barcode_list' => ['required'],
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $admin_id = $request->admin_id;
-            $picklist_id = (int)$request->picklist_id;
-            $picklist = WmsPicklist::find($picklist_id);
-            if ($picklist) {
-                if ($picklist->status == 0) {
-                    $scanned_barcodes = array();
-                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
-                    $shipment_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
-                    $courier_order_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
-                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 2]);
-                    WmsCourierOrders::whereIn('id', $courier_order_ids)->update(['status' => 3]);
-                    $picklist->status = 1;
-                    $picklist->save();
-                    if ($request->has('barcode_list')) {
-                        $barcode_lists = json_decode($request->barcode_list, true);
-                        foreach ($barcode_lists as $barcode_list) {
-                            array_push($scanned_barcodes,$barcode_list['barcode']);
-                        }
-                    }
-                    foreach ($picklist->items as $item) {
-                        $item->status = 1;
-                        $item->save();
-                    }
-                    foreach ($shipment_ids as $shipment_id) {
-                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment_id)->where('courier_id', 1)->get();
-                        foreach ($shipment_products as $shipment_product) {
-                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
-                                ->where('wms_product_barcodes.status', 3)
-                                ->whereIn('id', $scanned_barcodes)
-                                ->where('product_id', $shipment_product->product_id)
-                                ->take($shipment_product->quantity);
-                            if ($product_barcodes->exists()) {
-                                $product_barcodes = $product_barcodes->get();
-                                foreach ($product_barcodes as $product_barcode) {
-                                    $product_barcode->shipment_id = $shipment_id;
-                                    $product_barcode->courier_id = 1;
-                                    $product_barcode->picklist_id = $picklist_id;
-                                    $product_barcode->save();
-                                }
-                            }
-                        }
-                    }
-                    foreach ($courier_order_ids as $courier_order_id) {
-                        $courier_products = WmsShipmentProduct::where('shipment_id', $courier_order_id)->where('courier_id', 2)->get();
-                        foreach ($courier_products as $courier_product) {
-                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
-                                ->where('wms_product_barcodes.status', 3)
-                                ->WhereIn('id', $scanned_barcodes)
-                                ->where('product_id', $courier_product->product_id)
-                                ->take($courier_product->quantity);
-                            if ($product_barcodes->exists()) {
-                                $product_barcodes = $product_barcodes->get();
-                                foreach ($product_barcodes as $product_barcode) {
-                                    $product_barcode->shipment_id = $shipment_id;
-                                    $product_barcode->courier_id = 2;
-                                    $product_barcode->picklist_id = $picklist_id;
-                                    $product_barcode->save();
-                                }
-                            }
-                        }
-                    }
-                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
-                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
-                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Picklist already updated']);
-                }
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Picklist']);
-            }
-        }
-    }
-
-    public function pick_list_receive(Request $request)
     {
         $rules = [
             'picklist_id' => ['required'],
@@ -6607,6 +6646,46 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function pick_list_receive(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required'],
+            'barcode_list' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $picklist_id = $request->picklist_id;
+            $picklist = WmsPicklist::find($picklist_id);
+            $admin_id = $request->admin_id;
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
+                    $shipment_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
+                    $courier_order_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 8]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=', 7)->update(['status' => 3]);
+                    $picklist->status = 1;
+                    $picklist->save();
+                    foreach ($picklist->items as $item) {
+                        $item->status = 1;
+                        $item->save();
+                    }
+                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
+                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
+                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
+                } else {
+                    return response()->json(['status' => 0, 'message' => 'Picklist already updated']);
+                }
+
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Picklist not found!']);
+            }
+        }
+    }
+
     public function check_bolt_version(Request $request)
     {
         $admin_id = $request->admin_id;
@@ -6638,7 +6717,19 @@ class AdminAPIController extends Controller
     public function daily_visit_index()
     {
         $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
-        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses]);
+        $shippers = User::where('status', 3)->get(['id', 'name']);
+        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses, 'shippers' => $shippers]);
+    }
+
+    public function shipper_details(Request $request){
+
+        $shipper_detail = User::where('status', 3)->where('id', $request->shipper_id)->select('name','poc','address','email','phone');
+        if($shipper_detail){
+            $shipper_detail = $shipper_detail->get();
+            return response()->json(['status' => 0, 'shipper_detail' => $shipper_detail]);
+        }else {
+            return response()->json(['status' => 1, 'message' => "Invalid Shipper!"]);
+        }
     }
 
     public function daily_visit_store(Request $request)
@@ -6655,6 +6746,7 @@ class AdminAPIController extends Controller
             'longitude' => ['required'],
             'business_card_image' => ['required'],
             'location_image' => ['required'],
+            'shipper_id' => ['nullable', 'integer'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -6663,6 +6755,7 @@ class AdminAPIController extends Controller
         }else{
             try{
                 $daily_visit = new DailyVisit();
+                $daily_visit->shipper_id = $request->shipper_id;
                 $daily_visit->company_name = str_replace('"',"",$request->company_name);
                 $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
                 $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
@@ -6770,6 +6863,661 @@ class AdminAPIController extends Controller
             }
         }else{
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+
+    }
+
+    public function store_dws_image(Request $request){
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')],
+            'picture' => ['required', 'mimes:png,jpeg,jpg']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(false);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+            $shipment_details = ShipmentDetail::where('shipment_id', $shipment->id);
+            if($shipment_details->exists()){
+                $shipment_details = $shipment_details->first();
+                if($shipment_details->dws_status == 1 && $shipment_details->dws_image == null){
+                    $date = Carbon::now()->format('Y_m_d');
+                    $file = $request->file('picture');
+                    $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
+                    $directory = 'dws_images';
+                    $picture_path = $directory . '/' . $filename;
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                    $shipment_details->dws_image = $picture_path;
+                    $shipment_details->save();
+                    return response()->json(true);
+                }
+                return response()->json(false);
+            }
+            return response()->json(false);
+        }
+    }
+
+    public function signup_data(Request $request)
+    {
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $designation = EmployeeDesignation::where('status', 1)->select('id', 'name', 'department_id')->get();
+        $domicile = EmployeeDomicile::select('id', 'name')->get();
+        $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
+        $nationality = EmployeeNationality::select('id', 'name')->get();
+        $religion = EmployeeReligion::select('id', 'name')->get();
+        $gender = EmployeeGender::select('id', 'name')->get();
+        $zone = Zone::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $department = AdminDepartment::select('id', 'name')->get();
+        $hub = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        $relationships = EmployeeRelationship::select('id', 'name')->get();
+        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
+        $banks = BanksList::select('id', 'name')->where('status', 1)->get();
+        $rider_type = RiderType::select('id', 'name')->get();
+        $staff_categories = StaffCategory::select('id', 'name')->get();
+        $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
+        $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
+        $shift_data = array();
+        foreach($shifts as $shift){
+            $datum = array();
+            $datum['id'] = $shift->id;
+            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
+            $shift_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+    }
+
+    public function mark_attendance_v3(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
+            if($last_action_log->exists()){
+                $last_action_log = $last_action_log->first();
+                if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
+                    $attendance_date = $attendance_date->addDays(1);
+                }
+            }
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', Carbon::parse($attendance_date)->format("Y-m-d"))
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
+            if ($request->action == 1) {
+                if($admin_attendance->clock_in_datetime == null){
+                    $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                    $admin_attendance->clock_in_latitude = $request->latitude;
+                    $admin_attendance->clock_in_longitude = $request->longitude;
+                    $admin_attendance->clock_in_location = $location_status;
+                    $admin_attendance->save();
+                }
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+            elseif ($request->action == 2) {
+                $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)->orderBy('id', 'DESC')->where('action_id', 1)->first();
+                $attendance_date = $last_clockin_action->attendance_date;
+
+                $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function adjustment_index(Request $request)
+    {
+        if ($request->has('adjustment_id')) {
+            $leave = EmployeeAttendanceAdjustment::find($request->adjustment_id);
+            if ($leave) {
+                if ($leave->employee_type_id == 1) {
+                    $admin = Admin::find($leave->employee_id);
+                    if ($admin) {
+                        if(!$admin->role->department->department_head_id){
+                            return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                        }
+                        $data = array();
+                        $data['trax_id'] = $admin->trax_id;
+                        $data['name'] = $admin->name;
+                        $data['designation'] = $admin->designation;
+                        $data['department'] = $admin->role->department->name;
+                        $data['approver_email'] = $admin->role->department->department_head->email;
+                        $data['approver_name'] = $admin->role->department->department_head->name;
+                        $role_id = $admin->role_id;
+                        if ($role_id == 81) {
+                            $data['user_type'] = 2;
+                        } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                            $data['user_type'] = 1;
+                        } else {
+                            $data['user_type'] = 0;
+                        }
+                        return response()->json(['status' => 0, 'data' => $data]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "User not found"]);
+                } elseif ($leave->employee_type_id == 2) {
+                    $rider = Rider::find($leave->employee_id);
+                    $department = AdminDepartment::find(6);
+                    if ($department) {
+                        if ($rider) {
+                            if(!$department->department_head_id){
+                                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                            }
+                            $data = array();
+                            $data['trax_id'] = $rider->trax_id;
+                            $data['name'] = $rider->name;
+                            $data['designation'] = "Rider";
+                            $data['department'] = "Operations";
+                            $data['approver_email'] = $department->department_head->email;
+                            $data['approver_name'] = $department->department_head->name;
+                            $data['user_type'] = 0;
+                            return response()->json(['status' => 0, 'data' => $data]);
+                        }
+                        return response()->json(['status' => 1, 'message' => "Rider not found"]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Failed"]);
+                }
+            }
+        }
+        else {
+            $admin_id = $request->admin_id;
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                if(!$admin->role->department->department_head_id){
+                    return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                }
+                $data = array();
+                $data['trax_id'] = $admin->trax_id;
+                $data['name'] = $admin->name;
+                $data['designation'] = $admin->designation;
+                $data['department'] = $admin->role->department->name;
+                $data['approver_email'] = $admin->role->department->department_head->email;
+                $data['approver_name'] = $admin->role->department->department_head->name;
+                $role_id = $admin->role_id;
+                if ($role_id == 81) {
+                    $data['user_type'] = 2;
+                } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                    $data['user_type'] = 1;
+                } else {
+                    $data['user_type'] = 0;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "User not found"]);
+        }
+    }
+
+    public function adjustment_apply(Request $request)
+    {
+        $rules = [
+            'date' => ['required'],
+            'reason' => ['required', 'max:500'],
+            'adjustment_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                if ($request->has('adjustment_id')) {
+                    $leave_request = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id);
+                    if ($leave_request->exists()) {
+                        $leave_request = $leave_request->first();
+                        $leave_request->date = $request->date;
+                        $leave_request->applied_reason = $request->reason;
+
+                        if ($leave_request->status == 2) {
+                            $leave_request->updated_by = $admin_id;
+                        }
+                        $leave_request->save();
+                        $message = "Adjustment Request edited successfully";
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Adjustment Request ID']);
+                    }
+                }
+                else {
+                    $leave = EmployeeAttendanceAdjustment::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('date', $request->date);
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
+                    }
+                    $leave_request = new EmployeeAttendanceAdjustment();
+                    $leave_request->employee_id = $admin_id;
+                    $leave_request->employee_type_id = 1;
+                    if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                        $reporter_id = 8;
+                    } else {
+                        $reporter_id = $admin->role->department->department_head_id;
+                    }
+                    $leave_request->reporter_id = $reporter_id;
+                    $leave_request->date = $request->date;
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->save();
+                    $message = "Adjustment Request submitted successfully";
+                    NotificationsController::app_notification(17, $admin_id, 1, $leave_request->id);
+                    NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
+                }
+                return response()->json(['status' => 0, 'apply_message' => $message]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User Not Found']);
+            }
+        }
+
+    }
+
+    public function employee_adjustment_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
+            ->where('employee_id', $admin_id)
+            ->where('employee_type_id', 1);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['date'] = $employee_leave->date;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Adjustment Found!"]);
+    }
+
+    public function approver_adjustment_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $admin_role = $admin->role_id;
+            if (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
+                    ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.employee_type_id as type_id')
+                    ->where('employee_attendance_adjustments.reporter_id', $admin_id)
+                    ->where('employee_attendance_adjustments.status', 1);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+            }
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->get();
+                $data = array();
+                foreach ($employee_leaves as $employee_leave) {
+                    $datum = array();
+                    $datum['id'] = $employee_leave->id;
+                    $datum['date'] = $employee_leave->date;
+                    $datum['applied_reason'] = $employee_leave->applied_reason;
+                    $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                    $datum['status_id'] = $employee_leave->status_id;
+                    $datum['status'] = $employee_leave->status;
+                    if ($employee_leave->type_id == 1) {
+                        $admin = Admin::find($employee_leave->employee_id);
+                        if ($admin) {
+                            $datum['name'] = $admin->name;
+                            $datum['trax_id'] = $admin->trax_id;
+                            $datum['designation'] = $admin->designation;
+                            $data[] = $datum;
+                        }
+                    } elseif ($employee_leave->type_id == 2) {
+                        $rider = Rider::find($employee_leave->employee_id);
+                        if ($rider) {
+                            $datum['name'] = $rider->name;
+                            $datum['trax_id'] = $rider->trax_id;
+                            $datum['designation'] = "Rider";
+                            $data[] = $datum;
+                        }
+                    }
+                }
+                return response()->json(['status' => 0, 'approver_response' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Pending Adjustment For Approval!"]);
+        }
+    }
+
+    public function adjustment_approve(Request $request)
+    {
+        $rules = [
+            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    $employee_leaves->status = 2;
+                    $employee_leaves->updated_by = $admin_id;
+                    if ($employee_leaves->employee_type_id == 1) {
+                        $user = Admin::find($employee_leaves->employee_id);
+                    } else {
+                        $user = Rider::find($employee_leaves->employee_id);
+                    }
+                    if (!$user) {
+                        return response()->json(['status' => 1, 'message' => "Invalid Employee ID"]);
+                    }
+                    $shift = EmployeeShift::find($user->shift_id);
+                    $date = Carbon::parse($employee_leaves->date)->format("Y-m-d");
+                    $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
+                        ->where('employee_type', $employee_leaves->employee_type_id)
+                        ->whereDate('attendance_date', $date);
+                    if ($mark_attendance->exists()) {
+                        $mark_attendance = $mark_attendance->first();
+                    } else {
+                        $mark_attendance = new EmployeeAttendance();
+                    }
+                    $mark_attendance->attendance_date = $date;
+                    $mark_attendance->employee_id = $employee_leaves->employee_id;
+                    $mark_attendance->employee_type = $employee_leaves->employee_type_id;
+                    $mark_attendance->clock_in_latitude = "24.85758065592256";
+                    $mark_attendance->clock_in_longitude = "67.12476908400743";
+                    $mark_attendance->clock_out_latitude = "24.85758065592256";
+                    $mark_attendance->clock_out_longitude = "67.12476908400743";
+                    if ($shift) {
+                        $mark_attendance->clock_in_datetime = $date . ' ' . $shift->start_time;
+                        $mark_attendance->clock_out_datetime = $date . ' ' . $shift->end_time;
+                    } else {
+                        $mark_attendance->clock_in_datetime = $date . ' 09:00:00';
+                        $mark_attendance->clock_out_datetime = $date . ' 18:00:00';
+                    }
+                    $mark_attendance->leave_status = 2;
+                    $mark_attendance->save();
+
+                    $attendance_action = new EmployeeAttendanceActionLog();
+                    $attendance_action->employee_id = $mark_attendance->employee_id;
+                    $attendance_action->employee_type = $mark_attendance->employee_type;
+                    $attendance_action->action_id = 1;
+                    $attendance_action->action_date = $mark_attendance->clock_in_datetime;
+                    $attendance_action->attendance_date = $date;
+                    $attendance_action->latitude = $mark_attendance->clock_in_latitude;
+                    $attendance_action->longitude = $mark_attendance->clock_in_longitude;
+                    $attendance_action->save();
+
+                    $attendance_action = new EmployeeAttendanceActionLog();
+                    $attendance_action->employee_id = $mark_attendance->employee_id;
+                    $attendance_action->employee_type = $mark_attendance->employee_type;
+                    $attendance_action->action_id = 2;
+                    $attendance_action->action_date = $mark_attendance->clock_out_datetime;
+                    $attendance_action->attendance_date = $date;
+                    $attendance_action->latitude = $mark_attendance->clock_out_latitude;
+                    $attendance_action->longitude = $mark_attendance->clock_out_longitude;
+                    $attendance_action->save();
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(17, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return response()->json(['status' => 0, 'message' => "Adjustment request has been approved!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Adjustment Found!"]);
+            }
+        }
+    }
+
+    public function adjustment_reject(Request $request)
+    {
+        $rules = [
+            'adjustment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_attendance_adjustments,id'],
+            'rejection_reason' => ['required', 'max:500'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $admin_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    $employee_leaves->status = 3;
+                    $employee_leaves->rejected_reason = $request->rejection_reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(17, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return response()->json(['status' => 0, 'message' => "Adjustment request has been rejected!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
+    }
+
+    public function login_v4(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($user->exists()) {
+                $user = $user->first();
+                if($user->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
+                if (Hash::check($request->input('pin'), $user->password)) {
+                    $employee = Employee::where('trax_id', $user->trax_id);
+                    $information = array();
+
+                    $information['id'] = $user->id;
+                    $information['name'] = $user->name;
+                    $information['phone'] = $user->phone_number;
+                    $information['cnic'] = $user->cnic;
+                    $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                    if($user->designation_id){
+                        $user_department = $user->Edesignation->department_id;
+                    }else{
+                        $user_department = $user->role->department_id;
+                    }
+                    $information['sales_person'] = ($user_department == 7) ? 1 : 0;
+                    if ($employee->exists()) {
+                        $employee = $employee->first();
+                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                    } else {
+                        $information['address'] = '';
+                    }
+                    $information['role'] = 'staff';
+                    if($request->has('device_token')){
+                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
+                        $employee_device_token = new EmployeeDeviceToken();
+                        $employee_device_token->employee_id = $user->id;
+                        $employee_device_token->employee_type_id = 1;
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
+
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $user->id);
+
+                    if ($reporting_location->exists()) {
+                        $reporting_location = $reporting_location->first();
+                        $information['distance'] = $reporting_location->radius;
+                        $information['lat'] = $reporting_location->lat;
+                        $information['long'] = $reporting_location->long;
+                    }else{
+                        $information['distance'] = 0;
+                        $information['lat'] = 0;
+                        $information['long'] = 0;
+                    }
+
+                    if ($user->api_token) {
+                        $information['api_token'] = $user->api_token;
+                    } else {
+                        $api_token = uniqid(base64_encode(str_random(60)));
+
+                        $user->api_token = $api_token;
+
+                        $user->save();
+
+                        $information['api_token'] = $api_token;
+                    }
+
+                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
+        }
+    }
+
+    public function admin_attachments_check(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $data = array();
+            $employee_id = $request->employee_id;
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+                $data["cv"] = ($attachments->cv != NULL) ? 1 : 0;
+                $data["cnic"] = ($attachments->cnic != NULL) ? 1 : 0;
+                $data["photo"] = ($attachments->photo != NULL) ? 1 : 0;
+                $data["academic"] = ($attachments->academic != NULL) ? 1 : 0;
+                $data["experience"] = ($attachments->experience != NULL) ? 1 : 0;
+                $data["last_pay_slip"] = ($attachments->last_pay_slip != NULL) ? 1 : 0;
+                $data["nikkah_nama"] = ($attachments->nikkah_nama != NULL) ? 1 : 0;
+                $data["cnic_spouse"] = ($attachments->cnic_spouse != NULL) ? 1 : 0;
+                $data["child_b_form"] = ($attachments->child_b_form != NULL) ? 1 : 0;
+                $data["cnic_nominee"] = ($attachments->cnic_nominee != NULL) ? 1 : 0;
+                $data["utility_bill"] = ($attachments->utility_bill != NULL) ? 1 : 0;
+                $data["affidavit"] = ($attachments->affidavit != NULL) ? 1 : 0;
+                $data["cheque"] = ($attachments->cheque != NULL) ? 1 : 0;
+
+                return response()->json(['status' => 0, "data" => $data]);
+            } else {
+                return response()->json(['status' => 1, "message" => "Attachment Not Found!"]);
+            }
+        }
+    }
+
+    public function get_line_managers(Request $request)
+    {
+        $rules = [
+            //Attachments
+            'department_id' => ['required', 'integer', 'digits_between:1,10'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+                ->leftjoin('cities as h', 'h.id', 'c.hub_id')
+                ->where('is_line_manager', 1)
+                ->where('department_id', $request->department_id)
+                ->select(['employees.name as name', 'employees.trax_id as trax_id', 'employees.id as id', 'h.name as hub as hub']);
+            if($line_managers->exists()){
+                $line_managers = $line_managers->get();
+                $data = array();
+                foreach ($line_managers as $line_manager){
+                    $datum = array();
+                    $datum["id"] = $line_manager->id;
+                    $datum["name"] = $line_manager->name." "."(".$line_manager->trax_id. " | ".$line_manager->hub.")";
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'line_managers' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
 
     }
