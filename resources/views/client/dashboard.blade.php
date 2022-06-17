@@ -16,11 +16,19 @@
                                 @include('client.inc.messages')
                                 <div class="col mt-2">
                                     <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="form-group">
-                                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                                        </div>
 
-                                        <div class="col-4">
+                                        <div class="col-3">
+                                           <div class="form-group">
+                                               <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                           </div>
+                                       </div>
+
+                                        <div class="col-auto">
+                                            <div class="form-group">
+                                                <input type="text" name="phone_number" class="form-control phone_number" placeholder="Phone Number (Full)">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                       <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -30,7 +38,7 @@
                                                 <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
                                             </div>
                                         </div>
-                                        <div class="col-4">
+                                        <div class="col-3">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,7 +49,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group col-md-5 mt-2 justify-content-center">
+                                        <div class="form-group col-md-3 mt-2 justify-content-center">
                                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         </div>
                                     </form>
@@ -51,6 +59,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S No.</th>
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Business Category</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
@@ -501,7 +510,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
@@ -516,6 +525,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('#track_form .phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -942,10 +957,11 @@
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
+                        d.phone_number = $('input[name="phone_number"]').val();
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                order: [[2, 'desc']],
 
                 columns: [
                     {
@@ -968,6 +984,7 @@
                             return '';
                         }
                     },
+                    {data: 'shipment_id', name: 'shipments.id', visible: false},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -1042,53 +1059,54 @@
                         var column = this;
                         var header = column.header();
 
-
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
-                            $(td).appendTo($(search));
-                        } else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_status')) {
-                            $(payment_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.payment_module')) {
-                                $(payment_mode).appendTo($(search))
+                        if (column.visible()) {
+                            if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
+                                $(td).appendTo($(search));
+                            } else if ($(header).is('.status')) {
+                                $(status_select).appendTo($(search))
                                     .on('change', function () {
                                         column.search($(this).val(), false, false, true).draw();
                                     }).wrap(td);
-                        }  else if ($(header).is('.business_category')) {
-                            $(business_category).appendTo($(search))
-                                .on('change', function () {
+                            } else if ($(header).is('.payment_status')) {
+                                $(payment_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.payment_module')) {
+                                    $(payment_mode).appendTo($(search))
+                                        .on('change', function () {
+                                            column.search($(this).val(), false, false, true).draw();
+                                        }).wrap(td);
+                            }  else if ($(header).is('.business_category')) {
+                                $(business_category).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.service_type')) {
+                                $(service_drop_select).appendTo($(search))
+                                    .on('change', function () {
+                                        console.log($(this).val())
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.product_type')) {
+                                $(product_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            } else if ($(header).is('.booked_by')) {
+                                $(user_select).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
+                            }
+                            else {
+                                var current = $(input).appendTo($(search)).on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.service_type')) {
-                            $(service_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    console.log($(this).val())
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.product_type')) {
-                            $(product_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.booked_by')) {
-                            $(user_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                                }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
+                                if (column.search()) {
+                                    current.val(column.search());
+                                }
                             }
                         }
                     });
@@ -1517,8 +1535,9 @@
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
                 var booking_from_date = $('#track_form #booking_from_date').val();
                 var booking_to_date = $('#track_form #booking_to_date').val();
+                var phone_number = $('#track_form .phone_number').val();
 
-                if (tracking_numbers != ''  || (booking_from_date != '' && booking_to_date != '')) {
+                if (tracking_numbers != ''  || (booking_from_date != '' && booking_to_date != '' || phone_number != '' )) {
                     table.draw();
                 }
 

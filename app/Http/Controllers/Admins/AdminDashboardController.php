@@ -36,6 +36,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DiscountWeightCharge;
 use App\Http\Models\DuplicateUser;
+use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HistoryDiscountWeightCharge;
 use App\Http\Models\HR\Employee;
@@ -1810,7 +1811,7 @@ class AdminDashboardController extends Controller
     {
 
         $user = User::find($id);
-        $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+        $dws_weight = DwsWeightCharges::where('user_id', $id);
 
         $on_dws_charges = null;
         $ol_dws_charges = null;

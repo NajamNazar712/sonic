@@ -17,7 +17,7 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="col-5 mt-1">
+                                        <div class="col-4 mt-1">
                                             <div class="form-group input-group ">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -29,7 +29,7 @@
                                                        id="search_date_from" placeholder="Select From Date">
                                             </div>
                                         </div>
-                                        <div class="col-5 mt-1">
+                                        <div class="col-4 mt-1">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,16 +41,58 @@
                                                        id="search_date_to" placeholder="Select To Date">
                                             </div>
                                         </div>
+                                        <div class="col-4 mt-1">
+                                            <div class="form-group">
+                                                <select name="search_line_manager" id="search_line_manager" class="select2 form-control " style="width: 100%">
+                                                    @foreach($line_managers as $line_manager)
+                                                        <option value="{{$line_manager->id}}">{{$line_manager->name}} ({{$line_manager->trax_id}} | {{$line_manager->hub}})</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
 
-                                        <div class="col-2 mt-1">
+                                        <input type="hidden" id="filter_line_manager" value="0">
+                                        <div class="col-4 mt-1">
                                             <div class="form-group">
                                                 <button type="button" id="search_filter_btn"
-                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                        class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
                                                     Search
                                                 </button>
                                             </div>
                                         </div>
                                     </form>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8"></div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary border-primary round"><a
+                                                                data-action="collapse">Legend
+                                                            <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
+                                                <input type="hidden" id="legend_filter">
+
+                                                <table class="table mb-0">
+                                                    <tbody>
+                                                    <tr style="background-color: yellow; color:#010a10;">
+                                                        <td class="align-middle" id="filter_line_manager_btn">Line Manager</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -71,6 +113,7 @@
                                     <th class="border-primary border-darken-1">Incentive Amount</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
+                                    <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
@@ -597,6 +640,50 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="updateLineManagerModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="updateLineManagerModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Update Line Manager</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_directory.update_line_manager')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="updateLineManagerForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <div class="form-group">
+                            <select name="line_manager_id" id="line_manager_id" class="select2 form-control "
+                                    data-rule-required="true" data-msg-required="Line Manager is required"
+                                    style="width: 100%">
+                                @foreach($line_managers as $line_manager)
+                                    <option value="{{$line_manager->id}}">{{$line_manager->name}}
+                                        ({{$line_manager->trax_id}} | {{$line_manager->hub}})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <select name="new_line_manager_id" id="new_line_manager_id" class="select2 form-control "
+                                    data-rule-required="true" data-msg-required="New Line Manager is required"
+                                    style="width: 100%">
+                            </select>
+                        </div>
+
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary" value="edit">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -605,6 +692,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
+    <style>
+        .is_line_manager{
+            background-color: yellow;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -953,6 +1045,58 @@
                 $('#last_working_day').val('');
             });
 
+            $("#search_line_manager").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Line Manager",
+                allowClear: true,
+                width: '100%',
+            });
+
+            $("#updateLineManagerForm #line_manager_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Line Manager",
+                width: '100%',
+                dropdownParent: $('#updateLineManagerModal')
+            }).bind('change', function () {
+                id = $(this).val();
+                $.ajax({
+                    url: '{{route("admin.human_resource.employee_directory.get_line_managers")}}',
+                    method: 'POST',
+                    data: {
+                        'line_manager_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 0) {
+                            $("#updateLineManagerForm #new_line_manager_id").html('');
+                            $.each(data.line_managers, function (i, v) {
+                                $("#updateLineManagerForm #new_line_manager_id").append("<option value='" + v.id + "'>" + v.name + " (" + v.trax_id + " | " + v.hub + ")</option>");
+                            });
+                            $("#updateLineManagerForm #new_line_manager_id").val('').trigger('change');
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center',
+                            });
+                        }
+                    });
+            });
+
+            $("#updateLineManagerForm #new_line_manager_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select New Line Manager",
+                width: '100%',
+                dropdownParent: $('#updateLineManagerModal'),
+            });
+
+            $("#updateLineManagerForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
 
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
@@ -980,6 +1124,7 @@
                             head.push('Incentive Amount');
                             head.push('Designation');
                             head.push('Department Name');
+                            head.push('Line Manager');
                             head.push('IBAN No.');
                             head.push('Zone Name');
                             head.push('Request/Document Status');
@@ -1002,6 +1147,7 @@
                                 row.push(values.incentive_amount);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
+                                row.push(values.line_manager);
                                 row.push(values.iban);
                                 row.push(values.zone_name);
                                 row.push(values.request_status);
@@ -1017,10 +1163,21 @@
                     return {body: body, header: head};
                 }
             });
+
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                        @if (session('role_id') == 1 || in_array(712, session('permissions')))
+                    {
+                        text: '<i class="la la-refresh"></i> Update Line Manager',
+                        className: 'btn btn-primary',
+                        action: function (e, dt, node, config) {
+                            $("#updateLineManagerForm #line_manager_id").val('').trigger('change');
+                            $("#updateLineManagerModal").modal('show');
+                        }
+                    },
+                        @endif
                     {
                         extend: 'excel',
                         title: 'Employee Directory',
@@ -1240,6 +1397,8 @@
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_line_manager = $('#search_line_manager').val();
+                        d.filter_line_manager = $('#filter_line_manager').val();
                     }
                 },
                 order: [[18, 'desc']],
@@ -1260,6 +1419,7 @@
                     {data: 'incentive_amount', name: 'r.incentive_amount', class: 'align-middle incentive_amount'},
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
+                    {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
@@ -1409,6 +1569,11 @@
 
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $("#filter_line_manager_btn").on('click',function (){
+                $("#filter_line_manager").val(1);
+                table.draw();
             });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {

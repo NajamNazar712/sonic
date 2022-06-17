@@ -120,8 +120,9 @@ class DeliveryController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
+        $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $service_type = BookingType::all();
-        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs]);
     }
 
     public function pending_list(Request $request)
@@ -172,6 +173,10 @@ class DeliveryController extends Controller
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        if ($hub = $request->get('search_hub')) {
+            $shipments = $shipments->where('h.id', '=', $hub);
         }
 
         $datatables = Datatables::of($shipments)
@@ -4950,6 +4955,11 @@ class DeliveryController extends Controller
                     $dropdown .= $closed_status;
                 }
 
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status != 2){
+                    $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
+                    $dropdown .= $reconcile_to_resolved;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4972,6 +4982,7 @@ class DeliveryController extends Controller
                 if ($result->sdn_type == 1 && $result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions')))) {
                     $dropdown .= $reconcile_to_deposit;
                 }
+
 
                 if ($result->status == 0 && $result->adjusted == 0 && (session('role_id') == 1 || in_array(605, session('permissions')))) {
                     if ($result->sdn_type == 1) {
@@ -5102,6 +5113,8 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
         }
     }
+
+
 
     public function get_petty_cash_statements(Request $request)
     {
@@ -6700,13 +6713,15 @@ class DeliveryController extends Controller
 
                     $shipment->save();
 
+                    $status_reason_id = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',12)->orderBy('id','desc')->pluck('status_reason_id')->first();
+
                     $new_intercept_request = InterceptReBookRequest::where('shipment_id', $shipment_id)->update([
                         'status' => 2,
                         'updated_by' => Auth::id(),
                         'updated_by_date' => Carbon::now()
                     ]);
 
-                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, $remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, $status_reason_id, $remarks, NULL, Auth::id());
                 }
             }
 
@@ -7962,19 +7977,67 @@ class DeliveryController extends Controller
         }
     }
 
+    public function resolved(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                $station_deposit_note->status = 2;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Resolved']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
+        }
+    }
+
     public function bulk_closed(Request $request){
         $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
 
         if ($station_deposit_notes->exists()) {
             $station_deposit_notes = $station_deposit_notes->get();
             foreach($station_deposit_notes as $station_deposit_note){
-                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0 && $station_deposit_note->status == 1) {
-                    $station_deposit_note->status = 3;
-                    $station_deposit_note->closed_at = Carbon::now();
-                    $station_deposit_note->save();
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0)
+                {
+                    if($station_deposit_note->status == 1) {
+                        $station_deposit_note->status = 3;
+                        $station_deposit_note->closed_at = Carbon::now();
+                        $station_deposit_note->save();
+                        return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+                    }else{
+                        return response()->json(['status'=> 0,'error'=>"Status Should Be Deposited First"]);
+                    }
+                }
+                else{
+                    return response()->json(['status'=> 0,'error'=>"Difference Amount is pending"]);
                 }
             }
-            return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+        }
+    }
+
+    public function bulk_resolved(Request $request){
+        $station_deposit_notes = StationDepositNote::whereIn('id',$request->sdn_ids);
+        $return_id = "";
+
+        if ($station_deposit_notes->exists()) {
+            $station_deposit_notes = $station_deposit_notes->get();
+            foreach($station_deposit_notes as $station_deposit_note){
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                    $station_deposit_note->status = 2;
+                    $station_deposit_note->closed_at = Carbon::now();
+                    $station_deposit_note->save();
+                }else{
+                    $return_id.=  "ID = ".$station_deposit_note->id.", ";
+                }
+            }
+            if(empty($return_id)) {
+                return response()->json(['status' => 1, 'success' => "Station Deposit Notes Status Updated To Resolved"]);
+            }else{
+                return response()->json(['status' => 0, 'error' => "Difference Amount is pending"]);
+            }
 
         } else {
             return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);

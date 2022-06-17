@@ -65,6 +65,11 @@ class AdminERFController extends Controller
             $erf = $erf->where('dp.id', session('department_id'));
         }
 
+        if(session('role_id') != 1)
+        {
+            $erf = $erf->whereIn('h.id',session('hubs'));
+        }
+
         $datatables = Datatables::of($erf)
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;

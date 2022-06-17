@@ -1201,7 +1201,7 @@ class RiderManagementController extends Controller
 
                 $delivery_date = $date_to;
                 $delivery_date = Carbon::parse($delivery_date)->toDateString();
-                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->whereIn('status', [0,1]);
+                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereBetween('pending_for_verification_at', [$date_from, $date_to])->whereIn('status', [0,1]);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
@@ -1380,7 +1380,7 @@ class RiderManagementController extends Controller
 
                     $riders_incentive = new RidersIncentive();
                     $riders_incentive->rider_id = $rider->id;
-                    $riders_incentive->date = Carbon::now();
+                    $riders_incentive->date = $date;
                     $riders_incentive->pickup_shipments = $pickup_shipments_count;
                     
                     $riders_incentive->pickup_incentive = $incentive_amount; //$incentive_amount

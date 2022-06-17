@@ -1085,6 +1085,9 @@ class Permission
 
             'human_resource.reporting_location.index' => 478,
             'human_resource.reporting_location.list' => 478,
+
+            'human_resource.designation.hub.update' => 718,
+
             'human_resource.designation.index' => 481,
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
@@ -1112,9 +1115,13 @@ class Permission
             'human_resource.fnf.hr.index' => 576,
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
+            'human_resource.fnf.reopen' => 713,
 
             'human_resource.employee_shifts.index' => 592,
             'human_resource.employee_shifts.list' => 592,
+
+            'human_resource.adjustment.index' => 717,
+            'human_resource.adjustment.list' => 717,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,
@@ -1224,6 +1231,8 @@ class Permission
             'settings.lost_shipment_shippers.index' => 708,
             'settings.lost_shipment_admins.index' => 710,
 
+            'settings.invoice_against_return_delivered_shipper.index' => 716,
+			'settings.undelivered_sms_hub_wise.index' => 714,
             
 
             

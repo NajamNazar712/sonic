@@ -380,6 +380,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_consignee_phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
