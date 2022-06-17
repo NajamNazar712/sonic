@@ -14,8 +14,8 @@ class AddColCiniRelation extends Migration
     public function up()
     {
         Schema::table('shipments', function (Blueprint $table) {
-            $table->string('relation')->nullable();
-            $table->string('cnic')->nullable();
+            $table->string('consignee_relation')->nullable();
+            $table->string('consignee_cnic')->nullable();
         });
     }
 
@@ -27,8 +27,8 @@ class AddColCiniRelation extends Migration
     public function down()
     {
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('relation');
-            $table->dropColumn('cnic');
+            $table->dropColumn('consignee_relation');
+            $table->dropColumn('consignee_cnic');
         });
     }
 }
