@@ -129,6 +129,10 @@ class ConsigneeAPIController extends Controller
             $consignee_otp->otp = bcrypt($otp_pin);
             $consignee_otp->save();
             NotificationsController::trax_otp_verification($request->input('phone_number'), $otp_pin);
+
+            $data = array("otp"=>$otp_pin,"phone_number"=>$request->phone_number);
+            NotificationsController::send(138, $rider, $data);
+
             return response()->json(['status' => 0, 'otp_message' => 'OTP has been sent to your registered number']);
         }
     }

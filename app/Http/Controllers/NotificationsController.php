@@ -9450,9 +9450,8 @@ class NotificationsController extends Controller
         if (strpos($body, '[pin]') !== FALSE) {
             $body = str_replace('[pin]', $pin, $body);
         }
-
         $to = $phone_number;
-        self::sms($body, $to, 1);
+        self::sms_otp($body, $to, "Consignee", $pin, 1);
     }
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
