@@ -967,6 +967,13 @@
 
             });
 
+            if ($('.cnic').length > 0) {
+                //do something
+                $(this).attr('data-rule-required', 'true');
+                $(this).attr('data-msg-required', 'CNIC is required');
+                console.log('got yea');
+            }
+
             $('body').on('click', 'input.open_box', function(){
                 var open_box_id = $(this).parents('tr').attr('id');
                 var ob_index = $.inArray(open_box_id, open_box_ids);
