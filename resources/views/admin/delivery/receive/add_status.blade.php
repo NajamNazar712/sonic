@@ -56,8 +56,8 @@
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
-                            <th class="border-primary border-darken-1">CNIC</th>
-                            <th class="border-primary border-darken-1">Relation</th>
+                            <th class="border-primary border-darken-1" width="250">CNIC</th>
+                            <th class="border-primary border-darken-1" width="250">Relation</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Open Box</th>
@@ -771,7 +771,7 @@
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'cnic',name: 'cnic', class: 'align-middle cnic'},
-                    {data:'relation',name: 'relation', class: 'relation'},
+                    {data:'relation',name: 'relation', class: 'align-middle relation'},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
                     {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
@@ -856,7 +856,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box') || $(header).is('.consolidation')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box') || $(header).is('.consolidation')|| $(header).is('.relation')|| $(header).is('.cnic')) {
                             $(td).appendTo($(search));
                         }
                         else {

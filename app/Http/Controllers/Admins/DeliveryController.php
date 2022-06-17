@@ -1889,8 +1889,8 @@ class DeliveryController extends Controller
                     return '-';
                 }
                 else
-                {
-                    $cnic = '<input class="form-control form-control-sm" name="cnic[]" placeholder="Enter CNIC" value="">';
+                {   $mask = "$(this).inputmask({'mask': '99999-9999999-9', 'clearIncomplete': true})";
+                    $cnic = '<input class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[]" placeholder="Enter CNIC" value="" data-rule-required="true" data-msg-required="CNIC is required">';
                     return $cnic;
                 }
             })
@@ -1901,7 +1901,7 @@ class DeliveryController extends Controller
                 }
                 else
                 {
-                    $relation = '<input class="form-control form-control-sm" name="relation[]" placeholder="Father,Brother" value=" ">';
+                    $relation = '<input class="form-control form-control-sm" name="relation[]" placeholder="Enter Relation" value="" data-rule-required="true" data-msg-required="Relation is required">';
                     return $relation;
                 }
             })
