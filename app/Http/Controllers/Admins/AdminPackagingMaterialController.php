@@ -701,32 +701,33 @@ class AdminPackagingMaterialController extends Controller
                     $shipment_product->courier_id = 1;
                     $shipment_product->save();
 
-                    $this->add_product_location($shipment->id, $product->id, $item->quantity, $trax_address->id, 1);
+//                    $this->add_product_location($shipment->id, $product->id, $item->quantity, $trax_address->id, 1);
 
-//                        $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
-//                        if($existing_pending_picking){
-//                            $new_quantity = $existing_pending_picking->quantity + $item->quantity;
-//                            $existing_pending_picking->quantity = $new_quantity;
-//                            $existing_pending_picking->save();
-//
-//                            $pending_picking_shipment = new WmsPendingPickingShipments();
-//                            $pending_picking_shipment->picking_id = $existing_pending_picking->id;
-//                            $pending_picking_shipment->shipment_id = $shipment->id;
-//                            $pending_picking_shipment->courier_id = 1;
-//                            $pending_picking_shipment->save();
-//                        }
-//                        else{
-//                            $pending_picking = new WmsPendingPicking();
-//                            $pending_picking->product_id = $product->id;
-//                            $pending_picking->quantity = $item->quantity;
-//                            $pending_picking->save();
-//
-//                            $pending_picking_shipment = new WmsPendingPickingShipments();
-//                            $pending_picking_shipment->picking_id = $pending_picking->id;
-//                            $pending_picking_shipment->shipment_id = $shipment->id;
-//                            $pending_picking_shipment->courier_id = 1;
-//                            $pending_picking_shipment->save();
-//                        }
+                    $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('hub_id', $warehouse_hub_id)->where('status', 0)->first();
+                    if($existing_pending_picking){
+                        $new_quantity = $existing_pending_picking->quantity + $item->quantity;
+                        $existing_pending_picking->quantity = $new_quantity;
+                        $existing_pending_picking->save();
+
+                        $pending_picking_shipment = new WmsPendingPickingShipments();
+                        $pending_picking_shipment->picking_id = $existing_pending_picking->id;
+                        $pending_picking_shipment->shipment_id = $shipment->id;
+                        $pending_picking_shipment->courier_id = 1;
+                        $pending_picking_shipment->save();
+                    }
+                    else{
+                        $pending_picking = new WmsPendingPicking();
+                        $pending_picking->product_id = $product->id;
+                        $pending_picking->hub_id = $warehouse_hub_id;
+                        $pending_picking->quantity = $item->quantity;
+                        $pending_picking->save();
+
+                        $pending_picking_shipment = new WmsPendingPickingShipments();
+                        $pending_picking_shipment->picking_id = $pending_picking->id;
+                        $pending_picking_shipment->shipment_id = $shipment->id;
+                        $pending_picking_shipment->courier_id = 1;
+                        $pending_picking_shipment->save();
+                    }
                     $serial++;
                     $current_stock = WmsCurrentStock::where('product_id', $product->id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id)->first();
                     $new_available_stock = $current_stock->stock - $item->quantity;
@@ -1313,7 +1314,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
@@ -1334,7 +1335,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
