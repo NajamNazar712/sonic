@@ -1890,7 +1890,7 @@ class DeliveryController extends Controller
                 }
                 else
                 {
-                    $cnic = '<input class="form-control form-control-sm" name="cnic" placeholder="Enter CNIC" value="">';
+                    $cnic = '<input class="form-control form-control-sm" name="cnic[]" placeholder="Enter CNIC" value="">';
                     return $cnic;
                 }
             })
@@ -1901,7 +1901,7 @@ class DeliveryController extends Controller
                 }
                 else
                 {
-                    $relation = '<input class="form-control form-control-sm" name="relation" placeholder="Father,Brother" value=" ">';
+                    $relation = '<input class="form-control form-control-sm" name="relation[]" placeholder="Father,Brother" value=" ">';
                     return $relation;
                 }
             })
