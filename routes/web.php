@@ -4007,5 +4007,17 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('store','Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');
     });
 
+    Route::prefix('return')->name('return.')->group(function(){
+        Route::get('confirmation_pending','Retail\RetailReturnController@confirmation_pending')->name('confirmation_pending.index');
+        Route::get('confirmation_pending_list','Retail\RetailReturnController@confirmation_pending_list')->name('confirmation_pending.list');
+        Route::get('reattempt_history','Retail\RetailReturnController@reattempt_history')->name('reattempt_history.index');
+        Route::get('reattempt_history_list','Retail\RetailReturnController@reattempt_history_list')->name('reattempt_history.list');
+        Route::post('pending_reattempt_nsa','Retail\RetailReturnController@pending_reattempt_nsa')->name('pending_reattempt_nsa');
+        Route::post('mark_reattempt','Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
+        
+    });
+
+    
+
 });
 
