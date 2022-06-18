@@ -126,7 +126,7 @@
                         <div class="row">
                             <div class="col">
                                 <div class="card">
-                                    <div class="card-content border rounded">
+                                    <div class="card-content border rounded cursor-pointer">
                                         <div class="card-body">
                                             <div class="media d-flex">
                                                 <div class="align-self-center">
@@ -142,7 +142,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-primary">
+                                <div class="card bg-gradient-directional-primary cursor-pointer">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
@@ -159,7 +159,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card bg-gradient-directional-info">
+                                <div class="card bg-gradient-directional-info cursor-pointer">
                                     <div class="card-content">
                                         <div class="card-body">
                                             <div class="media d-flex">
