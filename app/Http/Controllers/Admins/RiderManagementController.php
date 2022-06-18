@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
@@ -35,7 +36,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use DB;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class RiderManagementController extends Controller
 {
@@ -1425,6 +1425,7 @@ class RiderManagementController extends Controller
 
     public function rider_otp_update(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),547);
         $settings = GlobalSettings::where('type','rider_otp');
         if($settings->doesntExist())
         {
