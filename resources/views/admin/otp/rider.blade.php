@@ -17,8 +17,8 @@
                     @csrf
                     <div class="row justify-content-center">
                         <div class="input-group col-3">
-                            <label class="mr-2 font-medium-3"><b>Rider OTP:</b></label>
-                            <div class="form-group ml-1">
+                            <label class="mr-2 font-medium-3"><b>Rider Login OTP:</b></label>
+                            <div class="form-group">
                                 <input type="checkbox" name="rider_otp_toggle" id="rider_otp_toggle" class="switchery rider_otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
                             </div>
                         </div>
