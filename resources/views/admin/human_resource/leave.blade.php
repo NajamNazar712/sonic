@@ -154,6 +154,17 @@
                                        id="leave_request_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                                 <label id="leave_request_reason-error" class="danger w-100" for="leave_request_reason"></label>
                             </div>
+                            <div class="col-6">
+                                <select name="leave_type" id="leave_type" class="form-control">
+                                    @foreach ($leave_types as $leave_type)
+                                        <option value="{{$leave_type->id}}">{{$leave_type->name}}</option>
+                                    @endforeach
+                                </select>
+                                <textarea class="form-control" placeholder="Reasons of Leaves"
+                                       name="leave_request_reason"
+                                       id="leave_request_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                <label id="leave_request_reason-error" class="danger w-100" for="leave_request_reason"></label>
+                            </div>
 
                             <div class="col-12">
                                 <button type="submit"
