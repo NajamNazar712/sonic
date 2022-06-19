@@ -1163,6 +1163,13 @@ class Permission
 
 			'admin_otp.index' => 527,
             'admin_otp.list' => 527,
+
+            'admin_otp.update' => 722,
+
+            'rider_otp.index' => 563,
+            'rider_otp.list' => 563,
+
+            'rider_otp.update' => 721,
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,

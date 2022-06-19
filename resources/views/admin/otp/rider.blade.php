@@ -1,10 +1,10 @@
 
 @extends('admin.layout.master')
-@section('title','Admin OTP')
+@section('title','Rider OTP (Login & Delivery Note)')
 
 @section('content')
     <h1 class="mb-1">
-        Admin OTP
+        Rider OTP (Login & Delivery Note)
     </h1>
 
     <div class="card">
@@ -12,14 +12,14 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                @if(session('role_id') == 1 || in_array(722,session('permissions')))
-                <form action="{{route('admin.admin_otp.update')}}" method="post" novalidate="novalidate" id="admin_otp_form">
+                @if(session('role_id') == 1 || in_array(721,session('permissions')))
+                <form action="{{route('admin.rider_otp.update')}}" method="post" novalidate="novalidate" id="rider_otp_form">
                     @csrf
                     <div class="row justify-content-center">
                         <div class="input-group col-3">
-                            <label class="mr-2 font-medium-3"><b>Admin OTP:</b></label>
-                            <div class="form-group ml-1">
-                                <input type="checkbox" name="admin_otp_toggle" id="admin_otp_toggle" class="switchery admin_otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
+                            <label class="mr-2 font-medium-3"><b>Rider Login OTP:</b></label>
+                            <div class="form-group">
+                                <input type="checkbox" name="rider_otp_toggle" id="rider_otp_toggle" class="switchery rider_otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
                             </div>
                         </div>
                     </div>
@@ -32,6 +32,7 @@
                 </form>
                 @endif
 
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -39,8 +40,10 @@
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Login OTP</th>
-                        <th class="border-primary border-darken-1">Reset Pin OTP</th>
                         <th class="border-primary border-darken-1">Last Login Attempt</th>
+                        <th class="border-primary border-darken-1">Reset Pin OTP</th>
+                        <th class="border-primary border-darken-1">Delivery Note OTP</th>
+                        <th class="border-primary border-darken-1">Delivery Note OTP Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -134,7 +137,7 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.admin_otp.list') }}',
+                    url: '{{ route('admin.rider_otp.list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
@@ -143,8 +146,10 @@
                         head.push('Name');
                         head.push('City');
                         head.push('Login OTP');
-                        head.push('Reset Pin OTP');
                         head.push('Last Login Attempt');
+                        head.push('Reset Pin OTP');
+                        head.push('Delivery Note OTP');
+                        head.push('Delivery Note OTP Date');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -152,8 +157,10 @@
                             row.push(values.name);
                             row.push(values.city);
                             row.push(values.otp);
-                            row.push(values.reset_pin_otp);
                             row.push(values.last_login_attempt);
+                            row.push(values.reset_pin_otp);
+                            row.push(values.delivery_note_otp);
+                            row.push(values.delivery_note_otp_date);
 
                             body.push(row);
                         });
@@ -170,7 +177,7 @@
             buttons: [
                 {
                     extend: 'excel',
-                    title: 'Admin OTP',
+                    title: 'Rider OTP',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -187,17 +194,19 @@
             },
             serverSide: true,
             ajax:{
-                url: '{{ route('admin.admin_otp.list') }}',
+                url: '{{ route('admin.rider_otp.list') }}',
             },
             rowId: 'shId',
-            order: [[5, 'desc']],
+            order: [[7, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'name', name: 'admins.name', class: 'align-middle name'},
+                {data: 'name', name: 'riders.name', class: 'align-middle name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
-                {data: 'otp', name: 'admins.otp', class: 'align-middle otp'},
-                {data: 'reset_pin_otp', name: 'admins.reset_pin_otp', class: 'align-middle reset_pin_otp'},
-                {data: 'last_login_attempt', name: 'admins.last_login_attempt', class: 'align-middle last_login_attempt'},
+                {data: 'otp', name: 'riders.otp', class: 'align-middle otp'},
+                {data: 'last_login_attempt', name: 'riders.last_login_attempt', class: 'align-middle last_login_attempt'},
+                {data: 'reset_pin_otp', name: 'riders.reset_pin_otp', class: 'align-middle reset_pin_otp'},
+                {data: 'delivery_note_otp', name: 'riders.delivery_note_otp', class: 'align-middle delivery_note_otp'},
+                {data: 'delivery_note_otp_date', name: 'riders.otp_date', class: 'align-middle delivery_note_otp_date'},
 
             ],
             rowCallback: function(row, data, index) {
@@ -230,9 +239,11 @@
                 });
                 this.api().table().columns.adjust();
             }
+
+
         });
 
-        $("#admin_otp_form").validate({
+        $("#rider_otp_form").validate({
             errorClass: 'danger',
             successClass: 'success',
             errorPlacement: function(error, element) {
@@ -241,7 +252,7 @@
             submitHandler: function (form) {
                 swal({
                     title: 'Are You Sure?',
-                    text: 'Select Yes to toggle Admin OTP!',
+                    text: 'Select Yes to toggle Rider OTP!',
                     icon: 'warning',
                     buttons: {
                         cancel: {
