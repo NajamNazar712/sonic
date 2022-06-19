@@ -15,8 +15,8 @@ class UpdateShipmentsForFuelFactorSurchargeTable extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->Decimal('esc_charges ')->after('fuel_surcharge')->nullable();
-            $table->Decimal('open_box_charges ')->after('fuel_surcharge')->nullable();
+            $table->Decimal('esc_charges')->after('fuel_surcharge')->nullable();
+            $table->Decimal('open_box_charges')->after('fuel_surcharge')->nullable();
             $table->Decimal('fuel_factor_surcharge')->after('fuel_surcharge')->nullable();
         });
     }
