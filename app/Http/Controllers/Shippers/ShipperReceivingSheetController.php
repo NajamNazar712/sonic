@@ -476,10 +476,15 @@ class ShipperReceivingSheetController extends Controller
                 '<td class="color primary"><strong>Quantity</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
-                            <td class="color primary"><strong>Pieces</strong></td>
+                            ';
+            if(in_array(session('user_id'),[6693,12412])){
+                $shipment_details .=
+                    ' <td class="color primary"><strong>Actual Weight</strong></td> ';
+            }
+            
+            $shipment_details .= '<td class="color primary"><strong>Pieces</strong></td>
                             <td class="color primary"><strong>Amount</strong></td>
-                          </tr>
-            ';
+                          </tr>';
 
             foreach ($receiving_sheet_shipments->orderBy('shipment_id')->get() as $receiving_sheet_shipment) {
                 $total_shipments++;
@@ -498,11 +503,13 @@ class ShipperReceivingSheetController extends Controller
 
                         $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
-                            <td>' . $shipment->estimated_weight . '</td>
-                            <td>' . $shipment->pieces . '</td>
+                            <td>' . $shipment->estimated_weight . '</td> ';
+                        if(in_array(session('user_id'),[6693,12412])) {
+                            $shipment_details_row_end .= '<td>' . $shipment->actual_weight . '</td> ';
+                        }
+                        $shipment_details_row_end .= '<td>' . $shipment->pieces . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
-                          </tr>
-                    ';
+                          </tr>';
                     }
                     else {
                         $number_of_items = $shipment->items->count();
