@@ -11570,7 +11570,7 @@ class RiderAPIController extends Controller
                             $rider->api_token = $api_token;
                         }
                         $rider->save();
-                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token]);
                     }else {
                         return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
                     }
