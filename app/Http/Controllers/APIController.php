@@ -20,6 +20,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\OneLink;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -4995,6 +4996,116 @@ class APIController extends Controller
         }
         else{
             return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
+    public function onelink_payment_billinquiry(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if(in_array($ip_address, $valid_ip_addresses)){
+                $flag = true;
+            }
+            else{
+                $flag = false;
+            }
+        }
+        else{
+            $flag = true;
+        }
+        if($flag){
+
+            $username = $request->header('username');
+            $password = $request->header('password');
+
+            // $rules = [
+            //     'username' => ['required', 'string', Rule::exists('one_links', 'username'),'min:3',"max:14"],
+            //     'password' => ['required', 'string', Rule::exists('one_links', 'password'),'min:3',"max:14"],
+            // ];
+            // $validate = Validator::make($request->header(), $rules, $this->messages);
+
+            // $validate->setAttributeNames($this->names);
+
+            // return json_encode($validate->errors()->all());
+
+            $authenticate = OneLink::where("username",$username)->where("active",0)->first();
+            
+            if($authenticate)
+            {
+                if(Hash::check($password, $authenticate->password))
+                {
+                    // getting body data
+                    $request_data['consumer_number'] = $request->input('consumer_number');
+                    $request_data['bank_mnemonic'] = $request->input('bank_mnemonic');
+                    $request_data['reserved'] = $request->input('reserved');
+
+                    $response_Code = "00";
+                    $consumer_Detail = "MUHAMMAD FEROZ";
+                    $bill_status = "U";
+                    $due_date = "081010";
+                    $amount_within_dueDate = "-0000000186900";
+                    $amount_after_dueDate = "+0000000202500";
+                    $billing_month = "0809";
+                    $date_paid = "20180301";
+                    $amount_paid = "000000202500";
+                    $tran_auth_Id = "202500";
+                    $reserved = "something, special, string, can, be, send, into, it.s";
+
+                    // explode consumer_prefx from consumer_number
+                    $consumer_prefx  = substr($request_data['consumer_number'],0,6);
+
+                    // explode tracking number from consumer_number
+                    $tracking_no  = substr($request_data['consumer_number'],6);
+
+                    $shipment_data = Shipment::where('tracking_number',$tracking_no)->first();
+
+                    return json_encode($shipment_data);
+
+                    if($shipment_data)
+                    {
+                        $response_Code = "00";
+                        $consumer_Detail = $shipment_data->consignee_name;
+                        
+                    }
+                    else{
+                        $response_Code = "01";
+
+                    }
+
+                    // consumer prefix is exist in one_links table provided by 1link
+
+                    $return_data['response_Code'] = $response_Code;
+                    $return_data['consumer_Detail'] = $consumer_Detail;
+                    $return_data['bill_status'] = $bill_status;
+                    $return_data['due_date'] = $due_date;
+                    $return_data['amount_within_dueDate'] = $amount_within_dueDate;
+                    $return_data['amount_after_dueDate'] = $amount_after_dueDate;
+                    $return_data['billing_month'] = $billing_month;
+                    $return_data['date_paid'] = $date_paid;
+                    $return_data['amount_paid'] = $amount_paid;
+                    $return_data['tran_auth_Id'] = $tran_auth_Id;
+                    $return_data['reserved'] = $reserved;
+
+                    return json_encode(['status' => 200, 'message' => 'Iquiry Data Found', 'result' =>  $return_data]);
+                }
+                else{
+                    // Unauthorized when password is incorrect
+                    return json_encode(['status' => 401 , 'message' => 'Unauthorized']);
+                }
+            }
+            else{
+                // Unauthorized! Invalid username or password when username and password both are incorrect
+                return json_encode(['status' => 401 , 'message' => 'Unauthorized! Invalid username or password']);
+            }
+        }
+        else{
+            // Access Forbidden! when ip is not not matched with given in above code in production environment
+            return ['status' => 403, 'message' => 'Access Forbidden!'];
         }
     }
 
