@@ -653,6 +653,8 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),544);
         $settings = GlobalSettings::where('type','admin_otp');
         if($settings->doesntExist())
         {
@@ -669,6 +671,10 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),545);
+        }
         $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.reset_pin_otp as reset_pin_otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->join('cities', 'admins.default_hub_id', '=', 'cities.id')
@@ -682,6 +688,8 @@ class UserManagementController extends Controller
 
     public function admin_otp_update(Request $request)
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),546);
         $settings = GlobalSettings::where('type','admin_otp');
         if($settings->doesntExist())
         {
