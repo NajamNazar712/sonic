@@ -26,7 +26,7 @@ class UpdateShipmentJourneyTableShipmentStatusSubReasonId extends Migration
     public function down()
     {
         Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->dropColumn('status_sub_reason_id');
+            $table->dropColumn('status_remarks_id');
         });
     }
 }
