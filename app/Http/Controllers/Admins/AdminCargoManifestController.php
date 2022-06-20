@@ -2929,8 +2929,6 @@ class AdminCargoManifestController extends Controller
 
         $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
         if ($bag_shipments->exists()) {
-            echo "here6";
-            die();
             $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
