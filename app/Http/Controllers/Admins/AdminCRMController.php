@@ -86,6 +86,19 @@ class AdminCRMController extends Controller
         $this->middleware('Permission');
     }
 
+    public function get_admins(Request $request)
+    {
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->where('a.status', 1)
+            ->where('admin_roles.department_id',$request->dept)
+            ->where('a.default_hub_id', $request->hub)
+            ->whereNotIn('admin_roles.department_id', [1,3])
+            ->get();
+
+        return response()->json(['status'=>0,'admins'=>$admins]);
+    }
+
     public function add_request(Request $request){
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;

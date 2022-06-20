@@ -401,6 +401,17 @@
                                 @endif
                             </div>
                             <div class="form-group">
+                                @if($consignee_refused_reasons)
+                                    <fieldset class="form-group d-none">
+                                        <select name="consignee_refused_reasons" id="consignee_refused_reasons" name="consignee_refused_reasons" class="form-control select2">
+                                            @foreach($consignee_refused_reasons as $reasons)
+                                                <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                @endif
+                            </div>
+                            <div class="form-group">
                                 <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
                             </div>
                             <div class="row justify-content-center">
@@ -497,6 +508,14 @@
                 width: '100%',
                 placeholder: 'Select Reason'
             });
+
+            $('#consignee_refused_reasons').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Sub Reason',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $('#ReturnConfirmReasonModal') 
+            });
+
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",
@@ -1642,6 +1661,52 @@
                 $('#ReturnConfirmReasonModal').modal('show');
 
             });
+
+            $('#return_reason_select').on('change', function () {
+                var selected_value = $(this).val();
+                if(selected_value == 38){
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#consignee_refused_reasons').parent('fieldset').removeClass('d-none');
+                    $('#consignee_refused_reasons').attr('data-rule-required');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#consignee_refused_reasons').parent('fieldset').addClass('d-none');
+                    $('#btnReturn').attr('disabled', false);
+                }
+            });
+
+            $('#consignee_refused_reasons').on('change', function () {
+                var selected_value = $(this).val();
+                var selected_data = $(this).select2('data');
+                var selected_text =  selected_data[0].text;
+                console.log(selected_value);
+                if(selected_value == 12){
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#return_reason_shipment_remarks').val('');
+                    $('#return_reason_shipment_remarks').attr('data-rule-required','true');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#return_reason_shipment_remarks').val(selected_text);
+                    $('#btnReturn').attr('disabled', false);
+                }
+                
+            });
+
+            $('#return_reason_shipment_remarks').keyup(function () {
+                value = $(this).val();
+                if(value.length > 0)
+                {
+                    $('#btnReturn').attr('disabled', false);
+                }
+                else{
+                    $('#btnReturn').attr('disabled', true);
+                }
+            });
+
             $('#tracking').on('click', '.rider_information', function () {
                 id = $(this).attr('data-id');
                 var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
@@ -2327,6 +2392,7 @@
             },
             submitHandler: function(form) {
                     var return_reason_select = $('#return_reason_select').val();
+                    var consignee_refused_reasons = $('#consignee_refused_reasons').val();
                     var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                             title: 'Please Wait!',
@@ -2343,6 +2409,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#return_shipment_id').val(),
                             'single_return_reason_select': return_reason_select,
+                            'consignee_refused_reasons': consignee_refused_reasons,
                             'remark': remarks,
                             'action': 'confirm'
                         }

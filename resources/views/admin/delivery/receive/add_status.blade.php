@@ -163,8 +163,9 @@
                         <input type="hidden" name="delivery_note_id" value="{{$delivery_note_id}}">
 
                         <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            <div class="col-12">
+                                <button id="ReplacementUpdate" type="submit" class="btn btn-primary">Update</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -225,8 +226,9 @@
                         <input type="hidden" name="trybuy_shipment_id" id="trybuy_shipment_id">
                         <hr>
                         <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="TrybuyUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            <div class="col-12">
+                                <button id="TrybuyUpdate" type="submit" class="btn btn-primary">Update</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -269,8 +271,9 @@
                         <input type="hidden" name="delivery_note_id" value="{{$delivery_note_id}}">
 
                         <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="NsaUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            <div class="col-12">
+                                <button id="NsaUpdate" type="submit" class="btn btn-primary">Update</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -305,8 +308,9 @@
                         </div>
                         <input type="hidden" name="date_shipment_id" id="date_shipment_id">
                         <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="DateUpdate" type="button" class="btn btn-primary btn-block">Update</button>
+                            <div class="col-12">
+                                <button id="DateUpdate" type="button" class="btn btn-primary">Update</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
 
@@ -396,8 +400,9 @@
 
                     </div>
                     <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button id="AICUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
+                        <div class="col-12">
+                            <button id="AICUpdate" type="button" disabled class="btn btn-primary">Update</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
                     </div>
 
@@ -442,9 +447,19 @@
 
                     <input type="hidden" name="iad_shipment_id" id="iad_shipment_id">
                     <input type="hidden" name="iad_status" id="iad_status">
+                    <input type="hidden" name="iad_status_id" id="iad_status_id">
                     <div class="row justify-content-center mb-2">
                         <div class="col-9 text-left">
-                            <fieldset>
+                            {{-- consignee_refused_reasons --}}
+                            <fieldset class="form-group">
+                                <select name="consignee_refused_reasons" id="consignee_refused_reasons" class="form-control select2">
+                                    @foreach($consignee_refused_reasons as $reasons)
+                                        <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+
+                            {{-- <fieldset>
                                 <div class="custom-control custom-radio">
                                     <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio11" status="Consignee Wants To Open The Shipment.">
                                     <label class="custom-control-label" for="customRadio11">Consignee Wants To Open The Shipment</label>
@@ -473,16 +488,17 @@
                                     <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio15">
                                     <label class="custom-control-label" for="customRadio15">Other</label>
                                 </div>
-                            </fieldset>
+                            </fieldset>--}}
                             <fieldset class="d-none">
                                 <textarea name="other_description" class="form-control" id="cr_other_description" cols="30" rows="10"></textarea>
-                            </fieldset>
+                            </fieldset> 
                         </div>
 
                     </div>
                     <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button id="CRUpdate" type="button" disabled class="btn btn-primary btn-block">Update</button>
+                        <div class="col-12">
+                            <button id="CRUpdate" type="button" disabled class="btn btn-primary">Update</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
                     </div>
 
@@ -658,6 +674,12 @@
                 placeholder:'Select Status',
                 width:'100%',
                 allowClear:true
+            });
+            $('#consignee_refused_reasons').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Reason',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $('#consignee_refused_modal') 
             });
             $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Reason',
@@ -990,15 +1012,31 @@
 
             });
 
-            $('.cr_radio').on('click', function () {
-                var id = $(this).attr('id');
-                var status = $(this).attr('status');
-                if(id == 'customRadio15'){
+            // $('.cr_radio').on('click', function () {
+            //     var id = $(this).attr('id');
+            //     var status = $(this).attr('status');
+            //     if(id == 'customRadio15'){
+            //         $('#cr_other_description').parent('fieldset').removeClass('d-none');
+            //         $('#CRUpdate').attr('disabled', true);
+
+            //     }else{
+            //         $('#cr_other_description').parent('fieldset').addClass('d-none');
+            //         $('#iad_status').val(status);
+            //         $('#CRUpdate').attr('disabled', false);
+            //     }
+            // });
+
+            $('#consignee_refused_reasons').on('change', function () {
+                var selected_value = $(this).val();
+                var selected_text = $(this).select2('data');
+                var status = selected_text[0].text;
+                if(selected_value == 12){
                     $('#cr_other_description').parent('fieldset').removeClass('d-none');
                     $('#CRUpdate').attr('disabled', true);
 
                 }else{
                     $('#cr_other_description').parent('fieldset').addClass('d-none');
+                    $('#iad_status_id').val(selected_value);
                     $('#iad_status').val(status);
                     $('#CRUpdate').attr('disabled', false);
                 }
@@ -1166,11 +1204,19 @@
 
 
             $('#CRUpdate').on('click', function () {
-                var status = $('#iad_status').val();
+                var remarks_status = $('#iad_status').val();
+                var remarks_id = $('#iad_status_id').val();
                 var id = $('#iad_shipment_id').val();
-                var remark_input = $('#datatable tr#'+id).find('td.remarks input');
-                var remark = remark_input.val();
-                remark = remark+ ' ' + status;
+                var remark_id = $('#datatable tr#'+id).find('td.remarks input:nth-child(1)');
+                var remark_input = $('#datatable tr#'+id).find('td.remarks input:nth-child(2)');
+
+                console.log(remark_id);
+                console.log(remark_input);
+
+                var remarks_id = remarks_id;
+                var remark = remarks_status;
+
+                remark_id.val(remarks_id);
                 remark_input.val(remark);
                 $('#consignee_refused_modal').modal('hide');
             });
@@ -1188,6 +1234,7 @@
                 $('#iad_status').val('');
                 $('#iad_shipment_id').val('');
                 $('.cr_radio').prop('checked', false);
+                $('#consignee_refused_reasons').val('').trigger('change');
                 $('#CRUpdate').attr('disabled', true);
             });
 
@@ -1449,7 +1496,7 @@
                                     var rowNo = nsatable.rows().count();
                                     $.each(data.shipments, function (key, value) {
                                         var charges = "<div class='form-group mb-0'><input class='form-control decimal' name='charges[" + value.id + "]' placeholder='Enter Estimated Charges'  data-rule-required='true' data-msg-required='Estimated Charges is required!'></div>";
-                                        var remarks = "<div class='form-group mb-0'><input class='form-control' name='remarks[" + value.id + "]' placeholder='Enter Remarks'  data-rule-required='true' data-msg-required='Remark is required!' value='" + value.remarks + "'></div>";
+                                        var remarks = "<div class='form-group mb-0'><input class='form-control' name='remarks[" + value.id + "]' placeholder='Enter Remarks'  data-rule-required='true' data-msg-required='Remark is required!' value='" + value.remarks + "'> </div>";
                                         // console.log(value.tracking_number)
                                         nsatable.row.add([rowNo + 1, value.tracking_number, value.consignee_address, value.consignee_city_id, value.user_id, charges, remarks]).node().id = value.id;
                                         nsatable.draw(false);

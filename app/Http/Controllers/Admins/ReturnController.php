@@ -67,6 +67,7 @@ use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OsaChargesLog;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\ConsigneeRefusedReason;
 
 class ReturnController extends Controller
 {
@@ -86,10 +87,12 @@ class ReturnController extends Controller
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
 
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
+
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)->get();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists]);
+        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -453,7 +456,8 @@ class ReturnController extends Controller
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
-        $return_reason = $request->return_reason_select;
+        $consignee_refused_reasons = $request->consignee_refused_reasons;
+        $remarks = $request->remark;
         $remarks = $request->remark;
 
         if($request->action == 'confirm'){
@@ -466,8 +470,8 @@ class ReturnController extends Controller
                 $remark_inp = "remark.$shipment";
                 if(!in_array($parcel->shipper_status_id, [5, 13, 15, 20, 54, 55])){
 
-//                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-//                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                //    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
+                //    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     $parcel->shipper_status_id = 20;
                     $parcel->consignee_status_id = 20;
                     $parcel->save();
@@ -496,7 +500,7 @@ class ReturnController extends Controller
                             AdminFinanceController::done_payment($shipment, 1);
                         }
                     }
-                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id(),null,null,1,null,null,$consignee_refused_reasons);
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
                    if($return_assign_shipment->exists()){
 
@@ -613,6 +617,8 @@ class ReturnController extends Controller
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
+            $single_consignee_refused_reasons = $request->single_consignee_refused_reasons;
+            $consignee_refused_reasons = $request->consignee_refused_reasons;
             $parcel = Shipment::find($request->shipment_id);
             // $pickup_address_city = $parcel->pickup_address->city_id;
             // if(!in_array($pickup_address_city, session('hubs')))
@@ -649,7 +655,7 @@ class ReturnController extends Controller
                         AdminFinanceController::done_payment($request->shipment_id, 1);
                     }
                 }
-                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id(),null,null,1,null,null,$consignee_refused_reasons);
                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
                 if($return_assign_shipment->exists()){
                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
