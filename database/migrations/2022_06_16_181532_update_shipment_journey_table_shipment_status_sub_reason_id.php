@@ -14,7 +14,7 @@ class UpdateShipmentJourneyTableShipmentStatusSubReasonId extends Migration
     public function up()
     {
         Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->integer('status_remarks_id')->nullable()->default(NULL)->after('remarks');
+            $table->integer('status_remarks_id')->index()->nullable()->default(NULL)->after('remarks');
         });
     }
 
