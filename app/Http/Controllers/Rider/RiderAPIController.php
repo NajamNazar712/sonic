@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\AdminAPIController;
-use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -25,11 +27,11 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -57,73 +59,56 @@ use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PayslipPdf;
+use App\Http\Models\PickupNote;
+use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\PickupRequest;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RidersIncentive;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Rider\RiderTickerImage;
-use App\Http\Models\Rider\RiderReturnNoteStatus;
-use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\RiderPickup;
+use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\RiderPickupInvalidLog;
+use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDistributionProduct;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\WarehouseStock;
-use App\Http\Models\WarehouseStockRequest;
-use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessAgentCallMonitoring;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-use Illuminate\Support\Facades\Auth;
-use Psy\Util\Json;
-use Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Facades\Storage;
-
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-
-use App\Http\Models\City;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderRequest;
-use App\Http\Models\PickupNote;
-use App\Http\Models\PickupRequestAssignedShipment;
-use App\Http\Models\PickupRequest;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\RiderPickup;
-use App\Http\Models\PickupNoteRequest;
-use App\Http\Models\RiderPickupActionLog;
-use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Jobs\ProcessAgentCallMonitoring;
 use DB;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Validator;
 
 class RiderAPIController extends Controller
 {
@@ -11224,6 +11209,7 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
+            'remarks_id' => ['nullable','integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
             'picture' => ['required', 'mimes:png,jpeg,jpg'],
             'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file'],
@@ -11365,7 +11351,12 @@ class RiderAPIController extends Controller
                                             $remarks = $request->remarks;
                                         }
 
-                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+                                        $remarks_id = NULL;
+                                        if ($request->has('remarks_id')) {
+                                            $remarks_id = $request->remarks_id;
+                                        }
+
+                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, $remarks_id);
                                         NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                                         $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
