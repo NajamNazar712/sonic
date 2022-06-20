@@ -11571,7 +11571,6 @@ class RiderAPIController extends Controller
                         }
                         $rider->save();
                         $information = array();
-
                         $information['name'] = $rider->name;
                         $information['phone'] = $rider->phone;
                         $information['cnic'] = $rider->cnic;
