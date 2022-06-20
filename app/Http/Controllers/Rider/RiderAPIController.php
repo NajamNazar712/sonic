@@ -11541,20 +11541,29 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $generate_otp = false;
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($rider->exists()) {
                 $rider = $rider->first();
                 if ($rider->status) {
                     if (Hash::check($request->input('pin'), $rider->pin)) {
                         $environment = config('app.env');
-                        if ($environment == 'production' || $environment == 'staging') {
-                            $otp = mt_rand(100000, 999999);
-                            $rider->otp = $otp;
-                            $rider->last_login_attempt = Carbon::now();
-                            $rider->save();
-                            $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
-                            NotificationsController::send(138, $rider, $data);
+                        $settings = GlobalSettings::where('type', 'rider_otp');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if ($settings->setting_value) {
+                                if ($environment == 'production' || $environment == 'staging') {
+                                    $otp = mt_rand(100000, 999999);
+                                    $rider->otp = $otp;
+                                    $rider->last_login_attempt = Carbon::now();
+                                    $rider->save();
+                                    $data = array("otp" => $otp, "phone_number" => $request->phone_number);
+                                    NotificationsController::send(138, $rider, $data);
+                                    $generate_otp = true;
+                                }
+                            }
                         }
+
                         if ($rider->api_token) {
                             $api_token = $rider->api_token;
                         } else {
@@ -11562,36 +11571,39 @@ class RiderAPIController extends Controller
                             $rider->api_token = $api_token;
                         }
                         $rider->save();
-                        $information = array();
-                        $information['name'] = $rider->name;
-                        $information['phone'] = $rider->phone;
-                        $information['cnic'] = $rider->cnic;
-                        $information['address'] = $rider->address;
-                        $information['role'] = 'rider';
-                        $information['api_token'] = $rider->api_token;
-                        $information['cargo_user'] = 0;
-                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                            ->join('riders as r', 'e.id', 'r.employee_id')
-                            ->where('r.id', $rider->id);
-                        if ($reporting_location->exists()) {
-                            $reporting_location = $reporting_location->first();
-                            $information['distance'] = $reporting_location->radius;
-                            $information['lat'] = $reporting_location->lat;
-                            $information['long'] = $reporting_location->long;
-                        }else{
-                            $information['distance'] = 0;
-                            $information['lat'] = 0;
-                            $information['long'] = 0;
+                        if ($generate_otp) {
+                            return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                        } else {
+                            $information = array();
+                            $information['name'] = $rider->name;
+                            $information['phone'] = $rider->phone;
+                            $information['cnic'] = $rider->cnic;
+                            $information['address'] = $rider->address;
+                            $information['role'] = 'rider';
+                            $information['api_token'] = $rider->api_token;
+                            $information['cargo_user'] = 0;
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                ->join('riders as r', 'e.id', 'r.employee_id')
+                                ->where('r.id', $rider->id);
+                            if ($reporting_location->exists()) {
+                                $reporting_location = $reporting_location->first();
+                                $information['distance'] = $reporting_location->radius;
+                                $information['lat'] = $reporting_location->lat;
+                                $information['long'] = $reporting_location->long;
+                            } else {
+                                $information['distance'] = 0;
+                                $information['lat'] = 0;
+                                $information['long'] = 0;
+                            }
+                            return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
                         }
-                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
-                    }else {
+                    } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
-            }
-            else {
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
             }
         }
