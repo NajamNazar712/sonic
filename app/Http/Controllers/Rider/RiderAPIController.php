@@ -11570,7 +11570,29 @@ class RiderAPIController extends Controller
                             $rider->api_token = $api_token;
                         }
                         $rider->save();
-                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token]);
+                        $information = array();
+
+                        $information['name'] = $rider->name;
+                        $information['phone'] = $rider->phone;
+                        $information['cnic'] = $rider->cnic;
+                        $information['address'] = $rider->address;
+                        $information['role'] = 'rider';
+                        $information['api_token'] = $rider->api_token;
+                        $information['cargo_user'] = 0;
+                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                            ->join('riders as r', 'e.id', 'r.employee_id')
+                            ->where('r.id', $rider->id);
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $information['distance'] = $reporting_location->radius;
+                            $information['lat'] = $reporting_location->lat;
+                            $information['long'] = $reporting_location->long;
+                        }else{
+                            $information['distance'] = 0;
+                            $information['lat'] = 0;
+                            $information['long'] = 0;
+                        }
+                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
                     }else {
                         return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
                     }
