@@ -5002,7 +5002,6 @@ class APIController extends Controller
     {
         $valid_ip_addresses = array();
         $valid_ip_addresses[] = '103.111.84.67';
-        $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
 
         if ($environment == 'production') {
