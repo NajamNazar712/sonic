@@ -11348,7 +11348,7 @@ class RiderAPIController extends Controller
                                             $shipment->open_box = 1;
                                             $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
                                             if($shipment_open_box->exists()){
-                                                $shipment_open_box->first();
+                                                $shipment_open_box = $shipment_open_box->first();
                                             }else{
                                                 $shipment_open_box = new ShipmentOpenBox();
                                                 $shipment_open_box->shipment_id = $shipment->id;
