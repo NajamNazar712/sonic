@@ -456,8 +456,8 @@ class ReturnController extends Controller
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
+        $return_reason = $request->return_reason_select;
         $consignee_refused_reasons = $request->consignee_refused_reasons;
-        $remarks = $request->remark;
         $remarks = $request->remark;
 
         if($request->action == 'confirm'){
