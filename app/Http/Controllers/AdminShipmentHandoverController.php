@@ -188,7 +188,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers) as remaining')]);
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining')]);
 
         $datatable = Datatables::of($handover_list)
 
