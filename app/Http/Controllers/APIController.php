@@ -5084,9 +5084,9 @@ class APIController extends Controller
                                         
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
-                                        $return_data['date_paid'] = $transaction_data->tran_date; // getting date from 1link transaction table after creating migration
-                                        $return_data['amount_paid'] = $transaction_data->transaction_amount; // getting paid amount from 1link transaction table after creating migration
-                                        $return_data['tran_auth_Id'] = $transaction_data->tran_auth_id; // getting tran_auth_Id from 1link transaction table after creating migration
+                                        $return_data['date_paid'] = isset($transaction_data->tran_date)?$transaction_data->tran_date : ""; // getting date from 1link transaction table after creating migration
+                                        $return_data['amount_paid'] = isset($transaction_data->transaction_amount)?$transaction_data->transaction_amount : ""; // getting paid amount from 1link transaction table after creating migration
+                                        $return_data['tran_auth_Id'] = isset($transaction_data->tran_auth_id)?$transaction_data->tran_auth_id : ""; // getting tran_auth_Id from 1link transaction table after creating migration
                                         $return_data['reserved'] = "bill already paid";
                                     }
                                     else{
