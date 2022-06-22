@@ -183,7 +183,10 @@ class AdminERFController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),263);
         $cities = City::where('status',1)->where('business_category_id',1)->select('id','name')->get();
         $hubs =  City::where('hub',1)->select('id','name')->get();
-        if (session('role_id') == 1 || session('department_id') == 10) {
+        if(session('role_id') == 1){
+            $departments = AdminDepartment::select('id', 'name')->get();
+        }
+        else if (session('department_id') == 10) {
             $departments = AdminDepartment::where('id', '!=', 1)->select('id', 'name')->get();
         }
         else{
@@ -659,10 +662,10 @@ class AdminERFController extends Controller
 
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
         $employee_trax_id  = Employee::whereNotIn('trax_id', $invalid_employees)->where('department_id',$request->id)->get();
-
         $trax_ids = array();
-        $inactive = '';
+      
         foreach($employee_trax_id as $employee){
+            $inactive = '';
             if($employee->status_id == 2){
                $inactive = '-inactive';
             }

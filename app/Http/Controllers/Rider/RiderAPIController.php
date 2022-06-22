@@ -8521,7 +8521,7 @@ class RiderAPIController extends Controller
         $to_date = $request->get('to_date');
         $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
         if ($to_date) {
-            $rider_incentives = $rider_incentives->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
+            $rider_incentives = $rider_incentives->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
 
             $total_payable = DeliveryNote::where('rider_id', $rider_id)
                 ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
@@ -8531,7 +8531,7 @@ class RiderAPIController extends Controller
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->where('rider_id', $rider_id)->first();
         } else {
-            $rider_incentives = $rider_incentives->whereDate('created_at', $from_date);
+            $rider_incentives = $rider_incentives->whereDate('date', $from_date);
 
             $total_payable = DeliveryNote::where('rider_id', $rider_id)
                 ->whereDate('created_at', $from_date)
@@ -8548,9 +8548,9 @@ class RiderAPIController extends Controller
             foreach ($rider_incentives as $rider_incentive) {
                 $datum = array();
                 $payable = DeliveryNote::where('rider_id', $rider_id)
-                    ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->created_at)))
+                    ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->date)))
                     ->sum('received_cod_amount');
-                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->created_at));
+                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->date));
                 $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
                 $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
                 $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
@@ -11334,7 +11334,7 @@ class RiderAPIController extends Controller
                                             $shipment->open_box = 1;
                                             $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
                                             if($shipment_open_box->exists()){
-                                                $shipment_open_box->first();
+                                                $shipment_open_box = $shipment_open_box->first();
                                             }else{
                                                 $shipment_open_box = new ShipmentOpenBox();
                                                 $shipment_open_box->shipment_id = $shipment->id;
