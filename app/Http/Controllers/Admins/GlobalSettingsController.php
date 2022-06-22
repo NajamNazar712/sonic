@@ -941,10 +941,10 @@ class GlobalSettingsController extends Controller
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
                 if (!empty($include_ids)) {
-                    $users = User::where('status', 3)->whereIn('id', $include_ids)->get();
+                    $users = User::whereIn('id', $include_ids)->get();
                 }
                 else {
-                    // $users = User::where('status', 3)->get();
+                    $users = User::where('status', 3)->get();
                 }
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
@@ -1061,7 +1061,7 @@ class GlobalSettingsController extends Controller
                         $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
                     }
                     else {
-                        // $users = User::whereIn('id', $include_ids)->get();
+                        $users = User::whereIn('id', $include_ids)->get();
                     }
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
