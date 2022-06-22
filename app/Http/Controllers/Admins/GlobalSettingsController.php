@@ -933,12 +933,19 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
+        $include_ids = [];
+
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->get();
+                if (!empty($include_ids)) {
+                    $users = User::where('status', 3)->whereIn('id', $include_ids)->get();
+                }
+                else {
+                    // $users = User::where('status', 3)->get();
+                }
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1050,7 +1057,12 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->get();
+                    if (!empty($include_ids)) {
+                        $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+                    }
+                    else {
+                        // $users = User::whereIn('id', $include_ids)->get();
+                    }
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
