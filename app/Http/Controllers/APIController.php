@@ -5223,11 +5223,8 @@ class APIController extends Controller
             $request_data['bank_mnemonic'] = $request->input('bank_mnemonic');
             $request_data['reserved'] = $request->input('reserved');
 
-            
-
             if(isset($username) && isset($password) && isset($request_data['consumer_number']) && isset($request_data['tran_auth_id']) && isset($request_data['transaction_amount']) && isset($request_data['tran_date']) && isset($request_data['tran_time']) && isset($request_data['bank_mnemonic']))
             {
-                
                 $authenticate = OneLink::where("username",$username)->where("active",0)->first();
                 
                 if($authenticate)
@@ -5235,8 +5232,6 @@ class APIController extends Controller
                     // return json_encode($request_data);
                     if(Hash::check($password, $authenticate->password) && $authenticate->bank_mnemonic == $request_data['bank_mnemonic'])
                     {
-                        
-
                         // explode consumer_prefx from consumer_number
                         $consumer_prefx  = substr($request_data['consumer_number'],0,6);
 
@@ -5266,8 +5261,7 @@ class APIController extends Controller
                                 else{
                                     $return_data['response_Code'] = "06";
                                     $return_data['reserved'] = "bill already paid";
-                                }
-                                    
+                                } 
                             }
                             else{
 
@@ -5283,7 +5277,6 @@ class APIController extends Controller
                                     $tran_date_formated = Carbon::parse($request_data['tran_date'])->format('Y-m-d');
                                     $tran_time_formated = Carbon::parse($request_data['tran_time'])->format('h:i:s');
 
-
                                     $request_data['consumer_prefx'] = $consumer_prefx;
                                     $request_data['tracking_no'] = $tracking_no;
                                     $request_data['shipment_id'] = $shipment_data->id;
@@ -5298,6 +5291,7 @@ class APIController extends Controller
                                         $return_data['response_Code'] = "00";
                                         $return_data['Identification_parameter'] = "Consignee Name";
                                         $return_data['reserved'] = "successful bill payment";
+                                        Shipment::where('tracking_number', $tracking_no)->update(['received_amount' => $transfer_amount]);
 
                                         return json_encode(['status' => 200, 'message' => 'Successful Bill Payment', 'result' =>  $return_data]);
                                     }
@@ -5309,7 +5303,6 @@ class APIController extends Controller
                                     }
                                 }
                             }
-
                         }
                         else{
                             // if shipment is not exist in DB 
@@ -5329,7 +5322,6 @@ class APIController extends Controller
                 }
                 else{
                     // Unauthorized! Invalid username or password when username and password both are incorrect
-                
                     $return_data['response_Code'] = "04";
                     $return_data['reserved'] = "invalid username or password";
 
