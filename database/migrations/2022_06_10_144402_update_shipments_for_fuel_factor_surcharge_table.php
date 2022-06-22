@@ -30,6 +30,8 @@ class UpdateShipmentsForFuelFactorSurchargeTable extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
+            $table->dropColumn('esc_charges');
+            $table->dropColumn('open_box_charges');
             $table->dropColumn('fuel_factor_surcharge');
         });
     }
