@@ -201,7 +201,7 @@ class AdminShipmentHandoverController extends Controller
             }
             })
             ->addColumn('remaining_shipment_count', function($handover_list) {
-                if ($handover_list->shipment_count != 0) {
+                if ($handover_list->shipment_count != 0 && $handover_list->received_shipments != 0) {
                     $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
                     if($remaining > 0){
                         return '<button class="btn btn-sm btn-outline-info align-middle">' . $remaining  . '</button>';
