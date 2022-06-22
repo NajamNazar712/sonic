@@ -5080,14 +5080,13 @@ class APIController extends Controller
                                     if($shipment_data->amount == $shipment_data->received_amount)
                                     {
                                         // Bill paid status
-                                        // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
-
-                                        // dd($transaction_data->shipment_data->user_id);
+                                        $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                                        
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
-                                        $return_data['date_paid'] = "will create after migation"; // getting date from 1link transaction table after creating migration
-                                        $return_data['amount_paid'] = "will create after migation"; // getting paid amount from 1link transaction table after creating migration
-                                        $return_data['tran_auth_Id'] = "will create after migation"; // getting tran_auth_Id from 1link transaction table after creating migration
+                                        $return_data['date_paid'] = $transaction_data->tran_date; // getting date from 1link transaction table after creating migration
+                                        $return_data['amount_paid'] = $transaction_data->transaction_amount; // getting paid amount from 1link transaction table after creating migration
+                                        $return_data['tran_auth_Id'] = $transaction_data->tran_auth_id; // getting tran_auth_Id from 1link transaction table after creating migration
                                         $return_data['reserved'] = "bill already paid";
                                     }
                                     else{
@@ -5155,7 +5154,7 @@ class APIController extends Controller
                         }
 
                         // return status 200 due to sucessfully Inquiry
-                        return json_encode(['status' => 200, 'message' => 'Iquiry Data Found', 'result' =>  $return_data]);
+                        return json_encode(['status' => 200, 'message' => 'Inquiry Data Found', 'result' =>  $return_data]);
                     }
                     else{
                         // Unauthorized when password is incorrect
@@ -5249,11 +5248,12 @@ class APIController extends Controller
 
                         if($shipment_data)
                         {
-                            $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
-                            // return json_encode($transaction_data);
+                            // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                            $transaction_data = OneLinkPaymentTransaction::where('tracking_no',$tracking_no)->first();
+                            
                             if($transaction_data)
                             {
-                                if($transaction_data->tran_auth_id == $request_data['tran_auth_id'])
+                                if($transaction_data->consumer_number == $request_data['consumer_number'] && $transaction_data->tran_auth_id == $request_data['tran_auth_id'] && $transaction_data->tran_date == $request_data['tran_date'] && $transaction_data->tran_time == $request_data['tran_time'])
                                 {
                                     $return_data['response_Code'] = "03";
                                     $return_data['reserved'] = "duplicate transaction";
@@ -5310,7 +5310,7 @@ class APIController extends Controller
                             $return_data['reserved'] = "consumer number does not exist";
                         }
                         // return status 200 due to sucessfully Inquiry
-                        return json_encode(['status' => 200, 'message' => 'Iquiry Data Found', 'result' =>  $return_data]);
+                        return json_encode(['status' => 200, 'message' => 'Inquiry Data Found', 'result' =>  $return_data]);
                     }
                     else{
                         // Unauthorized when password is incorrect
