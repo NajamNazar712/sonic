@@ -5289,7 +5289,7 @@ class APIController extends Controller
                                     if($upload_transaction)
                                     {
                                         $return_data['response_Code'] = "00";
-                                        $return_data['Identification_parameter'] = "Consignee Name";
+                                        $return_data['Identification_parameter'] = $shipment_data->consignee_name;
                                         $return_data['reserved'] = "successful bill payment";
                                         Shipment::where('tracking_number', $tracking_no)->update(['received_amount' => $transfer_amount]);
 
