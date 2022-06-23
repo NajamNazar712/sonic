@@ -1785,6 +1785,8 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                var missing_input_issue = [];
+                                var missing_input_temp = "";
                                 var not_updated_shipments = [];
                                 var shipment_remarks_obj = {};
                                 var shipment_received_refused_obj = {};
@@ -1793,6 +1795,7 @@
                                 if (select_all_status == 14) {
                                     table.rows().nodes().each(function (index) {
                                         var row = table.row(index);
+
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
                                             var amount = parseInt($(row.node()).attr('amount'));
@@ -1800,9 +1803,28 @@
                                             shipment_remarks_obj[id] = remarks;
                                             if (amount == 0) {
                                                 var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
-                                                if ($.trim(receiver_name) == '') {
+                                                var cnic_input = $(row.node()).find('td.cnic input').val();
+                                                var relation_input = $(row.node()).find('td.relation input').val();
+                                                if ($.trim(!receiver_name) || $.trim(!cnic_input) || $.trim(!relation_input)) {
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;
+
+                                                    //Print Message
+
+                                                    if(!receiver_name){
+                                                        missing_input_temp+=" {Name} ";
+                                                    }
+                                                    if(!cnic_input){
+                                                        missing_input_temp+=" {CNIC} ";
+                                                    }
+                                                    if(!relation_input){
+                                                        missing_input_temp+=" {RELATION} ";
+                                                    }
+                                                    if(missing_input_temp) {
+                                                        missing_input_issue.push(missing_input_temp);
+                                                    }
+                                                    //Print Message End
+
                                                 } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
                                                 }
@@ -1815,7 +1837,7 @@
 
                                         var html = '';
                                         $.each(not_updated_shipments, function (index, tracking_number) {
-                                            html += tracking_number + '<br/>';
+                                            html += missing_input_issue[index]+" not found of "+ tracking_number + '<br/>';
                                         });
 
                                         html += '<br/>Update Received/Refused By for all Shipment(s) of 0 (zero) amount!';
@@ -1823,7 +1845,7 @@
                                         content = document.createElement('div');
                                         content.innerHTML = html;
                                         swal({
-                                            title: 'Names Not Updated',
+                                            title: "Fill the empty fields",
                                             content: content,
                                             icon: 'warning',
                                             buttons: {
