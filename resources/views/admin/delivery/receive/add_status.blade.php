@@ -1790,6 +1790,8 @@
                                 var not_updated_shipments = [];
                                 var shipment_remarks_obj = {};
                                 var shipment_received_refused_obj = {};
+                                var shipment_received_refused_obj2 = {};
+                                var shipment_received_refused_obj3 = {};
                                 // blockPagePermanently();
                                 submit_all_status_flag = true;
                                 if (select_all_status == 14) {
@@ -1827,6 +1829,8 @@
 
                                                 } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
+                                                    shipment_received_refused_obj2[id] = cnic_input;
+                                                    shipment_received_refused_obj3[id] = relation_input;
                                                 }
                                             }
 
@@ -1894,6 +1898,8 @@
                                             'delivery_note_id': delivery_note,
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
+                                            'cnic': shipment_received_refused_obj2,
+                                            'relation': shipment_received_refused_obj3,
                                             '_token': '{{ csrf_token() }}',
                                             'password': password,
                                         }

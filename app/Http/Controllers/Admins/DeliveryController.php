@@ -1698,7 +1698,7 @@ class DeliveryController extends Controller
                     ->where('rds.id', '=',
                         DB::raw('(select max(id) from rider_deliveries where rider_deliveries.delivery_note_id = delivery_notes.id and rider_deliveries.shipment_id = shipments.id)'));
             })
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id', 'crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request', 'dns.ordering', 'consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id', 'sjl.received_or_refused_by', 'rds.ccd_image as ccd_image'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id', 'crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request', 'dns.ordering', 'consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id', 'sjl.received_or_refused_by', 'rds.ccd_image as ccd_image','sjl.relation','sjl.cnic'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering', 'asc', 'dns.shipment_id', 'asc');
 
@@ -1890,7 +1890,8 @@ class DeliveryController extends Controller
                 }
                 else
                 {   $mask = "$(this).inputmask({'mask': '99999-9999999-9', 'clearIncomplete': true})";
-                    $cnic = '<div class="form-group"><input class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[]" placeholder="Enter CNIC" value="" data-rule-required="true" data-msg-required="CNIC is required"> </div>';
+
+                    $cnic = '<input class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[' . $deliveries->shId . ']" placeholder="Enter CNIC" value="' . $deliveries->cnic . '"> </div>';
                     return $cnic;
                 }
             })
@@ -1901,7 +1902,7 @@ class DeliveryController extends Controller
                 }
                 else
                 {
-                    $relation = '<div class="form-group"><input class="form-control form-control-sm" name="relation[]" placeholder="Enter Relation" value="" data-rule-required="true" data-msg-required="Relation is required"></div>';
+                    $relation = '<input class="form-control form-control-sm" name="relation[' . $deliveries->shId . ']" value="' . $deliveries->relation . '" placeholder="Enter Relation" value="' . $deliveries->relation . '" ></div>';
                     return $relation;
                 }
             })
@@ -2094,7 +2095,7 @@ class DeliveryController extends Controller
                             ShipmentOpenBoxJourneyController::add($shipment, 4, Auth::id());
                         }
                     }
-                    $received_refused_by_name = "received_or_refused_by.$shipment";
+                    $received_refused_by_name = "received_or_refused_by.$shipment";  $cnic_ = "cnic.$shipment";  $relation_ = "relation.$shipment";
                     $journey_remarks = "remarks.$shipment";
                     if ($selected_status == 7 || $selected_status == 18) {
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2110,17 +2111,17 @@ class DeliveryController extends Controller
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                     } else if ($selected_status == 14) {
                         if ($shipment_details->booking_type_id == 2) {
-                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null));
+                            ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null),null,($request->has($cnic_) ? $request->cnic[$shipment] : null),($request->has($relation_) ? $request->relation[$shipment] : null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                         } elseif ($shipment_details->booking_type_id == 3) {
-                            ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null));
+                            ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null),null,($request->has($cnic_) ? $request->cnic[$shipment] : null),($request->has($relation_) ? $request->relation[$shipment] : null));
 
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
 
                         } elseif ($shipment_details->booking_type_id == 4) {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null));
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null),null,($request->has($cnic_) ? $request->cnic[$shipment] : null),($request->has($relation_) ? $request->relation[$shipment] : null));
 
                             if ($shipment_details->charges_mode_id == 1) {
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 14, 'consignee_status_id' => 14]);
@@ -2131,7 +2132,7 @@ class DeliveryController extends Controller
                             }
 
                         } else {
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null));
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null),null,($request->has($cnic_) ? $request->cnic[$shipment] : null),($request->has($relation_) ? $request->relation[$shipment] : null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
 
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
@@ -2407,7 +2408,7 @@ class DeliveryController extends Controller
                     }
 
                 }
-                ShipmentsJourney::where('shipment_id', $shipment)->update(['cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
+//                ShipmentsJourney::where('shipment_id', $shipment)->update(['cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
