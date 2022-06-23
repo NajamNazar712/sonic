@@ -2021,6 +2021,21 @@ class V2AdminPickupsController extends Controller
         }
         NotificationsController::send(4, $shipment_ids);
 
+        //todo: send sms for self collection!
+        foreach ($shipment_ids as $shipment_id) {
+            $self_collection_shipment = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
+            if($self_collection_shipment->exists())
+            {
+                $shipment = Shipment::where('id',$shipment_id)->first();
+                $user_city = $shipment->user->city_id;
+                if($shipment->consignee_city_id == $user_city)
+                {
+                    NotificationsController::send(178, $shipment_id);
+                }
+            }
+        }
+        //todo: send sms for self collection end!
+
         if (empty($print_shipment_ids)) {
             return redirect()->back()->with(['success' => 'Arrival Done']);
         } else {
