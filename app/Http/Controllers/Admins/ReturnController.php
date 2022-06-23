@@ -1510,6 +1510,10 @@ class ReturnController extends Controller
             $status = '';
             if($shipment->exists()) {
                 $shipment = $shipment->first();
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if(!$dispute_check){
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                }
                 ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                 if($request->shipper_id != null){
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
