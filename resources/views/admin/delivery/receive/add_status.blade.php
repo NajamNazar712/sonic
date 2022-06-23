@@ -1790,8 +1790,8 @@
                                 var not_updated_shipments = [];
                                 var shipment_remarks_obj = {};
                                 var shipment_received_refused_obj = {};
-                                var shipment_received_refused_obj2 = {};
-                                var shipment_received_refused_obj3 = {};
+                                var shipment_cnic_obj = {};
+                                var shipment_relation_obj = {};
                                 // blockPagePermanently();
                                 submit_all_status_flag = true;
                                 if (select_all_status == 14) {
@@ -1829,8 +1829,8 @@
 
                                                 } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
-                                                    shipment_received_refused_obj2[id] = cnic_input;
-                                                    shipment_received_refused_obj3[id] = relation_input;
+                                                    shipment_cnic_obj[id] = cnic_input;
+                                                    shipment_relation_obj[id] = relation_input;
                                                 }
                                             }
 
@@ -1898,8 +1898,8 @@
                                             'delivery_note_id': delivery_note,
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
-                                            'cnic': shipment_received_refused_obj2,
-                                            'relation': shipment_received_refused_obj3,
+                                            'cnic': shipment_cnic_obj,
+                                            'relation': shipment_relation_obj,
                                             '_token': '{{ csrf_token() }}',
                                             'password': password,
                                         }
