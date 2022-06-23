@@ -10473,7 +10473,7 @@ class RiderAPIController extends Controller
 
                             $response['status'] = 0;
                             $response['employee_id'] = $employee_request->id;
-                            $message = 'Request Has Been Submitted and Pending for Approval';
+                            $message = "Welcome to TRAX ".$request->name. " Your Request have been received by Trax, and is pending for Approval from HR.";
                         } catch (Exception $ex) {
                             $response['message'] = $ex;
                         }
@@ -10560,7 +10560,7 @@ class RiderAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = 'Optional details Has Been Submitted and Pending for Approval';
+                        $message = "Welcome to TRAX ".$employee_request->name. " Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -11582,6 +11582,11 @@ class RiderAPIController extends Controller
                             $information['role'] = 'rider';
                             $information['api_token'] = $rider->api_token;
                             $information['cargo_user'] = 0;
+                            $information['welcome_bit'] = 0;
+                            if(!$rider->first_login){
+                                $information['welcome_bit'] = 1;
+                                $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
+                            }
                             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                                 ->join('riders as r', 'e.id', 'r.employee_id')
                                 ->where('r.id', $rider->id);
@@ -11595,6 +11600,8 @@ class RiderAPIController extends Controller
                                 $information['lat'] = 0;
                                 $information['long'] = 0;
                             }
+                            $rider->first_login = 1;
+                            $rider->save();
                             return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
                         }
                     } else {
@@ -11604,7 +11611,13 @@ class RiderAPIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0))->whereIn('request_status_id',[1,2]);
+                if($employee->exists()){
+                    $employee = $employee->first();
+                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ." Your request is in process and is pending for approval from HR."]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
             }
         }
     }
@@ -11657,6 +11670,11 @@ class RiderAPIController extends Controller
                     $information['distance'] = 0;
                     $information['lat'] = 0;
                     $information['long'] = 0;
+                }
+                $information['welcome_bit'] = 0;
+                if(!$rider->first_login){
+                    $information['welcome_bit'] = 1;
+                    $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
                 }
                 return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
             } else {
