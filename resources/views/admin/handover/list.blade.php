@@ -267,63 +267,6 @@
 							});
 						}
 					},
-                            {
-							text: '<i class="la la-check"></i> Mark as Delivered',
-							className: 'btn btn-success text-white delivered',
-							enabled: false,
-							action: function (e, dt, node, config) {
-								swal({
-									text: 'Are you sure, you want to Mark Handover as delivered?',
-									icon: 'warning',
-									buttons: {
-										cancel: {
-											text: 'No',
-											value: null,
-											visible: true,
-											closeModal: true,
-										},
-										confirm: {
-											text: 'Yes',
-											value: true,
-											visible: true,
-											closeModal: true
-										}
-									},
-									closeOnClickOutside: false,
-									closeOnEsc: false,
-									dangerMode: true
-								}).then(function(confirm) {
-									if (confirm) {
-										$.ajax({
-											url: '{!! route('admin.handover.list.delivered') !!}',
-											method: 'PUT',
-											data: {
-												'handover_ids': selected_rows,
-												'_token': '{{ csrf_token() }}'
-											}
-										})
-										.done(function(data) {
-											if (data.status == 0) {
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-											}
-											else {
-												toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-											}
-
-											table.rows().deselect();
-
-											selected_rows = [];
-
-											//table.button('.delivered').disable();
-											 table.button('.delivered').disable();
-
-											table.draw('false');
-										});
-									}
-                                    
-								});
-							}
-						},
                     {
                   extend: 'selectAll',
                   text: 'Select All',
