@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\app\Http\Models\HR\LeaveType as HRLeaveType;
 use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -45,6 +46,7 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
 use App\Http\Models\HR\LeaveStatus;
+use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -2809,9 +2811,18 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 393);
         }
         $departments = AdminDepartment::leftjoin('admins as a', 'a.id', '=', 'admin_departments.department_head_id')
-            ->select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description', 'a.name as head', 'admin_departments.department_head_id as head_id']);
+            ->select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description', 'a.name as head', 'admin_departments.department_head_id as head_id','admin_departments.working_days as working_days']);
 
         return Datatables::of($departments)
+        ->editColumn("working_days", function ($data){
+            if($data->working_days == 1){
+                return "Mon to Sat";
+            }elseif($data->working_days == 2){
+                return "Mon to Fri";
+            }else{
+                return "";
+            }
+        })
             ->addColumn("action", function ($data) {
                 if (session('role_id') == 1 || in_array(485, session('permissions'))) {
                     $dropdown = '
@@ -2840,6 +2851,7 @@ class AdminHumanResourseController extends Controller
         $department->name = $request->name;
         $department->description = $request->description;
         $department->department_head_id = $request->head_id;
+        $department->working_days = $request->working_days;
         $department->save();
 
         $department->code = 'Dep' . str_pad($department->id, 3, '0', STR_PAD_LEFT);
@@ -3716,6 +3728,7 @@ class AdminHumanResourseController extends Controller
 
     public function leave_index()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         $users = Admin::where('status', 1)->select('id', 'name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
@@ -3726,7 +3739,9 @@ class AdminHumanResourseController extends Controller
         $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
-        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic]);
+        $leave_types= LeaveType::select('id', 'name')->get();
+        
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic,'leave_types'=> $leave_types]);
     }
 
     public function leave_list(Request $request)
@@ -3734,13 +3749,22 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
         }
-        $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
+        $emp_id = Employee::where('trax_id',Auth::user()->trax_id);
+        if($emp_id->exists()){
+            $emp_id = $emp_id->first()->id;
+        }    
+        $employee_leaves = EmployeeLeave::leftjoin('employees as e', 'e.id', 'employee_leaves.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
             ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
-            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
-            ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
+            ->leftjoin('admin_departments as ad', 'ad.id', 'e.department_id')
+            ->leftjoin('employee_designations as ed', 'ed.id', 'e.designation_id')
+            ->leftjoin('leave_types as lt', 'lt.id', 'employee_leaves.leave_type')
+            ->select('e.name as admin_name', 'e.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'e.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason','lt.name as leave_type','lt.id as leave_type_id','ad.working_days as working_days_id','e.line_manager_id as line_manager_id');
+            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
+                $employee_leaves = $employee_leaves->where('e.trax_id',Auth::user()->trax_id)
+                ->orWhere('e.line_manager_id',$emp_id);
+            }
+          
 
         /*if(session('role_id') != 1 && session('role_id') != 63){
             $employee_leaves->where('ad.id', session('department_id'));
@@ -3749,22 +3773,25 @@ class AdminHumanResourseController extends Controller
             }
         }*/
 //        dd(session()->all());
-        $find_manager = AdminDepartment::where('department_head_id', auth::user()->id)->first();
-        $department_head = "";
-        if (!empty($find_manager)) {
-            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
-                $department_head = $find_manager->department_head_id;
-                $employee_leaves = $employee_leaves->where(function ($query) use ($find_manager) {
-                    $query->where('department_id', $find_manager->id);
-                });
-            }
-        }else{
-            if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
-                $employee_leaves = $employee_leaves->where(function ($query) {
-                    $query->where('employee_leaves.employee_id', Auth::id());
-                });
-            }
-        }
+
+        // leave_quota
+        // $find_manager = AdminDepartment::where('department_head_id', Auth::user()->id)->first();
+        // $department_head = "";
+        // if (!empty($find_manager)) {
+        //     if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
+        //         $department_head = $find_manager->department_head_id;
+        //         $employee_leaves = $employee_leaves->where(function ($query) use ($find_manager) {
+        //             $query->where('department_id', $find_manager->id);
+        //         });
+        //     }
+        // }else{
+        //     if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
+        //         $employee_leaves = $employee_leaves->where(function ($query) {
+        //             $query->where('employee_leaves.employee_id', Auth::id());
+        //         });
+        //     }
+        // }
+        // leave_quota  end
 
 
         $datatable = Datatables::of($employee_leaves)
@@ -3817,7 +3844,14 @@ class AdminHumanResourseController extends Controller
                 if ($employee->to) {
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
-                    return $start_date->diffInDays($end_date) + 1;
+
+                    if($employee->working_days_id == 1){
+                        $diffDays = $start_date->diffInWeekdays($end_date,Carbon::setWeekendDays([ Carbon::SATURDAY,Carbon::SUNDAY ]));
+                    }else{
+                        $diffDays = $start_date->diffInWeekdays($end_date,Carbon::setWeekendDays([ Carbon::SATURDAY]));
+                    }
+                    return $diffDays;
+                    
                 } else {
                     return 1;
                 }
@@ -3836,53 +3870,103 @@ class AdminHumanResourseController extends Controller
                     ->where('leave_status', 1)->count();
                 return $leave_count;
             })
-            ->addColumn("action", function ($employee) use ($department_head) {
-                if (in_array($employee->status_id, [1, 2])) {
-                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions')) || in_array(706, session('permissions'))) {
+            // ->addColumn("action", function ($employee) use ($department_head) {
+                ->addColumn("action", function ($employee) {
 
-                        $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                        //todo:HOD
-                        if ((($employee->status_id == 1) && (auth()->id() == $employee->department_head) && (in_array(706, session('permissions')))) || (session('role_id') == 1 && $employee->status_id == 1)) {
+                    $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                  ';
+                if($employee->status_id == 1){
+                    if($employee->leave_type_id == 1){
+                        $emp_id = Employee::where('trax_id',Auth::user()->trax_id);
+                        if($emp_id->exists()){
+                            $emp_id = $emp_id->first();
+                            if($employee->line_manager_id == $emp_id->id){
+                                $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
+        
+                            }
+                        }
+                        
+                    }else{
+
+                        if($employee->department_head == Auth::id()){
                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
                         }
-                        //todo:HOD end
-
-                        if (session('role_id') == 1 || (in_array(614, session('permissions')))) {
-                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit '.$employee->status_id.' &nbsp; '.auth()->id().' '.$employee->department_head.'</div></button>';
-                        }
-
-                        if ((($employee->status_id == 2 && in_array(615, session('permissions'))) &&    (auth()->id() == $employee->department_head)) || (session('role_id') == 1 && $employee->status_id == 2)) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-                        }
-
-                        $dropdown .= '
+                        
+                    }
+                    $dropdown .= '
+                    </div>
+                  </div>
+                '; 
+                return $dropdown;
+                }
+                if($employee->status_id == 2){
+                    if ((in_array(session('role_id'), [63, 69, 70, 1]))) {
+                        
+                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                    }
+                    $dropdown .= '
                 </div>
               </div>
-            ';
-//                        $hr = AdminDepartment::find(10);
-//                        if($hr->department_head_id == auth()->id())
-//                        {
-//                            return $dropdown;
-//                        }
-//                        else
-                            if(empty($department_head) || !in_array($employee->status_id, [2,3])) {
-                            return $dropdown;
-                        }else{
-                            return '';
-                        }
-                    } else {
-                        return '';
-                    }
-                } else {
-                    return '';
+            '; 
+            return $dropdown;
                 }
+
+                return '-';
+                
+
+
+//                 if (in_array($employee->status_id, [1, 2])) {
+//                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions')) || in_array(706, session('permissions'))) {
+
+//                         $dropdown = '
+//               <div class="btn-group">
+//                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+//                 <div class="dropdown-menu dropdown-menu-sm">
+//             ';
+//                         //todo:HOD
+//                         if ((($employee->status_id == 1) && (auth()->id() == $employee->department_head) && (in_array(706, session('permissions')))) || (session('role_id') == 1 && $employee->status_id == 1)) {
+//                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+//                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
+//                         }
+//                         //todo:HOD end
+
+//                         if (session('role_id') == 1 || (in_array(614, session('permissions')))) {
+//                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit '.$employee->status_id.' &nbsp; '.auth()->id().' '.$employee->department_head.'</div></button>';
+//                         }
+
+//                         if ((($employee->status_id == 2 && in_array(615, session('permissions'))) &&    (auth()->id() == $employee->department_head)) || (session('role_id') == 1 && $employee->status_id == 2)) {
+
+//                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+//                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+//                         }
+
+//                         $dropdown .= '
+//                 </div>
+//               </div>
+//             ';
+// //                        $hr = AdminDepartment::find(10);
+// //                        if($hr->department_head_id == auth()->id())
+// //                        {
+// //                            return $dropdown;
+// //                        }
+// //                        else
+//                             if(empty($department_head) || !in_array($employee->status_id, [2,3])) {
+//                             return $dropdown;
+//                         }else{
+//                             return '';
+//                         }
+//                     } else {
+//                         return '';
+//                     }
+//                 } else {
+//                     return '';
+//                 }
 
             });
         if ($search_admin = $request->get('search_admin')) {
@@ -3908,39 +3992,93 @@ class AdminHumanResourseController extends Controller
 
     public function leave_request(Request $request)
     {
+        
         if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
             $admin_id = $request->admin_id;
             $from = $request->requested_from_date;
             $to = $request->requested_to_date;
             $reason = $request->leave_request_reason;
+            $leave_type = LeaveType::find($request->leave_type);
             $admin = Admin::find($admin_id);
-            if ($admin) {
-                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
-                if ($leave->exists()) {
-                    return redirect()->back()->with('error','Leave Request Already Submitted & Pending for Approval');
+            if ($admin && $admin->trax_id) {
+                $admin_profile = Employee::where('trax_id', $admin->trax_id);
+                if ($admin_profile->exists()) {
+                    $admin_profile = $admin_profile->first();
+                    $admin_id = $admin_profile->id;
 
-//                    return response()->json(['status' => 3, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    $working_days = $admin_profile->department->working_days; 
+                    $from_date = Carbon::parse($from);
+                    $to_date = Carbon::parse($to);
+                    
+                    if($working_days == 1){
+                        $diffDays = $from_date->diffInWeekdays($to_date,Carbon::setWeekendDays([ Carbon::SATURDAY,Carbon::SUNDAY ]));
+                    }else{
+                        $diffDays = $from_date->diffInWeekdays($to_date,Carbon::setWeekendDays([ Carbon::SATURDAY]));
+                    }
+
+                    if($diffDays <= 56){
+                        if($request->leave_type == 1){
+                            if($admin_profile->leave_count < $diffDays){
+                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                            }else{
+                                $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                            }
+                        }
+                        if($request->leave_type == 2){
+                            if($admin_profile->employee_gender_id == 1){
+                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                            }
+                        }
+                        if($request->leave_type == 3){
+                            if($admin_profile->employee_gender_id == 2 || $diffDays > $leave_type->count){
+                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                            }
+                        }
+                        if($request->leave_type == 4){
+                            if($admin_profile->religion_id != 1 || $diffDays > $leave_type->count){
+                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                            }
+                        }
+                        if($request->leave_type == 5){
+                            if($admin_profile->religion_id != 1 || $diffDays > $leave_type->count){
+                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                            }
+                        }
+                        
+                        
+                        $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                        if ($leave->exists()) {
+                            return redirect()->back()->with('error','Leave Request Already Submitted & Pending for Approval');
+                        }
+                        
+                        $leave_request = new EmployeeLeave();
+                        $leave_request->employee_id = $admin_id;
+                        $leave_request->employee_type_id = 1;
+                        if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                            $reporter_id = 8;
+                        } else {
+                            $reporter_id = $admin->role->department->department_head_id;
+                        }
+                        $leave_request->reporter_id = $reporter_id;
+                        $leave_request->from = $from;
+                        $leave_request->to = $to;
+                        $leave_request->applied_reason = $reason;
+                        $leave_request->leave_type = $request->leave_type;
+                        $leave_request->updated_by = auth()->id();
+                        $leave_request->save();
+                        $admin_profile->save();
+        
+                        NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                        NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+        //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+                        return redirect()->back()->with('success','Leave Request submitted successfully');
+                    }else{
+                        return redirect()->back()->with('error','Leave Request Days Exceed Quota');
+                    }
+
+                }else{
+                    return redirect()->back()->with('error','User Not Found');
                 }
-                $leave_request = new EmployeeLeave();
-                $leave_request->employee_id = $admin_id;
-                $leave_request->employee_type_id = 1;
-                if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
-                    $reporter_id = 8;
-                } else {
-                    $reporter_id = $admin->role->department->department_head_id;
-                }
-                $leave_request->reporter_id = $reporter_id;
-                $leave_request->from = $from;
-                $leave_request->to = $to;
-                $leave_request->applied_reason = $reason;
-                $leave_request->updated_by = auth()->id();
-                $leave_request->save();
-
-
-                NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
-                NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
-//                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
-                return redirect()->back()->with('success','Leave Request submitted successfully');
             }
             return redirect()->back()->with('error','User Not Found');
 //            return response()->json(['status' => '1', 'error' => 'User Not Found']);
@@ -3959,10 +4097,14 @@ class AdminHumanResourseController extends Controller
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
-                    $employee_leaves->status = 4;
+                    if($request->line_manager == 1){
+                        $employee_leaves->status = 6;
+                    }else{
+                        $employee_leaves->status = 4;
+                    }
                     $employee_leaves->updated_by = $admin_id;
                     if ($employee_leaves->employee_type_id == 1) {
-                        $user = Admin::find($employee_leaves->employee_id);
+                        $user = Employee::find($employee_leaves->employee_id);
                     } else {
                         $user = Rider::find($employee_leaves->employee_id);
                     }

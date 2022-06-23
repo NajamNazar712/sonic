@@ -155,15 +155,15 @@
                                 <label id="leave_request_reason-error" class="danger w-100" for="leave_request_reason"></label>
                             </div>
                             <div class="col-6">
-                                <select name="leave_type" id="leave_type" class="form-control">
-                                    @foreach ($leave_types as $leave_type)
-                                        <option value="{{$leave_type->id}}">{{$leave_type->name}}</option>
-                                    @endforeach
-                                </select>
-                                <textarea class="form-control" placeholder="Reasons of Leaves"
-                                       name="leave_request_reason"
-                                       id="leave_request_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
-                                <label id="leave_request_reason-error" class="danger w-100" for="leave_request_reason"></label>
+                                <div class="form-group">
+                                    <select name="leave_type" id="leave_type" class="form-control" data-rule-required="true" data-msg-required="Leave Type is required">
+                                        @foreach ($leave_types as $leave_type)
+                                            <option value="{{$leave_type->id}}">{{$leave_type->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    <label id="leave_type-error" class="danger w-100" for="leave_type"></label>
+
+                                </div>
                             </div>
 
                             <div class="col-12">
@@ -316,6 +316,7 @@
                           novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="approve_leave_id" value="">
+                        <input type="hidden" name="line_manager" id="line_manager_approve_leave_id" value="0">
                     </form>
                 </div>
             </div>
@@ -435,6 +436,12 @@
                 width: '100%',
                 allowClear: true
             });
+            $('#leave_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select Leave Type',
+                width: '100%',
+                allowClear: true
+            });
+            
 
             var from_date = $('#editLeaveForm #edit_from').pickadate({
                 firstDay: 1,
@@ -798,6 +805,40 @@
             $('body').on('click', '.approve', function (e) {
                 var id = $(this).data('target-id');
                 $('#approveLeaveForm #approve_leave_id').val(id);
+                atext = "Select Yes to Approve Request!";
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#approveLeaveForm').submit();
+                    }
+                });
+
+            });
+
+            $('body').on('click', '.approve_by_line_manager', function (e) {
+                var id = $(this).data('target-id');
+                $('#approveLeaveForm #approve_leave_id').val(id);
+                $('#approveLeaveForm #line_manager_approve_leave_id').val(1);
                 atext = "Select Yes to Approve Request!";
                 swal({
                     title: 'Are You Sure?',
