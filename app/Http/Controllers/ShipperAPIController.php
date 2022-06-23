@@ -273,7 +273,7 @@ class ShipperAPIController extends Controller
                     }
 
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Following Tracking Number don't belong to you : " . $request->tracking_no]);
+                    return response()->json(['status' => 1, 'message' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Shipment not found"]);
