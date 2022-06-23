@@ -2819,18 +2819,20 @@ class AdminCargoManifestController extends Controller
                             $consignee_status_id = 4;
 
                             $self_collection = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
+
                             if($self_collection->exists())
                             {
                                 $consignee_city = $shipment->consignee_city_id;
+                                $user_city = $shipment->user->city_id;
 
-                                $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id')->first();
-
-                                if ($city_id->exists()) {
-                                    if ($city_id->city_id == '202' || $city_id->city_id == '223') {
+                                if($consignee_city == '202' || $consignee_city == '223')
+                                {
                                         NotificationsController::send(178, $shipment_id);
-                                    } else {
-                                        NotificationsController::send(75, $shipment_id, $city_id->address);
-                                    }
+                                }
+                                else
+                                {
+                                    $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id','address')->first();
+                                    NotificationsController::send(75, $shipment_id, $city_id->address);
                                 }
                             }
                         }
