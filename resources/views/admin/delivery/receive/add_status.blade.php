@@ -1805,7 +1805,7 @@
                                                 var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
                                                 var cnic_input = $(row.node()).find('td.cnic input').val();
                                                 var relation_input = $(row.node()).find('td.relation input').val();
-                                                if ($.trim(!receiver_name) || $.trim(!cnic_input) || $.trim(!relation_input)) {
+                                                if ($.trim(receiver_name) == '' || $.trim(cnic_input) == '' || $.trim(relation_input) == '' ) {
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;
 
