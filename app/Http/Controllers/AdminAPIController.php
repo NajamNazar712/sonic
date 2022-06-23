@@ -5788,7 +5788,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = "Welcome to TRAX ".$request->name. " Your Request have been received by Trax, and is pending for Approval from HR.";
+                        $message = "Welcome to TRAX ".$request->name. ". Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -5873,7 +5873,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = "Welcome to TRAX ".$employee_request->name. " Your Request have been received by Trax, and is pending for Approval from HR.";
+                        $message = "Welcome to TRAX ".$employee_request->name. ". Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -7452,7 +7452,7 @@ class AdminAPIController extends Controller
                 $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0))->whereIn('request_status_id',[1,2]);
                 if($employee->exists()){
                     $employee = $employee->first();
-                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ." Your request is in process and is pending for approval from HR."]);
+                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name .". Your request is in process and is pending for approval from HR."]);
                 }else{
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
