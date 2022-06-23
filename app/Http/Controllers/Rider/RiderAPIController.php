@@ -11676,6 +11676,8 @@ class RiderAPIController extends Controller
                     $information['welcome_bit'] = 1;
                     $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
                 }
+                $rider->first_login = 1;
+                $rider->save();
                 return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
