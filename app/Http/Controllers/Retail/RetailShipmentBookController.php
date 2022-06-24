@@ -1759,7 +1759,7 @@ class RetailShipmentBookController extends Controller
 
         if (isset($spreadsheet)) {
                 $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id', 27 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 27){
+            if (count($spreadsheet[0]) != 28){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -1776,7 +1776,6 @@ class RetailShipmentBookController extends Controller
                     foreach ($spreadsheet_row as $key => $value) {
                         $row[$fields[$key]] = $value;
                     }
-
                     $rows[] = $row;
                 }
 
@@ -1792,6 +1791,7 @@ class RetailShipmentBookController extends Controller
                     foreach ($form as $key=>$value){
                         $row[$key] = $value;
                     }
+
                     $rows[] = $row;
                 }
             }
@@ -1872,7 +1872,6 @@ class RetailShipmentBookController extends Controller
                     $row['pickup_address_id'] = $pickup_address_id;
                     $row['category'] = $category;
                     $row['category_id'] = $category_id;
-
                     dispatch(new ProcessRetailShipmentBookingDB($row));
                 }
 
@@ -1927,6 +1926,7 @@ class RetailShipmentBookController extends Controller
         'business_category_id' => $request->city_business_category,
         'shipping_mode_id' => $request->city_shipping_mode,
         'city_name' => $city_name,
+        'phone_number' => $request->city_phone_number,
       ]);
 
       return response()->json(['status' => 1, 'success' => 'City Request Added']);

@@ -192,7 +192,7 @@
                                     <div class="col pt-5 mt-2 mb-3">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">City Request</label>
-                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-outline-success" >ADD</a>
+                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-outline-success" >Add</a>
                                         </div>
                                     </div>
                                     <div class="col mt-2 mb-1">
@@ -319,6 +319,7 @@
                         </div>
                         <div class="col-12 form-group d-none" id="cities_domestic">
                             <select name="city_domestic" id="city_domestic" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                <option value="other">Other</option>
                                 @foreach($domestic_cities as $domestic_city)
                                     <option value="{{$domestic_city->name}}">{{$domestic_city->name}}</option>
                                 @endforeach
@@ -331,6 +332,7 @@
                         </div>
                         <div class="col-12 form-group d-none" id="cities_international">
                             <select name="city_international" id="city_international" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                <option value="other">Other</option>
                                 @foreach($international_cities as $international_city)
                                     <option value="{{$international_city->name}}">{{$international_city->name}}</option>
                                 @endforeach
@@ -340,6 +342,9 @@
                             <div class="form-group">
                                 <input type="text" name="other_cities_international" id="other_cities_international" class="form-control" placeholder="New City Type" data-rule-required="true" data-msg-required="City is required">
                             </div>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_phone_number">
+                            <input type="text" class="form-control" id="city_phone_number" name="city_phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone # is required">
                         </div>
                    </div>
                    
@@ -701,6 +706,8 @@
 
 
             $(".phone1").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $("#city_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            
             $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
@@ -1061,8 +1068,6 @@
                 placeholder:"Select City Category*"
             }).bind('change',function(){
                 var id = parseInt($(this).val());
-                // var shipping_mode = parseInt($("#shipping_mode").val());
-                console.log(id);
                 if(id == 1){
 
                     $('#cities_domestic').removeClass('d-none');
@@ -1071,10 +1076,12 @@
                     $('#cities_domestic').addClass('d-none');
                     $('#cities_international').removeClass('d-none');
                 }
+                $('#cities_phone_number').removeClass('d-none');
 
                 
+                
             });
-            $('#city_domestic').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+            $('#city_domestic').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
@@ -1086,7 +1093,7 @@
                     $('#other_city_domestics').addClass('d-none');
                 }
             });
-            $('#city_international').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+            $('#city_international').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
@@ -1116,6 +1123,8 @@
                         '_token': '{{ csrf_token() }}',
                         'city_shipping_mode': $('select[name="city_shipping_mode"]').val(),
                         'city_business_category': $('select[name="city_business_category"]').val(),
+                        'city_phone_number': $('input[name="city_phone_number"]').val(),
+                        
                         'city_domestic': $('select[name="city_domestic"]').val(),
                         'other_city_domestic': $('input[name="other_city_domestic"]').val(),
                         'city_international': $('select[name="city_international"]').val(),
@@ -1133,11 +1142,11 @@
                             $('#AddCityReqModal').modal('hide');
                             $('#city_shipping_mode').val('').trigger('change.select2');
                             $('#city_business_category').val('').trigger('change.select2');
-
                             $('#city_domestic').val('').trigger('change.select2');
                             $('#other_city_domestic').val('');
                             $('#city_international').val('').trigger('change.select2');
                             $('#other_cities_international').val('');
+                            $('#city_phone_number').val('');
                         }
                     });
                 }
@@ -1152,6 +1161,10 @@
                 $('#other_city_domestic').val('');
                 $('#city_international').val('').trigger('change.select2');
                 $('#other_cities_international').val('');
+                $('#other_city_domestics').addClass('d-none');
+                $('#other_cities_internationals').addClass('d-none');
+                $('#cities_international').addClass('d-none');
+                $('#cities_domestic').addClass('d-none');
                 
             });
 

@@ -31,6 +31,7 @@
                                         <th>Height (cm)</th>
                                         <th>Pieces</th>
                                         <th>Payment Mode ID</th>
+                                        <th>Charges Mode ID</th>
                                         <th>Shipper Cell Number (03000000000)</th>
                                         <th>Shipper Name</th>
                                         <th>Shipper CNIC</th>
@@ -46,6 +47,7 @@
                                         <th>IBAN Number</th>
                                         <th>Account Number</th>
                                         <th>Bank ID</th>
+                                        <th>Special Instruction</th>
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -198,6 +200,11 @@
                                                 <td>{!! Form::select('form[' . $no . '][bank_id]',$banks ,null,['class' => 'form-control is-invalid bank_id select2','id'=>'bank_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['bank_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][bank_id]', $ro['bank_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['special_instruction']))
+                                                <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['special_instruction']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
