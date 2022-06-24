@@ -460,6 +460,10 @@ class ReturnController extends Controller
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
+                if(!$dispute_check){
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                }
                 if($parcel->booking_type_id == 5){
                     continue;
                 }
@@ -619,6 +623,10 @@ class ReturnController extends Controller
             // {
             //     return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
             // }
+            $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
+            if(!$dispute_check){
+                return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            }
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
@@ -3211,6 +3219,10 @@ class ReturnController extends Controller
     public function return_confirmed_revert(Request $request) {
 
         $shipment = Shipment::find($request->id);
+        $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+        if(!$dispute_check){
+            return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+        }
         $flag = true;
         $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
         if($consolidation){
