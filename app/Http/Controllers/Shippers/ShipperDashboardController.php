@@ -8,6 +8,7 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -173,6 +174,8 @@ class ShipperDashboardController extends Controller
                 $shipper_payment = null;
             }*/
             $shipper_payment = null;
+
+
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }
