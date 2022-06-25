@@ -5458,9 +5458,9 @@ class NotificationsController extends Controller
                             $cc = array_merge($cc, $cc_admins->pluck('email')->toArray());
                         }
                     } else {
-                        $to[] = 'faizan.ahmed@trax.pk';
-                        $cc[] = 'mohsin.qamar@trax.pk';
-                        $cc[] = 'fawad.ahmed@trax.pk';
+                        $to[] = 'aamir.sohail@trax.pk';
+                        $to[] = 'mohsin.qamar@trax.pk';
+                        $to[] = 'fawad.ahmed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $cc[] = 'shafay.tariq@trax.pk';
                     }
