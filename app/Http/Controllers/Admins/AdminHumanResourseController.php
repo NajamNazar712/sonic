@@ -3848,7 +3848,7 @@ class AdminHumanResourseController extends Controller
                     if($employee->working_days_id == 1){
                         $diffDays = $start_date->diffInWeekdays($end_date,Carbon::setWeekendDays([ Carbon::SATURDAY,Carbon::SUNDAY ]));
                     }else{
-                        $diffDays = $start_date->diffInWeekdays($end_date,Carbon::setWeekendDays([ Carbon::SATURDAY]));
+                        $diffDays = $start_date->diffInWeekdays($end_date,Carbon::setWeekendDays([ Carbon::SUNDAY]));
                     }
                     return $diffDays;
                     
@@ -3872,48 +3872,64 @@ class AdminHumanResourseController extends Controller
             })
             // ->addColumn("action", function ($employee) use ($department_head) {
                 ->addColumn("action", function ($employee) {
-
-                    $dropdown = '
-                    <div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                  ';
+                    $dropdown = '-';
+                    
                 if($employee->status_id == 1){
                     if($employee->leave_type_id == 1){
                         $emp_id = Employee::where('trax_id',Auth::user()->trax_id);
                         if($emp_id->exists()){
                             $emp_id = $emp_id->first();
                             if($employee->line_manager_id == $emp_id->id){
+                                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                  ';
                                 $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
-        
+                                $dropdown .= '
+                                </div>
+                              </div>
+                            '; 
+                            
                             }
                         }
-                        
+                      
                     }else{
 
                         if($employee->department_head == Auth::id()){
+                            $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                  ';
                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
+                            $dropdown .= '
+                            </div>
+                          </div>
+                        '; 
                         }
                         
                     }
-                    $dropdown .= '
-                    </div>
-                  </div>
-                '; 
+                   
                 return $dropdown;
                 }
                 if($employee->status_id == 2){
                     if ((in_array(session('role_id'), [63, 69, 70, 1]))) {
-                        
+                        $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                  ';
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-                    }
-                    $dropdown .= '
+                        $dropdown .= '
                 </div>
               </div>
             '; 
+                    }
+                
             return $dropdown;
                 }
 
@@ -4026,7 +4042,7 @@ class AdminHumanResourseController extends Controller
                         }
                         if($request->leave_type == 2){
                             if($admin_profile->employee_gender_id == 1){
-                                return redirect()->back()->with('error','Leave Request Can\'nt be approve');
+                                return redirect()->back()->with('error','Maternity Leave Request Can\'nt be approve');
                             }
                         }
                         if($request->leave_type == 3){
@@ -4040,7 +4056,7 @@ class AdminHumanResourseController extends Controller
                             }
                         }
                         if($request->leave_type == 5){
-                            if($admin_profile->religion_id != 1 || $diffDays > $leave_type->count){
+                            if($diffDays > $leave_type->count){
                                 return redirect()->back()->with('error','Leave Request Can\'nt be approve');
                             }
                         }
