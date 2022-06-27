@@ -135,7 +135,15 @@ class RetailShipmentBookController extends Controller
             $consignee_information_log->save();
 
         }else{
-            $consignee_information = $consignee_information->first();
+
+          $consignee_information = $consignee_information->first();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->save();
+
             $consignee_information_log = new ConsigneeInformationLog();
             $consignee_information_log->consignee_information_id = $consignee_information->id;
             $consignee_information_log->phone = $consignee_information->phone;
@@ -145,13 +153,6 @@ class RetailShipmentBookController extends Controller
             $consignee_information_log->city_id = $consignee_information->city_id;
             $consignee_information_log->user_id = $user_id;
             $consignee_information_log->save();
-
-            $consignee_information->phone = $consignee_phone_number_1;
-            $consignee_information->phone2 = $consignee_phone_number_2;
-            $consignee_information->name = $consignee_name;
-            $consignee_information->address = $consignee_address;
-            $consignee_information->city_id = $consignee_city_id;
-            $consignee_information->save();
         }
         return $shipment_id;
     }
