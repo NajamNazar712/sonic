@@ -1844,7 +1844,7 @@
                                             html += missing_input_issue[index]+" not found of "+ tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Update Received/Refused By for all Shipment(s) of 0 (zero) amount!';
+                                        html += '<br/>Update Received / Refused By , Cnic , Relation for all Shipment(s) of 0 (zero) amount !';
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
