@@ -3726,45 +3726,37 @@ class AdminHumanResourseController extends Controller
         $emp_id = Employee::where('trax_id', Auth::user()->trax_id);
         if ($emp_id->exists()) {
             $emp_id = $emp_id->first()->id;
+        }else{
+            $emp_id = null;
         }
+        
         $employee_leaves = EmployeeLeave::leftjoin('employees as e', 'e.id', 'employee_leaves.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
             ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
             ->leftjoin('admin_departments as ad', 'ad.id', 'e.department_id')
             ->leftjoin('employee_designations as ed', 'ed.id', 'e.designation_id')
             ->leftjoin('leave_types as lt', 'lt.id', 'employee_leaves.leave_type')
-            ->select('e.name as admin_name', 'e.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'e.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason', 'lt.name as leave_type', 'lt.id as leave_type_id', 'ad.working_days as working_days_id', 'e.line_manager_id as line_manager_id');
-        if ((!in_array(session('role_id'), [63, 69, 70]))) {
-            $employee_leaves = $employee_leaves->where('e.trax_id', Auth::user()->trax_id)
-                ->orWhere('e.line_manager_id', Auth::user()->trax_id);
-        }
+            ->select('e.name as admin_name', 'e.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'e.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason', 'lt.name as leave_type', 'lt.id as leave_type_id', 'ad.working_days as working_days_id', 'e.line_manager_id as line_manager_id')
+            ;
 
-        /*if(session('role_id') != 1 && session('role_id') != 63){
-        $employee_leaves->where('ad.id', session('department_id'));
-        if(session('department_id') != 6){
-        $employee_leaves->where('employee_leaves.employee_type_id', 1);
-        }
-        }*/
-//        dd(session()->all());
+            $employee_leaves->where(function ($query) use ($emp_id) {
+                if($emp_id){
+                    $query->where('e.trax_id', Auth::user()->trax_id)
+                    ->orWhere('e.line_manager_id', $emp_id);
+                }else{
+                    $query->where('e.trax_id', Auth::user()->trax_id);
+                }
+            })->orWhere(function ($query){
+                $query->whereIn('ls.id',[2,3,4,5,6])
+                    ->where('ad.department_head_id', Auth::user()->id)
+                    ->where('lt.id','<>',1);
+            })
+            ->orWhere(function ($query){
+                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                    $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
+                }
+            });
 
-        // leave_quota
-        // $find_manager = AdminDepartment::where('department_head_id', Auth::user()->id)->first();
-        // $department_head = "";
-        // if (!empty($find_manager)) {
-        //     if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
-        //         $department_head = $find_manager->department_head_id;
-        //         $employee_leaves = $employee_leaves->where(function ($query) use ($find_manager) {
-        //             $query->where('department_id', $find_manager->id);
-        //         });
-        //     }
-        // }else{
-        //     if ((!in_array(session('role_id'), [63, 69, 70, 1]))) {
-        //         $employee_leaves = $employee_leaves->where(function ($query) {
-        //             $query->where('employee_leaves.employee_id', Auth::id());
-        //         });
-        //     }
-        // }
-        // leave_quota  end
 
         $datatable = Datatables::of($employee_leaves)
             ->editColumn('trax_id', function ($employee) {
@@ -3988,6 +3980,7 @@ class AdminHumanResourseController extends Controller
     {
 
         if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+            
             $admin_id = $request->admin_id;
             $from = $request->requested_from_date;
             $to = $request->requested_to_date;
@@ -4003,7 +3996,22 @@ class AdminHumanResourseController extends Controller
                     $working_days = $admin_profile->department->working_days;
                     $from_date = Carbon::parse($from);
                     $to_date = Carbon::parse($to);
+//checking for fiscal year start
+                    $start_year = Carbon::today()->month(7)->startOfMonth();
+                    $end_year = Carbon::today()->month(6)->endOfMonth();
+                   
+                    if(Carbon::now() > $start_year){
+                        $end_year = $end_year->addYear(1);
+                    }        
+                    else{
+                        $start_year = $start_year->subYear(1);        
+                    }
+                    if(!($from_date >= $start_year && $to_date <= $end_year)){
+                        return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
 
+                    }
+//checking for fiscal year end
+                    
                     if ($working_days == 1) {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                     } else {
