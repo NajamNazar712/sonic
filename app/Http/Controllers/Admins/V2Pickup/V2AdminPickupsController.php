@@ -2026,9 +2026,13 @@ class V2AdminPickupsController extends Controller
             $self_collection_shipment = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
             if($self_collection_shipment)
             {
+
                 $shipment = Shipment::where('id',$shipment_id)->first();
                 $user_city = $shipment->user->city_id;
-                if($shipment->consignee_city_id == $user_city)
+
+//                $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id
+//                if($shipment->consignee_city_id == $user_city)
+                if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id)
                 {
                     NotificationsController::send(178, $shipment_id);
                 }
