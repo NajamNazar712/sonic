@@ -120,6 +120,7 @@ class RetailShipmentBookController extends Controller
             $consignee_information->name = $consignee_name;
             $consignee_information->address = $consignee_address;
             $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->retail_consignee = 1;
             $consignee_information->save();
         }else{
             $consignee_information = $consignee_information->first();
