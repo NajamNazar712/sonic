@@ -3822,7 +3822,7 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
-                    return $diffDays;
+                    return $diffDays + 1;
 
                 } else {
                     return 1;
@@ -4009,6 +4009,8 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SATURDAY]));
                     }
+
+                    $diffDays++;
 
                     if ($diffDays <= 56) {
                         if ($request->leave_type == 1) {
@@ -4246,6 +4248,7 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
+                    $diffDays++;
                     $old_start_date = Carbon::createFromFormat('Y-m-d', $leave_request->from);
                     $old_end_date = Carbon::createFromFormat('Y-m-d', $leave_request->to);
 
@@ -4254,7 +4257,7 @@ class AdminHumanResourseController extends Controller
                                 } else {
                                     $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                                 }
-
+                                $old_diffDays++;
                     if ($diffDays <= 56) {
                         if ($request->edit_leave_type == 1) {
                             if ($admin_profile->leave_count < $diffDays) {
