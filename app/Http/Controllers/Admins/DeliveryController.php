@@ -405,7 +405,10 @@ class DeliveryController extends Controller
             $rider_name = '';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
-
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if(!$dispute_check){
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                }
 
                 if ($shipment->shipment_detail()->exists()) {
                     if ($shipment->shipment_detail->is_open == 1) {
