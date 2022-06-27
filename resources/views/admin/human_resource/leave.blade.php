@@ -85,6 +85,7 @@
                                     <th class="border-primary border-darken-1">Availed Leaves</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Leave Purpose</th>
+                                    <th class="border-primary border-darken-1">Leave Type</th>
                                     <th class="border-primary border-darken-1">Reject Reason</th>
                                     <th class="border-primary border-darken-1">Leave From</th>
                                     <th class="border-primary border-darken-1">Leave TO</th>
@@ -142,7 +143,7 @@
                                     </div>
                                     <input type="text" name="requested_to_date"
                                            class="form-control bg-primary border-primary white rounded-right required"
-                                           id="requested_to_date" placeholder="To" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
+                                           id="requested_to_date" placeholder="Till" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
                                     <label id="requested_to_date-error" class="danger w-100" for="requested_to_date"></label>
                                 </div>
 
@@ -196,69 +197,52 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="row mb-2 justify-content-center">
+                           
                             <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_name" class="text-left">Employee Name</label>
-                                    <input type="text" name="name" id="edit_name" class="form-control" readonly>
-                                </div>
-                            </div>
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_trax_id" class="text-left">Employee ID</label>
-                                    <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_designation" class="text-left">Designation</label>
-                                    <input type="text" name="designation" id="edit_designation" class="form-control"
-                                           readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <div class="form-group">
-                                    <label for="edit_department" class="text-left">Department</label>
-                                    <input type="text" name="department" id="edit_department" class="form-control"
-                                           readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
-                                <div class="form-group input-group ">
-                                    <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                                    </div>
-                                    <input type="text" name="from"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true"
-                                           data-msg-required="Leave-From Date is required">
-                                </div>
-                            </div>
-
-                            <div class="col-6 mt-1">
-                                <label for="edit_to" class="text-left">To Date</label>
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
                                     </div>
-                                    <input type="text" name="to"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="edit_to" placeholder="Leave Date (To)">
+                                    <input type="text" name="edit_from"
+                                           class="form-control bg-primary border-primary white rounded-right"
+                                           id="edit_from" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
+                                    <label id="edit_from-error" class="danger w-100" for="edit_from"></label>
                                 </div>
                             </div>
-                            <div class="col mt-1">
+
+                            <div class="col-6 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                    </div>
+                                    <input type="text" name="edit_to"
+                                           class="form-control bg-primary border-primary white rounded-right required"
+                                           id="edit_to" placeholder="Till" aria-required="true" data-rule-required="true" data-msg-required="Date is required">
+                                    <label id="edit_to-error" class="danger w-100" for="edit_to"></label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" placeholder="Reasons of Leaves"
+                                       name="reason"
+                                       id="edit_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                <label id="edit_reason-error" class="danger w-100" for="edit_reason"></label>
+                            </div>
+                            <div class="col-6">
                                 <div class="form-group">
-                                    <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason"
-                                              readonly></textarea>
+                                    <select name="edit_leave_type" id="edit_leave_type" class="form-control" data-rule-required="true" data-msg-required="Leave Type is required">
+                                        @foreach ($leave_types as $leave_type)
+                                            <option value="{{$leave_type->id}}">{{$leave_type->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    <label id="edit_leave_type-error" class="danger w-100" for="edit_leave_type"></label>
+
                                 </div>
                             </div>
+                          
 
                         </div>
                         <div class="form-group ml-1">
@@ -371,45 +355,29 @@
     {{--    todo date filter field--}}
     <script>
         var booking_from_date = $('#requested_from_date').pickadate({
+            max: '{{ Carbon\Carbon::today()->month(6)->endOfMonth() }}',
+            min: '{{ Carbon\Carbon::now()}}',
+            format: 'yyyy-mm-dd',
             firstDay: 1,
             clear: '',
-            yearRange: "2002:2012",
-            max: '{{ Carbon\Carbon::now()->addYear(1) }}',
-            min: '{{ Carbon\Carbon:: now()->subYear(1)}}',
-            // format: 'dd mmmm, yyyy',
-            format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
-            // hiddenSuffix: '_formatted',
-            onSet: function (context) {
+            formatSubmit: 'yyyy-mm-dd',
+            onSet: function(context) {
                 if (context.select) {
                     $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
                 }
             }
         });
 
-        // var booking_from_date =  $( "#requested_from_date" ).datepicker({
-        //     yearRange: "2002:2012"
-        // });
-
         var booking_to_date = $('#requested_to_date').pickadate({
             firstDay: 1,
             clear: '',
-            {{--max: '{{ Carbon\Carbon::now() }}',--}}
-            // format: 'dd mmmm, yyyy',
-            max: '{{ Carbon\Carbon::now()->addYear(1) }}',
-            min: '{{ Carbon\Carbon:: now()->subYear(1)}}',
+            max: '{{ Carbon\Carbon::today()->month(6)->endOfMonth() }}',
             format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
-            // hiddenSuffix: '_formatted',
-            onSet: function (context) {
-                if (context.select) {
-                    $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
-                }
-            }
         });
     </script>
     {{--    todo date filter field end--}}
@@ -441,8 +409,13 @@
                 width: '100%',
                 allowClear: true
             });
+            $('#edit_leave_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select Leave Type',
+                width: '100%',
+                allowClear: true
+            });
             
-
+            
             var from_date = $('#editLeaveForm #edit_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -493,6 +466,7 @@
                             head.push('Availed Leaves');
                             head.push('Status');
                             head.push('Leave Purpose');
+                            head.push('Leave Type');
                             head.push('Reject Reason');
                             head.push('Leave From');
                             head.push('Leave To');
@@ -514,6 +488,7 @@
                                 row.push(values.leave_count);
                                 row.push(values.status);
                                 row.push(values.applied_reason);
+                                row.push(values.leave_type);
                                 row.push(values.reject_reason);
                                 row.push(values.from);
                                 row.push(values.to);
@@ -608,6 +583,13 @@
                         orderable: false
                     },
                     {
+                        data: 'leave_type',
+                        name: 'lt.id',
+                        class: 'align-middle leave_type',
+                        orderable: false
+                    },
+                    
+                    {
                         data: 'reject_reason',
                         name: 'employee_leaves.rejected_reason',
                         class: 'align-middle reject_reason',
@@ -638,6 +620,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var status_filter = '<select name="status_filter" id="status_filter" class="select2 form-control"></select>';
+                    var leave_type_filter = '<select name="leave_type_filter" id="leave_type_filter" class="select2 form-control"></select>';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type" id="employee_type" class="select2 form-control">' +
                         '<option value="1">Staff</option>' +
@@ -656,6 +639,11 @@
                                 }).wrap(td);
                         } else if ($(header).is('.status')) {
                             $(status_filter).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        } else if ($(header).is('.leave_type')) {
+                            $(leave_type_filter).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -691,6 +679,21 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    var data_leave_type = $.map({!! $leave_types !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+                    $('#leave_type_filter').prepend('<option value="" selected></option>').select2({
+                        data: data_leave_type,
+                        placeholder: "Select Leave Type",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
                     this.api().table().columns.adjust();
                 }
             });
@@ -700,12 +703,8 @@
             });
 
             $('body').on('click', '.edit', function (e) {
-
+                var leave_type_id = $(this).attr('rel');
                 var id = $(this).data('target-id');
-                var name = table.row($(this).parents('tr')).data().name;
-                var trax_id = table.row($(this).parents('tr')).data().trax_id;
-                var designation = table.row($(this).parents('tr')).data().designation;
-                var department = table.row($(this).parents('tr')).data().department;
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
@@ -713,11 +712,9 @@
                 to_date.pickadate('picker').set('select', new Date(to));
                 from_date.pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
                 $('#leave_id').val(id);
-                $('#edit_name').val(name);
-                $('#edit_trax_id').val(trax_id);
-                $('#edit_department').val(department);
-                $('#edit_designation').val(designation);
                 $('#edit_reason').val(reason);
+                $('#edit_leave_type').val(leave_type_id).trigger('change');
+                
                 $('#editLeaveModal').modal('show');
             });
 
@@ -731,6 +728,9 @@
                 $('#reject_leave_id').val('');
                 $('#reject_reason').val('');
             });
+
+            
+
 
             $("#rejectLeaveForm").validate({
                 errorClass: "danger",
@@ -873,6 +873,24 @@
             $("#leave_request_btn").click(function () {
                 $("#leave_request").modal('show');
             });
+
+            $('#leave_request').on('hide.bs.modal', function () {
+                $('#leave_request_reason').val('');
+                $('#leave_type').val('').trigger('change');
+                $('#requested_from_date').val('');
+                $('#requested_to_date').val('');
+                
+
+            });
+            $('#editLeaveModal').on('hide.bs.modal', function () {
+                $('#edit_reason').val('');
+                $('#edit_leave_type').val('').trigger('change');
+                $('#edit_from').val('');
+                $('#edit_to').val('');
+                
+
+            });
+            
             //todo : for calling buttons id end
 
             //todo : leave request form submission
