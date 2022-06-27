@@ -1796,6 +1796,7 @@
                                 submit_all_status_flag = true;
                                 if (select_all_status == 14) {
                                     table.rows().nodes().each(function (index) {
+                                        missing_input_temp = "";
                                         var row = table.row(index);
 
                                         if ($(row.node()).hasClass('selected')) {
