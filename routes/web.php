@@ -3508,6 +3508,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'AdminShipmentHandoverController@handover_list')->name('list');
             Route::post('shipments','AdminShipmentHandoverController@handover_shipments_count')->name('shipments');
             Route::put('delivered','AdminShipmentHandoverController@handover_shipments_delivered')->name('delivered');
+            Route::post('remaining','AdminShipmentHandoverController@handover_shipments_remaining')->name('remaining');
             Route::post('print','AdminShipmentHandoverController@handover_print')->name('print');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
