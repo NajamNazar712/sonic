@@ -2024,7 +2024,7 @@ class V2AdminPickupsController extends Controller
         //todo: send sms for self collection!
         foreach ($shipment_ids as $shipment_id) {
             $self_collection_shipment = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
-            if($self_collection_shipment->exists())
+            if($self_collection_shipment)
             {
                 $shipment = Shipment::where('id',$shipment_id)->first();
                 $user_city = $shipment->user->city_id;
