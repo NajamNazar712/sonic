@@ -3818,9 +3818,9 @@ class AdminHumanResourseController extends Controller
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
 
                     if ($employee->working_days_id == 1) {
-                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
-                    } else {
                         $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                    } else {
+                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
                     return $diffDays;
 
@@ -4005,9 +4005,9 @@ class AdminHumanResourseController extends Controller
                     $to_date = Carbon::parse($to);
 
                     if ($working_days == 1) {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                     } else {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SATURDAY]));
                     }
 
                     if ($diffDays <= 56) {
@@ -4242,17 +4242,17 @@ class AdminHumanResourseController extends Controller
                     $to_date = Carbon::parse($to);
 
                     if ($working_days == 1) {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
                     } else {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
                     $old_start_date = Carbon::createFromFormat('Y-m-d', $leave_request->from);
                     $old_end_date = Carbon::createFromFormat('Y-m-d', $leave_request->to);
 
                                 if ($working_days == 1) {
-                                    $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                                    $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
                                 } else {
-                                    $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                                    $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                                 }
 
                     if ($diffDays <= 56) {
