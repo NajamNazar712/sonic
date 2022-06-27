@@ -111,7 +111,35 @@ class RetailShipmentBookController extends Controller
 
         $reference_1_id = null;
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
+        
+        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1)->where('retail_consignee',1);
+        if(!$consignee_information->exists()){
+            $consignee_information = new ConsigneeInformation();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->save();
+        }else{
+            $consignee_information = $consignee_information->first();
+            $consignee_information_log = new ConsigneeInformationLog();
+            $consignee_information_log->consignee_information_id = $consignee_information->id;
+            $consignee_information_log->phone = $consignee_information->phone;
+            $consignee_information_log->phone2 = $consignee_information->phone2;
+            $consignee_information_log->name = $consignee_information->name;
+            $consignee_information_log->address = $consignee_information->address;
+            $consignee_information_log->city_id = $consignee_information->city_id;
+            $consignee_information_log->user_id = $user_id;
+            $consignee_information_log->save();
 
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->save();
+        }
         return $shipment_id;
     }
 
@@ -1937,7 +1965,7 @@ class RetailShipmentBookController extends Controller
       // $phone = $request->phone;
       $phone = substr_replace($request->phone, '-', 4, 0);
         $message = '';
-        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        $consignee_information = ConsigneeInformation::where('phone', $phone)->where('retail_consignee',1);
         if ($consignee_information->exists()) {
           $consignee_information = $consignee_information->first();
           $consignee_info = ConsigneeInformationLog::where('consignee_information_id',$consignee_information->id)->get();
