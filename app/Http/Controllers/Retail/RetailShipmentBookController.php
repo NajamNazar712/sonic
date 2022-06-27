@@ -123,7 +123,7 @@ class RetailShipmentBookController extends Controller
             $consignee_information->retail_consignee = 1;
             $consignee_information->save();
 
-            $consignee_information = $consignee_information->first();
+            // $consignee_information = $consignee_information->first();
             $consignee_information_log = new ConsigneeInformationLog();
             $consignee_information_log->consignee_information_id = $consignee_information->id;
             $consignee_information_log->phone = $consignee_information->phone;
@@ -1975,16 +1975,17 @@ class RetailShipmentBookController extends Controller
     }
 
     public function consignee_info(Request $request){
-      // $phone = $request->phone;
-      $phone = substr_replace($request->phone, '-', 4, 0);
+      $phone = $request->phone;
+      // $phone = substr_replace($request->phone, '-', 4, 0);
         $message = '';
         $consignee_information = ConsigneeInformation::where('phone', $phone)->where('retail_consignee',1);
         if ($consignee_information->exists()) {
           $consignee_information = $consignee_information->first();
           $consignee_info = ConsigneeInformationLog::where('consignee_information_id',$consignee_information->id)->get();
-                
-                $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
-                if ($blacklist->exists()) {
+          
+          $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+          if ($blacklist->exists()) {
+                  // dd($blacklist->get());
                   
                   return response()->json(['status' => 0, 'consignee' => $consignee_info, 'blacklist'=> 1]);
                 }else{
