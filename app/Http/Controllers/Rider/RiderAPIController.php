@@ -11615,7 +11615,7 @@ class RiderAPIController extends Controller
                     }
                 }
             } else {
-                $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0))->whereIn('request_status_id',[1,2])->where('employee_type_id',2);
+                $employee = Employee::whereIn('request_status_id',[1,2])->where('employee_type_id',2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
                 if($employee->exists()){
                     $employee = $employee->first();
                     return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ."- Your request is in process and is pending for approval from HR."]);
