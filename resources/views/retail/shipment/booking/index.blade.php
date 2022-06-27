@@ -135,7 +135,7 @@
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
                                     <div class="form-group col-6">
                                         <a href="javascript:void(0);" id="auto_fetch" class="btn btn-sm btn-outline-success sm" disabled="disabled">Auto Fetch</a>
@@ -472,6 +472,11 @@
 
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
+
+            $('#consignee_phone_no').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
             
             function print(ids){
                 $.ajax({
