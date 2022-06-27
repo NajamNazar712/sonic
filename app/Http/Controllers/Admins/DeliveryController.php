@@ -2970,29 +2970,29 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->addColumn('cnic', function ($deliveries) {
-                if($deliveries->amount > 0)
-                {
-                    return '-';
-                }
-                else
-                {   $mask = "$(this).inputmask({'mask': '99999-9999999-9', 'clearIncomplete': true})";
-
-                    $cnic = '<input readonly class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[' . $deliveries->shId . ']" placeholder="Enter CNIC" value="' . $deliveries->cnic . '"> </div>';
-                    return $cnic;
-                }
-            })
-            ->addColumn('relation', function ($deliveries) {
-                if($deliveries->amount > 0)
-                {
-                    return '-';
-                }
-                else
-                {
-                    $relation = '<input readonly class="form-control form-control-sm" name="relation[' . $deliveries->shId . ']" value="' . $deliveries->relation . '" placeholder="Enter Relation" value="' . $deliveries->relation . '" ></div>';
-                    return $relation;
-                }
-            })
+//            ->addColumn('cnic', function ($deliveries) {
+//                if($deliveries->amount > 0)
+//                {
+//                    return '-';
+//                }
+//                else
+//                {   $mask = "$(this).inputmask({'mask': '99999-9999999-9', 'clearIncomplete': true})";
+//
+//                    $cnic = '<input readonly class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[' . $deliveries->shId . ']" placeholder="Enter CNIC" value="' . $deliveries->cnic . '"> </div>';
+//                    return $cnic;
+//                }
+//            })
+//            ->addColumn('relation', function ($deliveries) {
+//                if($deliveries->amount > 0)
+//                {
+//                    return '-';
+//                }
+//                else
+//                {
+//                    $relation = '<input readonly class="form-control form-control-sm" name="relation[' . $deliveries->shId . ']" value="' . $deliveries->relation . '" placeholder="Enter Relation" value="' . $deliveries->relation . '" ></div>';
+//                    return $relation;
+//                }
+//            })
             ->make(true);
     }
 
