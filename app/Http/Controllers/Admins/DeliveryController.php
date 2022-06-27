@@ -2720,7 +2720,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipment_open_boxes as sob', 'shipments.id', '=', 'sob.shipment_id')
-            ->select(['riders.name as rider_name', 'delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status', 'sj.created_at as arrival', 'usi.poc', 'rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id', 'dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered', 'sob.open_box_type as open_box_type'])
+            ->select(['riders.name as rider_name', 'delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status', 'sj.created_at as arrival', 'usi.poc', 'rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id', 'dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered', 'sob.open_box_type as open_box_type','rrb.cnic','rrb.relation'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering', 'asc', 'dns.shipment_id', 'asc');
 
@@ -2968,6 +2968,29 @@ class DeliveryController extends Controller
                     }
                 } else {
                     return '-';
+                }
+            })
+            ->addColumn('cnic', function ($deliveries) {
+                if($deliveries->amount > 0)
+                {
+                    return '-';
+                }
+                else
+                {   $mask = "$(this).inputmask({'mask': '99999-9999999-9', 'clearIncomplete': true})";
+
+                    $cnic = '<input readonly class="form-control form-control-sm cnic_input" onfocus="' . $mask. '"  name="cnic[' . $deliveries->shId . ']" placeholder="Enter CNIC" value="' . $deliveries->cnic . '"> </div>';
+                    return $cnic;
+                }
+            })
+            ->addColumn('relation', function ($deliveries) {
+                if($deliveries->amount > 0)
+                {
+                    return '-';
+                }
+                else
+                {
+                    $relation = '<input readonly class="form-control form-control-sm" name="relation[' . $deliveries->shId . ']" value="' . $deliveries->relation . '" placeholder="Enter Relation" value="' . $deliveries->relation . '" ></div>';
+                    return $relation;
                 }
             })
             ->make(true);
