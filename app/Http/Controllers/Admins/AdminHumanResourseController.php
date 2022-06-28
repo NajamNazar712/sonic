@@ -4204,7 +4204,7 @@ class AdminHumanResourseController extends Controller
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
                 if (in_array($employee_leaves->status, [1])) {
-                    $employee_leaves->status = 6;
+                    $employee_leaves->status = 7;
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
