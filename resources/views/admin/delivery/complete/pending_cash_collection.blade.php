@@ -58,6 +58,7 @@
                         <th class="border-primary border-darken-1">CCD Receipts</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
+                        <th class="border-primary border-darken-1">One Link Payment Count</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -107,6 +108,26 @@
         </div>
     </div>
     <!--Shipments popup -->
+    <!-- one link payment details popup -->
+    <div class="modal fade" id="one_link_payment_details_modal" data-backdrop="static" role="dialog" aria-labelledby="one_link_payment_details_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="one_link_payment_details_modal_title">One Link Payment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- one link payment details popup -->
     <!--HBL Konnect Information -->
     <div class="modal fade" id="transactions_information_modal" data-backdrop="static" role="dialog" aria-labelledby="transactions_information_modal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -500,6 +521,7 @@
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
+                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle one_link_payment_count'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -799,6 +821,36 @@
                     });
 
             });
+
+            $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#one_link_payment_details_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.onelinkpayment') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var html = '';
+
+                        if (data.shipments) {
+                            $.each(data.shipments, function(index, tracking_number) {
+                                html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            });
+                        }
+                        $('#one_link_payment_details_modal .modal-body').html(html);
+                    }
+                });
+
+                console.log("done");
+
+            });
+
             $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#delivered_shipments_modal .modal-body').html('');

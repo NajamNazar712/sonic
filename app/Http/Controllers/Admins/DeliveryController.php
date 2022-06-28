@@ -4140,7 +4140,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
@@ -4159,6 +4159,14 @@ class DeliveryController extends Controller
             ->editColumn('transactions_amount', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('one_link_payment_count', function ($deliveries) {
+                if($deliveries->one_link_payment_count != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 }
                 else{
                     return '-';
@@ -5954,6 +5962,23 @@ class DeliveryController extends Controller
         } else {
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
+    }
+
+    public function one_link_payments(Request $request)
+    {
+        // $delivery_note_id = $request->input('delivery_note_id');
+        // $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        // $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
+        // $shipments = array();
+        // if ($delivery_note_shipments->count() != 0) {
+        //     foreach ($delivery_note_shipments as $delivery_note_shipment) {
+        //         $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+        //         $shipments[] = $shipment->tracking_number;
+        //     }
+        //     return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        // } else {
+        //     return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        // }
     }
 
     public function cash_collection_shipments_delivered(Request $request)

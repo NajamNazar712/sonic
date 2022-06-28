@@ -1158,6 +1158,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
+                Route::post('onelinkpayment','Admins\DeliveryController@cash_collection_shipments')->name('onelinkpayment');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
                 Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
