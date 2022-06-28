@@ -4204,6 +4204,14 @@ class AdminHumanResourseController extends Controller
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
                 if (in_array($employee_leaves->status, [1])) {
+                    $employee_leaves->status = 6;
+                    $employee_leaves->rejected_reason = $request->reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return redirect()->back()->with('success', 'Leave Reject Successfully');
+                }
+                if (in_array($employee_leaves->status, [6])) {
                     $employee_leaves->status = 3;
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
