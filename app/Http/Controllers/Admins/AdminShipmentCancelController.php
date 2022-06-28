@@ -115,6 +115,7 @@ class AdminShipmentCancelController extends Controller
                                     }
                                 }
                                 $shipment->warehouse_order_status = 9;
+                                $shipment->save();
                                 WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
                             }
                             //cacel from warehouse end
