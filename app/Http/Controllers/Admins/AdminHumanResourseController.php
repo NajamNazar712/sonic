@@ -3752,7 +3752,7 @@ class AdminHumanResourseController extends Controller
                     ->where('lt.id','<>',1);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
+                if ((in_array(session('role_id'), [63, 69, 70]))) {
                     $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
                 }
             });
@@ -3877,7 +3877,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif ($employee->status_id == 2) {
-                    if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
+                    if ((in_array(session('role_id'), [63, 69, 70]))) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -4276,7 +4276,7 @@ class AdminHumanResourseController extends Controller
                                 $old_diffDays++;
                     if ($diffDays <= 56) {
                         if ($request->edit_leave_type == 1) {
-                            if ($admin_profile->leave_count < $diffDays) {
+                            if (($admin_profile->leave_count + $old_diffDays) < $diffDays) {
                                 return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
                             } else {
                                 $admin_profile->leave_count = ($admin_profile->leave_count + $old_diffDays) - $diffDays;
