@@ -1871,10 +1871,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
-
+            
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_add_store')->name('store');
+                Route::post('duplicate_role', 'Admins\UserManagementController@role_duplicate')->name('duplicate_role');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function() {
@@ -3508,6 +3509,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'AdminShipmentHandoverController@handover_list')->name('list');
             Route::post('shipments','AdminShipmentHandoverController@handover_shipments_count')->name('shipments');
             Route::put('delivered','AdminShipmentHandoverController@handover_shipments_delivered')->name('delivered');
+            Route::post('remaining','AdminShipmentHandoverController@handover_shipments_remaining')->name('remaining');
             Route::post('print','AdminShipmentHandoverController@handover_print')->name('print');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
