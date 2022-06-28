@@ -327,7 +327,7 @@
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
                     {data: 'leaver_name', name: 'a.name', class: 'align-middle leaver_name'},
-                    {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
+                    {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
