@@ -3931,6 +3931,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
     });
+    Route::prefix('nps')->name('nps.')->group(function (){
+        Route::get('/','Admins\NpsController@index')->name('index');
+        Route::get('/add','Admins\NpsController@add')->name('add');
+        Route::post('/submit','Admins\NpsController@submit')->name('submit');
+
+    });
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {
