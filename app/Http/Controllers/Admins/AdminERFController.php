@@ -142,9 +142,32 @@ class AdminERFController extends Controller
                     return $trax_id;
                 }
             })
-            ->filterColumn('trax_id', function ($query, $keyword) {
-                $sql = "CONCAT(a.trax_id,'-','a.trax_idm')  like ?";
-                $query->whereRaw($sql, ["%$keyword%"]);
+            ->editColumn('trax_id_for_excel', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $value){
+                        $trax_id.= $value->trax_id.",";
+                    }
+                    return $trax_id;
+                }
+            })
+            ->addColumn('leaver_name_for_excel', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $id){
+                        $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
+                        $trax_id.= $name->name.",";
+                    }
+                    return $trax_id;
+                }
             })
             ->addColumn('leaver_name', function($erf) {
                 if($erf->type == 1){
@@ -157,7 +180,6 @@ class AdminERFController extends Controller
                         $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
                         $trax_id.= $name->name.",<br>";
                     }
-//                    dd($trax_id);
                     return $trax_id;
                 }
             })
@@ -175,8 +197,8 @@ class AdminERFController extends Controller
                     return '-';
                 }
                 else{
-                    $requested_by = EmployeeRequisition::where('id',$erf->requested_by)->select('name')->first();
-                    return $requested_by->name;
+                    $requested_date = EmployeeRequisition::where('id',$erf->id)->select('created_at')->first();
+                    return $requested_date->created_at;
                 }
             })
 
