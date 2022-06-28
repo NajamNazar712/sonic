@@ -29,6 +29,7 @@ use App\Http\Models\PickupAction;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
+use App\Http\Models\SelfCollectionCities;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
@@ -2044,7 +2045,15 @@ class V2AdminPickupsController extends Controller
 //                if($shipment->consignee_city_id == $user_city)
                 if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id)
                 {
-                    NotificationsController::send(178, $shipment_id);
+                    if($shipment->consignee_city->hub_id == '202' || $shipment->consignee_city->hub_id == '223')
+                    {
+                        NotificationsController::send(178, $shipment_id);
+                    }
+                    else
+                    {
+                        $city_id = SelfCollectionCities::where('city_id', $shipment->consignee_city->hub_id)->select('city_id','address')->first();
+                        NotificationsController::send(75, $shipment_id, $city_id->address);
+                    }
                 }
             }
         }
