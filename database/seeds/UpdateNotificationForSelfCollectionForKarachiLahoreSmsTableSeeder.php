@@ -14,7 +14,7 @@ class UpdateNotificationForSelfCollectionForKarachiLahoreSmsTableSeeder extends 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 178, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Self Collection SMS For Lahore n Karachi', 'type_id' => 2, 'subject' => null, 'body' => 'Dear [name],' . PHP_EOL . 'your parcel is arrived at our office please contact us at our helpline (021-111-118-729) for further process.', 'status' => 1,'updated_by' => 7)
+            array('id' => 178, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Auto Self Collection SMS (helpline number)', 'type_id' => 2, 'subject' => null, 'body' => 'Dear [name],' . PHP_EOL . 'your parcel is arrived at our office please contact us at our helpline (021-111-118-729) for further process.', 'status' => 1,'updated_by' => 7)
         ));
 
 
