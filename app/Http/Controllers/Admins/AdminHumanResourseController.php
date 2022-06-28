@@ -3752,7 +3752,7 @@ class AdminHumanResourseController extends Controller
                     ->where('lt.id','<>',1);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
                     $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
                 }
             });
@@ -3877,7 +3877,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif ($employee->status_id == 2) {
-                    if ((in_array(session('role_id'), [63, 69, 70]))) {
+                    if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
