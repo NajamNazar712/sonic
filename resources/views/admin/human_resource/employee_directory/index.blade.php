@@ -84,7 +84,7 @@
 
                                                 <table class="table mb-0">
                                                     <tbody>
-                                                    <tr style="background-color: yellow; color:#010a10;">
+                                                    <tr style="background-color: yellow; color:#010a10;" class="legends">
                                                         <td class="align-middle" id="filter_line_manager_btn">Line Manager</td>
                                                     </tr>
                                                     </tbody>
@@ -693,6 +693,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <style>
+
+        .legends{
+            cursor:pointer;
+        }
+        
         .is_line_manager{
             background-color: yellow;
         }

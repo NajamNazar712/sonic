@@ -2547,9 +2547,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.saleem@trax.pk', 'mursaleen.rafiq@trax.pk', 'balaj.khan@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
 
-                    $bcc = ['muhammad.waqas@trax.pk', 'anum.khan@trax.pk', 'danish.zahid@trax.pk'];
+                    $bcc = ['muhammad.waqas@trax.pk', 'danish.zahid@trax.pk', 'muhammad.yousuf@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
@@ -5390,7 +5390,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 75) {
+                }
+                else if ($id == 75) {
                     $shipment = Shipment::find($reference_1_id);
                     $address = $reference_2_id;
                     if ($shipment) {
@@ -9384,6 +9385,23 @@ class NotificationsController extends Controller
                     
 
                 }
+                else if ($id == 178) {
+
+                    $shipment = Shipment::find($reference_1_id);
+//                    dd($shipment);
+                    if ($shipment) {
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $shipment->consignee_name, $body);
+                        }
+
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to);
+                        if ($shipment->consignee_phone_number_2 != NULL) {
+                            $to = $shipment->consignee_phone_number_2;
+                            self::sms($body, $to);
+                        }
+                    }
+                }
             }
         }
     }
@@ -9450,9 +9468,8 @@ class NotificationsController extends Controller
         if (strpos($body, '[pin]') !== FALSE) {
             $body = str_replace('[pin]', $pin, $body);
         }
-
         $to = $phone_number;
-        self::sms($body, $to);
+        self::sms_otp($body, $to, "Consignee", $pin, 1);
     }
 
     static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
