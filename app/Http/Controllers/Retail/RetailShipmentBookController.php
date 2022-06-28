@@ -112,7 +112,7 @@ class RetailShipmentBookController extends Controller
         $reference_1_id = null;
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
         
-        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1)->where('retail_consignee',1);
+        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
         if(!$consignee_information->exists()){
             $consignee_information = new ConsigneeInformation();
             $consignee_information->phone = $consignee_phone_number_1;
@@ -1979,7 +1979,7 @@ class RetailShipmentBookController extends Controller
       $phone = $request->phone;
       // $phone = substr_replace($request->phone, '-', 4, 0);
         $message = '';
-        $consignee_information = ConsigneeInformation::where('phone', $phone)->where('retail_consignee',1);
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
         if ($consignee_information->exists()) {
           $consignee_information = $consignee_information->first();
           $consignee_info = ConsigneeInformationLog::where('consignee_information_id',$consignee_information->id)->get();
