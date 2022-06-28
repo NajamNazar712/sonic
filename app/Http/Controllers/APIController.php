@@ -5185,6 +5185,7 @@ class APIController extends Controller
             return ['status' => 403, 'message' => 'Access Forbidden!'];
         }
     }
+
     public function onelink_payment_billpayment(Request $request)
     {
         $valid_ip_addresses = array();
@@ -5277,13 +5278,17 @@ class APIController extends Controller
                                     $tran_date_formated = Carbon::parse($request_data['tran_date'])->format('Y-m-d');
                                     $tran_time_formated = Carbon::parse($request_data['tran_time'])->format('h:i:s');
 
+                                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_data->id)->orderBy('delivery_note_id', 'desc')->first();
+                                    $delivery_note = $delivery_note_shipment->delivery_note_id;
+
                                     $request_data['consumer_prefx'] = $consumer_prefx;
                                     $request_data['tracking_no'] = $tracking_no;
                                     $request_data['shipment_id'] = $shipment_data->id;
                                     $request_data['amount'] = $transfer_amount;
                                     $request_data['tran_date_formated'] = $tran_date_formated;
                                     $request_data['tran_time_formated'] = $tran_time_formated;
-
+                                    $request_data['delivery_note_id'] = $delivery_note;
+                                    
                                     $upload_transaction = OneLinkPaymentTransaction::create($request_data);
 
                                     if($upload_transaction)
