@@ -128,7 +128,7 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.employee_status', 2);
                 }
             })
-
+a
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
