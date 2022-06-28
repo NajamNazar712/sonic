@@ -37,6 +37,9 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
+                                    <th class="border-primary border-darken-1">Trax ID</th>
+                                    <th class="border-primary border-darken-1">Leaver Name</th>
+                                    <th class="border-primary border-darken-1">Requested By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -322,6 +325,9 @@
                     {data: 'status', name: 's.name', class: 'align-middle status'},
                     {data: 'es', name: 'employee_requisitions.employee_status', class: 'align-middle es'},
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
+                    {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
+                    {data: 'leaver_name', name: 'a.name', class: 'align-middle leaver_name'},
+                    {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 

@@ -55,11 +55,19 @@ class AdminERFController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'employee_requisitions.designation_id')
             ->join('admin_departments as dp', 'dp.id', '=', 'employee_requisitions.department_id')
             ->join('employee_requisition_statuses as s', 's.id', '=', 'employee_requisitions.status_id')
+//            ->leftjoin('employee_requisitions as e','e.id','=','employee_requisition_replacements.er_id')
+//            ->leftjoin('employee_requisition_replacements as err','employee_requisitions.id','=','err.er_id')
+//            ->leftJoin('employee_requisition_replacements as err', function ($join) {
+//                $join->on('err.er_id', '=', 'employee_requisitions.id')
+//                    ->where('err.er_id', '=',
+//                        DB::raw('(select max(id) as err_id  from employee_requisition_replacements where employee_requisition_replacements.er_id = employee_requisitions.id)'));
+//            })
             ->leftjoin('employee_requisition_attachments',function($join){
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es']);
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es','a.trax_id as trax_id'
+            ]);
 
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
@@ -126,6 +134,46 @@ class AdminERFController extends Controller
                 }
                 else if($keyword == 'notice period' || $keyword == 'notice'){
                     $query->where('employee_requisitions.employee_status', 2);
+                }
+            })
+            ->editColumn('trax_id', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $value){
+                        $trax_id.= $value->trax_id.",<br>";
+                    }
+                    return $trax_id;
+                }
+            })
+            ->filterColumn('trax_id', function ($query, $keyword) {
+                $sql = "CONCAT(a.trax_id,'-','a.trax_idm')  like ?";
+                $query->whereRaw($sql, ["%$keyword%"]);
+            })
+            ->addColumn('leaver_name', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $id){
+                        $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
+                        $trax_id.= $name->name.",<br>";
+                    }
+//                    dd($trax_id);
+                    return $trax_id;
+                }
+            })
+            ->addColumn('requested_by', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    return 'test';
                 }
             })
 
