@@ -3702,7 +3702,7 @@ class AdminHumanResourseController extends Controller
 
     public function leave_index()
     {
-
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         $users = Admin::where('status', 1)->select('id', 'name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
@@ -3713,7 +3713,26 @@ class AdminHumanResourseController extends Controller
         $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
-        $leave_types = LeaveType::select('id', 'name')->get();
+        $admin_profile = Employee::where('trax_id', Auth::user()->trax_id);
+        if ($admin_profile->exists()) {
+            $admin_profile = $admin_profile->first();
+            if($admin_profile->employee_gender_id == 1){
+                if($admin_profile->religion_id == 1){
+                    $leave_types = LeaveType::where('id','<>',2)->select('id', 'name')->get();
+                }else{
+                    $leave_types = LeaveType::whereIn('id',[1,3,5,6])->select('id', 'name')->get();
+
+                }
+            }elseif($admin_profile->employee_gender_id == 2){
+                if($admin_profile->religion_id == 1){
+                    $leave_types = LeaveType::where('id','<>',3)->select('id', 'name')->get();
+                }else{
+                    $leave_types = LeaveType::whereIn('id',[1,2,5,6])->select('id', 'name')->get();
+
+                }
+            }
+
+        }
 
         return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic, 'leave_types' => $leave_types]);
     }
@@ -3907,52 +3926,6 @@ class AdminHumanResourseController extends Controller
 
                 return '-';
 
-//                 if (in_array($employee->status_id, [1, 2])) {
-                //                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions')) || in_array(706, session('permissions'))) {
-
-//                         $dropdown = '
-                //               <div class="btn-group">
-                //                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                //                 <div class="dropdown-menu dropdown-menu-sm">
-                //             ';
-                //                         //todo:HOD
-                //                         if ((($employee->status_id == 1) && (auth()->id() == $employee->department_head) && (in_array(706, session('permissions')))) || (session('role_id') == 1 && $employee->status_id == 1)) {
-                //                             $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                //                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
-                //                         }
-                //                         //todo:HOD end
-
-//                         if (session('role_id') == 1 || (in_array(614, session('permissions')))) {
-                //                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit '.$employee->status_id.' &nbsp; '.auth()->id().' '.$employee->department_head.'</div></button>';
-                //                         }
-
-//                         if ((($employee->status_id == 2 && in_array(615, session('permissions'))) &&    (auth()->id() == $employee->department_head)) || (session('role_id') == 1 && $employee->status_id == 2)) {
-
-//                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                //                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-                //                         }
-
-//                         $dropdown .= '
-                //                 </div>
-                //               </div>
-                //             ';
-                // //                        $hr = AdminDepartment::find(10);
-                // //                        if($hr->department_head_id == auth()->id())
-                // //                        {
-                // //                            return $dropdown;
-                // //                        }
-                // //                        else
-                //                             if(empty($department_head) || !in_array($employee->status_id, [2,3])) {
-                //                             return $dropdown;
-                //                         }else{
-                //                             return '';
-                //                         }
-                //                     } else {
-                //                         return '';
-                //                     }
-                //                 } else {
-                //                     return '';
-                //                 }
 
             });
         if ($search_admin = $request->get('search_admin')) {
@@ -3996,21 +3969,23 @@ class AdminHumanResourseController extends Controller
                     $working_days = $admin_profile->department->working_days;
                     $from_date = Carbon::parse($from);
                     $to_date = Carbon::parse($to);
-//checking for fiscal year start
-                    $start_year = Carbon::today()->month(7)->startOfMonth();
-                    $end_year = Carbon::today()->month(6)->endOfMonth();
-                   
-                    if(Carbon::now() > $start_year){
-                        $end_year = $end_year->addYear(1);
-                    }        
-                    else{
-                        $start_year = $start_year->subYear(1);        
+                    if ($request->leave_type == 1) {
+                        //checking for fiscal year start
+                                            $start_year = Carbon::today()->month(7)->startOfMonth();
+                                            $end_year = Carbon::today()->month(6)->endOfMonth();
+                                           
+                                            if(Carbon::now() > $start_year){
+                                                $end_year = $end_year->addYear(1);
+                                            }        
+                                            else{
+                                                $start_year = $start_year->subYear(1);        
+                                            }
+                                            if(!($from_date >= $start_year && $to_date <= $end_year)){
+                                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                        
+                                            }
+                        //checking for fiscal year end
                     }
-                    if(!($from_date >= $start_year && $to_date <= $end_year)){
-                        return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
-
-                    }
-//checking for fiscal year end
                     
                     if ($working_days == 1) {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
@@ -4023,19 +3998,19 @@ class AdminHumanResourseController extends Controller
                     if ($diffDays <= 56) {
                         if ($request->leave_type == 1) {
                             if ($admin_profile->leave_count < $diffDays) {
-                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                             } else {
                                 $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
                             }
                         }
                         if ($request->leave_type == 2) {
                             if ($admin_profile->employee_gender_id == 1) {
-                                return redirect()->back()->with('error', 'Maternity Leave Request Can\'t be approve');
+                                return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
                             }
                         }
                         if ($request->leave_type == 3) {
                             if ($admin_profile->employee_gender_id == 2 || $diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                                return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
                             }
                         }
                         if ($request->leave_type == 4) {
@@ -4045,7 +4020,7 @@ class AdminHumanResourseController extends Controller
                         }
                         if ($request->leave_type == 5) {
                             if ($diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
                             }
                         }
 
@@ -4076,7 +4051,8 @@ class AdminHumanResourseController extends Controller
                         //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
                         return redirect()->back()->with('success', 'Leave Request submitted successfully');
                     } else {
-                        return redirect()->back()->with('error', 'Leave Request Days Exceed Quota');
+                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.
+                        ');
                     }
 
                 } else {
@@ -4213,14 +4189,14 @@ class AdminHumanResourseController extends Controller
                             $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
                             $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
         
-                                        if ($working_days == 1) {
-                                            $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
-                                        } else {
-                                            $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
-                                        }
-                                        $old_diffDays++;
-                                        $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
-                                        $admin_profile->save();
+                            if ($working_days == 1) {
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
+                            } else {
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                            }
+                            $old_diffDays++;
+                            $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
+                            $admin_profile->save();
                         }
                         $employee_leaves->status = 7;
                         $employee_leaves->rejected_reason = $request->reason;
@@ -4262,7 +4238,9 @@ class AdminHumanResourseController extends Controller
     {
         $leave_request = EmployeeLeave::find($request->leave_id);
         
-
+        if($leave_request->stauts == 1){
+            return redirect()->back()->with('error', 'Leave Request Can\'t be edited');
+        }
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
         $edit_leave_type = LeaveType::find($request->edit_leave_type);

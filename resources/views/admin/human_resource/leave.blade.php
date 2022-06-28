@@ -404,7 +404,7 @@
                 width: '100%',
                 allowClear: true
             });
-            $('#leave_type').prepend('<option value="" selected="selected"></option>').select2({
+            $('#leave_type').select2({
                 placeholder: 'Select Leave Type',
                 width: '100%',
                 allowClear: true
