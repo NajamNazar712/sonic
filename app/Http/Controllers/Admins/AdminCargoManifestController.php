@@ -609,6 +609,11 @@ class AdminCargoManifestController extends Controller
 
         $shipment = Shipment::find(current($request->shipment_ids));
 
+        $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+        if(!$dispute_check){
+            return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+        }
+
         if ($shipment->shipper_status_id == 49) {
             $shipment_details = $shipment->misrouted_history()->latest()->first();
             $city_details = City::find($shipment_details->old_consignee_city_id);
@@ -694,6 +699,10 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
+            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+            if(!$dispute_check){
+                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            }
 
             if ($shipment->shipper_status_id == 55) {
                 /*   if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
@@ -2658,6 +2667,11 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+            if(!$dispute_check){
+                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            }
 
             if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21 && $shipment->shipper_status_id != 26 && $shipment->shipper_status_id != 32 && $shipment->shipper_status_id != 49) {
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
