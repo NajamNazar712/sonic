@@ -5281,6 +5281,13 @@ class APIController extends Controller
                                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_data->id)->orderBy('delivery_note_id', 'desc')->first();
                                     $delivery_note = $delivery_note_shipment->delivery_note_id;
 
+                                    $delivery_note_data = DeliveryNote::where('id', $delivery_note)->first();
+
+                                    $update_count = $delivery_note_data->one_link_payment_count + 1;
+
+                                    DeliveryNote::where('id', $delivery_note)->update(['one_link_payment_count' => $update_count]);
+
+
                                     $request_data['consumer_prefx'] = $consumer_prefx;
                                     $request_data['tracking_no'] = $tracking_no;
                                     $request_data['shipment_id'] = $shipment_data->id;
