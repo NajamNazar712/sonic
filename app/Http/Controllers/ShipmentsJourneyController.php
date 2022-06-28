@@ -28,7 +28,7 @@ use Auth;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL,$cnic= NULL,$relation = NULL) {
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL,$cnic= NULL,$relation = NULL,$remarks_id = NULL) {
       $shipment_journey = new ShipmentsJourney();
 
       $shipment_journey->shipment_id = $shipment_id;
