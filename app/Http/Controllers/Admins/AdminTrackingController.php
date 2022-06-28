@@ -978,7 +978,19 @@ class AdminTrackingController extends Controller
                         } else {
                             $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         }
-                        $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+
+                        if($shipment->shipment_type == 1){
+
+                            $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                        }
+                        else{
+                            $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                            if($retail_shipment){
+                                $details['order_information']['shipping_mode'] = $retail_shipment->shipping_modes->name;
+                            }
+                        }
+                       
+                      
                         $details['order_information']['shipping_mode_id'] = $shipment->shipping_mode->id;
 
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
