@@ -4199,41 +4199,62 @@ class AdminHumanResourseController extends Controller
     {
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
-        if ($admin) {
-            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
-            if ($employee_leaves->exists()) {
-                $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1])) {
-                    $employee_leaves->status = 7;
-                    $employee_leaves->rejected_reason = $request->reason;
-                    $employee_leaves->updated_by = $admin_id;
-                    $employee_leaves->save();
-                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                    return redirect()->back()->with('success', 'Leave Reject Successfully');
+        if ($admin && $admin->trax_id) {
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    if (in_array($employee_leaves->status, [1])) {
+                        if($employee_leaves->leave_type == 1){
+                            $working_days = $admin_profile->department->working_days;
+                            
+                            $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
+                            $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
+        
+                                        if ($working_days == 1) {
+                                            $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
+                                        } else {
+                                            $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                                        }
+                                        $old_diffDays++;
+                                        $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
+                                        $admin_profile->save();
+                        }
+                        $employee_leaves->status = 7;
+                        $employee_leaves->rejected_reason = $request->reason;
+                        $employee_leaves->updated_by = $admin_id;
+                        $employee_leaves->save();
+                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                        return redirect()->back()->with('success', 'Leave Reject Successfully');
+                    }
+                    if (in_array($employee_leaves->status, [6])) {
+                        $employee_leaves->status = 3;
+                        $employee_leaves->rejected_reason = $request->reason;
+                        $employee_leaves->updated_by = $admin_id;
+                        $employee_leaves->save();
+                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                        return redirect()->back()->with('success', 'Leave Reject Successfully');
+                    }
+    //                else {
+                    //                    return redirect()->back()->with('error', 'Leave Already Rejected');
+                    //                }
+                    elseif (in_array($employee_leaves->status, [2])) {
+                        $employee_leaves->status = 5;
+                        $employee_leaves->rejected_reason = $request->reason;
+                        $employee_leaves->updated_by = $admin_id;
+                        $employee_leaves->save();
+                        NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                        return redirect()->back()->with('success', 'Leave Reject Successfully');
+                    } else {
+                        return redirect()->back()->with('error', 'Leave Already Rejected');
+                    }
                 }
-                if (in_array($employee_leaves->status, [6])) {
-                    $employee_leaves->status = 3;
-                    $employee_leaves->rejected_reason = $request->reason;
-                    $employee_leaves->updated_by = $admin_id;
-                    $employee_leaves->save();
-                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                    return redirect()->back()->with('success', 'Leave Reject Successfully');
-                }
-//                else {
-                //                    return redirect()->back()->with('error', 'Leave Already Rejected');
-                //                }
-                elseif (in_array($employee_leaves->status, [2])) {
-                    $employee_leaves->status = 5;
-                    $employee_leaves->rejected_reason = $request->reason;
-                    $employee_leaves->updated_by = $admin_id;
-                    $employee_leaves->save();
-                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
-                    return redirect()->back()->with('success', 'Leave Reject Successfully');
-                } else {
-                    return redirect()->back()->with('error', 'Leave Already Rejected');
-                }
+                return redirect()->back()->with('error', 'Invalid Leave ID');
+
             }
-            return redirect()->back()->with('error', 'Invalid Leave ID');
+            return redirect()->back()->with('error', 'Employees ID not found');
         }
     }
 
