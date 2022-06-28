@@ -912,7 +912,7 @@ class ShipperReportsController extends Controller
             ->select('shipments.tracking_number','shipments.return_address_id','shipments.shipper_status_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
-            $query->where('shipments.user_id', 1091)
+            $query->where('shipments.user_id', 7306)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
@@ -1003,7 +1003,7 @@ class ShipperReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('shipper_name', function ($shipment) {
-                if($shipment->shipper_id == 1091){
+                if($shipment->shipper_id == 7306){
                     return '-';
                 }else{
                     return $shipment->shipper_name;
