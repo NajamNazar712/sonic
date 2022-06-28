@@ -5390,7 +5390,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                } else if ($id == 75) {
+                }
+                else if ($id == 75) {
                     $shipment = Shipment::find($reference_1_id);
                     $address = $reference_2_id;
                     if ($shipment) {
@@ -9383,6 +9384,23 @@ class NotificationsController extends Controller
                     }
                     
 
+                }
+                else if ($id == 178) {
+
+                    $shipment = Shipment::find($reference_1_id);
+//                    dd($shipment);
+                    if ($shipment) {
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $shipment->consignee_name, $body);
+                        }
+
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to);
+                        if ($shipment->consignee_phone_number_2 != NULL) {
+                            $to = $shipment->consignee_phone_number_2;
+                            self::sms($body, $to);
+                        }
+                    }
                 }
             }
         }

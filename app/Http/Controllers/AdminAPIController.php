@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\LeadTaggingController;
@@ -4867,6 +4868,10 @@ class AdminAPIController extends Controller
 
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
+                $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
+                if(!$dispute_check){
+                    return response()->json(false);
+                }
                 // arrive function
                 // if ($shipment->actual_weight == null) {
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\EmployeeAttendanceController;
@@ -726,6 +727,10 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+            if(!$dispute_check){
+                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            }
             $user = $shipment->user;
             if($user->sub_segment_id == 2){
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
@@ -1406,6 +1411,11 @@ class V2AdminPickupsController extends Controller
             $pickup_request_id = null;
             $rider = null;
             $rider_assigned_flag = false;
+
+            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+            if(!$dispute_check){
+                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            }
             $shipment_origin = $shipment->pickup_address->city->hub_id;
             if (session('role_id') != 1) {
                 if (!in_array($shipment_origin, session('hubs'))) {
@@ -2029,6 +2039,25 @@ class V2AdminPickupsController extends Controller
             }
         }
         NotificationsController::send(4, $shipment_ids);
+
+        //todo: send sms for self collection!
+        foreach ($shipment_ids as $shipment_id) {
+            $self_collection_shipment = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
+            if($self_collection_shipment)
+            {
+
+                $shipment = Shipment::where('id',$shipment_id)->first();
+                $user_city = $shipment->user->city_id;
+
+//                $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id
+//                if($shipment->consignee_city_id == $user_city)
+                if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id)
+                {
+                    NotificationsController::send(178, $shipment_id);
+                }
+            }
+        }
+        //todo: send sms for self collection end!
 
         if (empty($print_shipment_ids)) {
             return redirect()->back()->with(['success' => 'Arrival Done']);

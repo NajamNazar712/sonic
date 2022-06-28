@@ -56,6 +56,8 @@
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
+                            <th class="border-primary border-darken-1" width="250">CNIC</th>
+                            <th class="border-primary border-darken-1" width="250">Relation</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Open Box</th>
@@ -790,6 +792,8 @@
                     {data:'reason',name: 'reason', class: 'align-middle reason form-group reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
+                    {data:'cnic',name: 'cnic', class: 'align-middle cnic'},
+                    {data:'relation',name: 'relation', class: 'align-middle relation'},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
                     {data:'open_box' ,name: 'open_box', class: 'align-middle test-center open_box',orderable: false, searchable: false},
@@ -874,7 +878,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box') || $(header).is('.consolidation')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.received_or_refused_by')|| $(header).is('.open_box') || $(header).is('.consolidation')|| $(header).is('.relation')|| $(header).is('.cnic')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -984,6 +988,13 @@
                 });
 
             });
+
+            if ($('.cnic').length > 0) {
+                //do something
+                $(this).attr('data-rule-required', 'true');
+                $(this).attr('data-msg-required', 'CNIC is required');
+                console.log('got yea');
+            }
 
             $('body').on('click', 'input.open_box', function(){
                 var open_box_id = $(this).parents('tr').attr('id');
@@ -1821,14 +1832,20 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+                                var missing_input_issue = [];
+                                var missing_input_temp = "";
                                 var not_updated_shipments = [];
                                 var shipment_remarks_obj = {};
                                 var shipment_received_refused_obj = {};
+                                var shipment_cnic_obj = {};
+                                var shipment_relation_obj = {};
                                 // blockPagePermanently();
                                 submit_all_status_flag = true;
                                 if (select_all_status == 14) {
                                     table.rows().nodes().each(function (index) {
+                                        missing_input_temp = "";
                                         var row = table.row(index);
+
                                         if ($(row.node()).hasClass('selected')) {
                                             var id = parseInt(row.id());
                                             var amount = parseInt($(row.node()).attr('amount'));
@@ -1836,11 +1853,32 @@
                                             shipment_remarks_obj[id] = remarks;
                                             if (amount == 0) {
                                                 var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
-                                                if ($.trim(receiver_name) == '') {
+                                                var cnic_input = $(row.node()).find('td.cnic input').val();
+                                                var relation_input = $(row.node()).find('td.relation input').val();
+                                                if ($.trim(receiver_name) == '' || $.trim(cnic_input) == '' || $.trim(relation_input) == '') {
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;
+
+                                                    //Print Message
+
+                                                    if ($.trim(receiver_name) == ''){
+                                                        missing_input_temp+=" {Name} ";
+                                                    }
+                                                    if ($.trim(cnic_input) == ''){
+                                                        missing_input_temp+=" {CNIC} ";
+                                                    }
+                                                    if ($.trim(relation_input) == ''){
+                                                        missing_input_temp+=" {RELATION} ";
+                                                    }
+                                                    if(missing_input_temp) {
+                                                        missing_input_issue.push(missing_input_temp);
+                                                    }
+                                                    //Print Message End
+
                                                 } else {
                                                     shipment_received_refused_obj[id] = receiver_name;
+                                                    shipment_cnic_obj[id] = cnic_input;
+                                                    shipment_relation_obj[id] = relation_input;
                                                 }
                                             }
 
@@ -1851,15 +1889,15 @@
 
                                         var html = '';
                                         $.each(not_updated_shipments, function (index, tracking_number) {
-                                            html += tracking_number + '<br/>';
+                                            html += missing_input_issue[index]+" not found of "+ tracking_number + '<br/>';
                                         });
 
-                                        html += '<br/>Update Received/Refused By for all Shipment(s) of 0 (zero) amount!';
+                                        html += '<br/>Update Received / Refused By , Cnic , Relation for all Shipment(s) of 0 (zero) amount !';
 
                                         content = document.createElement('div');
                                         content.innerHTML = html;
                                         swal({
-                                            title: 'Names Not Updated',
+                                            title: "Fill the empty fields",
                                             content: content,
                                             icon: 'warning',
                                             buttons: {
@@ -1908,6 +1946,8 @@
                                             'delivery_note_id': delivery_note,
                                             'remarks': shipment_remarks_obj,
                                             'received_or_refused_by': shipment_received_refused_obj,
+                                            'cnic': shipment_cnic_obj,
+                                            'relation': shipment_relation_obj,
                                             '_token': '{{ csrf_token() }}',
                                             'password': password,
                                         }
