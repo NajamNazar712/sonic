@@ -71,7 +71,7 @@ class AdminShipmentCancelController extends Controller
                         $cancellation_check = true;
 
                         if($shipment->warehouse == 1){
-                            if($shipment->warehouse_order_status != 2){
+                            if($shipment->warehouse_order_status != 1){
                                 $cancellation_check = false;
                             }
                         }
@@ -110,6 +110,7 @@ class AdminShipmentCancelController extends Controller
                                         $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
                                         if($current_stock_addition){
                                             $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                            $current_stock_addition->in_process_stock = $current_stock_addition->in_process_stock - $shipment_product->quantity;
                                             $current_stock_addition->save();
                                         }
                                     }
