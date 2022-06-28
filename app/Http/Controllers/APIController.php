@@ -1818,20 +1818,26 @@ class APIController extends Controller
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-            if ($shipment->shipper_status_id == 1) {
-                $shipment->shipper_status_id = 17;
-                $shipment->consignee_status_id = 17;
-
-                $shipment->save();
-
-                V2AdminPickupsController::cancel($shipment->id);
-
-                ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
-
-                return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+            if($shipment->warehouse == 1){
+                return response()->json(['status' => 1, 'message' => 'Warehouse Shipment\'s can\'t be cancelled through Sonic.']);
             }
+            else{
+                if ($shipment->shipper_status_id == 1) {
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+
+                    $shipment->save();
+
+                    V2AdminPickupsController::cancel($shipment->id);
+
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
+
+                    return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+                }
+            }
+
         }
     }
 
@@ -3618,13 +3624,13 @@ class APIController extends Controller
                             } else {
                                 $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $current_status['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_event = array();
 
                                 $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $transit_event['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_events[] = $transit_event;
                             }
