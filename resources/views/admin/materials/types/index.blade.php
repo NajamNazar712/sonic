@@ -15,7 +15,8 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Type</th>
+                        <th class="border-primary border-darken-1">Name</th>
+                        <th class="border-primary border-darken-1">Packaging Type</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Created At</th>
@@ -283,7 +284,7 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Edit</button>
+                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Update</button>
                                 </div>
                             </div>
                         </div>
@@ -462,7 +463,8 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Type');
+                            head.push('Name');
+                            head.push('Packaging Type');
                             head.push('Description');
                             head.push('Category');
                             head.push('Created At');
@@ -477,6 +479,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.type);
+                                row.push(values.packaging_type);
                                 row.push(values.description);
                                 row.push(values.category);
                                 row.push(values.created_at);
@@ -530,6 +533,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'type', name: 'packaging_material_types.type', class: 'align-middle type'},
+                    {data: 'packaging_type', name: 'packaging_material_types.packaging_type', class: 'align-middle packaging_type'},
                     {data: 'description', name: 'packaging_material_types.description', class: 'align-middle description'},
                     {data: 'category', name: 'packaging_material_types.category', class: 'align-middle category'},
                     {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
