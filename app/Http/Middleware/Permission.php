@@ -1166,8 +1166,8 @@ class Permission
 
             'admin_otp.update' => 722,
 
-            'rider_otp.index' => 720,
-            'rider_otp.list' => 720,
+            'rider_otp.index' => 563,
+            'rider_otp.list' => 563,
 
             'rider_otp.update' => 721,
             
