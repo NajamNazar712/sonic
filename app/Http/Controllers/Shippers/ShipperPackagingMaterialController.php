@@ -417,6 +417,8 @@ class ShipperPackagingMaterialController extends Controller
 
         $user_id = session('user_id');
 
+        
+
         if($request->mode_of_payment == 1) {
             if ($request->input('address_select') == 0) {
                 $result = PackagingMaterialRequest::create([
@@ -436,6 +438,7 @@ class ShipperPackagingMaterialController extends Controller
                     'city_id' => $user_address->city_id,
                     'address' => $user_address->pickup_address,
                     'poc' => $user_address->poc,
+                    'reference_id' => $request->new_pickup_reference_id,
                     'phone' => $user_address->phone,
                     'amount' => $total_charges,
                     'status_id' => 1,
@@ -487,6 +490,7 @@ class ShipperPackagingMaterialController extends Controller
                             'city_id'=>$user_address->city_id,
                             'address'=>$user_address->pickup_address,
                             'poc'=>$user_address->poc,
+                            'reference_id' => $request->new_pickup_reference_id,
                             'phone'=>$user_address->phone,
                             'amount'=>$total_charges,
                             'status_id'=>1,
@@ -532,6 +536,7 @@ class ShipperPackagingMaterialController extends Controller
                         'city_id'=>$user_address->city_id,
                         'address'=>$user_address->pickup_address,
                         'poc'=>$user_address->poc,
+                        'reference_id' => $request->new_pickup_reference_id,
                         'phone'=>$user_address->phone,
                         'amount'=>$total_charges,
                         'status_id'=>1,
