@@ -9539,7 +9539,6 @@ class NotificationsController extends Controller
                     if (strpos($body, '[status_name]') !== FALSE) {
                         $body = str_replace('[status_name]', $status->name, $body);
                     }
-                    dd($employee_id);
                     self::push_notification($employee_id, $employee_type, $title, $body);
                 }
                 else if ($id == 8) {
