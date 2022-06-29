@@ -50,7 +50,7 @@ class ProcessPushNotification implements ShouldQueue
                 $data['screen_id'] = $push_notification->screen_id;
             }
             $message = [
-                'data' => $data,
+                'notification' => $data,
                 'to' => $device_token
             ];
 
