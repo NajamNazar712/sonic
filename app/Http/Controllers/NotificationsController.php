@@ -135,7 +135,7 @@ class NotificationsController extends Controller
         $notification_history->message = $body;
         $notification_history->screen_id = $screen;
         $notification_history->save();
-
+        dd($notification_history->get());
         dispatch(new ProcessPushNotification($notification_history));
     }
 
