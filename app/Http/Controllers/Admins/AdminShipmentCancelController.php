@@ -334,7 +334,7 @@ class AdminShipmentCancelController extends Controller
                 return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
             }
             else{
-                return ['status' => 1, 'error' => 'Warehouse Shipment can\'t be reverted here'];
+                return ['status' => 1, 'error' => 'Warehouse Shipment can not be reverted from Sonic!'];
             }
 
     }

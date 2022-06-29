@@ -58,7 +58,8 @@
             </tbody>
         </table>
     @endif
-    @if ($shipment->cash_handling_charges != null && $shipment->return_charges == null)
+    @if($shipment->shipment_type == 1)
+        @if ($shipment->cash_handling_charges != null && $shipment->return_charges == null)
         <div style="margin-top:15px">
         <h6 style="text-align: left"><b>Cash</b></h6>
         <table class="table table-sm table-bordered">
@@ -88,6 +89,25 @@
             </tbody>
         </table>
         </div>
+    @endif
+    @else
+        @if ($shipment->amount != null)
+            <div style="margin-top:15px">
+                <h6 style="text-align: left"><b>Cash</b></h6>
+                <table class="table table-sm table-bordered">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1 align-middle text-center">Collection Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="align-middle text-center">Rs. {{ floatval($shipment->amount) }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        @endif
     @endif
     @if ($shipment->return_charges != null)
         <div style="margin-top:15px">
