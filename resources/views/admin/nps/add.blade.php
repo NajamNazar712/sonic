@@ -28,7 +28,15 @@
                                 {{ csrf_field() }}
 
                                 <div class="row">
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                                        <div class="form-group input-group ">
+                                            <input type="text" class="form-control" name="survey_name"
+                                                   id="survey_name" placeholder="Survey Name" data-rule-required="true"
+                                                   data-msg-required="Survey Name is Required">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                                         <div class="form-group input-group ">
                                             <div class="input-group-prepend">
 												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -45,7 +53,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                                         <div class="form-group input-group ">
                                             <div class="input-group-prepend">
 												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -62,7 +70,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                                         <div class="form-group input-group ">
                                             <label class="font-medium-2 font-weight-bold block">Shippers</label>
                                             <select name="shipper_ids[]" id="shippers_select" class="form-control select2"
@@ -76,7 +84,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-3">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                                         <label class="font-medium-2 font-weight-bold block">All Shippers</label>
                                         <div class="form-group">
                                             <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
@@ -85,7 +93,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-3">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                                         <label class="font-medium-2 font-weight-bold block">Recommendation Box</label>
                                         <div class="form-group">
                                             <label class="font-medium-2 text-bold-600 mr-1">No</label>
@@ -114,7 +122,7 @@
                                                 <tbody>
                                                 <tr>
                                                     <td>1</td>
-                                                    <td> <div class="form-group"><input id="question0" data-rule-required="true" data-msg-required="Question is required" class="form-control" name="question[]"></div></td>
+                                                    <td> <div class="form-group" style="margin-bottom:0px"><input  data-rule-required="true" data-msg-required="Question is required" class="form-control question" name="question[0]"></div></td>
                                                 </tr>
                                                 </tbody>
                                             </table>
@@ -237,10 +245,15 @@
                     closeOnClickOutside: false,
                     closeOnEsc: false
                 });
-                form.submit();
+
+
+                if ($("#nps_form").valid()) {
+                    form.submit();
+                }
 
             }
         });
+
 
         var serial_no = 1;
 
@@ -249,7 +262,7 @@
             var add_row = `
                   <tr>
                     <td>${serial_no}</td>
-                      <td> <div class="form-group"><input id=question${serial_no} data-rule-required="true" data-msg-required="Question is required" class="form-control" name="question[]"></div>
+                      <td> <div class="form-group" style="margin-bottom:0px"><input id=question${serial_no} data-rule-required="true" data-msg-required="Question is required" class="form-control question" name="question[${serial_no}]"></div>
 
                         </td>
                     <td><button onclick="$(this).closest('tr').remove();" type="button" class="btn btn-danger btn-sm"><span class="ft-x"></span></button></td>
@@ -258,13 +271,11 @@
             $('#survey_data tbody').append(add_row);
 
 
-            $("#question"+serial_no+" .validated").each(function(){
+            $(`#question${serial_no}`).each(function(){
                 $( this ).rules( "add", {
                     required: true,
                 });
-
             });
-            $(`#question${serial_no}`).focus();
         }
 
 

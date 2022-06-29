@@ -3933,8 +3933,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('nps')->name('nps.')->group(function (){
         Route::get('/','Admins\NpsController@index')->name('index');
+        Route::get('/list','Admins\NpsController@list')->name('list');
         Route::get('/add','Admins\NpsController@add')->name('add');
         Route::post('/submit','Admins\NpsController@submit')->name('submit');
+        Route::get('/view_shippers','Admins\NpsController@view_shippers')->name('view_shippers');
+        Route::get('/view_questions','Admins\NpsController@view_questions')->name('view_questions');
+        Route::put('status', 'Admins\NpsController@SurveyStatus')->name('status');
 
     });
 });

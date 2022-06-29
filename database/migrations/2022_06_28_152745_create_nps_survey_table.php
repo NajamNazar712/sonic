@@ -15,11 +15,12 @@ class CreateNpsSurveyTable extends Migration
     {
         Schema::create('nps_survey', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('survey_name');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->integer('recommendation_box')->default(0)->nullable();
             $table->integer('all_shipper')->default(0)->nullable();
-            $table->string('shipper_ids')->nullable();
+            $table->string('shipper_ids',500)->nullable();
             $table->integer('status')->default(0);
             $table->integer('admin_id');
             $table->timestamps();
