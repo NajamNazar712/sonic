@@ -442,6 +442,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
+        Route::put('bulk_revert', 'Shippers\ShipperShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
     Route::prefix('intercept')->name('intercept.')->group(function (){
@@ -2612,6 +2613,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
+        Route::put('bulk_revert', 'Admins\AdminShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
     });
 
