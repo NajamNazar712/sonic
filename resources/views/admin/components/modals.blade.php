@@ -620,27 +620,27 @@
     </div>
 </div>
 
-{{--<div class="modal fade text-left" id="LocationDeniedModal" data-backdrop="static" data-keyboard="false" tabindex="-1"--}}
-{{--     role="dialog" aria-labelledby="LocationDeniedModal"--}}
-{{--     aria-hidden="true">--}}
-{{--    <div class="modal-dialog modal-m" role="document">--}}
-{{--        <div class="modal-content">--}}
-{{--            <div class="modal-header">--}}
-{{--                <h4 class="modal-title" id="shipment_charges_modal_heading">Location Denied!<span></span></h4>--}}
-{{--            </div>--}}
-{{--            <div class="modal-body password_change_body text-center" id="password_change_body">--}}
-{{--                <form class="form form-horizontal">--}}
-{{--                    <div class="form-body">--}}
-{{--                        <p>You have to allow Location, cannot proceed without it.</p>--}}
-{{--                    </div>--}}
-{{--                    <div class="form-actions center">--}}
-{{--                        <button type="button" class="btn btn-primary">Retry</button>--}}
-{{--                    </div>--}}
-{{--                </form>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}
+<div class="modal fade text-left" id="LocationDeniedModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+     role="dialog" aria-labelledby="LocationDeniedModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-m" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="shipment_charges_modal_heading">Location Denied!<span></span></h4>
+            </div>
+            <div class="modal-body password_change_body text-center" id="password_change_body">
+                <form class="form form-horizontal">
+                    <div class="form-body">
+                        <p>You have to allow Location, cannot proceed without it.</p>
+                    </div>
+                    <div class="form-actions center">
+                        <button type="button" class="btn btn-primary">Retry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade text-left" id="EditOneTimeProfileModal" data-backdrop="static" data-keyboard="false"
      tabindex="-1" role="dialog" aria-labelledby="EditOneTimeProfileModal"
