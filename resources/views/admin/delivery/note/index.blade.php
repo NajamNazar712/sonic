@@ -11,6 +11,25 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                <div id="camera_scan" class="d-none">
+                    <div id="camera_view" class="camera_view"></div>
+                </div>
+
+                <form action="#" id="delivery_note_form">
+                    <div class="row justify-content-center align-items-center mb-2">
+                        <div class="col-3">
+                            <fieldset>
+                                <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
+                            </fieldset>
+                        </div>
+
+                        <div class="col-1">
+                            <a href="#" id="camera_scan_initiate" class="d-block text-right" tabindex="-1">
+                                <i class="ft-camera h1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
@@ -43,25 +62,6 @@
 
                 </div>
 
-                <div id="camera_scan" class="d-none">
-                    <div id="camera_view" class="camera_view"></div>
-                </div>
-
-                <form action="#" id="delivery_note_form">
-                    <div class="row justify-content-center align-items-center mb-2">
-                        <div class="col-3">
-                            <fieldset>
-                                <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
-                            </fieldset>
-                        </div>
-
-                        <div class="col-1">
-                            <a href="#" id="camera_scan_initiate" class="d-block text-right" tabindex="-1">
-                                <i class="ft-camera h1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -538,7 +538,6 @@
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
                             $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false)
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
                         }
                         else {
@@ -555,7 +554,7 @@
                 }
 
             });
-            $('#scan_tracking').attr("disabled","disabled")
+
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
@@ -570,7 +569,6 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                var rider_id = $('#rider_name').val();
                 if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
@@ -582,7 +580,6 @@
                             method:'POST',
                             data: {
                                 'tracking':tracking,
-                                'rider_id':rider_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -735,7 +732,6 @@
 
                         });
                     } else {
-                        var rider_id = $('#rider_name').val();
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
                             blockPagePermanently();
@@ -746,7 +742,6 @@
                                 data: {
                                     'tracking':tracking,
                                     'hub_id':hub_id,
-                                    'rider_id':rider_id,
                                     '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
