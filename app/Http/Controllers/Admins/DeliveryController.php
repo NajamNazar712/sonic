@@ -397,6 +397,29 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
+        if ($request->tracking != '' && $request->rider_id != '' )
+        {
+            $tracking_number = $request->tracking;
+            $rider_id = $request->rider_id;
+
+            $rider_type = Rider::where('id',$rider_id)->select('rider_category_id')->first();
+            $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight')->first();
+            if($rider_type->rider_category_id == 1)
+            {
+                if($shipment->actual_weight > 5)
+                {
+                    return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider is light weighted !'];
+                }
+            }
+            elseif($rider_type->rider_category_id == 2)
+            {
+                if(!$shipment->actual_weight < 5)
+                {
+                    return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider is heavy weighted !'];
+                }
+            }
+        }
+
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);

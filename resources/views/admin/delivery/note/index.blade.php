@@ -538,7 +538,7 @@
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
                             $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false)
+                            $('#scan_tracking').attr("disabled", false);
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
                         }
                         else {
