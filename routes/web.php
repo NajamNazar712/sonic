@@ -1803,6 +1803,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
             Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
             Route::post('images','Admins\V2AdminDisputeShipmentsController@dispute_images')->name('images');
+            Route::post('bulk_in_process','Admins\V2AdminDisputeShipmentsController@bulk_in_process')->name('bulk_in_process');
+            Route::post('bulk_resolved','Admins\V2AdminDisputeShipmentsController@bulk_resolved')->name('bulk_resolved');
+            Route::post('excel_upload','Admins\V2AdminDisputeShipmentsController@excel_upload')->name('excel_upload');
+            
+            
         });
 
     });
