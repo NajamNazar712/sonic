@@ -6123,8 +6123,8 @@ class AdminAPIController extends Controller
             }
         }
         if($leads){
-            $leads->orderBy('leads.requested_date', "DESC");
-            $leads = $leads->get();
+            /*$leads->orderBy('leads.requested_date', "DESC");
+            $leads = $leads->get();*/
             $data = array();
             foreach ($leads as $lead){
                 $datum = array();
