@@ -6122,7 +6122,7 @@ class AdminAPIController extends Controller
                 $leads = $leads->whereDate('leads.requested_date', $request->date_from);
             }
         }
-        if($leads->exists()){
+        if($leads){
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
             $data = array();
