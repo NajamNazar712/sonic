@@ -263,12 +263,13 @@
                         <th class="border-primary border-darken-1">Company</th>
                         <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged At</th>
+                        <th class="border-primary border-darken-1">Sale Person Tagged Aging</th>
                         <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Lead Reason</th>
-                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -907,12 +908,13 @@
                             head.push('Company');
                             head.push('Lead Reference');
                             head.push('Requested Date/Time');
+                            head.push('Aging');
                             head.push('Sale Person Tagged');
                             head.push('Sale Person Tagged At');
+                            head.push('Sale Person Tagged Aging');
                             head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Reason');
-                            head.push('Aging');
                             head.push('Updated By');
                             head.push('Updated At');
 
@@ -934,12 +936,13 @@
                                 row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
+                                row.push(values.aging);
                                 row.push(values.sale_person);
                                 row.push(values.sale_person_updated_at);
+                                row.push(values.sale_person_tagged_aging);
                                 row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.reason_id);
-                                row.push(values.aging);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
 
@@ -1095,16 +1098,17 @@
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
+                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'sale_person', name: 'sp.name', class: 'align-middle sale_person'},
                     {
                         data: 'sale_person_updated_at',
                         name: 'leads.sale_person_updated_at',
                         class: 'align-middle sale_person_updated_at'
                     },
+                    {data: 'sale_person_tagged_aging', name: 'sale_person_tagged_aging', class: 'align-middle sale_person_tagged_aging', orderable: false, searchable: false},
                     {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
-                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
@@ -1129,7 +1133,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging')) {
                             $(td).appendTo($(search) || $(header).is('.serial_number'));
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
