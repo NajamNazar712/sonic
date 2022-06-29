@@ -3939,6 +3939,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/view_shippers','Admins\NpsController@view_shippers')->name('view_shippers');
         Route::get('/view_questions','Admins\NpsController@view_questions')->name('view_questions');
         Route::put('status', 'Admins\NpsController@SurveyStatus')->name('status');
+        Route::get('edit/{id}', 'Admins\NpsController@survey_edit')->name('edit');
+        Route::post('update/{id}', 'Admins\NpsController@survey_update')->name('update');
 
     });
 });

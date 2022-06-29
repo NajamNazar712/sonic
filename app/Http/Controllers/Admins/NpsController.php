@@ -65,6 +65,9 @@ class NpsController extends Controller
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
+
+
+                    $dropdown .= '<a href="' . route('admin.nps.edit',$result->id) . '" class="dropdown-item edit_mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
                     if($result->status == 0) {
                         $dropdown .= '<button type="button" class="dropdown-item active_survey" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate</div></button>';
                     }else{
@@ -173,6 +176,8 @@ class NpsController extends Controller
                 $survey->updated_at = Carbon::now();
                 $survey->save();
 
+                NpsSurvey::where('id','!=',$id)->update(['status' => 0,'updated_at'=>Carbon::now()]);
+
                 return redirect()->route('admin.nps.index')->with('success', 'Survey is Activated.');
 
             } else {
@@ -194,4 +199,51 @@ class NpsController extends Controller
         }
 
     }
+
+    public function survey_edit ($id){
+
+        $nps_survey = NpsSurvey::find($id);
+        $max_date = Carbon::now()->addYear(1);
+        $min_date = Carbon::now()->subYear(1);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.nps.edit', compact('shippers', 'min_date', 'max_date','nps_survey','id'));
+    }
+
+    public function survey_update($id,Request $request)
+    {
+
+        $survey_name = $request->survey_name;
+        $start_time = $request->start_time;
+        $end_time = $request->end_time;
+        $shipper_id = isset($request->shipper_ids) ? implode(',', $request->shipper_ids) : null;
+        $all_shipper = isset($request->all_shipper) ? 1 : 0;
+        $recommendation_box = isset($request->recommendation_box) ? 1 : 0;
+        $date = Carbon::now();
+
+        $NpsSurvey =  NpsSurvey::find($id);
+        $NpsSurvey->survey_name = $survey_name;
+        $NpsSurvey->start_time = $start_time;
+        $NpsSurvey->end_time = $end_time;
+        $NpsSurvey->shipper_ids = $shipper_id;
+        $NpsSurvey->all_shipper = $all_shipper;
+        $NpsSurvey->recommendation_box = $recommendation_box;
+        $NpsSurvey->admin_id = Auth::user()->id;
+        $NpsSurvey->updated_at = $date;
+        $NpsSurvey->save();
+
+        $NpsSurveyQuestion = NpsSurveyQuestion::where('nps_survey_id',$id)->delete();
+        foreach ($request->question as $question) {
+            $NpsSurveyQuestion= new NpsSurveyQuestion();
+            $NpsSurveyQuestion->nps_survey_id = $NpsSurvey->id;
+            $NpsSurveyQuestion->question = $question;
+            $NpsSurveyQuestion->created_at = $date;
+            $NpsSurveyQuestion->updated_at = $date;
+            $NpsSurveyQuestion->save();
+        }
+
+        return redirect()->route('admin.nps.index')->with('success', 'Survey Updated Successfully');
+
+
+    }
+
 }
