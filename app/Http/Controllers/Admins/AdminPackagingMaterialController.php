@@ -1295,7 +1295,7 @@ class AdminPackagingMaterialController extends Controller
                     $query->where('packaging_material_types.packaging_type', 2);
                 }
                 else if ($keyword == 'both') {
-                    $query->where('packaging_material_types.packaging_type', 2);
+                    $query->where('packaging_material_types.packaging_type', 3);
                 }
                 else if ($keyword == 'only' || $keyword == 'only shipper') {
                     $query->where('packaging_material_types.packaging_type', 4);
