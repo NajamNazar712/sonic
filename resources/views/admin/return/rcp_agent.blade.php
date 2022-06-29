@@ -73,7 +73,7 @@
                 <div id="report_data">
                     <div class="row">
                         <div class="col-3">
-                            <div class="card pull-up">
+                            <div class="card pull-up cursor-pointer">
                                 <div class="card-content border rounded" id="total_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-primary pull-up">
+                            <div class="card bg-gradient-directional-primary pull-up cursor-pointer">
                                 <div class="card-content" id="completed_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-info pull-up">
+                            <div class="card bg-gradient-directional-info pull-up cursor-pointer">
                                 <div class="card-content" id="rcp_reattempt_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -124,7 +124,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-success pull-up">
+                            <div class="card bg-gradient-directional-success pull-up cursor-pointer">
                                 <div class="card-content" id="productivity_main">
                                     <div class="card-body">
                                         <div class="media d-flex">

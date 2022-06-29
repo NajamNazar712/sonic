@@ -142,6 +142,9 @@
                                                                         <input type="text" name="new_pickup_phone_number" id="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                                                                     </div>
                                                                     <div class="form-group">
+                                                                        <input type="text" name="new_pickup_reference_id" id="new_pickup_reference_id" class="form-control" placeholder="Reference ID">
+                                                                    </div>
+                                                                    <div class="form-group">
                                                                         <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
                                                                             @foreach($cities as $city)
                                                                                 <option value="{{ $city->id }}">{{ $city->name }}</option>
