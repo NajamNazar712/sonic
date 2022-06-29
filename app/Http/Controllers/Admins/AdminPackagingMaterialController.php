@@ -1280,7 +1280,7 @@ class AdminPackagingMaterialController extends Controller
                     return 'Both';
                 }
                 else if($type->packaging_type == 4){
-                    return 'Only Shipper';
+                    return 'Selected Shipper';
                 }
                 else{
                     return 'Marco';
@@ -1297,10 +1297,10 @@ class AdminPackagingMaterialController extends Controller
                 else if ($keyword == 'both') {
                     $query->where('packaging_material_types.packaging_type', 3);
                 }
-                else if ($keyword == 'only' || $keyword == 'only shipper') {
+                else if ($keyword == 'selected' || $keyword == 'selected shipper' || $keyword == 'shipper') {
                     $query->where('packaging_material_types.packaging_type', 4);
                 }
-                else if ($keyword == 'only' || $keyword == 'marco') {
+                else if ($keyword == 'marco') {
                     $query->where('packaging_material_types.packaging_type', 5);
                 }
                 else {
