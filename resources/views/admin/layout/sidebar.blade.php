@@ -853,6 +853,10 @@
                         <li><a class="menu-item" href="{{ route('admin.international.shipment_status.index') }}">International Shipment Status</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || in_array(750, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.international.extra_service_charges.index') }}">International Extra Service Charges</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(471, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.activity_trail.index') }}">Activity Trail</a></li>
                     @endif

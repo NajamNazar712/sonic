@@ -95,7 +95,7 @@ class LostShipmentsController extends Controller
             $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
             if($check_lost_shipments_admins->exists() || session('role_id') == 1){
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
-                $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
+                //$shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
 
             }else{
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();

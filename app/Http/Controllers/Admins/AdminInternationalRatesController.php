@@ -1458,4 +1458,12 @@ class AdminInternationalRatesController extends Controller
             return response()->json(['status' => 1, 'Something went wrong!']);
         }
     }
+
+    public function extra_service_charges_index(){
+        return view('admin.international.service_charges');
+    }
+
+    public function international_shipment_details(Request $request){
+        //
+    }
 }

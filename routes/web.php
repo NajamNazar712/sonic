@@ -3574,7 +3574,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('updatemodal', 'Admins\AdminInternationalShipmentsController@shipment_status_update_modal')->name('updatemodal');
 
         });
-            Route::prefix('rates')->name('rates.')->group(function () {
+        Route::prefix('rates')->name('rates.')->group(function () {
             Route::prefix('economy')->name('economy.')->group(function (){
                 Route::get('{id}/{view?}','Admins\AdminInternationalRatesController@addEconomyRatesView')->name('create');
                 Route::post('{id}','Admins\AdminInternationalRatesController@addEconomyRatesStore')->name('store');
@@ -3593,6 +3593,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             });
         });
+        Route::prefix('extra_service_charges')->name('extra_service_charges.')->group(function () {
+            Route::get('','Admins\AdminInternationalRatesController@extra_service_charges_index')->name('index');
+        });
+
     });
 
 	Route::prefix('telenor')->name('telenor.')->group(function(){
