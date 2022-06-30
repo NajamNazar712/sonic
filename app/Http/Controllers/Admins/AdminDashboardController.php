@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\Admin\DisableAccountIntimationQuestion;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
@@ -12128,6 +12129,186 @@ class AdminDashboardController extends Controller
         } else {
             return redirect()->back()->with('error', 'Segments not added.');
         }
+    }
+
+    public function disable_account_intimation_survey_index()
+    {
+        // ActivityTrailController::createActivityTrailLog(Auth::id(), 279);
+
+        $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->get();
+        // dd($disabled_shippers);
+        return view('admin.accounts.disable_account_intimation_survey')->with(['disabled_shippers' => $disabled_shippers]);
+
+    }
+
+    public function disable_account_intimation_survey_list(Request $request)
+    {
+        
+
+        // if ($request->get('excel') && $request->get('excel') == true) {
+        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 278);
+        // }
+
+        $questions = DisableAccountIntimationQuestion::leftjoin('admins as created_user','created_user.id','disable_account_intimation_questions.created_by')
+        ->leftjoin('admins as updated_user','updated_user.id','disable_account_intimation_questions.updated_by')
+        ->select(['disable_account_intimation_questions.*', 'created_user.name as created_by_name' , 'updated_user.name as updated_by_name' ]);
+
+        return Datatables::of($questions)
+            ->editColumn('status', function ($notification) {
+                if ($notification->status == 0) {
+                    return 'Disabled';
+                } else {
+                    return "Enabled";
+                }
+            })
+            ->addColumn('action', function($notification) {
+                $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+    
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                ';
+    
+                if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+                    if ($notification->status) {
+                        $dropdown .= $edit_button;
+                        $dropdown .= $disable_button;
+                    }
+                    else {
+                        $dropdown .= $enable_button;
+                    }
+                }
+    
+                $dropdown .= '
+                      </div>
+                    </div>
+                ';
+    
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function details(Request $request) {
+        
+        $notification = DisableAccountIntimationQuestion::find($request->id);
+
+        return $notification;
+        
+    }
+
+    public function edit(Request $request) {
+        $notification = DisableAccountIntimationQuestion::find($request->get('id'));
+
+        if ($notification) {
+
+            if($notification->status == 1)
+            {
+                $notification->questions = $request->get('question');
+                $notification->option1 = $request->get('option1');
+                $notification->option2 = $request->get('option2');
+                $notification->option3 = $request->get('option3');
+                $notification->option4 = $request->get('option4');
+                $notification->updated_by = Auth::id();
+    
+                $notification->save();
+    
+                return ['status' => 0, 'success' => 'Question has been edited'];
+
+            }
+            else{
+                return ['status' => 1, 'error' => 'Some one disabled this question please refresh your page'];
+            }
+
+           
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Question with given ID is present'];
+        }
+    }
+
+    public function add(Request $request) {
+
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+
+        $notification = new DisableAccountIntimationQuestion();
+
+        $notification->questions = $request->get('question');
+        $notification->option1 = $request->get('option1');
+        $notification->option2 = $request->get('option2');
+        $notification->option3 = $request->get('option3');
+        $notification->option4 = $request->get('option4');
+        $notification->created_by = Auth::id();
+        $notification->created_at = $timestamp;
+        $notification->updated_at = $timestamp;
+        $notification->save();
+    
+        return ['status' => 0, 'success' => 'Question has been Added'];
+    }
+    
+
+    public function status(Request $request) {
+        
+        $notification = DisableAccountIntimationQuestion::find($request->id);
+        
+        if ($notification) {
+
+            $notification->status = $request->status;
+            $notification->updated_by = Auth::id();
+            $notification->save();
+
+            if ($request->status) {
+                return ['status' => 0, 'success' => 'Question has been enabled'];
+            }
+            else {
+                return ['status' => 0, 'success' => 'Question has been disabled'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Notication with given ID is present'];
+        }
+    }
+
+    public function send_survey(Request $request)
+    {
+        if($request)
+        {
+            $disabled_shippers = "";
+           
+            if($request->all_shippers_checkbox == "on")
+            {
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->select(['id','email','name','phone','phone2'])->get(); 
+            }
+            else if($request->all_shippers_checkbox == "off"){
+
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone','phone2'])->get(); 
+            }
+
+            // dd($disabled_shippers);
+
+
+            if($request->send_via == "email")
+            {
+                // id 179 is used for email notification Disable Account Intimation Survey
+                NotificationsController::send(179, $disabled_shippers);
+            }
+            else if($request->send_via == "sms")
+            {    
+                    // id 179 is used for email notification Disable Account Intimation Survey
+                    NotificationsController::send(180, $disabled_shippers);
+            }
+            // else if($request->send_via == "both"){
+
+            // }
+
+        }
+
+        
+
+
     }
 
 

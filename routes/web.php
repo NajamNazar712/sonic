@@ -17,6 +17,10 @@ Route::get('/', function () {
     return redirect()->route('cod.login');
 });
 
+Route::prefix('survey_form')->name('survey.')->group(function () {
+    Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey_details')->name('index');
+});
+
 
 Auth::routes();
 
@@ -717,6 +721,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('packaging')->name('packaging.')->group(function(){
             Route::post('invoice_log','Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
         });
+
+        Route::prefix('disable_account_intimation_survey')->name('disable.account.intimation.survey.')->group(function(){
+            Route::get('','Admins\AdminDashboardController@disable_account_intimation_survey_index')->name('index');
+            Route::get('list','Admins\AdminDashboardController@disable_account_intimation_survey_list')->name('list');
+            Route::post('status', 'Admins\AdminDashboardController@status')->name('status');
+            Route::post('add', 'Admins\AdminDashboardController@add')->name('add');
+            Route::post('details', 'Admins\AdminDashboardController@details')->name('details');
+            Route::post('edit', 'Admins\AdminDashboardController@edit')->name('edit');
+            Route::post('send_survey', 'Admins\AdminDashboardController@send_survey')->name('send_survey');
+        });
+
+        
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {

@@ -26,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\Admin\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
@@ -71,6 +72,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\GlobalSettingsController;
@@ -244,7 +246,7 @@ class NotificationsController extends Controller
                     $shipper = User::find($reference_1_id);
                     $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
                     $cc = array();
-//                    $bcc = array();
+                    //                    $bcc = array();
                     $sale_person_email = Admin::find($sales_person->admin_id)->email;
                     if($sale_person_email){
                         $cc[] = $sale_person_email;
@@ -490,7 +492,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[arrival_at]', $today, $body);
                         }
 
-//              $to = $shipper->email;
+                            //              $to = $shipper->email;
 
                         if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
                             $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
@@ -9383,6 +9385,77 @@ class NotificationsController extends Controller
                     }
                     
 
+                }
+
+                else if ($id == 179) {
+                    
+                    if($reference_1_id != null){
+                        // dd($reference_1_id,"test");
+
+                        foreach($reference_1_id as $key => $val)
+                        {
+                            $random_id = date("dmY") . $val->id . date("his");
+                            $send_by = Auth::id();
+                            $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+                            $link = url("/survey_form/$random_id");
+                            
+                            $survey_record = new DisableAccountIntimationSendSurvey();
+                            $survey_record->shipper_id = $val->id;
+                            $survey_record->random_id = $random_id;
+                            $survey_record->send_by = $send_by;
+                            $survey_record->send_via = "email";
+                            $survey_record->url = $link;
+                            $survey_record->send_via = 0;
+                            $survey_record->created_at = $timestamp;
+                            $survey_record->updated_at = $timestamp;
+                            $survey_record->save();
+
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            // self::email($subject, $body,$val->email);
+                            // $response = self::email($subject, $body,$val->email);
+
+                            // dd($subject, $body,$val->email , $response);
+                        }
+                    }
+                }
+                else if ($id == 180) {
+
+                    if($reference_1_id != null){
+                        // dd($reference_1_id,"test");
+
+                        foreach($reference_1_id as $key => $val)
+                        {
+                            $random_id = date("dmY") . $val->id . date("his");
+                            $send_by = Auth::id();
+                            $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+                            $link = url("/survey_form/$random_id");
+                            
+                            $survey_record = new DisableAccountIntimationSendSurvey();
+                            $survey_record->shipper_id = $val->id;
+                            $survey_record->random_id = $random_id;
+                            $survey_record->send_by = $send_by;
+                            $survey_record->send_via = "sms";
+                            $survey_record->url = $link;
+                            $survey_record->send_via = 0;
+                            $survey_record->created_at = $timestamp;
+                            $survey_record->updated_at = $timestamp;
+                            $survey_record->save();
+
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            // $response = self::email($subject, $body,$val->email);
+                            // $response = self::sms($body, $val->phone);
+
+                            // dd($body, $val->phone);
+                        }
+                    }
                 }
             }
         }

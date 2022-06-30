@@ -41,6 +41,10 @@
                                     <li><a class="menu-item" href="{{ route('admin.accounts.active.today')}}">Active Today</a></li>
                                     @endif
 
+                                    {{-- @if (session('role_id') == 1 || in_array(470, session('permissions'))) --}}
+                                    <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.index')}}">Disable Account Intimation Survey</a></li>
+                                    {{-- @endif --}}
+
                                 </ul>
                             </li>
                         @endif
@@ -76,9 +80,9 @@
                                 </ul>
                             </li>
                         @endif
-                            @if (session('role_id') == 1 || session('sales_coordinator'))
-                                <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
-                            @endif
+                        @if (session('role_id') == 1 || session('sales_coordinator'))
+                            <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
