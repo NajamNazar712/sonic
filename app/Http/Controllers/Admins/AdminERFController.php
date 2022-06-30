@@ -163,7 +163,7 @@ class AdminERFController extends Controller
                     $trax_id = "";
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $id){
-                        $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
+                        $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
                         $trax_id.= $name->name.",";
                     }
                     return $trax_id;
@@ -177,7 +177,7 @@ class AdminERFController extends Controller
                     $trax_id = "";
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $id){
-                        $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
+                        $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
                         $trax_id.= $name->name.",<br>";
                     }
                     return $trax_id;
