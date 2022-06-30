@@ -31,16 +31,16 @@
                                     <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Designation</th>
-                                    <th class="border-primary border-darken-1">Trax ID</th>
+                                    <th class="border-primary border-darken-1">Leaver Trax ID</th>
                                     <th class="border-primary border-darken-1">Leaver Name</th>
                                     <th class="border-primary border-darken-1">Requested By</th>
+                                    <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
-                                    <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -235,13 +235,14 @@
                             head.push('trax_id');
                             head.push('leaver_name');
                             head.push('requested_by');
+                            head.push('requested_at');
                             head.push('Hub');
                             head.push('City');
                             head.push('Line Manager');
                             head.push('Status');
                             head.push('Employee Status');
                             head.push('Aging');
-                            head.push('requested_at');
+
 
 
                             $.each(result.data, function (index, values) {
@@ -255,13 +256,14 @@
                                 row.push(values.trax_id_for_excel);
                                 row.push(values.leaver_name_for_excel);
                                 row.push(values.requested_by);
+                                row.push(values.requested_at);
                                 row.push(values.hub);
                                 row.push(values.city);
                                 row.push(values.admin);
                                 row.push(values.status);
                                 row.push(values.es);
                                 row.push(values.aging);
-                                row.push(values.requested_at);
+
                                 body.push(row);
                             });
                         },
@@ -332,13 +334,13 @@
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', orderable: false, sortable: false},
                     {data: 'leaver_name', name: 'a.name', class: 'align-middle leaver_name', orderable: false, sortable: false},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
+                    {data: 'requested_date', name: 'employee_requisitions.created_at', class: 'align-middle requested_date'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
                     {data: 'es', name: 'employee_requisitions.employee_status', class: 'align-middle es'},
                     {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
-                    {data: 'requested_date', name: 'employee_requisitions.created_at', class: 'align-middle requested_date'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
