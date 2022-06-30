@@ -215,7 +215,7 @@
                             $('#question_recommend_input').html(`
 
                             <label>Any recommendations/suggestions?</label>
-                            <textarea class="form-control"  name="recommendation" placeholder="Recommendations or suggestions"></textarea>
+                            <textarea class="form-control"  name="recommendations_box" placeholder="Recommendations or suggestions"></textarea>
                             `);
                         }
                         $.each(data.question.nps, function(index, values) {
@@ -224,17 +224,17 @@
                                             <tr>
                                              <td>
                                                  ${index+1}
-                                                 <input type="hidden" value="${values.id}">
-                                                 <input type="hidden" value="${values.nps_survey_id}">
+                                                 <input type="hidden" name="question_id[${index}]" value="${values.id}">
+                                                 <input type="hidden" name="nps_survey_id" value="${values.nps_survey_id}">
                                              </td>
                                              <td>${values.question}</td>
                                              <td>
                                                 <div style="display: contents">
-                                                    <input title="1" style="width: 20px;height: 20px;cursor:pointer" class="radio" value="1" type="radio" name="ratting[${index}]">
-                                                    <input title="2" style="width: 20px;height: 20px;cursor:pointer" class="radio" value="2" type="radio" name="ratting[${index}]">
-                                                    <input title="3" style="width: 20px;height: 20px;cursor:pointer" class="radio" value="3" type="radio" name="ratting[${index}]">
-                                                    <input title="4" style="width: 20px;height: 20px;cursor:pointer" class="radio" value="4" type="radio" name="ratting[${index}]">
-                                                    <input title="5" style="width: 20px;height: 20px;cursor:pointer" class="radio" value="5" type="radio" name="ratting[${index}]">
+                                                    <input title="1" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="1" type="radio" name="ratting[${index}]">
+                                                    <input title="2" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="2" type="radio" name="ratting[${index}]">
+                                                    <input title="3" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="3" type="radio" name="ratting[${index}]">
+                                                    <input title="4" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="4" type="radio" name="ratting[${index}]">
+                                                    <input title="5" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="5" type="radio" name="ratting[${index}]">
                                                  </div>
 
                                             </td>
@@ -245,6 +245,32 @@
                         $('#question_data_table tbody').html(html);
                     }
 
+
+                });
+
+                $("#rate_nps_survey").on('click',function (e){
+                    if(!$(".radio_nps").is(':checked'))
+                    {
+                        toastr.error("Please Select Rating", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        return;
+                    }
+                    $("#question_submit").submit();
+                });
+
+                $("#skip_nps_survey").on('click',function (e){
+
+                    $.ajax({
+                            url: '{!! route('cod.nps.nps_skip') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': '{{session('user_id')}}',
+                                'survey_id':'{{session('nps_survey')}}',
+                                '_token': '{{ csrf_token() }}'
+                            }
+                    })
+                    .done(function (data) {
+                        $('#question_modal').modal('hide');
+                    });
 
                 });
 

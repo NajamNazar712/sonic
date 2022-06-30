@@ -539,6 +539,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('nps')->name('nps.')->group(function(){
         Route::post('nps_survey_check','Shippers\NpsSurveyShipperController@nps_survey_check')->name('nps_survey_check');
         Route::post('ratting_submit','Shippers\NpsSurveyShipperController@ratting_submit')->name('ratting_submit');
+        Route::post('nps_skip','Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
 
     });
 

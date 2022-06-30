@@ -145,7 +145,7 @@
     </div>
 @endif
 
-@if(Session::has('nps_survey') && session('nps_survey') == 1)
+@if(Session::has('nps_survey') &&  !empty(session('nps_survey')))
 
     <div class="modal fade" id="question_modal" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="question_modal"
          aria-hidden="true">

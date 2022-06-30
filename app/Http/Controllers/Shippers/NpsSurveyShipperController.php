@@ -8,6 +8,8 @@ use App\Http\Models\Admin\NpsSurvey;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\Admin\NpsSurveyQuestion;
+use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\NpsShipperSkipSurvey;
 
 class NpsSurveyShipperController extends Controller
 {
@@ -48,5 +50,73 @@ class NpsSurveyShipperController extends Controller
 
     public function ratting_submit(Request $request){
 
+        if(isset($request->question_id)){
+
+            $questions_id = $request->question_id;
+            $nps_survey_id = $request->nps_survey_id;
+            $ratting = $request->ratting;
+            $user_id = Auth::user()->id;
+            $recommendations_box = isset($request->recommendations_box) ? $request->recommendations_box : null;
+            $date = Carbon::now();
+            $total_ratting = 0;
+
+            $nps_shipper_rattings = NpsShipperRatting::where('nps_survey_id',$nps_survey_id)->where('user_id',$user_id);
+
+            if(!$nps_shipper_rattings->exists()) {
+
+                foreach ($questions_id as $key => $value) {
+                    $nps_shipper_rattings = new NpsShipperRatting();
+                    $nps_shipper_rattings->nps_survey_id = $nps_survey_id;
+                    $nps_shipper_rattings->user_id = $user_id;
+                    $nps_shipper_rattings->question_id = $questions_id[$key];
+                    $nps_shipper_rattings->ratting = isset($ratting[$key]) ? $ratting[$key] : 0;
+                    $nps_shipper_rattings->recommendations_box = $recommendations_box;
+                    $nps_shipper_rattings->created_at = $date;
+                    $nps_shipper_rattings->updated_at = $date;
+                    $nps_shipper_rattings->save();
+                    $total_ratting +=isset($ratting[$key]) ? $ratting[$key] : 0;
+                }
+                $nps_shipper_rattings = NpsShipperRatting::where('nps_survey_id',$nps_survey_id)
+                    ->where('user_id',$user_id)->update(['total_ratting'=>$total_ratting]);
+
+                session(['nps_survey' => null]); //Disable Survey After Submission
+
+                return redirect()->back()->with('success', 'Survey Submitted');
+
+            }else{
+                return redirect()->back()->with('error', 'Survey Already Submitted');
+            }
+
+        }else{
+            return redirect()->back()->with('error', 'Questions Not Found');
+        }
+    }
+
+    public function nps_skip(Request $request)
+    {
+        if(isset($request->survey_id)){
+
+            $nps_shipper_skip_surveys = NpsShipperSkipSurvey::where('nps_survey_id',$request->survey_id)->where('user_id',$request->id);
+            if(!$nps_shipper_skip_surveys->exists()){
+                $nps_shipper_skip_surveys = new NpsShipperSkipSurvey();
+                $nps_shipper_skip_surveys->nps_survey_id = $request->survey_id;
+                $nps_shipper_skip_surveys->user_id = $request->id;
+                $nps_shipper_skip_surveys->skip_count = 1;
+                $nps_shipper_skip_surveys->created_at = Carbon::now();
+                $nps_shipper_skip_surveys->updated_at = Carbon::now();
+                $nps_shipper_skip_surveys->save();
+
+            }else{
+                $nps_shipper_skip_surveys = $nps_shipper_skip_surveys->first();
+                $nps_shipper_skip_surveys->skip_count = $nps_shipper_skip_surveys->skip_count+1;
+                $nps_shipper_skip_surveys->updated_at = Carbon::now();
+                $nps_shipper_skip_surveys->save();
+            }
+            session(['nps_survey' => null]); //Disable Survey After Skip
+
+            return response()->json(['status' => 1]);
+        }else{
+            return response()->json(['status' => 0]);
+        }
     }
 }
