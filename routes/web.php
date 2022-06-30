@@ -3948,6 +3948,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('status', 'Admins\NpsController@SurveyStatus')->name('status');
         Route::get('edit/{id}', 'Admins\NpsController@survey_edit')->name('edit');
         Route::post('update/{id}', 'Admins\NpsController@survey_update')->name('update');
+        Route::get('/response_report','Admins\NpsController@response_report')->name('response.report');
+        Route::get('/response_report_list','Admins\NpsController@response_report_list')->name('response_report_list');
+        Route::get('/consolidate_report','Admins\NpsController@consolidate_report')->name('consolidate.report');
 
     });
 });

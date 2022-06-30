@@ -12,6 +12,7 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Admin\NpsSurvey;
 use App\Http\Models\Admin\NpsSurveyQuestion;
+use App\Http\Models\NpsShipperRatting;
 
 class NpsController extends Controller
 {
@@ -26,7 +27,7 @@ class NpsController extends Controller
 
     public function index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),751);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),548);
         return view('admin.nps.index');
     }
 
@@ -121,7 +122,7 @@ class NpsController extends Controller
 
     public function add()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),752);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),549);
         $max_date = Carbon::now()->addYear(1);
         $min_date = Carbon::now()->subYear(1);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
@@ -248,6 +249,76 @@ class NpsController extends Controller
         return redirect()->route('admin.nps.index')->with('success', 'Survey Updated Successfully');
 
 
+    }
+
+    public function response_report(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),550);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $nps_survey = NpsSurvey::orderby('id','desc')->select(['id','survey_name'])->get();
+        return view('admin.nps.report.response',compact('shippers','nps_survey'));
+    }
+
+    public function response_report_list(Request $request){
+
+
+        $nps = NpsShipperRatting::
+             leftjoin('nps_survey as ns', 'ns.id', '=', 'nps_shipper_rattings.nps_survey_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'ns.admin_id')
+            ->leftjoin('users as u', 'u.id', '=', 'nps_shipper_rattings.user_id')
+            ->select(['u.name as shipper_name','nps_shipper_rattings.ratting','nps_shipper_rattings.user_id','nps_shipper_rattings.nps_survey_id','ns.survey_name','nps_shipper_rattings.recommendations_box','nps_shipper_rattings.created_at as response_date','a.name as requested_by'])
+            ->groupby(['nps_survey_id','user_id']);
+
+        if ($search_shipper = $request->get('search_shipper')) {
+            $nps = $nps->whereIn('nps_shipper_rattings.user_id', $search_shipper);
+        }
+
+        if ($search_survey = $request->get('search_survey')) {
+            $nps = $nps->where('nps_shipper_rattings.nps_survey_id', $search_survey);
+        }
+
+        $datatables = Datatables::of($nps)
+                ->addColumn('promoters', function ($nps) use($search_shipper,$search_survey) {
+                    $npr = NpsShipperRatting::where('user_id',$nps->user_id)
+                        ->where(function ($query) use($search_shipper,$search_survey){
+                            if(!empty($search_survey)){
+                                $query->where('nps_survey_id',$search_survey);
+                            }
+                        })
+                        ->where('ratting','>=',4)
+                        ->where('ratting','<=',5)
+                        ->count('ratting');
+                    return $npr;
+                })
+            ->addColumn('passive', function ($nps) use($search_shipper,$search_survey){
+                $npr = NpsShipperRatting::where('user_id',$nps->user_id)
+                    ->where(function ($query) use($search_shipper,$search_survey){
+                        if(!empty($search_survey)){
+                            $query->where('nps_survey_id',$search_survey);
+                        }
+                    })
+                    ->where('ratting',3)
+                    ->count('ratting');
+                return $npr;
+            })
+            ->addColumn('destructor', function ($nps) use($search_shipper,$search_survey){
+                $npr = NpsShipperRatting::where('user_id',$nps->user_id)
+                    ->where(function ($query) use($search_shipper,$search_survey){
+                        if(!empty($search_survey)){
+                            $query->where('nps_survey_id',$search_survey);
+                        }
+                    })
+                    ->where('ratting','>=',0)
+                    ->where('ratting','<=',2)
+                    ->count('ratting');
+                return $npr;
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function consolidate_report(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),551);
+        return view('admin.nps.report.consolidate');
     }
 
 }

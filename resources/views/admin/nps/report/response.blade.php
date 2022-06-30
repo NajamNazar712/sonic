@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'NPS SURVEY')
+@section('title', 'NPS Response Report')
 
 @section('content')
-    <h1>NPS SURVEY</h1>
+    <h1>NPS Response Report</h1>
 
     <section>
         <div class="row">
@@ -11,15 +11,48 @@
             <div class="col-12">
                 <div class="card">
                     @include('admin.inc.messages')
+                    <div id="search_form" class="row p-1 mb-2">
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="search_admins[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    @foreach($shippers as $val)
+                                        <option value="{{$val->id}}">{{$val->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_survey" id="search_survey" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                                    <option value="">Select</option>
+                                    @foreach($nps_survey as $val)
+                                        <option value="{{$val->id}}">{{$val->survey_name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
+{{--                        <div class="col-3">--}}
+{{--                            <fieldset class="form-group">--}}
+{{--                                <select name="ratting_status" id="ratting_status" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">--}}
+{{--                                    <option value="">Select</option>--}}
+{{--                                    <option value="1">Promoters</option>--}}
+{{--                                    <option value="2">Passive</option>--}}
+{{--                                    <option value="3">Detractors</option>--}}
+
+{{--                                </select>--}}
+{{--                            </fieldset>--}}
+{{--                        </div>--}}
+
+                        <div class="col-2">
+                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </div>
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             <div class="row justify-content-center">
                                 <div class="col-3">
-{{--                                    <select name="search_status" id="search_status" class="form-control select2">--}}
-{{--                                        @foreach($erf_status as $status)--}}
-{{--                                            <option value="{{$status->id}}">{{$status->name}}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
                                 </div>
                             </div>
 
@@ -27,28 +60,18 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Survey ID</th>
+                                    <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Survey Name</th>
-                                    <th class="border-primary border-darken-1">Start Time</th>
-                                    <th class="border-primary border-darken-1">End Time</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Assign Shippers</th>
-                                    <th class="border-primary border-darken-1">Question</th>
-                                    <th class="border-primary border-darken-1">Recommendation Box</th>
-                                    <th class="border-primary border-darken-1">Admin</th>
-                                    <th class="border-primary border-darken-1">Action</th>
+                                    <th class="border-primary border-darken-1">Promoters</th>
+                                    <th class="border-primary border-darken-1">Passive</th>
+                                    <th class="border-primary border-darken-1">Detractor</th>
+                                    <th class="border-primary border-darken-1">Response Date</th>
+                                    <th class="border-primary border-darken-1">Requested By</th>
+                                    <th class="border-primary border-darken-1">Suggestions</th>
                                 </tr>
                                 </thead>
                             </table>
                         </div>
-                    </div>
-                    <div style="display: none;">
-                        <form id="account_active_form" action="{{route('admin.nps.status')}}" method="post" class="mt-2">
-                            {{csrf_field()}}
-                            <input type="hidden" name="_method" value="PUT">
-                            <input type="hidden" name="shid" id="shid">
-                            <input type="hidden" name="status" id="shstatus">
-                        </form>
                     </div>
                 </div>
             </div>
@@ -68,10 +91,10 @@
                 <div class="modal-body text-center">
                     <table class="table table-bordered" id="shipper_data_table">
                         <thead>
-                            <tr>
-                               <th>S.no</th>
-                                <th>Shipper Name</th>
-                            </tr>
+                        <tr>
+                            <th>S.no</th>
+                            <th>Shipper Name</th>
+                        </tr>
                         </thead>
                         <tbody>
 
@@ -197,25 +220,33 @@
     <script>
 
         $(document).ready(function() {
-            var route = '<?php echo route('admin.nps.add'); ?>';
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shippers",
+                allowClear:true,
+                dropdownParent:$('#search_form')
+            });
+
+            $('#search_survey').select2({
+                width:'100%',
+                placeholder:"Select Survey",
+                allowClear:true,
+                dropdownParent:$('#search_form')
+            });
+            // $('#ratting_status').select2({
+            //     width:'100%',
+            //     placeholder:"Ratting Type",
+            //     allowClear:true,
+            //     dropdownParent:$('#search_form')
+            // });
+
+
+
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    @if(session('role_id') == 1 ||  in_array(752, session('permissions')))
-                    {
-                        title: 'Add Survey',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-plus"></i> Add Survey',
-                        action: function (e) {
-                            window.location = route;
-
-                        }
-                    },
-                    @endif
-
-                    'reset'
-                ],
                 scrollX: true, scrollY: '500px',
+                buttons:[],
                 "autoWidth": true,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -225,8 +256,15 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
-                    url: '{{ route('admin.nps.list') }}',
+                    url: '{{ route('admin.nps.response_report_list') }}',
+                    type: "get",
+                    data: function (d) {
+                        d['_token'] = "{{csrf_token()}}";
+                        d.search_survey = $('#search_survey').val();
+                        d.search_shipper = $('#search_shipper').val();
+                    }
                 },
                 rowId: 'survey_id',
                 order: [[1, 'desc']],
@@ -242,16 +280,14 @@
                         }
                     },
 
-                    {data: 'survey_id', name: 'nps_survey.id', class: 'align-middle survey_id'},
-                    {data: 'survey_name', name: 'nps_survey.survey_name', class: 'align-middle survey_name'},
-                    {data: 'start_time', name: 'nps_survey.start_time', class: 'align-middle start_time'},
-                    {data: 'end_time', name: 'nps_survey.end_time', class: 'align-middle end_time'},
-                    {data: 'status', name: 'nps_survey.status', class: 'align-middle status'},
-                    {data: 'shippers', name: 'shippers', class: 'align-middle shippers' , orderable: false, sortable: false},
-                    {data: 'questions', name: 'questions', class: 'align-middle questions' , orderable: false, sortable: false},
-                    {data: 'recommendation_box', name: 'nps_survey.recommendation_box', class: 'align-middle recommendation_box'},
-                    {data: 'admin_name', name: 'a.name', class: 'align-middle admin'},
-                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
+                    {data: 'survey_name', name: 'ns.survey_name', class: 'align-middle survey_name'},
+                    {data: 'promoters', name: 'promoters', class: 'align-middle promoters'},
+                    {data: 'passive', name: 'passive', class: 'align-middle passive'},
+                    {data: 'destructor', name: 'destructor', class: 'align-middle destructor'},
+                    {data: 'response_date', name: 'nps_shipper_rattings.created_at', class: 'align-middle response_date'},
+                    {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
+                    {data: 'recommendations_box', name: 'nps_shipper_rattings.recommendations_box', class: 'align-middle recommendations_box'},
 
 
                 ],
@@ -282,7 +318,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.aging')  || $(header).is('.shippers') || $(header).is('.questions')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.promoters')  || $(header).is('.passive') || $(header).is('.destructor')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
@@ -325,6 +361,11 @@
                 }
             });
 
+            $('#search_filter_btn').on('click',function () {
+
+                table.draw();
+            });
+
             $('body').on('click', 'button.shippers_modal',  function(){
                 var id = $(this).parents('tr').attr('id');
                 if(id){
@@ -334,12 +375,12 @@
                             'survey_id': id,
                         }
                     })
-                    .done(function(data) {
-                        if(data.status == 1){
-                            $('#shippers_modal').modal('show');
-                            var html = "";
+                        .done(function(data) {
+                            if(data.status == 1){
+                                $('#shippers_modal').modal('show');
+                                var html = "";
                                 $.each(data.shippers, function(index, values) {
-                                     html+= `
+                                    html+= `
 
                                             <tr>
                                              <td>${index+1}</td>
@@ -347,11 +388,11 @@
                                             </tr>
 
                                 `;
-                            });
-                            $('#shipper_data_table tbody').html(html);
-                        }
+                                });
+                                $('#shipper_data_table tbody').html(html);
+                            }
 
-                    });
+                        });
                 }
             });
 

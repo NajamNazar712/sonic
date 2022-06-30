@@ -1853,7 +1853,10 @@
                                         <li><a class="menu-item" href="{{ route('admin.nps.index') }}">Survey</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(752, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.nps.add') }}">Report</a></li>
+                                        <li><a class="menu-item" href="{{ route('admin.nps.response.report') }}">Response Report</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(752, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.nps.consolidate.report') }}">Consolidated Report</a></li>
                                     @endif
                                 </ul>
                             </li>
