@@ -33,9 +33,6 @@
                                     <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Delivery Note</th>
-                                    <th class="border-primary border-darken-1">Pending DNCC</th>
-                                    <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Requested By</th>
@@ -57,7 +54,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header text-center">
-                    <h4 class="modal-title w-100 font-weight-bold">Add Request</h4>
+                    <h4 class="modal-title w-100 font-weight-bold">Add Rider Category Bypass Request</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -244,7 +241,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.note.request_list') }}',
+                        url: '{{ route('admin.delivery.note.rider_request_list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -253,9 +250,6 @@
                             head.push('Rider ID');
                             head.push('Rider');
                             head.push('Hub');
-                            head.push('Delivery Note');
-                            head.push('Pending DNCC');
-                            head.push('Amount');
                             head.push('Reason');
                             head.push('Requested Date');
                             head.push('Requested By');
@@ -270,9 +264,6 @@
                                 row.push(values.rider_id);
                                 row.push(values.rider);
                                 row.push(values.hub);
-                                row.push(values.delivery_note);
-                                row.push(values.dn_received_amount);
-                                row.push(values.amount);
                                 row.push(values.reason);
                                 row.push(values.requested_at);
                                 row.push(values.requested_by);
@@ -322,7 +313,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.delivery.note.request_list') }}',
+                    url: '{{ route('admin.delivery.note.rider_request_list') }}',
                     method:'get',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -347,9 +338,6 @@
                     {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
-                    {data: 'delivery_note', name: 'delivery_note_requests.delivery_note', class: 'align-middle delivery_note'},
-                    {data: 'dn_received_amount', name: 'delivery_note_requests.dn_received_amount', class: 'align-middle dn_received_amount'},
-                    {data: 'amount', name: 'delivery_note_requests.amount', class: 'align-middle amount'},
                     {data: 'reason', name: 'delivery_note_requests.reason', class: 'align-middle reason'},
                     {data: 'requested_at', name: 'delivery_note_requests.requested_at', class: 'align-middle requested_at'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
@@ -461,8 +449,5 @@
                 form.submit();
             }
         });
-
-
-
     </script>
 @endsection

@@ -2453,13 +2453,66 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
         if (session('role_id') != 1) {
-
             $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
         } else {
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         return view('admin.delivery.note.rider_category_request')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
+    public function rider_request_list(Request $requests)
+    {
+        if ($requests->get('excel') && $requests->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 270);
+        }
+        $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
+            ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub']);
+        if ($requests->search_hub) {
+            $request = $request->where('c.hub_id', $requests->search_hub);
+        }
+
+        $datatables = Datatables::of($request)
+            ->editColumn('status', function ($result) {
+                if ($result->status == 1) {
+                    return 'Requested';
+                } else {
+                    return 'Approved';
+                }
+            })
+            ->editColumn('delivery_note', function ($result) {
+                if ($result->delivery_note) {
+                    return $result->delivery_note;
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn("action", function ($result) {
+                if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 1) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (($result->status == 1) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
+                        $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
+
+                    }
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+
     }
     //ajax function
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution
