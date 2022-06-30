@@ -26,7 +26,7 @@ class NpsController extends Controller
 
     public function index()
     {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),751);
         return view('admin.nps.index');
     }
 
@@ -59,19 +59,22 @@ class NpsController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle question_modal">' .$question . '</button>';
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([518, 519, 520, 521], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([753,754], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-
-                    $dropdown .= '<a href="' . route('admin.nps.edit',$result->id) . '" class="dropdown-item edit_mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
-                    if($result->status == 0) {
-                        $dropdown .= '<button type="button" class="dropdown-item active_survey" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate</div></button>';
-                    }else{
-                        $dropdown .= '<button type="button" class="dropdown-item active_survey" rel="deactivate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
+                    if (session('role_id') == 1 || in_array(753, session('permissions'))) {
+                        $dropdown .= '<a href="' . route('admin.nps.edit', $result->id) . '" class="dropdown-item edit_mapping"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
+                    }
+                    if (session('role_id') == 1 || in_array(754, session('permissions'))) {
+                        if ($result->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item active_survey" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate</div></button>';
+                        } else {
+                            $dropdown .= '<button type="button" class="dropdown-item active_survey" rel="deactivate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
+                        }
                     }
                     $dropdown .= '
                         </div>
@@ -118,6 +121,7 @@ class NpsController extends Controller
 
     public function add()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),752);
         $max_date = Carbon::now()->addYear(1);
         $min_date = Carbon::now()->subYear(1);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();

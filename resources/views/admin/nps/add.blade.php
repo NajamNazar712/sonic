@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Add Survey')
+@section('title', 'NPS Add Survey')
 
 @section('content')
     <style>
