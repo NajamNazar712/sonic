@@ -6123,7 +6123,7 @@ class AdminAPIController extends Controller
         }
         if($leads->exists()){
             $leads->orderBy('leads.requested_date', "DESC");
-            $leads = $leads->paginate(10);
+            $leads = $leads->get();
             $data = array();
             foreach ($leads as $lead){
                 $datum = array();
@@ -7551,5 +7551,67 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
 
+    }
+
+    public function leads_list_v2(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+
+        $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+        $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
+            ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
+
+        if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
+            $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
+        }
+
+        if($request->lead_id){
+            $leads = $leads->where('leads.id', $request->lead_id);
+        }
+        if($request->city_id){
+            $leads = $leads->where('leads.city_id', $request->city_id);
+        }
+        if($request->status_id){
+            $leads = $leads->where('leads.status_id', $request->status_id);
+        }
+        if($request->date_from){
+            if($request->date_to){
+                $from = $request->date_from.' 00:00:00';
+                $to = $request->date_to.' 23:59:59';
+                $leads = $leads->whereBetween('leads.requested_date', [$from, $to]);
+            }
+            else{
+                $leads = $leads->whereDate('leads.requested_date', $request->date_from);
+            }
+        }
+        if($leads->exists()){
+            $leads->orderBy('leads.requested_date', "DESC");
+            $leads = $leads->paginate(10);
+            $data = array();
+            foreach ($leads as $lead){
+                $datum = array();
+                $datum["lead_id"] = $lead->lead_id;
+                $datum["contact_person"] = $lead->contact_person;
+                $datum["phone_number"] = $lead->phone_number;
+                $datum["email_address"] = $lead->email_address;
+                $datum["requested_date"] = $lead->requested_date;
+                $datum["message"] = ($lead->message != null) ? $lead->message : "";
+                $datum["status"] = $lead->status;
+                $datum["status_id"] = $lead->status_id;
+                $datum["city"] = $lead->city;
+                $datum["service"] = $lead->service;
+                $datum["brand"] = $lead->brand;
+                $datum["sale_person"] = ($lead->sale_person != null) ? $lead->sale_person : "";
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
+        }else{
+            return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
+        }
     }
 }

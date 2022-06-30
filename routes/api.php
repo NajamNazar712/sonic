@@ -373,6 +373,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::post('list', 'AdminAPIController@leads_list')->name('list');
+                Route::post('list_v2', 'AdminAPIController@leads_list_v2')->name('list_v2');
                 Route::post('status_list', 'AdminAPIController@lead_statuses')->name('status_list');
                 Route::post('status_update', 'AdminAPIController@lead_status_update')->name('status_update');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
