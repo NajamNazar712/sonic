@@ -32,7 +32,6 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
-                                    <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Requested By</th>
@@ -61,33 +60,26 @@
                     </button>
                 </div>
                 <div class="modal-body mx-3">
-                    <form method="post" id="request_form" novalidate="novalidate" action="{{route('admin.delivery.note.request_submit')}}">
+                    <form method="post" id="request_form" novalidate="novalidate" action="{{route('admin.delivery.note.rider_category_submit')}}">
                         @method('POST')
                         @csrf
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <label><strong>Rider</strong></label>
                                 <fieldset class="form-group">
-                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                    <select name="rider_cat" id="rider_cat" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
+                                        @foreach($riders_cat as $rider_cat)
+                                            <option value="{{$rider_cat->id}}">{{$rider_cat->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <div class="form-group">
-                                    <label><strong>Pending DNCC</strong></label>
-                                    <input type="text" name="dncc" id="dncc" class="form-control" {{--placeholder="Pending DNCC"--}} readonly>
-                                    <input type="hidden" name="dnid" id="dnid" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <div class="form-group">
-                                    <label><strong>COD Amount</strong></label>
-                                    <input type="text" name="amount" id="amount" class="form-control"  {{--placeholder="Amount"--}} readonly>
-                                </div>
+                                <label><strong>Rider</strong></label>
+                                <fieldset class="form-group">
+                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
+                                    </select>
+                                </fieldset>
                             </div>
                         </div>
                         <div class="row justify-content-center">
@@ -190,38 +182,35 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
+            $('#rider_cat').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider Category',
                 width:'100%',
-                dropdownParent: $("#request_form")
+                allowClear:true
             }).bind('change', function () {
-                var rider_id = this.value;
-                if(rider_id == null || rider_id == ''){
+                var rider_cat = this.value;
+                if(rider_cat == null || rider_cat == ''){
                     return false;
                 }
                 $.ajax({
-                    url: '{!! route('admin.delivery.note.request.info') !!}',
+                    url: '{!! route('admin.delivery.note.check_rider_cat') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'id': rider_id,
-
+                        'rider_cat':rider_cat
                     }
                 }).done(function (data) {
 
                     if (data.status == 1) {
-                        var value ='';
-                        var delivery_note = data.note.id;
-                        if(data.note.received_cod_amount == null){
-                            value = 0;
-                        }
-                        else{
-                            value = data.note.received_cod_amount
-                        }
-                        $('#dnid').val(delivery_note);
-                        $('#dncc').val(value);
-                        $('#amount').val(data.note.total_cod_amount);
-                        $('#form_btn').attr('disabled' , false);
+
+                        $('#rider_id').empty();
+                        $.each(data.rider, function(index, values) {
+
+                            var html = `
+                                <option value='${values.id}'>${values.name}</option>
+                            `
+                            $('#rider_id').append(html);
+
+                        });
 
                     } else {
                         toastr.error(data.error, 'Error!', {
@@ -233,6 +222,11 @@
 
                 });
             });
+            $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider',
+                width:'100%',
+                dropdownParent: $("#request_form")
+            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -241,7 +235,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.note.rider_request_list') }}',
+                        url: '{{ route('admin.delivery.note.rider_cat_request_list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -313,7 +307,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.delivery.note.rider_request_list') }}',
+                    url: '{{ route('admin.delivery.note.rider_cat_request_list') }}',
                     method:'get',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -337,13 +331,13 @@
                     },
                     {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
-                    {data: 'reason', name: 'delivery_note_requests.reason', class: 'align-middle reason'},
-                    {data: 'requested_at', name: 'delivery_note_requests.requested_at', class: 'align-middle requested_at'},
+                    // {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason'},
+                    {data: 'requested_at', name: 'requested_at', class: 'align-middle requested_at'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
-                    {data: 'approved_at', name: 'delivery_note_requests.approved_at', class: 'align-middle approved_at'},
-                    {data: 'approved_by', name: 'ad.name', class: 'align-middle approved_by'},
-                    {data: 'status', name: 'delivery_note_requests.status', class: 'align-middle status'},
+                    {data: 'approved_at', name: '.approved_at', class: 'align-middle approved_at'},
+                    {data: 'approved_by', name: 'a.name', class: 'align-middle approved_by'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
@@ -387,16 +381,15 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
 
-                var delivery_note_id = table.row($(this).parents('tr')).data().id;
+                var id = table.row($(this).parents('tr')).data().id;
 
                 if ($(this).hasClass('approve_request')) {
                     $.ajax({
-                        url: '{!! route('admin.delivery.note.request.approve') !!}',
+                        url: '{!! route('admin.delivery.note.rider_category_approve') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'id': delivery_note_id,
-
+                            'id': id,
                         }
                     }).done(function (data) {
 

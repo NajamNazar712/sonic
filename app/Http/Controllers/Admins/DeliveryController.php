@@ -28,6 +28,7 @@ use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
+use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteLog;
@@ -62,6 +63,7 @@ use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
@@ -2458,48 +2460,41 @@ class DeliveryController extends Controller
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-        return view('admin.delivery.note.rider_category_request')->with(['riders' => $riders, 'hubs' => $hubs]);
+        $rider_cat = RiderCategory::whereIn('id',[1,2])->get();
+        return view('admin.delivery.note.rider_category_request')->with(['riders' => $riders, 'hubs' => $hubs, 'riders_cat' => $rider_cat]);
     }
-    public function rider_request_list(Request $requests)
+    public function rider_cat_request_list(Request $requests)
     {
         if ($requests->get('excel') && $requests->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 270);
         }
-        $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
-            ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
-            ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
+        $request = RiderCategoryByPass::join('riders as r', 'r.id', '=', 'rider_category_by_passes.rider_id')
+            ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
+            ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub']);
+            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.id as id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
         }
 
         $datatables = Datatables::of($request)
             ->editColumn('status', function ($result) {
-                if ($result->status == 1) {
+                if ($result->status == 0) {
                     return 'Requested';
                 } else {
                     return 'Approved';
                 }
             })
-            ->editColumn('delivery_note', function ($result) {
-                if ($result->delivery_note) {
-                    return $result->delivery_note;
-                } else {
-                    return '-';
-                }
-            })
             ->addColumn("action", function ($result) {
-                if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 1) {
+                if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($result->status == 1) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
+                    if (($result->status == 0) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
-
                     }
                     $dropdown .= '
                         </div>
@@ -2514,6 +2509,48 @@ class DeliveryController extends Controller
         return $datatables->make(true);
 
     }
+
+    public function check_rider_cat(Request $request)
+    {
+        $rider = Rider::where('rider_category_id',$request->rider_cat)->get();
+        return response()->json(['status' => 1, 'rider' => $rider]);
+    }
+
+    public function rider_category_submit(Request $request)
+    {
+        if (RiderCategoryByPass::where('rider_id', $request->rider_id)->where('rider_category_id', $request->rider_cat)->exists()) {
+            return redirect()->route('admin.delivery.note.rider_category_request')->with(['error' => 'Request Already Present']);
+        }
+        else
+        {
+            $rider_details = new RiderCategoryByPass();
+            $rider_details->rider_category_id = $request->rider_cat;
+            $rider_details->rider_id = $request->rider_id;
+            $rider_details->reason = $request->reason;
+            $rider_details->status = 0;
+            $rider_details->requested_by = auth()->id();
+            $rider_details->requested_at = Carbon::now();
+            $rider_details->save();
+            return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+        }
+    }
+
+    public function rider_category_approve(Request $request)
+    {
+        $rider_category_detail = RiderCategoryByPass::find($request->id);
+
+        if ($rider_category_detail->status == 0) {
+            $rider_category_detail->status = 1;
+            $rider_category_detail->approved_at = Carbon::now();
+            $rider_category_detail->approved_by = Auth::id();
+            $rider_category_detail->save();
+
+            return response()->json(['status' => 1, 'success' => 'Request Approved']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Status already approved']);
+        }
+    }
+
     //ajax function
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution
     public function receive_delivery_status_check(Request $request)
