@@ -1151,6 +1151,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
 			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
 			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
+            Route::get('rider_category_request','Admins\DeliveryController@rider_category_request')->name('rider_category_request');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
@@ -95,7 +96,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
@@ -2449,6 +2449,18 @@ class DeliveryController extends Controller
         }
     }
 
+    public function rider_category_request()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
+        if (session('role_id') != 1) {
+
+            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
+        } else {
+            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
+        }
+        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        return view('admin.delivery.note.rider_category_request')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
     //ajax function
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution
     public function receive_delivery_status_check(Request $request)
