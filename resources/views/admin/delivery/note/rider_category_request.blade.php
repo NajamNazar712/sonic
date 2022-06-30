@@ -12,25 +12,12 @@
                     @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-{{--                            <div id="search_form" class="row mb-2 justify-content-center">--}}
-{{--                                <div class="col-4">--}}
-{{--                                    <fieldset class="form-group">--}}
-{{--                                        <select name="search_hub" id="search_hub" class="form-control select2">--}}
-{{--                                            @foreach($hubs as $hub)--}}
-{{--                                                <option value="{{$hub->id}}">{{$hub->name}}</option>--}}
-{{--                                            @endforeach--}}
-{{--                                        </select>--}}
-{{--                                    </fieldset>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-2">--}}
-{{--                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Rider ID</th>
+                                    <th class="border-primary border-darken-1">Rider Type</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
@@ -331,7 +318,7 @@
                     },
                     {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                    // {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                    {data: 'rider_type', name: 'rider_type', class: 'align-middle rider_type'},
                     {data: 'reason', name: 'reason', class: 'align-middle reason'},
                     {data: 'requested_at', name: 'requested_at', class: 'align-middle requested_at'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
@@ -409,12 +396,12 @@
                     });
                 }
             });
-            $('#request_modal').on('hide.bs.modal', function (e) {
-                $('#request_modal #rider_id').val('').trigger('change');
-                $('#request_modal #amount').val('');
-                $('#request_modal #reason').val('');
-                $('#request_modal #dncc').val('');
-            });
+            // $('#request_modal').on('hide.bs.modal', function (e) {
+            //     $('#request_modal #rider_id').val('').trigger('change');
+            //     $('#request_modal #amount').val('');
+            //     $('#request_modal #reason').val('');
+            //     $('#request_modal #dncc').val('');
+            // });
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
