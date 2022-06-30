@@ -1240,6 +1240,7 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
+			'settings.delivery_area_keyword.index' => 747,
             
 
             

@@ -6870,6 +6870,14 @@ public function sales_incentive()
 
     }
 
+    public function delivery_area_keyword(Request $request){
+        return view('admin.settings.delivery_area_keyword');
+    }
+
+    public function delivery_area_keyword_list(Request $request){
+        
+    }
+
     
     
 }

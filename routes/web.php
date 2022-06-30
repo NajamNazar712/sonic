@@ -3333,6 +3333,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\GlobalSettingsController@undelivered_sms_hub_wise_submit')->name('submit');
         });
 
+        Route::prefix('delivery_area_keyword')->name('delivery_area_keyword.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_area_keyword')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@delivery_area_keyword_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@delivery_area_keyword_add')->name('add');
+        });
+
 
 
 	});
