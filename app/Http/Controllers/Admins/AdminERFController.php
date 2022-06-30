@@ -134,12 +134,14 @@ class AdminERFController extends Controller
                     return '-';
                 }
                 else{
+                    $items = array();
                     $trax_id = "";
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $value){
-                        $trax_id.= $value->trax_id.",<br>";
+//                        $trax_id.= $value->trax_id.",<br>";
+                        $items[] = '<br>'.$value->trax_id;
                     }
-                    return $trax_id;
+                    return $items;
                 }
             })
             ->editColumn('trax_id_for_excel', function($erf) {
@@ -175,12 +177,14 @@ class AdminERFController extends Controller
                 }
                 else{
                     $trax_id = "";
+                    $leaver_name = array();
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $id){
                         $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
-                        $trax_id.= $name->name.",<br>".' ';
+//                        $trax_id.= $name->name.",<br>".' ';
+                        $leaver_name[] = '<br>'.$name->name;
                     }
-                    return $trax_id;
+                    return $leaver_name;
                 }
             })
             ->addColumn('requested_by', function($erf) {
