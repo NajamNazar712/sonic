@@ -536,6 +536,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
     });
 
+    Route::prefix('nps')->name('nps.')->group(function(){
+        Route::post('nps_survey_check','Shippers\NpsSurveyShipperController@nps_survey_check')->name('nps_survey_check');
+        Route::post('ratting_submit','Shippers\NpsSurveyShipperController@ratting_submit')->name('ratting_submit');
+
+    });
+
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {

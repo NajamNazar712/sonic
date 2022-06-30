@@ -13,6 +13,7 @@ use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -22,6 +23,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\SubstituteUserPermission;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Models\Admin\NpsSurvey;
 
 class LoginController extends Controller
 {
@@ -289,6 +291,14 @@ class LoginController extends Controller
             if(in_array($shipper_user_id, $return_address_change_shippers)){
                 session(['shipment_return_address_change' => TRUE]);
             }
+        }
+
+        //Nps Survey check
+        $now = date('Y-m-d H:i:s',strtotime(Carbon::now()));
+        $nps_survey = NpsSurvey::where('start_time','<=',$now)->where('end_time','>=',$now)->where('status',1)->select('id');
+        if($nps_survey->exists()){
+            $nps =  $nps_survey->first();
+            session(['nps_survey' => $nps->id]);
         }
 
         return redirect()->route('cod.welcome');
