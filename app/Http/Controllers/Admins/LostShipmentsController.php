@@ -92,7 +92,7 @@ class LostShipmentsController extends Controller
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
 
-//            if(session('role_id') != 1){
+            if(session('role_id') != 1){
                 $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
                 if(!empty($lost_shipments_shippers_id)){
@@ -103,7 +103,7 @@ class LostShipmentsController extends Controller
                             $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
                     }
                 }
-//            }
+            }
 
             return Datatables::of($shipments)
                 ->editColumn('tracking_number_link', function ($shipments) {
