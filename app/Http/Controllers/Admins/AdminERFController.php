@@ -164,7 +164,7 @@ class AdminERFController extends Controller
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $id){
                         $name = Admin::where('trax_id',$id->trax_id)->select('name')->first();
-                        $trax_id.= $name->name.",";
+                        $trax_id.= $name->name.",<br>";
                     }
                     return $trax_id;
                 }
