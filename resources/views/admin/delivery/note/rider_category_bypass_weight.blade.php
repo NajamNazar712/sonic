@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Light and Heavy Shipment Weight')
+@section('title', 'Rider Category ByPass Weight')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Light and Heavy Shipment Weight
+                    Rider Category ByPass Weight
                 </h1>
 
                 <div class="card">

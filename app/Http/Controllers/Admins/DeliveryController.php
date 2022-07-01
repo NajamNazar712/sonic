@@ -2481,7 +2481,7 @@ class DeliveryController extends Controller
 
     public function rider_category_request()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
         if (session('role_id') != 1) {
             $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
         } else {
@@ -2495,7 +2495,7 @@ class DeliveryController extends Controller
     public function rider_cat_request_list(Request $requests)
     {
         if ($requests->get('excel') && $requests->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 270);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 553);
         }
         $request = RiderCategoryByPass::join('riders as r', 'r.id', '=', 'rider_category_by_passes.rider_id')
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
@@ -2522,14 +2522,14 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 0) {
+                if ((session('role_id') == 1 || count(array_intersect([760], session('permissions'))) !== 0) && $result->status == 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($result->status == 0) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
+                    if (($result->status == 0) && (session('role_id') == 1 || in_array(760, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
                     }
                     $dropdown .= '
@@ -2597,6 +2597,7 @@ class DeliveryController extends Controller
 
     public function rider_category_bypass_weight()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 554);
         $settings = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
         $weight = $settings->text;
         return view('admin.delivery.note.rider_category_bypass_weight')->with(['weight' => $weight]);

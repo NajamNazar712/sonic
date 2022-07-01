@@ -52,7 +52,7 @@
                         @csrf
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <label><strong>Rider</strong></label>
+                                <label><strong>Rider Type</strong></label>
                                 <fieldset class="form-group">
                                     <select name="rider_cat" id="rider_cat" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
                                         @foreach($riders_cat as $rider_cat)
@@ -265,7 +265,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(538, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(759, session('permissions')))
                     {
                         title: 'Add Request',
                         className: 'btn btn-primary',
