@@ -399,6 +399,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
+//        todo: bypasses rider category
         if ($request->tracking != '' && $request->rider_id != '' )
         {
             $tracking_number = $request->tracking;
@@ -445,6 +446,7 @@ class DeliveryController extends Controller
                 }
             }
         }
+//        todo: bypasses rider category end
 
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
