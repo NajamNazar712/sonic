@@ -17,8 +17,8 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Rider ID</th>
-                                    <th class="border-primary border-darken-1">Rider Type</th>
                                     <th class="border-primary border-darken-1">Rider</th>
+                                    <th class="border-primary border-darken-1">Rider Type</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Requested By</th>

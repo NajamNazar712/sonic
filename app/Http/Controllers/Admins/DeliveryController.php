@@ -409,7 +409,9 @@ class DeliveryController extends Controller
 
             $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight')->first();
 
-            if($shipment->actual_weight > 5)
+            $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
+
+            if($shipment->actual_weight > $weight->text)
             {
                 $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',2)->select('rider_category_id')->first();
                 if($rider_bypass_type)
@@ -427,7 +429,7 @@ class DeliveryController extends Controller
                     return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                 }
             }
-            elseif($shipment->actual_weight <= 5)
+            elseif($shipment->actual_weight <= $weight->text)
             {
                 $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id')->first();
                 if($rider_bypass_type)
@@ -2590,6 +2592,28 @@ class DeliveryController extends Controller
             return response()->json(['status' => 1, 'success' => 'Request Approved']);
         } else {
             return response()->json(['status' => 0, 'error' => 'Status already approved']);
+        }
+    }
+
+    public function rider_category_bypass_weight()
+    {
+        $settings = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
+        $weight = $settings->text;
+        return view('admin.delivery.note.rider_category_bypass_weight')->with(['weight' => $weight]);
+    }
+
+    public function weight_store(Request $request)
+    {
+        if ($request->weight) {
+            $existing_weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
+            if ($request->weight == $existing_weight->text) {
+                return redirect()->back()->with('error', 'Same Weight Entered!');
+            } else {
+                $User_Update = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->update(["text" => $request->weight]);
+                return redirect()->back()->with('success', 'Weight Updated!');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Enter the Weight !');
         }
     }
 

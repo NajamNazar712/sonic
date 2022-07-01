@@ -1157,6 +1157,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('check_rider_cat','Admins\DeliveryController@check_rider_cat')->name('check_rider_cat');
             Route::post('rider_category_submit','Admins\DeliveryController@rider_category_submit')->name('rider_category_submit');
             Route::post('rider_category_approve','Admins\DeliveryController@rider_category_approve')->name('rider_category_approve');
+            Route::get('rider_category_bypass_weight','Admins\DeliveryController@rider_category_bypass_weight')->name('rider_category_bypass_weight');
+            Route::post('weight_store','Admins\DeliveryController@weight_store')->name('weight_store');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
