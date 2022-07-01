@@ -12,7 +12,7 @@ class LightAndHeavyDeliveryRiderPermissionsSeeder extends Seeder
     public function run()
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        
+
         DB::table('module_permissions')->insert(array(
             array('id' => 757, 'name' => 'Rider Category ByPass Request - View', 'module_id' => 8),
             array('id' => 758, 'name' => 'Rider Category ByPass Weight - View', 'module_id' => 8),
