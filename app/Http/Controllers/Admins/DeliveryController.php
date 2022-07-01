@@ -426,7 +426,7 @@ class DeliveryController extends Controller
                     return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                 }
             }
-            elseif($shipment->actual_weight < 5)
+            elseif($shipment->actual_weight <= 5)
             {
                 $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id')->first();
                 if($rider_bypass_type)
@@ -441,7 +441,7 @@ class DeliveryController extends Controller
                 }
                 elseif($rider_default_type->rider_category_id == 2)
                 {
-                    return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is heavy weighted !'];
+                    return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                 }
             }
         }
