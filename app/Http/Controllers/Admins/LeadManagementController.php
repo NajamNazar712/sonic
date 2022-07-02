@@ -528,6 +528,15 @@ class LeadManagementController extends Controller
                         LeadTaggingController::notification_unresponsive($lead->id);
                     }
                 }
+                if($status == 11)
+                {
+                    $detail = array();
+                    $detail['name'] = $lead->contact_person;
+                    $detail['contact_number'] = $lead->phone_number;
+                    $reason = LeadReason::where('id',$lead->reason)->select('name')->first();
+                    $detail['reason'] = $reason->name;
+                    NotificationsController::send(181, $detail);
+                }
 
                 return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
             } else {

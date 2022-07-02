@@ -9384,6 +9384,20 @@ class NotificationsController extends Controller
                     
 
                 }
+                else if ($id == 181) {
+                    $detail = $reference_1_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $details['name'], $body);
+                    }
+
+                    if (strpos($body, '[reason]') !== FALSE) {
+                        $body = str_replace('[reason]', $detail['reason'], $body);
+                    }
+                    $phone_number = $detail['contact_number'];
+                    $to = $phone_number;
+                    self::sms($body, $to);
+                }
             }
         }
     }
