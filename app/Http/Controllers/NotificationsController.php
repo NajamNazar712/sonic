@@ -9388,7 +9388,7 @@ class NotificationsController extends Controller
                     $detail = $reference_1_id;
 
                     if (strpos($body, '[name]') !== FALSE) {
-                        $body = str_replace('[name]', $details['name'], $body);
+                        $body = str_replace('[name]', $detail['name'], $body);
                     }
 
                     if (strpos($body, '[reason]') !== FALSE) {
