@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Models\Admin;
+namespace App\Http\Models\Survey;
 
 use Illuminate\Database\Eloquent\Model;
 

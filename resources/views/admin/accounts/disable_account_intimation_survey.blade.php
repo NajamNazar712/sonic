@@ -510,8 +510,27 @@
 							}
 						})
 						.done(function(data) {
+
+							console.log(data);
+
+							if(data.success)
+							{
+								toastr.success(data.success, 'Success!', {
+									positionClass: 'toast-bottom-center',
+									containerId: 'toast-bottom-center'
+								});
+
+								$('#SendSurveyModal').modal('hide');
+								
+							}
+							else
+							{
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
 							
-								//
+							
+							
+							
 						});
 					
 

@@ -26,7 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
-use App\Http\Models\Admin\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
@@ -9405,7 +9405,7 @@ class NotificationsController extends Controller
                             $survey_record->send_by = $send_by;
                             $survey_record->send_via = "email";
                             $survey_record->url = $link;
-                            $survey_record->send_via = 0;
+                            $survey_record->status = 0;
                             $survey_record->created_at = $timestamp;
                             $survey_record->updated_at = $timestamp;
                             $survey_record->save();
@@ -9416,9 +9416,6 @@ class NotificationsController extends Controller
                             }
 
                             // self::email($subject, $body,$val->email);
-                            // $response = self::email($subject, $body,$val->email);
-
-                            // dd($subject, $body,$val->email , $response);
                         }
                     }
                 }
@@ -9429,7 +9426,7 @@ class NotificationsController extends Controller
 
                         foreach($reference_1_id as $key => $val)
                         {
-                            $random_id = date("dmY") . $val->id . date("his");
+                            $random_id = date("his") . $val->id . date("dmY");
                             $send_by = Auth::id();
                             $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");
@@ -9440,7 +9437,7 @@ class NotificationsController extends Controller
                             $survey_record->send_by = $send_by;
                             $survey_record->send_via = "sms";
                             $survey_record->url = $link;
-                            $survey_record->send_via = 0;
+                            $survey_record->status = 0;
                             $survey_record->created_at = $timestamp;
                             $survey_record->updated_at = $timestamp;
                             $survey_record->save();
@@ -9450,10 +9447,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            // $response = self::email($subject, $body,$val->email);
-                            // $response = self::sms($body, $val->phone);
-
-                            // dd($body, $val->phone);
+                            // self::email($subject, $body,$val->email);
                         }
                     }
                 }

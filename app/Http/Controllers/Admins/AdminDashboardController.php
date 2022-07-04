@@ -11,7 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-use App\Http\Models\Admin\DisableAccountIntimationQuestion;
+use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
@@ -12287,28 +12287,35 @@ class AdminDashboardController extends Controller
                 $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone','phone2'])->get(); 
             }
 
-            // dd($disabled_shippers);
-
-
             if($request->send_via == "email")
             {
                 // id 179 is used for email notification Disable Account Intimation Survey
                 NotificationsController::send(179, $disabled_shippers);
+                return ['status' => 0, 'success' => 'Email Notification Send Sucessfully'];
+                
             }
             else if($request->send_via == "sms")
             {    
-                    // id 179 is used for email notification Disable Account Intimation Survey
-                    NotificationsController::send(180, $disabled_shippers);
+                // id 180 is used for sms notification Disable Account Intimation Survey
+                NotificationsController::send(180, $disabled_shippers);
+               
+                return ['status' => 0, 'success' => 'SMS Notification Send Sucessfully'];
             }
-            // else if($request->send_via == "both"){
+            else if($request->send_via == "both")
+            {
+                // id 179 is used for email notification Disable Account Intimation Survey
+                NotificationsController::send(179, $disabled_shippers);
 
-            // }
+                // id 180 is used for sms notification Disable Account Intimation Survey
+                NotificationsController::send(180, $disabled_shippers);
 
+                return ['status' => 0, 'success' => 'Email and SMS Notification Send Sucessfully'];
+            }
+            else{
+
+                return ['status' => 1, 'error' => 'No Notication with given ID is present'];
+            }
         }
-
-        
-
-
     }
 
 
