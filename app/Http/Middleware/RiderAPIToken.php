@@ -26,7 +26,7 @@ class RiderAPIToken
                 $rider = $rider->first();
 
                 if ($rider->status) {
-                    $request->request->add(['rider_id' => $rider->id]);
+                    $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id]);
 
                     return $next($request);
                 }

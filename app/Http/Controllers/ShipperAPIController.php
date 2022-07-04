@@ -247,6 +247,11 @@ class ShipperAPIController extends Controller
                         }
 
                     }
+                    $shipment_info['notification'] = 0;
+                    $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id', $shipment->id);
+                    if($shipment_subscription->exists()){
+                        $shipment_info['notification'] = 1;
+                    }
                     $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
                         ->where('shipments_journey.shipment_id', $shipment->id)
                         ->where('shipments_journey.verification', 1)
