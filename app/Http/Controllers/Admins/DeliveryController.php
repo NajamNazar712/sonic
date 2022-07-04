@@ -408,7 +408,7 @@ class DeliveryController extends Controller
                 $shipment = $shipment->first();
                 $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                 if(!$dispute_check){
-                    return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
 
                 if ($shipment->shipment_detail()->exists()) {

@@ -199,7 +199,7 @@ class LostShipmentsController extends Controller
                 $parcel = Shipment::find($shipment);
                 $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
                 if(!$dispute_check){
-                    return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
                 if($parcel->shipper_status_id == 18) {
                     
@@ -249,7 +249,7 @@ class LostShipmentsController extends Controller
 
                 $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
                 if(!$dispute_check){
-                    return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
                 if($parcel->shipper_status_id == 18) {
 
@@ -315,7 +315,7 @@ class LostShipmentsController extends Controller
                     $shipment = $shipment->first();
                     $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                     if(!$dispute_check){
-                        return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                        return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                     }
                     $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey)

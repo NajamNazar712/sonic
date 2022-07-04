@@ -730,7 +730,7 @@ class V2AdminPickupsController extends Controller
             $shipment = $shipment->first();
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $user = $shipment->user;
             if($user->sub_segment_id == 2){
@@ -1415,7 +1415,7 @@ class V2AdminPickupsController extends Controller
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $shipment_origin = $shipment->pickup_address->city->hub_id;
             if (session('role_id') != 1) {
