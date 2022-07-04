@@ -76,6 +76,7 @@
                                 </div>
                                 <div class="col-6">
                                     <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+                                    <h4 style="text-align: center;font-weight: bold" id="nps_percentage"></h4>
                                 </div>
                             </div>
                         </div>
@@ -287,14 +288,18 @@
             })
             .done(function(data) {
                     if(data.status == 1) {
+                        $('#nps_percentage').html("NPS ="+data.pie_chart.nps_percentage+"%");
                         var  promotors = (data.pie_chart.promoters_perc ? data.pie_chart.promoters_perc : 0);
                         var  passive = (data.pie_chart.passive_perc ? data.pie_chart.passive_perc : 0);
                         var  detractor = (data.pie_chart.detractor_perc ? data.pie_chart.detractor_perc : 0);
                         yValues = [promotors,passive,detractor];
                         pie_chart.data.datasets[0].data = yValues;
                         pie_chart.update();
-
-
+                    }else{
+                        $('#nps_percentage').html('');
+                        yValues = [0,0,0];
+                        pie_chart.data.datasets[0].data = yValues;
+                        pie_chart.update();
                     }
                 });
 

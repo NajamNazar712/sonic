@@ -373,6 +373,7 @@ class NpsController extends Controller
             $promoter_per = (!empty($promoters) && !empty($sum_question_and_response)) ?  ($promoters/$sum_question_and_response)*100 : 0;
             $passive_per = (!empty($passive) && !empty($sum_question_and_response)) ?  ($passive/$sum_question_and_response)*100 : 0;
             $detractors_per = (!empty($detractors) && !empty($sum_question_and_response)) ?  ($detractors/$sum_question_and_response)*100 : 0;
+            $nps_percentage = (!empty($promoter_per) && !empty($detractors_per)) ? $promoter_per - $detractors_per  : 0;
 
             $data['sum_question_and_response'] = $sum_question_and_response;
             $data['total_question'] = $total_question;
@@ -380,6 +381,7 @@ class NpsController extends Controller
             $data['promoters_perc'] = round($promoter_per,2);
             $data['passive_perc'] = round($passive_per,2);
             $data['detractor_perc'] =round($detractors_per,2);
+            $data['nps_percentage'] = round($nps_percentage,2);;
 
 
             return response()->json(['status' => 1, 'pie_chart' => $data]);
