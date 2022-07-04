@@ -346,6 +346,9 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+
+                //revamp
+                Route::post('index_v2', 'AdminAPIController@leave_index_v2')->name('index_v2');
             });
 
             Route::prefix('adjustment')->name('adjustment.')->group(function () {

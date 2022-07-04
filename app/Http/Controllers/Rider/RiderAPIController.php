@@ -11864,8 +11864,8 @@ class RiderAPIController extends Controller
 
     }
 
-    public function leave_index_v2(Request $request){
-        $rider_id = $request->rider_id;
+    public function leave_index_v2(Request $request)
+    {
         $employee = Employee::where('trax_id', $request->trax_id);
         if ($employee->exists()) {
             $employee = $employee->first();
@@ -11874,31 +11874,26 @@ class RiderAPIController extends Controller
                     $leave_types = LeaveType::where('id', '<>', 2)->select('id', 'name')->get();
                 } else {
                     $leave_types = LeaveType::whereIn('id', [1, 3, 5, 6])->select('id', 'name')->get();
-
                 }
             } else {
                 if ($employee->religion_id == 1) {
                     $leave_types = LeaveType::where('id', '<>', 3)->select('id', 'name')->get();
                 } else {
                     $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
-
                 }
             }
-            $department = AdminDepartment::find(6);
-            if($department){
-                if(!$department->department_head_id){
-                    return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
-                }
-                    $data = array();
-                    $data['trax_id'] = $employee->trax_id;
-                    $data['name'] = $employee->name;
-                    $data['designation'] = "Rider";
-                    $data['department'] = "Operations";
-                    $data['approver_email'] = $department->department_head->email;
-                    $data['approver_name'] = $department->department_head->name;
-                    $data['user_type'] = 0;
-                    return response()->json(['status' => 0, 'data' => $data, 'leave_types', $leave_types]);
+            if ($employee->line_manager_id) {
+                $data = array();
+                $data['trax_id'] = $employee->trax_id;
+                $data['name'] = $employee->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $employee->line_manager->email;
+                $data['approver_name'] = $employee->line_manager->name;
+                $data['user_type'] = 0;
+                return response()->json(['status' => 0, 'data' => $data, 'leave_types', $leave_types]);
             }
+            return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
         }
         return response()->json(['status' => 1, 'message' => "Employee not found!"]);
     }

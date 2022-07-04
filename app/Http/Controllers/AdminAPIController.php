@@ -69,10 +69,10 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
-use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
@@ -7612,6 +7612,69 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }else{
             return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
+        }
+    }
+
+    public function leave_index_v2(Request $request)
+    {
+        if ($request->has('leave_id')) {
+            $leave = EmployeeLeave::find($request->leave_id);
+            if ($leave) {
+                $employee = Employee::find($leave->employee_id);
+                if ($employee) {
+                    if ($employee->line_manager_id) {
+                        $data = array();
+                        $data['trax_id'] = $employee->trax_id;
+                        $data['name'] = $employee->name;
+                        $data['designation'] = $employee->designation;
+                        $data['department'] = $employee->department->name;
+                        $data['approver_email'] = $employee->line_manager->email;
+                        $data['approver_name'] = $employee->line_manager->name;
+                        $data['user_type'] = 0;
+                        if ($employee->is_line_manager) {
+                            $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
+                        }
+                        return response()->json(['status' => 0, 'data' => $data]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
+            }
+            return response()->json(['status' => 1, 'message' => "Invalid Leave ID"]);
+        } else {
+            $employee = Employee::where('trax_id', $request->trax_id);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                if ($employee->employee_gender_id == 1) {
+                    if ($employee->religion_id == 1) {
+                        $leave_types = LeaveType::where('id', '<>', 2)->select('id', 'name')->get();
+                    } else {
+                        $leave_types = LeaveType::whereIn('id', [1, 3, 5, 6])->select('id', 'name')->get();
+                    }
+                } else {
+                    if ($employee->religion_id == 1) {
+                        $leave_types = LeaveType::where('id', '<>', 3)->select('id', 'name')->get();
+                    } else {
+                        $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
+                    }
+                }
+                if ($employee->line_manager_id) {
+                    $data = array();
+                    $data['trax_id'] = $employee->trax_id;
+                    $data['name'] = $employee->name;
+                    $data['designation'] = $employee->designation;
+                    $data['department'] = $employee->department->name;
+                    $data['approver_email'] = $employee->line_manager->email;
+                    $data['approver_name'] = $employee->line_manager->name;
+                    $data['user_type'] = 0;
+                    if ($employee->is_line_manager) {
+                        $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
+                    }
+                    return response()->json(['status' => 0, 'data' => $data, 'leave_type' => $leave_types]);
+                }
+                return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
+            }
+            return response()->json(['status' => 1, 'message' => "Employee not found"]);
         }
     }
 }
