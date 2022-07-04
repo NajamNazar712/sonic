@@ -48,15 +48,15 @@ class ShipmentsJourneyController extends Controller
 
       
 
-      if($remarks_id != null){
-          $shipment_journey->status_sub_reason_id = $remarks_id;
-      }
+//      if($remarks_id != null){
+//          $shipment_journey->status_sub_reason_id = $remarks_id;
+//      }
 
       if($user_id != null){
           $city_id = User::find($user_id)->city_id;
           $shipment_journey->city_id = $city_id;
       }
-      else if($admin_id != null){
+      else if($admin_id != null){g
           $city_id = Admin::find($admin_id)->default_hub_id;
           $shipment_journey->city_id = $city_id;
       }
