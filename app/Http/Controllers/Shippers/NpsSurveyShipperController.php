@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\Admin\NpsSurveyQuestion;
 use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
+use App\Http\Models\NpsSurveyReport;
 
 class NpsSurveyShipperController extends Controller
 {
@@ -52,6 +53,7 @@ class NpsSurveyShipperController extends Controller
 
         if(isset($request->question_id)){
 
+
             $questions_id = $request->question_id;
             $nps_survey_id = $request->nps_survey_id;
             $ratting = $request->ratting;
@@ -59,25 +61,44 @@ class NpsSurveyShipperController extends Controller
             $recommendations_box = isset($request->recommendations_box) ? $request->recommendations_box : null;
             $date = Carbon::now();
             $total_ratting = 0;
+            $promoters= 0;
+            $passive = 0;
+            $detractor = 0;
 
             $nps_shipper_rattings = NpsShipperRatting::where('nps_survey_id',$nps_survey_id)->where('user_id',$user_id);
 
             if(!$nps_shipper_rattings->exists()) {
 
                 foreach ($questions_id as $key => $value) {
+                    $rate = isset($ratting[$key]) ? $ratting[$key] : 0;
                     $nps_shipper_rattings = new NpsShipperRatting();
                     $nps_shipper_rattings->nps_survey_id = $nps_survey_id;
                     $nps_shipper_rattings->user_id = $user_id;
                     $nps_shipper_rattings->question_id = $questions_id[$key];
-                    $nps_shipper_rattings->ratting = isset($ratting[$key]) ? $ratting[$key] : 0;
-                    $nps_shipper_rattings->recommendations_box = $recommendations_box;
+                    $nps_shipper_rattings->ratting = $rate;
                     $nps_shipper_rattings->created_at = $date;
                     $nps_shipper_rattings->updated_at = $date;
                     $nps_shipper_rattings->save();
-                    $total_ratting +=isset($ratting[$key]) ? $ratting[$key] : 0;
+                    if($rate >=0 && $rate<=2){
+                        $detractor++;
+                    }else if($rate == 3){
+                        $passive++;
+                    }else if($rate >=4 && $rate<=5){
+                        $promoters++;
+                    }
+                    $total_ratting +=$rate;
                 }
-                $nps_shipper_rattings = NpsShipperRatting::where('nps_survey_id',$nps_survey_id)
-                    ->where('user_id',$user_id)->update(['total_ratting'=>$total_ratting]);
+                $nps_survey_report = new NpsSurveyReport();
+                $nps_survey_report->user_id = $user_id;
+                $nps_survey_report->nps_survey_id = $nps_survey_id;
+                $nps_survey_report->promoters = $promoters;
+                $nps_survey_report->passive = $passive;
+                $nps_survey_report->detractor = $detractor;
+                $nps_survey_report->total_ratting = $total_ratting;
+                $nps_survey_report->recommendations_box = $recommendations_box;
+                $nps_survey_report->created_at = $date;
+                $nps_survey_report->updated_at = $date;
+                $nps_survey_report->save();
 
                 session(['nps_survey' => null]); //Disable Survey After Submission
 

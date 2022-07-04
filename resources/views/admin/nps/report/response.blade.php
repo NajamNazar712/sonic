@@ -11,48 +11,60 @@
             <div class="col-12">
                 <div class="card">
                     @include('admin.inc.messages')
-                    <div id="search_form" class="row p-1 mb-2">
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_admins[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                    @foreach($shippers as $val)
-                                        <option value="{{$val->id}}">{{$val->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-                        <div class="col-3">
-                            <fieldset class="form-group">
-                                <select name="search_survey" id="search_survey" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
-                                    <option value="">Select</option>
-                                    @foreach($nps_survey as $val)
-                                        <option value="{{$val->id}}">{{$val->survey_name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-{{--                        <div class="col-3">--}}
-{{--                            <fieldset class="form-group">--}}
-{{--                                <select name="ratting_status" id="ratting_status" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">--}}
-{{--                                    <option value="">Select</option>--}}
-{{--                                    <option value="1">Promoters</option>--}}
-{{--                                    <option value="2">Passive</option>--}}
-{{--                                    <option value="3">Detractors</option>--}}
-
-{{--                                </select>--}}
-{{--                            </fieldset>--}}
-{{--                        </div>--}}
-
-                        <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                        </div>
-                    </div>
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             <div class="row justify-content-center">
-                                <div class="col-3">
+                                <div id="search_form" class="row p-1 mb-2" style="width: 100%">
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group">
+                                            <select name="search_admins[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                                @foreach($shippers as $val)
+                                                    <option value="{{$val->id}}">{{$val->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <fieldset class="form-group">
+                                            <select name="search_survey" id="search_survey" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                                                <option value="">Select</option>
+                                                @foreach($nps_survey as $val)
+                                                    <option value="{{$val->id}}">{{$val->survey_name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="requested_from_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="requested_from_date" placeholder="Requested Date From">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="requested_to_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="requested_to_date" placeholder="Requested Date To">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-7">
+                                        <button type="button" id="search_filter_btn" class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -146,7 +158,9 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 
     <style>
@@ -211,14 +225,53 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    {{--    todo for datepicker--}}
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    {{--    todo for datepicker end--}}
 
+    {{--    todo date filter field--}}
     <script>
+        var booking_from_date = $('#requested_from_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                // if (context.select) {
+                //     $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
+                // }
+            }
+        });
+        var booking_to_date = $('#requested_to_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now()->addYear(1) }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                // if (context.select) {
+                //     $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
+                // }
+            }
+        });
 
+    </script>
+    <script>
         $(document).ready(function() {
             $('#search_shipper').select2({
                 width:'100%',
@@ -264,6 +317,9 @@
                         d['_token'] = "{{csrf_token()}}";
                         d.search_survey = $('#search_survey').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.requested_from_date = $('#requested_from_date').val();
+                        d.requested_to_date = $('#requested_to_date').val();
+
                     }
                 },
                 rowId: 'survey_id',
@@ -284,7 +340,7 @@
                     {data: 'survey_name', name: 'ns.survey_name', class: 'align-middle survey_name'},
                     {data: 'promoters', name: 'promoters', class: 'align-middle promoters'},
                     {data: 'passive', name: 'passive', class: 'align-middle passive'},
-                    {data: 'destructor', name: 'destructor', class: 'align-middle destructor'},
+                    {data: 'detractor', name: 'detractor', class: 'align-middle detractor'},
                     {data: 'response_date', name: 'nps_shipper_rattings.created_at', class: 'align-middle response_date'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
                     {data: 'recommendations_box', name: 'nps_shipper_rattings.recommendations_box', class: 'align-middle recommendations_box'},
@@ -318,7 +374,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.promoters')  || $(header).is('.passive') || $(header).is('.destructor')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
@@ -462,7 +518,5 @@
             });
 
         });
-
-
     </script>
 @endsection

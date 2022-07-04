@@ -13,6 +13,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Admin\NpsSurvey;
 use App\Http\Models\Admin\NpsSurveyQuestion;
 use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\NpsSurveyReport;
 
 class NpsController extends Controller
 {
@@ -261,64 +262,78 @@ class NpsController extends Controller
     public function response_report_list(Request $request){
 
 
-        $nps = NpsShipperRatting::
-             leftjoin('nps_survey as ns', 'ns.id', '=', 'nps_shipper_rattings.nps_survey_id')
+        $nps = NpsSurveyReport::
+             leftjoin('nps_survey as ns', 'ns.id', '=', 'nps_survey_reports.nps_survey_id')
             ->leftjoin('admins as a', 'a.id', '=', 'ns.admin_id')
-            ->leftjoin('users as u', 'u.id', '=', 'nps_shipper_rattings.user_id')
-            ->select(['u.name as shipper_name','nps_shipper_rattings.ratting','nps_shipper_rattings.user_id','nps_shipper_rattings.nps_survey_id','ns.survey_name','nps_shipper_rattings.recommendations_box','nps_shipper_rattings.created_at as response_date','a.name as requested_by'])
-            ->groupby(['nps_survey_id','user_id']);
+            ->leftjoin('users as u', 'u.id', '=', 'nps_survey_reports.user_id')
+            ->select(['u.name as shipper_name','nps_survey_reports.user_id','nps_survey_reports.nps_survey_id','ns.survey_name','nps_survey_reports.recommendations_box','nps_survey_reports.created_at as response_date','a.name as requested_by','nps_survey_reports.promoters','nps_survey_reports.passive','nps_survey_reports.detractor']);
+
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = $request->get('requested_from_date');
+            $to = $request->get('requested_to_date');
+            $nps->whereBetween('nps_survey_reports.created_at', [$from, $to]);
+        }
 
         if ($search_shipper = $request->get('search_shipper')) {
-            $nps = $nps->whereIn('nps_shipper_rattings.user_id', $search_shipper);
+            $nps = $nps->whereIn('nps_survey_reports.user_id', $search_shipper);
         }
 
         if ($search_survey = $request->get('search_survey')) {
-            $nps = $nps->where('nps_shipper_rattings.nps_survey_id', $search_survey);
+            $nps = $nps->where('nps_survey_reports.nps_survey_id', $search_survey);
         }
 
-        $datatables = Datatables::of($nps)
-                ->addColumn('promoters', function ($nps) use($search_shipper,$search_survey) {
-                    $npr = NpsShipperRatting::where('user_id',$nps->user_id)
-                        ->where(function ($query) use($search_shipper,$search_survey){
-                            if(!empty($search_survey)){
-                                $query->where('nps_survey_id',$search_survey);
-                            }
-                        })
-                        ->where('ratting','>=',4)
-                        ->where('ratting','<=',5)
-                        ->count('ratting');
-                    return $npr;
-                })
-            ->addColumn('passive', function ($nps) use($search_shipper,$search_survey){
-                $npr = NpsShipperRatting::where('user_id',$nps->user_id)
-                    ->where(function ($query) use($search_shipper,$search_survey){
-                        if(!empty($search_survey)){
-                            $query->where('nps_survey_id',$search_survey);
-                        }
-                    })
-                    ->where('ratting',3)
-                    ->count('ratting');
-                return $npr;
-            })
-            ->addColumn('destructor', function ($nps) use($search_shipper,$search_survey){
-                $npr = NpsShipperRatting::where('user_id',$nps->user_id)
-                    ->where(function ($query) use($search_shipper,$search_survey){
-                        if(!empty($search_survey)){
-                            $query->where('nps_survey_id',$search_survey);
-                        }
-                    })
-                    ->where('ratting','>=',0)
-                    ->where('ratting','<=',2)
-                    ->count('ratting');
-                return $npr;
-            });
-
+        $datatables = Datatables::of($nps);
         return $datatables->make(true);
     }
 
     public function consolidate_report(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),551);
-        return view('admin.nps.report.consolidate');
+        $nps_survey = NpsSurvey::orderby('id','desc')->select(['id','survey_name'])->get();
+        return view('admin.nps.report.consolidate',compact('shippers','nps_survey'));
+    }
+
+    public function consolidate_report_list(Request $request){
+
+
+        $nps = NpsSurvey::leftjoin('admins as a', 'a.id', '=', 'nps_survey.admin_id')
+            ->leftJoin('nps_survey_reports as nsr','nsr.nps_survey_id', '=', 'nps_survey.id')
+            ->select(['nps_survey.survey_name',DB::raw('count(nsr.nps_survey_id) as total_response'),DB::raw('sum(nsr.promoters) as promoters'),DB::raw('sum(nsr.passive) as passive'),DB::raw('sum(nsr.detractor) as detractor'),'nps_survey.all_shipper','nps_survey.shipper_ids'])
+            ->groupby(['nps_survey.id']);
+
+
+
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = $request->get('requested_from_date');
+            $to = $request->get('requested_to_date');
+            $nps->whereBetween('nps_survey.created_at', [$from, $to]);
+        }
+
+        if ($search_survey = $request->get('search_survey')) {
+            $nps = $nps->where('nps_survey.id', $search_survey);
+        }
+
+        $datatables = Datatables::of($nps)
+        ->addColumn('total_shippers', function ($nps) {
+            if ($nps->all_shipper == 0) {
+                $shiper = explode(',', $nps->shipper_ids);
+                $count = count($shiper);
+                return $count;
+            } else {
+                return User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->count();
+
+            }
+        })
+        ->addColumn('response_percentage', function ($nps) {
+            $pecentage= 0;
+           $total_shippers = $nps->total_shippers;
+           $total_response = $nps->total_response;
+           if(!empty($total_response) && !empty($total_shippers)) {
+               $pecentage = ($total_response / $total_shippers) * 100;
+           }
+           return $pecentage;
+        });
+
+        return $datatables->make(true);
     }
 
 }

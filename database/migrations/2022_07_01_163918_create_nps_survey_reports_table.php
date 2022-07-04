@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNpsShipperRattingsTable extends Migration
+class CreateNpsSurveyReportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,15 @@ class CreateNpsShipperRattingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('nps_shipper_rattings', function (Blueprint $table) {
+        Schema::create('nps_survey_reports', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('nps_survey_id')->index();
             $table->integer('user_id')->index();
-            $table->integer('question_id')->index();
-            $table->integer('ratting');
+            $table->integer('promoters');
+            $table->integer('passive');
+            $table->integer('detractor');
+            $table->integer('total_ratting');
+            $table->string('recommendations_box',300)->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +33,6 @@ class CreateNpsShipperRattingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('nps_shipper_rattings');
+        Schema::dropIfExists('nps_survey_reports');
     }
 }
