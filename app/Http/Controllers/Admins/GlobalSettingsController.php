@@ -14,6 +14,7 @@ use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Admin\DeliveryLocationMapping;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
@@ -6875,6 +6876,38 @@ public function sales_incentive()
     }
 
     public function delivery_area_keyword_list(Request $request){
+        $admins = DeliveryLocationMapping::join('admins as ad','ad.id','=','delivery_location_mappings.added_by')
+                 ->join('cities as ct','ct.id','=','delivery_location_mappings.city_id')
+                 ->leftjoin('admins as ub','ub.id','=','delivery_location_mappings.updated_by')
+        ->select('delivery_location_mappings.area_name','ct.name as city_name','ub.name as updated_by','ad.name as added_by','delivery_location_mappings.updated_at');
+        $datatables = Datatables::of($admins)
+        ->addColumn('action', function($admins) {
+            if (session('role_id') == 1 || in_array(749, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                        $dropdown .=' <button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
+                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        });
+
+        return $datatables->make(true);
+    }
+
+    public function delivery_area_keyword_add(){
         
     }
 
