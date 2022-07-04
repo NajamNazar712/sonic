@@ -27,6 +27,8 @@
                                         <th class="border-primary border-darken-1">Request Date/Time</th>
                                         <th class="border-primary border-darken-1">Requested Address</th>
                                         <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">Person Of Contact</th>
+                                        <th class="border-primary border-darken-1">Reference ID</th>
                                         {{--<th class="border-primary border-darken-1">Packaging Type</th>--}}
                                         {{--<th class="border-primary border-darken-1">Size</th>--}}
                                         {{--<th class="border-primary border-darken-1">Qty</th>--}}
@@ -342,6 +344,8 @@
                             head.push('Request Date/Time');
                             head.push('Requested Address');
                             head.push('City');
+                            head.push('Person Of Contact');
+                            head.push('Reference ID');
                             head.push('Amount');
                             head.push('Payment Mode');
                             head.push('Status');
@@ -355,6 +359,8 @@
                                 row.push(values.created_at);
                                 row.push(values.address);
                                 row.push(values.city);
+                                row.push(values.poc);
+                                row.push(values.reference_id);
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.request_status);
@@ -404,6 +410,8 @@
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
+                    {data: 'poc', name: 'packaging_material_requests.poc', class: 'align-middle poc'},
+                    {data: 'reference_id', name: 'packaging_material_requests.reference_id', class: 'align-middle reference_id'},
                     {data: 'amount', name: 'ct.name', class: 'align-middle amount'},
                     {data: 'mode', name: 'packaging_material_requests.packaging_payment_mode_id', class: 'align-middle mode'},
                     {data: 'request_status', name: 'packaging_material_requests.status_id', class: 'align-middle request_status'},

@@ -1872,10 +1872,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
-
+            
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_add_store')->name('store');
+                Route::post('duplicate_role', 'Admins\UserManagementController@role_duplicate')->name('duplicate_role');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function() {
