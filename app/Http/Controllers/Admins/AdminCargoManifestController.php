@@ -611,7 +611,7 @@ class AdminCargoManifestController extends Controller
 
         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
         if(!$dispute_check){
-            return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
         }
 
         if ($shipment->shipper_status_id == 49) {
@@ -701,7 +701,7 @@ class AdminCargoManifestController extends Controller
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
 
             if ($shipment->shipper_status_id == 55) {
@@ -2670,7 +2670,7 @@ class AdminCargoManifestController extends Controller
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
 
             if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21 && $shipment->shipper_status_id != 26 && $shipment->shipper_status_id != 32 && $shipment->shipper_status_id != 49) {

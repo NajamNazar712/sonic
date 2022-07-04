@@ -466,7 +466,7 @@ class ReturnController extends Controller
                 $parcel = Shipment::find($shipment);
                 $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
                 if(!$dispute_check){
-                    return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
                 if($parcel->booking_type_id == 5){
                     continue;
@@ -631,7 +631,7 @@ class ReturnController extends Controller
             // }
             $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
             if(!$dispute_check){
-                return ['status' => 0, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
@@ -1526,7 +1526,7 @@ class ReturnController extends Controller
                 $shipment = $shipment->first();
                 $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                 if(!$dispute_check){
-                    return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
                 ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                 if($request->shipper_id != null){
@@ -3227,7 +3227,7 @@ class ReturnController extends Controller
         $shipment = Shipment::find($request->id);
         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
         if(!$dispute_check){
-            return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+            return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
         }
         $flag = true;
         $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
