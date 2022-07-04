@@ -56,7 +56,7 @@ class ShipmentsJourneyController extends Controller
           $city_id = User::find($user_id)->city_id;
           $shipment_journey->city_id = $city_id;
       }
-      else if($admin_id != null){g
+      else if($admin_id != null){
           $city_id = Admin::find($admin_id)->default_hub_id;
           $shipment_journey->city_id = $city_id;
       }
