@@ -423,6 +423,7 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                         }
                     }
+//                    todo : update status 1 to 0 (take wo next time jbtk na aae jbtk status 1 na ho)
                 }
                 elseif($rider_default_type->rider_category_id == 1)
                 {
@@ -2567,6 +2568,7 @@ class DeliveryController extends Controller
         }
         else
         {
+//            todo: yahan p har dafa same rider add hoskta h bs ye check krna h k usko DN assign h ya nai or phir DN s baqi conditions check krni h
             $rider_details = new RiderCategoryByPass();
             $rider_details->rider_category_id = $request->rider_cat;
             $rider_details->rider_id = $request->rider_id;
