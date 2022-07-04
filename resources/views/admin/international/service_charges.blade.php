@@ -107,10 +107,19 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('form'));
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-                
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Charges are being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
                 }
             });
         });

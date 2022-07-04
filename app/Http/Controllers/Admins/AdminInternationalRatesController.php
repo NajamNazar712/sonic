@@ -1502,6 +1502,21 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function extra_service_charges_submit(Request $request){
-       dd($request);
+
+        $tracking_number = $request->tracking_number;
+        $amount = $request->amount;
+        if($tracking_number != null && $amount != null){
+            $shipment = Shipment::where('tracking_number',$tracking_number)->first();
+            if($shipment){
+                  InternationalShipmentExtraServiceCharges::create(['shipment_id' => $shipment->id,'amount' => $amount,'added_by' => Auth::id()]);
+                return redirect()->back()->with('success', 'Charges Added!');
+            }
+            else{
+                return redirect()->back()->with('error', 'Invalid Tracking Number!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Tracking Number and Amount are required!');
+        }
     }
 }
