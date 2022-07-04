@@ -259,6 +259,7 @@ Route::name('api.')->group(function () {
 
                 //revamp
                 Route::post('index_v2', 'Rider\RiderAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
             });
 
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
@@ -349,7 +350,6 @@ Route::name('api.')->group(function () {
 
                 //revamp
                 Route::post('index_v2', 'AdminAPIController@leave_index_v2')->name('index_v2');
-                Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
             });
 
             Route::prefix('adjustment')->name('adjustment.')->group(function () {
