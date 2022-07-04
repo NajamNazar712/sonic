@@ -48,8 +48,6 @@ class DisabledAccountIntimationSurveyController extends Controller
 
         }
         
-        
-        
     }
 
     function submit_survey(Request $request)
@@ -81,11 +79,4 @@ class DisabledAccountIntimationSurveyController extends Controller
         return view('survey')->with(['result' => $result , 'alert' => $alert]);
     }
     
-
-
-
-    // function survey_details($id)
-    // {
-    //     dd("its working" , $id);
-    // }
 }

@@ -12318,6 +12318,12 @@ class AdminDashboardController extends Controller
         }
     }
 
+    public function survey_report(Request $request)
+    {
+        dd("under development");
+        // return view('admin.accounts.disable_account_intimation_survey_report');
+    }
+
 
     public function todayActiveAccountsList()
     {

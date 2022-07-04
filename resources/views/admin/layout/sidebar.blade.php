@@ -42,7 +42,19 @@
                                     @endif
 
                                     {{-- @if (session('role_id') == 1 || in_array(470, session('permissions'))) --}}
-                                    <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.index')}}">Disable Account Intimation Survey</a></li>
+                                    <li><a class="menu-item" href="#">Disable Account Intimation Survey</a>
+                                        <ul class="menu-content">
+                                            @if (session('role_id') == 1 || in_array(79, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.index') }}">Send Survey</a>
+                                                </li>
+                                            @endif
+        
+                                            @if (session('role_id') == 1 || in_array(217, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.report')}}">Survey Report</a>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </li>
                                     {{-- @endif --}}
 
                                 </ul>
