@@ -268,7 +268,7 @@
                 title: {
                     display: true,
                     text: "Response %"
-                }
+                },
             }
         });
 

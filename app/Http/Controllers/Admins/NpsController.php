@@ -347,46 +347,45 @@ class NpsController extends Controller
         $sum_question_and_response = 0;
 
         $nps = NpsSurvey::with('nps_report','nps_quest');
-            if($nps){
-                if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
-                    $from = $request->get('requested_from_date');
-                    $to = $request->get('requested_to_date');
-                    $nps->whereBetween('created_at', [$from, $to]);
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = $request->get('requested_from_date');
+            $to = $request->get('requested_to_date');
+            $nps->whereBetween('created_at', [$from, $to]);
+        }
+
+        if ($search_survey = $request->get('survey_id')) {
+            $nps = $nps->where('id', $search_survey);
+        }
+        if($nps){
+            $nps = $nps->get();
+
+            foreach ($nps as $key =>$value){
+                foreach ($value->nps_report as $val) {
+                    $response+=1;
+                    $promoters += isset($val->promoters) ? $val->promoters : 0;
+                    $passive += isset($val->passive) ? $val->passive : 0;
+                    $detractors += isset($val->detractor) ? $val->detractor : 0;
                 }
+                $total_question+= isset($value->nps_quest) ? count($value->nps_quest) : 0;
 
-                if ($search_survey = $request->get('survey_id')) {
-                    $nps = $nps->where('id', $search_survey);
-                }
-
-                $nps = $nps->get();
-
-                foreach ($nps as $key =>$value){
-                    foreach ($value->nps_report as $val) {
-                        $response+=1;
-                        $promoters += isset($val->promoters) ? $val->promoters : 0;
-                        $passive += isset($val->passive) ? $val->passive : 0;
-                        $detractors += isset($val->detractor) ? $val->detractor : 0;
-                    }
-                    $total_question+= isset($value->nps_quest) ? count($value->nps_quest) : 0;
-
-                }
-                $sum_question_and_response = $total_question*$response;
-                $promoter_per = (!empty($promoters) && !empty($sum_question_and_response)) ?  ($promoters/$sum_question_and_response)*100 : 0;
-                $passive_per = (!empty($passive) && !empty($sum_question_and_response)) ?  ($passive/$sum_question_and_response)*100 : 0;
-                $detractors_per = (!empty($detractors) && !empty($sum_question_and_response)) ?  ($detractors/$sum_question_and_response)*100 : 0;
-
-                $data['sum_question_and_response'] = $sum_question_and_response;
-                $data['total_question'] = $total_question;
-                $data['total_response'] = $response;
-                $data['promoters_perc'] = round($promoter_per,2);
-                $data['passive_perc'] = round($passive_per,2);
-                $data['detractor_perc'] =round($detractors_per,2);
-
-
-                return response()->json(['status' => 1, 'pie_chart' => $data]);
-
-            }else{
-                return response()->json(['status' => 0]);
             }
+            $sum_question_and_response = $total_question*$response;
+            $promoter_per = (!empty($promoters) && !empty($sum_question_and_response)) ?  ($promoters/$sum_question_and_response)*100 : 0;
+            $passive_per = (!empty($passive) && !empty($sum_question_and_response)) ?  ($passive/$sum_question_and_response)*100 : 0;
+            $detractors_per = (!empty($detractors) && !empty($sum_question_and_response)) ?  ($detractors/$sum_question_and_response)*100 : 0;
+
+            $data['sum_question_and_response'] = $sum_question_and_response;
+            $data['total_question'] = $total_question;
+            $data['total_response'] = $response;
+            $data['promoters_perc'] = round($promoter_per,2);
+            $data['passive_perc'] = round($passive_per,2);
+            $data['detractor_perc'] =round($detractors_per,2);
+
+
+            return response()->json(['status' => 1, 'pie_chart' => $data]);
+
+        }else{
+            return response()->json(['status' => 0]);
+        }
     }
 }
