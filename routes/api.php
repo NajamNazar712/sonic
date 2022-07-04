@@ -256,6 +256,9 @@ Route::name('api.')->group(function () {
                 Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+
+                //revamp
+                Route::post('index_v2', 'Rider\RiderAPIController@leave_index_v2')->name('index_v2');
             });
 
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');

@@ -11884,45 +11884,23 @@ class RiderAPIController extends Controller
 
                 }
             }
-
             $department = AdminDepartment::find(6);
             if($department){
                 if(!$department->department_head_id){
                     return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                 }
-                if($rider){
                     $data = array();
-                    $data['trax_id'] = $rider->trax_id;
-                    $data['name'] = $rider->name;
+                    $data['trax_id'] = $employee->trax_id;
+                    $data['name'] = $employee->name;
                     $data['designation'] = "Rider";
                     $data['department'] = "Operations";
                     $data['approver_email'] = $department->department_head->email;
                     $data['approver_name'] = $department->department_head->name;
                     $data['user_type'] = 0;
-                    return response()->json(['status' => 0, 'data' => $data]);
-                }
-                return response()->json(['status' => 1, 'message' => "Rider not found"]);
+                    return response()->json(['status' => 0, 'data' => $data, 'leave_types', $leave_types]);
             }
         }
-        $department = AdminDepartment::find(6);
-        if($department){
-            if(!$department->department_head_id){
-                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
-            }
-            if($rider){
-                $data = array();
-                $data['trax_id'] = $rider->trax_id;
-                $data['name'] = $rider->name;
-                $data['designation'] = "Rider";
-                $data['department'] = "Operations";
-                $data['approver_email'] = $department->department_head->email;
-                $data['approver_name'] = $department->department_head->name;
-                $data['user_type'] = 0;
-                return response()->json(['status' => 0, 'data' => $data]);
-            }
-            return response()->json(['status' => 1, 'message' => "Rider not found"]);
-        }
-        return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+        return response()->json(['status' => 1, 'message' => "Employee not found!"]);
     }
 
     public function leave_apply_v2(Request $request)
