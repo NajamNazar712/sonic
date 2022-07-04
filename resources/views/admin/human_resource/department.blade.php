@@ -21,6 +21,7 @@
                                     <th class="border-primary border-darken-1">Department ID</th>
                                     <th class="border-primary border-darken-1">Department Name</th>
                                     <th class="border-primary border-darken-1">Department Head</th>
+                                    <th class="border-primary border-darken-1">Wroking Days</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -57,6 +58,12 @@
                                 @endforeach
                             </select>
                         </div>
+                         <div class="form-group text-left">
+                            <select name="working_days" id="working_days" class="form-control select2 text-left" style="width: 100%;" data-rule-required="true" data-msg-required="Working Days is required">
+                                <option value="1">Mon to Sat</option>
+                                <option value="2">Mon to Fri</option>
+                            </select>
+                        </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
@@ -90,6 +97,12 @@
                                 @foreach($admins as $admin)
                                     <option value="{{$admin->id}}"> {{"$admin->name | $admin->trax_id"}}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group text-left">
+                            <select name="edit_working_days" id="edit_working_days" class="form-control select2" style="width: 100%;" data-rule-required="true" data-msg-required="Working Days is required">
+                                <option value="1">Mon to Sat</option>
+                                <option value="2">Mon to Fri</option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -130,6 +143,15 @@
                 placeholder:'Select Department Head *',
                 dropdownParent: $("#editDepartmentForm")
             });
+            $('#working_days').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Working Days *',
+                dropdownParent: $("#addDepartmentForm")
+            });
+            $('#edit_working_days').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Working Days *',
+                dropdownParent: $("#editDepartmentForm")
+            });
+            
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -146,6 +168,7 @@
                             head.push('Department ID');
                             head.push('Department Name');
                             head.push('Department Head');
+                            head.push('Working Days');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -153,6 +176,7 @@
                                 row.push(values.code);
                                 row.push(values.name);
                                 row.push(values.head);
+                                row.push(values.working_days);
                                 body.push(row);
                             });
                         },
@@ -200,6 +224,7 @@
                     {data: 'code', name: 'admin_departments.code', class: 'align-middle code'},
                     {data: 'name', name: 'admin_departments.name', class: 'align-middle name'},
                     {data: 'head', name: 'a.name', class: 'align-middle head'},
+                    {data: 'working_days', name: 'admin_departments.working_days', class: 'align-middle working_days'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -242,10 +267,20 @@
                 var name = table.row($(this).parents('tr')).data().name;
                 var description = table.row($(this).parents('tr')).data().description;
                 var head_id = table.row($(this).parents('tr')).data().head_id;
+                var working_days = table.row($(this).parents('tr')).data().working_days;
+
+                if(working_days == 'Mon to Fri'){
+                    working_days = 2;
+                }else if(working_days == 'Mon to Sat'){
+                    working_days = 1;
+                }else{
+                    working_days = '';
+                }
                 $('#department_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_description').val(description);
                 $('#edit_head_list').val(head_id).trigger('change');
+                $('#edit_working_days').val(working_days).trigger('change');
                 $('#editDepartmentModal').modal('show');
             });
 

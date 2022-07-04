@@ -3781,7 +3781,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('leave')->name('leave.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@leave_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@leave_list')->name('list');
+            Route::post('leave_request', 'Admins\AdminHumanResourseController@leave_request')->name('leave_request');
             Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
+            Route::post('hod_approve', 'Admins\AdminHumanResourseController@hod_approve')->name('hod_approve');
             Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
@@ -3870,6 +3872,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('table', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_table')->name('table');
             Route::post('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_list')->name('list');
         });
+    });
+    Route::prefix('leaves')->name('leaves.')->group(function () {
+        Route::get('', 'Admins\Attendance\AdminAttendanceController@leaves')->name('leaves');
+        Route::get('list', 'Admins\Attendance\AdminAttendanceController@employee_list')->name('list');
+        Route::post('leaves_request', 'Admins\Attendance\AdminAttendanceController@leaves_request')->name('leaves_request');
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
