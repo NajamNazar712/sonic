@@ -67,7 +67,7 @@
                                             <th class="border-primary border-darken-1">Targeted (Num)</th>
                                             <th class="border-primary border-darken-1">Response (Num)</th>
                                             <th class="border-primary border-darken-1">Response %</th>
-                                            <th class="border-primary border-darken-1">Promoters</th>
+                                            <th class="border-primary border-darken-1">Promotors</th>
                                             <th class="border-primary border-darken-1">Passive</th>
                                             <th class="border-primary border-darken-1">Detractor</th>
                                         </tr>
@@ -249,7 +249,7 @@
     <script>
 
         var yValues = [0,0,0];
-        var xValues = ["Promoters", "Passive", "Detractor"];
+        var xValues = ["Promotors", "Passive", "Detractor"];
         var color = ["#1ec481", "#fbc02d", "#ff394fd4"];
         var barColors = [
             "#1ec481", "#fbc02d", "#ff394fd4"

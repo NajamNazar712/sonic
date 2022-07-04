@@ -74,7 +74,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Survey Name</th>
-                                    <th class="border-primary border-darken-1">Promoters</th>
+                                    <th class="border-primary border-darken-1">Promotors</th>
                                     <th class="border-primary border-darken-1">Passive</th>
                                     <th class="border-primary border-darken-1">Detractor</th>
                                     <th class="border-primary border-darken-1">Response Date</th>
