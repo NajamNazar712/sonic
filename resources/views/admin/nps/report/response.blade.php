@@ -45,7 +45,7 @@
                                             </div>
                                             <input type="text" name="requested_from_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="requested_from_date" placeholder="Requested Date From">
+                                                   id="requested_from_date" placeholder="Date From">
                                         </div>
                                     </div>
                                     <div class="col-6">
@@ -57,7 +57,7 @@
                                             </div>
                                             <input type="text" name="requested_to_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="requested_to_date" placeholder="Requested Date To">
+                                                   id="requested_to_date" placeholder="Date To">
                                         </div>
                                     </div>
 
