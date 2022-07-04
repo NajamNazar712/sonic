@@ -1038,6 +1038,7 @@ class ShipperAPIController extends Controller
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_no);
             if ($shipment->exists()) {
+                $shipment = $shipment->first();
                 if ($shipment->shipper_status_id != 14) {
                     $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
                     if ($shipper_subscription->count() < 5) {
