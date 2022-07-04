@@ -3595,6 +3595,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('extra_service_charges')->name('extra_service_charges.')->group(function () {
             Route::get('','Admins\AdminInternationalRatesController@extra_service_charges_index')->name('index');
+            Route::post('/detail','Admins\AdminInternationalRatesController@international_shipment_details')->name('shipment.detail');
+            Route::post('submit','Admins\AdminInternationalRatesController@extra_service_charges_submit')->name('submit');
         });
 
     });

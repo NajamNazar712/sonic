@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\InternationalShipmentExtraServiceCharges;
 use App\Http\Models\City;
 use App\Http\Models\HistoryInternationalUserRate;
 use App\Http\Models\International\HistoryInternationalRatesCashHandlingCharges;
@@ -35,6 +36,7 @@ use App\Http\Models\PendingInternationalUserRate;
 use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\Rates\InternationalEconomyRateHistory;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
@@ -1464,6 +1466,42 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function international_shipment_details(Request $request){
-        //
+
+        $tracking_number = $request->tracking_number;
+        if($tracking_number != null) {
+
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ($shipment->shipment_type == 2) {
+                    return response()->json(['status' => 0, 'error' => 'Retail Shipment Not Allowed']);
+                } else {
+                    if ($shipment->business_category_id == 2) {
+                        if (InternationalShipmentExtraServiceCharges::where('shipment_id', $shipment->id)->exists()) {
+                            return response()->json(['status' => 0, 'error' => 'Charges Already Added']);
+                        } else {
+                            if (in_array($shipment->shipper_status_id, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 17])) {
+                                return response()->json(['status' => 1, 'success' => 'Success']);
+                            } else {
+                                return response()->json(['status' => 0, 'error' => 'Charges Cannot be added against ' . $shipment->status_shipper->name]);
+                            }
+                        }
+                    } else {
+                        return response()->json(['status' => 0, 'error' => 'Only International Shipment is allowed']);
+                    }
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid Tracking Number']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Tracking Number is required']);
+        }
+
+    }
+
+    public function extra_service_charges_submit(Request $request){
+       dd($request);
     }
 }

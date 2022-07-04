@@ -1,13 +1,13 @@
 @extends('admin.layout.master')
 
-@section('title', 'Create Handover Note')
+@section('title', 'International Extra Service Charges')
 
 @section('content')
 
 
 
     <h1 class="mb-1">
-        Create Handover Note
+        International Extra Service Charges
     </h1>
 
     <div class="card">
@@ -15,33 +15,32 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                <form id="add_shipment_form" class="form mb-1" novalidate="novalidate" method="post" action="{{route('admin.international.extra_service_charges.submit')}}">
+                    @csrf
+                    <div class="row justify-content-center">
+                        <div class="col-lg-4 col-md-4 col-sm-6">
+                            <div class="form-group">
+                                <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
-                    <div class="form-group">
-                        <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group ml-1">
-                        <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-4 col-md-4 col-sm-6">
+                            <div class="form-group">
+                                <input type="text" name="amount" class="form-control amount" placeholder="Enter Amount*" data-rule-required="true" data-msg-required="Amount is required" disabled>
+
+                            </div>
+                        </div>
                     </div>
-                </form>
-                <div class="row mb-2 justify-content-center">
-                    {{ csrf_field() }}
-                </div>
-                
 
-                <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.handover.create.store') }}" novalidate="novalidate">
-                    {{ csrf_field() }}
-
-                    <input type="hidden" name="shipment_ids" class="shipment_ids">
-                    <input type="hidden" name="hub_id" class="hub_id">
-                    <input type="hidden" name="from" class="from">
-                    <input type="hidden" name="to" class="to">
-
-                    <div class="form-group ml-1">
-                        <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-6 col-md-6 col-sm-6 text-center">
+                            <button type="submit" class="btn btn-primary submit" disabled>Submit</button>
+                        </div>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -69,11 +68,8 @@
     <script>
         $(document).ready(function() {
 
-            var shipment_ids = [];
 
             $('#add_shipment_form input.tracking_number').focus();
-
-
 
             $('#add_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
@@ -81,6 +77,30 @@
                 'allowPlus': false
             });
 
+            var tracking_number = $('#add_shipment_form .tracking_number').val();
+
+            $('.tracking_number').bind('change',function () {
+                $.ajax({
+                    url: '{!! route('admin.international.extra_service_charges.shipment.detail') !!}',
+                    method: 'POST',
+                    data: {
+                        'tracking_number': this.value,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                     if(data.status == 1){
+
+                         $('#add_shipment_form .amount').prop('disabled', false);
+                         $('#add_shipment_form .submit').prop('disabled', false);
+                     }
+                     else{
+                         $('#add_shipment_form .amount').prop('disabled', true);
+                         $('#add_shipment_form .submit').prop('disabled', true);
+                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                     }
+                });
+            });
 
 
             $('#add_shipment_form').validate({
@@ -90,137 +110,9 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    $('#add_shipment_form button.add').prop('disabled', true);
-
-                    var tracking_number = $(form).find('input.tracking_number').val();
-
-                        $.ajax({
-                            url: '{!! route('admin.handover.create.shipment_details') !!}',
-                            method: 'POST',
-                            data: {
-                                'tracking_number': tracking_number,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                form.reset();
-
-                                $('#add_shipment_form input.tracking_number').val('').focus();
-
-                                remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-
-                                if (data.status == 0) {
-                                    id = data.details.id;
-
-                                    var index = $.inArray(id, shipment_ids);
-
-                                    if (index === -1) {
-                                       /* var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
-                                        table.draw(false);
-                                        table.order([0, 'desc']).draw();
-                                        scan_sound(1);
-                                        shipment_ids.push(data.details.id);
-                                        // console.log(shipment_ids);
-                                        // console.log(data.details.id);*/
-
-
-                                        $('#add_shipment_form button.add').prop('disabled', false);
-
-                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
-
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                }
-                                else {
-                                    $('#add_shipment_form button.add').prop('disabled', false);
-                                    scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-            });
-
-            $('#arrival_of_shipments_form').bind('submit', function(e) {
-                e.preventDefault();
-                hub_id =  $('#hub :selected').val();
-                from =  $('#from :selected').val();
-                to =  $('#to :selected').val();
-                errors = 0;
-
-                if (hub_id !== '' && hub_id !== null) {
-                    $('#rider_error').css('display', 'none');
-                }
-                else {
-                    var error = "Hub not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#hub_error').css('display', 'block');
-                }
-                if (from !== '' && from !== null) {
-                    $('#rider_error').css('display', 'none');
-                }
-                else{
-                    var error = "From not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#from_error').css('display', 'block');
-                }
-                if (to !== '' && to !== null) {
-                    $('#rider_error').css('display', 'none');
-                }
-                else {
-                    var error = "To not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#to_error').css('display', 'block');
-                }
-
-                $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
-                $('#arrival_of_shipments_form input.hub_id').val(hub_id);
-                $('#arrival_of_shipments_form input.from').val(from);
-                $('#arrival_of_shipments_form input.to').val(to);
-                var form = this;
-                //    console.log('hub_id '+hub_id);
-                if(errors !=1){
-                    swal({
-
-                        text: 'Are you sure, Select Yes to create the Handover Note?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Handovers are being created!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            blockPagePermanently();
-                            form.submit();
-                        }
-                    });
+                
                 }
             });
-
         });
 
     </script>
