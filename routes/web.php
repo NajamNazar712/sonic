@@ -3952,6 +3952,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/response_report_list','Admins\NpsController@response_report_list')->name('response_report_list');
         Route::get('/consolidate_report','Admins\NpsController@consolidate_report')->name('consolidate.report');
         Route::get('/consolidate_report_list','Admins\NpsController@consolidate_report_list')->name('consolidate_report_list');
+        Route::get('/pie_chart','Admins\NpsController@pie_chart')->name('pie_chart');
 
     });
 });

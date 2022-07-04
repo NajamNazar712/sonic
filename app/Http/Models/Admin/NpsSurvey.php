@@ -12,4 +12,7 @@ class NpsSurvey extends Model
     public function nps_quest(){
         return $this->hasMany('App\Http\Models\Admin\NpsSurveyQuestion','nps_survey_id','id');
     }
+    public function nps_report(){
+        return $this->hasMany('App\Http\Models\NpsSurveyReport','nps_survey_id','id');
+    }
 }

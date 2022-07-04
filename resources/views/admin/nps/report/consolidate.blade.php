@@ -57,21 +57,27 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width: 100%">
-                                <thead>
-                                <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Survey Name</th>
-                                    <th class="border-primary border-darken-1">Targeted (Num)</th>
-                                    <th class="border-primary border-darken-1">Response (Num)</th>
-                                    <th class="border-primary border-darken-1">Response %</th>
-                                    <th class="border-primary border-darken-1">Promoters</th>
-                                    <th class="border-primary border-darken-1">Passive</th>
-                                    <th class="border-primary border-darken-1">Detractor</th>
-                                </tr>
-                                </thead>
-                            </table>
+                            <div class="row">
+                                <div class="col-6">
+                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width: 100%">
+                                        <thead>
+                                        <tr class="bg-primary white">
+                                            <th class="border-primary border-darken-1">S. No</th>
+                                            <th class="border-primary border-darken-1">Survey Name</th>
+                                            <th class="border-primary border-darken-1">Targeted (Num)</th>
+                                            <th class="border-primary border-darken-1">Response (Num)</th>
+                                            <th class="border-primary border-darken-1">Response %</th>
+                                            <th class="border-primary border-darken-1">Promoters</th>
+                                            <th class="border-primary border-darken-1">Passive</th>
+                                            <th class="border-primary border-darken-1">Detractor</th>
+                                        </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div class="col-6">
+                                    <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -209,16 +215,16 @@
         .selectize-control .selectize-input .item {
             word-break: break-all;
         }
-        .yelloww{
-            background-color: yellow;
+        .greenn{
+            background-color: #1ec481;
             color:black;
         }
-        .greenn{
-            background-color: green;
+        .yelloww{
+            background-color: #fbc02d;
             color:black;
         }
         .redd{
-            background-color: red;
+            background-color: #ff394fd4;
             color:black;
         }
     </style>
@@ -234,6 +240,68 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+
+    <script src="{{asset('app-assets/vendors/js/charts/chartjs/chart.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+    <script>
+
+        var yValues = [0,0,0];
+        var xValues = ["Promoters", "Passive", "Detractor"];
+        var color = ["#1ec481", "#fbc02d", "#ff394fd4"];
+        var barColors = [
+            "#1ec481", "#fbc02d", "#ff394fd4"
+        ];
+
+        var pie_chart = new Chart("myChart", {
+            type: "pie",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: barColors,
+                    Color: color,
+                    data: yValues
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Response %"
+                }
+            }
+        });
+
+        $('#search_filter_btn').on('click',function () {
+
+            var search_survey = $('#search_survey').val();
+            var  requested_from_date = $('#requested_from_date').val();
+            var  requested_to_date = $('#requested_to_date').val()
+            $.ajax({
+                url: '{!! route('admin.nps.pie_chart') !!}',
+                data: {
+                    'survey_id': search_survey,
+                    'requested_from_date' :requested_from_date,
+                    'requested_to_date': requested_to_date,
+                }
+            })
+            .done(function(data) {
+                    if(data.status == 1) {
+                        var  promotors = (data.pie_chart.promoters_perc ? data.pie_chart.promoters_perc : 0);
+                        var  passive = (data.pie_chart.passive_perc ? data.pie_chart.passive_perc : 0);
+                        var  detractor = (data.pie_chart.detractor_perc ? data.pie_chart.detractor_perc : 0);
+                        yValues = [promotors,passive,detractor];
+                        pie_chart.data.datasets[0].data = yValues;
+                        pie_chart.update();
+
+
+                    }
+                });
+
+
+        });
+    </script>
+
     {{--    todo for datepicker end--}}
 
     {{--    todo date filter field--}}
@@ -299,7 +367,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: true, scrollY: '300px',
                 buttons:[],
                 "autoWidth": true,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -429,7 +497,6 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-
                 table.draw();
             });
 
@@ -472,7 +539,7 @@
                             'survey_id': id,
                         }
                     })
-                        .done(function(data) {
+                    .done(function(data) {
                             if(data.status == 1){
                                 $('#question_modal').modal('show');
                                 var html = "";
