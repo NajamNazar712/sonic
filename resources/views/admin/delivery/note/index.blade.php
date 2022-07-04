@@ -1304,7 +1304,7 @@
                                     }
                                 }
                                 else{
-                                    var error = "Rider already has a delivery note";
+                                    var error = "Rider can not be selected because previous delivery note is not been completed";
                                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
