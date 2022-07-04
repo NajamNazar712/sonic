@@ -349,6 +349,7 @@ Route::name('api.')->group(function () {
 
                 //revamp
                 Route::post('index_v2', 'AdminAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
             });
 
             Route::prefix('adjustment')->name('adjustment.')->group(function () {
