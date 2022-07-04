@@ -585,6 +585,16 @@ class LeadManagementController extends Controller
                         }
                     }
 
+                    if($status == 11)
+                    {
+                        $detail = array();
+                        $detail['name'] = $lead->contact_person;
+                        $detail['contact_number'] = $lead->phone_number;
+                        $reason1 = LeadReason::where('id',$lead->reason)->select('name')->first();
+                        $detail['reason'] = $reason1->name;
+                        NotificationsController::send(181, $detail);
+                    }
+
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Lead not found!']);
                 }

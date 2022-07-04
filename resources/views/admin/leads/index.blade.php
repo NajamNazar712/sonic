@@ -579,7 +579,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Status</h4>
+                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Statuss</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -619,6 +619,16 @@
                                 <option value="6"> HR Query</option>
                                 <option value="7"> Sales Person Already Assigned</option>
                                 <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_blocked1" class="form-group d-none">
+                            <select name="lead_status_blocked1" id="lead_status_blocked1"
+                                    class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -961,7 +971,7 @@
 
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
-                        text: 'Update Status',
+                        text: 'Bulk Update Status',
                         className: 'btn btn-primary update_status',
                         enabled: false,
                         action: function (e, dt, node, config) {
