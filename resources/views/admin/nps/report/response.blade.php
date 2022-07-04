@@ -323,7 +323,7 @@
                     }
                 },
                 rowId: 'survey_id',
-                order: [[1, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -341,9 +341,9 @@
                     {data: 'promoters', name: 'promoters', class: 'align-middle promoters'},
                     {data: 'passive', name: 'passive', class: 'align-middle passive'},
                     {data: 'detractor', name: 'detractor', class: 'align-middle detractor'},
-                    {data: 'response_date', name: 'nps_shipper_rattings.created_at', class: 'align-middle response_date'},
+                    {data: 'response_date', name: 'nps_survey_reports.created_at', class: 'align-middle response_date'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
-                    {data: 'recommendations_box', name: 'nps_shipper_rattings.recommendations_box', class: 'align-middle recommendations_box'},
+                    {data: 'recommendations_box', name: 'nps_survey_reports.recommendations_box', class: 'align-middle recommendations_box'},
 
 
                 ],
