@@ -14,7 +14,7 @@ class UpdateNotificationForBlockedLeadSmsSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 181, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Blocked Lead Sms', 'type_id' => 2,'body' => 'Dear [name],'. PHP_EOL .'Your lead is blocked due to the following reason.'.PHP_EOL .PHP_EOL.'[reason].', 'updated_by' => 7, 'status' => 1)
+            array('id' => 181, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Blocked Lead Sms', 'type_id' => 2,'body' => 'Dear [name],'. PHP_EOL .'Your lead is blocked due to the following reason : [reason].', 'updated_by' => 7, 'status' => 1)
         ));
     }
 }
