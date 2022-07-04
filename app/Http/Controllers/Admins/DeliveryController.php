@@ -413,9 +413,11 @@ class DeliveryController extends Controller
 
             if($shipment->actual_weight > $weight->text)
             {
-                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',2)->select('rider_category_id')->first();
+                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',2)->select('rider_category_id','id')->latest()->first();
+
                 if($rider_bypass_type)
                 {
+                    $rider_bypass_id = $rider_bypass_type->id;
                     if($rider_bypass_type->rider_category_id != 2)
                     {
                         if($rider_default_type->rider_category_id == 1)
@@ -423,7 +425,8 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                         }
                     }
-//                    todo : update status 1 to 0 (take wo next time jbtk na aae jbtk status 1 na ho)
+//                    todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
+                    $rider_bypass_update = RiderCategoryByPass::where('rider_id',$rider_id)->where('id',$rider_bypass_id)->update(["status" => 2]);
                 }
                 elseif($rider_default_type->rider_category_id == 1)
                 {
@@ -432,9 +435,11 @@ class DeliveryController extends Controller
             }
             elseif($shipment->actual_weight <= $weight->text)
             {
-                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id')->first();
+                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id','id')->latest()->first();
+
                 if($rider_bypass_type)
                 {
+                    $rider_bypass_id = $rider_bypass_type->id;
                     if($rider_bypass_type->rider_category_id != 1)
                     {
                         if($rider_default_type->rider_category_id == 2)
@@ -442,6 +447,8 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                         }
                     }
+                    //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
+                    $rider_bypass_update = RiderCategoryByPass::where('rider_id',$rider_id)->where('id',$rider_bypass_id)->update(["status" => 2]);
                 }
                 elseif($rider_default_type->rider_category_id == 2)
                 {
@@ -2561,14 +2568,26 @@ class DeliveryController extends Controller
         }
     }
 
+    public function check_dn_against_rider(Request $request)
+    {
+        $rider = $request->id;
+        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0)->latest()->first();
+        if ($delivery_note) {
+            return response()->json(['status' => 1, 'note' => $delivery_note]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No Delivery Note Found For the Rider']);
+        }
+    }
+
     public function rider_category_submit(Request $request)
     {
-        if (RiderCategoryByPass::where('rider_id', $request->rider_id)->where('rider_category_id', $request->rider_cat)->exists()) {
+        $rider_bypass = RiderCategoryByPass::where('rider_id',$request->rider_id)->where('status',0)->latest()->first();
+        if($rider_bypass)
+        {
             return redirect()->route('admin.delivery.note.rider_category_request')->with(['error' => 'Request Already Present']);
         }
         else
         {
-//            todo: yahan p har dafa same rider add hoskta h bs ye check krna h k usko DN assign h ya nai or phir DN s baqi conditions check krni h
             $rider_details = new RiderCategoryByPass();
             $rider_details->rider_category_id = $request->rider_cat;
             $rider_details->rider_id = $request->rider_id;
@@ -2578,6 +2597,7 @@ class DeliveryController extends Controller
             $rider_details->requested_at = Carbon::now();
             $rider_details->save();
             return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+
         }
     }
 
