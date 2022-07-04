@@ -92,14 +92,17 @@ class LostShipmentsController extends Controller
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
 
-            $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
-            if($check_lost_shipments_admins->exists() || session('role_id') == 1){
+            if(session('role_id') != 1){
+                $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
-                $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
-
-            }else{
-                $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
-                $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
+                if(!empty($lost_shipments_shippers_id)){
+                    if($check_lost_shipments_admins->exists()){
+                            $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
+                    }
+                    else{
+                            $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
+                    }
+                }
             }
 
             return Datatables::of($shipments)

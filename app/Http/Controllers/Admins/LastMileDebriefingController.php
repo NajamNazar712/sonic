@@ -520,8 +520,10 @@ class LastMileDebriefingController extends Controller
                 $delivery_note = DeliveryNote::find($data->delivery_note_id);
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment->id)->first();
                 $fake_status = FALSE;
-                if($delivery_note_shipment->fake_status == 1){
-                    $fake_status = TRUE;
+                if($delivery_note_shipment){
+                    if($delivery_note_shipment->fake_status == 1){
+                        $fake_status = TRUE;
+                    }
                 }
                 $total_calls = AgentCallMonitoring::where('agent_id', Auth::id())
                     ->where('created_at', '>=', $prev_time)
