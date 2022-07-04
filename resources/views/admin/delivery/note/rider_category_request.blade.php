@@ -360,10 +360,10 @@
                     {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'rider_type', name: 'rider_type', class: 'align-middle rider_type'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason'},
-                    {data: 'requested_at', name: 'requested_at', class: 'align-middle requested_at'},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, sortable: false},
+                    {data: 'requested_at', name: 'rider_category_by_passes.requested_at', class: 'align-middle requested_at'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
-                    {data: 'approved_at', name: '.approved_at', class: 'align-middle approved_at'},
+                    {data: 'approved_at', name: 'rider_category_by_passes.approved_at', class: 'align-middle approved_at'},
                     {data: 'approved_by', name: 'a.name', class: 'align-middle approved_by'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
@@ -390,7 +390,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.reason')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {

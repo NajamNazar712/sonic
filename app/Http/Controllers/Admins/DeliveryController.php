@@ -2524,10 +2524,44 @@ class DeliveryController extends Controller
             })
             ->editColumn('rider_type', function ($result) {
                 if ($result->rider_type == 1) {
-                    return 'Light';
+                    return 'light';
                 } else {
-                    return 'Heavy';
+                    return 'heavy';
                 }
+            })
+            ->filterColumn('rider_type', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('light', $keyword) !== FALSE) {
+                    $query->where('rider_category_by_passes.rider_category_id', '=', 1);
+                }
+                else if (strpos('heavy', $keyword) !== FALSE) {
+                    $query->where('rider_category_by_passes.rider_category_id', '=', 2);
+                }
+                else {
+                    $query->whereRaw('FALSE');
+                }
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('requested', $keyword) !== FALSE) {
+                    $query->where('rider_category_by_passes.status', '=', 0);
+                }
+                else if (strpos('approved', $keyword) !== FALSE) {
+                    $query->where('rider_category_by_passes.status', '=', 1)->orwhere('rider_category_by_passes.status', '=', 2);
+                }
+                else {
+                    $query->whereRaw('FALSE');
+                }
+            })
+            ->filterColumn('requested_by', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+                    $query->where('a.name', '=', $keyword);
+            })
+            ->filterColumn('approved_by', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+                $query->where('a.name', '=', $keyword);
             })
             ->addColumn("action", function ($result) {
                 if ((session('role_id') == 1 || count(array_intersect([760], session('permissions'))) !== 0) && $result->status == 0) {
