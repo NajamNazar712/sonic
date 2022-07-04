@@ -245,6 +245,7 @@
     <script src="{{asset('app-assets/vendors/js/charts/chartjs/chart.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js'></script>
 
     <script>
 
@@ -265,11 +266,32 @@
                     data: yValues
                 }]
             },
+
             options: {
                 title: {
                     display: true,
                     text: "Response %"
                 },
+                plugins: {
+                    labels: {
+                        fontColor: '#fff',
+                        fontStyle: 'normal',
+                        fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => {
+                                sum += data;
+                            });
+                            let percentage = value.toFixed(2)+"%";
+                            return percentage;
+                        },
+                        color: '#fff',
+                    }
+                }
             }
         });
 
