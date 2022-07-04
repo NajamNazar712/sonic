@@ -16,7 +16,7 @@ class CreateDisableAccountIntimationSendSurveysTable extends Migration
         Schema::create('disable_account_intimation_send_surveys', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipper_id')->index();
-            $table->string('random_id')->index()->unique();
+            $table->string('random_id')->index();
             $table->string('send_by')->index();
             $table->string('send_via');
             $table->string('url');

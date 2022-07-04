@@ -9426,7 +9426,7 @@ class NotificationsController extends Controller
 
                         foreach($reference_1_id as $key => $val)
                         {
-                            $random_id = date("his") . $val->id . date("dmY");
+                            $random_id = date("dmY") . $val->id . date("his");
                             $send_by = Auth::id();
                             $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");

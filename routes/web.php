@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
-    Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index');
+    Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
 
