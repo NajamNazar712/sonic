@@ -33,8 +33,6 @@ class RiderAPIToken
                     else{
                         $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id]);
                     }
-
-
                     return $next($request);
                 }
                 else {

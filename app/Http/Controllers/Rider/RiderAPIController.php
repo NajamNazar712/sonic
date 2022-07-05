@@ -12019,7 +12019,6 @@ class RiderAPIController extends Controller
         if(!$request->has('rider_employee')){
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
         }
-        $rider_id = $request->rider_id;
         $rider_employee = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
