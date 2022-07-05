@@ -11902,7 +11902,7 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'from' => ['required'],
-            'to' => ['nullable'],
+            'to' => ['required'],
             'reason' => ['required', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
