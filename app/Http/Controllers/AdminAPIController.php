@@ -7634,7 +7634,7 @@ class AdminAPIController extends Controller
                         if ($employee->is_line_manager) {
                             $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                         }
-                        return response()->json(['status' => 0, 'data' => $data]);
+                        return response()->json(['status' => 0, 'data' => $data, 'leave_type' => $leave_types]);
                     }
                     return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
                 }
