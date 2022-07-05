@@ -59,7 +59,8 @@ class AdminERFController extends Controller
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es','a.trax_id as trax_id','employee_requisitions.submitted_by as requested_by'
+            ->leftjoin('admins as ar', 'ar.id', '=', 'employee_requisitions.submitted_by')
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es','a.trax_id as trax_id','employee_requisitions.submitted_by as requested_by','ar.name as requested_by_name'
             ]);
 
         if (session('role_id') != 1 && session('department_id') != 10) {
@@ -187,13 +188,21 @@ class AdminERFController extends Controller
                     return $leaver_name;
                 }
             })
-            ->addColumn('requested_by', function($erf) {
+            ->editColumn('requested_by_name', function($erf) {
                 if($erf->type == 1){
                     return '-';
                 }
                 else{
-                    $requested_by = Admin::where('id',$erf->requested_by)->select('name')->first();
-                    return $requested_by->name;
+//                    $requested_by = Admin::where('id',$erf->requested_by)->select('name')->first();
+                    return $erf->requested_by_name;
+                }
+            })
+            ->filterColumn('ar.name', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('ar.name', "like","%".$keyword."%")->where('employee_requisitions.type','!=',1);
+                } else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('requested_date', function($erf) {

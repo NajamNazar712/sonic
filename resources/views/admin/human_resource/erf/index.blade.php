@@ -333,7 +333,7 @@
                     {data: 'designation', name: 'd.name', class: 'align-middle designation'},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', orderable: false, sortable: false},
                     {data: 'leaver_name', name: 'a.name', class: 'align-middle leaver_name', orderable: false, sortable: false},
-                    {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
+                    {data: 'requested_by_name', name: 'ar.name', class: 'align-middle requested_by_name'},
                     {data: 'requested_date', name: 'employee_requisitions.created_at', class: 'align-middle requested_date'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
