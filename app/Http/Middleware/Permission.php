@@ -1020,6 +1020,7 @@ class Permission
             'international.tracking_upload.list' => 398,
 
             'international.shipment_status.index' => 508,
+            'international.extra_service_charges.index' => 750,
 
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,

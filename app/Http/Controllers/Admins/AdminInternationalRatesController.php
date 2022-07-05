@@ -1462,6 +1462,7 @@ class AdminInternationalRatesController extends Controller
     }
 
     public function extra_service_charges_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),555);
         return view('admin.international.service_charges');
     }
 
@@ -1471,7 +1472,7 @@ class AdminInternationalRatesController extends Controller
         if($tracking_number != null) {
 
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
-
+            $shipment_status = array(1,6,26,27,28,29,30,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 if ($shipment->shipment_type == 2) {
@@ -1479,9 +1480,9 @@ class AdminInternationalRatesController extends Controller
                 } else {
                     if ($shipment->business_category_id == 2) {
                         if (InternationalShipmentExtraServiceCharges::where('shipment_id', $shipment->id)->exists()) {
-                            return response()->json(['status' => 0, 'error' => 'Charges Already Added']);
+                            return response()->json(['status' => 0, 'error' => 'Charges already added against this tracking number']);
                         } else {
-                            if (in_array($shipment->shipper_status_id, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 17])) {
+                            if (!in_array($shipment->shipper_status_id,$shipment_status )) {
                                 return response()->json(['status' => 1, 'success' => 'Success']);
                             } else {
                                 return response()->json(['status' => 0, 'error' => 'Charges Cannot be added against ' . $shipment->status_shipper->name]);

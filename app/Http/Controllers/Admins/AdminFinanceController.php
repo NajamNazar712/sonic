@@ -7016,29 +7016,6 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                /*if ($generate) {
-                    if ($user->invoice_group_by == 0) {
-                        $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-
-                        if ($pending_invoice_shipments->exists()) {
-                            self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
-                        }
-                    }
-                    else {
-                        foreach ($cities as $city) {
-                            $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment.pickup_address', function ($query) use ($user_id, $city) {
-                                $query->where('shipments.user_id', $user_id)
-                                    ->where('user_shipping_infos.city_id', $city->id);
-                            });
-
-                            if ($pending_invoice_shipments->exists()) {
-                                self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
-                            }
-                        }
-                    }
-                }*/
 
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id', $user_id)->where('status', 1)->first();
                 if ($packaging_invoice_toggle_on && $generate) {
