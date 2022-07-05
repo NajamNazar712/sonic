@@ -9413,7 +9413,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            // self::email($subject, $body,$val->email);
+                            self::email($subject, $body,$val->email);
                         }
                     }
                 }
@@ -9443,7 +9443,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            // self::email($subject, $body,$val->email);
+                            self::email($subject, $body,$val->email);
                         }
                     }
                 }
