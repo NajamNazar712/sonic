@@ -1255,6 +1255,9 @@
                                     @if (session('role_id') == 1 || in_array(338, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.pickup.pickup_settings')}}">Pickup Settings</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(338, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.pickup.weight_bypass')}}">Weight ByPass</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

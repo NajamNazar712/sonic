@@ -2658,6 +2658,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::get('pickup_settings', 'Admins\GlobalSettingsController@pickup_cut_off_settings_index')->name('pickup_settings');
             Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
+            Route::get('weight_bypass', 'Admins\GlobalSettingsController@weight_bypass')->name('weight_bypass');
+            Route::post('shipper_store_weight_bypass', 'Admins\GlobalSettingsController@shipper_store_weight_bypass')->name('shipper_store_weight_bypass');
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function (){
