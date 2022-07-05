@@ -7622,6 +7622,19 @@ class AdminAPIController extends Controller
             if ($leave) {
                 $employee = Employee::find($leave->employee_id);
                 if ($employee) {
+                    if ($employee->employee_gender_id == 1) {
+                        if ($employee->religion_id == 1) {
+                            $leave_types = LeaveType::where('id', '<>', 2)->select('id', 'name')->get();
+                        } else {
+                            $leave_types = LeaveType::whereIn('id', [1, 3, 5, 6])->select('id', 'name')->get();
+                        }
+                    } else {
+                        if ($employee->religion_id == 1) {
+                            $leave_types = LeaveType::where('id', '<>', 3)->select('id', 'name')->get();
+                        } else {
+                            $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
+                        }
+                    }
                     if ($employee->line_manager_id != null) {
                         $data = array();
                         $data['trax_id'] = $employee->trax_id;
@@ -7634,7 +7647,7 @@ class AdminAPIController extends Controller
                         if ($employee->is_line_manager) {
                             $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                         }
-                        return response()->json(['status' => 0, 'data' => $data, 'leave_type' => $leave_types]);
+                        return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
                     }
                     return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
                 }
@@ -7670,7 +7683,7 @@ class AdminAPIController extends Controller
                     if ($employee->is_line_manager) {
                         $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                     }
-                    return response()->json(['status' => 0, 'data' => $data, 'leave_type' => $leave_types]);
+                    return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
                 }
                 return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
             }
