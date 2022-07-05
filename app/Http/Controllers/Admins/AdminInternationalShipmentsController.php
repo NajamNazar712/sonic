@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\International\InternationalShipmentServiceProvider;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\InternationalShipmentsLog;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -222,6 +223,7 @@ class AdminInternationalShipmentsController extends Controller
                                 }
 
                             }
+                            $this->shipment_update_log($shipment_id, Auth::id(), $international_shipment_weight);
                         }
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
@@ -289,6 +291,8 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->save();
                         $shipment->actual_weight = $actual_weight;
                         $shipment->save();
+
+                        $this->shipment_update_log($shipment->id, Auth::id(), $actual_weight);
                         return redirect()->back()->with('success', 'Shipment successfully updated!');
                     }
                     return redirect()->back()->with('error', 'Shipment with this tracking number Not found!');
@@ -430,5 +434,13 @@ class AdminInternationalShipmentsController extends Controller
 
         }
         return redirect()->back()->with('error', 'Shipment Status not selected!');
+    }
+
+    public function shipment_update_log($shipment_id, $admin_id, $weight = NULL){
+        $shipment_log = new InternationalShipmentsLog();
+        $shipment_log->shipment_id = $shipment_id;
+        $shipment_log->weight = $weight;
+        $shipment_log->updated_by = $admin_id;
+        $shipment_log->save();
     }
 }
