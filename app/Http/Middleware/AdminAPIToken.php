@@ -25,7 +25,12 @@ class AdminAPIToken
                 $admin = $admin->first();
 
                 if ($admin->status) {
-                    $request->request->add(['admin_id' => $admin->id, 'trax_id' => $admin->trax_id]);
+                    if($admin->employee){
+                        $request->request->add(['rider_id' => $admin->id, 'trax_id' => $admin->trax_id, 'admin_employee' => $admin->employee->id]);
+                    }
+                    else{
+                        $request->request->add(['rider_id' => $admin->id, 'trax_id' => $admin->trax_id]);
+                    }
 
                     return $next($request);
                 }

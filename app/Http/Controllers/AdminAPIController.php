@@ -7793,4 +7793,43 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Employee not Found!']);
         }
     }
+
+    public function employee_leave_list_v2(Request $request)
+    {
+        if(!$request->has('admin_employee')){
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+        }
+        $admin_employee = $request->admin_employee;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            ->where('employee_id', $admin_employee)
+            ->where('employee_type_id', 1);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                $datum['leave_type'] = $employee_leave->leave_type;
+                $datum['leave_type_id'] = $employee_leave->leave_type_id;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
 }
