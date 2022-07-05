@@ -381,6 +381,9 @@ class NpsController extends Controller
             $passive_per = (!empty($passive_per) ? ($passive_per/$sum)*100 : 0 ) ;
             $detractors_per = (!empty($detractors_per) ? ($detractors_per/$sum)*100 : 0 ) ;
             $nps_percentage = (!empty($promoter_per) || !empty($detractors_per)) ? $promoter_per - $detractors_per  : 0;
+            if($nps_percentage < 0){
+                $nps_percentage = $nps_percentage/ -1;
+            }
 
             $data['sum_question_and_response'] = $sum_question_and_response;
             $data['total_question'] = $total_question;
