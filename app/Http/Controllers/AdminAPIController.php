@@ -7662,7 +7662,7 @@ class AdminAPIController extends Controller
                     $data = array();
                     $data['trax_id'] = $employee->trax_id;
                     $data['name'] = $employee->name;
-                    $data['designation'] = $employee->designation;
+                    $data['designation'] = $employee->designation->name;
                     $data['department'] = $employee->department->name;
                     $data['approver_email'] = $employee->line_manager->email;
                     $data['approver_name'] = $employee->line_manager->name;
