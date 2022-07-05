@@ -12014,6 +12014,43 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function employee_leave_list_v2(Request $request)
+    {
+        if(!$request->has('rider_employee')){
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+        }
+        $rider_id = $request->rider_id;
+        $rider_employee = $request->rider_employee;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->where('employee_id', $rider_employee)
+            ->where('employee_type_id', 2);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
