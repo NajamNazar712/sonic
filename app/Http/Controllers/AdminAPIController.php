@@ -7883,6 +7883,7 @@ class AdminAPIController extends Controller
                 $employee_leaves = $employee_leaves->get();
                 $data = array();
                 foreach ($employee_leaves as $employee_leave) {
+                    $leave_employee = $employee_leave->employee;
                     $datum = array();
                     $datum['id'] = $employee_leave->id;
                     $datum['from'] = $employee_leave->from;
@@ -7904,10 +7905,10 @@ class AdminAPIController extends Controller
                     }else{
                         $datum['days_count'] = 1;
                     }
-                    $datum['name'] = $employee->name;
-                    $datum['trax_id'] = $employee->trax_id;
+                    $datum['name'] = $leave_employee->name;
+                    $datum['trax_id'] = $leave_employee->trax_id;
                     if ($employee_leave->type_id == 1) {
-                        $datum['designation'] = $employee->designation->name;
+                        $datum['designation'] = $leave_employee->designation->name;
                     } elseif ($employee_leave->type_id == 2) {
                         $datum['designation'] = "Rider";
                     }
