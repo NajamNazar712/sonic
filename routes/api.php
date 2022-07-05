@@ -356,6 +356,7 @@ Route::name('api.')->group(function () {
                 Route::get('list_v2', 'AdminAPIController@employee_leave_list_v2')->name('list_v2');
                 Route::get('approver_list_v2', 'AdminAPIController@approver_leave_list_v2')->name('approver_list_v2');
                 Route::post('approve_v2', 'AdminAPIController@leave_approve_v2')->name('approve_v2');
+                Route::post('hod_approve', 'AdminAPIController@hod_approve')->name('hod_approve');
 
             });
 
