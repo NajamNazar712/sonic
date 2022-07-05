@@ -210,7 +210,7 @@ class NpsController extends Controller
 
         $nps_survey = NpsSurvey::find($id);
         $max_date = Carbon::now()->addYear(1);
-        $min_date = Carbon::now()->subYear(1);
+        $min_date = Carbon::now();
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         return view('admin.nps.edit', compact('shippers', 'min_date', 'max_date','nps_survey','id'));
     }
