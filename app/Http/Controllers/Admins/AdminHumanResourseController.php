@@ -3935,16 +3935,10 @@ class AdminHumanResourseController extends Controller
             $datatable->where('e.id', $search_rider)->where('e.employee_type_id', 2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function ($q) use ($search_trax_id) {
-                $q->where([['e.trax_id', $search_trax_id], ['e.employee_type_id', 1]])
-                    ->orWhere([['e.trax_id', $search_trax_id], ['e.employee_type_id', 2]]);
-            });
+            $datatable->where('e.trax_id', $search_trax_id);
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function ($q) use ($search_cnic) {
-                $q->where([['e.cnic', $search_cnic], ['e.employee_type_id', 1]])
-                    ->orWhere([['e.cnic', $search_cnic], ['e.employee_type_id', 2]]);
-            });
+            $datatable->where('e.cnic', $search_cnic);
         }
         return $datatable->make(true);
     }
