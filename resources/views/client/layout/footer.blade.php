@@ -215,7 +215,7 @@
                             $('#question_recommend_input').html(`
 
                             <label>Any recommendations/suggestions?</label>
-                            <textarea class="form-control"  name="recommendations_box" placeholder="Recommendations or suggestions"></textarea>
+                            <textarea class="form-control" maxlength="300" name="recommendations_box" placeholder="Recommendations or suggestions"></textarea>
                             `);
                         }
                         $.each(data.question.nps, function(index, values) {
