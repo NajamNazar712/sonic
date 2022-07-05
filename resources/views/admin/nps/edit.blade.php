@@ -63,7 +63,7 @@
                                             </div>
                                             <input type="text"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   min="{{$min_date}}" max="{{$max_date}}" name="end_time" value="{{$nps_survey->end_time}}"
+                                                   min="{{$nps_survey->start_time}}" max="{{$max_date}}" name="end_time" value="{{$nps_survey->end_time}}"
                                                    id="survey_end" placeholder="End Time" data-rule-required="true"
                                                    data-msg-min="Cannot select date less than one year from current date."
                                                    data-msg-max="Cannot be greater than one year."
