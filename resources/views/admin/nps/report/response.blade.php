@@ -343,7 +343,7 @@
                     {data: 'detractor', name: 'detractor', class: 'align-middle detractor'},
                     {data: 'response_date', name: 'nps_survey_reports.created_at', class: 'align-middle response_date'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
-                    {data: 'recommendations_box', name: 'nps_survey_reports.recommendations_box', class: 'align-middle recommendations_box'},
+                    {data: 'recommendations_box', name: 'nps_survey_reports.recommendations_box', class: 'align-middle recommendations_box',  orderable: false,},
 
 
                 ],
