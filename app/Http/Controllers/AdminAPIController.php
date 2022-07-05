@@ -7622,7 +7622,7 @@ class AdminAPIController extends Controller
             if ($leave) {
                 $employee = Employee::find($leave->employee_id);
                 if ($employee) {
-                    if ($employee->line_manager_id) {
+                    if ($employee->line_manager_id != null) {
                         $data = array();
                         $data['trax_id'] = $employee->trax_id;
                         $data['name'] = $employee->name;
@@ -7658,7 +7658,7 @@ class AdminAPIController extends Controller
                         $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
                     }
                 }
-                if ($employee->line_manager_id) {
+                if ($employee->line_manager_id != null) {
                     $data = array();
                     $data['trax_id'] = $employee->trax_id;
                     $data['name'] = $employee->name;
