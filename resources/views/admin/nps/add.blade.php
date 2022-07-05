@@ -46,6 +46,7 @@
                                             <input type="text"
                                                    class="form-control bg-primary border-primary white rounded-right"
                                                    min="{{$min_date}}" max="{{$max_date}}" name="start_time"
+                                                   onchange="$('#survey_end').attr('min',this.value)"
                                                    id="survey_start" placeholder="Start Time" data-rule-required="true"
                                                    data-msg-min="Cannot select date less than one year from current date."
                                                    data-msg-max="Cannot be greater than one year."
@@ -62,7 +63,7 @@
                                             </div>
                                             <input type="text"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   min="{{$min_date}}" max="{{$max_date}}" name="end_time"
+                                                   min="{{$min_date}}"  max="{{$max_date}}"   name="end_time"
                                                    id="survey_end" placeholder="End Time" data-rule-required="true"
                                                    data-msg-min="Cannot select date less than one year from current date."
                                                    data-msg-max="Cannot be greater than one year."

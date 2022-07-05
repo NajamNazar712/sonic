@@ -125,7 +125,7 @@ class NpsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),549);
         $max_date = Carbon::now()->addYear(1);
-        $min_date = Carbon::now()->subYear(1);
+        $min_date = Carbon::now();
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         return view('admin.nps.add', compact('shippers', 'min_date', 'max_date'));
     }
