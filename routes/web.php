@@ -732,7 +732,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminDashboardController@edit')->name('edit');
             Route::post('send_survey', 'Admins\AdminDashboardController@send_survey')->name('send_survey');
             Route::get('report', 'Admins\AdminDashboardController@survey_report')->name('report');
-            Route::get('report/list', 'Admins\AdminDashboardController@survey_report')->name('report.list');
+            Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
+            Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
         });
 
         

@@ -138,7 +138,7 @@
 		</div>
 	</div>
 
-	@if (session('role_id') == 1 || in_array(101, session('permissions')))
+	@if (session('role_id') == 1 || in_array(763, session('permissions')))
 		<div class="modal fade" id="add" role="dialog" aria-labelledby="add" aria-hidden="true">
 			<div class="modal-dialog modal-lg" role="document">
 				<div class="modal-content">
@@ -189,7 +189,7 @@
 		</div>
 	@endif
 
-	@if (session('role_id') == 1 || in_array(101, session('permissions')))
+	@if (session('role_id') == 1 || in_array(764, session('permissions')))
 		<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit" aria-hidden="true">
 			<div class="modal-dialog modal-lg" role="document">
 				<div class="modal-content">
@@ -345,37 +345,35 @@
 			var selected_rows = [];
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || in_array(82, session('permissions')))
-					buttons: [{
-						text: '<i class="la la-plus"></i> Add Question',
-						className: 'btn btn-primary add',
-						action: function (e, dt, node, config) {
-							$('#add').modal('show');
-						}
-					},{
-						text: '<i class="la la-send"></i> Send Survey',
-						className: 'btn btn-primary',
-						enabled:true,
-						action: function (e, dt, node, config) {
+				
+				buttons: [
+				@if (session('role_id') == 1 || in_array(763, session('permissions')))
+				{
+					text: '<i class="la la-plus"></i> Add Question',
+					className: 'btn btn-primary add',
+					action: function (e, dt, node, config) {
+						$('#add').modal('show');
+					}
+				},
+				@endif
+				@if (session('role_id') == 1 || in_array(767, session('permissions')))
+				{
+					text: '<i class="la la-send"></i> Send Survey',
+					className: 'btn btn-primary',
+					enabled:true,
+					action: function (e, dt, node, config) {
 
-							$('#SendSurveyModal').modal('show');
+						$('#SendSurveyModal').modal('show');
 
-						}
-					},
-					{
-                        extend: 'excel',
-                        title: 'Disable Account Intimation Questions',
-                    	className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
-				@else
-                buttons: [{
-						extend: 'excel',
-						title: 'Disable Account Intimation Questions',
-                    	className: 'btn btn-primary',
-						text: '<i class="la la-file-excel-o"></i> Excel',
-					},'reset'],
-	            @endif
+					}
+				},
+				@endif
+				{
+					extend: 'excel',
+					title: 'Disable Account Intimation Questions',
+					className: 'btn btn-primary',
+					text: '<i class="la la-file-excel-o"></i> Excel',
+				},'reset'],
 	            scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
@@ -632,7 +630,7 @@
 				var question_id = parseInt($(this).parents('tr').attr('id'));
 				var question_status = parseInt($(this).parents('tr').attr('data-type'));
 
-				@if (session('role_id') == 1 || in_array(101, session('permissions')))
+				@if (session('role_id') == 1 || in_array(764, session('permissions')))
 					if ($(this).hasClass('edit')) {
 						$.ajax({
 							url: '{!! route('admin.accounts.disable.account.intimation.survey.details') !!}',
@@ -656,7 +654,7 @@
 					}
 				@endif
 
-				@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				@if (session('role_id') == 1 || in_array(765, session('permissions')))
 					if ($(this).hasClass('enable')) {
 						$.ajax({
 							url: '{!! route('admin.accounts.disable.account.intimation.survey.status') !!}',

@@ -49,8 +49,17 @@ class ShipperAccountController extends Controller
             if (count($result) > 0) {
                 foreach ($result as $status) {
                     User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
+
+                    // sending survey form notification
+                    $disabled_shipper = User::where('id', $status)->select(['id','email','name','phone','phone2'])->get();
+
+                    // via email
+                    NotificationsController::send(179, $disabled_shippers);
+                    //via sms
+                    NotificationsController::send(180, $disabled_shippers);
                 }
             }
         } 

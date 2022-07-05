@@ -9386,11 +9386,9 @@ class NotificationsController extends Controller
                     
 
                 }
-
                 else if ($id == 179) {
                     
                     if($reference_1_id != null){
-                        // dd($reference_1_id,"test");
 
                         foreach($reference_1_id as $key => $val)
                         {
@@ -9422,7 +9420,6 @@ class NotificationsController extends Controller
                 else if ($id == 180) {
 
                     if($reference_1_id != null){
-                        // dd($reference_1_id,"test");
 
                         foreach($reference_1_id as $key => $val)
                         {
@@ -9441,7 +9438,6 @@ class NotificationsController extends Controller
                             $survey_record->created_at = $timestamp;
                             $survey_record->updated_at = $timestamp;
                             $survey_record->save();
-
 
                             if (strpos($body, '[link]') !== FALSE) {
                                 $body = str_replace('[link]', $link, $body);

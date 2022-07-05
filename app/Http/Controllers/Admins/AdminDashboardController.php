@@ -12,6 +12,8 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
+use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
@@ -12133,10 +12135,9 @@ class AdminDashboardController extends Controller
 
     public function disable_account_intimation_survey_index()
     {
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 279);
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 557);
         $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->get();
-        // dd($disabled_shippers);
+        
         return view('admin.accounts.disable_account_intimation_survey')->with(['disabled_shippers' => $disabled_shippers]);
 
     }
@@ -12145,9 +12146,9 @@ class AdminDashboardController extends Controller
     {
         
 
-        // if ($request->get('excel') && $request->get('excel') == true) {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 278);
-        // }
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 558);
+        }
 
         $questions = DisableAccountIntimationQuestion::leftjoin('admins as created_user','created_user.id','disable_account_intimation_questions.created_by')
         ->leftjoin('admins as updated_user','updated_user.id','disable_account_intimation_questions.updated_by')
@@ -12171,10 +12172,15 @@ class AdminDashboardController extends Controller
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
                 ';
-    
-                if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+
+                if (session('role_id') == 1 || in_array(764, session('permissions'))) {
                     if ($notification->status) {
                         $dropdown .= $edit_button;
+                    }
+                }
+    
+                if (session('role_id') == 1 || in_array(765, session('permissions'))) {
+                    if ($notification->status) {
                         $dropdown .= $disable_button;
                     }
                     else {
@@ -12320,8 +12326,80 @@ class AdminDashboardController extends Controller
 
     public function survey_report(Request $request)
     {
-        dd("under development");
-        // return view('admin.accounts.disable_account_intimation_survey_report');
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 559);
+        $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->get();
+        
+        return view('admin.accounts.disable_account_intimation_survey_report')->with(['disabled_shippers' => $disabled_shippers]);
+    }
+
+    public function survey_report_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 560);
+        }
+
+        $surveyReport = DisableAccountIntimationSendSurvey::join('users','disable_account_intimation_send_surveys.shipper_id','users.id')
+        ->join('admins as send_by','send_by.id','disable_account_intimation_send_surveys.send_by')
+        ->select(['users.name as shipper_name','users.email','users.phone','disable_account_intimation_send_surveys.random_id','disable_account_intimation_send_surveys.send_via','send_by.name as send_by','disable_account_intimation_send_surveys.status','disable_account_intimation_send_surveys.url','disable_account_intimation_send_surveys.created_at']);
+        
+        // dd($surveyReport);
+
+        return Datatables::of($surveyReport)
+            ->editColumn('status', function ($surveyReport) {
+                if ($surveyReport->status == 0) {
+                    return 'Not Collected';
+                } else {
+                    return "Collected";
+                }
+            })
+            ->editColumn('send_via', function ($surveyReport) {
+                if ($surveyReport->send_via == 'sms') {
+                    return 'SMS';
+                } else {
+                    return "Email";
+                }
+            })
+            ->editColumn('url', function ($surveyReport) {
+                
+                return $url = "<a href='$surveyReport->url' target='_blank'> $surveyReport->url</a>";
+            })
+            ->editColumn('answers', function ($surveyReport) {
+                if ($surveyReport->status == 0) {
+                    return ' - ';
+                } else {
+                    return $url = "<button class='btn btn-sm btn-outline-info align-middle show_answers'> Show Answers </button>";
+                }
+                
+            })
+            ->addColumn('url_excel', function ($surveyReport) {
+                
+                return $url =  $surveyReport->url;
+            })
+            ->make(true);
+    }
+
+
+    public function submitresponse_report(Request $request)
+    {
+        $survey_id = $request->survey_id;
+
+        $submit_survey_answers = DisableAccountIntimationSubmitSurvey::join('disable_account_intimation_questions as questions','disable_account_intimation_submit_surveys.question_id','questions.id')
+        ->select(['questions.id','questions.questions','questions.option1','questions.option2','questions.option3','questions.option4','disable_account_intimation_submit_surveys.selected_option'])
+        ->where('disable_account_intimation_submit_surveys.survey_id',$survey_id);
+
+        // dd($submit_survey_answers->get());
+
+        if($submit_survey_answers->exists())
+        {
+            $submit_survey_data = $submit_survey_answers->get();
+            return response()->json(['status' => 1, 'submit_survey_data' => $submit_survey_data]);
+                
+        }
+        else{
+            return response()->json(['status' => 0, 'submit_survey_data' => []]);
+        }
+        
     }
 
 
