@@ -15,6 +15,7 @@ use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\DeliveryLocationMapping;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
@@ -6879,18 +6880,28 @@ public function sales_incentive()
         $admins = DeliveryLocationMapping::join('admins as ad','ad.id','=','delivery_location_mappings.added_by')
                  ->join('cities as ct','ct.id','=','delivery_location_mappings.city_id')
                  ->leftjoin('admins as ub','ub.id','=','delivery_location_mappings.updated_by')
-        ->select('delivery_location_mappings.area_name','ct.name as city_name','ub.name as updated_by','ad.name as added_by','delivery_location_mappings.updated_at');
+        ->select('delivery_location_mappings.id','delivery_location_mappings.area_name','ct.name as city_name','ub.name as updated_by','ad.name as added_by','delivery_location_mappings.updated_at','delivery_location_mappings.status');
         $datatables = Datatables::of($admins)
+        ->addColumn('status', function($admins) {
+            if($admins->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+        })
         ->addColumn('action', function($admins) {
             if (session('role_id') == 1 || in_array(749, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                     ';
-
-                        $dropdown .=' <button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
-                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        if($admins->status == 1){
+                            $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }elseif($admins->status == 0){
+                            $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
+                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     
                     $dropdown .='</div>
                   </div>
@@ -6908,7 +6919,49 @@ public function sales_incentive()
     }
 
     public function delivery_area_keyword_add(){
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        return view('admin.settings.add_delivery_area',compact('cities'));
+    }
+
+    public function delivery_area_keyword_store(Request $request){
         
+        $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id);
+        
+        if($check_exists->exists()){
+            return redirect()->back()->with('error', 'Deivery Area City Already Exists!');
+        }
+
+        $keywords = explode(',', $request->delivery_area_keyword);
+        $delivery_location = new DeliveryLocationMapping;
+        $delivery_location->area_name = $request->area_name;
+        $delivery_location->city_id = $request->city_id;
+        $delivery_location->added_by = Auth::id();
+        $delivery_location->save();
+
+        foreach($keywords as $keyword){
+            $delivery_location_keyword = new DeliveryLocationMappingKeyword;
+            $delivery_location_keyword->keyword = $keyword;
+            $delivery_location_keyword->mapping_id = $delivery_location->id;
+            $delivery_location_keyword->save();
+
+        }
+        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Added');
+
+    }
+
+    public function delivery_area_keyword_enable_disable(Request $request){
+        $id = $request->id;
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if ($delivery_location) {
+            if ($delivery_location->status == 1) {
+                $delivery_location->status = 0;
+                $delivery_location->save();
+            } else {
+                $delivery_location->status = 1;
+                $delivery_location->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
     }
 
     

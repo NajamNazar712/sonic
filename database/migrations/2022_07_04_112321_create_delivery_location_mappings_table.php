@@ -19,6 +19,7 @@ class CreateDeliveryLocationMappingsTable extends Migration
             $table->integer('city_id')->index();
             $table->integer('added_by')->index();
             $table->integer('updated_by')->index()->nullable();
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
     }
