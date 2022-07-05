@@ -6873,6 +6873,8 @@ public function sales_incentive()
 
     public function weight_bypass()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),556);
+
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
 
         $settings = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
