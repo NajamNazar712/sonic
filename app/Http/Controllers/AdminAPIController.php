@@ -7928,8 +7928,7 @@ class AdminAPIController extends Controller
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
-                    dd($admin->employee->is_line_manger);
-                    if ($admin->employee->is_line_manger) {
+                    if ($admin->employee->is_line_manager) {
                         $employee_leaves->status = 6;
                         if($employee_leaves->leave_type != 1){
                             $employee_leaves->updated_by = $admin_id;
