@@ -7852,15 +7852,31 @@ class AdminAPIController extends Controller
         $admin = Admin::find($admin_id);
         if ($admin) {
             $admin_role = $admin->role_id;
+            $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
+            $employee = $admin->employee;
+            if(!$employee){
+                return response()->json(['status' => 1, 'message' => "Employee profile not found!"]);
+            }
             if ($admin_role == 63) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason')
+                    ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.status', 2);
-            } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+            } elseif (in_array($admin_id, $department_head_ids)) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason')
+                    ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
+                    ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
+                    ->where('employee_leaves.status', 6)
+                    ->where('employee_leaves.leave_type', '<>', 1)
+                    ->where('emp.department_id', $employee->department_id);
+            } elseif ($admin->employee->is_line_manager) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.reporter_id', $admin_id);
-            } else {
+            }
+            else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
             if ($employee_leaves->exists()) {
@@ -7875,6 +7891,7 @@ class AdminAPIController extends Controller
                     $datum['rejected_reason'] = $employee_leave->rejected_reason;
                     $datum['status_id'] = $employee_leave->status_id;
                     $datum['status'] = $employee_leave->status;
+                    $datum['leave_type'] = $employee_leave->leave_type;
                     if ($admin_role == 63){
                         $datum['role'] = 0;
                     }else{
@@ -7887,23 +7904,14 @@ class AdminAPIController extends Controller
                     }else{
                         $datum['days_count'] = 1;
                     }
+                    $datum['name'] = $employee->name;
+                    $datum['trax_id'] = $employee->trax_id;
                     if ($employee_leave->type_id == 1) {
-                        $admin = Admin::find($employee_leave->employee_id);
-                        if ($admin) {
-                            $datum['name'] = $admin->name;
-                            $datum['trax_id'] = $admin->trax_id;
-                            $datum['designation'] = $admin->designation;
-                            $data[] = $datum;
-                        }
+                        $datum['designation'] = $employee->designation->name;
                     } elseif ($employee_leave->type_id == 2) {
-                        $rider = Rider::find($employee_leave->employee_id);
-                        if ($rider) {
-                            $datum['name'] = $rider->name;
-                            $datum['trax_id'] = $rider->trax_id;
-                            $datum['designation'] = "Rider";
-                            $data[] = $datum;
-                        }
+                        $datum['designation'] = "Rider";
                     }
+                    $data[] = $datum;
                 }
                 return response()->json(['status' => 0, 'approver_response' => $data]);
             }
