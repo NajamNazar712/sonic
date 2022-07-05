@@ -10,7 +10,7 @@ class DeliveryLocationMapping extends Model
         return $this->belongsTo('App\Http\Models\City');
     }
 
-    public function delivery_location_mapping_keywords(){
-        return $this->hasMany('App\Http\Models\Admin\DeliveryLocationMappingKeyword');
+    public function mappings(){
+        return $this->hasMany('App\Http\Models\Admin\DeliveryLocationMappingKeyword','mapping_id');
     }
 }

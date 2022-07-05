@@ -495,6 +495,14 @@
                                 shipment += '<td><strong>Address</strong></td>';
                                 shipment += '<td colspan="3">' + details.consignee.address + '</td>';
                                 shipment += '</tr>';
+                                if(details.consignee.delivery_area){
+
+                                    shipment += '<tr>';
+                                    shipment += '<td><strong>Delivery Area</strong></td>';
+                                    shipment += '<td colspan="3">' + details.consignee.delivery_area + '</td>';
+                                    shipment += '</tr>';
+                                }
+
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';

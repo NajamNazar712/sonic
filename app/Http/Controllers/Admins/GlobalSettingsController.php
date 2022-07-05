@@ -6900,7 +6900,7 @@ public function sales_incentive()
                         }elseif($admins->status == 0){
                             $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                         }
-                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
+                        $dropdown .=' <button type="button" class="dropdown-item view_keyword"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
                         $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     
                     $dropdown .='</div>
@@ -6964,6 +6964,74 @@ public function sales_incentive()
         }
     }
 
+    public function delivery_area_keyword_edit($id){
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if($delivery_location){
+            $delivery_location_keywords = $delivery_location->mappings;
+            if ($delivery_location_keywords) {
+                $delivery_location_keywords = $delivery_location_keywords->pluck('keyword')->toArray();
+
+                $delivery_location_keywords = implode(',', $delivery_location_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.edit_delivery_area',compact('delivery_location_keywords','cities','delivery_location'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function delivery_area_keyword_update(Request $request){
+        $delivery_location = DeliveryLocationMapping::find($request->id);
+        if($delivery_location){
+            if($delivery_location->city_id != $request->city_id){
+                $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id);
+            
+                if($check_exists->exists()){
+                    return redirect()->back()->with('error', 'Deivery Area City Already Exists!');
+                }
+            }
+            DeliveryLocationMappingKeyword::where('mapping_id',$request->id)->delete();
+
+            $keywords = explode(',', $request->delivery_area_keyword);
+            $delivery_location->area_name = $request->area_name;
+            $delivery_location->city_id = $request->city_id;
+            $delivery_location->updated_by = Auth::id();
+            $delivery_location->save();
     
+            foreach($keywords as $keyword){
+                $delivery_location_keyword = new DeliveryLocationMappingKeyword;
+                $delivery_location_keyword->keyword = $keyword;
+                $delivery_location_keyword->mapping_id = $delivery_location->id;
+                $delivery_location_keyword->save();
+    
+            }
+            return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Updated');
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function delivery_area_keyword_view($id){
+       
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if($delivery_location){
+            $delivery_location_keywords = $delivery_location->mappings;
+            if ($delivery_location_keywords) {
+                $delivery_location_keywords = $delivery_location_keywords->pluck('keyword')->toArray();
+
+                $delivery_location_keywords = implode(',', $delivery_location_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.view_delivery_area',compact('delivery_location_keywords','cities','delivery_location'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
     
 }

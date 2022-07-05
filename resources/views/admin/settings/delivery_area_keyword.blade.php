@@ -234,8 +234,20 @@
                 
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
+                var redirect = '{!! url('/admin') !!}';
+                var id = parseInt($(this).parents('tr').attr('id'));
+                            
+                            var url = redirect + '/settings/delivery_area_keyword/edit/'+id;
 
+                            window.location = url;
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.view_keyword', function() {
+                var redirect = '{!! url('/admin') !!}';
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var url = redirect + '/settings/delivery_area_keyword/view/'+id;
+                window.location = url;
             });
 
             

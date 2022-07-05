@@ -15,7 +15,7 @@ use App\Http\Models\SubstituteUserShipment;
 use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\RiderDelivery;
@@ -150,6 +150,34 @@ class ShipperTrackingController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
+
+                        $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                        $msg_string = null;
+                        $str_arr = null;
+                        $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                        foreach ($check as $nsa) {
+                            foreach ($str_arr as $arr_value) {
+                                if (strtolower($nsa) == strtolower($arr_value)) {
+                                    $con_nsa = $arr_value;
+                                    if ($msg_string != null) {
+                                        $msg_string = $msg_string . ', ' . $arr_value;
+                                    } else {
+                                        $msg_string = $arr_value;
+                                    }
+                                }
+                            }
+                        }
+                        $delivery_area = null;
+                        if($msg_string != null){
+                            $found = DeliveryLocationMappingKeyword::where('keyword',$msg_string);
+                            if($found->exists()){
+                                $found = $found->first();
+                                $delivery_area = $found->delivery_location_mapping->area_name;
+                            }
+                        }
+                        $details['consignee']['delivery_area'] = $delivery_area;
+
+
                         foreach ($shipment->items as $item) {
                             $item_details = array();
 
@@ -369,6 +397,9 @@ class ShipperTrackingController extends Controller
     		else {
     			$tracking['invalid'][] = $tracking_number;
     		}
+
+            
+            
     	}
 
     	return $tracking;
