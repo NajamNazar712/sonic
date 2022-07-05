@@ -3929,21 +3929,21 @@ class AdminHumanResourseController extends Controller
 
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type_id', 1);
+            $datatable->where('e.id', $search_admin)->where('employee_type_id', 1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider)->where('employee_type_id', 2);
+            $datatable->where('e.id', $search_rider)->where('employee_type_id', 2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
             $datatable->where(function ($q) use ($search_trax_id) {
-                $q->where([['a.trax_id', $search_trax_id], ['employee_type_id', 1]])
-                    ->orWhere([['r.trax_id', $search_trax_id], ['employee_type_id', 2]]);
+                $q->where([['e.trax_id', $search_trax_id], ['employee_type_id', 1]])
+                    ->orWhere([['e.trax_id', $search_trax_id], ['employee_type_id', 2]]);
             });
         }
         if ($search_cnic = $request->get('search_cnic')) {
             $datatable->where(function ($q) use ($search_cnic) {
-                $q->where([['a.cnic', $search_cnic], ['employee_type_id', 1]])
-                    ->orWhere([['r.cnic', $search_cnic], ['employee_type_id', 2]]);
+                $q->where([['e.cnic', $search_cnic], ['employee_type_id', 1]])
+                    ->orWhere([['e.cnic', $search_cnic], ['employee_type_id', 2]]);
             });
         }
         return $datatable->make(true);
