@@ -7791,8 +7791,9 @@ class DeliveryController extends Controller
     public function delivery_note_info(Request $request)
     {
         $rider = $request->id;
-        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0)->latest()->first();
-        if ($delivery_note) {
+        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0);
+        if ($delivery_note->exists()) {
+            $delivery_note = $delivery_note->latest()->first();
             return response()->json(['status' => 1, 'note' => $delivery_note]);
         } else {
             return response()->json(['status' => 0, 'error' => 'No Delivery Note Found For the Rider']);
