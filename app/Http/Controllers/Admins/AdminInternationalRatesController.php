@@ -28,6 +28,7 @@ use App\Http\Models\InternationalRatesRemark;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
@@ -1479,7 +1480,7 @@ class AdminInternationalRatesController extends Controller
                     return response()->json(['status' => 0, 'error' => 'Retail Shipment Not Allowed']);
                 } else {
                     if ($shipment->business_category_id == 2) {
-                        if (InternationalShipmentExtraServiceCharges::where('shipment_id', $shipment->id)->exists()) {
+                        if (InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('service_charges')->exists()) {
                             return response()->json(['status' => 0, 'error' => 'Charges already added against this tracking number']);
                         } else {
                             if (!in_array($shipment->shipper_status_id,$shipment_status )) {
@@ -1509,7 +1510,10 @@ class AdminInternationalRatesController extends Controller
         if($tracking_number != null && $amount != null){
             $shipment = Shipment::where('tracking_number',$tracking_number)->first();
             if($shipment){
-                  InternationalShipmentExtraServiceCharges::create(['shipment_id' => $shipment->id,'amount' => $amount,'added_by' => Auth::id()]);
+                $shipment = InternationalShipment::where('shipment_id',$shipment->id)->first();
+                $shipment->service_charges = $amount;
+                $shipment->added_by = Auth::id();
+                $shipment->save();
                 return redirect()->back()->with('success', 'Charges Added!');
             }
             else{
