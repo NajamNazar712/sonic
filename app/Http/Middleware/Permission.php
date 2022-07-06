@@ -1336,7 +1336,7 @@ class Permission
             'reports.weight_reconciliation.list' => 8,
 
             
-            
+            'settings.pickup.weight_bypass' => 761
             
             
 
