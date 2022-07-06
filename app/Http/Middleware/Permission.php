@@ -1240,7 +1240,8 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-            
+
+            'settings.pickup.weight_bypass' => 556,
 
             
         ],
@@ -1334,9 +1335,6 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
-
-            
-            'settings.pickup.weight_bypass' => 761
             
             
 
