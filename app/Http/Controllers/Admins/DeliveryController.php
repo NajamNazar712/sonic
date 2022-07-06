@@ -22,6 +22,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -4145,6 +4146,7 @@ class DeliveryController extends Controller
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
 
+        
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
@@ -5966,6 +5968,23 @@ class DeliveryController extends Controller
 
     public function one_link_payments(Request $request)
     {
+        
+
+        $delivery_note_id = $request->delivery_note_id;
+        $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','amount','tran_date_formated','tran_time_formated','created_at']);
+
+        if($payment_transaction_data->exists())
+        {
+            $payment_transaction_data = $payment_transaction_data->get();
+            return response()->json(['status' => 1, 'transaction_data' => $payment_transaction_data]);
+            
+        }
+        else{
+            return response()->json(['status' => 0, 'transaction_data' => []]);
+        }
+
+
+        // dd($payment_transaction_data);
         // $delivery_note_id = $request->input('delivery_note_id');
         // $delivery_note_details = DeliveryNote::find($delivery_note_id);
         // $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;

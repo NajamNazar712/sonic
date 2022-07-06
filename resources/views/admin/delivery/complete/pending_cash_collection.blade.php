@@ -110,16 +110,26 @@
     <!--Shipments popup -->
     <!-- one link payment details popup -->
     <div class="modal fade" id="one_link_payment_details_modal" data-backdrop="static" role="dialog" aria-labelledby="one_link_payment_details_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" style="max-width: 900px;" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="one_link_payment_details_modal_title">One Link Payment(s)</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
                 </div>
-                <div class="modal-body text-center">
+                <div class="modal-body justify-content-center">
+                    <table class="table table-hover table-responsive" id="one_link_payment_details_table">
+                        <thead>
+                            <th>S.NO</th>
+                            <th>Tracking Number</th>
+                            <th>Transaction ID</th>
+                            <th>Amount </th>
+                            <th>Transaction Date</th>
+                            <th>Transaction Time</th>
+                            <th>Created at</th>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -521,7 +531,7 @@
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
-                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle one_link_payment_count'},
+                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -824,6 +834,7 @@
 
             $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
                 $('#one_link_payment_details_modal').modal('show');
 
                 $.ajax({
@@ -838,16 +849,33 @@
                     if (data) {
                         var html = '';
 
-                        if (data.shipments) {
-                            $.each(data.shipments, function(index, tracking_number) {
-                                html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                        if (data.transaction_data) {
+                            // $.each(data.shipments, function(index, tracking_number) {
+                            //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            // });
+                            $.each(data.transaction_data, function(index, values) {
+                                    html+= `
+
+                                        <tr>
+                                            <td>${index+1}</td>
+                                            <td>${values.tracking_no}</td>
+                                            <td>${values.tran_auth_id}</td>
+                                            <td>${values.amount}</td>
+                                            <td>${values.tran_date_formated}</td>
+                                            <td>${values.tran_time_formated}</td>
+                                            <td>${values.created_at}</td>
+                                        </tr>
+
+                                    `;
                             });
+                            $('#one_link_payment_details_table tbody').html(html);
+                        
+                        
+                        
                         }
-                        $('#one_link_payment_details_modal .modal-body').html(html);
+                        // $('#one_link_payment_details_modal .modal-body').html(html);
                     }
                 });
-
-                console.log("done");
 
             });
 
