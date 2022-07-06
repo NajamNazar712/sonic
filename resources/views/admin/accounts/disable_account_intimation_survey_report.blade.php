@@ -16,26 +16,9 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-							{{-- <div class="row justify-content-center mb-4">
-								<div class="col-4">
-									<fieldset class="form-group">
-										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											@foreach($roles as $role)
-												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach
-										</select>
-									</fieldset>
-								</div>
-								<div class="col-2">
-									<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-								</div>
-							</div> --}}
-
-
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										{{-- <th class="border-primary border-darken-1"></th> --}}
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Random ID</th>
 										<th class="border-primary border-darken-1">Shipper</th>
@@ -47,13 +30,6 @@
 										<th class="border-primary border-darken-1">Response Data</th>
 										<th class="border-primary border-darken-1">Sended URL</th>
 										<th class="border-primary border-darken-1">Created at</th>
-										{{-- <th class="border-primary border-darken-1">Role</th>
-										<th class="border-primary border-darken-1">Default Hub</th>
-										<th class="border-primary border-darken-1">Created Datetime</th>
-										<th class="border-primary border-darken-1">Updated Datetime</th>
-										<th class="border-primary border-darken-1">Updated by</th>
-										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1"></th> --}}
 									</tr>
 								</thead>
 							</table>
@@ -187,7 +163,6 @@
 				ajax: {
 					url: '{{ route('admin.accounts.disable.account.intimation.survey.report.list') }}',
 					data: function (d) {
-						// d.search_roles = $('#search_roles').val();
 				}
 				},
                 rowId: 'random_id',
@@ -195,7 +170,7 @@
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'random_id', name: 'disable_account_intimation_send_surveys.random_id', class: 'align-middle random_id'},
-					{data: 'shipper_name', name: 'users.shipper_name', class: 'align-middle shipper_name'},
+					{data: 'shipper_name', name: 'users.name', class: 'align-middle shipper_name'},
 					{data: 'phone', name: 'users.phone', class: 'align-middle phone'},
 					{data: 'email', name: 'users.email', class: 'align-middle email'},
 					{data: 'send_via', name: 'disable_account_intimation_send_surveys.send_via', class: 'align-middle send_via'},
@@ -228,7 +203,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.url') || $(header).is('.created_at')) {
+						if ($(header).is('.serial_number') || $(header).is('.url') || $(header).is('.created_at') || $(header).is('.answers')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -287,7 +262,6 @@
                                 var html = "";
                                 $.each(data.submit_survey_data, function(index, values) {
 
-                                    // none-of-above
                                     var opt1 = "", opt2 = "", opt3 = "", opt4 = "", noa = "";
                                     var style = 'style="font-weight:bold; background-color:yellow;"';
 

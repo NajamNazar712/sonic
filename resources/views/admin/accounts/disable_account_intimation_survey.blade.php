@@ -27,7 +27,6 @@
 									@method('POST')
 									@csrf
 									<div class="container">
-									    {{-- <input type="hidden" name="id"/> --}}
 										<div class="row justify-content-center">
 											<div class="col-6 form-group">
 												<label class="font-medium-2 font-weight-bold block">Send Via</label>
@@ -52,11 +51,6 @@
 											</div>
 	
 											<div class="col-6 form-group">
-												{{-- <select name="disabled_shippers" id="disabled_shippers" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Field Required">
-													@foreach($disabled_shippers as $shippers)
-														<option value="{{$shippers->id}}">{{$shippers->name}}</option>
-													@endforeach
-												</select> --}}
 												<div class="form-group input-group ">
 													<label class="font-medium-2 font-weight-bold block">Shippers</label>
 													<select name="shipper_ids[]" id="shippers_select" class="form-control select2"
@@ -89,27 +83,9 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-							{{-- <div class="row justify-content-center mb-4">
-								<div class="col-4">
-									<fieldset class="form-group">
-										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											@foreach($roles as $role)
-												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach
-										</select>
-									</fieldset>
-								</div>
-								<div class="col-2">
-									<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-								</div>
-							</div> --}}
-
-
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										{{-- <th class="border-primary border-darken-1"></th> --}}
-										{{-- <th class="border-primary border-darken-1">S. No.</th> --}}
 										<th class="border-primary border-darken-1">Q.ID</th>
 										<th class="border-primary border-darken-1">Question</th>
 										<th class="border-primary border-darken-1">Option 1</th>
@@ -121,13 +97,6 @@
 										<th class="border-primary border-darken-1">Created at</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Action</th>
-										{{-- <th class="border-primary border-darken-1">Role</th>
-										<th class="border-primary border-darken-1">Default Hub</th>
-										<th class="border-primary border-darken-1">Created Datetime</th>
-										<th class="border-primary border-darken-1">Updated Datetime</th>
-										<th class="border-primary border-darken-1">Updated by</th>
-										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1"></th> --}}
 									</tr>
 								</thead>
 							</table>
@@ -392,13 +361,11 @@
 				ajax: {
 					url: '{{ route('admin.accounts.disable.account.intimation.survey.list') }}',
 					data: function (d) {
-						// d.search_roles = $('#search_roles').val();
 				}
 				},
 				rowId: 'id',
 				order: [[0, 'Asc']],
 				columns: [
-					// {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id', name: 'id', class: 'align-middle id'},
 					{data: 'questions', name: 'questions', class: 'align-middle questions'},
 					{data: 'option1', name: 'option1', class: 'align-middle option1'},
@@ -413,8 +380,6 @@
 				],
 				rowCallback: function(row, data, index) {
 
-					// var info = table.page.info();
-					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -473,13 +438,6 @@
 				dropdownParent:$('#send_survey_form')
             });
 
-			// $("#send_survey_form").submit(function(e){
-			// 	e.preventDefault();
-
-				
-
-			// });
-
 			$('#send_survey_form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
@@ -509,8 +467,6 @@
 						})
 						.done(function(data) {
 
-							console.log(data);
-
 							if(data.success)
 							{
 								toastr.success(data.success, 'Success!', {
@@ -525,16 +481,7 @@
 							{
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
-							
-							
-							
-							
 						});
-					
-
-						// console.log('{!! route('admin.accounts.disable.account.intimation.survey.send_survey') !!}');
-						
-						
 					}
 			});	
 
@@ -641,7 +588,6 @@
 							}
 						})
 						.done(function(data) {
-							// console.log(data.questions);
 							$('#edit .id').val(data.id);
 							$('#edit .question').val(data.questions);
 							$('#edit .option1').val(data.option1);

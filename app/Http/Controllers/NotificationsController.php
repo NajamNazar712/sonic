@@ -9413,7 +9413,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            self::email($subject, $body,$val->email);
+                            // self::email($subject, $body,$val->email);
                         }
                     }
                 }
@@ -9423,7 +9423,7 @@ class NotificationsController extends Controller
 
                         foreach($reference_1_id as $key => $val)
                         {
-                            $random_id = date("dmY") . $val->id . date("his");
+                            $random_id = date("his") . $val->id . date("dmY");
                             $send_by = Auth::id();
                             $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");
@@ -9443,7 +9443,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[link]', $link, $body);
                             }
 
-                            self::sms($body, $val->phone);
+                            // self::sms($body, $val->phone);
                         }
                     }
                 }
