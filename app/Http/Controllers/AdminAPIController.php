@@ -7934,6 +7934,7 @@ class AdminAPIController extends Controller
                         if($employee_leaves->leave_type != 1){
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
+                            NotificationsController::app_notification(11, $employee_leaves->employee->admin->id, $employee_leaves->employee_type_id, $employee_leaves->id);
                             return response()->json(['status' => 0, 'message' => "Leave Approved Successfully!"]);
                         }
                     } else {
@@ -7999,7 +8000,7 @@ class AdminAPIController extends Controller
 
                         $employee_leaves->save();
                     }
-                    NotificationsController::app_notification(11, $employee_leaves->employee->id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    NotificationsController::app_notification(11, $employee_leaves->employee->admin->id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return response()->json(['status' => 0, 'message' => "Leave Approved Successfully!"]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Leave Already Approved']);
@@ -8016,6 +8017,67 @@ class AdminAPIController extends Controller
         $leave->updated_by = $request->admin_id;
         $leave->status = 2;
         $leave->save();
+        NotificationsController::app_notification(11, $leave->employee->admin->id, $leave->employee_type_id, $leave->id);
         return response()->json(['status' => 0, 'message' => 'Leave Approved Successfully']);
+    }
+
+    public function leave_reject_v2(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+            'rejection_reason' => ['required', 'max:500'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    $admin_profile = $employee_leaves->employee;
+                    if ($employee_leaves->status == 2) {
+                        $employee_leaves->status = 5;
+                    }
+                    elseif ($employee_leaves->status == 1) {
+                        if($employee_leaves->leave_type == 1){
+                            $working_days = $admin_profile->department->working_days;
+
+                            $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
+                            $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
+
+                            if ($working_days == 1) {
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
+                            } else {
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                            }
+                            $old_diffDays++;
+                            $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
+                            $admin_profile->save();
+                        }
+                        $employee_leaves->status = 7;
+                    }
+                    else if (in_array($employee_leaves->status == 6)) {
+                        $employee_leaves->status = 3;
+                    }
+                    else {
+                        return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+                    }
+                    $employee_leaves->rejected_reason = $request->rejection_reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee->admin->id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return response()->json(['status' => 0, 'message' => "Leave request has been rejected!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
     }
 }
