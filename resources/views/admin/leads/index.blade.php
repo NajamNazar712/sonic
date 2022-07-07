@@ -1053,7 +1053,7 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-                        @if (session('role_id') == 1 || in_array(678, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add Lead',
                         className: 'btn btn-primary add_lead',
