@@ -176,7 +176,7 @@
 					{data: 'send_via', name: 'disable_account_intimation_send_surveys.send_via', class: 'align-middle send_via'},
 					{data: 'send_by', name: 'send_by.name', class: 'align-middle send_by'},
 					{data: 'status', name: 'disable_account_intimation_send_surveys.status', class: 'align-middle status'},
-					{data: 'answers', name: 'answers', class: 'align-middle text-center answers'},
+					{data: 'answers', name: 'answers', class: 'align-middle text-center answers',sortable:false,orderable:false},
 					{data: 'url', name: 'disable_account_intimation_send_surveys.url', class: 'align-middle url'},
 					{data: 'created_at', name: 'disable_account_intimation_send_surveys.created_at', class: 'align-middle created_at'}
 				],

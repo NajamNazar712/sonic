@@ -15,7 +15,7 @@ class CreateDisableAccountIntimationSubmitSurveysTable extends Migration
     {
         Schema::create('disable_account_intimation_submit_surveys', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('survey_id')->index();
+            $table->bigInteger('survey_id')->index();
             $table->integer('question_id')->index();
             $table->string('selected_option')->nullable();
             $table->timestamps();

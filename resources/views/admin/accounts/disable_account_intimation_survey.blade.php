@@ -201,7 +201,7 @@
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-							<button type="submit" name="edit" class="btn btn-primary">Edit</button>
+							<button type="submit" name="edit" class="btn btn-primary">Update</button>
 						</div>
 					</form>
 				</div>
@@ -366,7 +366,7 @@
 				rowId: 'id',
 				order: [[0, 'Asc']],
 				columns: [
-					{data: 'id', name: 'id', class: 'align-middle id'},
+					{data: 'id', name: 'id', class: 'align-middle id',sortable:false,orderable:false},
 					{data: 'questions', name: 'questions', class: 'align-middle questions'},
 					{data: 'option1', name: 'option1', class: 'align-middle option1'},
 					{data: 'option2', name: 'option2', class: 'align-middle option2'},
@@ -376,7 +376,7 @@
 					{data: 'updated_by_name', name: 'updated_user.name', class: 'align-middle updated_by_name'},
 					{data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
 					{data: 'status', name: 'status', class: 'align-middle status'},
-					{data: 'action', name: 'action', class: 'align-middle action'}
+					{data: 'action', name: 'action', class: 'align-middle action',sortable:false,orderable:false}
 				],
 				rowCallback: function(row, data, index) {
 
