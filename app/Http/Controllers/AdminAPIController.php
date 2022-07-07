@@ -7869,7 +7869,7 @@ class AdminAPIController extends Controller
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where(function ($query) use($employee) {
-                        $query->where('employee_leaves.reporter_id', $employee->admin->id)
+                        $query->where('employee_leaves.reporter_id', $employee->id)
                             ->where('employee_leaves.status', 1);
                     })
                     ->orwhere(function ($query) use($employee) {
@@ -7882,7 +7882,7 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.reporter_id', $employee->admin->id)
+                    ->where('employee_leaves.reporter_id', $employee->id)
                     ->where('employee_leaves.status', 1);
                 $user_bit = 2;
             }
