@@ -1248,7 +1248,7 @@ class Permission
 
             'accounts.disable.account.intimation.survey.index' => 762,
 			'accounts.disable.account.intimation.survey.report' => 768,
-
+ 
             
         ],
 
