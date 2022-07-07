@@ -7797,7 +7797,7 @@ class AdminAPIController extends Controller
                     }
                     $employee->save();
                     NotificationsController::app_notification(11, $request->admin_id, 1, $leave_request->id);
-                    NotificationsController::app_notification(12, $employee->line_manager->employee->admin->id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $employee->line_manager->admin->id, 1, $leave_request->id);
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
