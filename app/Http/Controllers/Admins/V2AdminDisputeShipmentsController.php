@@ -389,13 +389,11 @@ class V2AdminDisputeShipmentsController extends Controller
                             $errors['Row #' . $row_id] = $validate->errors()->all();
                         }
                     }
-                    dump($rows);
                     if (empty($errors)) {
                         $updated = 0;
                         $not_updated = 0;
 
                         foreach ($rows as $data) {
-                            dump($data['tracking_number']);
                             $dispute = new V2Dispute();
                             $dispute->status_id = 1;
                             $dispute->reason_id = $data['reason_id'];
@@ -408,6 +406,7 @@ class V2AdminDisputeShipmentsController extends Controller
                                 
                             }
                             $dispute->save();
+                            $updated++;
                         }
 
                         $error_msg = '';
