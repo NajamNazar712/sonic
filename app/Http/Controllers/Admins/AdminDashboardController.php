@@ -12286,11 +12286,11 @@ class AdminDashboardController extends Controller
            
             if($request->all_shippers_checkbox == "on")
             {
-                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->select(['id','email','name','phone','phone2'])->get(); 
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->select(['id','email','name','phone'])->get(); 
             }
             else if($request->all_shippers_checkbox == "off"){
 
-                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone','phone2'])->get(); 
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone'])->get(); 
             }
 
             if($request->send_via == "email")

@@ -9392,7 +9392,8 @@ class NotificationsController extends Controller
 
                         foreach($reference_1_id as $key => $val)
                         {
-                            $random_id = date("dmY") . $val->id . date("his");
+                            // $body = $notification->body;
+                            $random_id = date("dmy") . $val->id . date("his");
                             $send_by = Auth::id();
                             $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");
@@ -9408,12 +9409,12 @@ class NotificationsController extends Controller
                             $survey_record->updated_at = $timestamp;
                             $survey_record->save();
 
-
+                            
                             if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
+                                $email_body = str_replace('[link]', $link, $body);
                             }
 
-                            self::email($subject, $body,$val->email);
+                            self::email($subject, $email_body,$val->email);
                         }
                     }
                 }
@@ -9423,7 +9424,7 @@ class NotificationsController extends Controller
 
                         foreach($reference_1_id as $key => $val)
                         {
-                            $random_id = date("his") . $val->id . date("dmY");
+                            $random_id = date("his") . $val->id . date("dmy");
                             $send_by = Auth::id();
                             $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");
@@ -9440,10 +9441,10 @@ class NotificationsController extends Controller
                             $survey_record->save();
 
                             if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
+                                $sms_body= str_replace('[link]', $link, $body);
                             }
 
-                            self::sms($body, $val->phone);
+                            self::sms($sms_body, $val->phone);
                         }
                     }
                 }
