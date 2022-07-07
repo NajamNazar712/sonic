@@ -7942,7 +7942,7 @@ class AdminAPIController extends Controller
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
                     if ($admin->employee->is_line_manager) {
                         if(in_array($admin_id, $department_head_ids)){
-                            $employee_leaves->status = 4;
+                            $employee_leaves->status = 2;
                         } else{
                             $employee_leaves->status = 6;
                         }
