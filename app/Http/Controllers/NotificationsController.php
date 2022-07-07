@@ -9306,7 +9306,7 @@ class NotificationsController extends Controller
 
                         $crm_log = new CrmSmsLog();
                         $crm_log->crm_request_id = $crm_request->id;
-                        $crm_log->agent = $agent->name;
+                        $crm_log->agent = isset($agent->name) ? $agent->name : '-';
                         $crm_log->massage = $crm_comment->comment;
                         $crm_log->save();
 
