@@ -85,57 +85,66 @@
                                 <h1 class="mb-1 text-center">
                                     Survey Form
                                 </h1>
-
+                                
                                 @if(!isset($result))
                                     <div class="card">
                                         <div class="card-content" aria-expanded="true">
                                             <div class="card-body">
                                                 @include('client.inc.messages')
-                                                <form id="client_survey_form" class="form-inline mb-1 justify-content-center" method="post" action="{{route('survey.submit')}}">
-                                                    @csrf
-                                                        {{-- survey_id --}}
-                                                        <input type="hidden" name="survey_id" value="{{$survey_id}}">
-                                                        <div class="row text-left form_header" style="width: 100%">
-                                                            <div class="col-sm-12 col-md-1 col-lg-1 align-middle sno">
-                                                                <b> S.NO </b>
+                                                @if(count($questions) > 0)
+                                                    <form id="client_survey_form" class="form-inline mb-1 justify-content-center" method="post" action="{{route('survey.submit')}}">
+                                                        @csrf
+                                                            {{-- survey_id --}}
+                                                            <input type="hidden" name="survey_id" value="{{$survey_id}}">
+                                                            <div class="row text-left form_header" style="width: 100%">
+                                                                <div class="col-sm-12 col-md-1 col-lg-1 align-middle sno">
+                                                                    <b> S.NO </b>
+                                                                </div>
+                
+                                                                <div class="col-sm-12 col-md-6 col-lg-6 align-middle question">
+                                                                    <b> Questions </b>
+                                                                </div>
+                
+                                                                <div class="col-sm-12 col-md-5 col-lg-5 options">
+                                                                    <b> Options </b>
+                                                                </div>
                                                             </div>
-            
-                                                            <div class="col-sm-12 col-md-6 col-lg-6 align-middle question">
-                                                                <b> Questions </b>
-                                                            </div>
-            
-                                                            <div class="col-sm-12 col-md-5 col-lg-5 options">
-                                                                <b> Options </b>
-                                                            </div>
-                                                        </div>
-                                                    @foreach ($questions as $key =>  $question)                                                   
-                                                        <div class="row text-left" style="width: 100%">
-                                                            <div class="col-sm-12 col-md-1 col-lg-1 align-middle sno">
-                                                                {{$key+1}}
-                                                            </div>
+                                                        @foreach ($questions as $key =>  $question)                                                   
+                                                            <div class="row text-left" style="width: 100%">
+                                                                <div class="col-sm-12 col-md-1 col-lg-1 align-middle sno">
+                                                                    {{$key+1}}
+                                                                </div>
 
-                                                            <div class="col-sm-12 col-md-6 col-lg-6 align-middle question">
-                                                                {{$question->questions}}
-                                                            </div>
+                                                                <div class="col-sm-12 col-md-6 col-lg-6 align-middle question">
+                                                                    {{$question->questions}}
+                                                                </div>
 
-                                                            <div class="col-sm-12 col-md-5 col-lg-5 options">
-                                                                <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option1}}"> {{$question->option1}} </div>
-                                                                <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option2}}"> {{$question->option2}} </div>
-                                                                <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option3}}"> {{$question->option3}} </div>
-                                                                <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option4}}"> {{$question->option4}} </div>
-                                                                <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="" checked> None of the Above </div>
-                                                                
+                                                                <div class="col-sm-12 col-md-5 col-lg-5 options">
+                                                                    <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option1}}"> {{$question->option1}} </div>
+                                                                    <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option2}}"> {{$question->option2}} </div>
+                                                                    <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option3}}"> {{$question->option3}} </div>
+                                                                    <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="{{$question->option4}}"> {{$question->option4}} </div>
+                                                                    <div class="option"> <input type="radio" name="option[{{$question->id}}]" class="form-select" value="" checked> None of the Above </div>
+                                                                    
+                                                                </div>
                                                             </div>
+                                                        @endforeach
+                                                        <div class="row submit-btn" style="width: 100%;">
+                                                            <div class="col-sm-12 col-md-12 col-lg-12 text-center">
+                                                                <input type="submit" value="Submit" id="sub" name="submit" class="btn btn-primary">
+                                                            </div>
+                                                            
                                                         </div>
-                                                    @endforeach
+                                                            
+                                                    </form>
+                                                @else
                                                     <div class="row submit-btn" style="width: 100%;">
                                                         <div class="col-sm-12 col-md-12 col-lg-12 text-center">
-                                                            <input type="submit" value="Submit" name="submit" class="btn btn-primary">
+                                                        <div class="alert alert-danger"> There is no Question to submit survey </div> 
                                                         </div>
                                                         
                                                     </div>
-                                                        
-                                                </form>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
