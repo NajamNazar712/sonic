@@ -6872,7 +6872,9 @@ public function sales_incentive()
 
     }
 
-    public function delivery_area_keyword(Request $request){
+    public function delivery_area_keyword(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),561);
         return view('admin.settings.delivery_area_keyword');
     }
 
