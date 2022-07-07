@@ -7797,7 +7797,7 @@ class AdminAPIController extends Controller
                     }
                     $employee->save();
                     NotificationsController::app_notification(11, $request->admin_id, 1, $leave_request->id);
-                    NotificationsController::app_notification(12, $employee->line_manager->admin->id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $employee->line_manager->employee->admin->id, 1, $leave_request->id);
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
@@ -7868,9 +7868,15 @@ class AdminAPIController extends Controller
                     ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.status', 6)
-                    ->where('employee_leaves.leave_type', '<>', 1)
-                    ->where('emp.department_id', $employee->department_id);
+                    ->where(function ($query) use($employee) {
+                        $query->where('employee_leaves.status', 6)
+                            ->where('employee_leaves.leave_type', '<>', 1)
+                            ->where('emp.department_id', $employee->department_id);
+                    })
+                    ->orwhere(function ($query) use($admin_id) {
+                        $query->where('employee_leaves.reporter_id', $admin_id)
+                            ->where('employee_leaves.status', 1);
+                    });
                 $user_bit = 1;
             } elseif ($admin->employee->is_line_manager) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
@@ -7897,7 +7903,11 @@ class AdminAPIController extends Controller
                     $datum['status_id'] = $employee_leave->status_id;
                     $datum['status'] = $employee_leave->status;
                     $datum['leave_type'] = $employee_leave->leave_type;
-                    $datum['role'] = $user_bit;
+                    if($employee_leaves->status_id == 6){
+                        $datum['role'] = 1;
+                    }else{
+                        $datum['role'] = 2;
+                    }
                     if($employee_leave->to){
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
