@@ -447,6 +447,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Shippers\ShipperShipmentCancelController@index')->name('index');
         Route::get('list', 'Shippers\ShipperShipmentCancelController@list')->name('list');
+        Route::put('bulk_revert', 'Shippers\ShipperShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
     Route::prefix('intercept')->name('intercept.')->group(function (){
@@ -539,6 +540,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('quick_search')->name('quick_search.')->group(function(){
         Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
+    });
+
+    Route::prefix('nps')->name('nps.')->group(function(){
+        Route::post('nps_survey_check','Shippers\NpsSurveyShipperController@nps_survey_check')->name('nps_survey_check');
+        Route::post('ratting_submit','Shippers\NpsSurveyShipperController@ratting_submit')->name('ratting_submit');
+        Route::post('nps_skip','Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
+
     });
 
 });
@@ -1891,10 +1899,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function() {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
-
+            
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_add_store')->name('store');
+                Route::post('duplicate_role', 'Admins\UserManagementController@role_duplicate')->name('duplicate_role');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function() {
@@ -2632,6 +2641,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
+        Route::put('bulk_revert', 'Admins\AdminShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
     });
 
@@ -3950,6 +3960,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             });
         });
+    });
+    Route::prefix('nps')->name('nps.')->group(function (){
+        Route::get('/','Admins\NpsController@index')->name('index');
+        Route::get('/list','Admins\NpsController@list')->name('list');
+        Route::get('/add','Admins\NpsController@add')->name('add');
+        Route::post('/submit','Admins\NpsController@submit')->name('submit');
+        Route::get('/view_shippers','Admins\NpsController@view_shippers')->name('view_shippers');
+        Route::get('/view_questions','Admins\NpsController@view_questions')->name('view_questions');
+        Route::put('status', 'Admins\NpsController@SurveyStatus')->name('status');
+        Route::get('edit/{id}', 'Admins\NpsController@survey_edit')->name('edit');
+        Route::post('update/{id}', 'Admins\NpsController@survey_update')->name('update');
+        Route::get('/response_report','Admins\NpsController@response_report')->name('response.report');
+        Route::get('/response_report_list','Admins\NpsController@response_report_list')->name('response_report_list');
+        Route::get('/consolidate_report','Admins\NpsController@consolidate_report')->name('consolidate.report');
+        Route::get('/consolidate_report_list','Admins\NpsController@consolidate_report_list')->name('consolidate_report_list');
+        Route::get('/pie_chart','Admins\NpsController@pie_chart')->name('pie_chart');
+
     });
 });
 

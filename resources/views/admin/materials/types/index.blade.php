@@ -16,8 +16,8 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
-                        <th class="border-primary border-darken-1">Packaging Type</th>
                         <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Packaging Type</th>
                         <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
@@ -464,8 +464,8 @@
                             head = [];
                             head.push('S.No');
                             head.push('Name');
-                            head.push('Packaging Type');
                             head.push('Description');
+                            head.push('Packaging Type');
                             head.push('Category');
                             head.push('Created At');
                             head.push('Created By');
@@ -479,8 +479,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.type);
-                                row.push(values.packaging_type);
                                 row.push(values.description);
+                                row.push(values.packaging_type);
                                 row.push(values.category);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
@@ -529,12 +529,12 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.types.list') }}',
                 rowId: 'id',
-                order: [[6, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'type', name: 'packaging_material_types.type', class: 'align-middle type'},
-                    {data: 'packaging_type', name: 'packaging_material_types.packaging_type', class: 'align-middle packaging_type'},
                     {data: 'description', name: 'packaging_material_types.description', class: 'align-middle description'},
+                    {data: 'packaging_type', name: 'packaging_material_types.packaging_type', class: 'align-middle packaging_type'},
                     {data: 'category', name: 'packaging_material_types.category', class: 'align-middle category'},
                     {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},

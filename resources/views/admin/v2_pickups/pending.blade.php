@@ -83,7 +83,7 @@
                                                         @foreach($legends as $legend)
                                                             @if($legend->id == 7)
                                                                 <tr style="background-color: {{$legend->color}}; color:#010a10;"
-                                                                    id="{{$legend->id}}">
+                                                                    id="{{$legend->id}}" class="legends">
                                                                     <td>
                                                                         <button type="button"
                                                                                 class="btn btn-sm round btn-min-width text-white"
@@ -96,7 +96,7 @@
                                                                 </tr>
                                                             @else
                                                                 <tr style="background-color: {{$legend->color}}; color:#010a10;"
-                                                                    id="{{$legend->id}}">
+                                                                    id="{{$legend->id}}" class="legends">
                                                                     <td>
                                                                         <button type="button"
                                                                                 class="btn btn-sm round btn-min-width p-1"
@@ -384,6 +384,10 @@
     <style>
         .btn-min-width {
             min-width: 5.5rem;
+        }
+
+        .legends{
+            cursor:pointer;
         }
         
 @foreach($legends as $legend)
