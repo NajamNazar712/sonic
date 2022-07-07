@@ -482,7 +482,7 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
-                                text: 'Are you sure, you want to mark status In Process?',
+                                text: 'Are you sure, you want to mark status Resolved?',
                                 icon: 'info',
                                 buttons: {
                                     cancel: {
@@ -636,9 +636,9 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 rowId: 'dispute_id',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -676,7 +676,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.reason') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.action') || $(header).is('.image_view')) {
+                        if ($(header).is('.reason') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.action') || $(header).is('.image_view')|| $(header).is('.select-checkbox') ) {
                             $(td).appendTo($(search));
                         }
                         else {
