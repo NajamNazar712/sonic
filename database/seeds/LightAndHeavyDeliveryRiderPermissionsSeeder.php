@@ -29,7 +29,7 @@ class LightAndHeavyDeliveryRiderPermissionsSeeder extends Seeder
 
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile > Delivery > Rider Category ByPass Request', 'url'=>'admin.delivery.note.rider_category_request', 'permission_id' => 757),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Finance > Invoices > Vendor Invoice', 'url'=>'admin.delivery.note.rider_category_bypass_weight', 'permission_id' => 758),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile > Delivery > Rider Category ByPass Weight', 'url'=>'admin.delivery.note.rider_category_bypass_weight', 'permission_id' => 758),
         ));
     }
 }
