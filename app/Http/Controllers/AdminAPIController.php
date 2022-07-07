@@ -7903,7 +7903,7 @@ class AdminAPIController extends Controller
                     $datum['status_id'] = $employee_leave->status_id;
                     $datum['status'] = $employee_leave->status;
                     $datum['leave_type'] = $employee_leave->leave_type;
-                    if($employee_leaves->status_id == 6){
+                    if($employee_leave->status_id == 6){
                         $datum['role'] = 1;
                     }else{
                         $datum['role'] = 2;
