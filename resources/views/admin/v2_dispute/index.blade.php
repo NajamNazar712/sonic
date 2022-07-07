@@ -441,8 +441,8 @@
                             closeOnEsc: false,
                             dangerMode: true
                         }).then(function(confirm) {
-                            $('#selected_record').val()
-                            $.ajax({
+                            if (confirm) {
+                                $.ajax({
                                 url:"{{route('admin.dispute.shipments.bulk_in_process')}}",
                                 method:'POST',
                                 data:{
@@ -450,18 +450,25 @@
                                     '_token':'{{ csrf_token() }}',
                                 }
                             }).done(function (data) {
+                                table.rows().deselect();
+
                                 if(data.status == 0){
-                                    table.draw('false');
+                                    selected_rows = [];
+                                                table.draw();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }else{
+                                    selected_rows = [];
+                                                table.draw();
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                 }
-                                selected_rows=[];
+                                // selected_rows=[];
                                 
-                                table.draw();
+                                // table.draw();
 
                             });
+                            }
+                            
                         });
                         }
                     },
@@ -495,8 +502,8 @@
                                 closeOnEsc: false,
                                 dangerMode: true
                             }).then(function(confirm) {
-
-                                $.ajax({
+                                if (confirm) {
+                                    $.ajax({
                                     url:"{{route('admin.dispute.shipments.bulk_resolved')}}",
                                     method:'POST',
                                     data:{
@@ -504,16 +511,24 @@
                                         '_token':'{{ csrf_token() }}',
                                     }
                                 }).done(function (data) {
+                                table.rows().deselect();
                                     if(data.status == 0){
+                                        selected_rows = [];
+                                                table.draw();
+                                                
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }else{
+                                        selected_rows = [];
+                                                table.draw();
                                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
     
                                     }
-                                    selected_rows=[];
-                                    table.draw(true);
-    
+                                    // selected_rows=[];
+                                    // table.draw(true);
+                                    
                                 });
+                                }
+                                
                             });
                         }
                     },
