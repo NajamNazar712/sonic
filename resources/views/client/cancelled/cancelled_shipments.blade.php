@@ -132,7 +132,7 @@
 
                     {
                         text: 'Revert',
-                        className: 'btn btn-primary revert',
+                        className: 'btn btn-primary bulk_revert',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
@@ -158,7 +158,7 @@
                             }).then(function(confirm) {
                                 if (confirm) {
                                     $.ajax({
-                                        url: '{!! route('cod.cancelled_shipments.revert') !!}',
+                                        url: '{!! route('cod.cancelled_shipments.bulk_revert') !!}',
                                         method: 'PUT',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
@@ -177,7 +177,7 @@
 
                                             selected_rows = [];
 
-                                            table.button('.revert').disable();
+                                            table.button('.bulk_revert').disable();
 
                                             table.draw('false');
                                         });
@@ -206,7 +206,7 @@
                                         selected_rows.push(id);
                                     }
 
-                                    table.button('.revert').enable();
+                                    table.button('.bulk_revert').enable();
                                 }
                             });
                         }
@@ -232,7 +232,7 @@
                                     }
 
                                     if (selected_rows.length == 0) {
-                                        table.button('.revert').disable();
+                                        table.button('.bulk_revert').disable();
                                     }
                                 }
                             });
@@ -354,10 +354,10 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button('.revert').enable();
+                    table.button('.bulk_revert').enable();
                 }
                 else {
-                    table.button('.revert').disable();
+                    table.button('.bulk_revert').disable();
                 }
             });
 
@@ -385,13 +385,13 @@
                     closeOnEsc: false,
                     dangerMode: true
                 }).then(function(confirm) {
-                    selected_rows = [];
+                    /* selected_rows = [];
 
-                    table.rows().deselect();
+                     table.rows().deselect();
 
-                    table.button('.revert').disable();
+                     table.button('.revert').disable();
 
-                    selected_rows.push(shipment_id);
+                     selected_rows.push(shipment_id);*/
 
                     if (confirm) {
                         $.ajax({
@@ -399,7 +399,7 @@
                             method: 'PUT',
                             data: {
                                 '_token': '{{ csrf_token() }}',
-                                'shipment_ids': selected_rows
+                                'shipment_id': shipment_id
                             }
                         })
                             .done(function(data) {

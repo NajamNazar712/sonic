@@ -60,7 +60,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="total_leads_div">
-                        <div class="card bg-gradient-directional-booked_shipments pull-up">
+                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="received_leads_div">
-                        <div class="card bg-gradient-directional-complaints_launched pull-up">
+                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -100,7 +100,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="in_process_div">
-                        <div class="card bg-gradient-directional-in_transit pull-up">
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -122,7 +122,7 @@
                     </div>
 
                     <div class="col-3" id="in_process_activation_div">
-                        <div class="card bg-gradient-directional-out_for_delivery pull-up">
+                        <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -147,7 +147,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="dead_leads_div">
-                        <div class="card bg-gradient-directional-pending_shipments pull-up">
+                        <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="activated_leads_div">
-                        <div class="card bg-gradient-directional-return_delivered pull-up">
+                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -190,7 +190,7 @@
                     </div>
 
                     <div class="col-3" id="lead_time_ratio_div">
-                        <div class="card bg-gradient-directional-return_confirm pull-up">
+                        <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -207,7 +207,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="lead_time_ratio_div">
-                        <div class="card bg-gradient-directional-destination pull-up">
+                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -227,7 +227,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="dormant_div">
-                        <div class="card bg-gradient-directional-pending_confirmation pull-up">
+                        <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">

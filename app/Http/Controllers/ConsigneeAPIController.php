@@ -10,6 +10,7 @@ use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
@@ -89,11 +90,17 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment_info = Shipment::where('tracking_number', $request->tracking_no)
+            $shipment_infos = Shipment::where('tracking_number', $request->tracking_no)
                 ->select('consignee_name', 'consignee_address', 'consignee_phone_number_1 as phone_number');
-            if ($shipment_info->exists()) {
-                $shipment_info = $shipment_info->get();
-                return response()->json(['status' => 0, 'consignee_info' => $shipment_info]);
+            if ($shipment_infos->exists()) {
+                $shipment_infos = $shipment_infos->get();
+                $data = array();
+                foreach ($shipment_infos as $shipment_info){
+                    $data["consignee_name"] = $shipment_info->consignee_name;
+                    $data["consignee_address"] = $shipment_info->consignee_address;
+                    $data["phone_number"] = str_replace("-", "",$shipment_info->phone_number);
+                }
+                return response()->json(['status' => 0, 'consignee_info' => $data]);
             }
             return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
         }
@@ -102,7 +109,7 @@ class ConsigneeAPIController extends Controller
     public function consignee_otp(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/']
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -113,7 +120,7 @@ class ConsigneeAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $otp_pin = rand(1000, 9999);
-            $consignee_otp = ConsigneeOtp::where('phone_number', $request->input('phone_number'));
+            $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_otp->exists()) {
                 $consignee_otp = $consignee_otp->first();
             } else {
@@ -124,6 +131,39 @@ class ConsigneeAPIController extends Controller
             $consignee_otp->save();
             NotificationsController::trax_otp_verification($request->input('phone_number'), $otp_pin);
             return response()->json(['status' => 0, 'otp_message' => 'OTP has been sent to your registered number']);
+        }
+    }
+
+    public function consignee_forget_pin_otp(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_user->exists()) {
+                $otp_pin = rand(1000, 9999);
+                $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                if ($consignee_otp->exists()) {
+                    $consignee_otp = $consignee_otp->first();
+                } else {
+                    $consignee_otp = new ConsigneeOtp();
+                    $consignee_otp->phone_number = $request->input('phone_number');
+                }
+                $consignee_otp->otp = bcrypt($otp_pin);
+                $consignee_otp->save();
+                NotificationsController::trax_otp_verification($request->input('phone_number'), $otp_pin);
+                return response()->json(['status' => 0, 'message' => 'OTP has been sent to your registered number']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Given Phone Number is not Present!']);
+            }
         }
     }
 
@@ -141,10 +181,15 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_otp = ConsigneeOtp::where('phone_number', $request->phone_number)->orderBy('id', 'DESC');
             if ($consignee_otp->exists()) {
                 $consignee_otp = $consignee_otp->first();
-                if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
+                if (Hash::check($request->otp, $consignee_otp->otp)) {
+                    $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($consignee_user->exists()) {
+                        $consignee_user = $consignee_user->first();
+                        EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $consignee_user->id)->delete();
+                    }
                     return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -158,8 +203,8 @@ class ConsigneeAPIController extends Controller
     public function consignee_signup(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'digits:4'],
             'name' => ['required'],
             'address' => ['required'],
         ];
@@ -171,7 +216,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
@@ -180,11 +225,11 @@ class ConsigneeAPIController extends Controller
                 $consignee_info->name = $request->name;
                 $consignee_info->address = $request->address;
                 $consignee_info->pin = bcrypt($request->pin);
-                $consignee_info->phone_number_1 = $request->phone_number;
+                $consignee_info->phone_number_1 = substr_replace($request->input('phone_number'), '-', 4, 0);
                 $consignee_info->api_token = $api_token;
                 $consignee_info->save();
-                $information = ['message' => 'Account has been created', 'api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
-                return response()->json(['status' => 0, 'information' => $information]);
+                $information = ['api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
+                return response()->json(['status' => 0, 'message' => 'Account has been created', 'information' => $information]);
 
             }
         }
@@ -211,7 +256,7 @@ class ConsigneeAPIController extends Controller
                         $information = array();
                         $information['name'] = $consignee_user->name;
                         $information['consignee_id'] = $consignee_user->id;
-                        $information['phone_number'] = $consignee_user->phone_number_1;
+                        $information['phone_number'] = substr_replace($consignee_user->phone_number_1, '-', 4, 0);
                         if ($consignee_user->api_token) {
                             $information['api_token'] = $consignee_user->api_token;
                         }
@@ -290,9 +335,8 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
-                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $consignee_shipment->id)->latest('delivery_note_id')->first();
-                    $delivery_note = $delivery_note_shipment->delivery_note;
-                    $rider = $delivery_note->rider;
+                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $consignee_shipment->shipment_id)->orderby('delivery_note_id','DESC')->first();
+                    $rider = $delivery_note_shipment->delivery_note->rider;
                     $datum['rider_name'] = $rider->name;
                     $datum['rider_phone_number'] = $rider->phone;
                 } elseif (in_array($consignee_shipment->status_id, [3, 49])) {
@@ -430,7 +474,7 @@ class ConsigneeAPIController extends Controller
     {
         $consignee_id = $request->consignee_id;
         $rules = [
-            'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
             'phone_number_updated' => ['required'],
             'pin' => ['nullable', 'integer', 'digits:4'],
             'name' => ['nullable'],
@@ -450,13 +494,13 @@ class ConsigneeAPIController extends Controller
                     $consignee_info->name = $request->name;
                 }
                 if ($request->has('phone_number') && $request->phone_number_updated == 1) {
-                    $consignee_info->phone_number_2 = $request->phone_number;
+                    $consignee_info->phone_number_2 = substr_replace($request->phone_number, '-', 4, 0);
                 }
-                if ($request->has('pin')) {
+                if ($request->pin) {
                     $consignee_info->pin = bcrypt($request->pin);
                 }
                 $consignee_info->save();
-                return response()->json(['status' => 0, 'profile_message' => 'Profile Updated Successfully']);
+                return response()->json(['status' => 0, 'message' => 'Profile Updated Successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
@@ -519,13 +563,13 @@ class ConsigneeAPIController extends Controller
             $notifiction_history = $notifiction_history->get();
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
-        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+        return response()->json(['status' => 1, 'message' => "No Notification Found"]);
     }
 
     public function update_pin(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
         ];
 
@@ -536,12 +580,12 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1',substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $consignee_info->pin = bcrypt($request->pin);
                 $consignee_info->save();
-                return response()->json(['status' => 0, 'Update_pin_message' => 'PIN Updated Successfully']);
+                return response()->json(['status' => 0, 'message' => 'PIN Updated Successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }

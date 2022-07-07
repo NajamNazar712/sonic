@@ -62,7 +62,6 @@ class AdminERFController extends Controller
             ->leftjoin('admins as ar', 'ar.id', '=', 'employee_requisitions.submitted_by')
             ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es','a.trax_id as trax_id','employee_requisitions.submitted_by as requested_by','ar.name as requested_by_name'
             ]);
-
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
         }
@@ -130,7 +129,7 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.employee_status', 2);
                 }
             })
-            ->editColumn('trax_id', function($erf) {
+->editColumn('trax_id', function($erf) {
                 if($erf->type == 1){
                     return '-';
                 }
@@ -214,7 +213,6 @@ class AdminERFController extends Controller
                     return $requested_date->created_at;
                 }
             })
-
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -269,7 +267,10 @@ class AdminERFController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),263);
         $cities = City::where('status',1)->where('business_category_id',1)->select('id','name')->get();
         $hubs =  City::where('hub',1)->select('id','name')->get();
-        if (session('role_id') == 1 || session('department_id') == 10) {
+        if(session('role_id') == 1){
+            $departments = AdminDepartment::select('id', 'name')->get();
+        }
+        else if (session('department_id') == 10) {
             $departments = AdminDepartment::where('id', '!=', 1)->select('id', 'name')->get();
         }
         else{
@@ -745,10 +746,10 @@ class AdminERFController extends Controller
 
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
         $employee_trax_id  = Employee::whereNotIn('trax_id', $invalid_employees)->where('department_id',$request->id)->get();
-
         $trax_ids = array();
-        $inactive = '';
+      
         foreach($employee_trax_id as $employee){
+            $inactive = '';
             if($employee->status_id == 2){
                $inactive = '-inactive';
             }

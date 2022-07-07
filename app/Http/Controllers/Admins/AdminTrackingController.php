@@ -56,6 +56,7 @@ use App\Http\Models\DwsDetail;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\ConsigneeRefusedReason;
 
 class AdminTrackingController extends Controller
 {
@@ -74,7 +75,8 @@ class AdminTrackingController extends Controller
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
-        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims, 'return_confirm_reasons' => $return_confirm_reasons]);
+        $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims, 'return_confirm_reasons' => $return_confirm_reasons , 'consignee_refused_reasons'=> $consignee_refused_reasons]);
     }
 
     public function track(Request $request)
@@ -978,7 +980,19 @@ class AdminTrackingController extends Controller
                         } else {
                             $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         }
-                        $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+
+                        if($shipment->shipment_type == 1){
+
+                            $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                        }
+                        else{
+                            $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                            if($retail_shipment){
+                                $details['order_information']['shipping_mode'] = $retail_shipment->shipping_modes->name;
+                            }
+                        }
+                       
+                      
                         $details['order_information']['shipping_mode_id'] = $shipment->shipping_mode->id;
 
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
