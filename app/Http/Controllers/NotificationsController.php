@@ -9320,8 +9320,8 @@ class NotificationsController extends Controller
                             $body = str_replace('[comment]', $crm_comment->comment, $body);
                         }
 
-//                        $to = $phone_number;
-//                        self::sms($body, $to);
+                        $to = $phone_number;
+                        self::sms($body, $to);
                     }
                 }
                 else if ($id == 177) {
