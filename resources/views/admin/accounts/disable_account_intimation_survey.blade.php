@@ -328,8 +328,8 @@
 				@if (session('role_id') == 1 || in_array(767, session('permissions')))
 				{
 					text: '<i class="la la-send"></i> Send Survey',
-					className: 'btn btn-primary',
-					enabled:true,
+					className: 'btn btn-primary send_survey',
+					enabled:false,
 					action: function (e, dt, node, config) {
 
 						$('#SendSurveyModal').modal('show');
@@ -379,6 +379,11 @@
 					{data: 'action', name: 'action', class: 'align-middle action',sortable:false,orderable:false}
 				],
 				rowCallback: function(row, data, index) {
+
+					if(data.status == "Enabled")
+					{
+						$('.send_survey').removeClass('disabled');
+					}
 
 				},
 				initComplete: function() {
@@ -463,10 +468,19 @@
 								'send_via': send_via,
 								'all_shippers_checkbox': all_shippers_checkbox,
 								'shipper_ids': shippers_select,
+							},
+							beforeSend: function(){
+								swal({
+									text: 'Please Wait',
+									icon: 'info',
+									buttons: false,
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+								})
 							}
 						})
 						.done(function(data) {
-
+							swal.close();
 							if(data.success)
 							{
 								toastr.success(data.success, 'Success!', {
@@ -501,6 +515,8 @@
 						var option3 = $(form).find('.option3').val();
 						var option4 = $(form).find('.option4').val();
 
+						
+
 						$.ajax({
 							url: '{!! route('admin.accounts.disable.account.intimation.survey.add') !!}',
 							method: 'POST',
@@ -516,7 +532,8 @@
 						.done(function(data) {
 							
 							if (data.status == 0) {
-								table.draw(false);
+								table.draw();
+								$('.send_survey').removeClass('disabled');
 								$('#add').modal('hide');
 
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -560,7 +577,7 @@
 						.done(function(data) {
 							
 							if (data.status == 0) {
-								table.draw(false);
+								table.draw();
 								$('#edit').modal('hide');
 
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -613,7 +630,8 @@
 						})
 						.done(function(data) {
 							if (data.status == 0) {
-								table.draw(false);
+								table.draw();
+								$('.send_survey').removeClass('disabled');
 
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
@@ -634,7 +652,8 @@
 						})
 						.done(function(data) {
 							if (data.status == 0) {
-								table.draw(false);
+								$('.send_survey').addClass('disabled');
+								table.draw();
 
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
