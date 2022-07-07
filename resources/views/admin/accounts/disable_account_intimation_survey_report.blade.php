@@ -166,7 +166,7 @@
 				}
 				},
                 rowId: 'random_id',
-				order: [[0, 'Asc']],
+				order: [[10, 'Desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'random_id', name: 'disable_account_intimation_send_surveys.random_id', class: 'align-middle random_id'},

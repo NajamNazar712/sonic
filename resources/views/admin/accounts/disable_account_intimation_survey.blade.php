@@ -124,27 +124,27 @@
 						<div class="modal-body">
 							<div class="form-group">
 								<label>Question</label>
-								<textarea type="text" name="question" class="form-control question" placeholder="Enter Question*" data-rule-required="true" data-msg-required="Question is required" data-rule-field="true"></textarea>
+								<textarea type="text" name="question" id="question" class="form-control question" placeholder="Enter Question*" data-rule-required="true" data-msg-required="Question is required" data-rule-field="true"></textarea>
 							</div>
 
 							<div class="form-group">
 								<label>Option 1</label>
-								<input type="text" name="option1" class="form-control option1" placeholder="Enter Option 1*" data-rule-required="true" data-msg-required="Option 1 is required" data-rule-field="true">
+								<input type="text" name="option1" id="option1" class="form-control option1" placeholder="Enter Option 1*" data-rule-required="true" data-msg-required="Option 1 is required" data-rule-field="true">
 							</div>
 
 							<div class="form-group">
 								<label>Option 2</label>
-								<input type="text" name="option2" class="form-control option2" placeholder="Enter Option 2*" data-rule-required="true" data-msg-required="Option 2 is required" data-rule-field="true">
+								<input type="text" name="option2" id="option2" class="form-control option2" placeholder="Enter Option 2*" data-rule-required="true" data-msg-required="Option 2 is required" data-rule-field="true">
 							</div>
 
 							<div class="form-group">
 								<label>Option 3</label>
-								<input type="text" name="option3" class="form-control option3" placeholder="Enter Option 3*" data-rule-required="true" data-msg-required="Option 3 is required" data-rule-field="true">
+								<input type="text" name="option3" id="option3" class="form-control option3" placeholder="Enter Option 3*" data-rule-required="true" data-msg-required="Option 3 is required" data-rule-field="true">
 							</div>
 
 							<div class="form-group">
 								<label>Option 4</label>
-								<input type="text" name="option4" class="form-control option4" placeholder="Enter Option 4*" data-rule-required="true" data-msg-required="Option 4 is required" data-rule-field="true">
+								<input type="text" name="option4" id="option4" class="form-control option4" placeholder="Enter Option 4*" data-rule-required="true" data-msg-required="Option 4 is required" data-rule-field="true">
 							</div>
 
 						</div>
@@ -175,7 +175,7 @@
 						<div class="modal-body">
 							<div class="form-group">
 								<label>Question</label>
-								<textarea type="text" name="question" class="form-control question" placeholder="Enter Question*" data-rule-required="true" data-msg-required="Question is required" data-rule-field="true"></textarea>
+								<textarea type="text" name="question"  class="form-control question" placeholder="Enter Question*" data-rule-required="true" data-msg-required="Question is required" data-rule-field="true"></textarea>
 							</div>
 
 							<div class="form-group">
@@ -364,7 +364,7 @@
 				}
 				},
 				rowId: 'id',
-				order: [[0, 'Asc']],
+				order: [[8, 'Desc']],
 				columns: [
 					{data: 'id', name: 'id', class: 'align-middle id',sortable:false,orderable:false},
 					{data: 'questions', name: 'questions', class: 'align-middle questions'},
@@ -532,6 +532,13 @@
 						.done(function(data) {
 							
 							if (data.status == 0) {
+
+								$('#question').val('');
+								$('#option1').val('');
+								$('#option2').val('');
+								$('#option3').val('');
+								$('#option4').val('');
+
 								table.draw();
 								$('.send_survey').removeClass('disabled');
 								$('#add').modal('hide');
