@@ -11968,11 +11968,6 @@ class RiderAPIController extends Controller
                         }
                     }
 
-                    $leave = EmployeeLeave::where('employee_id', $employee->id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
-                    if ($leave->exists()) {
-                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
-                    }
-
                     if (!$employee->line_manager_id) {
                         return response()->json(['status' => 1, 'message' => 'Line Manager is not selected!']);
                     }
@@ -11991,6 +11986,10 @@ class RiderAPIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
                         }
                     } else {
+                        $leave = EmployeeLeave::where('employee_id', $employee->id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
+                        if ($leave->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                        }
                         $leave_request = new EmployeeLeave();
                         $leave_request->employee_id = $employee->id;;
                         $leave_request->employee_type_id = 2;
