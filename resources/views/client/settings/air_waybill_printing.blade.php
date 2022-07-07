@@ -44,7 +44,7 @@
                                     <div class="input-group">
                                             <div id="info_display" class="form-group text-center p-1 border border-light rounded">
                                                 <label class="d-block">Page Brake After Each Item &nbsp;</label>
-                                                <input type="checkbox" name="page_breaker"  class="switch hidden" id="page_breaker" @if($air_waybill->page_breaker == 1) checked="checked" @endif>
+                                                <input type="checkbox" name="page_breaker"  class="switch hidden" id="page_breaker" @if(isset($air_waybill->page_breaker)) @if($air_waybill->page_breaker == 1)   checked="checked" @endif @endif >
                                             </div>
                                     </div>
                                 </div>
