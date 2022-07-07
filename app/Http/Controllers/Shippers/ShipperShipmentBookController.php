@@ -65,6 +65,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
@@ -2308,9 +2309,66 @@ class ShipperShipmentBookController extends Controller
                     
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                   </div>
+                  
                 </html>
             ';
+            }else{
+
+                //delivery location watermark start
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                            $msg_string = null;
+                            $str_arr = null;
+                            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                            foreach ($check as $nsa) {
+                                foreach ($str_arr as $arr_value) {
+                                    if (strtolower($nsa) == strtolower($arr_value)) {
+                                        if ($msg_string != null) {
+                                            $msg_string = $msg_string . ', ' . $arr_value;
+                                        } else {
+                                            $msg_string = $arr_value;
+                                        }
+                                    }
+                                }
+                            }
+                            $delivery_area = null;
+                            if($msg_string != null){
+                                $found = DeliveryLocationMappingKeyword::where('keyword',$msg_string);
+                                if($found->exists()){
+                                    $found = $found->first();
+                                    $delivery_area = $found->delivery_location_mapping->area_name;
+                                }
+                            }
+                            if($delivery_area != null){
+                                for($i=0; $i<60; $i++){
+                                    $delivery_area.= ' '.$delivery_area;
+                                    if(strlen($delivery_area)>700){
+                                        break;
+                                    }
+                                }
+                                $html .= '
+                                </body><div id="watermark_" class="watermark_">
+                                <h1 style="
+                                  text-align: center;  
+                                  text-transform: uppercase;                  
+                                  overflow: hidden;
+                                  position: fixed;
+                                  margin-top: -560px;
+                                  opacity: 0.2;
+                                  transform: rotate(350deg);
+                                  font-size: 400%; 
+                                  color: #000000; 
+                                  font-stretch: extra-expanded;"     
+                                  > ' . $delivery_area . '  </h1>
+                                
+                                <!--<p>Your trial membership will expire in 3 days!</p>-->
+                              </div></html>';
+                                
+                             
+
+                            }
+                            //delivery location watermark end
             }
+
         }
 
         return $html;
