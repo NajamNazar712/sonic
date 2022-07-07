@@ -7849,6 +7849,7 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
+        $is_hr = false;
         if ($admin) {
             $admin_role = $admin->role_id;
             $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
@@ -7861,29 +7862,25 @@ class AdminAPIController extends Controller
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.status', 2);
-                $user_bit = 0;
+                $is_hr = true;
             } elseif (in_array($admin_id, $department_head_ids)) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where(function ($query) use($admin_id) {
-                        $query->where('employee_leaves.reporter_id', $admin_id)
-                            ->where('employee_leaves.status', 1);
+                        $query->where('employee_leaves.reporter_id', $admin_id);
                     })
                     ->orwhere(function ($query) use($employee) {
                         $query->where('employee_leaves.status', 6)
                             ->where('employee_leaves.leave_type', '<>', 1)
                             ->where('emp.department_id', $employee->department_id);
                     });
-                $user_bit = 1;
             } elseif ($admin->employee->is_line_manager) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.reporter_id', $admin_id)
-                    ->where('employee_leaves.status', 1);
-                $user_bit = 2;
+                    ->where('employee_leaves.reporter_id', $admin_id);
             }
             else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
@@ -7905,7 +7902,12 @@ class AdminAPIController extends Controller
                     if($employee_leave->status_id == 6){
                         $datum['role'] = 1;
                     }else{
-                        $datum['role'] = 2;
+                        if($is_hr){
+                            $datum['role'] = 0;
+                        }
+                        else{
+                            $datum['role'] = 2;
+                        }
                     }
                     if($employee_leave->to){
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
