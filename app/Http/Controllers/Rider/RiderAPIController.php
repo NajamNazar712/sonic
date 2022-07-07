@@ -11994,7 +11994,7 @@ class RiderAPIController extends Controller
                         $leave_request = new EmployeeLeave();
                         $leave_request->employee_id = $employee->id;;
                         $leave_request->employee_type_id = 2;
-                        $leave_request->reporter_id = $employee->line_manager_id;
+                        $leave_request->reporter_id = $employee->line_manager->admin->id;
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
                         $leave_request->applied_reason = $request->reason;
@@ -12004,7 +12004,7 @@ class RiderAPIController extends Controller
                     }
                     $employee->save();
                     NotificationsController::app_notification(11, $request->rider_id, 2, $leave_request->id);
-                    NotificationsController::app_notification(12, $employee->line_manager->admin->id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);

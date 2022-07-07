@@ -7787,7 +7787,7 @@ class AdminAPIController extends Controller
                         $leave_request = new EmployeeLeave();
                         $leave_request->employee_id = $employee->id;;
                         $leave_request->employee_type_id = 1;
-                        $leave_request->reporter_id = $employee->line_manager_id;
+                        $leave_request->reporter_id = $employee->line_manager->admin->id;
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
                         $leave_request->applied_reason = $request->reason;
@@ -7797,7 +7797,7 @@ class AdminAPIController extends Controller
                     }
                     $employee->save();
                     NotificationsController::app_notification(11, $request->admin_id, 1, $leave_request->id);
-                    NotificationsController::app_notification(12, $employee->line_manager->admin->id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
@@ -7868,8 +7868,8 @@ class AdminAPIController extends Controller
                     ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where(function ($query) use($employee) {
-                        $query->where('employee_leaves.reporter_id', $employee->id)
+                    ->where(function ($query) use($admin_id) {
+                        $query->where('employee_leaves.reporter_id', $admin_id)
                             ->where('employee_leaves.status', 1);
                     })
                     ->orwhere(function ($query) use($employee) {
@@ -7882,7 +7882,7 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.reporter_id', $employee->id)
+                    ->where('employee_leaves.reporter_id', $admin_id)
                     ->where('employee_leaves.status', 1);
                 $user_bit = 2;
             }
@@ -7938,9 +7938,14 @@ class AdminAPIController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
+                $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
                     if ($admin->employee->is_line_manager) {
-                        $employee_leaves->status = 6;
+                        if(in_array($admin_id, $department_head_ids)){
+                            $employee_leaves->status = 4;
+                        } else{
+                            $employee_leaves->status = 6;
+                        }
                         if($employee_leaves->leave_type != 1){
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
