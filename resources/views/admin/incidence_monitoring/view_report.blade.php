@@ -36,13 +36,13 @@
                                                     <h4 class=" info">Legend</h4>
                                                     <table class="table mb-0">
                                                         <tbody>
-                                                            <tr style="color:#fff;" class="btn-purple">
+                                                            <tr style="color:#fff;" class="btn-purple legends">
                                                                 <td class="align-middle">Regional Manger</td>
                                                             </tr>
-                                                            <tr style="color:#fff;" class="btn-dark">
+                                                            <tr style="color:#fff;" class="btn-dark legends">
                                                                 <td class="align-middle">Zonal Manager</td>
                                                             </tr>
-                                                            <tr style="color:#fff;" class="btn-primary">
+                                                            <tr style="color:#fff;" class="btn-primary legends">
                                                                 <td class="align-middle">Operations</td>
                                                             </tr>
                                                         </tbody>
@@ -352,6 +352,10 @@
           href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
     <style>
+
+        .legends{
+            cursor:pointer;
+        }
         .half-margin {
             margin: 8px 0 0 0 !important;
         }

@@ -71,7 +71,7 @@ class ShipperPackagingMaterialController extends Controller
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->join('packaging_material_request_statuses as prs', 'prs.id','=', 'packaging_material_requests.status_id')
             ->leftjoin('shipments as s', 's.tracking_number', '=', 'packaging_material_requests.tracking_number')
-            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status', 's.id as shipment_id', 'packaging_material_requests.status_id as status_id'])
+            ->select(['packaging_material_requests.id as request_id','packaging_material_requests.poc','packaging_material_requests.reference_id','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.address','ppm.mode','packaging_material_requests.status_id','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link', 'prs.name as request_status', 's.id as shipment_id', 'packaging_material_requests.status_id as status_id'])
         ->where('packaging_material_requests.user_id', session('user_id'));
 
         return Datatables::of($requests)
@@ -340,6 +340,8 @@ class ShipperPackagingMaterialController extends Controller
 //
 //    }
     public function packaging_request_submit(Request $request){
+
+        // dd($request->all());
        
         $packaging_size_ids = $request->size;
         $packaging_quantities = $request->quantity;
@@ -415,6 +417,8 @@ class ShipperPackagingMaterialController extends Controller
 
         $user_id = session('user_id');
 
+        
+
         if($request->mode_of_payment == 1) {
             if ($request->input('address_select') == 0) {
                 $result = PackagingMaterialRequest::create([
@@ -422,6 +426,7 @@ class ShipperPackagingMaterialController extends Controller
                     'city_id' => $request->new_pickup_city,
                     'address' => $request->new_pickup_address,
                     'poc' => $request->new_pickup_person_of_contact,
+                    'reference_id' => $request->new_pickup_reference_id,
                     'phone' => $request->new_pickup_phone_number,
                     'amount' => $total_charges,
                     'status_id' => 1,
@@ -433,6 +438,7 @@ class ShipperPackagingMaterialController extends Controller
                     'city_id' => $user_address->city_id,
                     'address' => $user_address->pickup_address,
                     'poc' => $user_address->poc,
+                    'reference_id' => $request->new_pickup_reference_id,
                     'phone' => $user_address->phone,
                     'amount' => $total_charges,
                     'status_id' => 1,
@@ -471,6 +477,7 @@ class ShipperPackagingMaterialController extends Controller
                             'city_id'=>$request->new_pickup_city,
                             'address'=>$request->new_pickup_address,
                             'poc'=>$request->new_pickup_person_of_contact,
+                            'reference_id' => $request->new_pickup_reference_id,
                             'phone'=>$request->new_pickup_phone_number,
                             'amount'=>$total_charges,
                             'status_id'=>1,
@@ -483,6 +490,7 @@ class ShipperPackagingMaterialController extends Controller
                             'city_id'=>$user_address->city_id,
                             'address'=>$user_address->pickup_address,
                             'poc'=>$user_address->poc,
+                            'reference_id' => $request->new_pickup_reference_id,
                             'phone'=>$user_address->phone,
                             'amount'=>$total_charges,
                             'status_id'=>1,
@@ -515,6 +523,7 @@ class ShipperPackagingMaterialController extends Controller
                         'city_id'=>$request->new_pickup_city,
                         'address'=>$request->new_pickup_address,
                         'poc'=>$request->new_pickup_person_of_contact,
+                        'reference_id' => $request->new_pickup_reference_id,
                         'phone'=>$request->new_pickup_phone_number,
                         'amount'=>$total_charges,
                         'status_id'=>1,
@@ -527,6 +536,7 @@ class ShipperPackagingMaterialController extends Controller
                         'city_id'=>$user_address->city_id,
                         'address'=>$user_address->pickup_address,
                         'poc'=>$user_address->poc,
+                        'reference_id' => $request->new_pickup_reference_id,
                         'phone'=>$user_address->phone,
                         'amount'=>$total_charges,
                         'status_id'=>1,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
@@ -35,7 +36,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use DB;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class RiderManagementController extends Controller
 {
@@ -1393,6 +1393,7 @@ class RiderManagementController extends Controller
     }
 
     public function rider_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),414);
         $settings = GlobalSettings::where('type','rider_otp');
         if($settings->doesntExist())
         {
@@ -1409,10 +1410,13 @@ class RiderManagementController extends Controller
     }
 
     public function rider_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),415);
+        }
         $riders = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
-            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp', 'riders.last_login_attempt')
-            ->where('riders.status', 1)
-            ->whereNotNull('riders.otp');
+            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp','riders.delivery_note_otp as delivery_note_otp','riders.otp_date as delivery_note_otp_date', 'riders.last_login_attempt')
+            ->where('riders.status', 1);
 
         $datatable = Datatables::of($riders);
         return $datatable->make(true);
@@ -1421,6 +1425,7 @@ class RiderManagementController extends Controller
 
     public function rider_otp_update(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),547);
         $settings = GlobalSettings::where('type','rider_otp');
         if($settings->doesntExist())
         {

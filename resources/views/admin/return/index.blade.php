@@ -265,11 +265,22 @@
                             @endif
                         </div>
                         <div class="form-group">
+                            @if($consignee_refused_reasons)
+                                <fieldset class="form-group d-none">
+                                    <select name="consignee_refused_reasons" id="consignee_refused_reasons" name="consignee_refused_reasons" class="form-control select2">
+                                        @foreach($consignee_refused_reasons as $reasons)
+                                            <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            @endif
+                        </div>
+                        <div class="form-group">
                             <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="submit" name="add" id="btnReturn" class="btn btn-primary update_return_confirm" value="Add">Update To Return Confirm</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -300,6 +311,17 @@
                                         <option value="{{$reason->id}}">{{$reason->name}}</option>
                                     @endforeach
                                 </select>
+                            @endif
+                        </div>
+                        <div class="form-group">
+                            @if($consignee_refused_reasons)
+                                <fieldset class="form-group d-none">
+                                    <select name="single_consignee_refused_reasons" id="single_consignee_refused_reasons" name="single_consignee_refused_reasons" class="form-control select2">
+                                        @foreach($consignee_refused_reasons as $reasons)
+                                            <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
                             @endif
                         </div>
                         <div class="form-group">
@@ -475,6 +497,17 @@
                 placeholder: "Select Agent",
                 width:'100%',
                 dropdownParent:$('#AssignAgentModal')
+            });
+
+            $("#consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sub Reason",
+                width:'100%',
+                dropdownParent:$('#update_return_reason_form')
+            });
+            $("#single_consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sub Reason",
+                width:'100%',
+                dropdownParent:$('#ReturnConfirmReasonSingleModal')
             });
 
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
@@ -1457,6 +1490,7 @@
                 submitHandler: function(form) {
 
                     var return_reason_select = $('#return_reason_select').val();
+                    var consignee_refused_reasons = $('#consignee_refused_reasons').val();
                     var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                         title: 'Are You Sure?',
@@ -1500,7 +1534,8 @@
                                     '_token':'{{ csrf_token() }}',
                                     'action': 'confirm',
                                     'remark': remarks,
-                                    'return_reason_select': return_reason_select
+                                    'return_reason_select': return_reason_select,
+                                    'consignee_refused_reasons': consignee_refused_reasons,
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){
@@ -1530,10 +1565,101 @@
                 }
             });
 
+            // select all return confirm work
+
+            $('#return_reason_select').on('change', function () {
+                var selected_value = $(this).val();
+                if(selected_value == 38){
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#consignee_refused_reasons').parent('fieldset').removeClass('d-none');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#consignee_refused_reasons').parent('fieldset').addClass('d-none');
+                    $('#btnReturn').attr('disabled', false);
+                }
+            });
+
+            $('#consignee_refused_reasons').on('change', function () {
+                var selected_value = $(this).val();
+                var selected_data = $(this).select2('data');
+                var selected_text =  selected_data[0].text;
+                if(selected_value == 12){
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#return_reason_shipment_remarks').val('');
+                    // $('#return_reason_shipment_remarks').attr('data-rule-required','true');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#return_reason_shipment_remarks').val(selected_text);
+                    $('#btnReturn').attr('disabled', false);
+                }
+                
+            });
+
+            $('#return_reason_shipment_remarks_single').keyup(function () {
+                value = $(this).val();
+                if(value.length > 0)
+                {
+                    $('#single_reason_update_btn').attr('disabled', false);
+                }
+                else{
+                    $('#single_reason_update_btn').attr('disabled', true);
+                }
+            });
+
+            // single return confirm work
+
+            $('#single_return_reason_select').on('change', function () {
+                var selected_value = $(this).val();
+                if(selected_value == 38){
+                    $('#return_reason_shipment_remarks_single').attr('readonly', true);
+                    $('#single_consignee_refused_reasons').parent('fieldset').removeClass('d-none');
+                    $('#single_reason_update_btn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks_single').attr('readonly', false);
+                    $('#single_consignee_refused_reasons').parent('fieldset').addClass('d-none');
+                    $('#single_reason_update_btn').attr('disabled', false);
+                }
+            });
+
+            $('#single_consignee_refused_reasons').on('change', function () {
+                var selected_value = $(this).val();
+                var selected_data = $(this).select2('data');
+                var selected_text =  selected_data[0].text;
+                if(selected_value == 12){
+                    $('#return_reason_shipment_remarks_single').attr('readonly', false);
+                    $('#return_reason_shipment_remarks_single').val('');
+                    // $('#return_reason_shipment_remarks').attr('data-rule-required','true');
+                    $('#single_reason_update_btn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks_single').attr('readonly', true);
+                    $('#return_reason_shipment_remarks_single').val(selected_text);
+                    $('#single_reason_update_btn').attr('disabled', false);
+                }
+                
+            });
+
+            $('#return_reason_shipment_remarks').keyup(function () {
+                value = $(this).val();
+                if(value.length > 0)
+                {
+                    $('#btnReturn').attr('disabled', false);
+                }
+                else{
+                    $('#btnReturn').attr('disabled', true);
+                }
+            });
+
             $('#single_reason_update_btn').on('click', function(){
                 var shipment_id = $('#return_reason_shipment_id').val();
                 var remarks = $('#return_reason_shipment_remarks_single').val();
                 var single_return_reason_select = $('#single_return_reason_select').val();
+                var single_consignee_refused_reasons = $('#single_consignee_refused_reasons').val();
                 if(single_return_reason_select === ''){
                     var error = 'Select a reason!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1571,7 +1697,8 @@
                                     '_token':'{{ csrf_token() }}',
                                     'action': action,
                                     'remark':remarks,
-                                    'single_return_reason_select': single_return_reason_select
+                                    'single_return_reason_select': single_return_reason_select,
+                                    'single_consignee_refused_reasons': single_consignee_refused_reasons,
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){

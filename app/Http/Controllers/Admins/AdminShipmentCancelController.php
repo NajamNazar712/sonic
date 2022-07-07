@@ -66,62 +66,69 @@ class AdminShipmentCancelController extends Controller
 
                 if ($shipments->exists()) {
                     foreach ($shipments->get() as $shipment) {
-                        //cacel from warehouse
+                        // $shipment->warehouse_order_status = 9;
 
-                        if($shipment->warehouse != 1){
-                            // $shipment->warehouse_order_status = 9;
-                        //cacel from warehouse end
+                        $cancellation_check = true;
 
-                        $shipment->shipper_status_id = 17;
-                        $shipment->consignee_status_id = 17;
-                        $shipment->save();
-                        ShipmentsPickupJourneyController::add($shipment->id, 4);
-
-                        V2AdminPickupsController::cancel($shipment->id);
-
-                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
-                        if($pickup_request_shipment){
-                            $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
-                            if($pickup_requests->exists()){
-                                $pickup_requests = $pickup_requests->get();
-                                $flag = true;
-                                foreach ($pickup_requests as $pickup_request){
-                                    $is_shipment = Shipment::find($pickup_request->shipment_id);
-                                    if($is_shipment->shipper_status_id != 17){
-                                        $flag = false;
-                                    }
-                                }
-                                if($flag == true){
-                                    $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
-                                    $pickup_request->status_id = 4;
-                                    $pickup_request->save();
-                                }
-                            }
-                        }
-                        //cacel from warehouse
                         if($shipment->warehouse == 1){
-                            $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
-                            if($shipment_products){
-                                foreach ($shipment_products as $shipment_product){
-                                    $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
-                                    if($current_stock_addition){
-                                        $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
-                                        $current_stock_addition->save();
+                            if($shipment->warehouse_order_status != 1){
+                                $cancellation_check = false;
+                            }
+                        }
+                        if($cancellation_check){
+                            $shipment->shipper_status_id = 17;
+                            $shipment->consignee_status_id = 17;
+                            $shipment->save();
+                            ShipmentsPickupJourneyController::add($shipment->id, 4);
+
+                            V2AdminPickupsController::cancel($shipment->id);
+
+                            $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
+                            if($pickup_request_shipment){
+                                $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
+                                if($pickup_requests->exists()){
+                                    $pickup_requests = $pickup_requests->get();
+                                    $flag = true;
+                                    foreach ($pickup_requests as $pickup_request){
+                                        $is_shipment = Shipment::find($pickup_request->shipment_id);
+                                        if($is_shipment->shipper_status_id != 17){
+                                            $flag = false;
+                                        }
+                                    }
+                                    if($flag == true){
+                                        $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
+                                        $pickup_request->status_id = 4;
+                                        $pickup_request->save();
                                     }
                                 }
                             }
+                            //cacel from warehouse
+                            if($shipment->warehouse == 1){
+                                $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
+                                if($shipment_products){
+                                    foreach ($shipment_products as $shipment_product){
+                                        $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                                        if($current_stock_addition){
+                                            $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                            $current_stock_addition->in_process_stock = $current_stock_addition->in_process_stock - $shipment_product->quantity;
+                                            $current_stock_addition->save();
+                                        }
+                                    }
+                                }
+                                $shipment->warehouse_order_status = 9;
+                                $shipment->save();
+                                WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+                            }
+                            //cacel from warehouse end
 
-                            WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+                            ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
                         }
-                        //cacel from warehouse end
-                        
-                        ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
-                    }
                     }
                 }
             }
         }
     }
+
 
     public function index(Request $request) {
         ActivityTrailController::createActivityTrailLog(Auth::id(),291);
@@ -278,11 +285,11 @@ class AdminShipmentCancelController extends Controller
         return $datatables->make(true);
     }
 
-    public function revert(Request $request) {
+    public function bulk_revert(Request $request) {
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if ($shipment->shipper_status_id == 17) {
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
                 $shipment->shipper_status_id = 1;
                 $shipment->consignee_status_id = 1;
 
@@ -316,6 +323,27 @@ class AdminShipmentCancelController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Shipper']);
         }
+    }
+
+    public function revert(Request $request) {
+
+            $shipment = Shipment::find($request->shipment_id);
+
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
+                $shipment->shipper_status_id = 1;
+                $shipment->consignee_status_id = 1;
+
+                $shipment->save();
+
+                AdminPickupsController::generate($shipment->id);
+
+                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
+                return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Warehouse Shipment can not be reverted from Sonic!'];
+            }
+
     }
 
 
