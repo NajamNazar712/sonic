@@ -1480,7 +1480,7 @@ class AdminInternationalRatesController extends Controller
                     return response()->json(['status' => 0, 'error' => 'Retail Shipment Not Allowed']);
                 } else {
                     if ($shipment->business_category_id == 2) {
-                        if (InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('service_charges')->exists()) {
+                        if (Shipment::where('id', $shipment->id)->whereNotNull('esc_charges')->exists()) {
                             return response()->json(['status' => 0, 'error' => 'Charges already added against this tracking number']);
                         } else {
                             if (!in_array($shipment->shipper_status_id,$shipment_status )) {
@@ -1510,9 +1510,8 @@ class AdminInternationalRatesController extends Controller
         if($tracking_number != null && $amount != null){
             $shipment = Shipment::where('tracking_number',$tracking_number)->first();
             if($shipment){
-                $shipment = InternationalShipment::where('shipment_id',$shipment->id)->first();
-                $shipment->service_charges = $amount;
-                $shipment->added_by = Auth::id();
+                $shipment = Shipment::where('id',$shipment->id)->first();
+                $shipment->esc_charges = $amount;
                 $shipment->save();
                 return redirect()->back()->with('success', 'Charges Added!');
             }
