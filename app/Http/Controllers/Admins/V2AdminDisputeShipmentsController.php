@@ -340,8 +340,9 @@ class V2AdminDisputeShipmentsController extends Controller
                 'check_reason_id' => 'Reasong ID not found!',
             ];
             $rules = [
-                'tracking_number' => ['required', 'between:1,100', 'check_tracking_number'],
+                'tracking_number' => ['between:1,100', 'check_tracking_number'],
                 'reason_id' => ['required', 'between:1,20', 'check_reason_id'],
+                'remarks' => ['required', 'between:1,20'],
             ];
 
 
