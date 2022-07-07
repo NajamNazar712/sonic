@@ -3658,6 +3658,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
+        Route::post('add', 'Admins\LeadManagementController@add')->name('add');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function(){
