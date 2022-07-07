@@ -1240,7 +1240,11 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-            
+
+            'admin.nps.index' => 751,
+            'admin.nps.add' => 752,
+            'admin.nps.response.report' => 755,
+            'admin.nps.consolidate.report' => 756,
 
             
         ],
