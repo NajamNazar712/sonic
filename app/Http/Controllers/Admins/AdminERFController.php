@@ -59,8 +59,9 @@ class AdminERFController extends Controller
                 $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
                     ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
             })
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es']);
-
+            ->leftjoin('admins as ar', 'ar.id', '=', 'employee_requisitions.submitted_by')
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document','employee_requisitions.type as type','employee_requisitions.employee_status as es','a.trax_id as trax_id','employee_requisitions.submitted_by as requested_by','ar.name as requested_by_name'
+            ]);
         if (session('role_id') != 1 && session('department_id') != 10) {
             $erf = $erf->where('dp.id', session('department_id'));
         }
@@ -128,7 +129,90 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.employee_status', 2);
                 }
             })
-a
+->editColumn('trax_id', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $items = array();
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $value){
+//                        $trax_id.= $value->trax_id.",<br>";
+                        $items[] = '<br>'.$value->trax_id;
+                    }
+                    return $items;
+                }
+            })
+            ->editColumn('trax_id_for_excel', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $value){
+                        $trax_id.= $value->trax_id.",";
+                    }
+                    return $trax_id;
+                }
+            })
+            ->addColumn('leaver_name_for_excel', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $id){
+                        $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
+                        $trax_id.= $name->name.",";
+                    }
+                    return $trax_id;
+                }
+            })
+            ->addColumn('leaver_name', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $trax_id = "";
+                    $leaver_name = array();
+                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+                    foreach ($ids as $id){
+                        $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
+//                        $trax_id.= $name->name.",<br>".' ';
+                        $leaver_name[] = '<br>'.$name->name;
+                    }
+                    return $leaver_name;
+                }
+            })
+            ->editColumn('requested_by_name', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+//                    $requested_by = Admin::where('id',$erf->requested_by)->select('name')->first();
+                    return $erf->requested_by_name;
+                }
+            })
+            ->filterColumn('ar.name', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('ar.name', "like","%".$keyword."%")->where('employee_requisitions.type','!=',1);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('requested_date', function($erf) {
+                if($erf->type == 1){
+                    return '-';
+                }
+                else{
+                    $requested_date = EmployeeRequisition::where('id',$erf->id)->select('created_at')->first();
+                    return $requested_date->created_at;
+                }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '

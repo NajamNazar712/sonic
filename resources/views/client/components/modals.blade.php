@@ -144,3 +144,51 @@
         </div>
     </div>
 @endif
+
+@if(Session::has('nps_survey') &&  !empty(session('nps_survey')))
+
+    <div class="modal fade" id="question_modal" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="question_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white text-center">
+                    <h4 class="modal-title white" id="question_survery_heading">Survey Form</h4>
+                </div>
+                <form action="{{route('cod.nps.ratting_submit')}}" method="post" id="question_submit">
+                    @csrf
+                    <div class="modal-body  text-center" style="width: 100%;overflow-y: scroll;height: 500px!important;">
+                        <h5 style="text-align: left;">
+                            <strong>Dear Valued Customer,</strong>
+                            <br>
+                            In order to improve our service and to assure you to be the part of improvement, we request you to submit your valuable feedback/rating against this survey. Please rate us on scale of <strong> 0-5</strong>.<br>
+                            <strong> 0-2 (Bad).</strong>
+                            <strong> 3 (Neutral) </strong>
+                            <strong> 4-5 (Good) </strong>
+
+                        </h5>
+                        <table class="table table-bordered table-lg" id="question_data_table" style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th width="20">S.No </th>
+                                    <th width="800">Questions</th>
+                                    <th width="300">Ratting Scale</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                        <div class="col-12" id="question_recommend_input">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button tabindex="-1" type="button" id="skip_nps_survey" class="btn btn-primary ml-1">Skip</button>
+                        <button tabindex="-1" type="button" id="rate_nps_survey" class="btn btn-success ml-1">Rate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+@endif

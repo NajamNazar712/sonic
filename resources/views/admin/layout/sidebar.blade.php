@@ -41,6 +41,22 @@
                                     <li><a class="menu-item" href="{{ route('admin.accounts.active.today')}}">Active Today</a></li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || count(array_intersect([762, 767], session('permissions'))) !== 0)
+                                    <li><a class="menu-item" href="#">Disable Account Intimation Survey</a>
+                                        <ul class="menu-content">
+                                            @if (session('role_id') == 1 || in_array(762, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.index') }}">Send Survey</a>
+                                                </li>
+                                            @endif
+        
+                                            @if (session('role_id') == 1 || in_array(767, session('permissions')))
+                                                <li><a class="menu-item" href="{{ route('admin.accounts.disable.account.intimation.survey.report')}}">Survey Report</a>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </li>
+                                    @endif
+
                                 </ul>
                             </li>
                         @endif
@@ -76,9 +92,9 @@
                                 </ul>
                             </li>
                         @endif
-                            @if (session('role_id') == 1 || session('sales_coordinator'))
-                                <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
-                            @endif
+                        @if (session('role_id') == 1 || session('sales_coordinator'))
+                            <li><a class="menu-item" href="{{route('admin.shipment.poc_kam_tagged_accounts.index')}}">POC and KAM Tagged Accounts</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -1841,6 +1857,24 @@
                     @if (session('role_id') == 1 || in_array(702, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.dispute.shipments.index')}}">Dispute Shipments</a></li>
                     @endif
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || count(array_intersect([751, 752], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">NPS</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(751, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.nps.index') }}">Survey</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(752, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.nps.response.report') }}">Response Report</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(752, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.nps.consolidate.report') }}">Consolidated Report</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+                    </ul>
+
                 </ul>
             </li>
             @endif
