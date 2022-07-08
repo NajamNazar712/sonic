@@ -63,6 +63,7 @@ class AdminShipmentHandoverController extends Controller
             ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL);
 
             $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+
             $msg_string = null;
             $str_arr = null;
             $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
@@ -70,24 +71,34 @@ class AdminShipmentHandoverController extends Controller
                 foreach ($str_arr as $arr_value) {
                     if (strtolower($nsa) == strtolower($arr_value)) {
                         $con_nsa = $arr_value;
-                        if ($msg_string != null) {
-                            $msg_string = $msg_string . ', ' . $arr_value;
-                        } else {
+                        
+                        // if ($msg_string != null) {
+                        //     $msg_string = $msg_string . ', ' . $arr_value;
+                        // } else {
                             $msg_string = $arr_value;
-                        }
+                        // }
                     }
                 }
             }
+
+            
             $delivery_area = null;
-              if($msg_string != null){
-                  $found = DeliveryLocationMappingKeyword::where('keyword',$msg_string);
-                  if($found->exists()){
-                      $found = $found->first();
-                      $delivery_area = $found->delivery_location_mapping->id;
-                  }
-              }else{
-                $delivery_area = 0;
-              }
+            if($msg_string != null){
+                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                            ->select('dlm.area_name as area_name','dlm.id')
+                            ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                            ->where('dlm.city_id',$shipment->consignee_city_id);
+                if($found->exists()){
+                    $found = $found->first();
+                    $delivery_area = $found->area_name;
+                }
+            }else{
+              $delivery_area = 0;
+
+            }
+            
+
+
             $details['delivery_area'] = $delivery_area;
             if($request->delivery_location_mapping != null){
                 if($request->delivery_location_mapping != $delivery_area){

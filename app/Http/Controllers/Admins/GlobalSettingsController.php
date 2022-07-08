@@ -6927,10 +6927,10 @@ public function sales_incentive()
 
     public function delivery_area_keyword_store(Request $request){
         
-        $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id);
+        $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id)->where('area_name',$request->area_name);
         
         if($check_exists->exists()){
-            return redirect()->back()->with('error', 'Deivery Area City Already Exists!');
+            return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
         }
 
         $keywords = explode(',', $request->delivery_area_keyword);
@@ -6988,11 +6988,11 @@ public function sales_incentive()
     public function delivery_area_keyword_update(Request $request){
         $delivery_location = DeliveryLocationMapping::find($request->id);
         if($delivery_location){
-            if($delivery_location->city_id != $request->city_id){
-                $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id);
+            if($delivery_location->city_id != $request->city_id && $delivery_location->area_name != $request->area_name){
+                $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id)->where('area_name',$request->area_name);
             
                 if($check_exists->exists()){
-                    return redirect()->back()->with('error', 'Deivery Area City Already Exists!');
+                    return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
                 }
             }
             DeliveryLocationMappingKeyword::where('mapping_id',$request->id)->delete();
