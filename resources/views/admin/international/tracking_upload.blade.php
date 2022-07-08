@@ -13,7 +13,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row justify-content-end">
+                <!-- <div class="row justify-content-end">
                     <div class="col-5">
                         <div class="card">
                             <div class="card-header">
@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-<!--                <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+               <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                     {{ csrf_field() }}
 
                     <div class="row align-items-center justify-content-center">
