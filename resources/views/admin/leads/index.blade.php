@@ -511,6 +511,15 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
+                                    <select name="city_id" id="add_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}"> {{ $city->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
                                     <select name="territory_id" id="add_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
                                     </select>
                                 </div>
@@ -522,15 +531,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <select name="city_id" id="add_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{ $city->id }}"> {{ $city->name }} </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="col-6">
                                 <div class="form-group">
                                     <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
