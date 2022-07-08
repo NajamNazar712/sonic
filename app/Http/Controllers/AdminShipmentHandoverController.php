@@ -85,6 +85,8 @@ class AdminShipmentHandoverController extends Controller
                       $found = $found->first();
                       $delivery_area = $found->delivery_location_mapping->id;
                   }
+              }else{
+                $delivery_area = 0;
               }
             $details['delivery_area'] = $delivery_area;
             if($request->delivery_location_mapping != null){
