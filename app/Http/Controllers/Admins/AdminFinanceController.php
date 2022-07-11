@@ -3589,7 +3589,7 @@ class AdminFinanceController extends Controller
 
     }
 
-    static public function add_payment($shipment_id, $type)
+    static public function add_payment($shipment_id, $type,$esc_check = null)
     {
         $shipment = Shipment::find($shipment_id);
         $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
@@ -3602,16 +3602,10 @@ class AdminFinanceController extends Controller
         }
 
         $amount = $shipment->amount;
-        $service_charges = 0;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
-                    $international_shipment = InternationalShipment::where('shipment_id',$shipment->id)->whereNotNull('service_charges');
-                    if($international_shipment->exists()){
-                        $international_shipment = $international_shipment->first();
-                        $service_charges = $international_shipment->service_charges;
-                    }
-                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $service_charges;
+                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
@@ -3805,6 +3799,50 @@ class AdminFinanceController extends Controller
                         $pending_invoice_shipment->save();
                     }
                 }
+            }
+
+            if($esc_check == 1){
+                 $invoice_shipment = InvoiceShipment::where('type',0)->where('shipment_id',$shipment_id);
+                 if($invoice_shipment){
+                     $invoice_shipment = $invoice_shipment->latest()->first();
+                     $invoice =  Invoice::find($invoice_shipment->invoice_id);
+                     if($invoice->status_id != 3){
+
+                         $total_charges = 0;
+                         $total_gst = 0;
+                         $total_invoice_amount = 0;
+
+                         $invoice_shipment->charges = $charges;
+                         $invoice_shipment->gst = $gst;
+                         $invoice_shipment->invoice_amount = $charges + $gst;
+                         $invoice_shipment->save();
+
+                         foreach($invoice->invoice_shipments as $shipments){
+
+                             $total_charges = $total_charges + $shipments->charges;
+                             $total_gst = $total_gst + $shipments->gst;
+                             $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
+                         }
+
+                         $invoice->total_charges = $total_charges;
+                         $invoice->total_gst = $total_gst;
+                         $invoice->total_invoice_amount = $total_invoice_amount;
+                         $invoice->save();
+
+                     }
+
+                 }
+                 else{
+                     $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id',$shipment_id);
+                     if($pending_invoice_shipment){
+                         $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+                         $pending_invoice_shipment->type = $type;
+                         $pending_invoice_shipment->charges = $charges;
+                         $pending_invoice_shipment->gst = $gst;
+                         $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                         $pending_invoice_shipment->save();
+                     }
+                 }
             }
         } else {
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
