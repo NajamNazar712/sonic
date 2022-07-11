@@ -662,9 +662,10 @@ class AdminPackagingMaterialController extends Controller
                 $flag = true;
                 foreach ($request_details->items as $item) {
                     $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->where('wms_product_barcodes.product_id', $item->wms_product_id)->where('wsr.warehouse_pickup_address_id', $trax_address->id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->count();
+                    $wms_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->first();
+                    $remaining_stock = $product_barcodes - $wms_current_stock->in_process_stock;
                     if ($product_barcodes < $item->quantity) {
-                        $wms_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->first();
-                        $wms_current_stock->stock = $product_barcodes;
+                        $wms_current_stock->stock = $remaining_stock;
                         $wms_current_stock->save();
                         $flag = false;
                     }
@@ -1280,7 +1281,7 @@ class AdminPackagingMaterialController extends Controller
                     return 'Both';
                 }
                 else if($type->packaging_type == 4){
-                    return 'Only Shipper';
+                    return 'Selected Shipper';
                 }
                 else{
                     return 'Marco';
@@ -1295,12 +1296,12 @@ class AdminPackagingMaterialController extends Controller
                     $query->where('packaging_material_types.packaging_type', 2);
                 }
                 else if ($keyword == 'both') {
-                    $query->where('packaging_material_types.packaging_type', 2);
+                    $query->where('packaging_material_types.packaging_type', 3);
                 }
-                else if ($keyword == 'only' || $keyword == 'only shipper') {
+                else if ($keyword == 'selected' || $keyword == 'selected shipper' || $keyword == 'shipper') {
                     $query->where('packaging_material_types.packaging_type', 4);
                 }
-                else if ($keyword == 'only' || $keyword == 'marco') {
+                else if ($keyword == 'marco') {
                     $query->where('packaging_material_types.packaging_type', 5);
                 }
                 else {
@@ -1352,7 +1353,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
@@ -1373,7 +1374,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';

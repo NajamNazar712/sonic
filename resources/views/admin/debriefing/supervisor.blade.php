@@ -13,7 +13,7 @@
                 @include('admin.inc.messages')
                 <div class="row justify-content-center">
                     <div class="col-3">
-                        <div class="card bg-gradient-agent_assigned_shipments pull-up">
+                        <div class="card bg-gradient-agent_assigned_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <div class="card bg-gradient-bot_assigned_shipments pull-up">
+                        <div class="card bg-gradient-bot_assigned_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
