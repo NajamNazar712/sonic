@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\LeadTaggingController;
@@ -4854,6 +4855,7 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
+
             return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -4867,11 +4869,22 @@ class AdminAPIController extends Controller
 
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
+                $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
+                if(!$dispute_check){
+                    return response()->json(false);
+                }
                 // arrive function
                 // if ($shipment->actual_weight == null) {
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
+                if ($shipment->warehouse == 1) {
+                    if ($shipment->warehouse_order_status != 5) {
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not dispatched yet']);
+                    }
+                }
+
+                
                 if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 63) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
                     if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
                         return response()->json(false);
@@ -5795,7 +5808,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = 'Request Has Been Submitted and Pending for Approval';
+                        $message = "Welcome to TRAX ".$request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -5880,7 +5893,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = 'Optional details Has Been Submitted and Pending for Approval';
+                        $message = "Welcome to TRAX ".$employee_request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -7383,7 +7396,12 @@ class AdminAPIController extends Controller
             if ($user->exists()) {
                 $user = $user->first();
                 if($user->status == 0){
-                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+
+                    if($user->first_login == 0){
+                        return response()->json(['status' => 1, 'message' => "Dear ".$user->name ."- Your request is in process and is pending for approval from HR."]);
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                    }
                 }
                 if (Hash::check($request->input('pin'), $user->password)) {
                     $employee = Employee::where('trax_id', $user->trax_id);
@@ -7444,12 +7462,25 @@ class AdminAPIController extends Controller
                         $information['api_token'] = $api_token;
                     }
 
+                    $information['welcome_bit'] = 0;
+                    if(!$user->first_login){
+                        $information['welcome_bit'] = 1;
+                        $information['welcome_message'] = "Welcome to TRAX ".$user->name;
+                    }
+                    $user->first_login = 1;
+                    $user->save();
                     return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                $employee = Employee::whereIn('request_status_id',[1,2])->where('employee_type_id',1)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+                if($employee->exists()){
+                    $employee = $employee->first();
+                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ."- Your request is in process and is pending for approval from HR."]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
             }
         }
     }

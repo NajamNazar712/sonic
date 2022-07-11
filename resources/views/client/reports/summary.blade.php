@@ -72,7 +72,7 @@
                     <div class="row">
                         <div class="col-3">
                             <div class="card pull-up">
-                                <div class="card-content border rounded" id="total_shipments">
+                                <div class="card-content border rounded cursor-pointer" id="total_shipments">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
@@ -88,7 +88,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-primary pull-up">
+                            <div class="card bg-gradient-directional-primary pull-up cursor-pointer">
                                 <div class="card-content" id="total_pending">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-info pull-up">
+                            <div class="card bg-gradient-directional-info pull-up cursor-pointer">
                                 <div class="card-content" id="total_received">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -122,7 +122,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-success pull-up">
+                            <div class="card bg-gradient-directional-success pull-up cursor-pointer">
                                 <div class="card-content" id="total_delivered">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -141,7 +141,7 @@
                     </div>
                     <div class="row justify-content-center">
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-inprocess pull-up">
+                            <div class="card bg-gradient-directional-inprocess pull-up cursor-pointer">
                                 <div class="card-content" id="total_inprocess">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -159,7 +159,7 @@
                         </div>
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-warning pull-up">
+                            <div class="card bg-gradient-directional-warning pull-up cursor-pointer">
                                 <div class="card-content" id="total_return">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -176,7 +176,7 @@
                             </div>
                         </div>
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-red pull-up">
+                            <div class="card bg-gradient-directional-red pull-up cursor-pointer">
                                 <div class="card-content" id="total_cancelled">
                                     <div class="card-body">
                                         <div class="media d-flex">
