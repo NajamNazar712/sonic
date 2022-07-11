@@ -84,7 +84,7 @@
 
                                                 <table class="table mb-0">
                                                     <tbody>
-                                                    <tr style="background-color: yellow; color:#010a10;">
+                                                    <tr style="background-color: yellow; color:#010a10;" class="legends">
                                                         <td class="align-middle" id="filter_line_manager_btn">Line Manager</td>
                                                     </tr>
                                                     </tbody>
@@ -368,9 +368,9 @@
                         <div class="form-group">
                             <div class="form-group position-relative">
                                 <input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
-                                <div class="form-control-position" id="peye">
-                                    <i class="la la-eye success"></i>
-                                </div>
+{{--                                <div class="form-control-position" id="peye">--}}
+{{--                                    <i class="la la-eye success"></i>--}}
+{{--                                </div>--}}
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -693,6 +693,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <style>
+
+        .legends{
+            cursor:pointer;
+        }
+        
         .is_line_manager{
             background-color: yellow;
         }
@@ -720,7 +725,7 @@
             let route_id;
             var elm = document.getElementById("edit_ccd_rider_checkbox");
             var switchery = new Switchery(elm, { className: "switchery switchery-small", color: "#37BC9B" });
-            $('#peye').on('mousedown',function(){$('#pin').attr('type','text')}).on('mouseup',function(){$('#pin').attr('type','password')});
+            // $('#peye').on('mousedown',function(){$('#pin').attr('type','text')}).on('mouseup',function(){$('#pin').attr('type','password')});
             $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').attr('disabled','disabled');
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',

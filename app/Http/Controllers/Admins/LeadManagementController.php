@@ -20,10 +20,11 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadTagging;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use DB;
+use Auth;
+use Exception;
 
 class LeadManagementController extends Controller
 {
@@ -810,5 +811,35 @@ class LeadManagementController extends Controller
             return redirect()->back()->with('error', 'Lead not found!');
         }
         return redirect()->back()->with('error', 'Something went wrong!');
+    }
+
+    public function add(Request $request){
+
+        try {
+
+            $new_lead = new Lead();
+            $new_lead->contact_person = $request->contact_person;
+            $new_lead->phone_number = $request->phone_number;
+            $new_lead->email_address = $request->email_address;
+            $new_lead->city_id = $request->city_id;
+            $new_lead->requested_date = Carbon::now();
+            $new_lead->service_id = $request->service_id;
+            $new_lead->reference_id = 7;
+            $new_lead->territory_id = $request->territory_id;
+            $new_lead->territory_area_id = $request->territory_area_id;
+            $new_lead->brand = $request->brand;
+            $new_lead->company = $request->company;
+            $new_lead->save();
+
+            return redirect()->back()->with('success', 'Lead added successfully');
+
+        } catch (Exception $e) {
+
+            return $e->getMessage();
+        }
+
+
+
+
     }
 }

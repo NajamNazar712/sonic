@@ -60,7 +60,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="total_leads_div">
-                        <div class="card bg-gradient-directional-booked_shipments pull-up">
+                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="received_leads_div">
-                        <div class="card bg-gradient-directional-complaints_launched pull-up">
+                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -100,7 +100,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="in_process_div">
-                        <div class="card bg-gradient-directional-in_transit pull-up">
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -122,7 +122,7 @@
                     </div>
 
                     <div class="col-3" id="in_process_activation_div">
-                        <div class="card bg-gradient-directional-out_for_delivery pull-up">
+                        <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -147,7 +147,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="dead_leads_div">
-                        <div class="card bg-gradient-directional-pending_shipments pull-up">
+                        <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="activated_leads_div">
-                        <div class="card bg-gradient-directional-return_delivered pull-up">
+                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -190,7 +190,7 @@
                     </div>
 
                     <div class="col-3" id="lead_time_ratio_div">
-                        <div class="card bg-gradient-directional-return_confirm pull-up">
+                        <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -207,7 +207,7 @@
                         </div>
                     </div>
                     <div class="col-3" id="lead_time_ratio_div">
-                        <div class="card bg-gradient-directional-destination pull-up">
+                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -227,7 +227,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="dormant_div">
-                        <div class="card bg-gradient-directional-pending_confirmation pull-up">
+                        <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -464,6 +464,102 @@
         </div>
     </div>
 
+
+    {{--    Add Lead--}}
+    <div class="modal fade" id="add_lead_modal" role="dialog" aria-labelledby="add_lead_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="edit_lead_modal_title">Add Lead</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <form id="add_lead_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.leads.add') }}">
+                        @method('POST')
+                        @csrf
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Contact Person Name*" data-rule-required="true"  data-msg-required="Contact Person Name is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="phone_number" id="add_phone_number" placeholder="Phone Number*" data-rule-required="true"  data-msg-required="Phone Number is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" name="email_address" id="add_email" placeholder="Email*" data-rule-required="true"  data-msg-required="Email is required">
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="service_id" id="add_service" class="form-control select2" data-rule-required="true"  data-msg-required="Service is required">
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}"> {{ $service->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="city_id" id="add_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}"> {{ $city->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="territory_id" id="add_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="territory_area_id" id="add_area" class="form-control select2">
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="company" id="add_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <div class="form-group ml-1">
+                                <button type="submit" class="btn btn-primary width-200" value="Add">Add</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {{--    End Add Lead--}}
     {{--    todo bulk status model--}}
     <div class="modal fade" id="edit_lead_modal" role="dialog" aria-labelledby="edit_lead_modal"
          aria-hidden="true">
@@ -968,7 +1064,16 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-
+                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
+                    {
+                        text: '<i class="la la-plus"></i> Add Lead',
+                        className: 'btn btn-primary add_lead',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#add_lead_modal').modal('show');
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
                         text: 'Bulk Update Status',
@@ -1859,8 +1964,25 @@
                 width: '100%'
             });
 
+            $("#add_territory").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Territory*",
+                width: '100%'
+            });
+            $("#add_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                width: '100%'
+            });
+
+            $("#add_service").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Service*",
+                width: '100%'
+            });
+
             $('#edit_phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $("#edit_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+
+            $('#add_phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
+            $("#add_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
 
 
 
@@ -2067,6 +2189,117 @@
                     });
                 }
             });
+
+            $('#add_city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Select City*',
+            }).bind('change', function () {
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('cod.territory') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 0) {
+                            $('#add_territory').empty();
+                            $.each(data.territory, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('#add_territory').append(newOption);
+                            });
+                            $('#add_territory').val(territory).trigger('change');
+
+                        } else {
+                            $('#add_territory').empty();
+                            var error = 'No Territory found for the selected city';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                }
+            });
+            $('#add_territory').on('change',function () {
+                var territory_id = $(this).val();
+                if(territory_id){
+                    $.ajax({
+                        url: '{!! route('cod.area') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': territory_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+
+                            if (data.status == 0) {
+
+                                $('#add_area').empty();
+                                $.each(data.area, function (key, value) {
+                                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                    $('#add_area').append(newOption);
+                                });
+                                $('#add_area').val(area).trigger('change');
+                            }
+                            else{
+                                $('#add_area').empty();
+                                var error = 'No Area found for the selected Territory';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+
+            });
+
+            $('#add_lead_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    swal({
+                        text: 'Are you sure, you want to add this lead?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
         });
 
     </script>

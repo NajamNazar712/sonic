@@ -18,9 +18,11 @@
 							@include('admin.inc.messages')
 
 							<form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-								</div>
+                                <div class="col-lg-4 col-md-4 col-sm-6">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    </div>
+                                </div>
 
 								<div class="form-group ml-1">
 									<button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
@@ -401,6 +403,17 @@
                                 @endif
                             </div>
                             <div class="form-group">
+                                @if($consignee_refused_reasons)
+                                    <fieldset class="form-group d-none">
+                                        <select name="consignee_refused_reasons" id="consignee_refused_reasons" name="consignee_refused_reasons" class="form-control select2">
+                                            @foreach($consignee_refused_reasons as $reasons)
+                                                <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                @endif
+                            </div>
+                            <div class="form-group">
                                 <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
                             </div>
                             <div class="row justify-content-center">
@@ -440,9 +453,12 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
-		.selectize-control {
+		/*.selectize-control {
 			width: 300px !important;
-		}
+		}*/
+        .tracking_numbers{
+            width: 100% !important;
+        }
 	</style>
 @endsection
 
@@ -497,6 +513,14 @@
                 width: '100%',
                 placeholder: 'Select Reason'
             });
+
+            $('#consignee_refused_reasons').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Sub Reason',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $('#ReturnConfirmReasonModal') 
+            });
+
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",
@@ -744,7 +768,7 @@
 
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function (index, details) {
-                                
+
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
@@ -765,7 +789,7 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
-                                
+
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
                                     shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 mark_fake_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Mark Fake Status</button>';
@@ -794,7 +818,7 @@
 
                                     shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
                                     if(details.pod_file){
-                              
+
                                         shipment += '<button class="d-none mr-sm-1 d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Printq</button>';
                                         shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
 
@@ -896,7 +920,7 @@
                                     else {
                                         shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
                                     }
-                                    
+
                                     shipment += '<td><strong> Retail User Name</strong></td>';
 
                                     shipment += '<td>' + details.retail_user.name + '</td>';
@@ -996,13 +1020,13 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                
+
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Order Information</u></h4>';
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
-                                
+
                                 $.each(details.order_information.items, function (index, item) {
                                     shipment += '<tr>';
                                     shipment += '<td><strong>Product Type</strong></td>';
@@ -1025,7 +1049,7 @@
                                     height += '<td ><strong>Height</strong></td>'+'<td>'+details.order_information.height+'cm</td>';
                                     length += '<td ><strong>Length</strong></td>'+'<td>'+details.order_information.length+'cm</td>';
                                     breadth += '<td><strong>Breadth</strong></td>'+'<td>'+details.order_information.breadth+'cm</td>';
-                                    
+
                                 }
                                 else
                                 {
@@ -1095,7 +1119,7 @@
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
-                                        if(history.image_audio_location == undefined) {                                        
+                                        if(history.image_audio_location == undefined) {
                                             shipment += '<td>-</td>';}
                                         else
                                             shipment += '<td>' + history.image_audio_location + '</td>';
@@ -1642,6 +1666,52 @@
                 $('#ReturnConfirmReasonModal').modal('show');
 
             });
+
+            $('#return_reason_select').on('change', function () {
+                var selected_value = $(this).val();
+                if(selected_value == 38){
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#consignee_refused_reasons').parent('fieldset').removeClass('d-none');
+                    $('#consignee_refused_reasons').attr('data-rule-required');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#consignee_refused_reasons').parent('fieldset').addClass('d-none');
+                    $('#btnReturn').attr('disabled', false);
+                }
+            });
+
+            $('#consignee_refused_reasons').on('change', function () {
+                var selected_value = $(this).val();
+                var selected_data = $(this).select2('data');
+                var selected_text =  selected_data[0].text;
+                console.log(selected_value);
+                if(selected_value == 12){
+                    $('#return_reason_shipment_remarks').attr('readonly', false);
+                    $('#return_reason_shipment_remarks').val('');
+                    $('#return_reason_shipment_remarks').attr('data-rule-required','true');
+                    $('#btnReturn').attr('disabled', true);
+
+                }else{
+                    $('#return_reason_shipment_remarks').attr('readonly', true);
+                    $('#return_reason_shipment_remarks').val(selected_text);
+                    $('#btnReturn').attr('disabled', false);
+                }
+                
+            });
+
+            $('#return_reason_shipment_remarks').keyup(function () {
+                value = $(this).val();
+                if(value.length > 0)
+                {
+                    $('#btnReturn').attr('disabled', false);
+                }
+                else{
+                    $('#btnReturn').attr('disabled', true);
+                }
+            });
+
             $('#tracking').on('click', '.rider_information', function () {
                 id = $(this).attr('data-id');
                 var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
@@ -1823,7 +1893,7 @@
             $('#tracking').on('click', '.payment_print', function () {
                 id = $(this).attr('data-id');
                 shipment_type = $(this).attr('data-shipment_type');
-                
+
                 if(shipment_type == 1){
                     var url = '{!! route('admin.finance.done_payments.details_print') !!}';
                 }
@@ -2327,6 +2397,7 @@
             },
             submitHandler: function(form) {
                     var return_reason_select = $('#return_reason_select').val();
+                    var consignee_refused_reasons = $('#consignee_refused_reasons').val();
                     var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                             title: 'Please Wait!',
@@ -2343,6 +2414,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#return_shipment_id').val(),
                             'single_return_reason_select': return_reason_select,
+                            'consignee_refused_reasons': consignee_refused_reasons,
                             'remark': remarks,
                             'action': 'confirm'
                         }
@@ -2358,7 +2430,7 @@
 
                         $('#ReturnConfirmReasonModal').modal('hide');
                     });
-                    
+
             }
         });
         $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
@@ -2403,7 +2475,7 @@
 
                         $('#ReattemptModal').modal('hide');
                     });
-                    
+
             }
         });
 

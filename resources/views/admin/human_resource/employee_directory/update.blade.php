@@ -293,9 +293,9 @@
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
                                                 <div class="form-group position-relative">
                                                     <input type="password" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
-                                                    <div class="form-control-position" id="peye">
-                                                        <i class="la la-eye success"></i>
-                                                    </div>
+{{--                                                    <div class="form-control-position" id="peye">--}}
+{{--                                                        <i class="la la-eye success"></i>--}}
+{{--                                                    </div>--}}
                                                 </div>
                                             </div>
                                         </div>
@@ -2115,7 +2115,7 @@
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
-            $('#peye').on('mousedown',function(){$('#bolt_pin').attr('type','text')}).on('mouseup',function(){$('#bolt_pin').attr('type','password')});
+            // $('#peye').on('mousedown',function(){$('#bolt_pin').attr('type','text')}).on('mouseup',function(){$('#bolt_pin').attr('type','password')});
 
             $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',
