@@ -2509,6 +2509,7 @@ class DeliveryController extends Controller
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->orderBy('rider_category_by_passes.created_at','desc')
             ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
@@ -2615,6 +2616,7 @@ class DeliveryController extends Controller
 
     public function rider_category_submit(Request $request)
     {
+
         $rider_bypass = RiderCategoryByPass::where('rider_id',$request->rider_id)->where('status',0)->latest()->first();
         if($rider_bypass)
         {
@@ -2622,16 +2624,31 @@ class DeliveryController extends Controller
         }
         else
         {
-            $rider_details = new RiderCategoryByPass();
-            $rider_details->rider_category_id = $request->rider_cat;
-            $rider_details->rider_id = $request->rider_id;
-            $rider_details->reason = $request->reason;
-            $rider_details->status = 0;
-            $rider_details->requested_by = auth()->id();
-            $rider_details->requested_at = Carbon::now();
-            $rider_details->save();
-            return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
-
+            $check_rider_category = Rider::where('id',$request->rider_id)->select('rider_category_id')->first();
+            if($check_rider_category->rider_category_id == 1)
+            {
+                $rider_details = new RiderCategoryByPass();
+                $rider_details->rider_category_id = 2;
+                $rider_details->rider_id = $request->rider_id;
+                $rider_details->reason = $request->reason;
+                $rider_details->status = 0;
+                $rider_details->requested_by = auth()->id();
+                $rider_details->requested_at = Carbon::now();
+                $rider_details->save();
+                return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+            }
+            else
+            {
+                $rider_details = new RiderCategoryByPass();
+                $rider_details->rider_category_id = 1;
+                $rider_details->rider_id = $request->rider_id;
+                $rider_details->reason = $request->reason;
+                $rider_details->status = 0;
+                $rider_details->requested_by = auth()->id();
+                $rider_details->requested_at = Carbon::now();
+                $rider_details->save();
+                return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+            }
         }
     }
 
@@ -2673,6 +2690,8 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Enter the Weight !');
         }
     }
+
+
 
     //ajax function
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution

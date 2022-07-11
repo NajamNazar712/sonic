@@ -50,32 +50,22 @@
                     <form method="post" id="request_form" novalidate="novalidate" action="{{route('admin.delivery.note.rider_category_submit')}}">
                         @method('POST')
                         @csrf
-                        <div class="row">
+                        <div class="">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <label><strong>Rider Type</strong></label>
                                 <fieldset class="form-group">
-                                    <select name="rider_cat" id="rider_cat" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
-                                        @foreach($riders_cat as $rider_cat)
-                                            <option value="{{$rider_cat->id}}">{{$rider_cat->name}}</option>
+                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
                                         @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <label><strong>Rider</strong></label>
-                                <fieldset class="form-group">
-                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                     </select>
                                 </fieldset>
                             </div>
                         </div>
                         <div class="row justify-content-center">
-
                             <div class="form-group">
-
-                                <textarea type="text" rows="5" class="form-control" cols="90" id="reason" name="reason" placeholder="Enter Reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                <textarea type="text" rows="5" class="form-control" cols="50" id="reason" name="reason" placeholder="Enter Reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                             </div>
-
                         </div>
                         <div class="form-group text-center mt-2">
                             <button type="submit" class="btn btn-primary" id="form_btn">Submit</button>
@@ -169,52 +159,13 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#rider_cat').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Rider Category',
-                width:'100%',
-                allowClear:true
-            }).bind('change', function () {
-                var rider_cat = this.value;
-                if(rider_cat == null || rider_cat == ''){
-                    return false;
-                }
-                $.ajax({
-                    url: '{!! route('admin.delivery.note.check_rider_cat') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'rider_cat':rider_cat
-                    }
-                }).done(function (data) {
 
-                    if (data.status == 1) {
-
-                        $('#rider_id').empty();
-                        $.each(data.rider, function(index, values) {
-
-                            var html = `
-                                <option value='${values.id}'>${values.name}</option>
-                            `
-                            $('#rider_id').append(html);
-
-                        });
-
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                        $('#form_btn').attr('disabled' , true);
-                    }
-
-                });
-            });
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Rider',
                 width:'100%',
                 dropdownParent: $("#request_form")
             })
-            //todo :
+
                 .bind('change', function () {
                 var rider_id = this.value;
                 if(rider_id == null || rider_id == ''){
@@ -239,9 +190,6 @@
                         else{
                             value = data.note.received_cod_amount
                         }
-                        // $('#dnid').val(delivery_note);
-                        // $('#dncc').val(value);
-                        // $('#amount').val(data.note.total_cod_amount);
                         $('#form_btn').attr('disabled' , false);
 
                     } else {
@@ -254,7 +202,7 @@
 
                 });
             });
-            //todo:
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -437,12 +385,6 @@
                     });
                 }
             });
-            // $('#request_modal').on('hide.bs.modal', function (e) {
-            //     $('#request_modal #rider_id').val('').trigger('change');
-            //     $('#request_modal #amount').val('');
-            //     $('#request_modal #reason').val('');
-            //     $('#request_modal #dncc').val('');
-            // });
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
