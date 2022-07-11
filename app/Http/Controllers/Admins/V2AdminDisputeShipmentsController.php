@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\V2Dispute;
 use App\Http\Models\Admin\V2DisputeImage;
 use App\Http\Models\Admin\V2DisputeReason;
@@ -156,12 +160,36 @@ class V2AdminDisputeShipmentsController extends Controller
     }
     public function add_submit(Request $request)
     {
+        $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);
         $tracking_number = $request->tracking_number;
 
         if ($tracking_number) {
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                if(in_array($shipment->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
+                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id);
+                    if ($delivery_note_shipment->exists()) {
+                        $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
+                        $delivery = DeliveryNote::where('id' , $delivery_note_shipment)->where('status', 0)->exists();
+                        if($delivery){
+                            return redirect()->back()->with('error', 'Shipment is in an Unverified Delivery Note');
+                        }
+                    }
+                }
+
+                if(in_array($shipment->shipper_status_id,$return_note_statuses)){
+                    $return_note_shipments_details = ReturnNoteShipment::where('shipment_id', $shipment->id);
+                    if($return_note_shipments_details->exists()){
+                        $return_note_id = $return_note_shipments_details->max('return_note_id');
+                        $return_note = ReturnNote::where('id', $return_note_id)->where('status', 0)->exists();
+                        if($return_note){
+                            return redirect()->back()->with('error', 'Shipment is in an Unverified Return Note');
+                        }
+                    }
+                }
+
                 $dispute = new V2Dispute();
                 $dispute->shipment_id = $shipment->id;
                 $dispute->status_id = 1;
@@ -227,6 +255,7 @@ class V2AdminDisputeShipmentsController extends Controller
                 else if($dispute->status_id == 2){
                     $dispute->status_id = 3;
                 }
+                $dispute->updated_by = Auth::id();
                 $dispute->save();
                 return response()->json(['status' => 0, 'success' => 'Status updated successfully!']);
             }
