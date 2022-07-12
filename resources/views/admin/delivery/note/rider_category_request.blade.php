@@ -37,7 +37,7 @@
     </section>
     <div class="modal fade" id="request_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="request_modal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header text-center">
                     <h4 class="modal-title w-100 font-weight-bold">Add Rider Category Bypass Request</h4>
@@ -50,16 +50,20 @@
                     <form method="post" id="request_form" novalidate="novalidate" action="{{route('admin.delivery.note.rider_category_submit')}}">
                         @method('POST')
                         @csrf
-                        <div class="">
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <label><strong>Rider Type</strong></label>
-                                <fieldset class="form-group">
-                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label><strong>Select Rider</strong></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <fieldset class="form-group">
+                                        <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
+                                            @foreach($riders as $rider)
+                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                         </div>
                         <div class="row justify-content-center">

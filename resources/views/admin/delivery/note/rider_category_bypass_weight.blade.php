@@ -22,10 +22,10 @@
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.delivery.note.weight_store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
-                                            <div class="col-4 form-group">
+                                            <div class="col-3 form-group">
                                                 <input class="form-control" name="weight" id="weight" value="{{$weight}}"  data-msg-required="Enter Weight" data-rule-required="true" required="required">
-
                                             </div>
+                                            <h4 class="mt-1"><strong>Kg</strong></h4>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
