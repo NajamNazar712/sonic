@@ -3805,30 +3805,32 @@ class AdminFinanceController extends Controller
                  $invoice_shipment = InvoiceShipment::where('type',0)->where('shipment_id',$shipment_id);
                  if($invoice_shipment){
                      $invoice_shipment = $invoice_shipment->latest()->first();
-                     $invoice =  Invoice::find($invoice_shipment->invoice_id);
-                     if($invoice->status_id != 3){
+                     if($invoice_shipment) {
+                         $invoice = Invoice::find($invoice_shipment->invoice_id);
+                         if ($invoice->status_id != 3) {
 
-                         $total_charges = 0;
-                         $total_gst = 0;
-                         $total_invoice_amount = 0;
+                             $total_charges = 0;
+                             $total_gst = 0;
+                             $total_invoice_amount = 0;
 
-                         $invoice_shipment->charges = $charges;
-                         $invoice_shipment->gst = $gst;
-                         $invoice_shipment->invoice_amount = $charges + $gst;
-                         $invoice_shipment->save();
+                             $invoice_shipment->charges = $charges;
+                             $invoice_shipment->gst = $gst;
+                             $invoice_shipment->invoice_amount = $charges + $gst;
+                             $invoice_shipment->save();
 
-                         foreach($invoice->invoice_shipments as $shipments){
+                             foreach ($invoice->invoice_shipments as $shipments) {
 
-                             $total_charges = $total_charges + $shipments->charges;
-                             $total_gst = $total_gst + $shipments->gst;
-                             $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
+                                 $total_charges = $total_charges + $shipments->charges;
+                                 $total_gst = $total_gst + $shipments->gst;
+                                 $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
+                             }
+
+                             $invoice->total_charges = $total_charges;
+                             $invoice->total_gst = $total_gst;
+                             $invoice->total_invoice_amount = $total_invoice_amount;
+                             $invoice->save();
+
                          }
-
-                         $invoice->total_charges = $total_charges;
-                         $invoice->total_gst = $total_gst;
-                         $invoice->total_invoice_amount = $total_invoice_amount;
-                         $invoice->save();
-
                      }
 
                  }
@@ -7556,12 +7558,6 @@ class AdminFinanceController extends Controller
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
 
-               /* $service_charges= 0 ;
-                $international_shipment = InternationalShipment::where('shipment_id',$shipment->id)->whereNotNull('service_charges');
-                if($international_shipment->exists()){
-                    $international_shipment = $international_shipment->first();
-                    $service_charges = $international_shipment->service_charges;
-                }*/
 
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -7601,7 +7597,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
@@ -8513,13 +8509,6 @@ class AdminFinanceController extends Controller
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
 
-               /* $service_charges= 0 ;
-                $international_shipment = InternationalShipment::where('shipment_id',$shipment->id)->whereNotNull('service_charges');
-                if($international_shipment->exists()){
-                    $international_shipment = $international_shipment->first();
-                    $service_charges = $international_shipment->service_charges;
-                }*/
-
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
                 if ($shipment_journey->exists()) {
@@ -8821,7 +8810,7 @@ class AdminFinanceController extends Controller
                         </tr>
                          <tr>
                             <td>Extra Service Charges</td>
-                            <td>' . number_format($service_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -9567,14 +9556,7 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
-
-            $service_charges= 0 ;
-            $international_shipment = InternationalShipment::where('shipment_id',$shipment->id)->whereNotNull('service_charges');
-            if($international_shipment->exists()){
-                $international_shipment = $international_shipment->first();
-                $service_charges = $international_shipment->service_charges;
-            }
-
+            
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -9633,7 +9615,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . number_format($service_charges, 2) . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
@@ -9707,7 +9689,7 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                    $total_extra_service_charges[$origin] += $service_charges;
+                    $total_extra_service_charges[$origin] += $shipment->esc_charges;
                 } else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
@@ -14972,14 +14954,6 @@ class AdminFinanceController extends Controller
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
 
-                $service_charges= 0 ;
-                $international_shipment = InternationalShipment::where('shipment_id',$shipment->id)->whereNotNull('service_charges');
-                if($international_shipment->exists()){
-                    $international_shipment = $international_shipment->first();
-                    $service_charges = $international_shipment->service_charges;
-                }
-
-
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
                 if ($shipment_journey->exists()) {
@@ -15056,7 +15030,7 @@ class AdminFinanceController extends Controller
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                        $total_extra_service_charges[$origin] += $service_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
