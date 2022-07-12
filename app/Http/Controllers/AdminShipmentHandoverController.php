@@ -92,6 +92,11 @@ class AdminShipmentHandoverController extends Controller
                     $found = $found->first();
                     $delivery_area = $found->area_name;
                 }
+                if($request->delivery_location_mapping != null){
+                  if($request->delivery_location_mapping != $delivery_area){
+                    return ['status' => 1, 'error' => 'Delivery Location is different'];
+                  }
+                }
             }else{
               $delivery_area = 0;
 
@@ -100,11 +105,7 @@ class AdminShipmentHandoverController extends Controller
 
 
             $details['delivery_area'] = $delivery_area;
-            if($request->delivery_location_mapping != null){
-                if($request->delivery_location_mapping != $delivery_area){
-                  return ['status' => 1, 'error' => 'Delivery Location is different'];
-                }
-            }
+            
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
         } else {
