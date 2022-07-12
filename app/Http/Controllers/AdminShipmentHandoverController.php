@@ -105,7 +105,8 @@ class AdminShipmentHandoverController extends Controller
                 }
               }
             }
-            
+            dump($delivery_area);
+            dd($request->delivery_location_mapping);
 
 
             $details['delivery_area'] = $delivery_area;
