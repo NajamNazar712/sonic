@@ -52,10 +52,7 @@
                         @csrf
                         <div class="container">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <label><strong>Select Rider</strong></label>
-                                </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <fieldset class="form-group">
                                         <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
                                             @foreach($riders as $rider)
@@ -165,7 +162,7 @@
             });
 
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
+                placeholder:'Select Rider',
                 width:'100%',
                 dropdownParent: $("#request_form")
             })
