@@ -23,13 +23,12 @@
                                     <div class="form-group">
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="weight" value="{{$weight}}"
-                                                   name="weight" placeholder="Enter Weight"
+                                                   name="weight" placeholder="Enter Weight*"
                                                    data-rule-required="true" data-msg-required="This field is required">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">KG</span>
                                             </div>
                                         </div>
-
                                     </div>
                                     <button type="submit" class="btn btn-primary mt-2">Update</button>
                                 </form>
