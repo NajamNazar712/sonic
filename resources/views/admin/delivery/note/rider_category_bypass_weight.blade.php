@@ -18,18 +18,19 @@
                             @include('admin.inc.messages')
 
                             <div class="row justify-content-center">
-                                <div class="col-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.delivery.note.weight_store') }}" novalidate="novalidate">
-                                        {{ csrf_field() }}
-                                        <div class="row mb-2 justify-content-center">
-                                            <div class="col-3 form-group">
-                                                <input class="form-control" name="weight" id="weight" value="{{$weight}}"  data-msg-required="Enter Weight" data-rule-required="true" required="required">
-                                            </div>
-                                            <h4 class="mt-1"><strong>Kg</strong></h4>
+                                <form id="settings_form" class="form-horizontal text-center" method="POST"
+                                      action="{{ route('admin.delivery.note.weight_store') }}" novalidate="novalidate">
+                                    {{ csrf_field() }}
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="weight" value="{{$weight}}"
+                                               name="weight" placeholder="Enter Weight" required=""
+                                               data-rule-required="true" data-msg-required="This field is required">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">KG</span>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Update</button>
-                                    </form>
-                                </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-2">Update</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -45,12 +46,14 @@
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             $('#weight').inputmask({
                 'alias': 'integer',
@@ -63,7 +66,7 @@
                 // ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
@@ -89,7 +92,7 @@
                         closeOnEsc: false,
                         dangerMode: true
                     }).then(function (confirm) {
-                        if(confirm){
+                        if (confirm) {
                             $(form).find('button[type=submit]').attr('disabled', 'disabled');
                             blockPagePermanently();
                             form.submit();
