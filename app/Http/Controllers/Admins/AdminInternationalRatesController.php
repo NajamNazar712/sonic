@@ -1532,7 +1532,9 @@ class AdminInternationalRatesController extends Controller
                 $shipment->esc_charges = $amount - $charges;
                 $shipment->save();
 
-                AdminFinanceController::add_payment($shipment->id,0,1);
+                if($shipment->shipper_status_id == 14){
+                    AdminFinanceController::add_payment($shipment->id,0,1);
+                }
 
                 return redirect()->back()->with('success', 'Charges Added!');
             }
