@@ -57,9 +57,11 @@
                                         <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
                                             @foreach($riders as $rider)
                                                 @if($rider->rider_category_id == 1)
-                                                <option value="{{$rider->id}}">{{$rider->name}} - {{'Light'}}</option>
-                                                @else
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{'Light'}}</option>
+                                                @elseif($rider->rider_category_id == 2)
                                                     <option value="{{$rider->id}}">{{$rider->name}} - {{'Heavy'}}</option>
+                                                @else
+                                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
                                                 @endif
                                             @endforeach
                                         </select>
