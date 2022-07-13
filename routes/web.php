@@ -17,6 +17,11 @@ Route::get('/', function () {
     return redirect()->route('cod.login');
 });
 
+Route::prefix('survey_form')->name('survey.')->group(function () {
+    Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
+    Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
+});
+
 
 Auth::routes();
 
@@ -725,6 +730,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('packaging')->name('packaging.')->group(function(){
             Route::post('invoice_log','Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
         });
+
+        Route::prefix('disable_account_intimation_survey')->name('disable.account.intimation.survey.')->group(function(){
+            Route::get('','Admins\AdminDashboardController@disable_account_intimation_survey_index')->name('index');
+            Route::get('list','Admins\AdminDashboardController@disable_account_intimation_survey_list')->name('list');
+            Route::post('status', 'Admins\AdminDashboardController@status')->name('status');
+            Route::post('add', 'Admins\AdminDashboardController@add')->name('add');
+            Route::post('details', 'Admins\AdminDashboardController@details')->name('details');
+            Route::post('edit', 'Admins\AdminDashboardController@edit')->name('edit');
+            Route::post('send_survey', 'Admins\AdminDashboardController@send_survey')->name('send_survey');
+            Route::get('report', 'Admins\AdminDashboardController@survey_report')->name('report');
+            Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
+            Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
+        });
+
+        
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
@@ -1811,6 +1831,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit','Admins\V2AdminDisputeShipmentsController@add_submit')->name('submit');
             Route::post('update','Admins\V2AdminDisputeShipmentsController@dispute_update')->name('update');
             Route::post('images','Admins\V2AdminDisputeShipmentsController@dispute_images')->name('images');
+            Route::post('bulk_in_process','Admins\V2AdminDisputeShipmentsController@bulk_in_process')->name('bulk_in_process');
+            Route::post('bulk_resolved','Admins\V2AdminDisputeShipmentsController@bulk_resolved')->name('bulk_resolved');
+            Route::post('excel_upload','Admins\V2AdminDisputeShipmentsController@excel_upload')->name('excel_upload');
+            
+            
         });
 
     });
@@ -2666,6 +2691,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::get('pickup_settings', 'Admins\GlobalSettingsController@pickup_cut_off_settings_index')->name('pickup_settings');
             Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
+            Route::get('weight_bypass', 'Admins\GlobalSettingsController@weight_bypass')->name('weight_bypass');
+            Route::post('shipper_store_weight_bypass', 'Admins\GlobalSettingsController@shipper_store_weight_bypass')->name('shipper_store_weight_bypass');
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function (){
@@ -3665,6 +3692,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
+        Route::post('add', 'Admins\LeadManagementController@add')->name('add');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function(){
