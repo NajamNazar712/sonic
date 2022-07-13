@@ -2271,6 +2271,56 @@ class ShipperShipmentBookController extends Controller
             }
 
             $shipment_details = '';
+
+            //delivery location watermark start
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                            $msg_string = null;
+                            $str_arr = null;
+                            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                            foreach ($check as $nsa) {
+                                foreach ($str_arr as $arr_value) {
+                                    if (strtolower($nsa) == strtolower($arr_value)) {
+                                            $msg_string = $arr_value;
+                                    }
+                                }
+                            }
+                            $delivery_area = null;
+                            if($msg_string != null){
+                                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                                ->select('dlm.area_name as area_name','dlm.id')
+                                ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                                ->where('dlm.city_id',$shipment->consignee_city_id);
+                                if($found->exists()){
+                                    $found = $found->first();
+                                    $delivery_area = $found->area_name;
+                                }
+                            }
+                            if($delivery_area != null){
+                                for($i=0; $i<60; $i++){
+                                    $delivery_area.= ' '.$delivery_area;
+                                    if(strlen($delivery_area)>350){
+                                        break;
+                                    }
+                                }
+                                $overall_shipment_details .= '
+                                <div id="delivery_area_watermark" class="delivery_area_watermark">
+                                <h1 style="
+                                  text-align: center;  
+                                  text-transform: uppercase;                  
+                                  overflow: hidden;
+                                  position: fixed;
+                                  margin-top: -560px;
+                                  opacity: 0.2;
+                                  transform: rotate(350deg);
+                                  font-size: 400%; 
+                                  color: #000000; 
+                                  font-stretch: extra-expanded;"     
+                                  > ' . $delivery_area . '  </h1>
+                                
+                                <!--<p>Your trial membership will expire in 3 days!</p>-->
+                              </div>';
+                            }
+            //delivery location watermark end
         }
 
         $html .= $overall_shipment_details;
@@ -2289,6 +2339,7 @@ class ShipperShipmentBookController extends Controller
                 </script>
                 ';
             }
+            
 
             if ($watermark_flag) {
                 $html .= '
@@ -2312,61 +2363,6 @@ class ShipperShipmentBookController extends Controller
                   
                 </html>
             ';
-            }else{
-
-                //delivery location watermark start
-                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
-                            $msg_string = null;
-                            $str_arr = null;
-                            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
-                            foreach ($check as $nsa) {
-                                foreach ($str_arr as $arr_value) {
-                                    if (strtolower($nsa) == strtolower($arr_value)) {
-                                        if ($msg_string != null) {
-                                            $msg_string = $msg_string . ', ' . $arr_value;
-                                        } else {
-                                            $msg_string = $arr_value;
-                                        }
-                                    }
-                                }
-                            }
-                            $delivery_area = null;
-                            if($msg_string != null){
-                                $found = DeliveryLocationMappingKeyword::where('keyword',$msg_string);
-                                if($found->exists()){
-                                    $found = $found->first();
-                                    $delivery_area = $found->delivery_location_mapping->area_name;
-                                }
-                            }
-                            if($delivery_area != null){
-                                for($i=0; $i<60; $i++){
-                                    $delivery_area.= ' '.$delivery_area;
-                                    if(strlen($delivery_area)>700){
-                                        break;
-                                    }
-                                }
-                                $html .= '
-                                </body><div id="watermark_" class="watermark_">
-                                <h1 style="
-                                  text-align: center;  
-                                  text-transform: uppercase;                  
-                                  overflow: hidden;
-                                  position: fixed;
-                                  margin-top: -560px;
-                                  opacity: 0.2;
-                                  transform: rotate(350deg);
-                                  font-size: 400%; 
-                                  color: #000000; 
-                                  font-stretch: extra-expanded;"     
-                                  > ' . $delivery_area . '  </h1>
-                                
-                                <!--<p>Your trial membership will expire in 3 days!</p>-->
-                              </div></html>';
-                                
-                             
-
-                            }
-                            //delivery location watermark end
             }
 
         }
