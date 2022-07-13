@@ -1241,9 +1241,8 @@ class Permission
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
 
-            'delivery.note.rider_category_request' => 757,
+            'delivery.note.rider_category_bypass_request' => 757,
             'delivery.note.rider_category_bypass_weight' =>758,
-            
         ],
 
         'shipper' => [
