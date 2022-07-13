@@ -226,7 +226,6 @@
                             head.push('S.No');
                             head.push('Rider ID');
                             head.push('Rider');
-                            head.push('Hub');
                             head.push('Reason');
                             head.push('Requested Date');
                             head.push('Requested By');
@@ -240,7 +239,6 @@
                                 row.push(index + 1);
                                 row.push(values.rider_id);
                                 row.push(values.rider);
-                                row.push(values.hub);
                                 row.push(values.reason);
                                 row.push(values.requested_at);
                                 row.push(values.requested_by);
@@ -274,7 +272,7 @@
                         @endif
                     {
                         extend: 'excel',
-                        title: 'DN ByPass Request',
+                        title: 'Rider Category ByPass Request',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -300,7 +298,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[8, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {
                         orderable: false,

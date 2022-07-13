@@ -425,8 +425,6 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                         }
                     }
-//                    todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
-                    $rider_bypass_update = RiderCategoryByPass::where('rider_id',$rider_id)->where('id',$rider_bypass_id)->update(["status" => 2]);
                 }
                 elseif($rider_default_type->rider_category_id == 1)
                 {
@@ -447,8 +445,7 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                         }
                     }
-                    //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
-                    $rider_bypass_update = RiderCategoryByPass::where('rider_id',$rider_id)->where('id',$rider_bypass_id)->update(["status" => 2]);
+
                 }
                 elseif($rider_default_type->rider_category_id == 2)
                 {
@@ -951,6 +948,13 @@ class DeliveryController extends Controller
             }
             //rider attendance end
 
+            //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
+            $rider_bypass_type = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('status', 1)->select('rider_category_id', 'id')->latest()->first();
+            if ($rider_bypass_type) {
+                $rider_bypass_id = $rider_bypass_type->id;
+                $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
+            }
+            //todo end
 
             return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
         } else {
@@ -2509,7 +2513,6 @@ class DeliveryController extends Controller
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->orderBy('rider_category_by_passes.created_at','desc')
             ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
