@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,5 +19,10 @@ class CargoManifestBagJourneyController extends Controller
         $bag_journey->cargo_manifest_status_id = $cargo_manifest_status_id;
         $bag_journey->junction_id = Auth::user()->default_hub_id ?? NULL;
         $bag_journey->save();
+
+        $bag = CargoManifestBag::find($bag_id);
+        $bag->current_hub_id = Auth::user()->default_hub_id ?? NULL;
+        $bag->save();
+
     }
 }

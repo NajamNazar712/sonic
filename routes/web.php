@@ -1784,6 +1784,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCargoManifestController@manifest_draft_update')->name('update');
         });
 
+        Route::post('/total_bags', 'Admins\AdminCargoManifestController@total_bags_info')->name('total_bags');
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
