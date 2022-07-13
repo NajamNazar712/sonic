@@ -662,9 +662,10 @@ class AdminPackagingMaterialController extends Controller
                 $flag = true;
                 foreach ($request_details->items as $item) {
                     $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->where('wms_product_barcodes.product_id', $item->wms_product_id)->where('wsr.warehouse_pickup_address_id', $trax_address->id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->count();
+                    $wms_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->first();
+                    $remaining_stock = $product_barcodes - $wms_current_stock->in_process_stock;
                     if ($product_barcodes < $item->quantity) {
-                        $wms_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->first();
-                        $wms_current_stock->stock = $product_barcodes;
+                        $wms_current_stock->stock = $remaining_stock;
                         $wms_current_stock->save();
                         $flag = false;
                     }
@@ -1238,7 +1239,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by');
+            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
         return Datatables::of($types)
             ->editColumn('status', function ($type) {
                 if ($type->status == 0) {
@@ -1267,6 +1268,44 @@ class AdminPackagingMaterialController extends Controller
                 } else {
                     return 'Stationary';
 
+                }
+            })
+            ->editColumn('packaging_type',function($type){
+                if($type->packaging_type == 1){
+                    return 'Internal';
+                }
+                else if($type->packaging_type == 2){
+                    return 'External';
+                }
+                else if($type->packaging_type == 3){
+                    return 'Both';
+                }
+                else if($type->packaging_type == 4){
+                    return 'Selected Shipper';
+                }
+                else{
+                    return 'Marco';
+                }
+            })
+            ->filterColumn('packaging_material_types.packaging_type', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword == 'internal') {
+                    $query->where('packaging_material_types.packaging_type', 1);
+                }
+                else if ($keyword == 'external') {
+                    $query->where('packaging_material_types.packaging_type', 2);
+                }
+                else if ($keyword == 'both') {
+                    $query->where('packaging_material_types.packaging_type', 3);
+                }
+                else if ($keyword == 'selected' || $keyword == 'selected shipper' || $keyword == 'shipper') {
+                    $query->where('packaging_material_types.packaging_type', 4);
+                }
+                else if ($keyword == 'marco') {
+                    $query->where('packaging_material_types.packaging_type', 5);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('action', function ($type) {//Change ID
@@ -1314,7 +1353,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
@@ -1335,7 +1374,7 @@ class AdminPackagingMaterialController extends Controller
             ';
 
 
-        $shippers = User::all();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         foreach ($shippers as $shipper) {
             $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';

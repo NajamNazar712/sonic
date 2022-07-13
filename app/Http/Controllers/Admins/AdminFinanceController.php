@@ -3372,7 +3372,7 @@ class AdminFinanceController extends Controller
             ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
         } else {
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if ($retail_shipment->shipping_mode == 3 && in_array($adjustment_type, [2, 6, 7, 8, 9, 10, 11, 15, 16])) {
+            if ($retail_shipment->shipping_mode == 3) {
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
@@ -3439,7 +3439,16 @@ class AdminFinanceController extends Controller
             $details['status'] = $shipment->status_shipper->name;
 
             $details['service_type'] = $shipment->booking_type->booking_type;
-            $details['shipping_mode'] = $shipment->shipping_mode->mode;
+            if($shipment->shipment_type == 1){
+
+                $details['shipping_mode'] = $shipment->shipping_mode->mode;
+            }
+            else{
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                if($retail_shipment){
+                    $details['shipping_mode'] = $retail_shipment->shipping_modes->name;
+                }
+            }
             $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
             $details['payment_mode'] = $shipment->payment_mode->mode;

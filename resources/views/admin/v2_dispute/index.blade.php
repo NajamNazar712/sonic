@@ -160,7 +160,9 @@
                         <th class="border-primary border-darken-1">Image</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Added By</th>
                         <th class="border-primary border-darken-1">Added At</th>
+                        <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -374,7 +376,9 @@
                             head.push('Actual Weight');
                             head.push('Remarks');
                             head.push('Status');
-                            head.push('Created At');
+                            head.push('Added By');
+                            head.push('Added At');
+                            head.push('Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -388,7 +392,9 @@
                                 row.push(values.actual_weight);
                                 row.push(values.remarks);
                                 row.push(values.status);
+                                row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.updated_by);
 
                                 body.push(row);
                             });
@@ -650,7 +656,9 @@
                     {data: 'image_view', name: 'image_view', class: 'align-middle image_view', orderable: false, searchable: false},
                     {data: 'remarks', name: 'v2_disputes.remarks', class: 'align-middle remarks'},
                     {data: 'status', name: 'ds.name', class: 'align-middle status' , orderable: false, searchable: false},
+                    {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'v2_disputes.created_at', class: 'align-middle created_at'},
+                    {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
