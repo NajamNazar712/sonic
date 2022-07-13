@@ -226,6 +226,7 @@
                             head.push('S.No');
                             head.push('Rider ID');
                             head.push('Rider');
+                            head.push('rider_type');
                             head.push('Reason');
                             head.push('Requested Date');
                             head.push('Requested By');
@@ -239,6 +240,7 @@
                                 row.push(index + 1);
                                 row.push(values.rider_id);
                                 row.push(values.rider);
+                                row.push(values.rider_type);
                                 row.push(values.reason);
                                 row.push(values.requested_at);
                                 row.push(values.requested_by);
