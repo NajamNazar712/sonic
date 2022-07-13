@@ -21,9 +21,9 @@ class LightAndHeavyDeliveryRiderPermissionsSeeder extends Seeder
         ));
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 552, 'screen_name' => 'Vendor Invoice', 'action'=> 'View'),
-            array('id' => 553, 'screen_name' => 'Vendors Accounts List', 'action'=> 'View'),
-            array('id' => 554, 'screen_name' => 'Vendors Accounts List', 'action'=> 'View'),
+            array('id' => 552, 'screen_name' => 'Rider Category ByPass Request', 'action'=> 'View'),
+            array('id' => 553, 'screen_name' => 'Rider Category ByPass Request Excel', 'action'=> 'View'),
+            array('id' => 554, 'screen_name' => 'Rider Category ByPass Weight', 'action'=> 'View'),
         ));
 
 
