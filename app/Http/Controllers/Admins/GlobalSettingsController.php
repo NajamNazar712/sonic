@@ -12,6 +12,7 @@ use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\ByPassWeightShippers;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\DeliveryNote;
@@ -6882,6 +6883,37 @@ public function sales_incentive()
 
     }
 
-    
+    public function weight_bypass()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),556);
+
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+
+        $settings = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
+
+        return view('admin.settings.weight_bypass')->with(['shippers' => $shippers, 'users' => $settings]);
+    }
+
+    public function shipper_store_weight_bypass(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = $request->shippers;
+                ByPassWeightShippers::truncate();
+
+                foreach($shippers as $shipper)
+                {
+                    $update_shipper = new ByPassWeightShippers();
+                    $update_shipper->shipper_id = $shipper;
+                    $update_shipper->save();
+                }
+            }
+            return redirect()->back()->with('success', 'Setting Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shipper selected!');
+        }
+
+    }
     
 }

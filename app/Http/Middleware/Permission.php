@@ -1240,8 +1240,14 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-            
+            'nps.index' => 751,
+            'nps.add' => 752,
+            'nps.response.report' => 755,
+            'nps.consolidate.report' => 756,
 
+            'accounts.disable.account.intimation.survey.index' => 762,
+			'accounts.disable.account.intimation.survey.report' => 768,
+			'settings.pickup.weight_bypass' => 556
             
         ],
 
@@ -1334,12 +1340,6 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
-
-            
-            
-            
-            
-
         ]
     ];
 
