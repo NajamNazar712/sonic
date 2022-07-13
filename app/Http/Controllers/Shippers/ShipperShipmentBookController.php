@@ -2296,7 +2296,7 @@ class ShipperShipmentBookController extends Controller
                                 }
                             }
                             if($delivery_area != null){
-                                for($i=0; $i<60; $i++){
+                                for($i=0; $i<15; $i++){
                                     $delivery_area.= ' '.$delivery_area;
                                     if(strlen($delivery_area)>350){
                                         break;
@@ -2309,9 +2309,9 @@ class ShipperShipmentBookController extends Controller
                                   text-transform: uppercase;                  
                                   overflow: hidden;
                                   position: fixed;
-                                  margin-top: -560px;
+                                  margin-top: -490px;
                                   opacity: 0.2;
-                                  transform: rotate(350deg);
+                                 
                                   font-size: 400%; 
                                   color: #000000; 
                                   font-stretch: extra-expanded;"     
