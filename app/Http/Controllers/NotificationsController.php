@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\CrmSmsLog;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
@@ -9260,8 +9261,10 @@ class NotificationsController extends Controller
                     $crm_comment = CrmComments::find($crm_comment_id);
                     if($crm_comment){
                         $crm_request = CrmRequest::find($crm_comment->crm_request_id);
+                        $agent_id = $crm_request->agent_id;
                         if($crm_request){
                             $type = $reference_1_id;
+
                             if($type == 1){
                                     $shipper =  User::find($crm_request->shipper_id);
                                     if($shipper){
@@ -9298,6 +9301,17 @@ class NotificationsController extends Controller
                         $flag = false;
                     }
                     if($flag){
+//                        dd($name,$crm_request->id,$crm_comment->comment);
+                        //todo : now yahan p log savekrne k lye code krna h
+
+                        $agent = Admin::where('id',$agent_id)->select('name')->first();
+
+                        $crm_log = new CrmSmsLog();
+                        $crm_log->crm_request_id = $crm_request->id;
+                        $crm_log->agent = isset($agent->name) ? $agent->name : '-';
+                        $crm_log->massage = $crm_comment->comment;
+                        $crm_log->save();
+
                         if (strpos($body, '[name]') !== FALSE) {
                             $body = str_replace('[name]', $name, $body);
                         }
