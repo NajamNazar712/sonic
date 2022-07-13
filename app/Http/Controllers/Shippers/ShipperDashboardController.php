@@ -138,7 +138,14 @@ class ShipperDashboardController extends Controller
             if($sales_person_tag){
                 $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                 $sales_person_data['name'] = $sales_person_tag->name;
-                $sales_person_data['phone'] = $sales_person_tag->phone_number;
+                if($sales_person_tag->official_phone_number != '')
+                {
+                    $sales_person_data['phone'] = $sales_person_tag->official_phone_number;
+                }
+                else{
+                    $sales_person_data['phone'] = $sales_person_tag->phone_number;
+                }
+                
                 $sales_person_data['email'] = $sales_person_tag->email;
             }
             $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
@@ -175,7 +182,7 @@ class ShipperDashboardController extends Controller
             }*/
             $shipper_payment = null;
 
-
+            
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }

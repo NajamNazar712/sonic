@@ -18,9 +18,12 @@
 							@include('client.inc.messages')
 
 							<form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-								<div class="form-group">
-									<input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-								</div>
+								<div class="col-lg-4 col-md-4 col-sm-6">
+                                    <div class="form-group ">
+                                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    </div>
+                                </div>
+
 
 								<div class="form-group ml-1">
 									<button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
@@ -223,6 +226,10 @@
     <style>
         .selectize-control {
             width: 305px !important;
+        }
+
+        .tracking_numbers{
+            width: 100% !important;
         }
     </style>
 @endsection

@@ -49,11 +49,18 @@ class ProcessPushNotification implements ShouldQueue
             if($push_notification->screen_id != null){
                 $data['screen_id'] = $push_notification->screen_id;
             }
-            $message = [
-                'data' => $data,
-                'to' => $device_token
-            ];
 
+            if(in_array($push_notification->employee_type_id,[3,4])){
+                $message = [
+                    'notification' => $data,
+                    'to' => $device_token
+                ];
+            }else{
+                $message = [
+                    'data' => $data,
+                    'to' => $device_token
+                ];
+            }
             $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
             $response = $client->post('', [

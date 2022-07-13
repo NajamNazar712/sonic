@@ -12,6 +12,7 @@ use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\ByPassWeightShippers;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\DeliveryLocationMapping;
@@ -935,12 +936,19 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
+        $include_ids = [];
+
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->get();
+                if (!empty($include_ids)) {
+                    $users = User::whereIn('id', $include_ids)->get();
+                }
+                else {
+                    $users = User::where('status', 3)->get();
+                }
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1052,7 +1060,12 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->get();
+                    if (!empty($include_ids)) {
+                        $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+                    }
+                    else {
+                        $users = User::whereIn('id', $include_ids)->get();
+                    }
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
@@ -7034,6 +7047,38 @@ public function sales_incentive()
         }else{
             return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
         }
+    }
+    public function weight_bypass()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),556);
+
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+
+        $settings = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
+
+        return view('admin.settings.weight_bypass')->with(['shippers' => $shippers, 'users' => $settings]);
+    }
+
+    public function shipper_store_weight_bypass(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = $request->shippers;
+                ByPassWeightShippers::truncate();
+
+                foreach($shippers as $shipper)
+                {
+                    $update_shipper = new ByPassWeightShippers();
+                    $update_shipper->shipper_id = $shipper;
+                    $update_shipper->save();
+                }
+            }
+            return redirect()->back()->with('success', 'Setting Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shipper selected!');
+        }
+
     }
     
 }

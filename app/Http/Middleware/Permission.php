@@ -1166,8 +1166,8 @@ class Permission
 
             'admin_otp.update' => 722,
 
-            'rider_otp.index' => 720,
-            'rider_otp.list' => 720,
+            'rider_otp.index' => 563,
+            'rider_otp.list' => 563,
 
             'rider_otp.update' => 721,
             
@@ -1240,9 +1240,15 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-			'settings.delivery_area_keyword.index' => 747,
-            
+            'settings.delivery_area_keyword.index' => 747,            
+            'nps.index' => 751,
+            'nps.add' => 752,
+            'nps.response.report' => 755,
+            'nps.consolidate.report' => 756,
 
+            'accounts.disable.account.intimation.survey.index' => 762,
+			'accounts.disable.account.intimation.survey.report' => 768,
+			'settings.pickup.weight_bypass' => 556
             
         ],
 
@@ -1335,12 +1341,6 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
-
-            
-            
-            
-            
-
         ]
     ];
 
