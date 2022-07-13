@@ -2491,9 +2491,9 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
         if (session('role_id') != 1) {
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
+            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
         } else {
-            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
+            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $rider_cat = RiderCategory::whereIn('id',[1,2])->get();

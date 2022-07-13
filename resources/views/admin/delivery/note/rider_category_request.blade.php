@@ -18,7 +18,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
-                                    <th class="border-primary border-darken-1">Rider Type</th>
+                                    <th class="border-primary border-darken-1">Rider Category ByPass</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Requested By</th>
@@ -56,7 +56,11 @@
                                     <fieldset class="form-group">
                                         <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
                                             @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                @if($rider->rider_category_id == 1)
+                                                <option value="{{$rider->id}}">{{$rider->name}} - {{'Light'}}</option>
+                                                @else
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{'Heavy'}}</option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </fieldset>

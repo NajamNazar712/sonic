@@ -16,7 +16,6 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
                             <div class="row justify-content-center">
                                 <form id="settings_form" class="form-horizontal text-center" method="POST"
                                       action="{{ route('admin.delivery.note.weight_store') }}" novalidate="novalidate">
