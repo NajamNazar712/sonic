@@ -2491,7 +2491,7 @@ class DeliveryController extends Controller
         }
     }
 
-    public function rider_category_request()
+    public function rider_category_bypass_request()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
         if (session('role_id') != 1) {

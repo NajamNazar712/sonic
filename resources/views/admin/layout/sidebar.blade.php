@@ -403,7 +403,7 @@
                                         <li><a class="menu-item" href="{{route('admin.delivery.note.request_index')}}">DN ByPass Request</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(757, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.delivery.note.rider_category_request')}}">Rider Category ByPass Request</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.delivery.note.rider_category_bypass_request')}}">Rider Category ByPass Request</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(758, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.delivery.note.rider_category_bypass_weight')}}">Rider Category ByPass Weight</a></li>

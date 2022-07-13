@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rider Category Request')
+@section('title', 'Rider Category ByPass Request')
 
 @section('content')
     <h1>Rider Category ByPass Request</h1>

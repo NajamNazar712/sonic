@@ -1152,7 +1152,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
 			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
 
-            Route::get('rider_category_request','Admins\DeliveryController@rider_category_request')->name('rider_category_request');
+            Route::get('rider_category_bypass_request','Admins\DeliveryController@rider_category_bypass_request')->name('rider_category_bypass_request');
             Route::get('rider_cat_request_list','Admins\DeliveryController@rider_cat_request_list')->name('rider_cat_request_list');
             Route::post('check_rider_cat','Admins\DeliveryController@check_rider_cat')->name('check_rider_cat');
             Route::post('check_dn_against_rider','Admins\DeliveryController@check_dn_against_rider')->name('check_dn_against_rider');
