@@ -2256,23 +2256,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                 }
-            }
-            if ($user_type == 3) {
-                $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
-                if ($airwaybill_journey->exists()) {
-                    $watermark_flag = true;
-                }
-            }
-
-            $overall_shipment_details .= $shipment_details;
-
-            for ($i = 1; $i < $prints; $i++) {
-                $overall_shipment_details .= $shipment_details;
-            }
-
-            $shipment_details = '';
-
-            //delivery location watermark start
+                //delivery location watermark start
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                             $msg_string = null;
                             $str_arr = null;
@@ -2302,7 +2286,7 @@ class ShipperShipmentBookController extends Controller
                                         break;
                                     }
                                 }
-                                $overall_shipment_details .= '
+                                $shipment_details .= '
                                 <div id="delivery_area_watermark" class="delivery_area_watermark">
                                 <h1 style="
                                   text-align: center;  
@@ -2320,7 +2304,26 @@ class ShipperShipmentBookController extends Controller
                                 <!--<p>Your trial membership will expire in 3 days!</p>-->
                               </div>';
                             }
+                            $delivery_area = null;
+
             //delivery location watermark end
+            }
+            if ($user_type == 3) {
+                $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
+                if ($airwaybill_journey->exists()) {
+                    $watermark_flag = true;
+                }
+            }
+
+            $overall_shipment_details .= $shipment_details;
+
+            for ($i = 1; $i < $prints; $i++) {
+                $overall_shipment_details .= $shipment_details;
+            }
+
+            $shipment_details = '';
+
+            
         }
 
         $html .= $overall_shipment_details;
