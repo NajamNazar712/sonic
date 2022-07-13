@@ -226,7 +226,7 @@
                             head.push('S.No');
                             head.push('Rider ID');
                             head.push('Rider');
-                            head.push('rider_type');
+                            head.push('Rider Category ByPass');
                             head.push('Reason');
                             head.push('Requested Date');
                             head.push('Requested By');
