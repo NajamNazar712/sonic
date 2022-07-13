@@ -1290,6 +1290,7 @@ class ShipperShipmentBookController extends Controller
         } else {
             $prints = 1;
         }
+        $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
         foreach ($ids as $id) {
             $shipment = Shipment::find($id);
@@ -2257,7 +2258,6 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                 //delivery location watermark start
-                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                             $msg_string = null;
                             $str_arr = null;
                             $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
@@ -2268,6 +2268,7 @@ class ShipperShipmentBookController extends Controller
                                     }
                                 }
                             }
+
                             $delivery_area = null;
                             if($msg_string != null){
                                 $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
@@ -2279,10 +2280,11 @@ class ShipperShipmentBookController extends Controller
                                     $delivery_area = $found->area_name;
                                 }
                             }
+
                             if($delivery_area != null){
-                                for($i=0; $i<15; $i++){
+                                for($i=0; $i<10; $i++){
                                     $delivery_area.= ' '.$delivery_area;
-                                    if(strlen($delivery_area)>350){
+                                    if(strlen($delivery_area)>25){
                                         break;
                                     }
                                 }
@@ -2292,10 +2294,10 @@ class ShipperShipmentBookController extends Controller
                                   text-align: center;  
                                   text-transform: uppercase;                  
                                   overflow: hidden;
-                                  position: fixed;
-                                  margin-top: -490px;
+                                  position: absolute;
+                                  margin-top: -357px;
                                   opacity: 0.2;
-                                 
+                                  transform: rotate(350deg);
                                   font-size: 400%; 
                                   color: #000000; 
                                   font-stretch: extra-expanded;"     
@@ -2304,8 +2306,7 @@ class ShipperShipmentBookController extends Controller
                                 <!--<p>Your trial membership will expire in 3 days!</p>-->
                               </div>';
                             }
-                            $delivery_area = null;
-
+                            
             //delivery location watermark end
             }
             if ($user_type == 3) {
@@ -2320,9 +2321,9 @@ class ShipperShipmentBookController extends Controller
             for ($i = 1; $i < $prints; $i++) {
                 $overall_shipment_details .= $shipment_details;
             }
-
             $shipment_details = '';
-
+            //a
+            // $overall_shipment_details .=$delivery_area_watermark;
             
         }
 
