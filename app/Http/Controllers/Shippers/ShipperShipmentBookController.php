@@ -1183,6 +1183,9 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
+                        .page-breaker{
+                            page-break-after: always;
+                        }
                     </style>
                   </head>
                   <body>
@@ -1287,8 +1290,10 @@ class ShipperShipmentBookController extends Controller
         if ($settings->exists()) {
             $settings = $settings->first();
             $prints = $settings->print_count;
+            $page_break = $settings->page_breaker;
         } else {
             $prints = 1;
+            $page_break = 0;
         }
         $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
@@ -1857,6 +1862,9 @@ class ShipperShipmentBookController extends Controller
                       <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
+                        if($shipment->pieces  <=1 && $page_break == 1) {
+                            $table_end .= '<div class="page-breaker"></div>';
+                        }
                     }
 
                     if ($shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
@@ -2018,7 +2026,9 @@ class ShipperShipmentBookController extends Controller
 
                         }
 
-
+                        if($shipment->pieces  > 0 && $page_break == 1) {
+                            $shipment_pieces .= '<div class="page-breaker"></div>';
+                        }
                         $shipment_details .= $shipment_pieces;
                     }
 
