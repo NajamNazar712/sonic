@@ -2559,14 +2559,6 @@ class DeliveryController extends Controller
                     $query->whereRaw('FALSE');
                 }
             })
-            ->filterColumn('requested_by', function($query, $keyword) {
-                $keyword = strtolower($keyword);
-                    $query->where('a.name', '=', $keyword);
-            })
-            ->filterColumn('approved_by', function($query, $keyword) {
-                $keyword = strtolower($keyword);
-                $query->where('a.name', '=', $keyword);
-            })
             ->addColumn("action", function ($result) {
                 if ((session('role_id') == 1 || count(array_intersect([760], session('permissions'))) !== 0) && $result->status == 0) {
                     $dropdown = '

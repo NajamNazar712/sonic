@@ -319,7 +319,7 @@
                     {data: 'requested_at', name: 'rider_category_by_passes.requested_at', class: 'align-middle requested_at'},
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
                     {data: 'approved_at', name: 'rider_category_by_passes.approved_at', class: 'align-middle approved_at'},
-                    {data: 'approved_by', name: 'a.name', class: 'align-middle approved_by'},
+                    {data: 'approved_by', name: 'ad.name', class: 'align-middle approved_by'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
