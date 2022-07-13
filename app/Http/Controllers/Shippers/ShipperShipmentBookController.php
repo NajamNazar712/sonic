@@ -2298,23 +2298,44 @@ class ShipperShipmentBookController extends Controller
                                         break;
                                     }
                                 }
-                                $shipment_details .= '
-                                <div id="delivery_area_watermark" class="delivery_area_watermark">
-                                <h1 style="
-                                  text-align: center;  
-                                  text-transform: uppercase;                  
-                                  overflow: hidden;
-                                  position: absolute;
-                                  margin-top: -357px;
-                                  opacity: 0.2;
-                                  transform: rotate(350deg);
-                                  font-size: 400%; 
-                                  color: #000000; 
-                                  font-stretch: extra-expanded;"     
-                                  > ' . $delivery_area . '  </h1>
+                                if($page_break){
+                                    $shipment_details .= '
+                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -1200px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: #000000; 
+                                      font-stretch: extra-expanded;"     
+                                      > ' . $delivery_area . '  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }else{
+                                    $shipment_details .= '
+                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -290px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: #000000; 
+                                      font-stretch: extra-expanded;"     
+                                      > ' . $delivery_area . '  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }
                                 
-                                <!--<p>Your trial membership will expire in 3 days!</p>-->
-                              </div>';
                             }
                             
             //delivery location watermark end
