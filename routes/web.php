@@ -3379,7 +3379,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@delivery_area_keyword_update')->name('update');
         });
 
-
+        Route::prefix('booking_destination_keyword')->name('booking_destination_keyword.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@booking_destination_keyword')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@booking_destination_keyword_list')->name('list');
+            Route::get('add', 'Admins\GlobalSettingsController@booking_destination_keyword_add')->name('add');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@booking_destination_keyword_edit')->name('edit');
+            Route::get('view/{id}', 'Admins\GlobalSettingsController@booking_destination_keyword_view')->name('view');
+            Route::post('store', 'Admins\GlobalSettingsController@booking_destination_keyword_store')->name('store');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@booking_destination_keyword_enable_disable')->name('enable_disable');
+            Route::post('update', 'Admins\GlobalSettingsController@booking_destination_keyword_update')->name('update');
+            Route::get('address_verify', 'Admins\GlobalSettingsController@address_verify')->name('address_verify');
+        });
 
 	});
 

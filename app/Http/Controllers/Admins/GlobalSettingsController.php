@@ -113,6 +113,8 @@ use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
+use App\Http\Models\Admin\BookingDestinationMapping;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -7077,6 +7079,177 @@ public function sales_incentive()
 
         } else {
             return redirect()->back()->with('error', 'No shipper selected!');
+        }
+
+    }
+
+    public function booking_destination_keyword(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),565);
+        return view('admin.settings.booking_destination_mapping.index');
+    }
+
+    public function booking_destination_keyword_list(Request $request){
+        $admins = BookingDestinationMapping::join('admins as ad','ad.id','=','booking_destination_mappings.added_by')
+            ->join('cities as ct','ct.id','=','booking_destination_mappings.city_id')
+            ->leftjoin('admins as ub','ub.id','=','booking_destination_mappings.updated_by')
+            ->select('booking_destination_mappings.id','ct.name as city_name','ub.name as updated_by','ad.name as added_by','booking_destination_mappings.updated_at','booking_destination_mappings.status');
+        $datatables = Datatables::of($admins)
+            ->addColumn('status', function($admins) {
+                if($admins->status == 1){
+                    return 'Enable';
+                }else{
+                    return 'Disable';
+                }
+            })
+            ->addColumn('action', function($admins) {
+                if (session('role_id') == 1 || in_array(774, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if($admins->status == 1){
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }elseif($admins->status == 0){
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    $dropdown .=' <button type="button" class="dropdown-item view_keyword"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
+                    $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+                    return $dropdown;
+
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function booking_destination_keyword_add(){
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        return view('admin.settings.booking_destination_mapping.add',compact('cities'));
+    }
+
+    public function booking_destination_keyword_store(Request $request){
+
+        $check_exists = BookingDestinationMapping::where('city_id',$request->city_id);
+
+        if($check_exists->exists()){
+            return redirect()->back()->with('error',  'This City Keywords Already Exists');
+        }
+
+        $keywords = explode(',', $request->booking_destination_keywords);
+        $booking_destination_mapping = new BookingDestinationMapping;
+        $booking_destination_mapping->city_id = $request->city_id;
+        $booking_destination_mapping->added_by = Auth::id();
+        $booking_destination_mapping->save();
+
+        foreach($keywords as $keyword){
+            $booking_destination_mapping_keyword = new BookingDestinationMappingKeyword();
+            $booking_destination_mapping_keyword->keyword = $keyword;
+            $booking_destination_mapping_keyword->mapping_id = $booking_destination_mapping->id;
+            $booking_destination_mapping_keyword->save();
+
+        }
+        return redirect()->route('admin.settings.booking_destination_keyword.index')->with('success', 'Booking Destination Keyword Added');
+
+    }
+
+    public function booking_destination_keyword_view($id){
+
+        $booking_destination_mapping = BookingDestinationMapping::find($id);
+        if($booking_destination_mapping){
+            $booking_destination_mapping_keywords = $booking_destination_mapping->mappings;
+            if ($booking_destination_mapping_keywords) {
+                $booking_destination_mapping_keywords = $booking_destination_mapping_keywords->pluck('keyword')->toArray();
+
+                $booking_destination_mapping_keywords = implode(',', $booking_destination_mapping_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.booking_destination_mapping.view',compact('booking_destination_mapping_keywords','cities','booking_destination_mapping'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function booking_destination_keyword_enable_disable(Request $request){
+        $id = $request->id;
+        $booking_destination_mapping = BookingDestinationMapping::find($id);
+        if ($booking_destination_mapping) {
+            if ($booking_destination_mapping->status == 1) {
+                $booking_destination_mapping->status = 0;
+                $booking_destination_mapping->save();
+            } else {
+                $booking_destination_mapping->status = 1;
+                $booking_destination_mapping->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
+    }
+
+    public function booking_destination_keyword_edit($id){
+        $booking_destination_mapping = BookingDestinationMapping::find($id);
+        if($booking_destination_mapping){
+            $booking_destination_mapping_keywords = $booking_destination_mapping->mappings;
+            if ($booking_destination_mapping_keywords) {
+                $booking_destination_mapping_keywords = $booking_destination_mapping_keywords->pluck('keyword')->toArray();
+
+                $booking_destination_mapping_keywords = implode(',', $booking_destination_mapping_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.booking_destination_mapping.edit',compact('booking_destination_mapping_keywords','cities','booking_destination_mapping'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function booking_destination_keyword_update(Request $request){
+        $booking_destination_mapping = BookingDestinationMapping::find($request->id);
+        if($booking_destination_mapping){
+            if($booking_destination_mapping->city_id != $request->city_id){
+                $check_exists = BookingDestinationMapping::where('city_id',$request->city_id);
+
+                if($check_exists->exists()){
+                    return redirect()->back()->with('error',  'This City Keywords Already Exists');
+                }
+            }
+            BookingDestinationMappingKeyword::where('mapping_id',$request->id)->delete();
+
+            $keywords = explode(',', $request->booking_destination_keywords);
+            $booking_destination_mapping->city_id = $request->city_id;
+            $booking_destination_mapping->updated_by = Auth::id();
+            $booking_destination_mapping->save();
+
+            foreach($keywords as $keyword){
+                $booking_destination_mapping_keyword = new BookingDestinationMappingKeyword();
+                $booking_destination_mapping_keyword->keyword = $keyword;
+                $booking_destination_mapping_keyword->mapping_id = $booking_destination_mapping->id;
+                $booking_destination_mapping_keyword->save();
+
+            }
+            return redirect()->route('admin.settings.booking_destination_keyword.index')->with('success', 'Booking Destination Keyword Updated');
+        }else{
+            return redirect()->back()->with('error', 'Booking Destination Keyword Not Found');
+        }
+    }
+
+    public function address_verify(Request $request){
+        if(isset($request->city_id)){
+            echo false;
+        }else{
+            echo false;
         }
 
     }

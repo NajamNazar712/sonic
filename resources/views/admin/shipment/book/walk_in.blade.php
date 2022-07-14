@@ -603,6 +603,31 @@
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                rules: {
+                    consignee_address: {
+                        remote: {
+                            url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',
+                            data: {
+                                city_id: function () {
+                                    return $("#consignee_city").val();
+                                },
+                            },
+                            success: function (data) {
+
+                            }
+
+                        },
+                        maxlength: 255,
+                    },
+                },
+                messages: {
+                    consignee_address: {
+                        required: "Address Is Required",
+                        minlength:"Address is required",
+                        maxlength :"Address can be maximum 255 characters",
+                        remote: "Invalid Address"
+                    },
+                },
                 normalizer: function(value) {
                     return $.trim(value);
                 },
