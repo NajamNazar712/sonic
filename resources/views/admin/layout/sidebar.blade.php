@@ -16,7 +16,7 @@
                         @if (session('role_id') == 1 || in_array(364, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.shipment.receiving_sheet.index')}}">Receiving Sheets</a></li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([5, 11, 15, 242,428,470], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([5, 11, 15, 242, 428, 470, 762, 767], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                                                     data-i18n="nav.dash.main">Accounts</span></a>
                                 <ul class="menu-content">
