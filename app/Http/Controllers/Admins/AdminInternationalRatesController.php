@@ -1528,8 +1528,7 @@ class AdminInternationalRatesController extends Controller
             $shipment = Shipment::where('tracking_number',$tracking_number)->first();
             if($shipment){
                 $shipment = Shipment::where('id',$shipment->id)->first();
-                $charges =  $shipment->esc_charges;
-                $shipment->esc_charges = $amount - $charges;
+                $shipment->esc_charges = $amount;
                 $shipment->save();
 
                 if($shipment->shipper_status_id == 14){
