@@ -20,6 +20,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
+										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">Table ID</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Department</th>
@@ -57,34 +58,164 @@
 			</form>
         </div>
     </div>
+
+	<div class="modal fade text-left" id="AddRoleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRoleModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Roles</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="dispute_form" action="" method="post">
+
+                        <div class="row mb-2">
+                            <div class="col-12 form-group">
+                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                    <option></option>
+                                    @foreach($cities as $city)
+                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-12 form-group">
+                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                    <option></option>
+                                    @foreach($cities as $city)
+                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <button id="DisputeCreate" type="submit" class="btn btn-primary btn-block">Launch Dispute</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
+	<style>
+		
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
+            var selected_rows = [];
 			var table = $('#datatable').DataTable({
 				@if (session('role_id') == 1 || in_array(86, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
 						text: 'Add',
 						className: 'btn btn-primary add',
+						enabled: false,
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.user_management.roles.add.index') }}';
 						}
-					},'reset'],
+					},{
+						text: 'Remove',
+						className: 'btn btn-primary remove',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							window.location = '{{ route('admin.user_management.roles.add.index') }}';
+						}
+					},{
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+
+                                table.button('.add').enable();
+                                table.button('.remove').enable();
+								
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.add').disable();
+									table.button('.remove').disable();
+
+                                }
+                            }
+                        });
+                    }
+                },'reset'],
 				@else
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: ['reset'],
 	            @endif
+				select: {
+					info: false,
+					style: 'multi',
+					selector: 'td.select-checkbox',
+					className: 'selected bg-primary bg-lighten-5 primary'
+            	},
 	            scrollX: true, scrollY: '500px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
@@ -98,6 +229,7 @@
 				rowId: 'id',
 				order: [[4, 'desc']],
 				columns: [
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'id', name: 'admin_roles.id', class: 'align-middle id'},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
 					{data: 'department', name: 'ad.id', class: 'align-middle department'},
@@ -108,7 +240,10 @@
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
-
+					$('td:eq(0)', row).addClass('select-checkbox');
+					if ($.inArray(data.id, selected_rows) !== -1) {
+						table.row(row).select();
+					}
 					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
@@ -123,7 +258,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.action') ||  $(header).is('.select')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.department')){
                             $(departments_select).appendTo($(search))
@@ -190,9 +325,32 @@
                     form.submit();
 				}
 			});
+			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+                if (selected_rows.length > 0) {
+                    table.button('.add').enable();
+                    table.button('.remove').enable();
+                }
+                else {
+                    table.button('.add').disable();
+                    table.button('.remove').disable();
+                }
+				
+            });
 		});
 
 		
+		
+			
 
 		
 	</script>

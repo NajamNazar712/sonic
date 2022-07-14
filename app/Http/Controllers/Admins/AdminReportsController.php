@@ -9820,7 +9820,6 @@ class AdminReportsController extends Controller
 
     public function reverse_pickup_index()
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 470);
         return view('admin.reports.reverse_pickup');
     }
