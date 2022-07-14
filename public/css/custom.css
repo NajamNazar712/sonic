@@ -27,6 +27,10 @@ html body .content .content-wrapper {
 	min-width: 100%;
 }
 
+.cursor-pointer{
+	cursor: pointer;
+}
+
 .header-navbar .navbar-header .navbar-brand .brand-logo {
 	width: auto;
 }

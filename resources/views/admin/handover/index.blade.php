@@ -16,7 +16,7 @@
                     @include('admin.inc.messages')
 
                     <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
+                        <input type="hidden" name="delivery_location_mapping" id="delivery_location_mapping">
                         <div class="form-group">
                             <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
@@ -223,12 +223,15 @@
                     $('#add_shipment_form button.add').prop('disabled', true);
 
                     var tracking_number = $(form).find('input.tracking_number').val();
+                    var delivery_location_mapping = $('#delivery_location_mapping').val();
+                    
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
                             url: '{!! route('admin.handover.create.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
+                                'delivery_location_mapping': delivery_location_mapping,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -254,7 +257,7 @@
                                         // console.log(shipment_ids);
                                         // console.log(data.details.id);
 
-
+                                        $('#delivery_location_mapping').val(data.details.delivery_area);
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
                                         $('#arrival_of_shipments_form button.confirm').prop('disabled', false);

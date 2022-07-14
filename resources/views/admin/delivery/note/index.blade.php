@@ -16,21 +16,20 @@
                 </div>
 
                 <form action="#" id="delivery_note_form">
-                <div class="row justify-content-center align-items-center mb-2">
-                    <div class="col-3">
-                        <fieldset>
-                            <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
-                        </fieldset>
-                    </div>
+                    <div class="row justify-content-center align-items-center mb-2">
+                        <div class="col-3">
+                            <fieldset>
+                                <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
+                            </fieldset>
+                        </div>
 
-                    <div class="col-1">
-                        <a href="#" id="camera_scan_initiate" class="d-block text-right" tabindex="-1">
-                            <i class="ft-camera h1"></i>
-                        </a>
+                        <div class="col-1">
+                            <a href="#" id="camera_scan_initiate" class="d-block text-right" tabindex="-1">
+                                <i class="ft-camera h1"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
                 </form>
-
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
@@ -62,7 +61,6 @@
                     </div>
 
                 </div>
-
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
