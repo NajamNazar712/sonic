@@ -171,44 +171,44 @@
                 placeholder:'Select Rider',
                 width:'100%',
                 dropdownParent: $("#request_form")
-            })
-
-                .bind('change', function () {
-                var rider_id = this.value;
-                if(rider_id == null || rider_id == ''){
-                    return false;
-                }
-                $.ajax({
-                    url: '{!! route('admin.delivery.note.check_dn_against_rider') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': rider_id,
-
-                    }
-                }).done(function (data) {
-
-                    if (data.status == 1) {
-                        var value ='';
-                        var delivery_note = data.note.id;
-                        if(data.note.received_cod_amount == null){
-                            value = 0;
-                        }
-                        else{
-                            value = data.note.received_cod_amount
-                        }
-                        $('#form_btn').attr('disabled' , false);
-
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                        $('#form_btn').attr('disabled' , true);
-                    }
-
-                });
             });
+
+            {{--    .bind('change', function () {--}}
+            {{--    var rider_id = this.value;--}}
+            {{--    if(rider_id == null || rider_id == ''){--}}
+            {{--        return false;--}}
+            {{--    }--}}
+            {{--    $.ajax({--}}
+            {{--        url: '{!! route('admin.delivery.note.check_dn_against_rider') !!}',--}}
+            {{--        method: 'POST',--}}
+            {{--        data: {--}}
+            {{--            '_token': '{{ csrf_token() }}',--}}
+            {{--            'id': rider_id,--}}
+
+            {{--        }--}}
+            {{--    }).done(function (data) {--}}
+
+            {{--        if (data.status == 1) {--}}
+            {{--            var value ='';--}}
+            {{--            var delivery_note = data.note.id;--}}
+            {{--            if(data.note.received_cod_amount == null){--}}
+            {{--                value = 0;--}}
+            {{--            }--}}
+            {{--            else{--}}
+            {{--                value = data.note.received_cod_amount--}}
+            {{--            }--}}
+            {{--            $('#form_btn').attr('disabled' , false);--}}
+
+            {{--        } else {--}}
+            {{--            toastr.error(data.error, 'Error!', {--}}
+            {{--                positionClass: 'toast-top-center',--}}
+            {{--                containerId: 'toast-top-center'--}}
+            {{--            });--}}
+            {{--            $('#form_btn').attr('disabled' , true);--}}
+            {{--        }--}}
+
+            {{--    });--}}
+            {{--});--}}
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {

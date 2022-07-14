@@ -2598,16 +2598,16 @@ class DeliveryController extends Controller
         }
     }
 
-    public function check_dn_against_rider(Request $request)
-    {
-        $rider = $request->id;
-        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0)->latest()->first();
-        if ($delivery_note) {
-            return response()->json(['status' => 1, 'note' => $delivery_note]);
-        } else {
-            return response()->json(['status' => 0, 'error' => 'No Delivery Note Found For the Rider']);
-        }
-    }
+//    public function check_dn_against_rider(Request $request)
+//    {
+//        $rider = $request->id;
+//        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0)->latest()->first();
+//        if ($delivery_note) {
+//            return response()->json(['status' => 1, 'note' => $delivery_note]);
+//        } else {
+//            return response()->json(['status' => 0, 'error' => 'No Delivery Note Found For the Rider']);
+//        }
+//    }
 
     public function rider_category_submit(Request $request)
     {
@@ -2630,7 +2630,7 @@ class DeliveryController extends Controller
                 $rider_details->requested_by = auth()->id();
                 $rider_details->requested_at = Carbon::now();
                 $rider_details->save();
-                return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+                return redirect()->route('admin.delivery.note.rider_category_bypass_request')->with(['success' => 'Request Added']);
             }
             else
             {
@@ -2642,7 +2642,7 @@ class DeliveryController extends Controller
                 $rider_details->requested_by = auth()->id();
                 $rider_details->requested_at = Carbon::now();
                 $rider_details->save();
-                return redirect()->route('admin.delivery.note.rider_category_request')->with(['success' => 'Request Added']);
+                return redirect()->route('admin.delivery.note.rider_category_bypass_request')->with(['success' => 'Request Added']);
             }
         }
     }

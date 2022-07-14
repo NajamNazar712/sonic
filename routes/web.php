@@ -1155,7 +1155,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('rider_category_bypass_request','Admins\DeliveryController@rider_category_bypass_request')->name('rider_category_bypass_request');
             Route::get('rider_cat_request_list','Admins\DeliveryController@rider_cat_request_list')->name('rider_cat_request_list');
             Route::post('check_rider_cat','Admins\DeliveryController@check_rider_cat')->name('check_rider_cat');
-            Route::post('check_dn_against_rider','Admins\DeliveryController@check_dn_against_rider')->name('check_dn_against_rider');
+//            Route::post('check_dn_against_rider','Admins\DeliveryController@check_dn_against_rider')->name('check_dn_against_rider');
             Route::post('rider_category_submit','Admins\DeliveryController@rider_category_submit')->name('rider_category_submit');
             Route::post('rider_category_approve','Admins\DeliveryController@rider_category_approve')->name('rider_category_approve');
             Route::get('rider_category_bypass_weight','Admins\DeliveryController@rider_category_bypass_weight')->name('rider_category_bypass_weight');
