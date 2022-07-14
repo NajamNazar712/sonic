@@ -7247,10 +7247,46 @@ public function sales_incentive()
 
     public function address_verify(Request $request){
         if(isset($request->city_id)){
-            echo false;
-        }else{
-            echo false;
+
+
+            $city_id = $request->city_id;
+            $consignee_address = $request->consignee_address;
+            $check = BookingDestinationMappingKeyword::pluck('keyword')->toArray();
+
+            $str_arr = null;
+            $str_arr = preg_split("/[ ,]+/", $consignee_address);
+            $found_keyword = array();
+            foreach ($check as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            $invalid_cities  = array();
+            if($arr_value) {
+                $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
+                    ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
+                    ->whereIn('booking_destination_mapping_keywords.keyword', $found_keyword);
+                if ($data_found->exists()) {
+                    $data_found =$data_found->get();
+
+                    foreach ($data_found as $value){
+                        if($value->city_id != $city_id){
+                            $dd = isset($invalid_cities[$value->city_name]) ? $invalid_cities[$value->city_name] : '';
+                            $invalid_cities[$value->city_name] = trim($dd)." ".$value->keyword;
+                        }
+                    }
+                    if($invalid_cities){
+                        return response()->json(['status'=>'false','invalid_cities'=>$invalid_cities,'error'=>'Invalid Address']);
+                    }
+                }
+            }
+            return response()->json(['status'=>'true']);
+
         }
+        return response()->json(['status'=>'true']);
 
     }
     
