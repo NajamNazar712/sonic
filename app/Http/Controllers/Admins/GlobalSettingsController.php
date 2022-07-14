@@ -12,8 +12,11 @@ use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\ByPassWeightShippers;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Admin\DeliveryLocationMapping;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
@@ -933,12 +936,19 @@ class GlobalSettingsController extends Controller
 
     public function fuel_factor_store(Request $request)
     {
+        $include_ids = [];
+
         $fuel_factor = $request->fuel_factor;
 
         if ($fuel_factor != null) {
             if ($request->has('all_shippers_checkbox')) {
                 $shipping_modes = ShippingMode::all();
-                $users = User::where('status', 3)->get();
+                if (!empty($include_ids)) {
+                    $users = User::whereIn('id', $include_ids)->get();
+                }
+                else {
+                    $users = User::where('status', 3)->get();
+                }
                 if (!$users->isEmpty()) {
                     foreach ($users as $user) {
                         foreach ($shipping_modes as $shipping_mode) {
@@ -1050,7 +1060,12 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    $users = User::whereIn('id', $request->shippers)->get();
+                    if (!empty($include_ids)) {
+                        $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+                    }
+                    else {
+                        $users = User::whereIn('id', $include_ids)->get();
+                    }
                     if (!$users->isEmpty()) {
                         foreach ($users as $user) {
                             foreach ($shipping_modes as $shipping_mode) {
@@ -6870,6 +6885,200 @@ public function sales_incentive()
 
     }
 
+    public function delivery_area_keyword(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),561);
+        return view('admin.settings.delivery_area_keyword');
+    }
+
+    public function delivery_area_keyword_list(Request $request){
+        $admins = DeliveryLocationMapping::join('admins as ad','ad.id','=','delivery_location_mappings.added_by')
+                 ->join('cities as ct','ct.id','=','delivery_location_mappings.city_id')
+                 ->leftjoin('admins as ub','ub.id','=','delivery_location_mappings.updated_by')
+        ->select('delivery_location_mappings.id','delivery_location_mappings.area_name','ct.name as city_name','ub.name as updated_by','ad.name as added_by','delivery_location_mappings.updated_at','delivery_location_mappings.status');
+        $datatables = Datatables::of($admins)
+        ->addColumn('status', function($admins) {
+            if($admins->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+        })
+        ->addColumn('action', function($admins) {
+            if (session('role_id') == 1 || in_array(749, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                        if($admins->status == 1){
+                            $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }elseif($admins->status == 0){
+                            $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                        $dropdown .=' <button type="button" class="dropdown-item view_keyword"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Keyword</div></button>';
+                        $dropdown .=' <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        });
+
+        return $datatables->make(true);
+    }
+
+    public function delivery_area_keyword_add(){
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        return view('admin.settings.add_delivery_area',compact('cities'));
+    }
+
+    public function delivery_area_keyword_store(Request $request){
+        
+        $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id)->where('area_name',$request->area_name);
+        
+        if($check_exists->exists()){
+            return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
+        }
+
+        $keywords = explode(',', $request->delivery_area_keyword);
+        $delivery_location = new DeliveryLocationMapping;
+        $delivery_location->area_name = $request->area_name;
+        $delivery_location->city_id = $request->city_id;
+        $delivery_location->added_by = Auth::id();
+        $delivery_location->save();
+
+        foreach($keywords as $keyword){
+            $delivery_location_keyword = new DeliveryLocationMappingKeyword;
+            $delivery_location_keyword->keyword = $keyword;
+            $delivery_location_keyword->mapping_id = $delivery_location->id;
+            $delivery_location_keyword->save();
+
+        }
+        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Added');
+
+    }
+
+    public function delivery_area_keyword_enable_disable(Request $request){
+        $id = $request->id;
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if ($delivery_location) {
+            if ($delivery_location->status == 1) {
+                $delivery_location->status = 0;
+                $delivery_location->save();
+            } else {
+                $delivery_location->status = 1;
+                $delivery_location->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
+    }
+
+    public function delivery_area_keyword_edit($id){
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if($delivery_location){
+            $delivery_location_keywords = $delivery_location->mappings;
+            if ($delivery_location_keywords) {
+                $delivery_location_keywords = $delivery_location_keywords->pluck('keyword')->toArray();
+
+                $delivery_location_keywords = implode(',', $delivery_location_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.edit_delivery_area',compact('delivery_location_keywords','cities','delivery_location'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function delivery_area_keyword_update(Request $request){
+        $delivery_location = DeliveryLocationMapping::find($request->id);
+        if($delivery_location){
+            if($delivery_location->city_id != $request->city_id && $delivery_location->area_name != $request->area_name){
+                $check_exists = DeliveryLocationMapping::where('city_id',$request->city_id)->where('area_name',$request->area_name);
+            
+                if($check_exists->exists()){
+                    return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
+                }
+            }
+            DeliveryLocationMappingKeyword::where('mapping_id',$request->id)->delete();
+
+            $keywords = explode(',', $request->delivery_area_keyword);
+            $delivery_location->area_name = $request->area_name;
+            $delivery_location->city_id = $request->city_id;
+            $delivery_location->updated_by = Auth::id();
+            $delivery_location->save();
     
+            foreach($keywords as $keyword){
+                $delivery_location_keyword = new DeliveryLocationMappingKeyword;
+                $delivery_location_keyword->keyword = $keyword;
+                $delivery_location_keyword->mapping_id = $delivery_location->id;
+                $delivery_location_keyword->save();
+    
+            }
+            return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Updated');
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+
+    public function delivery_area_keyword_view($id){
+       
+        $delivery_location = DeliveryLocationMapping::find($id);
+        if($delivery_location){
+            $delivery_location_keywords = $delivery_location->mappings;
+            if ($delivery_location_keywords) {
+                $delivery_location_keywords = $delivery_location_keywords->pluck('keyword')->toArray();
+
+                $delivery_location_keywords = implode(',', $delivery_location_keywords);
+            }
+
+            $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+            return view('admin.settings.view_delivery_area',compact('delivery_location_keywords','cities','delivery_location'));
+
+        }else{
+            return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
+        }
+    }
+    public function weight_bypass()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),556);
+
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+
+        $settings = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
+
+        return view('admin.settings.weight_bypass')->with(['shippers' => $shippers, 'users' => $settings]);
+    }
+
+    public function shipper_store_weight_bypass(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = $request->shippers;
+                ByPassWeightShippers::truncate();
+
+                foreach($shippers as $shipper)
+                {
+                    $update_shipper = new ByPassWeightShippers();
+                    $update_shipper->shipper_id = $shipper;
+                    $update_shipper->save();
+                }
+            }
+            return redirect()->back()->with('success', 'Setting Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shipper selected!');
+        }
+
+    }
     
 }

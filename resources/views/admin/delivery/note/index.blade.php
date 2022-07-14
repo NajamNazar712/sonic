@@ -11,7 +11,25 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+ <div id="camera_scan" class="d-none">
+                    <div id="camera_view" class="camera_view"></div>
+                </div>
+
+                <form action="#" id="delivery_note_form">
+                    <div class="row justify-content-center align-items-center mb-2">
+                        <div class="col-3">
+                            <fieldset>
+                                <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
+                            </fieldset>
+                        </div>
+
+                        <div class="col-1">
+                            <a href="#" id="camera_scan_initiate" class="d-block text-right" tabindex="-1">
+                                <i class="ft-camera h1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>                <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>

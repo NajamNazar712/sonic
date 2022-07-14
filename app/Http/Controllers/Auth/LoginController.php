@@ -13,6 +13,7 @@ use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -22,6 +23,9 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\SubstituteUserPermission;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Models\Admin\NpsSurvey;
+use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\NpsShipperSkipSurvey;
 
 class LoginController extends Controller
 {
@@ -288,6 +292,29 @@ class LoginController extends Controller
             $return_address_change_shippers = array_map('intval', explode(',' , $settings->text));
             if(in_array($shipper_user_id, $return_address_change_shippers)){
                 session(['shipment_return_address_change' => TRUE]);
+            }
+        }
+
+        //Nps Survey check
+        $skip_count = 0;
+        $hours= 24; //set default 24 hour to by pass the condition
+        $now = date('Y-m-d H:i:s',strtotime(Carbon::now()));
+        $nps_survey = NpsSurvey::where('start_time','<=',$now)->where('end_time','>=',$now)->where('status',1)->select('id');
+        if($nps_survey->exists()){
+            $nps =  $nps_survey->first();
+            $nps_shipper_rattings = NpsShipperRatting::where('nps_survey_id',$nps->id)->where('user_id',session('user_id'));
+            $nps_shipper_skip_surveys = NpsShipperSkipSurvey::where('nps_survey_id',$nps->id)->where('user_id',session('user_id'));
+            if($nps_shipper_skip_surveys->exists()){
+                $nps_shipper_skip_surveys = $nps_shipper_skip_surveys->first();
+                $skip_count = $nps_shipper_skip_surveys->skip_count;
+                $skip_time = date('Y-m-d H:i:s',strtotime($nps_shipper_skip_surveys->updated_at));
+                $start_date = Carbon::parse($now);
+                $end_date = Carbon::parse($skip_time);
+                $hours = $end_date->diffInHours($start_date);
+            }
+//                            dd($nps->id. ' ' .$hours .' '.$skip_count);
+            if(!$nps_shipper_rattings->exists() && $skip_count <2 && $hours>=24) {
+                session(['nps_survey' => $nps->id]);
             }
         }
 

@@ -100,7 +100,13 @@ class RetailAPIController extends Controller
 
                         $information['api_token'] = $api_token;
                     }
-
+                    $information['welcome_bit'] = 0;
+                    if(!$user->first_login){
+                        $information['welcome_bit'] = 1;
+                        $information['welcome_message'] = "Welcome to TRAX ".$user->name;
+                    }
+                    $user->first_login = 1;
+                    $user->save();
                     return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Password']);
