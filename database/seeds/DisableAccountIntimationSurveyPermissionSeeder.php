@@ -23,9 +23,9 @@ class DisableAccountIntimationSurveyPermissionSeeder extends Seeder
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 557, 'screen_name' => 'Disable Account Intimation SURVEY Questions View', 'action'=> 'View'),
-            array('id' => 558, 'screen_name' => 'Disable Account Intimation SURVEY Questions Excel', 'action'=> 'View'),
+            array('id' => 558, 'screen_name' => 'Disable Account Intimation SURVEY Questions', 'action'=> 'Excel Download'),
             array('id' => 559, 'screen_name' => 'Disable Account Intimation SURVEY Report View', 'action'=> 'View'),
-            array('id' => 560, 'screen_name' => 'Disable Account Intimation SURVEY Report Excel', 'action'=> 'View')
+            array('id' => 560, 'screen_name' => 'Disable Account Intimation SURVEY Report', 'action'=> 'Excel Download ')
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
