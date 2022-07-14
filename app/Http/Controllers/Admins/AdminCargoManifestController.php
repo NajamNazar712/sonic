@@ -1019,6 +1019,7 @@ class AdminCargoManifestController extends Controller
             $bag->transport_mode_id = 2;
             $bag->status_id = 1;
             $bag->completed = 0;
+            $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
             CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1144,6 +1145,7 @@ class AdminCargoManifestController extends Controller
                 $bag->status_id = 1;
                 $bag->open_bag = 1;
                 $bag->completed = 0;
+                $bag->current_hub_id = Auth::user()->default_hub_id;
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1630,6 +1632,7 @@ class AdminCargoManifestController extends Controller
                         $master_cargo->junction_mapping_id = $bag->junction_mapping_id;
                         $master_cargo->update();
                     }
+                    $bag->current_hub_id = Auth::user()->default_hub_id;
                     $bag->update();
 
                     CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1);
@@ -2408,6 +2411,7 @@ class AdminCargoManifestController extends Controller
                                 $shipment_table->update();
                             }
                         }
+                        $bag->current_hub_id = Auth::user()->default_hub_id;
 
                         $bag->update();
 
@@ -2449,6 +2453,7 @@ class AdminCargoManifestController extends Controller
                         if (!in_array($manifest_bag->cargo_manifest_bag_id, $bag_short_received)) {
                             $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                             $short_received_bag->status_id = 9;
+                            $bag->current_hub_id = Auth::user()->default_hub_id;
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
@@ -2496,6 +2501,7 @@ class AdminCargoManifestController extends Controller
                         if (!in_array($manifest_bag->cargo_manifest_bag_id, $bag_short_received)) {
                             $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                             $short_received_bag->status_id = 9;
+                            $bag->current_hub_id = Auth::user()->default_hub_id;
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
