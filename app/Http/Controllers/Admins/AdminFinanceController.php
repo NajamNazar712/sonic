@@ -15390,7 +15390,6 @@ class AdminFinanceController extends Controller
 
     static public function update_esc_charges($shipment_id,$type){
         $shipment = Shipment::find($shipment_id);
-        $amount = $shipment->amount;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
@@ -15406,46 +15405,47 @@ class AdminFinanceController extends Controller
                 $gst = 0;
             }
 
-            $invoice_shipment = InvoiceShipment::where('type',0)->where('shipment_id',$shipment_id);
-            if($invoice_shipment){
-                $invoice_shipment = $invoice_shipment->latest()->first();
-                if($invoice_shipment) {
-                    $invoice = Invoice::find($invoice_shipment->invoice_id);
-                    if ($invoice->status_id != 3) {
 
-                        $total_charges = 0;
-                        $total_gst = 0;
-                        $total_invoice_amount = 0;
-
-                        $invoice_shipment->charges = $charges;
-                        $invoice_shipment->gst = $gst;
-                        $invoice_shipment->invoice_amount = $charges + $gst;
-                        $invoice_shipment->save();
-
-                        foreach ($invoice->invoice_shipments as $shipments) {
-
-                            $total_charges = $total_charges + $shipments->charges;
-                            $total_gst = $total_gst + $shipments->gst;
-                            $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
-                        }
-
-                        $invoice->total_charges = $total_charges;
-                        $invoice->total_gst = $total_gst;
-                        $invoice->total_invoice_amount = $total_invoice_amount;
-                        $invoice->save();
-
-                    }
-                }
+            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id',$shipment_id)->where('type',0);
+            if($pending_invoice_shipment->exists()){
+                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+                $pending_invoice_shipment->type = $type;
+                $pending_invoice_shipment->charges = $charges;
+                $pending_invoice_shipment->gst = $gst;
+                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                $pending_invoice_shipment->save();
             }
             else{
-                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id',$shipment_id);
-                if($pending_invoice_shipment){
-                    $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
-                    $pending_invoice_shipment->type = $type;
-                    $pending_invoice_shipment->charges = $charges;
-                    $pending_invoice_shipment->gst = $gst;
-                    $pending_invoice_shipment->invoice_amount = $charges + $gst;
-                    $pending_invoice_shipment->save();
+                $invoice_shipment = InvoiceShipment::where('shipment_id',$shipment_id)->where('type',0);
+                if($invoice_shipment->exists()){
+                    $invoice_shipment = $invoice_shipment->latest()->first();
+                    if($invoice_shipment) {
+                        $invoice = Invoice::find($invoice_shipment->invoice_id);
+                        if ($invoice->status_id != 3) {
+
+                            $total_charges = 0;
+                            $total_gst = 0;
+                            $total_invoice_amount = 0;
+
+                            $invoice_shipment->charges = $charges;
+                            $invoice_shipment->gst = $gst;
+                            $invoice_shipment->invoice_amount = $charges + $gst;
+                            $invoice_shipment->save();
+
+                            foreach ($invoice->invoice_shipments as $shipments) {
+
+                                $total_charges = $total_charges + $shipments->charges;
+                                $total_gst = $total_gst + $shipments->gst;
+                                $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
+                            }
+
+                            $invoice->total_charges = $total_charges;
+                            $invoice->total_gst = $total_gst;
+                            $invoice->total_invoice_amount = $total_invoice_amount;
+                            $invoice->save();
+
+                        }
+                    }
                 }
             }
         }
