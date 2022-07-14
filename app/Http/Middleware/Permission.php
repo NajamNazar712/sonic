@@ -1249,7 +1249,7 @@ class Permission
 
 			'accounts.disable.account.intimation.survey.index' => 762,
 			'accounts.disable.account.intimation.survey.report' => 768,
-			'settings.pickup.weight_bypass' => 556,			'delivery.note.rider_category_bypass_request' => 757,
+			'settings.pickup.weight_bypass' => 761,			'delivery.note.rider_category_bypass_request' => 757,
             'delivery.note.rider_category_bypass_weight' =>758
         ],
 
