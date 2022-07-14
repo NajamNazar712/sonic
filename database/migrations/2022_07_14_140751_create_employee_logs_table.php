@@ -15,9 +15,10 @@ class CreateEmployeeLogsTable extends Migration
     {
         Schema::create('employee_logs', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('trax_id');
-            $table->integer('employee_type_id')->index(); // rider or staff
-            $table->integer('request_status_id')->index(); // active,inactive n active no info
+            $table->string('trax_id')->index()->nullable();
+            $table->integer('employee_type_id')->index()->nullable(); // rider or staff
+            $table->integer('staff_category_id')->index()->nullable(); //
+            $table->integer('request_status_id')->index()->nullable(); // active,inactive n active no info
             $table->integer('status_id')->index()->nullable();// blocked ki 2 h
             $table->integer('updated_by')->index();
             $table->timestamps();

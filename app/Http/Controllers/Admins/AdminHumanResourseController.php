@@ -13,6 +13,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
@@ -862,6 +863,13 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $employee_log = new EmployeeLog();
+        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
     }
@@ -890,6 +898,13 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $employee_log = new EmployeeLog();
+        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->status_id = 2;
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
@@ -4134,6 +4149,13 @@ class AdminHumanResourseController extends Controller
             'converted_by' => Auth::id(),
         ]);
 
+        $employee_log = new EmployeeLog();
+        $employee_log->trax_id = $rider->trax_id;
+        $employee_log->employee_type_id = 1;
+        $employee_log->staff_category_id = 1;
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return back()->with("success","Rider Converted To Staff Successfully");
     }
 
@@ -4162,6 +4184,14 @@ class AdminHumanResourseController extends Controller
 
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
+
+                    $employee_log = new EmployeeLog();
+                    $employee_log->trax_id = $employee->trax_id;
+//                    $employee_log->employee_type_id = 1;
+                    $employee_log->staff_category_id = 3;
+                    $employee_log->updated_by = auth()->id();
+                    $employee_log->save();
+
                     return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
