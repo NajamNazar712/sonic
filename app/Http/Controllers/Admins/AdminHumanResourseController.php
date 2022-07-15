@@ -782,6 +782,13 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = 2;
         $employee->update();
+
+        $employee_log = new EmployeeLog();
+        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->status_id = 2;
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
     }
@@ -809,6 +816,13 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $employee_log = new EmployeeLog();
+        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
     }
