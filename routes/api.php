@@ -256,6 +256,12 @@ Route::name('api.')->group(function () {
                 Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+
+                //revamp
+                Route::post('index_v2', 'Rider\RiderAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
+                Route::get('list_v2', 'Rider\RiderAPIController@employee_leave_list_v2')->name('list_v2');
+
             });
 
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
@@ -343,6 +349,15 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+
+                //revamp
+                Route::post('index_v2', 'AdminAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply_v2', 'AdminAPIController@leave_apply_v2')->name('apply_v2');
+                Route::get('list_v2', 'AdminAPIController@employee_leave_list_v2')->name('list_v2');
+                Route::get('approver_list_v2', 'AdminAPIController@approver_leave_list_v2')->name('approver_list_v2');
+                Route::post('approve_v2', 'AdminAPIController@leave_approve_v2')->name('approve_v2');
+                Route::post('hod_approve', 'AdminAPIController@hod_approve')->name('hod_approve');
+                Route::post('reject_v2', 'AdminAPIController@leave_reject_v2')->name('reject_v2');
             });
 
             Route::prefix('adjustment')->name('adjustment.')->group(function () {
@@ -373,6 +388,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::post('list', 'AdminAPIController@leads_list')->name('list');
+                Route::post('list_v2', 'AdminAPIController@leads_list_v2')->name('list_v2');
                 Route::post('status_list', 'AdminAPIController@lead_statuses')->name('status_list');
                 Route::post('status_update', 'AdminAPIController@lead_status_update')->name('status_update');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
@@ -418,6 +434,7 @@ Route::name('api.')->group(function () {
         Route::post('get_info', 'ConsigneeAPIController@consignee_info')->name('get_info');
         Route::post('test', 'ConsigneeAPIController@test')->name('test');
         Route::post('consignee_otp', 'ConsigneeAPIController@consignee_otp')->name('consignee_otp');
+        Route::post('consignee_forget_pin_otp', 'ConsigneeAPIController@consignee_forget_pin_otp')->name('consignee_forget_pin_otp');
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
@@ -442,6 +459,7 @@ Route::name('api.')->group(function () {
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
 
             Route::prefix('subscription')->name('subscription.')->group(function () {
+                Route::post('add', 'ShipperAPIController@shipper_subscription_add')->name('add');
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
@@ -451,6 +469,30 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
                 Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
+            });
+
+            Route::prefix('rcp')->name('rcp.')->group(function () {
+                Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+                Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
+                Route::post('mark_reattempt', 'ShipperAPIController@mark_reattempt')->name('mark_reattempt');
+                Route::prefix('intercept')->name('intercept.')->group(function () {
+                    Route::post('index', 'ShipperAPIController@intercept_re_book_index')->name('index');
+                    Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
+                });
+            });
+
+            Route::get('get_booking_types', 'ShipperAPIController@booking_types')->name('get_booking_types');
+
+            Route::prefix('corporate')->name('corporate.')->group(function () {
+                Route::get('index', 'ShipperAPIController@corporate_index')->name('index');
+                Route::post('ftl_info', 'ShipperAPIController@get_ftl_info')->name('ftl_info');
+                Route::post('shipping_modes', 'ShipperAPIController@corporate_shipping_modes')->name('shipping_modes');
+                Route::post('submit', 'APIController@shipment_book')->name('submit');
+            });
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::get('index', 'ShipperAPIController@reimbursement_index')->name('index');
+                Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
+                Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
         });
 

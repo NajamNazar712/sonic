@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
@@ -393,6 +395,9 @@ class APIController extends Controller
 
     public function shipment_book(Request $request)
     {
+        /********************************NOTE********************************/
+        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+
         $user_id = $request->user_id;
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -497,7 +502,7 @@ class APIController extends Controller
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'self_collection' => ['nullable', 'boolean'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
-                'package_type' => ['required_if:service_type_id,3', 'boolean'],
+                'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
@@ -552,7 +557,8 @@ class APIController extends Controller
                     })];
                 }
             }
-        } else {
+        }
+        else {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -609,7 +615,10 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email']
+                'substitute_user_email' => ['nullable', 'filled', 'email'],
+
+                'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
+                'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
 
             ];
 
@@ -787,7 +796,8 @@ class APIController extends Controller
                 if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
                 }
-            } else {
+            }
+            else {
                 $pickup_consignee_city = City::find($request->input('consignee_city_id'));
                 if (!$pickup_consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
@@ -870,7 +880,8 @@ class APIController extends Controller
                 $payment_mode_id = 1;
                 $self_collection = false;
                 $delivery_type_id = 1;
-            } else {
+            }
+            else {
                 $pickup_address_id = $request->input('pickup_address_id');
                 $consignee_city_id = $request->input('consignee_city_id');
 
@@ -1197,6 +1208,12 @@ class APIController extends Controller
                         $blacklist_message = $blacklist_setting->message;
                     }
                 }
+            }
+
+            if ($service_type_id == 6) {
+                $ftl_request_id = $request->approve_freight_request;
+                FtlRequest::where('id', $ftl_request_id)->update(['shipment_id' => $shipment_id, 'status_id' => 5, 'collection_type' => $request->ftl_collection_type]);
+                FTLController::FTLRequestStatusHistory($ftl_request_id, 5, $user_id);
             }
 
             if ($msg_string != null && $blacklist_message == null) {
@@ -1820,20 +1837,26 @@ class APIController extends Controller
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-            if ($shipment->shipper_status_id == 1) {
-                $shipment->shipper_status_id = 17;
-                $shipment->consignee_status_id = 17;
-
-                $shipment->save();
-
-                V2AdminPickupsController::cancel($shipment->id);
-
-                ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
-
-                return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+            if($shipment->warehouse == 1){
+                return response()->json(['status' => 1, 'message' => 'Warehouse Shipment\'s can\'t be cancelled through Sonic.']);
             }
+            else{
+                if ($shipment->shipper_status_id == 1) {
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+
+                    $shipment->save();
+
+                    V2AdminPickupsController::cancel($shipment->id);
+
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, null, 'Cancelled by Shipper', $user_id, null);
+
+                    return response()->json(['status' => 0, 'message' => 'Shipment #' . $tracking_number . ' is Cancelled']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment\'s Status has already been changed']);
+                }
+            }
+
         }
     }
 
@@ -3620,13 +3643,13 @@ class APIController extends Controller
                             } else {
                                 $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $current_status['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_event = array();
 
                                 $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                                 $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                                $transit_event['Location'] = $this->shipment_google_location_name($shipment->shipper_status_id, $cities);
 
                                 $transit_events[] = $transit_event;
                             }
@@ -3729,6 +3752,12 @@ class APIController extends Controller
             'device_token' => ['required'],
         ];
 
+        //type_id
+        /*
+        1- Admin
+        2- Rider
+        3- Shipper
+        4- Consignee*/
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -3736,8 +3765,8 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
             $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
-
             if ($employee_device_token->exists()) {
                 $employee_device_token = $employee_device_token->first();
             } else {

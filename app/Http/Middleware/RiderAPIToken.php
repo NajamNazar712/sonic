@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 
 use Closure;
@@ -26,8 +27,12 @@ class RiderAPIToken
                 $rider = $rider->first();
 
                 if ($rider->status) {
-                    $request->request->add(['rider_id' => $rider->id]);
-
+                    if($rider->employee){
+                        $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id, 'rider_employee' => $rider->employee->id]);
+                    }
+                    else{
+                        $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id]);
+                    }
                     return $next($request);
                 }
                 else {

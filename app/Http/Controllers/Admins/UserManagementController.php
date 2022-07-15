@@ -566,6 +566,7 @@ class UserManagementController extends Controller
                           <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                           <div class="dropdown-menu dropdown-menu-sm">
                             <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                            <button type="button" class="dropdown-item duplicate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-copy"></i></div><div class="col-9 offset-1">Duplicate</div></button>
                           </div>
                         </div>
                 ';
@@ -606,6 +607,31 @@ class UserManagementController extends Controller
         }
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']);
+    }
+
+    public function role_duplicate(Request $request) {
+
+        $id = $request->input('role_id');
+        $admin_role_data = AdminRole::find($id);
+
+        if($admin_role_data)
+        {   
+            $admin_role = new AdminRole();
+            $admin_role->name = $request->input('designation');
+            $admin_role->department_id = $admin_role_data->department_id;
+            $admin_role->updated_by = Auth::id();
+            $admin_role->save();
+
+            $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();
+            foreach ($current_permission_ids as $permission_id) {
+                $admin_role_module_permission = new AdminRoleModulePermission();
+
+                $admin_role_module_permission->role_id = $admin_role->id;
+                $admin_role_module_permission->permission_id = $permission_id;
+                $admin_role_module_permission->save();
+            }
+            return redirect()->back()->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']); 
+        }
     }
 
     public function role_update_index($id) {
@@ -653,6 +679,8 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),544);
         $settings = GlobalSettings::where('type','admin_otp');
         if($settings->doesntExist())
         {
@@ -669,6 +697,10 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),545);
+        }
         $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.reset_pin_otp as reset_pin_otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->join('cities', 'admins.default_hub_id', '=', 'cities.id')
@@ -682,6 +714,8 @@ class UserManagementController extends Controller
 
     public function admin_otp_update(Request $request)
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),546);
         $settings = GlobalSettings::where('type','admin_otp');
         if($settings->doesntExist())
         {

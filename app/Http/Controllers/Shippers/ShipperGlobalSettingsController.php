@@ -51,7 +51,7 @@ class ShipperGlobalSettingsController extends Controller
             else{
                 $settings->information = 0;
             }
-
+            $settings->page_breaker = isset($request->page_breaker) ? 1 : 0;
             $settings->save();
         }
         else{
@@ -64,6 +64,7 @@ class ShipperGlobalSettingsController extends Controller
             else{
                 $new_settings->information = 0;
             }
+            $settings->page_breaker = isset($request->page_breaker) ? 1 : 0;
             $new_settings->save();
         }
 

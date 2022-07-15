@@ -1569,85 +1569,6 @@ class ShipperFinanceController extends Controller
             ';
     }
 
-    /*$html .= '
-                <div class="row align-items-start justify-content-between summary">
-                    <div class="col-6">
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                                <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Account No.</strong></td>
-                                <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
-                            </tr>';
-                            if($account_type_id == 2){
-                                $html .= '<tr>
-                                    <td class="color secondary"><strong>Shipper Name</strong></td>
-                                    <td>' . $shipper->name . '</td>
-                                </tr>';
-                            }
-                            $html .= '<tr>
-                                <td class="color secondary"><strong>Name</strong></td>
-                                <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Contact No.</strong></td>
-                                <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>NTN</strong></td>
-                              <td>' . $shipper->ntn_no . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>STRN</strong></td>
-                              <td>' . $shipper->strn_no . '</td>
-                            </tr>
-                           </tbody>
-                        </table>
-                    </div>
-
-                    <div class="col-4">
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                                <td class="color primary"><strong>NTN</strong></td>
-                                <td>7930679-5</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>SNTN</strong></td>
-                                <td>S-7930679-5</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>PNTN</strong></td>
-                                <td>P-7930679-5</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>Billing Period</strong></td>
-                                <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>Invoice No.</strong></td>
-                                <td>' . $invoice->invoice_number . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>Invoice Date</strong></td>
-                                <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color primary"><strong>Due Date</strong></td>
-                                <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
-                            </tr>
-                           </tbody>
-                        </table>
-                    </div>
-                </div>
-    ';*/
-
     $html .= '<div>
           <div class="p-1">';
 
@@ -1794,6 +1715,7 @@ class ShipperFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
+                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
@@ -1846,11 +1768,17 @@ class ShipperFinanceController extends Controller
                 $total_adjustment_charges[$origin] = 0;
             }
 
+            if (!isset($total_extra_service_charges[$origin])) {
+                $total_extra_service_charges[$origin] = 0;
+            }
+
+
             if ($invoice_shipment->type != 2) {
                 if ($invoice_shipment->type == 0) {
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                    $total_extra_service_charges[$origin] += $shipment->esc_charges;
                 } else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
@@ -1878,7 +1806,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -1892,6 +1820,7 @@ class ShipperFinanceController extends Controller
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
                             <th class="color secondary">Packaging Charges (PKR)</th>
+                            <th class="color secondary">Extra Service Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
                         </tr>
                       </thead>
@@ -1912,6 +1841,7 @@ class ShipperFinanceController extends Controller
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                         </tr>
             ';
@@ -1993,7 +1923,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -2008,6 +1938,7 @@ class ShipperFinanceController extends Controller
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Packaging Charges (PKR)</th>
+                          <th class="color secondary">Extra Service Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -2544,6 +2475,10 @@ class ShipperFinanceController extends Controller
                     $total_adjustment_charges[$origin] = 0;
                 }
 
+                if (!isset($total_extra_service_charges[$origin])) {
+                    $total_extra_service_charges[$origin] = 0;
+                }
+
                 if (!isset($total_charges[$origin])) {
                     $total_charges[$origin] = 0;
                 }
@@ -2561,6 +2496,7 @@ class ShipperFinanceController extends Controller
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -2730,7 +2666,7 @@ class ShipperFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="11">'.$shipment_counts[$origin].'</td>
+                            <td rowspan="12">'.$shipment_counts[$origin].'</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -2772,6 +2708,10 @@ class ShipperFinanceController extends Controller
                         <tr>
                             <td>Adjustments</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                        </tr>
+                         <tr>
+                            <td>Extra Service Charges</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -4446,11 +4386,16 @@ class ShipperFinanceController extends Controller
                     $total_adjustment_charges[$origin] = 0;
                 }
 
+                if (!isset($total_extra_service_charges[$origin])) {
+                    $total_extra_service_charges[$origin] = 0;
+                }
+
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -4632,7 +4577,7 @@ class ShipperFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="11">'.$shipment_counts[$origin].'</td>
+                            <td rowspan="12">'.$shipment_counts[$origin].'</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -4674,6 +4619,10 @@ class ShipperFinanceController extends Controller
                         <tr>
                             <td>Adjustments</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                        </tr>
+                         <tr>
+                            <td>Extra Service Charges</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>

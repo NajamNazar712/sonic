@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\AdminAPIController;
-use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -25,11 +27,11 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -56,74 +58,58 @@ use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PayslipPdf;
+use App\Http\Models\PickupNote;
+use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\PickupRequest;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RidersIncentive;
+use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Rider\RiderTickerImage;
-use App\Http\Models\Rider\RiderReturnNoteStatus;
-use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\RiderPickup;
+use App\Http\Models\RiderPickupActionLog;
 use App\Http\Models\RiderPickupInvalidLog;
+use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDistributionProduct;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\WarehouseStock;
-use App\Http\Models\WarehouseStockRequest;
-use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessAgentCallMonitoring;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-use Illuminate\Support\Facades\Auth;
-use Psy\Util\Json;
-use Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Facades\Storage;
-
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-
-use App\Http\Models\City;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderRequest;
-use App\Http\Models\PickupNote;
-use App\Http\Models\PickupRequestAssignedShipment;
-use App\Http\Models\PickupRequest;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\RiderPickup;
-use App\Http\Models\PickupNoteRequest;
-use App\Http\Models\RiderPickupActionLog;
-use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Jobs\ProcessAgentCallMonitoring;
 use DB;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Validator;
 
 class RiderAPIController extends Controller
 {
@@ -8536,7 +8522,7 @@ class RiderAPIController extends Controller
         $to_date = $request->get('to_date');
         $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
         if ($to_date) {
-            $rider_incentives = $rider_incentives->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
+            $rider_incentives = $rider_incentives->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
 
             $total_payable = DeliveryNote::where('rider_id', $rider_id)
                 ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
@@ -8546,7 +8532,7 @@ class RiderAPIController extends Controller
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->where('rider_id', $rider_id)->first();
         } else {
-            $rider_incentives = $rider_incentives->whereDate('created_at', $from_date);
+            $rider_incentives = $rider_incentives->whereDate('date', $from_date);
 
             $total_payable = DeliveryNote::where('rider_id', $rider_id)
                 ->whereDate('created_at', $from_date)
@@ -8563,9 +8549,9 @@ class RiderAPIController extends Controller
             foreach ($rider_incentives as $rider_incentive) {
                 $datum = array();
                 $payable = DeliveryNote::where('rider_id', $rider_id)
-                    ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->created_at)))
+                    ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->date)))
                     ->sum('received_cod_amount');
-                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->created_at));
+                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->date));
                 $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
                 $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
                 $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
@@ -10488,7 +10474,7 @@ class RiderAPIController extends Controller
 
                             $response['status'] = 0;
                             $response['employee_id'] = $employee_request->id;
-                            $message = 'Request Has Been Submitted and Pending for Approval';
+                            $message = "Welcome to TRAX ".$request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
                         } catch (Exception $ex) {
                             $response['message'] = $ex;
                         }
@@ -10575,7 +10561,7 @@ class RiderAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = 'Optional details Has Been Submitted and Pending for Approval';
+                        $message = "Welcome to TRAX ".$employee_request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -11224,6 +11210,7 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
+            'remarks_id' => ['nullable','integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
             'picture' => ['required', 'mimes:png,jpeg,jpg'],
             'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file'],
@@ -11348,7 +11335,7 @@ class RiderAPIController extends Controller
                                             $shipment->open_box = 1;
                                             $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
                                             if($shipment_open_box->exists()){
-                                                $shipment_open_box->first();
+                                                $shipment_open_box = $shipment_open_box->first();
                                             }else{
                                                 $shipment_open_box = new ShipmentOpenBox();
                                                 $shipment_open_box->shipment_id = $shipment->id;
@@ -11365,7 +11352,12 @@ class RiderAPIController extends Controller
                                             $remarks = $request->remarks;
                                         }
 
-                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+                                        $remarks_id = NULL;
+                                        if ($request->has('remarks_id')) {
+                                            $remarks_id = $request->remarks_id;
+                                        }
+
+                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, $remarks_id);
                                         NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                                         $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
@@ -11434,7 +11426,7 @@ class RiderAPIController extends Controller
             if ($profile->exists()) {
                 $profile = $profile->first();
                 if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id){
-                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                    return response()->json(['status' => 1, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
@@ -11550,20 +11542,29 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $generate_otp = false;
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($rider->exists()) {
                 $rider = $rider->first();
                 if ($rider->status) {
                     if (Hash::check($request->input('pin'), $rider->pin)) {
                         $environment = config('app.env');
-                        if ($environment == 'production' || $environment == 'staging') {
-                            $otp = mt_rand(100000, 999999);
-                            $rider->otp = $otp;
-                            $rider->last_login_attempt = Carbon::now();
-                            $rider->save();
-                            $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
-                            NotificationsController::send(138, $rider, $data);
+                        $settings = GlobalSettings::where('type', 'rider_otp');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if ($settings->setting_value) {
+                                if ($environment == 'production' || $environment == 'staging') {
+                                    $otp = mt_rand(100000, 999999);
+                                    $rider->otp = $otp;
+                                    $rider->last_login_attempt = Carbon::now();
+                                    $rider->save();
+                                    $data = array("otp" => $otp, "phone_number" => $request->phone_number);
+                                    NotificationsController::send(138, $rider, $data);
+                                    $generate_otp = true;
+                                }
+                            }
                         }
+
                         if ($rider->api_token) {
                             $api_token = $rider->api_token;
                         } else {
@@ -11571,16 +11572,57 @@ class RiderAPIController extends Controller
                             $rider->api_token = $api_token;
                         }
                         $rider->save();
-                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
-                    }else {
+                        if ($generate_otp) {
+                            return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                        } else {
+                            $information = array();
+                            $information['name'] = $rider->name;
+                            $information['phone'] = $rider->phone;
+                            $information['cnic'] = $rider->cnic;
+                            $information['address'] = $rider->address;
+                            $information['role'] = 'rider';
+                            $information['api_token'] = $rider->api_token;
+                            $information['cargo_user'] = 0;
+                            $information['welcome_bit'] = 0;
+                            if(!$rider->first_login){
+                                $information['welcome_bit'] = 1;
+                                $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
+                            }
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                ->join('riders as r', 'e.id', 'r.employee_id')
+                                ->where('r.id', $rider->id);
+                            if ($reporting_location->exists()) {
+                                $reporting_location = $reporting_location->first();
+                                $information['distance'] = $reporting_location->radius;
+                                $information['lat'] = $reporting_location->lat;
+                                $information['long'] = $reporting_location->long;
+                            } else {
+                                $information['distance'] = 0;
+                                $information['lat'] = 0;
+                                $information['long'] = 0;
+                            }
+                            $rider->first_login = 1;
+                            $rider->save();
+                            return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
+                        }
+                    } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                    if($rider->first_login == 0){
+                        return response()->json(['status' => 1, 'message' => "Dear ".$rider->name ."- Your request is in process and is pending for approval from HR."]);
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                    }
                 }
-            }
-            else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            } else {
+                $employee = Employee::whereIn('request_status_id',[1,2])->where('employee_type_id',2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+                if($employee->exists()){
+                    $employee = $employee->first();
+                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ."- Your request is in process and is pending for approval from HR."]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                }
             }
         }
     }
@@ -11634,6 +11676,13 @@ class RiderAPIController extends Controller
                     $information['lat'] = 0;
                     $information['long'] = 0;
                 }
+                $information['welcome_bit'] = 0;
+                if(!$rider->first_login){
+                    $information['welcome_bit'] = 1;
+                    $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
+                }
+                $rider->first_login = 1;
+                $rider->save();
                 return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -11813,6 +11862,194 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
 
+    }
+
+    public function leave_index_v2(Request $request)
+    {
+        $employee = Employee::where('trax_id', $request->trax_id);
+        if ($employee->exists()) {
+            $employee = $employee->first();
+            if ($employee->employee_gender_id == 1) {
+                if ($employee->religion_id == 1) {
+                    $leave_types = LeaveType::where('id', '<>', 2)->select('id', 'name')->get();
+                } else {
+                    $leave_types = LeaveType::whereIn('id', [1, 3, 5, 6])->select('id', 'name')->get();
+                }
+            } else {
+                if ($employee->religion_id == 1) {
+                    $leave_types = LeaveType::where('id', '<>', 3)->select('id', 'name')->get();
+                } else {
+                    $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
+                }
+            }
+            if ($employee->line_manager_id != null) {
+                $data = array();
+                $data['trax_id'] = $employee->trax_id;
+                $data['name'] = $employee->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $employee->line_manager->email;
+                $data['approver_name'] = $employee->line_manager->name;
+                $data['user_type'] = 0;
+                return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
+            }
+            return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
+        }
+        return response()->json(['status' => 1, 'message' => "Employee not found!"]);
+    }
+
+    public function leave_apply_v2(Request $request)
+    {
+        $rules = [
+            'from' => ['required'],
+            'to' => ['required'],
+            'reason' => ['required', 'max:500'],
+            'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
+            'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::where('trax_id', $request->trax_id);
+            $leave_type = LeaveType::find($request->leave_type);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                $working_days = $employee->department->working_days;
+                $from_date = Carbon::parse($request->from);
+                $to_date = Carbon::parse($request->to);
+                if ($request->leave_type == 1) {
+                    //checking for fiscal year start
+                    $start_year = Carbon::today()->month(7)->startOfMonth();
+                    $end_year = Carbon::today()->month(6)->endOfMonth();
+                    if (Carbon::now() > $start_year) {
+                        $end_year = $end_year->addYear(1);
+                    } else {
+                        $start_year = $start_year->subYear(1);
+                    }
+                    if (!($from_date >= $start_year && $to_date <= $end_year)) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Can\'t be approve']);
+                    }
+                    //checking for fiscal year end
+                }
+                if ($working_days == 1) {
+                    $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                } else {
+                    $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SATURDAY]));
+                }
+                $diffDays++;
+                if ($diffDays <= 56) {
+                    if ($request->leave_type == 1) {
+                        if ($employee->leave_count < $diffDays) {
+                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                        } else {
+                            $employee->leave_count = $employee->leave_count - $diffDays;
+                        }
+                    }
+                    if ($request->leave_type == 2) {
+                        if ($employee->employee_gender_id == 1) {
+                            return response()->json(['status' => 1, 'message' => 'Maternity for males : Your gender doesn\'t allow to apply this leave category.']);
+                        }
+                    }
+                    if ($request->leave_type == 3) {
+                        if ($employee->employee_gender_id == 2 || $diffDays > $leave_type->count) {
+                            return response()->json(['status' => 1, 'message' => 'Your gender doesn\'t allow to apply this leave category.']);
+                        }
+                    }
+                    if ($request->leave_type == 4) {
+                        if ($employee->religion_id != 1 || $diffDays > $leave_type->count) {
+                            return response()->json(['status' => 1, 'message' => 'Leave Request Can\'t be approve']);
+                        }
+                    }
+                    if ($request->leave_type == 5) {
+                        if ($diffDays > $leave_type->count) {
+                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from ' . $leave_type->count . ' days']);
+                        }
+                    }
+
+                    if (!$employee->line_manager_id) {
+                        return response()->json(['status' => 1, 'message' => 'Line Manager is not selected!']);
+                    }
+
+                    if ($request->has('leave_id')) {
+                        $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                        if ($leave_request->exists()) {
+                            $leave_request = $leave_request->first();
+                            $leave_request->from = $request->from;
+                            $leave_request->to = $request->to;
+                            $leave_request->applied_reason = $request->reason;
+                            $leave_request->leave_type = $request->leave_type;
+                            $leave_request->save();
+                            $message = "Leave Request edited successfully";
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                        }
+                    } else {
+                        $leave = EmployeeLeave::where('employee_id', $employee->id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
+                        if ($leave->exists()) {
+                            return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                        }
+                        $leave_request = new EmployeeLeave();
+                        $leave_request->employee_id = $employee->id;;
+                        $leave_request->employee_type_id = 2;
+                        $leave_request->reporter_id = $employee->line_manager->admin->id;
+                        $leave_request->from = $request->from;
+                        $leave_request->to = $request->to;
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->leave_type = $request->leave_type;
+                        $leave_request->save();
+                        $message = "Leave Request submitted successfully";
+                    }
+                    $employee->save();
+                    NotificationsController::app_notification(11, $request->rider_id, 2, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                    return response()->json(['status' => 0, 'apply_message' => $message]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
+                }
+            }
+            return response()->json(['status' => 1, 'message' => 'Employee not Found!']);
+        }
+    }
+
+    public function employee_leave_list_v2(Request $request)
+    {
+        if(!$request->has('rider_employee')){
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+        }
+        $rider_employee = $request->rider_employee;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            ->where('employee_id', $rider_employee)
+            ->where('employee_type_id', 2);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                $datum['leave_type'] = $employee_leave->leave_type;
+                $datum['leave_type_id'] = $employee_leave->leave_type_id;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

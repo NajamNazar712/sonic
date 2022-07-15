@@ -1020,6 +1020,7 @@ class Permission
             'international.tracking_upload.list' => 398,
 
             'international.shipment_status.index' => 508,
+            'international.extra_service_charges.index' => 750,
 
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,
@@ -1166,8 +1167,8 @@ class Permission
 
             'admin_otp.update' => 722,
 
-            'rider_otp.index' => 720,
-            'rider_otp.list' => 720,
+            'rider_otp.index' => 563,
+            'rider_otp.list' => 563,
 
             'rider_otp.update' => 721,
             
@@ -1240,9 +1241,16 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-            
+			'settings.delivery_area_keyword.index' => 747,
+            'nps.index' => 751,
+            'nps.add' => 752,
+            'nps.response.report' => 755,
+            'nps.consolidate.report' => 756,
 
-            
+			'accounts.disable.account.intimation.survey.index' => 762,
+			'accounts.disable.account.intimation.survey.report' => 768,
+			'settings.pickup.weight_bypass' => 761,			'delivery.note.rider_category_bypass_request' => 757,
+            'delivery.note.rider_category_bypass_weight' =>758
         ],
 
         'shipper' => [
@@ -1334,12 +1342,6 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
-
-            
-            
-            
-            
-
         ]
     ];
 
