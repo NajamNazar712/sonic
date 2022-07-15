@@ -7254,10 +7254,11 @@ public function sales_incentive()
             $check = BookingDestinationMappingKeyword::pluck('keyword')->toArray();
 
             $str_arr = null;
-            $str_arr = preg_split("/[ ,]+/", $consignee_address);
+            $str_arr = preg_split('/[\s]+/', $consignee_address);
             $found_keyword = array();
             foreach ($check as $nsa) {
                 foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
                     if (strtolower($nsa) == strtolower($arr_value)) {
                         array_push($found_keyword,$arr_value);
                     }
