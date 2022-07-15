@@ -476,7 +476,7 @@
 
                     }
                 },
-                order: [[9, 'desc']],
+                order: [[10, 'desc']],
                 rowId: 'id',
                 columns: [
                     {

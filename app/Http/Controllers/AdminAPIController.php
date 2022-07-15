@@ -20,6 +20,7 @@ use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\ByPassWeightShippers;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -4946,7 +4947,10 @@ class AdminAPIController extends Controller
                                     }
                                 }
 
+                                $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
                                 $not_include_shippers = [6693, 12412];
+                                $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
@@ -5002,7 +5006,10 @@ class AdminAPIController extends Controller
                                 }
                                 $dws_charges_status = 1;
 
+                                $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
                                 $not_include_shippers = [6693, 12412];
+                                $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 

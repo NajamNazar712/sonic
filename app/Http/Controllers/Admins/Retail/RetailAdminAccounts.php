@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipment;
@@ -274,6 +275,19 @@ class RetailAdminAccounts extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
+
+            if($shipment->shipment_type == 1){
+
+                $shipping_mode = $shipment->shipping_mode->mode;
+            }
+            else{
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                if($retail_shipment){
+                    $shipping_mode = $retail_shipment->shipping_modes->name;
+                }
+            }
+
+
             $slip = '
                       <div class="position-relative">
                         <table class="table table-sm table-bordered border twice">
@@ -529,7 +543,7 @@ class RetailAdminAccounts extends Controller
                           <tr>';
                           if($shipment->business_category->id==1){
                             $table_start.='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                            <td><strong>' . $shipping_mode . '</strong></td>
                 ';
                         }
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\ByPassWeightShippers;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
@@ -730,7 +731,7 @@ class V2AdminPickupsController extends Controller
             $shipment = $shipment->first();
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $user = $shipment->user;
             if($user->sub_segment_id == 2){
@@ -965,7 +966,10 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
+                        $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
                         $not_include_shippers = [6693, 12412];
+                        $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+
                         if (!in_array($shipment->user_id, $not_include_shippers)) {
                             $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
@@ -1415,7 +1419,7 @@ class V2AdminPickupsController extends Controller
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
-                return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $shipment_origin = $shipment->pickup_address->city->hub_id;
             if (session('role_id') != 1) {
@@ -1440,6 +1444,7 @@ class V2AdminPickupsController extends Controller
 
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if ($shipment->booking_type_id == 3) {
+
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -1514,7 +1519,12 @@ class V2AdminPickupsController extends Controller
                             $actual_weight = $request->weight;
                         }
 
+                        $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
+
                         $not_include_shippers = [6693, 12412];
+
+                        $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+
                         if (!in_array($shipment->user_id, $not_include_shippers)) {
                             $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
 
