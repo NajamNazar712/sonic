@@ -7269,7 +7269,7 @@ public function sales_incentive()
                 }
             }
             $invalid_cities  = array();
-            if($arr_value) {
+            if($found_keyword) {
                 $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
                     ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
                     ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
