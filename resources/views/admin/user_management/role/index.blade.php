@@ -61,7 +61,7 @@
 
 	<div class="modal fade text-left" id="AddRoleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRoleModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Add Roles</h4>
@@ -70,31 +70,30 @@
                     </button>
                 </div>
                 <div class="modal-body  text-center">
-                    <form id="dispute_form" action="" method="post">
-
+                    <form id="add_permission_form" action="" method="post"  novalidate="novalidate">
+						@csrf
                         <div class="row mb-2">
                             <div class="col-12 form-group">
-                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                    <option></option>
-                                    @foreach($cities as $city)
-                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                <select name="module_select" id="module_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                    @foreach($modules as $module)
+                                        <option value="{{$module->id}}">{{$module->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                        <div class="row mb-2">
+						<div class="row mb-2">
                             <div class="col-12 form-group">
-                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                    <option></option>
-                                    @foreach($cities as $city)
-                                        <option value="{{$city->id}}">{{$city->name}}</option>
-                                    @endforeach
+                                <select name="permission_select" id="permission_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                 </select>
                             </div>
                         </div>
+						<div class="row mb-2 justify-content-center">
+                               <a href="javascript:void(0);" id="add_permission" class="btn btn-primary"><i class="ft-plus-circle"></i></a>
+                        </div>
+						<div id="inner_permission"></div>
                         <div class="row justify-content-center">
                             <div class="col-12">
-                                <button id="DisputeCreate" type="submit" class="btn btn-primary btn-block">Launch Dispute</button>
+                                <button id="AddPermission" type="submit" class="btn btn-primary btn-block">Add</button>
                             </div>
                         </div>
                     </form>
@@ -131,6 +130,44 @@
 
 	<script>
 		$(document).ready(function() {
+
+			$('#add_permission').on('click',function(){
+				
+				var modules = {!! $modules !!};
+				var counter = document.getElementById('inner_permission').childElementCount;
+            	var html='<div class="row mb-2">';
+                html += '<div class="col-12 form-group">';
+                html += '<select name="module_select'+counter+'" id="module_select_'+counter+'" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">';
+				$.each(modules, function (i, v) {
+					
+					html += "<option value='" + v.id + "' >" + v.name + "</option>";
+                });
+				html += '</select></div></div>';
+                $('#inner_permission').append(html);
+
+        	});
+
+			$("#module_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Module",
+                    width:'100%',
+                }).bind('change', function () {
+					var module_id = $(this).val();
+					var data = $.map({!! $permissions !!}, function (obj) {
+
+						$("#permission_select").html('');
+						if(obj.module_id == module_id){
+							obj.id = obj.id;
+							obj.text = obj.name;
+							return obj;
+						}
+
+					});
+					$("#permission_select").prepend('<option value="" selected></option>').select2({
+						placeholder: "Select Permission",
+						width:'100%',
+						data:data,
+					});
+				});
             var selected_rows = [];
 			var table = $('#datatable').DataTable({
 				@if (session('role_id') == 1 || in_array(86, session('permissions')))
@@ -140,14 +177,16 @@
 						className: 'btn btn-primary add',
 						enabled: false,
 						action: function (e, dt, node, config) {
-							window.location = '{{ route('admin.user_management.roles.add.index') }}';
+							
+							$('#AddRoleModal').modal('show');
 						}
 					},{
 						text: 'Remove',
 						className: 'btn btn-primary remove',
 						enabled: false,
 						action: function (e, dt, node, config) {
-							window.location = '{{ route('admin.user_management.roles.add.index') }}';
+							$('#AddRoleModal').modal('show');
+
 						}
 					},{
                     extend: 'selectAll',
@@ -325,6 +364,18 @@
                     form.submit();
 				}
 			});
+			$('#add_permission_form').validate({
+				ignore: [],
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function(form) {
+                    form.submit();
+				}
+			});
+			
 			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 

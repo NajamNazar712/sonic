@@ -551,7 +551,10 @@ class UserManagementController extends Controller
     public function role_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),374);
         $departments = AdminDepartment::all();
-        return view('admin.user_management.role.index')->with(['departments'=>$departments]);
+        $modules = Module::all();
+        $permissions = ModulePermission::all();
+
+        return view('admin.user_management.role.index')->with(['departments'=>$departments, 'modules' => $modules, 'permissions' => $permissions]);
     }
 
     public function role_list(Request $request) {
