@@ -258,6 +258,12 @@ Route::name('api.')->group(function () {
                 Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+
+                //revamp
+                Route::post('index_v2', 'Rider\RiderAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
+                Route::get('list_v2', 'Rider\RiderAPIController@employee_leave_list_v2')->name('list_v2');
+
             });
 
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
@@ -347,6 +353,15 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+
+                //revamp
+                Route::post('index_v2', 'AdminAPIController@leave_index_v2')->name('index_v2');
+                Route::post('apply_v2', 'AdminAPIController@leave_apply_v2')->name('apply_v2');
+                Route::get('list_v2', 'AdminAPIController@employee_leave_list_v2')->name('list_v2');
+                Route::get('approver_list_v2', 'AdminAPIController@approver_leave_list_v2')->name('approver_list_v2');
+                Route::post('approve_v2', 'AdminAPIController@leave_approve_v2')->name('approve_v2');
+                Route::post('hod_approve', 'AdminAPIController@hod_approve')->name('hod_approve');
+                Route::post('reject_v2', 'AdminAPIController@leave_reject_v2')->name('reject_v2');
             });
 
             Route::prefix('adjustment')->name('adjustment.')->group(function () {
@@ -377,6 +392,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::post('list', 'AdminAPIController@leads_list')->name('list');
+                Route::post('list_v2', 'AdminAPIController@leads_list_v2')->name('list_v2');
                 Route::post('status_list', 'AdminAPIController@lead_statuses')->name('status_list');
                 Route::post('status_update', 'AdminAPIController@lead_status_update')->name('status_update');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
@@ -449,6 +465,7 @@ Route::name('api.')->group(function () {
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
 
             Route::prefix('subscription')->name('subscription.')->group(function () {
+                Route::post('add', 'ShipperAPIController@shipper_subscription_add')->name('add');
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });

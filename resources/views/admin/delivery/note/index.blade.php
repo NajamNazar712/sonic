@@ -298,6 +298,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var rider_dncc_check = false;
+
             $('.phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -531,6 +534,7 @@
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
+                rider_dncc_check = false;
                 if(rider_id != null){
                     $.ajax({
                         url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
@@ -545,6 +549,7 @@
                             $('#route').val(route).trigger('change');
                             $('#scan_tracking').attr("disabled", false);
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                            rider_dncc_check = true;
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -1299,10 +1304,16 @@
                             if(special == 1){
                                 $('#SpecialRiderModal').modal('show');
                             }else{
-                                if(operation_id === '2'){
-                                    create_delivery_note();
-                                }else{
-                                    otp_generation();
+                                if(rider_dncc_check == true){
+                                    if(operation_id === '2'){
+                                        create_delivery_note();
+                                    }else{
+                                        otp_generation();
+                                    }
+                                }
+                                else{
+                                    var error = "Rider can not be selected because previous delivery note is not been completed";
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
                         }
