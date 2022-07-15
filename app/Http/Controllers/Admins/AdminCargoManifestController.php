@@ -2685,6 +2685,11 @@ class AdminCargoManifestController extends Controller
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
                     if ($bag) {
+
+                        if($bag->type != $request->bag_type){
+                            return ['status' => 1, 'error' => 'Shipment bag type is not same as selected bag type'];
+                        }
+
                         $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
                         if (!$cargo_manifest_bag) {
                             return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
