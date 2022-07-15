@@ -7251,7 +7251,11 @@ public function sales_incentive()
 
             $city_id = $request->city_id;
             $consignee_address = $request->consignee_address;
-            $check = BookingDestinationMappingKeyword::pluck('keyword')->toArray();
+            $check = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
 
             $str_arr = null;
             $str_arr = preg_split('/[\s]+/', $consignee_address);
