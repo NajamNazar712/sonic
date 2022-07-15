@@ -765,6 +765,38 @@
                                         </div>
                                     </div>
                                 @endif
+
+                                @if(count($crm_sms_history) > 0)
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3>SMS History</h3>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead>
+                                                    <tr class="border-bottom-active border-custom-color">
+                                                        <th>S No.</th>
+                                                        <th>Agent Name</th>
+                                                        <th>Massage</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($crm_sms_history as $index => $history)
+                                                        @php $index++; @endphp
+                                                        <tr class="border-bottom-success border-custom-color">
+                                                            <td>{{$index}}</td>
+                                                            <td>{{$history->agent}}</td>
+                                                            <td>{{$history->massage}}</td>
+                                                            <td>{{$history->created_at}}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                         </div>
