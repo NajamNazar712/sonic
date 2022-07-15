@@ -2834,7 +2834,7 @@ class AdminCargoManifestController extends Controller
 
                             $self_collection = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
 
-                            if($self_collection->exists())
+                            if($self_collection)
                             {
                                 $consignee_city = $shipment->consignee_city_id;
                                 $user_city = $shipment->user->city_id;
@@ -2846,7 +2846,9 @@ class AdminCargoManifestController extends Controller
                                 else
                                 {
                                     $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id','address')->first();
-                                    NotificationsController::send(75, $shipment_id, $city_id->address);
+                                    if($city_id){
+                                        NotificationsController::send(75, $shipment_id, $city_id->address);
+                                    }
                                 }
                             }
                         }
