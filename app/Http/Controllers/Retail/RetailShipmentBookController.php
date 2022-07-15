@@ -711,6 +711,19 @@ class RetailShipmentBookController extends Controller
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
 //            }
+
+            if($shipment->shipment_type == 1){
+
+               $shipping_mode = $shipment->shipping_mode->mode;
+            }
+            else{
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                if($retail_shipment){
+                    $shipping_mode = $retail_shipment->shipping_modes->name;
+                }
+            }
+
+
                     $slip = '
                       <div class="position-relative">
                         <table class="table table-sm table-bordered border twice">
@@ -884,23 +897,6 @@ class RetailShipmentBookController extends Controller
                             </div>
                            ';
 
-                           
-
-
-                          
-
-
-
-
-
-
-
-
-
-
-
-
-
             $slip .= '
                   <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
                   <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
@@ -1028,7 +1024,7 @@ class RetailShipmentBookController extends Controller
                           <tr>';
                           if($shipment->business_category->id==1){
                             $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                            <td><strong>' . $shipping_mode . '</strong></td>
                 ';
                         }
                            

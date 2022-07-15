@@ -71,7 +71,7 @@ class AdminShipmentCancelController extends Controller
                         $cancellation_check = true;
 
                         if($shipment->warehouse == 1){
-                            if($shipment->warehouse_order_status != 2){
+                            if($shipment->warehouse_order_status != 1){
                                 $cancellation_check = false;
                             }
                         }
@@ -110,11 +110,13 @@ class AdminShipmentCancelController extends Controller
                                         $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
                                         if($current_stock_addition){
                                             $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                            $current_stock_addition->in_process_stock = $current_stock_addition->in_process_stock - $shipment_product->quantity;
                                             $current_stock_addition->save();
                                         }
                                     }
                                 }
                                 $shipment->warehouse_order_status = 9;
+                                $shipment->save();
                                 WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
                             }
                             //cacel from warehouse end
@@ -283,11 +285,11 @@ class AdminShipmentCancelController extends Controller
         return $datatables->make(true);
     }
 
-    public function revert(Request $request) {
+    public function bulk_revert(Request $request) {
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if ($shipment->shipper_status_id == 17) {
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
                 $shipment->shipper_status_id = 1;
                 $shipment->consignee_status_id = 1;
 
@@ -321,6 +323,27 @@ class AdminShipmentCancelController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Shipper']);
         }
+    }
+
+    public function revert(Request $request) {
+
+            $shipment = Shipment::find($request->shipment_id);
+
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
+                $shipment->shipper_status_id = 1;
+                $shipment->consignee_status_id = 1;
+
+                $shipment->save();
+
+                AdminPickupsController::generate($shipment->id);
+
+                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
+                return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Warehouse Shipment can not be reverted from Sonic!'];
+            }
+
     }
 
 

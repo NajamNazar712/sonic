@@ -424,6 +424,7 @@ Route::name('api.')->group(function () {
         Route::post('get_info', 'ConsigneeAPIController@consignee_info')->name('get_info');
         Route::post('test', 'ConsigneeAPIController@test')->name('test');
         Route::post('consignee_otp', 'ConsigneeAPIController@consignee_otp')->name('consignee_otp');
+        Route::post('consignee_forget_pin_otp', 'ConsigneeAPIController@consignee_forget_pin_otp')->name('consignee_forget_pin_otp');
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
@@ -457,6 +458,30 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
                 Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
+            });
+
+            Route::prefix('rcp')->name('rcp.')->group(function () {
+                Route::get('list', 'ShipperAPIController@confirmation_pending_list')->name('list');
+                Route::post('mark_return_confirm', 'ShipperAPIController@mark_return_confirm')->name('mark_return_confirm');
+                Route::post('mark_reattempt', 'ShipperAPIController@mark_reattempt')->name('mark_reattempt');
+                Route::prefix('intercept')->name('intercept.')->group(function () {
+                    Route::post('index', 'ShipperAPIController@intercept_re_book_index')->name('index');
+                    Route::post('submit', 'ShipperAPIController@intercept_re_book_submit')->name('submit');
+                });
+            });
+
+            Route::get('get_booking_types', 'ShipperAPIController@booking_types')->name('get_booking_types');
+
+            Route::prefix('corporate')->name('corporate.')->group(function () {
+                Route::get('index', 'ShipperAPIController@corporate_index')->name('index');
+                Route::post('ftl_info', 'ShipperAPIController@get_ftl_info')->name('ftl_info');
+                Route::post('shipping_modes', 'ShipperAPIController@corporate_shipping_modes')->name('shipping_modes');
+                Route::post('submit', 'APIController@shipment_book')->name('submit');
+            });
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::get('index', 'ShipperAPIController@reimbursement_index')->name('index');
+                Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
+                Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
         });
 

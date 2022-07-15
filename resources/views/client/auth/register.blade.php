@@ -544,7 +544,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{ old('iban_no.0') }}" name="iban_no[]" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)*" value="{{ old('iban_no.0') }}" name="iban_no[]" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                                                     </div>
 
                                                         <div class="form-group">
@@ -740,18 +740,21 @@
                                                     <div class="form-group">
                                                         <label for="cnic_front_image">
                                                             Picture of CNIC (Front):
+                                                            <span class="danger">*</span>
                                                         </label>
                                                         <input class="form-control form-control-sm  required" type="file" name="cnic_front_image" id="cnic_front_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="cnic_back_image">
                                                             Picture of CNIC (Back):
+                                                            <span class="danger">*</span>
                                                         </label>
                                                         <input class="form-control form-control-sm  required" type="file" name="cnic_back_image" id="cnic_back_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="blank_cheque_image">
                                                             Picture of Blank cheque:
+                                                            <span class="danger">*</span>
                                                         </label>
                                                         <input class="form-control form-control-sm  required" type="file" name="blank_cheque_image" id="blank_cheque_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                                     </div>
