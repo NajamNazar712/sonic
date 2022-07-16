@@ -1239,7 +1239,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by');
+            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
         return Datatables::of($types)
             ->editColumn('status', function ($type) {
                 if ($type->status == 0) {
@@ -1268,6 +1268,44 @@ class AdminPackagingMaterialController extends Controller
                 } else {
                     return 'Stationary';
 
+                }
+            })
+            ->editColumn('packaging_type',function($type){
+                if($type->packaging_type == 1){
+                    return 'Internal';
+                }
+                else if($type->packaging_type == 2){
+                    return 'External';
+                }
+                else if($type->packaging_type == 3){
+                    return 'Both';
+                }
+                else if($type->packaging_type == 4){
+                    return 'Selected Shipper';
+                }
+                else{
+                    return 'Marco';
+                }
+            })
+            ->filterColumn('packaging_material_types.packaging_type', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword == 'internal') {
+                    $query->where('packaging_material_types.packaging_type', 1);
+                }
+                else if ($keyword == 'external') {
+                    $query->where('packaging_material_types.packaging_type', 2);
+                }
+                else if ($keyword == 'both') {
+                    $query->where('packaging_material_types.packaging_type', 3);
+                }
+                else if ($keyword == 'selected' || $keyword == 'selected shipper' || $keyword == 'shipper') {
+                    $query->where('packaging_material_types.packaging_type', 4);
+                }
+                else if ($keyword == 'marco') {
+                    $query->where('packaging_material_types.packaging_type', 5);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('action', function ($type) {//Change ID

@@ -2,6 +2,7 @@
 
 namespace App\Http\Models\Admin;
 
+use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Notifications\AdminResetPasswordNotification;
 use Illuminate\Notifications\Notifiable;
@@ -59,6 +60,10 @@ class Admin extends Authenticatable
     public function Edesignation()
     {
         return $this->belongsTo(EmployeeDesignation::class, 'designation_id', 'id');
+    }
+
+    public function employee(){
+        return $this->belongsTo(Employee::class,'trax_id','trax_id');
     }
 }
 

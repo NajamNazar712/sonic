@@ -20,6 +20,7 @@ class V2DisputeStatusAndReasonSeeder extends Seeder
             array('id' => 4, 'name' => 'Open receive at origin'),
             array('id' => 5, 'name' => 'Open received at destination'),
             array('id' => 6, 'name' => 'Open return'),
+            array('id' => 7, 'name' => 'Others'),
         ));
 
         DB::table('v2_dispute_statuses')->truncate();

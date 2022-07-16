@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use App\Http\Models\HR\Employee;
 use Illuminate\Database\Eloquent\Model;
 
 class Rider extends Model
@@ -23,5 +24,8 @@ class Rider extends Model
     }
     public function open_parcel_rider(){
         return $this->hasOne('App\Http\Models\OpenParcelHistory');
+    }
+    public function employee(){
+        return $this->belongsTo(Employee::class,'trax_id','trax_id');
     }
 }

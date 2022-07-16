@@ -504,7 +504,7 @@ class ReturnController extends Controller
                             AdminFinanceController::done_payment($shipment, 1);
                         }
                     }
-                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id(),null,null,1,null,null,$consignee_refused_reasons);
+                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id(),null,null,1,null,null,null,null,$consignee_refused_reasons);
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
                    if($return_assign_shipment->exists()){
 
@@ -550,6 +550,7 @@ class ReturnController extends Controller
     }
     
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+        
         $shipment_ids = $request->shipment_ids;
 
         if($request->action == 'reattempt'){
@@ -663,7 +664,7 @@ class ReturnController extends Controller
                         AdminFinanceController::done_payment($request->shipment_id, 1);
                     }
                 }
-                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id(),null,null,1,null,null,$consignee_refused_reasons);
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id(),null,null,1,null,null,null,null,$consignee_refused_reasons);
                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
                 if($return_assign_shipment->exists()){
                    $return_assign_shipment = $return_assign_shipment ->latest()->first();

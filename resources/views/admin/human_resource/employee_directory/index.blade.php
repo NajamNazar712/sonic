@@ -1412,7 +1412,7 @@
                         d.filter_line_manager = $('#filter_line_manager').val();
                     }
                 },
-                order: [[18, 'desc']],
+                order: [[19, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
