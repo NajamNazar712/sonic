@@ -1054,7 +1054,8 @@ class ShipperReportsController extends Controller
         }
         if ($request->get('booking_date_from') && $request->get('booking_date_to')) {
             $from = $request->get('booking_date_from');
-            $to = $request->get('booking_date_to');)            $datatable->whereBetween('shipments.created_at', [$from, $to]);
+            $to = $request->get('booking_date_to');
+            $datatable->whereBetween('shipments.created_at', [$from, $to]);
         }
         
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
