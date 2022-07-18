@@ -409,6 +409,11 @@ Route::name('api.')->group(function () {
                 Route::any('report', 'AdminAPIController@daily_visit_report')->name('report');
             });
 
+            Route::prefix('return')->name('return.')->group(function () {
+                Route::get('index', 'AdminAPIController@return_create_index')->name('index');
+                Route::post('get_riders', 'AdminAPIController@get_riders_by_hub')->name('get_riders');
+            });
+
         });
 
     });

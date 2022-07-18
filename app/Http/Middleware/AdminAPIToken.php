@@ -26,10 +26,10 @@ class AdminAPIToken
 
                 if ($admin->status) {
                     if($admin->employee){
-                        $request->request->add(['admin_id' => $admin->id, 'trax_id' => $admin->trax_id, 'admin_employee' => $admin->employee->id]);
+                        $request->request->add(['admin_id' => $admin->id, 'trax_id' => $admin->trax_id, 'admin_employee' => $admin->employee->id, 'role_id' => $admin->role_id]);
                     }
                     else{
-                        $request->request->add(['admin_id' => $admin->id, 'trax_id' => $admin->trax_id]);
+                        $request->request->add(['admin_id' => $admin->id, 'trax_id' => $admin->trax_id, 'role_id' => $admin->role_id]);
                     }
 
                     return $next($request);

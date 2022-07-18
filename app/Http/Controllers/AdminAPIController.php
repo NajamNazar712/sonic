@@ -6724,6 +6724,9 @@ class AdminAPIController extends Controller
             $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
             $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
             $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
+            $permissions['return_note_create'] = (in_array(48, $user_permissions)) ? 1 : 0;
+            $permissions['return_note_view'] = (in_array(49, $user_permissions)) ? 1 : 0;
+            $permissions['return_note_receive'] = (in_array(50, $user_permissions)) ? 1 : 0;
             $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
             if($global_settings->exists()){
                 $global_settings = $global_settings->first();
@@ -8110,5 +8113,34 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
             }
         }
+    }
+
+    public function return_create_index(Request $request){
+        $role_id = $request->role_id;
+        $admin_id = $request->admin_id;
+        $admin_hubs = AdminHub::where('admin_id',$admin_id)->pluck('hub_id')->toArray();
+        $routes = Route::where('status', 1);
+        $hubs = City::where([['status',1],['hub',1]]);
+        if ($role_id != 1) {
+            $routes = $routes->whereHas('city', function ($query) use($admin_hubs) {
+                $query->whereIn('hub_id', $admin_hubs);
+            });
+            $hubs = $hubs->WhereIn('id',session('hubs'));
+        }
+
+        $routes = $routes->get();
+        $hubs = $hubs->get(['id','name']);
+        return response()->json(['status'=> 0, 'routes'=>$routes,'hubs'=>$hubs]);
+    }
+
+    public function get_riders_by_hub(Request $request)
+    {
+        $hub_id = $request->hub_id;
+        $riders = Rider::where('status', 1)
+            ->whereHas('city', function ($query) use ($hub_id) {
+                $query->where('hub_id', $hub_id);
+            })->get(['id','name','route_id','trax_id']);
+
+        return response()->json(['status'=> 0,'riders'=>$riders]);
     }
 }
