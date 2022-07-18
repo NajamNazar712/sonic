@@ -909,7 +909,7 @@ class ShipperReportsController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-            ->select('shipments.tracking_number','shipments.return_address_id','shipments.shipper_status_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
+            ->select('shipments.tracking_number','shipments.return_address_id','shipments.shipper_status_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id','shipments.created_at as created_at');
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -1052,7 +1052,11 @@ class ShipperReportsController extends Controller
             $to = $request->get('search_date_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
         }
-
+        if ($request->get('booking_date_from') && $request->get('booking_date_to')) {
+            $from = $request->get('booking_date_from');
+            $to = $request->get('booking_date_to');)            $datatable->whereBetween('shipments.created_at', [$from, $to]);
+        }
+        
         if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
