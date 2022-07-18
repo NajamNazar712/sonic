@@ -8153,7 +8153,7 @@ class AdminAPIController extends Controller
         } else {
             $hub_id = $request->hub_id;
             $riders = Rider::leftjoin('routes as r','r.id', '=', 'riders.route_id')->where('riders.status', 1)
-                ->whereHas('riders.city', function ($query) use ($hub_id) {
+                ->whereHas('city', function ($query) use ($hub_id) {
                     $query->where('hub_id', $hub_id);
                 })->get(['riders.id as id', 'riders.name as name', 'riders.route_id as route_id', 'riders.trax_id as trax_id', 'r.name as route_name']);
             return response()->json(['status' => 0, 'riders' => $riders]);
