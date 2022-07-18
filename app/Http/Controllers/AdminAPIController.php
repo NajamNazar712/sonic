@@ -86,6 +86,7 @@ use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
+use App\Http\Models\Route;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
