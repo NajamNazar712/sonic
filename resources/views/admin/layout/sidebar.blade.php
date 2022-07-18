@@ -887,6 +887,16 @@
                             <li><a class="menu-item" href="{{route('admin.settings.cn_print_right.cn_print_right')}}">CN Print Rights Setting</a></li>
                         @endif
 
+                    @if (session('role_id') == 1 || count(array_intersect([408, 409], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Vigilance Verification</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(408, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.vigilance.verification.index') }}">Delivery Note</a></li>
+                                @endif
+
+                            </ul>
+                        </li>
+                    @endif
                   {{--  <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>--}}
                 </ul>
             </li>

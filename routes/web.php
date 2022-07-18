@@ -3997,6 +3997,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/pie_chart','Admins\NpsController@pie_chart')->name('pie_chart');
 
     });
+
+    Route::prefix('vigilance')->name('vigilance.')->group(function (){
+        Route::prefix('verification')->name('verification.')->group(function (){
+                Route::get('/','Admins\VigilanceController@verification_index')->name('index');
+                Route::get('/list','Admins\VigilanceController@verification_list')->name('list');
+                Route::get('delivery_note_info','Admins\verification_index@delivery_note_info')->name('delivery_note_info');
+                Route::post('/info','Admins\VigilanceController@verification_info')->name('info');
+                Route::post('/add','Admins\VigilanceController@verification_add')->name('add');
+            Route::prefix('history')->name('history.')->group(function (){
+                Route::get('/','Admins\VigilanceController@history_index')->name('index');
+            });
+        });
+    });
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {
