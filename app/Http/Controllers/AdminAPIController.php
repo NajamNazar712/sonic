@@ -8152,11 +8152,25 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $hub_id = $request->hub_id;
-            $riders = Rider::leftjoin('routes as r','r.id', '=', 'riders.route_id')->where('riders.status', 1)
+            $riders = Rider::where('status', 1)
                 ->whereHas('city', function ($query) use ($hub_id) {
                     $query->where('hub_id', $hub_id);
-                })->get(['riders.id as id', 'riders.name as name', 'riders.route_id as route_id', 'riders.trax_id as trax_id', 'r.name as route_name']);
-            return response()->json(['status' => 0, 'riders' => $riders]);
+                })->select('id', 'name', 'route_id', 'trax_id');
+            if($riders->exists()){
+                $riders = $riders->get();
+                $data = array();
+                foreach ($riders as $rider){
+                    $datum = array();
+                    $datum["id"] = $rider->id;
+                    $datum["name"] = $rider->name;
+                    $datum["route_id"] = $rider->route_id;
+                    $datum["trax_id"] = $rider->trax_id;
+                    $datum["router_name"] = ($rider->trax_id) ? $rider->route->code." (".$rider->route->start." to ".$rider->route->end.")" : NULL;
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'riders' => $riders]);
+            }
+            return response()->json(['status' => 1, 'message' => "Riders not found!"]);
         }
     }
 
