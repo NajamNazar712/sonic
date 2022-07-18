@@ -13,7 +13,8 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <div class="alert alert-danger" id="consignee_address_error" style="display: none">
+                            </div>
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
@@ -96,7 +97,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="5"></textarea>
+                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*"  rows="5"></textarea>
                                         </div>
 
                                         <div class="form-group">
@@ -286,6 +287,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('css')
@@ -603,6 +605,54 @@
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                rules: {
+                    consignee_address: {
+                        remote: {
+                            url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',
+                            data: {
+                                city_id: function () {
+                                    return $("#consignee_city").val();
+                                },
+                            },
+                            dataFilter: function(data) {
+                                // var json = JSON.parse(data);
+                                // if(json.status === "true") {
+                                //     return true;
+                                // }
+                                // return "\"" + json.error + "\"";
+
+                                return true;
+
+
+                            },
+                            complete: function (data) {
+                                if (data.responseText) {
+                                    var json = JSON.parse(data.responseText);
+                                    var er = "";
+                                    if (json.invalid_cities) {
+                                        $.each(json.invalid_cities, function (key, value) {
+                                            er +=  "Select " + key + " in destination for " + value+"<br>";
+                                        });
+                                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
+                                        $('#consignee_address_error').show();
+
+                                    }else{
+                                        $('#consignee_address_error').html('');
+                                        $('#consignee_address_error').hide();
+                                    }
+                                }
+                            }
+
+                        },
+                        maxlength: 255,
+                    },
+                },
+                messages: {
+                    consignee_address: {
+                        required: "Address Is Required",
+                        maxlength :"Address can be maximum 255 characters",
+                    },
+                },
                 normalizer: function(value) {
                     return $.trim(value);
                 },
