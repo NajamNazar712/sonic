@@ -398,7 +398,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';

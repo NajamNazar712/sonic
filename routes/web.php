@@ -1724,7 +1724,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::prefix('create')->name('create.')->group(function () {
-                Route::get('', 'Admins\AdminCargoManifestController@create_index')->name('index');
+                Route::get('', 'Admins\Admishipment_statusnCargoManifestController@create_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details')->name('shipment_details');
                 Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
                 Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');

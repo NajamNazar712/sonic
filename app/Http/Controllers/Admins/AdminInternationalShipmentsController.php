@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\International\InternationalShipmentServiceProvider;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
@@ -302,7 +305,7 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),441);
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18,21,22,23,24,25])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [4,5,8,14,17,18,21,22,23,24,25])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -314,6 +317,15 @@ class AdminInternationalShipmentsController extends Controller
             if($default_status_id == 0){
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', [1, 2, 17])->where('business_category_id', 2);
                 if ($shipment->exists()) {
+                    $bag = CargoManifestBag::where('seal_number',$tracking_number);
+                    if($bag->exists()){
+                        $bag = $bag->first();
+                        if($bag->status_id == 1 && $bag->type == 1 && !ManifestBag::where('cargo_manifest_bag_id',$bag->id)->exists()){
+                            return response()->json(['status' => 0, 'error' =>'PLease Create Manifest For This Shipment!']);
+                        }
+                    }
+
+
                     $data = array();
                     $shipment = $shipment->first();
 
@@ -411,6 +423,25 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
                         $international_shipment->sync = 0;
                         $international_shipment->save();
+
+                        $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
+                        if($manifest_shipment->exists()){
+                            $manifest_shipment = $manifest_shipment->first();
+                            $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
+                            if($bag){
+                                if($bag->shipments == ($bag->lost_shipments + $bag->received_shipments)){
+                                    foreach($bag->shipment as $shipment){
+                                        $bag_shipment = CargoManifestBagShipments::find($shipment);
+                                        $bag_shipment->update(['status' => 1]);
+                                    }
+
+                                    $bag->status_id = 7;
+                                    $bag->completed = 1;
+                                    $bag->received_by = 346; //global_admin
+                                    $bag->save();
+                                }
+                            }
+                        }
 
                     }
                 }

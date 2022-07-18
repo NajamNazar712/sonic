@@ -698,6 +698,10 @@ class AdminCargoManifestController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            
+            if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->exists()){
+                return ['status' => 1, 'error' => 'Bag Already Created'];
+            }
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
