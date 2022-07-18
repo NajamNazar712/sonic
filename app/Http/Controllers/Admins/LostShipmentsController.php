@@ -338,15 +338,13 @@ class LostShipmentsController extends Controller
 
                     if($shipment->shipper_status_id != 18) {
 
-                        if(in_array($shipment->shipper_status_id,$shipment_status_for_bags)){
-                            $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment->id);
-                            if($cargo_manifest_bag_shipments->exists()){
-                                $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                                $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                                if($bag){
-                                    if(ManifestBagLostShipment::where(['bag_id' => $bag->id,'shipment_id' => $shipment->id])){
-                                        return response()->json(['status' => 0, 'error' => 'Shipment already marked lost for the current bag']);
-                                    }
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+                        if($cargo_manifest_bag_shipments->exists()){
+                            $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                            $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                            if($bag){
+                                if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
+                                    return response()->json(['status' => 0, 'error' => 'Shipment already marked lost for the current bag']);
                                 }
                             }
                         }
@@ -411,16 +409,17 @@ class LostShipmentsController extends Controller
 
                                 $bag_total_shipments = $bag->shipments;
                                 $bag_lost_shipments = $bag->lost_shipments;
-                                $bag_short_shipments = $bag->received_shipments;
+                                $bag_received_shipments = $bag->received_shipments;
 
-                                if($bag_total_shipments == ($bag_lost_shipments + $bag_short_shipments)){
+                                if($bag_total_shipments == ($bag_lost_shipments + $bag_received_shipments)){
                                     foreach($bag->shipment as $shipment){
-                                        $bag_shipment = CargoManifestBagShipments::find($shipment);
-                                        $bag_shipment->update(['status' => 1]);
+                                        $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment->shipment_id)->first();
+                                        $bag_shipment->status = 1;
+                                        $bag_shipment->save();
                                     }
                                     $bag->status_id = 7;
                                     $bag->completed = 1;
-                                    $bag->received_by = 346; //global_admin
+                                    $bag->receiver_id = 346; //global_admin
                                     $bag->save();
                                 }
                             }

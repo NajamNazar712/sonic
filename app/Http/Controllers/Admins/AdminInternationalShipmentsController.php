@@ -305,7 +305,7 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),441);
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [4,5,8,14,17,18,21,22,23,24,25])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [4,14,17,18,21,22,23,24,25])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -321,10 +321,9 @@ class AdminInternationalShipmentsController extends Controller
                     if($bag->exists()){
                         $bag = $bag->first();
                         if($bag->status_id == 1 && $bag->type == 1 && !ManifestBag::where('cargo_manifest_bag_id',$bag->id)->exists()){
-                            return response()->json(['status' => 0, 'error' =>'PLease Create Manifest For This Shipment!']);
+                            return response()->json(['status' => 0, 'error' =>'Please Create Manifest For This Shipment!']);
                         }
                     }
-
 
                     $data = array();
                     $shipment = $shipment->first();
@@ -391,6 +390,29 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->sync = 0;
                         $international_shipment->save();
 
+                        $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
+                        if($manifest_shipment->exists()){
+                            $received_shipments = 0;
+                            $manifest_shipment = $manifest_shipment->first();
+                            $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
+                            if($bag){
+                                $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('cargo_manifest_bag_id',$bag->id)->first();
+                                if($bag_shipment){
+                                    $bag_shipment->status = 1;
+                                    $bag_shipment->save();
+                                }
+                                $received_shipments = $bag->shipment->where('status',1)->count();
+                            }
+
+                            if($bag->shipments == $received_shipments){
+                                $bag->received_shipments = $received_shipments;
+                                $bag->status_id = 7;
+                                $bag->completed = 1;
+                                $bag->receiver_id = 346; //global_admin
+                                $bag->save();
+
+                            }
+                        }
                     }
                 }
                 else{
@@ -409,7 +431,7 @@ class AdminInternationalShipmentsController extends Controller
         return redirect()->back()->with('error', 'Shipment Status not selected!');
     }
     public function shipment_status_update_modal(Request $request){
-       
+
         $shipper_status_id = $request->shipment_status_id;
         $seal_number = $request->seal_number;
         if($shipper_status_id){
@@ -423,25 +445,6 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
                         $international_shipment->sync = 0;
                         $international_shipment->save();
-
-                        $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
-                        if($manifest_shipment->exists()){
-                            $manifest_shipment = $manifest_shipment->first();
-                            $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
-                            if($bag){
-                                if($bag->shipments == ($bag->lost_shipments + $bag->received_shipments)){
-                                    foreach($bag->shipment as $shipment){
-                                        $bag_shipment = CargoManifestBagShipments::find($shipment);
-                                        $bag_shipment->update(['status' => 1]);
-                                    }
-
-                                    $bag->status_id = 7;
-                                    $bag->completed = 1;
-                                    $bag->received_by = 346; //global_admin
-                                    $bag->save();
-                                }
-                            }
-                        }
 
                     }
                 }
