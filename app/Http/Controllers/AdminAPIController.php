@@ -8280,9 +8280,9 @@ class AdminAPIController extends Controller
                                     }
                                 }
                             }
-                            $class = null;
+                            $crm_row = 0;
                             if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
-                                $class = 'complaint_row';
+                                $crm_row = 1;
                             }
                             if(!$request->has('pieces_confirm')){
                                 if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -8294,10 +8294,10 @@ class AdminAPIController extends Controller
                                     $details['tracking_number'] = $shipment->tracking_number;
                                     $details['pieces_count'] = $shipment->pieces;
                                     $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                    return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                    return ['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details];
                                 }
                             }
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class, 'shipper_id' => $shipment->user_id]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]);
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
@@ -8323,7 +8323,6 @@ class AdminAPIController extends Controller
                                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                                 if ($shipment_journey->exists()) {
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
                                     $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
                                     if ($status_id != '') {
                                         $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
@@ -8339,7 +8338,7 @@ class AdminAPIController extends Controller
                                         $settings = $settings->first();
                                         $role_ids = array_map('intval', explode(',', $settings->text));
                                         array_push($role_ids, 1);
-                                        if (!in_array(session('role_id'), $role_ids)) {
+                                        if (!in_array($role_id, $role_ids)) {
                                             if (!$shipment->packaging_material_request) {
                                                 $shipper_payable = 0;
                                                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -8355,15 +8354,15 @@ class AdminAPIController extends Controller
                                                     }
                                                 }
                                                 if ($shipper_payable < 0) {
-                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                    return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                $class = null;
+                                $crm_row = 0;
                                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
-                                    $class = 'complaint_row';
+                                    $crm_row = 1;
                                 }
                                 if(!$request->has('pieces_confirm')){
                                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -8375,14 +8374,13 @@ class AdminAPIController extends Controller
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                        return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                     }
                                 }
-                                return response()->json(['status' => 0,'shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                return response()->json(['status' => 0,'shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
 
                             } else {
-                                return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
-
+                                return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
                             }
                     }else
                         if($request->has('hub_id') && ($destination_id == $request->hub_id)){
@@ -8409,7 +8407,6 @@ class AdminAPIController extends Controller
                                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                                 if ($shipment_journey->exists()) {
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
                                     $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
                                     if ($status_id != '') {
                                         $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
@@ -8420,12 +8417,11 @@ class AdminAPIController extends Controller
                                 }
                                 if($shipment->booking_type_id != 4) {
                                     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
-
                                     if ($settings->exists()) {
                                         $settings = $settings->first();
                                         $role_ids = array_map('intval', explode(',', $settings->text));
                                         array_push($role_ids, 1);
-                                        if (!in_array(session('role_id'), $role_ids)) {
+                                        if (!in_array($role_id, $role_ids)) {
                                             if (!$shipment->packaging_material_request) {
                                                 $shipper_payable = 0;
                                                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -8441,15 +8437,15 @@ class AdminAPIController extends Controller
                                                     }
                                                 }
                                                 if ($shipper_payable < 0) {
-                                                    return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                    return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                $class = null;
+                                $crm_row = 0;
                                 if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
-                                    $class = 'complaint_row';
+                                    $crm_row = 1;
                                 }
                                 if(!$request->has('pieces_confirm')){
                                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -8460,10 +8456,10 @@ class AdminAPIController extends Controller
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                        return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                return response()->json(['status' => 0, 'shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
 
                             } else
                                 if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
@@ -8488,7 +8484,6 @@ class AdminAPIController extends Controller
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                                     if ($shipment_journey->exists()) {
                                         $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
                                         $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
                                         if ($status_id != '') {
                                             $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
@@ -8504,7 +8499,7 @@ class AdminAPIController extends Controller
                                             $settings = $settings->first();
                                             $role_ids = array_map('intval', explode(',', $settings->text));
                                             array_push($role_ids, 1);
-                                            if (!in_array(session('role_id'), $role_ids)) {
+                                            if (!in_array($role_id, $role_ids)) {
                                                 if (!$shipment->packaging_material_request) {
                                                     $shipper_payable = 0;
                                                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -8520,15 +8515,15 @@ class AdminAPIController extends Controller
                                                         }
                                                     }
                                                     if ($shipper_payable < 0) {
-                                                        return response()->json(['status' => 1, 'error' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                                        return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    $class = null;
+                                    $crm_row = 0;
                                     if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
-                                        $class = 'complaint_row';
+                                        $crm_row = 1;
                                     }
                                     if(!$request->has('pieces_confirm')){
                                         if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -8539,23 +8534,23 @@ class AdminAPIController extends Controller
                                             $details['tracking_number'] = $shipment->tracking_number;
                                             $details['pieces_count'] = $shipment->pieces;
                                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                            return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                            return ['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details];
                                         }
                                     }
-                                    return response()->json(['status' => 0,'shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                    return response()->json(['status' => 0,'shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
 
                                 } else {
-                                    return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
+                                    return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
 
                                 }
                         }else{
-                            return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
+                            return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);
                         }
                 } else {
-                    return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
+                    return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present, Check tracking!'];
+                return response()->json(['status' => 1, 'message' => 'No Shipment with given Tracking Number is present, Check tracking!']);
             }
 
 
