@@ -8165,10 +8165,10 @@ class AdminAPIController extends Controller
                     $datum["name"] = $rider->name;
                     $datum["route_id"] = $rider->route_id;
                     $datum["trax_id"] = $rider->trax_id;
-                    $datum["router_name"] = ($rider->trax_id) ? $rider->route->code." (".$rider->route->start." to ".$rider->route->end.")" : NULL;
+                    $datum["router_name"] = ($rider->route_id) ? $rider->route->code." (".$rider->route->start." to ".$rider->route->end.")" : NULL;
                     $data[] = $datum;
                 }
-                return response()->json(['status' => 0, 'riders' => $riders]);
+                return response()->json(['status' => 0, 'riders' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "Riders not found!"]);
         }
