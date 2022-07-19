@@ -11733,12 +11733,12 @@ class RiderAPIController extends Controller
                     $leave_request = new EmployeeAttendanceAdjustment();
                     $leave_request->employee_id = $employee_id;
                     $leave_request->employee_type_id = 2;
-                    $leave_request->reporter_id = $employee->line_manager_id;
+                    $leave_request->reporter_id = $rider->line_manager_id;
                     $leave_request->date = $request->date;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
                     $notify = false;
-                    $user = Admin::where('employee_id',$employee->line_manager_id)->first();
+                    $user = Admin::where('employee_id',$rider->line_manager_id)->first();
                     if($user)
                     {
                         $user_id = $user->id;
