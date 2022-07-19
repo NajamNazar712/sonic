@@ -336,9 +336,13 @@ class DeliveryController extends Controller
     public function check_rider_dncc_status(Request $request)
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::where(['rider_id' => $request->rider_id, 'dncc_status' => 0])->where('status', '!=', 4)
-            ->whereDate('created_at', '>', $datetime)
-            ->whereDate('created_at', '!=', Carbon::today());
+        $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+        ->where('r.id' ,$request->rider_id)
+        ->where('delivery_notes.dncc_status',0)
+        ->where('delivery_notes.status', '!=', 4)
+        ->whereDate('delivery_notes.created_at', '>', $datetime)
+        ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
+        ->where('r.operation_rider_id',1);
 
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -408,51 +412,39 @@ class DeliveryController extends Controller
             $tracking_number = $request->tracking;
             $rider_id = $request->rider_id;
 
-            $rider_default_type = Rider::where('id',$rider_id)->select('rider_category_id')->first();
+            $rider_default_type = Rider::where('id',$rider_id)->where('operation_rider_id',1)->first();
+            if($rider_default_type) {
 
-            $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight')->first();
+                $shipment = Shipment::where('tracking_number', $tracking_number)->select('actual_weight')->first();
 
-            $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
+                $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
 
-            if($shipment->actual_weight > $weight->text)
-            {
-                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',2)->select('rider_category_id','id')->latest()->first();
+                if ($shipment->actual_weight > $weight->text) {
+                    $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 2)->select('rider_category_id', 'id')->latest()->first();
 
-                if($rider_bypass_type)
-                {
-                    $rider_bypass_id = $rider_bypass_type->id;
-                    if($rider_bypass_type->rider_category_id != 2)
-                    {
-                        if($rider_default_type->rider_category_id == 1)
-                        {
+                    if ($rider_bypass_type) {
+                        $rider_bypass_id = $rider_bypass_type->id;
+                        if ($rider_bypass_type->rider_category_id != 2) {
+
                             return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                         }
+                    } elseif ($rider_default_type->rider_category_id == 1) {
+                        return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
                     }
-                }
-                elseif($rider_default_type->rider_category_id == 1)
-                {
-                    return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
-                }
-            }
-            elseif($shipment->actual_weight <= $weight->text)
-            {
-                $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id','id')->latest()->first();
+                } elseif ($shipment->actual_weight <= $weight->text) {
+                    $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 1)->select('rider_category_id', 'id')->latest()->first();
 
-                if($rider_bypass_type)
-                {
-                    $rider_bypass_id = $rider_bypass_type->id;
-                    if($rider_bypass_type->rider_category_id != 1)
-                    {
-                        if($rider_default_type->rider_category_id == 2)
-                        {
-                            return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
+                    if ($rider_bypass_type) {
+                        $rider_bypass_id = $rider_bypass_type->id;
+                        if ($rider_bypass_type->rider_category_id != 1) {
+                            if ($rider_default_type->rider_category_id == 2) {
+                                return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
+                            }
                         }
-                    }
 
-                }
-                elseif($rider_default_type->rider_category_id == 2)
-                {
-                    return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
+                    } elseif ($rider_default_type->rider_category_id == 2) {
+                        return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
+                    }
                 }
             }
         }
