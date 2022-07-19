@@ -1915,6 +1915,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_update_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_update_store')->name('store');
             });
+            Route::get('bulk_add/{id}', 'Admins\UserManagementController@role_bulk_add_index')->name('bulk_add');
+            Route::post('bulk_add', 'Admins\UserManagementController@role_bulk_add_store')->name('bulk_add.store');
+
+            Route::get('bulk_remove/{id}', 'Admins\UserManagementController@role_bulk_remove_index')->name('bulk_remove');
+            Route::post('bulk_remove', 'Admins\UserManagementController@role_bulk_remove_store')->name('bulk_remove.store');
+            
+            
         });
 
         Route::prefix('user_requests')->name('user_requests.')->group(function() {

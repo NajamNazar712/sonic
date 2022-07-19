@@ -59,48 +59,7 @@
         </div>
     </div>
 
-	<div class="modal fade text-left" id="AddRoleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRoleModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Roles</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="add_permission_form" action="" method="post"  novalidate="novalidate">
-						@csrf
-                        <div class="row mb-2">
-                            <div class="col-12 form-group">
-                                <select name="module_select" id="module_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                    @foreach($modules as $module)
-                                        <option value="{{$module->id}}">{{$module->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-						<div class="row mb-2">
-                            <div class="col-12 form-group">
-                                <select name="permission_select" id="permission_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                </select>
-                            </div>
-                        </div>
-						<div class="row mb-2 justify-content-center">
-                               <a href="javascript:void(0);" id="add_permission" class="btn btn-primary"><i class="ft-plus-circle"></i></a>
-                        </div>
-						<div id="inner_permission"></div>
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                                <button id="AddPermission" type="submit" class="btn btn-primary btn-block">Add</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+	
 @endsection
 
 @section('css')
@@ -131,43 +90,7 @@
 	<script>
 		$(document).ready(function() {
 
-			$('#add_permission').on('click',function(){
-				
-				var modules = {!! $modules !!};
-				var counter = document.getElementById('inner_permission').childElementCount;
-            	var html='<div class="row mb-2">';
-                html += '<div class="col-12 form-group">';
-                html += '<select name="module_select'+counter+'" id="module_select_'+counter+'" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">';
-				$.each(modules, function (i, v) {
-					
-					html += "<option value='" + v.id + "' >" + v.name + "</option>";
-                });
-				html += '</select></div></div>';
-                $('#inner_permission').append(html);
-
-        	});
-
-			$("#module_select").prepend('<option value="" selected></option>').select2({
-                    placeholder: "Select Module",
-                    width:'100%',
-                }).bind('change', function () {
-					var module_id = $(this).val();
-					var data = $.map({!! $permissions !!}, function (obj) {
-
-						$("#permission_select").html('');
-						if(obj.module_id == module_id){
-							obj.id = obj.id;
-							obj.text = obj.name;
-							return obj;
-						}
-
-					});
-					$("#permission_select").prepend('<option value="" selected></option>').select2({
-						placeholder: "Select Permission",
-						width:'100%',
-						data:data,
-					});
-				});
+		
             var selected_rows = [];
 			var table = $('#datatable').DataTable({
 				@if (session('role_id') == 1 || in_array(86, session('permissions')))
@@ -175,17 +98,28 @@
 					buttons: [{
 						text: 'Add',
 						className: 'btn btn-primary add',
-						enabled: false,
 						action: function (e, dt, node, config) {
-							
-							$('#AddRoleModal').modal('show');
+							window.location = '{{ route('admin.user_management.roles.add.index') }}';
 						}
 					},{
-						text: 'Remove',
+						text: 'Bulk Add',
+						className: 'btn btn-primary bulk_add',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							var redirect = '{!! route('admin.user_management.roles.bulk_add', ':id') !!}';
+							var url = redirect.replace(':id', selected_rows);
+							window.location = url;
+							selected_rows = [];
+						}
+					},{
+						text: 'Bulk Remove',
 						className: 'btn btn-primary remove',
 						enabled: false,
 						action: function (e, dt, node, config) {
-							$('#AddRoleModal').modal('show');
+							var redirect = '{!! route('admin.user_management.roles.bulk_remove', ':id') !!}';
+							var url = redirect.replace(':id', selected_rows);
+							window.location = url;
+							selected_rows = [];
 
 						}
 					},{
@@ -209,7 +143,7 @@
                                     selected_rows.push(id);
                                 }
 
-                                table.button('.add').enable();
+                                table.button('.bulk_add').enable();
                                 table.button('.remove').enable();
 								
                             }
@@ -237,7 +171,7 @@
                                 }
 
                                 if (selected_rows.length == 0) {
-                                    table.button('.add').disable();
+                                    table.button('.bulk_add').disable();
 									table.button('.remove').disable();
 
                                 }
@@ -364,17 +298,7 @@
                     form.submit();
 				}
 			});
-			$('#add_permission_form').validate({
-				ignore: [],
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('.form-group'));
-				},
-				submitHandler: function(form) {
-                    form.submit();
-				}
-			});
+		
 			
 			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -388,11 +312,11 @@
                     selected_rows.splice(index, 1);
                 }
                 if (selected_rows.length > 0) {
-                    table.button('.add').enable();
+                    table.button('.bulk_add').enable();
                     table.button('.remove').enable();
                 }
                 else {
-                    table.button('.add').disable();
+                    table.button('.bulk_add').disable();
                     table.button('.remove').disable();
                 }
 				
