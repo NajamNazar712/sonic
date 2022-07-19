@@ -1189,7 +1189,7 @@ class APIController extends Controller
                         }
                     }
                 }
-            }
+            }            
             if ($user_type['logo_status'] == 1) {
                 $shipment = Shipment::find($shipment_id);
                 $shipment->shipment_invoice_status = 1;
