@@ -92,14 +92,17 @@ class LostShipmentsController extends Controller
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
 
-            $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
-            if($check_lost_shipments_admins->exists() || session('role_id') == 1){
+            if(session('role_id') != 1){
+                $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
-                $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
-
-            }else{
-                $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
-                $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
+                if(!empty($lost_shipments_shippers_id)){
+                    if($check_lost_shipments_admins->exists()){
+                            $shipments = $shipments->whereIn('shipments.user_id', $lost_shipments_shippers_id);
+                    }
+                    else{
+                            $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
+                    }
+                }
             }
 
             return Datatables::of($shipments)
@@ -197,6 +200,10 @@ class LostShipmentsController extends Controller
             foreach ($shipment_ids as $shipment){
                 
                 $parcel = Shipment::find($shipment);
+                $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
+                if(!$dispute_check){
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                }
                 if($parcel->shipper_status_id == 18) {
                     
                     $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
@@ -242,6 +249,11 @@ class LostShipmentsController extends Controller
 
         foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+
+                $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
+                if(!$dispute_check){
+                    return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                }
                 if($parcel->shipper_status_id == 18) {
 
                     $lost_shipments_shippers = LostShipmentShipper::where('user_id',$parcel->user_id);
@@ -297,14 +309,17 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
-            $passing_status_array = array(1, 5, 11 , 14, 17, 25, 30, 31, 60);
+            $passing_status_array = array(1, 3, 5, 11, 14, 17, 21, 25, 26, 30, 31, 32, 36, 37, 38, 49, 50, 51, 56, 60);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment->exists()) {
                     $data = array();
                     $shipment = $shipment->first();
-
+                    $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                    if(!$dispute_check){
+                        return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                    }
                     $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey)
                     {

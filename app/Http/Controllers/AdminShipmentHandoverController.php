@@ -12,6 +12,7 @@ use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
 use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
@@ -44,9 +45,7 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function arrival_bulk_shipment_details(Request $request){
-
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
-
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
@@ -62,6 +61,54 @@ class AdminShipmentHandoverController extends Controller
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
             ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL);
+
+            $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+
+            $msg_string = null;
+            $str_arr = null;
+            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+            foreach ($check as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        $con_nsa = $arr_value;
+                        
+                        // if ($msg_string != null) {
+                        //     $msg_string = $msg_string . ', ' . $arr_value;
+                        // } else {
+                            $msg_string = $arr_value;
+                        // }
+                    }
+                }
+            }
+
+            
+            $delivery_area = null;
+            if($msg_string != null){
+                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                            ->select('dlm.area_name as area_name','dlm.id')
+                            ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                            ->where('dlm.city_id',$shipment->consignee_city_id);
+                if($found->exists()){
+                    $found = $found->first();
+                    $delivery_area = $found->area_name;
+                }
+                if($request->delivery_location_mapping != null){
+                  if($request->delivery_location_mapping != $delivery_area){
+                    return ['status' => 1, 'error' => 'Delivery Location is different'];
+                  }
+                }
+            }else{
+              $delivery_area = 0;
+              if($request->delivery_location_mapping != null){
+                  return ['status' => 1, 'error' => 'Delivery Location is different'];
+              }
+            }
+            // dump($delivery_area);
+            // dd($request->delivery_location_mapping);
+
+
+            $details['delivery_area'] = $delivery_area;
+            
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
         } else {
@@ -188,7 +235,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at']);
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining')]);
 
         $datatable = Datatables::of($handover_list)
 
@@ -199,6 +246,20 @@ class AdminShipmentHandoverController extends Controller
             else {
                 return 0;
             }
+            })
+            ->addColumn('remaining_shipment_count', function($handover_list) {
+                if ($handover_list->shipment_count != 0 && $handover_list->received_shipments != 0) {
+                    $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
+                    if($remaining > 0){
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $remaining  . '</button>';
+                    }
+                    else{
+                        return 0;
+                    }
+                }
+                else {
+                    return 0;
+                }
             });
 
             if ($tracking_number = $request->get('search_tracking')) {
@@ -587,4 +648,21 @@ class AdminShipmentHandoverController extends Controller
          }
          return redirect()->back()->with(['status'=>0,'error'=>"Responsible not found!"]);
     }
+
+    public function handover_shipments_remaining(Request $request){
+        $handover_id = $request->input('id');
+        $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->where('status',1)->get();
+        $shipments = array();
+        if($handover_shipments->count() != 0){
+            foreach ($handover_shipments as $handover_shipment){
+                $shipment = Shipment::find($handover_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Handover Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+
 }

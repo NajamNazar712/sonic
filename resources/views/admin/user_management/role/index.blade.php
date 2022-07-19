@@ -36,6 +36,27 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="duplicate_role_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_role_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+			<form id="duplicate_role_form" method="POST" action="{{ route('admin.user_management.roles.add.duplicate_role') }}" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+				@csrf
+				<div class="modal-content">
+					<div class="modal-header bg-primary">
+						<h4 class="modal-title white">Duplicate Role</h4>
+					</div>
+					<div class="modal-body text-center form-group">
+						<input type="hidden" name="role_id" id="role_id">
+						<input type="text" name="designation" id="designation" class="form-control" placeholder="Enter Designation*" data-rule-required="true">
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">Create</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</form>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -44,6 +65,7 @@
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -148,7 +170,30 @@
 
 					window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
 				});
+
+				$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.duplicate', function() {
+					var id = parseInt($(this).parents('tr').attr('id'));
+
+					$('#role_id').val(id);
+					$('#duplicate_role_modal').modal('show');
+				});
 			@endif
+
+			$('#duplicate_role_form').validate({
+				ignore: [],
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function(form) {
+                    form.submit();
+				}
+			});
 		});
+
+		
+
+		
 	</script>
 @endsection

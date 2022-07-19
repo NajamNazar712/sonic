@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\InternationalShipmentExtraServiceCharges;
 use App\Http\Models\City;
 use App\Http\Models\HistoryInternationalUserRate;
 use App\Http\Models\International\HistoryInternationalRatesCashHandlingCharges;
@@ -27,14 +28,18 @@ use App\Http\Models\InternationalRatesRemark;
 use App\Http\Models\InternationalRatesReturnCharges;
 use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceShipment;
 use App\Http\Models\PendingInternationalUserRate;
 use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\Rates\InternationalEconomyRateHistory;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
@@ -1456,6 +1461,88 @@ class AdminInternationalRatesController extends Controller
         }
         else{
             return response()->json(['status' => 1, 'Something went wrong!']);
+        }
+    }
+
+    public function extra_service_charges_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),555);
+        return view('admin.international.service_charges');
+    }
+
+    public function international_shipment_details(Request $request){
+
+        $tracking_number = $request->tracking_number;
+        if($tracking_number != null) {
+
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+            //$shipment_status = array(1,6,26,27,28,29,30,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ($shipment->shipment_type == 2) {
+                    return response()->json(['status' => 0, 'error' => 'Retail Shipment Not Allowed']);
+                } else {
+                    if ($shipment->business_category_id == 2) {
+                       /* if (Shipment::where('id', $shipment->id)->whereNotNull('esc_charges')->exists()) {
+                            return response()->json(['status' => 0, 'error' => 'Charges already added against this tracking number']);
+                        } else {
+                            if (!in_array($shipment->shipper_status_id,$shipment_status )) {
+                                return response()->json(['status' => 1, 'success' => 'Success']);
+                            } else {
+                                return response()->json(['status' => 0, 'error' => 'Charges Cannot be added against ' . $shipment->status_shipper->name]);
+                            }
+                        }*/
+
+                       $shipment_invoice = InvoiceShipment::where('shipment_id',$shipment->id);
+                       if($shipment_invoice->exists()){
+                           $shipment_invoice = $shipment_invoice->latest()->first();
+                           $invoice = Invoice::find($shipment_invoice->invoice_id);
+                           if($invoice->status_id == 3){
+                               return response()->json(['status' => 0, 'error' => 'Invoice already paid for this tracking number']);
+                           }
+                           else{
+                               return response()->json(['status' => 1, 'success' => 'Success']);
+                           }
+                       }
+                       else{
+                           return response()->json(['status' => 1, 'success' => 'Success']);
+                       }
+                    } else {
+                        return response()->json(['status' => 0, 'error' => 'Charges can be added only against international shipments']);
+                    }
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid Tracking Number']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Tracking Number is required']);
+        }
+
+    }
+
+    public function extra_service_charges_submit(Request $request){
+
+        $tracking_number = $request->tracking_number;
+        $amount = $request->amount;
+        if($tracking_number != null && $amount != null){
+            $shipment = Shipment::where('tracking_number',$tracking_number)->first();
+            if($shipment){
+                $shipment = Shipment::where('id',$shipment->id)->first();
+                $shipment->esc_charges = $amount;
+                $shipment->save();
+
+                if($shipment->shipper_status_id == 14){
+                    AdminFinanceController::update_esc_charges($shipment->id,0);
+                }
+
+                return redirect()->back()->with('success', 'Charges Added!');
+            }
+            else{
+                return redirect()->back()->with('error', 'Invalid Tracking Number!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Tracking Number and Amount are required!');
         }
     }
 }

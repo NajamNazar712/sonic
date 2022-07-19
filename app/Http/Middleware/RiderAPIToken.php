@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 
 use Closure;

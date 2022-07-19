@@ -8,6 +8,7 @@ use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -28,7 +29,7 @@ use Auth;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL) {
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL,$cnic= NULL,$relation = NULL,$remarks_id = NULL) {
       $shipment_journey = new ShipmentsJourney();
 
       $shipment_journey->shipment_id = $shipment_id;
@@ -43,6 +44,9 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
+      $shipment_journey->relation = $relation;
+      $shipment_journey->cnic = $cnic;
+
 
       if($user_id != null){
           $city_id = User::find($user_id)->city_id;
@@ -146,6 +150,21 @@ class ShipmentsJourneyController extends Controller
         }
 
       $shipment_journey->save();
+
+        if($remarks_id != null){
+            $shipment_journey_id = $shipment_journey->id;
+
+            $ShipmentJourneyConsigneeRefusedSubReason = new ShipmentJourneyConsigneeRefusedSubReason();
+            $ShipmentJourneyConsigneeRefusedSubReason->shipment_journey_id = $shipment_journey_id;
+            $ShipmentJourneyConsigneeRefusedSubReason->status_sub_reason_id = $remarks_id;
+            $ShipmentJourneyConsigneeRefusedSubReason->status = 1;
+            $ShipmentJourneyConsigneeRefusedSubReason->updated_by = Auth::id();
+            $ShipmentJourneyConsigneeRefusedSubReason->save();
+        }
+
+        
+       
+
       if($verification == 1){
           if($shipper_status_id != 1){
               ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);

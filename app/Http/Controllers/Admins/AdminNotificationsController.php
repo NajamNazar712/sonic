@@ -744,7 +744,13 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['sales_person','shipper_name','pickup_request_no','remarks'];
         }
-		return $details;
+		else if ($id == 178)
+        {
+            $details['fields'] = ['name'];
+        }		else if ($id == 181)
+        {
+            $details['fields'] = ['name','reason'];
+        }		return $details;
     }
 
     public function edit(Request $request) {

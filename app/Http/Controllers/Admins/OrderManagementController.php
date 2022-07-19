@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\BookingType;
 use App\Http\Models\BusinessCategory;
@@ -203,9 +204,13 @@ class OrderManagementController extends Controller
         return $datatable->make(true);
     }
     public function get_shipment_charges(Request $request){
+        $retail_shipment = '';
         $shipment_id = $request->shipment_id;
         $shipment = Shipment::find($shipment_id);
-        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        if($shipment->shipment_type == 2){
+            $retail_shipment = RetailShipment::where('shipment_id',$shipment_id)->first();
+        }
+        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment,'retail_shipment' => $retail_shipment])->render();
         return response()->json($returnHTML);
     }
     public function shipper_recall(Request $request) {
