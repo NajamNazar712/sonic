@@ -8580,7 +8580,7 @@ class AdminAPIController extends Controller
 
     public function return_note_create(Request $request)
     {
-        return response() ->json(['request' => $request]);
+        return response() ->json(['status'=>0, 'request' => $request]);
         $tracking_numbers = explode(',', $request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
         $trackings = Shipments::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
