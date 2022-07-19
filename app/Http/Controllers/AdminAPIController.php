@@ -3423,6 +3423,7 @@ class AdminAPIController extends Controller
     public function employee_shift(Request $request)
     {
         $admin_id = $request->admin_id;
+        $employee_id = $request->employee_id;
         $admins = Admin::find($admin_id);
         if($admins){
             $response = array();
@@ -3439,7 +3440,7 @@ class AdminAPIController extends Controller
                     else{
                         $date = Carbon::now()->subDays(1)->format("Y-m-d");
                     }
-                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                    $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $employee_id)
                         ->where('employee_type', 1)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
                     if($last_action_log->exists()){
                         $last_action_log = $last_action_log->first();
@@ -6906,7 +6907,7 @@ class AdminAPIController extends Controller
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
                 if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
-                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                    return response()->json(['status' => 1, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
