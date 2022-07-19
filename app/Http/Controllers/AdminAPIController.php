@@ -7751,7 +7751,6 @@ class AdminAPIController extends Controller
                         $leave_types = LeaveType::whereIn('id', [1, 2, 5, 6])->select('id', 'name')->get();
                     }
                 }
-                dd($employee->line_manager_id." ".$employee->id);
                 if ($employee->line_manager_id != null) {
                     $data = array();
                     $data['trax_id'] = $employee->trax_id;
