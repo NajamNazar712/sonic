@@ -42,6 +42,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\ShipmentsEstimatedWeight;
@@ -115,7 +116,6 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -123,6 +123,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Password;
+use Yajra\Datatables\Datatables;
 
 class AdminAPIController extends Controller
 {
@@ -8297,7 +8298,7 @@ class AdminAPIController extends Controller
                                     return ['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details];
                                 }
                             }
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]);
+                            return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
@@ -8377,7 +8378,7 @@ class AdminAPIController extends Controller
                                         return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                     }
                                 }
-                                return response()->json(['status' => 0,'shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
+                                return response()->json(['status' => 0,"shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
@@ -8459,7 +8460,7 @@ class AdminAPIController extends Controller
                                         return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
+                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                             } else
                                 if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
@@ -8537,7 +8538,7 @@ class AdminAPIController extends Controller
                                             return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                         }
                                     }
-                                    return response()->json(['status' => 0,'shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
+                                    return response()->json(['status' => 0,"shipment_details" => ['shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                                 } else {
                                     return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
@@ -8597,5 +8598,201 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, "return_notes" => $deliveries]);
         }
         return response()->json(['status' => 1, 'message' => 'No Return Note Found!']);
+    }
+
+    public function return_note_shipments_list(Request $request)
+    {
+        $rules = [
+            'return_note_id' => ['required']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $role_id = $request->role_id;
+            $admin_id = $request->admin_id;
+            $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+            $deliveries = ReturnNote::join('return_note_shipments as dns', 'dns.return_note_id', '=', 'return_notes.id')
+                ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
+                ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+                ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
+                ->join('users', 'shipments.user_id', '=', 'users.id')
+                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+                ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+                ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+                ->leftjoin('crm_requests as crm', function ($join) {
+                    $join->on('crm.shipment_id', '=', 'shipments.id')
+                        ->whereIn('crm.status_id', [2, 3, 5])
+                        ->where('crm.case_nature_id', 1);
+                })
+                ->leftjoin('shipments_journey as rrb', function ($join) {
+                    $join->on('rrb.shipment_id', '=', 'shipments.id')
+                        ->whereIn('shipments.shipper_status_id', [25, 31, 38])
+                        ->where('rrb.id', '=',
+                            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                })
+                ->select(['return_notes.id as return_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'usi.pickup_address as address', 'users.name as shipper', 'bt.booking_type as service_type', 'shipments.booking_type_id', 'shipments.shipper_status_id', 'ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges', 'crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
+                ->where('return_notes.id', $request->return_note_id);
+
+            if ($role_id != 1) {
+                $deliveries = $deliveries->whereIn('return_notes.hub_id', $admin_hubs);
+            }
+
+            if($deliveries->exists()){
+                $deliveries = $deliveries->get();
+                foreach ($deliveries as $shipment){
+                    $shipment["crm_row"] = ($shipment->complaint != null) ? 1 : 0;
+                    $shipment["shipper"] = ($shipment->booking_type_id == 4) ? $shipment->shipper . ' (' . $shipment->poc . ')' : $shipment->shipper;
+                    $shipment["return_address"] = ($shipment->return_address_location != NULL) ? $deliveries->return_address_location :  $deliveries->address;
+                    $shipment["return_city"] = ($deliveries->return_city_name != NULL) ? $deliveries->return_city_name : $deliveries->destination;
+                }
+            }
+            return Datatables::of($deliveries)
+                ->setRowAttr([
+                    'class' => function ($deliveries) {
+                        if ($deliveries->complaint != null) {
+                            return 'complaint_row';
+                        } else {
+                            return '';
+                        }
+                    }
+                ])
+                ->addColumn('return_note_flag', function ($deliveries) {
+                    $flag = TRUE;
+                    if (ReturnNoteShipment::where('return_note_id', '>', $deliveries->return_note)->where('shipment_id', $deliveries->shId)->exists()) {
+                        $flag = FALSE;
+                    }
+                    return $flag;
+                })
+                ->addColumn('shipment_id_padded', function ($deliveries) {
+                    return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+                })
+                ->editColumn('shipper', function ($shipment) {
+                    if ($shipment->booking_type_id == 4) {
+                        return $shipment->shipper . ' (' . $shipment->poc . ')';
+                    } else {
+                        return $shipment->shipper;
+                    }
+                })
+                ->editColumn('amount', function ($shipment) {
+                    return number_format($shipment->amount);
+                })
+                ->filterColumn('u.name', function ($query, $keyword) {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '!=', 4)
+                            ->where('u.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('shipments.booking_type_id', '=', 4)
+                                ->where('usi.poc', 'like', '%' . $keyword . '%');
+                        });
+                })
+                ->addColumn('return_address', function ($deliveries) {
+                    if ($deliveries->return_address_location != NULL) {
+                        return $deliveries->return_address_location;
+                    } else {
+                        return $deliveries->address;
+                    }
+
+                })
+                ->addColumn('return_city', function ($deliveries) {
+                    if ($deliveries->return_city_name != NULL) {
+                        return $deliveries->return_city_name;
+                    } else {
+                        return $deliveries->destination;
+                    }
+                })
+                ->addColumn('status', function ($deliveries) {
+                    $delivered_array = array(25, 31, 38);
+                    $return_array = array(23, 25);
+                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
+                        return $deliveries->current_status_name;
+                    } else {
+                        if (in_array($deliveries->booking_type_id, [1, 4, 5])) {
+                            $where = array(24, 47, 48, 60);
+                        } else if ($deliveries->booking_type_id == 2) {
+                            $where = array(47, 48, 60);
+                            if (in_array($deliveries->shipper_status_id, $return_array)) {
+                                $where[] = 25;
+                            } else {
+                                $where[] = 29;
+                            }
+
+                        } else if ($deliveries->booking_type_id == 3) {
+                            $where = array(35, 47, 48, 60);
+                        }
+                        $statuses = ShipmentStatus::whereIn('id', $where)->get();
+                        $drops = '';
+                        foreach ($statuses as $status) {
+                            $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
+                        }
+                        $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" ><option></option>' . $drops . '</select>';
+                        return $select;
+                    }
+
+                })
+                ->addColumn('reason', function ($deliveries) {
+                    $delivered_array = array(25, 31, 38);
+                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
+                        return '';
+                    } else {
+                        $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" ><option></option></select>';
+                        return $reason;
+                    }
+
+                })
+                ->addColumn('remarks', function ($deliveries) {
+                    $delivered_array = array(25, 31, 38);
+                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
+                        return $deliveries->remarks;
+                    } else {
+                        $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks">';
+                        return $reason;
+                    }
+
+                })
+                ->addColumn('received_or_refused_by', function ($deliveries) {
+                    $delivered_array = array(25, 31, 38);
+                    if (!in_array($deliveries->shipper_status_id, $delivered_array)) {
+                        $received_or_refused_by = '<input class="form-control form-control-sm" name="received_or_refused_by[' . $deliveries->shId . ']" placeholder="Enter Name">';
+                        return $received_or_refused_by;
+                    } else {
+                        return $deliveries->received_or_refused_by;
+                    }
+
+                })
+                ->addColumn('charges', function ($shipment) {
+                    if ($shipment->booking_type_id == 4) {
+                        if ($shipment->charges_mode_id == 1) {
+                            return number_format($shipment->return_charges);
+                        } else {
+                            return number_format($shipment->amount);
+                        }
+                    } else {
+                        return '';
+                    }
+                })
+                ->addColumn('open_box', function ($deliveries) {
+                    $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
+                    return $open_box_checkbox;
+                })
+                ->addColumn('action', function ($deliveries) {
+                    $delivered_array = array(25, 31, 38);
+                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
+                        return '';
+                    } else {
+                        return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                                            </div></span>";
+                    }
+
+                })
+                ->make(true);
+        }
     }
 }
