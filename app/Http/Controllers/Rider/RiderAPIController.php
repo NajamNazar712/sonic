@@ -11738,7 +11738,7 @@ class RiderAPIController extends Controller
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
                     $notify = false;
-                    $user = Admin::find($rider->line_manager_id->admin->id);
+                    $user = Admin::find($rider->line_manager->admin->id);
                     if($user)
                     {
                         $user_id = $user->id;
