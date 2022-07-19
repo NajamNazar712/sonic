@@ -32,7 +32,7 @@ class AdminAPIToken
                     {
                         $employee_id = $employee->id;
                     }
-                    $request->request->add(['admin_id' => $admin->id,'employee_id' => $employee_id,'admin_role_id'=>$admin->role_id]);
+                    $request->request->add(['admin_id' => $admin->id,'employee_id' => $employee_id,'admin_role_id'=>$admin->role_id, 'trax_id'=>$admin->trax_id]);
 
                     return $next($request);
                 }
