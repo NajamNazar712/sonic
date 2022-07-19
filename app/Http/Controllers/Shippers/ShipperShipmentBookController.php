@@ -4838,6 +4838,14 @@ class ShipperShipmentBookController extends Controller
             $blacklist_errors = array();
             $blacklist_found_categories = array();
 
+            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+            $bdmk_error = array();
+            $bdmk_result = array();
+
             if (Session::has('prefix')) {
                 $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -5061,6 +5069,13 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
 
+                        if(!$request->excel_bdmk) {
+                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
+                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+                            }
+                        }
+
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
                             $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
                         }
@@ -5154,47 +5169,50 @@ class ShipperShipmentBookController extends Controller
 
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                    if (TRUE || empty($blacklist_errors)) {
-                        $tracking_numbers = array();
+                    if (empty($bdmk_error)) {
+                        if (TRUE || empty($blacklist_errors)) {
+                            $tracking_numbers = array();
 
-                        foreach ($rows as $key => $row) {
-                            $row['user_id'] = $user_id;
-                            $row['account_type_id'] = 2;
-                            $row['nsas'] = $check;
-                            $row['nsa'] = $request->excel_nsa;
-                            if (Session::has('prefix')) {
-                                $row['prefix'] = session('prefix');
-                            } else {
-                                $row['prefix'] = NULL;
+                            foreach ($rows as $key => $row) {
+                                $row['user_id'] = $user_id;
+                                $row['account_type_id'] = 2;
+                                $row['nsas'] = $check;
+                                $row['nsa'] = $request->excel_nsa;
+                                if (Session::has('prefix')) {
+                                    $row['prefix'] = session('prefix');
+                                } else {
+                                    $row['prefix'] = NULL;
+                                }
+                                if (session('user_type') == 2) {
+                                    $row['substitute_user_id'] = Auth::id();
+                                } else {
+                                    $row['substitute_user_id'] = null;
+                                }
+                                $row['business_category_id'] = 1;
+                                if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                    $row['payment_mode_id'] = 1;
+                                }
+                                if (!isset($row['payment_mode_id'])) {
+                                    $rows[$key]['payment_mode_id'] = 1;
+                                    $row['payment_mode_id'] = 1;
+                                }
+                                if ($row['payment_mode_id'] == 4) {
+                                    $row['amount'] = 0;
+                                }
+                                if ($user_id != 3324) {
+                                    dispatch(new ProcessShipmentBookingDB($row));
+                                } else {
+                                    dispatch(new ProcessShipmentBookingDBPriority($row));
+                                }
                             }
-                            if (session('user_type') == 2) {
-                                $row['substitute_user_id'] = Auth::id();
-                            } else {
-                                $row['substitute_user_id'] = null;
-                            }
-                            $row['business_category_id'] = 1;
-                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] = 1;
-                            }
-                            if (!isset($row['payment_mode_id'])) {
-                                $rows[$key]['payment_mode_id'] = 1;
-                                $row['payment_mode_id'] = 1;
-                            }
-                            if ($row['payment_mode_id'] == 4) {
-                                $row['amount'] = 0;
-                            }
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            } else {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            }
+
+                            return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        } else {
+                            return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
                         }
-
-                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
-                    } else {
-                        return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
+                    }else{
+                        return view('client.shipment.book.corporate.bdmk')->with(['data' => $rows, 'bdmk_error' => $bdmk_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                     }
-
                 } else {
                     return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                 }
