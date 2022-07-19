@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
 use Closure;
 
 class AdminAPIToken
