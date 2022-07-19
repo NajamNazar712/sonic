@@ -8580,7 +8580,7 @@ class AdminAPIController extends Controller
 
     public function return_note_create(Request $request)
     {
-        return response() ->json(['status'=>0, 'request' => $request]);
+        return response()->json(['status'=>0, 'trackings' => $request->tracking, 'open_box' => $request->open_box]);
         $tracking_numbers = explode(',', $request->shipment_ids);
         $open_box_ids = explode(',',$request->open_box_ids);
         $trackings = Shipments::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
@@ -8617,30 +8617,21 @@ class AdminAPIController extends Controller
                             $old_return_note_id = $old_return_note_id->first();
 
                             if(ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status',0)->exists()){
-
-                                /*$return_note_shupment = ReturnNoteShipment::where('return_note_id', $old_return_note_id->return_note_id)->where('shipment_id', $shipment->id)->where('status', 0);
-
-                                if($return_note_shupment->exists()){
-                                    $return_note_shupment->delete();
-                                    unset($valid_shipments);
-                                    continue;
-                                }*/
                                 $journey = ShipmentsJourney::where('shipment_id',$shipment_id)->latest()->first();
 
-                                ShipmentsJourneyController::add($journey->shipment_id,57,NULL,$journey->status_reason_id,$journey->remarks,NULL,Auth::id(),$journey->reference_1_id,NULL,1,NULL);
-
+                                ShipmentsJourneyController::add($journey->shipment_id,57,NULL,$journey->status_reason_id,$journey->remarks,NULL,$admin,$journey->reference_1_id,NULL,1,NULL);
                             }
                         }
                         if(in_array($shipment_id, $open_box_ids)){
                             $shipment->open_box = 1;
-                            ShipmentOpenBoxJourneyController::add($shipment_id, 6,Auth::id());
+                            ShipmentOpenBoxJourneyController::add($shipment_id, 6,$admin);
                         }
                         if(in_array($shipment->booking_type_id, [1,4,5])){
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
                             $shipment->shipper_status_id = 23;
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
-                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, $admin, $note->id, $rider);
                         }else{
                             if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
@@ -8654,7 +8645,7 @@ class AdminAPIController extends Controller
                                 $shipment->shipper_status_id = $shipper_status_id;
                                 $shipment->consignee_status_id = $consignee_status_id;
                                 $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                                ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin, $note->id, $rider);
 
 
                             } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
@@ -8663,7 +8654,7 @@ class AdminAPIController extends Controller
                                 $shipment->shipper_status_id = 34;
                                 $shipment->consignee_status_id = 34;
                                 $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                                ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, $admin, $note->id, $rider);
 
 
                             }else{
@@ -8671,7 +8662,7 @@ class AdminAPIController extends Controller
                                 $shipment->shipper_status_id = 23;
                                 $shipment->consignee_status_id = 23;
                                 $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                                ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, $admin, $note->id, $rider);
                             }
                         }
                         $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
@@ -8692,12 +8683,12 @@ class AdminAPIController extends Controller
                 }
                 EmployeeAttendanceController::riders_attendance_mark($rider);
 
-                return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
+                return response()->json(['status' => 0, 'message' => "Return note has been created with Return Note Number:" . $note->id]);
             }
 
-        }else{
-
-            return ['error'=>"No shipments scanned"];
+        }
+        else{
+            return response()->json(['status' => 1, 'message'=>"No shipments scanned"]);
         }
     }
 
