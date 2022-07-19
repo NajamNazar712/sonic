@@ -609,6 +609,11 @@ class AdminHumanResourseController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
                         }
                     }
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+
+                            $dropdown .= '<button type="button" class="dropdown-item employee_log" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Employee Log</div></button>';
+
+                    }
 
                         $dropdown .= '
                 </div>
@@ -669,6 +674,13 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
+            $employee_log = new EmployeeLog();
+            $employee_log->employee_id = $request->employee_id;
+            $employee_log->employee_type_id = $employee->employee_type_id;
+            $employee_log->update_pin = 1;
+            $employee_log->updated_by = auth()->id();
+            $employee_log->save();
+
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
         return back()->with(['error' => 'Employee Not Found']);
@@ -704,6 +716,14 @@ class AdminHumanResourseController extends Controller
 
                         $employee->rider_type_id = 2;
                         $employee->update();
+
+                        $employee_log = new EmployeeLog();
+                        $employee_log->employee_id = $employee_id;
+                        $employee_log->employee_type_id = 2;
+                        $employee_log->rider_type_id = 2;
+                        $employee_log->updated_by = auth()->id();
+                        $employee_log->save();
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
 
@@ -747,6 +767,14 @@ class AdminHumanResourseController extends Controller
                         $employee->trax_id = $trax_id;
                         $employee->rider_type_id = 1;
                         $employee->update();
+
+                        $employee_log = new EmployeeLog();
+                        $employee_log->employee_id = $employee_id;
+                        $employee_log->employee_type_id = 2;
+                        $employee_log->rider_type_id = 1; // rider permanent
+                        $employee_log->updated_by = auth()->id();
+                        $employee_log->save();
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
 
@@ -784,8 +812,10 @@ class AdminHumanResourseController extends Controller
         $employee->update();
 
         $employee_log = new EmployeeLog();
-        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->employee_id = $employee_id;
+        $employee_log->employee_type_id = 2;
         $employee_log->status_id = 2;
+        $employee_log->blacklist = 1;
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
 
@@ -818,7 +848,9 @@ class AdminHumanResourseController extends Controller
         $employee->save();
 
         $employee_log = new EmployeeLog();
-        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->employee_id = $employee_id;
+        $employee_log->employee_type_id = 2;
+        $employee_log->first_inactive = 1;
         $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -851,6 +883,14 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $employee_log = new EmployeeLog();
+        $employee_log->employee_id = $employee_id;
+        $employee_log->employee_type_id = 2;
+        $employee_log->status_id = 2;
+        $employee_log->updated_by = auth()->id();
+        $employee_log->save();
+
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
 
@@ -879,7 +919,8 @@ class AdminHumanResourseController extends Controller
         $employee->save();
 
         $employee_log = new EmployeeLog();
-        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->employee_id = $employee_id;
+        $employee_log->employee_type_id = 1;
         $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -914,7 +955,8 @@ class AdminHumanResourseController extends Controller
         $employee->save();
 
         $employee_log = new EmployeeLog();
-        $employee_log->trax_id = $employee->trax_id;
+        $employee_log->employee_id = $employee_id;
+        $employee_log->employee_type_id = 1;
         $employee_log->status_id = 2;
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -4164,9 +4206,9 @@ class AdminHumanResourseController extends Controller
         ]);
 
         $employee_log = new EmployeeLog();
-        $employee_log->trax_id = $rider->trax_id;
-        $employee_log->employee_type_id = 1;
-        $employee_log->staff_category_id = 1;
+        $employee_log->employee_id = $employee->id;
+        $employee_log->employee_type_id = 1; //staff
+        $employee_log->staff_category_id = 1; // staff not intern
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
 
@@ -4200,9 +4242,9 @@ class AdminHumanResourseController extends Controller
                     $admin->save();
 
                     $employee_log = new EmployeeLog();
-                    $employee_log->trax_id = $employee->trax_id;
-//                    $employee_log->employee_type_id = 1;
-                    $employee_log->staff_category_id = 3;
+                    $employee_log->employee_id = $employee->id;
+                    $employee_log->employee_type_id = 1;
+                    $employee_log->staff_category_id = 1;
                     $employee_log->updated_by = auth()->id();
                     $employee_log->save();
 
@@ -4225,6 +4267,32 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'logs' => $designation_logs]);
         }else{
             return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
+        }
+    }
+
+    public function employee_log(Request $request)
+    {
+        $employee_details = array();
+
+        $employee_log = EmployeeLog::leftjoin('employee_types as et','employee_logs.employee_type_id','=','et.id')
+            ->leftjoin('employee_statuses as es','employee_logs.status_id','=','es.id')
+            ->leftjoin('rider_types as rt','rt.id','=','employee_logs.rider_type_id')
+            ->leftjoin('staff_categories as sc','employee_logs.staff_category_id','=','sc.id')
+            ->leftjoin('admins as a','employee_logs.updated_by','=','a.id')
+            ->select('et.name as employee_type','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist','employee_logs.update_pin','employee_logs.updated_by','employee_logs.created_at','a.name')
+            ->where('employee_id', $request->employee_id)
+            ->orderBy('employee_logs.created_at', 'DESC');
+//            ->get();
+
+//dd($employee_log);
+
+        if($employee_log->exists()){
+            $employee_log = $employee_log->get();
+            return response()->json(['status' => 1, 'logs' => $employee_log]);
+        }
+        else
+            {
+            return response()->json(['status' => 0, 'error' => "Employee Log not found"]);
         }
     }
 

@@ -567,6 +567,37 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="employee_log" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="employee_log" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="employee_log">Employee Log<span></span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body employee_log" id="employee_log">
+                    <table class="table table-bordered datatable" id="employee_log_header">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Employee Type</th>
+                            <th class="border-primary border-darken-1">Employee Status</th>
+                            <th class="border-primary border-darken-1">Pin Update</th>
+                            <th class="border-primary border-darken-1">Blacklist</th>
+                            <th class="border-primary border-darken-1">Updated By</th>
+                            <th class="border-primary border-darken-1">Updated At</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="LastWorkingDayModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="LastWorkingDayModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -1819,6 +1850,61 @@
 
             $('body').on('hidden.bs.modal', '#designationChangeLogModal', function () {
                 log_datatable.clear().draw();
+            });
+
+            var log_datatable1 = $('#employee_log_header').DataTable({
+                dom: 'ltipr',
+                scrollX: false,
+                autoWidth : false,
+                paging:false,
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'employee_type', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'employee_status', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'update_pin', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'blacklist', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'updated_by', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'created_at', class: 'align-middle', orderable: false, searchable: false},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = log_datatable1.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('body').on('click', '.employee_log', function (e) {
+                var id = $(this).data('target-id');
+                $.ajax({
+                    url:'{!! route('admin.human_resource.employee_directory.employee_log') !!}',
+                    type:'POST',
+                    data: {
+                        'employee_id': id,
+                        '_token':'{!! csrf_token() !!}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        var logs = data.logs;
+                        $.each(logs, function (index, value) {
+                            log_datatable1.row.add([0, value.employee_type,value.employee_status, value.update_pin,value.blacklist, value.updated_by, value.created_at]);
+                            log_datatable1.draw(true);
+                        });
+                        $('#employee_log').modal('show');
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
+            $('body').on('hidden.bs.modal', '#employee_log', function () {
+                log_datatable1.clear().draw();
             });
 
             function edit_Rider_function(elm,rejoin=false)
