@@ -70,13 +70,8 @@ class AdminShipmentHandoverController extends Controller
             foreach ($check as $nsa) {
                 foreach ($str_arr as $arr_value) {
                     if (strtolower($nsa) == strtolower($arr_value)) {
-                        $con_nsa = $arr_value;
-                        
-                        // if ($msg_string != null) {
-                        //     $msg_string = $msg_string . ', ' . $arr_value;
-                        // } else {
+                       
                             $msg_string = $arr_value;
-                        // }
                     }
                 }
             }
@@ -99,13 +94,10 @@ class AdminShipmentHandoverController extends Controller
                 }
             }else{
               $delivery_area = 0;
-              if($request->delivery_location_mapping != null){
+              if($request->delivery_location_mapping != 0){
                   return ['status' => 1, 'error' => 'Delivery Location is different'];
               }
             }
-            // dump($delivery_area);
-            // dd($request->delivery_location_mapping);
-
 
             $details['delivery_area'] = $delivery_area;
             
