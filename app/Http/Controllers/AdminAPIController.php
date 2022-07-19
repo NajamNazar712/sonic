@@ -7863,6 +7863,7 @@ class AdminAPIController extends Controller
                         if ($leave->exists()) {
                             return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
                         }
+                        dd($employee->line_manager->admin->id);
                         $leave_request = new EmployeeLeave();
                         $leave_request->employee_id = $employee->id;;
                         $leave_request->employee_type_id = 1;
