@@ -3824,6 +3824,13 @@ class AdminHumanResourseController extends Controller
                     return $employee->department;
                 }
             })
+            ->editColumn('cnic', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_cnic;
+                } else {
+                    return $employee->admin_cnic;
+                }
+            })
             ->editColumn('days', function ($employee) {
                 if ($employee->to) {
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
