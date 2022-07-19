@@ -402,7 +402,7 @@ class LostShipmentsController extends Controller
                         if($cargo_manifest_bag_shipments->exists()){
                             $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                             $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                            if($bag){
+                            if($bag->status_id != 7){
                                 ManifestBagLostShipment::create(['bag_id' => $bag->id,'shipment_id' => $shipment_details->id]);
                                 $bag->lost_shipments++;
                                 $bag->save();
