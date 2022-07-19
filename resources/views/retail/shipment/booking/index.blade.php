@@ -135,7 +135,7 @@
                                     </div>
                                     <div class="form-group col">
                                         {{-- <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea> --}}
-                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*"  rows="5"></textarea>
+                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*" onchange="bdmk()" rows="5"></textarea>
                                     </div>
                                     <div class="col">
                                         <div class="row d-none" id="cod_check">
@@ -347,6 +347,40 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        function bdmk(){
+            var city_id = $('#domestic_destination').val();
+            var consignee_address = $('#consignee_address').val();
+
+
+            $.ajax({
+                url: '{{route('retail.shipment.book.address_verify')}}',
+                method: 'get',
+                data: {
+                    'city_id': city_id,
+                    'consignee_address': consignee_address
+                }
+            }).done(function (data) {
+
+                if (data) {
+                    var er = "";
+                    if (data.invalid_cities) {
+                        $.each(data.invalid_cities, function (key, value) {
+                            er +=  "Select " + key + " in destination for " + value+"<br>";
+                        });
+                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
+                        $('#consignee_address_error').show();
+
+                    }else{
+                        $('#consignee_address_error').html('');
+                        $('#consignee_address_error').hide();
+                    }
+                }
+
+            });
+
+        }
+
         $(document).ready(function () {
             function print(ids){
                 $.ajax({
@@ -767,43 +801,43 @@
                 successClass: 'success',
                 rules: {
                     consignee_address: {
-                        remote: {
-                            url: '{{route('retail.shipment.book.address_verify')}}',
-                            data: {
-                                city_id: function () {
-                                    return $("#domestic_destination").val();
-                                },
-                            },
-                            dataFilter: function(data) {
-                                // var json = JSON.parse(data);
-                                // if(json.status === "true") {
-                                //     return true;
-                                // }
-                                // return "\"" + json.error + "\"";
+                        // remote: {
+                        //     url: '{{route('retail.shipment.book.address_verify')}}',
+                        //     data: {
+                        //         city_id: function () {
+                        //             return $("#domestic_destination").val();
+                        //         },
+                        //     },
+                        //     dataFilter: function(data) {
+                        //         // var json = JSON.parse(data);
+                        //         // if(json.status === "true") {
+                        //         //     return true;
+                        //         // }
+                        //         // return "\"" + json.error + "\"";
 
-                                return true;
+                        //         return true;
 
 
-                            },
-                            complete: function (data) {
-                                if (data.responseText) {
-                                    var json = JSON.parse(data.responseText);
-                                    var er = "";
-                                    if (json.invalid_cities) {
-                                        $.each(json.invalid_cities, function (key, value) {
-                                            er +=  "Select " + key + " in destination for " + value+"<br>";
-                                        });
-                                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
-                                        $('#consignee_address_error').show();
+                        //     },
+                        //     complete: function (data) {
+                        //         if (data.responseText) {
+                        //             var json = JSON.parse(data.responseText);
+                        //             var er = "";
+                        //             if (json.invalid_cities) {
+                        //                 $.each(json.invalid_cities, function (key, value) {
+                        //                     er +=  "Select " + key + " in destination for " + value+"<br>";
+                        //                 });
+                        //                 $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
+                        //                 $('#consignee_address_error').show();
 
-                                    }else{
-                                        $('#consignee_address_error').html('');
-                                        $('#consignee_address_error').hide();
-                                    }
-                                }
-                            }
+                        //             }else{
+                        //                 $('#consignee_address_error').html('');
+                        //                 $('#consignee_address_error').hide();
+                        //             }
+                        //         }
+                        //     }
 
-                        },
+                        // },
                         maxlength: 255,
                     },
                 },

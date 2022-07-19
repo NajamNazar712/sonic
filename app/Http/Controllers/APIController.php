@@ -1189,7 +1189,22 @@ class APIController extends Controller
                         }
                     }
                 }
-            }            
+            }           
+            
+            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+            $bdmk_error = "";
+            $bdmk_result = array();
+
+            $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk);
+            if (isset($bdmk_result['invalid_cities'])) {
+                $bdmk_error = $bdmk_result['invalid_cities'];
+            }
+           
+
             if ($user_type['logo_status'] == 1) {
                 $shipment = Shipment::find($shipment_id);
                 $shipment->shipment_invoice_status = 1;
@@ -5924,4 +5939,54 @@ class APIController extends Controller
 //        }
     }
     //BOTSIFY WhatsApp API
+
+
+    function check_bdmk($city_id,$consignee_address,$check_bdmk){
+
+        if(isset($city_id)){
+
+            $str_arr = null;
+            $str_arr = preg_split('/[\s]+/', $consignee_address);
+            $found_keyword = array();
+            $result = array();
+            foreach ($check_bdmk as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            $invalid_cities  = array();
+            $invalid_cities_string = "";
+            if($found_keyword) {
+                $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
+                    ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
+                    ->whereIn('booking_destination_mapping_keywords.keyword', $found_keyword);
+                if ($data_found->exists()) {
+                    $data_found =$data_found->get();
+
+                    foreach ($data_found as $value){
+                        if($value->city_id != $city_id){
+                            $dd = isset($invalid_cities[$value->city_name]) ? $invalid_cities[$value->city_name] : '';
+                            $invalid_cities[$value->city_name] = trim($dd)." ".$value->keyword;
+                        }
+                    }
+                    if($invalid_cities){
+                        foreach ($invalid_cities as $key=>$value){
+                            if(empty($invalid_cities_string)){
+                                $invalid_cities_string=  $key.':' ." ".$value;
+                            }else{
+                                $invalid_cities_string= $invalid_cities_string . ", ".  $key.':' ." ".$value;
+                            }
+
+                        }
+                        return $result = array('status'=>'false','invalid_cities'=>trim($invalid_cities_string),'error'=>'Invalid Address');
+                    }
+                }
+            }
+            return $result;
+        }
+    }
 }
