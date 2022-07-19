@@ -263,12 +263,13 @@
                         <th class="border-primary border-darken-1">Company</th>
                         <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged At</th>
+                        <th class="border-primary border-darken-1">Sale Person Tagged Aging</th>
                         <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Lead Reason</th>
-                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -464,6 +465,102 @@
         </div>
     </div>
 
+
+    {{--    Add Lead--}}
+    <div class="modal fade" id="add_lead_modal" role="dialog" aria-labelledby="add_lead_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="edit_lead_modal_title">Add Lead</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <form id="add_lead_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.leads.add') }}">
+                        @method('POST')
+                        @csrf
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Contact Person Name*" data-rule-required="true"  data-msg-required="Contact Person Name is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="phone_number" id="add_phone_number" placeholder="Phone Number*" data-rule-required="true"  data-msg-required="Phone Number is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" name="email_address" id="add_email" placeholder="Email*" data-rule-required="true"  data-msg-required="Email is required">
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="service_id" id="add_service" class="form-control select2" data-rule-required="true"  data-msg-required="Service is required">
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}"> {{ $service->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="city_id" id="add_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}"> {{ $city->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="territory_id" id="add_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="territory_area_id" id="add_area" class="form-control select2">
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="company" id="add_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <div class="form-group ml-1">
+                                <button type="submit" class="btn btn-primary width-200" value="Add">Add</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {{--    End Add Lead--}}
     {{--    todo bulk status model--}}
     <div class="modal fade" id="edit_lead_modal" role="dialog" aria-labelledby="edit_lead_modal"
          aria-hidden="true">
@@ -579,7 +676,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Status</h4>
+                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Statuss</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -619,6 +716,16 @@
                                 <option value="6"> HR Query</option>
                                 <option value="7"> Sales Person Already Assigned</option>
                                 <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_blocked1" class="form-group d-none">
+                            <select name="lead_status_blocked1" id="lead_status_blocked1"
+                                    class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -907,12 +1014,13 @@
                             head.push('Company');
                             head.push('Lead Reference');
                             head.push('Requested Date/Time');
+                            head.push('Aging');
                             head.push('Sale Person Tagged');
                             head.push('Sale Person Tagged At');
+                            head.push('Sale Person Tagged Aging');
                             head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Reason');
-                            head.push('Aging');
                             head.push('Updated By');
                             head.push('Updated At');
 
@@ -934,12 +1042,13 @@
                                 row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
+                                row.push(values.aging);
                                 row.push(values.sale_person);
                                 row.push(values.sale_person_updated_at);
+                                row.push(values.sale_person_tagged_aging);
                                 row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.reason_id);
-                                row.push(values.aging);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
 
@@ -958,10 +1067,19 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-
+                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
+                    {
+                        text: '<i class="la la-plus"></i> Add Lead',
+                        className: 'btn btn-primary add_lead',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#add_lead_modal').modal('show');
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
-                        text: 'Update Status',
+                        text: 'Bulk Update Status',
                         className: 'btn btn-primary update_status',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -1095,16 +1213,17 @@
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
+                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'sale_person', name: 'sp.name', class: 'align-middle sale_person'},
                     {
                         data: 'sale_person_updated_at',
                         name: 'leads.sale_person_updated_at',
                         class: 'align-middle sale_person_updated_at'
                     },
+                    {data: 'sale_person_tagged_aging', name: 'sale_person_tagged_aging', class: 'align-middle sale_person_tagged_aging', orderable: false, searchable: false},
                     {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
-                    {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
@@ -1129,7 +1248,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging')) {
                             $(td).appendTo($(search) || $(header).is('.serial_number'));
                         } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
@@ -1849,8 +1968,25 @@
                 width: '100%'
             });
 
+            $("#add_territory").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Territory*",
+                width: '100%'
+            });
+            $("#add_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                width: '100%'
+            });
+
+            $("#add_service").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Service*",
+                width: '100%'
+            });
+
             $('#edit_phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $("#edit_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+
+            $('#add_phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
+            $("#add_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
 
 
 
@@ -2057,6 +2193,117 @@
                     });
                 }
             });
+
+            $('#add_city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Select City*',
+            }).bind('change', function () {
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('cod.territory') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 0) {
+                            $('#add_territory').empty();
+                            $.each(data.territory, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('#add_territory').append(newOption);
+                            });
+                            $('#add_territory').val(territory).trigger('change');
+
+                        } else {
+                            $('#add_territory').empty();
+                            var error = 'No Territory found for the selected city';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                }
+            });
+            $('#add_territory').on('change',function () {
+                var territory_id = $(this).val();
+                if(territory_id){
+                    $.ajax({
+                        url: '{!! route('cod.area') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': territory_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+
+                            if (data.status == 0) {
+
+                                $('#add_area').empty();
+                                $.each(data.area, function (key, value) {
+                                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                    $('#add_area').append(newOption);
+                                });
+                                $('#add_area').val(area).trigger('change');
+                            }
+                            else{
+                                $('#add_area').empty();
+                                var error = 'No Area found for the selected Territory';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+
+            });
+
+            $('#add_lead_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    swal({
+                        text: 'Are you sure, you want to add this lead?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
         });
 
     </script>
