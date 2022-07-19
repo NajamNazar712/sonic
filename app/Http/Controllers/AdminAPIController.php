@@ -8534,14 +8534,13 @@ class AdminAPIController extends Controller
                                             $details['tracking_number'] = $shipment->tracking_number;
                                             $details['pieces_count'] = $shipment->pieces;
                                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                            return ['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details];
+                                            return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
                                         }
                                     }
                                     return response()->json(['status' => 0,'shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]);
 
                                 } else {
                                     return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
-
                                 }
                         }else{
                             return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);

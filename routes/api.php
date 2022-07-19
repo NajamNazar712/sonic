@@ -412,6 +412,7 @@ Route::name('api.')->group(function () {
             Route::prefix('return')->name('return.')->group(function () {
                 Route::get('index', 'AdminAPIController@return_create_index')->name('index');
                 Route::post('get_riders', 'AdminAPIController@get_riders_by_hub')->name('get_riders');
+                Route::post('get_shipment_details', 'AdminAPIController@get_shipment_details')->name('get_shipment_details');
             });
 
         });
