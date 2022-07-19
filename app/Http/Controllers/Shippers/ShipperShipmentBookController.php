@@ -3074,10 +3074,12 @@ class ShipperShipmentBookController extends Controller
                                 $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
                             }
                         };
-                        $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id,$row['consignee_address'],$check_bdmk);
+                        if(!$request->excel_bdmk) {
+                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
 //                        dd($bdmk_result[$row_id]);
-                        if(isset($bdmk_result[$row_id]['invalid_cities'])){
-                            $bdmk_error[$row_id]['msg'] =  $bdmk_result[$row_id]['invalid_cities'];
+                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+                            }
                         }
 
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
@@ -3170,7 +3172,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
-//            dd($service_type_check_id);
+//            dd($nsa_error);
             if (empty($errors)) {
                 if (empty($nsa_error)) {
                     if (empty($bdmk_error)) {
