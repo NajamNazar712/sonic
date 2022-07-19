@@ -72,7 +72,6 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
-use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\BookingDestinationMapping;
 
 use App\Jobs\ProcessShipmentBookingDB;
