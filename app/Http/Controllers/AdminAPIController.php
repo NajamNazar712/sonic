@@ -42,7 +42,6 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
-use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\ShipmentsEstimatedWeight;
@@ -123,7 +122,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Password;
-use Yajra\Datatables\Datatables;
 
 class AdminAPIController extends Controller
 {
@@ -8639,160 +8637,59 @@ class AdminAPIController extends Controller
             if ($role_id != 1) {
                 $deliveries = $deliveries->whereIn('return_notes.hub_id', $admin_hubs);
             }
-
-            if($deliveries->exists()){
+            if ($deliveries->exists()) {
                 $deliveries = $deliveries->get();
-                foreach ($deliveries as $shipment){
+                $delivered_array = array(25, 31, 38);
+                $return_array = array(23, 25);
+                $data = array();
+                foreach ($deliveries as $shipment) {
                     $shipment["crm_row"] = ($shipment->complaint != null) ? 1 : 0;
                     $shipment["shipper"] = ($shipment->booking_type_id == 4) ? $shipment->shipper . ' (' . $shipment->poc . ')' : $shipment->shipper;
-                    $shipment["return_address"] = ($shipment->return_address_location != NULL) ? $deliveries->return_address_location :  $deliveries->address;
-                    $shipment["return_city"] = ($deliveries->return_city_name != NULL) ? $deliveries->return_city_name : $deliveries->destination;
-                }
-            }
-            return Datatables::of($deliveries)
-                ->setRowAttr([
-                    'class' => function ($deliveries) {
-                        if ($deliveries->complaint != null) {
-                            return 'complaint_row';
-                        } else {
-                            return '';
-                        }
-                    }
-                ])
-                ->addColumn('return_note_flag', function ($deliveries) {
-                    $flag = TRUE;
-                    if (ReturnNoteShipment::where('return_note_id', '>', $deliveries->return_note)->where('shipment_id', $deliveries->shId)->exists()) {
-                        $flag = FALSE;
-                    }
-                    return $flag;
-                })
-                ->addColumn('shipment_id_padded', function ($deliveries) {
-                    return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
-                })
-                ->editColumn('shipper', function ($shipment) {
-                    if ($shipment->booking_type_id == 4) {
-                        return $shipment->shipper . ' (' . $shipment->poc . ')';
-                    } else {
-                        return $shipment->shipper;
-                    }
-                })
-                ->editColumn('amount', function ($shipment) {
-                    return number_format($shipment->amount);
-                })
-                ->filterColumn('u.name', function ($query, $keyword) {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '!=', 4)
-                            ->where('u.name', 'like', '%' . $keyword . '%');
-                    })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('shipments.booking_type_id', '=', 4)
-                                ->where('usi.poc', 'like', '%' . $keyword . '%');
-                        });
-                })
-                ->addColumn('return_address', function ($deliveries) {
-                    if ($deliveries->return_address_location != NULL) {
-                        return $deliveries->return_address_location;
-                    } else {
-                        return $deliveries->address;
-                    }
+                    $shipment["return_address"] = ($shipment->return_address_location != NULL) ? $shipment->return_address_location : $shipment->address;
+                    $shipment["return_city"] = ($shipment->return_city_name != NULL) ? $shipment->return_city_name : $shipment->destination;
+                    $shipment["remarks"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? $shipment->remarks : NULL;
+                    $shipment["reason"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? "-" : NULL;
+                    $shipment["received_or_refused_by"] = (in_array($deliveries->shipper_status_id, $delivered_array)) ? $deliveries->received_or_refused_by : NULL;
+                    $shipment["clear_button"] = (in_array($deliveries->shipper_status_id, $delivered_array)) ? 0 : 1;
 
-                })
-                ->addColumn('return_city', function ($deliveries) {
-                    if ($deliveries->return_city_name != NULL) {
-                        return $deliveries->return_city_name;
+                    if (in_array($shipment->shipper_status_id, $delivered_array)) {
+                        $statuses = [['id' => $shipment->shipper_status_id, 'name' => $shipment->current_status_name]];
                     } else {
-                        return $deliveries->destination;
-                    }
-                })
-                ->addColumn('status', function ($deliveries) {
-                    $delivered_array = array(25, 31, 38);
-                    $return_array = array(23, 25);
-                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
-                        return $deliveries->current_status_name;
-                    } else {
-                        if (in_array($deliveries->booking_type_id, [1, 4, 5])) {
+                        if (in_array($shipment->booking_type_id, [1, 4, 5])) {
                             $where = array(24, 47, 48, 60);
-                        } else if ($deliveries->booking_type_id == 2) {
+                        } else if ($shipment->booking_type_id == 2) {
                             $where = array(47, 48, 60);
-                            if (in_array($deliveries->shipper_status_id, $return_array)) {
+                            if (in_array($shipment->shipper_status_id, $return_array)) {
                                 $where[] = 25;
                             } else {
                                 $where[] = 29;
                             }
 
-                        } else if ($deliveries->booking_type_id == 3) {
+                        } else if ($shipment->booking_type_id == 3) {
                             $where = array(35, 47, 48, 60);
                         }
-                        $statuses = ShipmentStatus::whereIn('id', $where)->get();
-                        $drops = '';
-                        foreach ($statuses as $status) {
-                            $drops .= '<option value="' . $status->id . '">' . $status->name . '</option>';
-                        }
-                        $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop[' . $deliveries->shId . ']" ><option></option>' . $drops . '</select>';
-                        return $select;
+                        $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->get();
                     }
 
-                })
-                ->addColumn('reason', function ($deliveries) {
-                    $delivered_array = array(25, 31, 38);
-                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
-                        return '';
-                    } else {
-                        $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop[' . $deliveries->shId . ']" ><option></option></select>';
-                        return $reason;
-                    }
-
-                })
-                ->addColumn('remarks', function ($deliveries) {
-                    $delivered_array = array(25, 31, 38);
-                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
-                        return $deliveries->remarks;
-                    } else {
-                        $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks">';
-                        return $reason;
-                    }
-
-                })
-                ->addColumn('received_or_refused_by', function ($deliveries) {
-                    $delivered_array = array(25, 31, 38);
-                    if (!in_array($deliveries->shipper_status_id, $delivered_array)) {
-                        $received_or_refused_by = '<input class="form-control form-control-sm" name="received_or_refused_by[' . $deliveries->shId . ']" placeholder="Enter Name">';
-                        return $received_or_refused_by;
-                    } else {
-                        return $deliveries->received_or_refused_by;
-                    }
-
-                })
-                ->addColumn('charges', function ($shipment) {
                     if ($shipment->booking_type_id == 4) {
                         if ($shipment->charges_mode_id == 1) {
-                            return number_format($shipment->return_charges);
+                            $charges = number_format($shipment->return_charges);
                         } else {
-                            return number_format($shipment->amount);
+                            $charges = number_format($shipment->amount);
                         }
                     } else {
-                        return '';
-                    }
-                })
-                ->addColumn('open_box', function ($deliveries) {
-                    $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
-                    return $open_box_checkbox;
-                })
-                ->addColumn('action', function ($deliveries) {
-                    $delivered_array = array(25, 31, 38);
-                    if (in_array($deliveries->shipper_status_id, $delivered_array)) {
-                        return '';
-                    } else {
-                        return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
-                                            </div></span>";
+                        $charges = '';
                     }
 
-                })
-                ->make(true);
+                    $shipment["status"] = $statuses;
+                    $shipment["charges"] = $charges;
+                    $data[] = $shipment;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Shipments Not Found!"]);
+            }
         }
     }
+
 }
