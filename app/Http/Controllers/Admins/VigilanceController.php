@@ -155,32 +155,24 @@ class VigilanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 564);
         }
 
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = VigilanceVerification::
+            join('delivery_notes', 'delivery_notes.id', '=', 'vigilance_verifications.delivery_note_id')
+            ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-            ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
-            ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('rider_delivery_note_statuses as rdns', 'rdns.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftjoin('rider_deliveries as rd', 'rd.delivery_note_id', '=', 'delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path'])
-            ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
-            ->groupBy('delivery_notes.id');
+            ->leftjoin('admins as cb', 'cb.id', '=', 'vigilance_verifications.created_by')
+            ->select(['delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'cb.name as created_by', 'vigilance_verifications.id as vigilance_id', 'vigilance_verifications.created_at as created_at', 'vigilance_verifications.verify_shipments_count', 'vigilance_verifications.excess_shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.special_rider_name']);
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($deliveries)
-            ->editColumn('delivery_note', function ($deliveries) {
-                $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            ->addColumn('delivery_note', function ($deliveries) {
+                $link = "<a href='javascript:void(0);' class='printdeliverynote' noteId='". $deliveries->delivery_note_id ."'><u>" . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
                 if ($deliveries->pending_status == 1) {
                     $link .= "<br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
                 }
                 return $link;
-            })
-            ->editColumn('amount', function ($shipment) {
-                return number_format($shipment->amount);
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -188,16 +180,23 @@ class VigilanceController extends Controller
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
             })
-            ->editColumn('shipments_count_link', function ($deliveries) {
+            ->addColumn('shipments_count_link', function ($deliveries) {
                 if ($deliveries->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                    return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $deliveries->delivery_note_id .'">' . $deliveries->shipments_count . '</button>';
                 } else {
                     return 0;
                 }
             })
-            ->editColumn('delivered_shipments_link', function ($deliveries) {
-                if ($deliveries->delivered_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_shipments . '</button>';
+            ->addColumn('excess_shipments_link', function ($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $deliveries->delivery_note_id .'">' . $deliveries->excess_shipments_count . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('verify_shipments_link', function ($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $deliveries->delivery_note_id .'">' . $deliveries->verify_shipments_count . '</button>';
                 } else {
                     return 0;
                 }
@@ -253,32 +252,60 @@ class VigilanceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })
-            ->editColumn('updated_via_app', function($shipment) {
-                if ($shipment->updated_via_app == 1) {
-                    return 'Partial';
-                } elseif ($shipment->updated_via_app == 2) {
-                    return 'Yes';
-                } elseif ($shipment->updated_via_app == 0) {
-                    return 'No';
-                }
-                else{
-                    return '-';
-                }
-            })
-            ->filterColumn('rdns.status', function ($query, $keyword) {
-                if ($keyword != 0) {
-                    $query->where('rdns.status', $keyword);
-                } else {
-                    $query->where('rdns.status' , null)->orWhere('rdns.status',0);
-                }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
+            $datatable->whereBetween('vigilance_verifications.created_at', [$from, $to]);
         }
         return $datatable->make(true);
 
+    }
+    public function verification_excess_cns(Request $request){
+        $verify_id = $request->verify_id;
+        if($verify_id){
+            $vigilance = VigilanceVerification::find($verify_id);
+            if($vigilance){
+                $excess_count = $vigilance->excess_shipments_count;
+                if($excess_count != 0){
+                    $shipments = array();
+                    $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id', $vigilance->id)->where('verification_type', 2)->get();
+                    if($vigilance_shipments->count() != 0){
+                        foreach ($vigilance_shipments as $vigilance_shipment) {
+                            $shipment = Shipment::find($vigilance_shipment->shipment_id);
+                            $shipments[] = $shipment->tracking_number;
+                        }
+                        return ['status' => 0, 'success' => 'Excess Shipments', 'shipments' => $shipments];
+                    }
+                    else{
+                        return ['status' => 0, 'success' => 'No Excess Shipments', 'shipments' => FALSE];
+                    }
+                }
+            }
+        }
+    }
+
+    public function verification_verify_cns(Request $request){
+        $verify_id = $request->verify_id;
+        if($verify_id){
+            $vigilance = VigilanceVerification::find($verify_id);
+            if($vigilance){
+                $verify_count = $vigilance->verify_shipments_count;
+                if($verify_count != 0){
+                    $shipments = array();
+                    $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id', $vigilance->id)->where('verification_type', 1)->get();
+                    if($vigilance_shipments->count() != 0){
+                        foreach ($vigilance_shipments as $vigilance_shipment) {
+                            $shipment = Shipment::find($vigilance_shipment->shipment_id);
+                            $shipments[] = $shipment->tracking_number;
+                        }
+                        return ['status' => 0, 'success' => 'Verify Shipments', 'shipments' => $shipments];
+                    }
+                    else{
+                        return ['status' => 0, 'success' => 'No Verify Shipments', 'shipments' => FALSE];
+                    }
+                }
+            }
+        }
     }
 }

@@ -46,9 +46,9 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
-                        <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">Excess CNs</th>
-                        <th class="border-primary border-darken-1">Vigilance Verify CNs</th>
+                        <th class="border-primary border-darken-1">No. Of Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Excess Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Verify Shipment(s)</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated Date</th>
                     </tr>
@@ -58,6 +58,68 @@
             </div>
         </div>
     </div>
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
+
+    <!--Excess Shipments popup -->
+    <div class="modal fade" id="excess_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="excess_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excess_shipments_modal_title">Excess Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
+
+    <!--Excess Shipments popup -->
+    <div class="modal fade" id="verify_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="verify_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="verify_shipments_modal_title">Verify Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 
 @endsection
 
@@ -162,7 +224,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.history.list') }}',
+                        url: '{{ route('admin.vigilance.verification.history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -174,16 +236,10 @@
                             head.push('Rider');
                             head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('No. Of Shipments Delivered');
-                            head.push('Assigned By');
-                            head.push('Assigned Date');
-                            head.push('Updated By');
-                            head.push('Updated Date');
-                            head.push('Cash Collected By');
-                            head.push('Cash Collection Date');
-                            head.push('DNCC Amount');
-                            head.push('Updated via App');
-                            head.push('Last Updated At');
+                            head.push('Excess Shipments');
+                            head.push('Verify Shipments');
+                            head.push('Created By');
+                            head.push('Created Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -196,17 +252,10 @@
                                 row.push(values.rider);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
-                                row.push(values.delivered_shipments);
-                                row.push(values.assignee);
+                                row.push(values.excess_shipments_count);
+                                row.push(values.verify_shipments_count);
+                                row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.updated_by);
-                                row.push(values.updated_at);
-                                row.push(values.cash_collected);
-                                row.push(values.cash_collected_at);
-                                row.push(values.amount);
-                                row.push(values.updated_via_app);
-                                row.push(values.last_updated_at);
-
                                 body.push(row);
                             });
                         },
@@ -226,6 +275,7 @@
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
                 scrollX: true, scrollY: '500px',
+                autoWidth:false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -235,15 +285,14 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.delivery.history.list') }}',
+                    url: '{{ route('admin.vigilance.verification.history.list') }}',
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        d.operation_rider_id=$('#operation_rider_id').val();
                     }
                 },
-                rowId: 'delivery_note_id',
-                order: [[9, 'desc']],
+                rowId: 'vigilance_id',
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
@@ -252,16 +301,10 @@
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'excess_shipments_link' ,name: 'vigilance_verifications.excess_shipments_count', class: 'align-middle excess_shipments_link text-center'},
+                    { data:'verify_shipments_link' ,name: 'vigilance_verifications.verify_shipments_count', class: 'align-middle verify_shipments_link text-center'},
+                    { data:'created_by' ,name: 'cb.name', class: 'align-middle created_by'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
-                    { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
-                    { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
-                    { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
-                    { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -284,11 +327,6 @@
                         '<option value="5">Canceled</option>' +
                         '</select>';
 
-                    var updated_by_app_select = '<select name="updated_by_app_select" id="updated_by_app_select" class="select2 form-control">' +
-                        '<option value="0">No</option>' +
-                        '<option value="1">Partial</option>' +
-                        '<option value="2">Yes</option>' +
-                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -297,12 +335,6 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.updated_via_app')){
-                            $(updated_by_app_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -324,12 +356,6 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    $("#updated_by_app_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Updated Via App",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
             });
@@ -367,8 +393,8 @@
                     });
             }
             $('body').on('click','.printdeliverynote',function () {
-                var deliverynote = $(this).parents('tr').attr('id');
-                // console.log(deliverynote);
+                var deliverynote = parseInt($(this).attr('noteId'));
+
                 print(deliverynote);
             });
             function printDNCC(id) {
@@ -401,7 +427,7 @@
             }
 
             $('body').on('click','.printDNCC',function () {
-                var note_id = $(this).parents('tr').attr('id');
+                var note_id = parseInt($(this).attr('noteId'));
                 printDNCC(note_id);
             });
 
@@ -410,7 +436,7 @@
             var route = '{!! route('admin.tracking.index') !!}';
 
             $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
+                var id = parseInt($(this).attr('noteId'));
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
 
@@ -436,17 +462,17 @@
                     });
 
             });
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+            $('#datatable tbody').on('click','tr td.excess_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                $('#delivered_shipments_modal .modal-body').html('');
-                $('#delivered_shipments_modal').modal('show');
+                $('#excess_shipments_modal .modal-body').html('');
+                $('#excess_shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.history.shipments.delivered') !!}',
+                    url: '{!! route('admin.vigilance.verification.excess_cns') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'verify_id': id
                     }
                 })
                     .done(function(data) {
@@ -458,20 +484,38 @@
                                     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                 });
                             }
-                            $('#delivered_shipments_modal .modal-body').html(html);
+                            $('#excess_shipments_modal .modal-body').html(html);
                         }
                     });
 
             });
 
-            $('#datatable tbody').on('click','tr td.signature_via_app button',function () {
-                var link = $(this).attr('data-link');
+            $('#datatable tbody').on('click','tr td.verify_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#verify_shipments_modal .modal-body').html('');
+                $('#verify_shipments_modal').modal('show');
 
-                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+                $.ajax({
+                    url: '{!! route('admin.vigilance.verification.verify_cns') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'verify_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
 
-                $('#signature_modal .modal-body').html(image);
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#verify_shipments_modal .modal-body').html(html);
+                        }
+                    });
 
-                $('#signature_modal').modal('show');
             });
 
         });
