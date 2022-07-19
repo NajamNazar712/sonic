@@ -50,9 +50,9 @@
                                 </div>
                             </form>
 
-{{--                            <div id="information" class="information text-center">--}}
-{{--                                <button type="button" name="info_button" class="btn btn-dark info_button" id="info_button">Scanned: <span class="scanned">{{$scanned_bags}}</span>/<span class="total">{{$total_bags}}</span></button>--}}
-{{--                            </div>--}}
+                            <div id="information" class="information text-center">
+                                <button type="button" name="info_button" class="btn btn-dark info_button" id="info_button">Scanned: <span class="scanned">{{$scanned_bags}}</span>/<span class="total">{{$total_bags}}</span></button>
+                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
