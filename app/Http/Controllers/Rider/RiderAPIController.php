@@ -9688,6 +9688,7 @@ class RiderAPIController extends Controller
             'attendance_date' => ['required']
         ];
         $rider_id = $request->rider_id;
+        $employee_id = $request->employee_id;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -9695,7 +9696,7 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $employee_id)
                 ->whereDate('attendance_date', $request->attendance_date)
                 ->where('employee_type', 2)
                 ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')

@@ -3623,6 +3623,7 @@ class AdminAPIController extends Controller
             'attendance_date' => ['required']
         ];
         $admin_id = $request->admin_id;
+        $employee_id = $request->employee_id;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -3630,7 +3631,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $employee_id)
                 ->whereDate('attendance_date', $request->attendance_date)
                 ->where('employee_type', 1)
                 ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
