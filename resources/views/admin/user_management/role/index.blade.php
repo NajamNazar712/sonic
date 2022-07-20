@@ -93,15 +93,20 @@
 		
             var selected_rows = [];
 			var table = $('#datatable').DataTable({
-				@if (session('role_id') == 1 || in_array(86, session('permissions')))
+				
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
-					buttons: [{
+					buttons: [
+						@if (session('role_id') == 1 || in_array(86, session('permissions')))	
+					{
 						text: 'Add',
 						className: 'btn btn-primary add',
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.user_management.roles.add.index') }}';
 						}
-					},{
+					},
+					@endif
+					@if (session('role_id') == 1 || in_array(775, session('permissions')))
+					{
 						text: 'Bulk Add',
 						className: 'btn btn-primary bulk_add',
 						enabled: false,
@@ -111,7 +116,11 @@
 							window.location = url;
 							selected_rows = [];
 						}
-					},{
+					},
+					@endif
+					@if (session('role_id') == 1 || in_array(776, session('permissions')))
+					
+					{
 						text: 'Bulk Remove',
 						className: 'btn btn-primary remove',
 						enabled: false,
@@ -122,7 +131,10 @@
 							selected_rows = [];
 
 						}
-					},{
+					},
+					@endif
+					@if (session('role_id') == 1 || count(array_intersect([775, 776], session('permissions'))) !== 0)
+					{
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -178,11 +190,11 @@
                             }
                         });
                     }
-                },'reset'],
-				@else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
-	            @endif
+                },
+				@endif
+				
+				'reset'],
+				
 				select: {
 					info: false,
 					style: 'multi',
