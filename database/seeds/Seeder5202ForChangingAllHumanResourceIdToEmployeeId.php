@@ -55,11 +55,11 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
             {
                 $trax_id = $user->trax_id;
                 $employee = Employee::where('trax_id',$trax_id)->whereNotNull('trax_id');
+
                 if($employee->exists())
                 {
                     $employee = $employee->first();
-                    $emp->employee_id = $employee->id;
-                    $emp->update();
+                    EmployeeAttendance::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->where('employee_id', $emp->employee_id)->update(['employee_id' => $employee->id]);
                 }
             }
         }
@@ -81,8 +81,7 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 if($employee->exists())
                 {
                     $employee = $employee->first();
-                    $emp->employee_id = $employee->id;
-                    $emp->update();
+                    EmployeeAttendanceActionLog::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->where('employee_id', $emp->employee_id)->update(['employee_id' => $employee->id]);
                 }
             }
         }
