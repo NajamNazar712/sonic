@@ -13,9 +13,10 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
     /**
      * Run the database seeds.
      *
+     * @param $rider
      * @return void
      */
-    public function run()
+    public function run($rider)
     {
         /*foreach (EmployeeLeave::all() as $emp)
         {
@@ -42,7 +43,6 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
 
         $employee_attendance = EmployeeAttendance::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->groupBy('employee_id')->get();
 
-        dd($employee_attendance);
         foreach ($employee_attendance as $emp)
         {
             if($emp->employee_type == 1)
@@ -50,7 +50,7 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 $user = Admin::find($emp->employee_id);
             }
             else if($emp->employee_type == 2){
-                $user = Rider::find($emp->employee_id);
+                $user = $rider::find($emp->employee_id);
             }
 
             if($user)
