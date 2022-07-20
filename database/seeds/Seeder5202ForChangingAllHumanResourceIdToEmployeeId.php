@@ -59,11 +59,12 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 if($employee->exists())
                 {
                     $employee = $employee->first();
+                    dd($employee);
                     EmployeeAttendance::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->where('employee_id', $emp->employee_id)->update(['employee_id' => $employee->id]);
                 }
             }
         }
-        $action_logs = EmployeeAttendanceActionLog::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->groupBy('employee_id')->get();
+        /*$action_logs = EmployeeAttendanceActionLog::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->groupBy('employee_id')->get();
         foreach ($action_logs as $emp)
         {
             if($emp->employee_type == 1)
@@ -84,6 +85,6 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                     EmployeeAttendanceActionLog::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->where('employee_id', $emp->employee_id)->update(['employee_id' => $employee->id]);
                 }
             }
-        }
+        }*/
     }
 }
