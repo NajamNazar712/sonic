@@ -4423,8 +4423,8 @@ class AdminAPIController extends Controller
             $employee_id = $request->employee_id;
             $employee = Employee::find($employee_id);
             if($employee) {
-                if($employee->line_manager == null || $employee->line_manager == 0){
-                    return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                if($employee->line_manager_id == null || $employee->line_manager_id == 0){
+                    return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
                 }
                 $data = array();
                 $data['trax_id'] = $employee->trax_id;
