@@ -9819,11 +9819,7 @@ else if ($id == 178) {
                 else if ($id == 18) {
                     $leave = EmployeeAttendanceAdjustment::find($reference1_id);
                     if($leave){
-                        if($leave->employee_type_id == 1){
-                            $user = Admin::find($leave->employee_id);
-                        }else{
-                            $user = Rider::find($leave->employee_id);
-                        }
+                        $user = Employee::find($leave->employee_id);
                         if (strpos($body, '[employee_name]') !== FALSE) {
                             $body = str_replace('[employee_name]', $user->name, $body);
                         }

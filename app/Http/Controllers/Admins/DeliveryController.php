@@ -7686,13 +7686,13 @@ class DeliveryController extends Controller
                             $attendance_time = Carbon::now()->format('H:i:s');
                             // $city_id_location = City::find($delivery_note->hub_id);
 
-                            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                            $rider_attendance = EmployeeAttendance::where('employee_id', $rider->employee_id)
                                 ->whereDate('attendance_date', $attendance_date)
                                 ->where('employee_type', 2);
 
                             if (!$rider_attendance->exists()) {
                                 $rider_attendance = new EmployeeAttendance();
-                                $rider_attendance->employee_id = $rider_id;
+                                $rider_attendance->employee_id = $rider->employee_id;
                                 $rider_attendance->employee_type = 2;
                                 $rider_attendance->attendance_date = $attendance_date;
                                 $rider_attendance->clock_in_datetime = $attendance_datetime;
@@ -7701,7 +7701,7 @@ class DeliveryController extends Controller
                                 $rider_attendance->save();
 
                                 $rider_attendance_action = new EmployeeAttendanceActionLog();
-                                $rider_attendance_action->employee_id = $rider_id;
+                                $rider_attendance_action->employee_id = $rider->employee_id;
                                 $rider_attendance_action->employee_type = 2;
                                 $rider_attendance_action->action_id = 1;
                                 $rider_attendance_action->attendance_date = $attendance_date;
@@ -7717,7 +7717,7 @@ class DeliveryController extends Controller
 
 
                                     $rider_attendance_action = new EmployeeAttendanceActionLog();
-                                    $rider_attendance_action->employee_id = $rider_id;
+                                    $rider_attendance_action->employee_id = $rider->employee_id;
                                     $rider_attendance_action->employee_type = 2;
                                     $rider_attendance_action->action_id = 1;
                                     $rider_attendance_action->attendance_date = $attendance_date;
