@@ -1178,6 +1178,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
 			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
 			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
+
+            Route::get('rider_category_bypass_request','Admins\DeliveryController@rider_category_bypass_request')->name('rider_category_bypass_request');
+            Route::get('rider_cat_request_list','Admins\DeliveryController@rider_cat_request_list')->name('rider_cat_request_list');
+            Route::post('check_rider_cat','Admins\DeliveryController@check_rider_cat')->name('check_rider_cat');
+//            Route::post('check_dn_against_rider','Admins\DeliveryController@check_dn_against_rider')->name('check_dn_against_rider');
+            Route::post('rider_category_submit','Admins\DeliveryController@rider_category_submit')->name('rider_category_submit');
+            Route::post('rider_category_approve','Admins\DeliveryController@rider_category_approve')->name('rider_category_approve');
+            Route::get('rider_category_bypass_weight','Admins\DeliveryController@rider_category_bypass_weight')->name('rider_category_bypass_weight');
+            Route::post('weight_store','Admins\DeliveryController@weight_store')->name('weight_store');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -3620,7 +3629,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('updatemodal', 'Admins\AdminInternationalShipmentsController@shipment_status_update_modal')->name('updatemodal');
 
         });
-            Route::prefix('rates')->name('rates.')->group(function () {
+        Route::prefix('rates')->name('rates.')->group(function () {
             Route::prefix('economy')->name('economy.')->group(function (){
                 Route::get('{id}/{view?}','Admins\AdminInternationalRatesController@addEconomyRatesView')->name('create');
                 Route::post('{id}','Admins\AdminInternationalRatesController@addEconomyRatesStore')->name('store');
@@ -3639,6 +3648,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             });
         });
+        Route::prefix('extra_service_charges')->name('extra_service_charges.')->group(function () {
+            Route::get('','Admins\AdminInternationalRatesController@extra_service_charges_index')->name('index');
+            Route::post('/detail','Admins\AdminInternationalRatesController@international_shipment_details')->name('shipment.detail');
+            Route::post('submit','Admins\AdminInternationalRatesController@extra_service_charges_submit')->name('submit');
+        });
+
     });
 
 	Route::prefix('telenor')->name('telenor.')->group(function(){
@@ -3829,7 +3844,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('leave')->name('leave.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@leave_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@leave_list')->name('list');
+            Route::post('leave_request', 'Admins\AdminHumanResourseController@leave_request')->name('leave_request');
             Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
+            Route::post('hod_approve', 'Admins\AdminHumanResourseController@hod_approve')->name('hod_approve');
             Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
@@ -3918,6 +3935,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('table', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_table')->name('table');
             Route::post('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_list')->name('list');
         });
+    });
+    Route::prefix('leaves')->name('leaves.')->group(function () {
+        Route::get('', 'Admins\Attendance\AdminAttendanceController@leaves')->name('leaves');
+        Route::get('list', 'Admins\Attendance\AdminAttendanceController@employee_list')->name('list');
+        Route::post('leaves_request', 'Admins\Attendance\AdminAttendanceController@leaves_request')->name('leaves_request');
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {

@@ -2685,6 +2685,11 @@ class AdminCargoManifestController extends Controller
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
                     if ($bag) {
+
+                        if($bag->type != $request->bag_type){
+                            return ['status' => 1, 'error' => 'Shipment bag type is not same as selected bag type'];
+                        }
+
                         $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
                         if (!$cargo_manifest_bag) {
                             return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
@@ -2834,7 +2839,7 @@ class AdminCargoManifestController extends Controller
 
                             $self_collection = SelfCollectionShipment::where('shipment_id',$shipment_id)->first();
 
-                            if($self_collection->exists())
+                            if($self_collection)
                             {
                                 $consignee_city = $shipment->consignee_city_id;
                                 $user_city = $shipment->user->city_id;
@@ -2846,7 +2851,9 @@ class AdminCargoManifestController extends Controller
                                 else
                                 {
                                     $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id','address')->first();
-                                    NotificationsController::send(75, $shipment_id, $city_id->address);
+                                    if($city_id){
+                                        NotificationsController::send(75, $shipment_id, $city_id->address);
+                                    }
                                 }
                             }
                         }

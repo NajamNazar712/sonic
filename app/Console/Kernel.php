@@ -116,6 +116,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ShortOfBusinessShippers',
         'App\Console\Commands\BirthdayMessage',
 		'App\Console\Commands\AutoComplaintHighAging',
+		'App\Console\Commands\LeaveCountUpdate',
+        
         ];
 
     /**
@@ -393,6 +395,9 @@ class Kernel extends ConsoleKernel
         $cron = DB::table('global_settings')->where('type','rcp_sms_cron_time')->select('text')->first();
         $cron_time = isset($cron->text) ? $cron->text : "12:00";
         $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
+
+        $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
+
 
     }
     /**
