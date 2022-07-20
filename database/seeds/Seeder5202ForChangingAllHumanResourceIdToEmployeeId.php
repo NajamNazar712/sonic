@@ -17,7 +17,7 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
      */
     public function run()
     {
-        foreach (EmployeeLeave::all() as $emp)
+        /*foreach (EmployeeLeave::all() as $emp)
         {
             if($emp->employee_type_id == 1)
             {
@@ -38,9 +38,10 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                     $emp->update();
                 }
             }
-        }
+        }*/
 
-        foreach (EmployeeAttendance::all() as $emp)
+        $employee_attendance = EmployeeAttendance::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->groupBy('employee_id')->get();
+        foreach ($employee_attendance as $emp)
         {
             if($emp->employee_type == 1)
             {
@@ -62,8 +63,8 @@ class Seeder5202ForChangingAllHumanResourceIdToEmployeeId extends Seeder
                 }
             }
         }
-
-        foreach (EmployeeAttendanceActionLog::all() as $emp)
+        $action_logs = EmployeeAttendanceActionLog::whereBetween('attendance_date', ['2022-05-25', '2022-07-20'])->groupBy('employee_id')->get();
+        foreach ($action_logs as $emp)
         {
             if($emp->employee_type == 1)
             {
