@@ -8579,7 +8579,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
-                        return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece]);
+                        return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
                     }
