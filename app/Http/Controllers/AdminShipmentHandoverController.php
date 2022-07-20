@@ -84,7 +84,7 @@ class AdminShipmentHandoverController extends Controller
                             ->where('delivery_location_mapping_keywords.keyword',$msg_string)
                             ->where('dlm.city_id',$shipment->consignee_city_id);
                 if($found->exists()){
-                    $found = $found->first();
+                    $found = $found->get()->first();
                     $delivery_area = $found->area_name;
                 }
                 if($request->delivery_location_mapping != null){
