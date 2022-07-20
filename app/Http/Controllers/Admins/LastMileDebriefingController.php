@@ -94,7 +94,7 @@ class LastMileDebriefingController extends Controller
             ->pluck('agent_id')
             ->toArray();
         if(count($admin_ids) > 0){
-            $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
+            $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
             ->whereIn('admins.id', $admin_ids)
             ->where('admins.role_id', 18)
             ->where('admins.status',1)

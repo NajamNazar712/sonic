@@ -82,29 +82,30 @@ class AdminAttendanceController extends Controller
         if(in_array(session('role_id'), [1, 63, 70])){
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
-            $users = Admin::where('status', 1)->select('id','name')->get();
+            $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
             $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
             $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
             $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
-            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+            $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
         }
         else{
             $cities = City::select('id','name')->whereIn('id', session('hubs'))->get();
             $departments = AdminDepartment::select('id','name')->where('id', session('department_id'))->get();
-            $users = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+            $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')
+                ->join('admin_roles as ar','ar.id','=','admins.role_id')
                 ->join('admin_departments as ad','ad.id','=','ar.department_id')
                 ->where('ad.id', session('department_id'))
-                ->select('admins.id','admins.name')->get();
+                ->select('e.id','e.name')->get();
             $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
             $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
             $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
-            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+            $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
         }
 
         return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
@@ -142,21 +143,14 @@ class AdminAttendanceController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),116);
         }
-        $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
-            ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
+        $attendances = EmployeeAttendance::leftjoin('employees as a', 'a.id', 'employee_attendances.employee_id')
+            ->leftjoin('cities as c', 'c.id', 'a.city_id')
             ->leftjoin('employee_designations as ed','ed.id','a.designation_id')
-            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
             ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
-            ->leftjoin('employees as employees', 'a.trax_id', 'employees.trax_id')
-            ->leftjoin('employee_statuses as es', 'es.id', 'employees.status_id')
-            ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
-            ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
-            ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
-            ->leftjoin('employees as rider_employees', 'r.trax_id', 'rider_employees.trax_id')
-            ->leftjoin('employee_statuses as rider_es', 'rider_es.id', 'rider_employees.status_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift', 'employees.status_id as status_id', 'rider_employees.status_id as rider_status_id','es.name as status_name','rider_es.name as rider_status_name','c.hub_id');
+            ->leftjoin('employee_statuses as es', 'es.id', 'a.status_id')
+            ->leftjoin('rider_types as rt', 'rt.id', 'a.rider_type_id')
+            ->select('a.name as name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation','rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'a.cnic as cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as shift', 'a.status_id as status_id','es.name as status_name','c.hub_id');
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
             if(session('department_id') != 6){
@@ -183,27 +177,6 @@ class AdminAttendanceController extends Controller
         
         
         $datatable = Datatables::of($attendances)
-            ->editColumn('trax_id', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_trax_id;
-                } else {
-                    return $employee->trax_id;
-                }
-            })
-            ->editColumn('shift', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_shift;
-                } else {
-                    return $employee->admin_shift;
-                }
-            })
-            ->editColumn('status_name', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_status_name;
-                } else {
-                    return $employee->status_name;
-                }
-            })
             ->editColumn('clock_in', function ($employee) {
                 if ($employee->clock_in_datetime) {
                     return Carbon::parse($employee->clock_in_datetime)->format("Y-m-d H:i:s");
@@ -218,20 +191,7 @@ class AdminAttendanceController extends Controller
                     return $employee->clock_out;
                 }
             })
-            ->editColumn('name', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_name;
-                } else {
-                    return $employee->admin_name;
-                }
-            })
-            ->editColumn('city_name', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_city_name;
-                } else {
-                    return $employee->city_name;
-                }
-            })
+
             ->editColumn('employee_type', function ($employee) {
                 if ($employee->employee_type == 2) {
                     return "Rider";
@@ -251,13 +211,6 @@ class AdminAttendanceController extends Controller
                     return "Operations";
                 } else {
                     return $employee->department;
-                }
-            })
-            ->editColumn('cnic', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_cnic;
-                } else {
-                    return $employee->admin_cnic;
                 }
             })
             ->addColumn('attendance_day', function ($employee) {
@@ -303,12 +256,12 @@ class AdminAttendanceController extends Controller
             $datatable->where('a.id', $search_admin)->where('employee_type',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider)->where('employee_type',2);
+            $datatable->where('a.id', $search_rider)->where('employee_type',2);
         }
         if ($search_city = $request->get('search_city')) {
             $datatable->where(function($q) use ($search_city){
                 $q->where([['c.id', $search_city],['employee_type',1]])
-                    ->orWhere([['rc.id', $search_city],['employee_type',2]]);
+                    ->orWhere([['c.id', $search_city],['employee_type',2]]);
             });
         }
         if ($search_department = $request->get('search_department')) {
@@ -325,15 +278,13 @@ class AdminAttendanceController extends Controller
 
         if ($search_trax_id = $request->get('search_trax_id')) {
             $datatable->where(function($q) use ($search_trax_id){
-                $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
-                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+                $q->where('a.trax_id', $search_trax_id);
             });
         }
 
         if ($search_cnic = $request->get('search_cnic')) {
             $datatable->where(function($q) use ($search_cnic){
-                $q->where([['a.cnic', $search_cnic],['employee_type',1]])
-                    ->orWhere([['r.cnic', $search_cnic],['employee_type',2]]);
+                $q->where('a.cnic', $search_cnic);
             });
         }
 
@@ -530,9 +481,9 @@ class AdminAttendanceController extends Controller
     public function mark_attendance_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 432);
-        $admin_id = Auth::id();
+        $admin_id = Auth::user()->employee_id;
         $date = Carbon::now()->format("Y-m-d");
-        $admin = Admin::find($admin_id);
+        $admin = Employee::find($admin_id);
         if ($admin) {
             $admin_shift = EmployeeShift::where('id', $admin->shift_id);
             if ($admin_shift->exists()) {
@@ -591,8 +542,8 @@ class AdminAttendanceController extends Controller
     public function mark_attendance_submit(Request $request)
     {
         $attendance_mark = Carbon::now()->format('Y-m-d H:i:s');
-        $admin_id = Auth::id();
-        $admin = Admin::find($admin_id);
+        $admin_id = Auth::user()->employee_id;
+        $admin = Employee::find($admin_id);
         if ($admin) {
             if (session('latitude') && session('longitude')) {
                 $attendance_date = Carbon::createFromFormat('Y-m-d', $request->attendance_date);
@@ -719,7 +670,7 @@ class AdminAttendanceController extends Controller
         if ($request->has('attendance_date')) {
             $date = Carbon::parse($request->attendance_date)->format("Y-m-d");
         }
-        $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::id())
+        $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::user()->employee_id)
             ->whereDate('attendance_date', $date)
             ->where('employee_type', 1)
             ->select('latitude', 'longitude', 'action_id', 'attendance_date', 'action_date');
@@ -878,11 +829,7 @@ class AdminAttendanceController extends Controller
                                         }
                                     }
                                     $type = $employee->employee_type_id;
-                                    if ($type == 1) {
-                                        $employee_id = $employee->admin->id;
-                                    } else {
-                                        $employee_id = $employee->rider->id;
-                                    };
+                                    $employee_id = $employee->id;
                                     $clock_out_flag = true;
                                     if ($night) {
                                         $max = max($time);
@@ -1002,11 +949,7 @@ class AdminAttendanceController extends Controller
         }
         $employee = $employee->first();
         $type = $employee->employee_type_id;
-        if ($type == 1) {
-            $employee_id = $employee->admin->id;
-        } else {
-            $employee_id = $employee->rider->id;
-        }
+        $employee_id = $employee->id;
         $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to])->orderBy('attendance_date', 'ASC');
         if(!$employee_attendances->exists()){
             return redirect()->back()->with(['status' => 0, 'error' => 'Attendance not found!']);

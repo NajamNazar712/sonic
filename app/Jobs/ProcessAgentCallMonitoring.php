@@ -77,7 +77,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
               // $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();previous
                
-                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
+                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
                 ->whereIn('admins.id', $admin_ids)
                 ->where('admins.role_id', 18)
                 ->where('admins.status',1)

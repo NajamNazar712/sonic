@@ -16,7 +16,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Rider ID</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Rider Category ByPass</th>
                                     <th class="border-primary border-darken-1">Reason</th>
@@ -57,11 +57,11 @@
                                         <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider category is required">
                                             @foreach($riders as $rider)
                                                 @if($rider->rider_category_id == 1)
-                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{'Light'}}</option>
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}} - {{'Light'}}</option>
                                                 @elseif($rider->rider_category_id == 2)
-                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{'Heavy'}}</option>
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}} - {{'Heavy'}}</option>
                                                 @else
-                                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}}</option>
                                                 @endif
                                             @endforeach
                                         </select>
@@ -224,7 +224,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Rider ID');
+                            head.push('Employee ID');
                             head.push('Rider');
                             head.push('Rider Category ByPass');
                             head.push('Reason');
@@ -238,7 +238,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.rider_id);
+                                row.push(values.trax_id);
                                 row.push(values.rider);
                                 row.push(values.rider_type);
                                 row.push(values.reason);
@@ -312,7 +312,7 @@
                             return '';
                         }
                     },
-                    {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
+                    {data: 'trax_id', name: 'r.trax_id', class: 'align-middle trax_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'rider_type', name: 'rider_type', class: 'align-middle rider_type'},
                     {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, sortable: false},
