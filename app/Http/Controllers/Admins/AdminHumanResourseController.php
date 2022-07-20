@@ -849,8 +849,8 @@ class AdminHumanResourseController extends Controller
 
         $employee_log = new EmployeeLog();
         $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
-        $employee_log->first_inactive = 1;
+//        $employee_log->employee_type_id = 2;
+//        $employee_log->first_inactive = 1;
         $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -886,7 +886,7 @@ class AdminHumanResourseController extends Controller
 
         $employee_log = new EmployeeLog();
         $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
+//        $employee_log->employee_type_id = 2;
         $employee_log->status_id = 2;
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -920,7 +920,7 @@ class AdminHumanResourseController extends Controller
 
         $employee_log = new EmployeeLog();
         $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 1;
+//        $employee_log->employee_type_id = 1;
         $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -956,7 +956,7 @@ class AdminHumanResourseController extends Controller
 
         $employee_log = new EmployeeLog();
         $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 1;
+//        $employee_log->employee_type_id = 1;
         $employee_log->status_id = 2;
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
@@ -4272,23 +4272,65 @@ class AdminHumanResourseController extends Controller
 
     public function employee_log(Request $request)
     {
-        $employee_details = array();
-
-        $employee_log = EmployeeLog::leftjoin('employee_types as et','employee_logs.employee_type_id','=','et.id')
+        $details = array();
+        $employee_logs = EmployeeLog::leftjoin('employee_types as et','employee_logs.employee_type_id','=','et.id')
             ->leftjoin('employee_statuses as es','employee_logs.status_id','=','es.id')
             ->leftjoin('rider_types as rt','rt.id','=','employee_logs.rider_type_id')
             ->leftjoin('staff_categories as sc','employee_logs.staff_category_id','=','sc.id')
             ->leftjoin('admins as a','employee_logs.updated_by','=','a.id')
-            ->select('et.name as employee_type','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist','employee_logs.update_pin','employee_logs.updated_by','employee_logs.created_at','a.name')
-            ->where('employee_id', $request->employee_id)
+            ->select('employee_logs.employee_type_id as employee_type_id','et.name as employee_type','employee_logs.staff_category_id as staff_category_id','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist as blacklist','employee_logs.update_pin as pin_update','employee_logs.created_at as updated_at','a.name as updated_by')
+            ->where('employee_logs.employee_id', $request->employee_id)
             ->orderBy('employee_logs.created_at', 'DESC');
-//            ->get();
 
-//dd($employee_log);
 
-        if($employee_log->exists()){
-            $employee_log = $employee_log->get();
-            return response()->json(['status' => 1, 'logs' => $employee_log]);
+
+        if($employee_logs->exists()) {
+            $employee_logs = $employee_logs->get();
+//            dd($employee_logs->count());
+            foreach ($employee_logs as $key=> $employee_log) {
+                if ($employee_log->employee_type_id == 1) {
+                    if ($employee_log->staff_category_id == 2) {
+                        $details[$key]['employee_type'] = 'Intern';
+                    } else {
+                        $details[$key]['employee_type'] = 'Staff';
+                    }
+
+                } elseif($employee_log->employee_type_id == 2) {
+                    $details[$key]['employee_type'] = $employee_log->employee_type;
+                    if ($employee_log->rider_type != null) {
+                        $details[$key]['employee_type'] .= ' - ' . $employee_log->rider_type;
+                    }
+                }
+                else
+                {
+                    $details[$key]['employee_type'] = '-';
+                }
+
+                if ($employee_log->employee_status) {
+                    $details[$key]['employee_status'] = $employee_log->employee_status;
+                } else {
+                    $details[$key]['employee_status'] = '-';
+                }
+
+                if ($employee_log->pin_update == 1) {
+                    $details[$key]['pin_update'] = 'Updated';
+                } else {
+                    $details[$key]['pin_update'] = '-';
+                }
+
+                if ($employee_log->blacklist == 1) {
+                    $details[$key]['blacklist'] = 'Updated';
+                } else {
+                    $details[$key]['blacklist'] = '-';
+                }
+
+                $details[$key]['updated_at'] = date('Y-m-d H:i:s',strtotime($employee_log->updated_at));
+
+                $details[$key]['updated_by'] = $employee_log->updated_by;
+
+
+            }
+            return response()->json(['status' => 1, 'logs' => $details]);
         }
         else
             {

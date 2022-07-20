@@ -576,7 +576,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body employee_log" id="employee_log">
+                <div class="modal-body employee_log" id="employee_log" style="height: 350px;overflow: scroll">
                     <table class="table table-bordered datatable" id="employee_log_header">
                         <thead>
                         <tr role="row" class="bg-primary white">
@@ -589,6 +589,9 @@
                             <th class="border-primary border-darken-1">Updated At</th>
                         </tr>
                         </thead>
+                        <tbody>
+
+                        </tbody>
                     </table>
                 </div>
                 <div class="modal-footer">
@@ -1852,30 +1855,6 @@
                 log_datatable.clear().draw();
             });
 
-            var log_datatable1 = $('#employee_log_header').DataTable({
-                dom: 'ltipr',
-                scrollX: false,
-                autoWidth : false,
-                paging:false,
-                columns: [
-                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {name: 'employee_type', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {name: 'employee_status', class: 'align-middle', orderable: false, searchable: false},
-                    {name: 'update_pin', class: 'align-middle', orderable: false, searchable: false},
-                    {name: 'blacklist', class: 'align-middle', orderable: false, searchable: false},
-                    {name: 'updated_by', class: 'align-middle', orderable: false, searchable: false},
-                    {name: 'created_at', class: 'align-middle', orderable: false, searchable: false},
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = log_datatable1.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });
             $('body').on('click', '.employee_log', function (e) {
                 var id = $(this).data('target-id');
                 $.ajax({
@@ -1887,11 +1866,21 @@
                     }
                 }).done(function (data) {
                     if(data.status == 1){
-                        var logs = data.logs;
-                        $.each(logs, function (index, value) {
-                            log_datatable1.row.add([0, value.employee_type,value.employee_status, value.update_pin,value.blacklist, value.updated_by, value.created_at]);
-                            log_datatable1.draw(true);
+                        var table_data = "";
+                        $.each(data.logs, function (index, value) {
+                            table_data += `
+                                <tr>
+                                    <td>${index+1}</td>
+                                    <td>${value.employee_type}</td>
+                                    <td>${value.employee_status}</td>
+                                    <td>${value.pin_update}</td>
+                                    <td>${value.blacklist}</td>
+                                    <td>${value.updated_by}</td>
+                                    <td>${value.updated_at}</td>
+                                </tr>
+                            `
                         });
+                        $('#employee_log_header tbody').html(table_data);
                         $('#employee_log').modal('show');
                     }
                     else {
@@ -1903,9 +1892,6 @@
                 });
             });
 
-            $('body').on('hidden.bs.modal', '#employee_log', function () {
-                log_datatable1.clear().draw();
-            });
 
             function edit_Rider_function(elm,rejoin=false)
             {
