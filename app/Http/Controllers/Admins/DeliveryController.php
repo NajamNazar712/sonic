@@ -2533,7 +2533,8 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
         if (session('role_id') != 1) {
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
+            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
+            $riders = Rider::where('status', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
         } else {
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
         }
@@ -2566,9 +2567,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('rider_type', function ($result) {
                 if ($result->rider_type == 1) {
-                    return 'light';
+                    return 'Light';
                 } else {
-                    return 'heavy';
+                    return 'Heavy';
                 }
             })
             ->filterColumn('rider_type', function($query, $keyword) {
@@ -8037,8 +8038,8 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
         if (session('role_id') != 1) {
-
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
+            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
+            $riders = Rider::where('status', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name')->get();
         } else {
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
         }
