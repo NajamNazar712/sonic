@@ -13,6 +13,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNote;
@@ -1199,7 +1200,7 @@ class APIController extends Controller
             $bdmk_error = "";
             $bdmk_result = array();
 
-            $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk);
+            $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk,$consignee_city->name);
             if (isset($bdmk_result['invalid_cities'])) {
                 $bdmk_error = $bdmk_result['invalid_cities'];
             }
@@ -1231,19 +1232,47 @@ class APIController extends Controller
                 FTLController::FTLRequestStatusHistory($ftl_request_id, 5, $user_id);
             }
 
+            $return_array = array(
+                'status' => 0,
+                'message' => 'Shipment has been Booked!',
+                'tracking_number' => $tracking_number
+            );
+
             if ($msg_string != null && $blacklist_message == null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
                 $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+                $return_array['non_service_area'] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
             }
             if ($msg_string == null && $blacklist_message != null) {
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
+                $return_array['blacklisted_consignee'] = $blacklist_message;
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
                 $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'blacklisted_consignee' => $blacklist_message]);
+                $return_array['non_service_area'] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
+                $return_array['blacklisted_consignee'] = $blacklist_message;
             }
+
+            // bdmk work
+
+            if ($bdmk_error != null && $blacklist_message == null) {
+                $bdmk_error = $bdmk_error;
+                $return_array['bdmk_message'] = $bdmk_error;
+            }
+            if ($bdmk_error == null && $blacklist_message != null) {
+                $return_array['blacklisted_consignee'] = $blacklist_message ;
+            }
+            if ($bdmk_error != null && $blacklist_message != null) {
+                $bdmk_error = $bdmk_error;
+                $return_array['bdmk_message'] = $bdmk_error;
+            }
+
+            if(isset($return_array['non_service_area']) || isset($return_array['blacklisted_consignee']) || isset($return_array['bdmk_message']))
+            {
+                return response()->json($return_array);
+            }
+
+            // bdmk work end
 
             NotificationsController::send(2, $shipment_id);
             $now = Carbon::now()->format('H:i:s');
@@ -5941,7 +5970,7 @@ class APIController extends Controller
     //BOTSIFY WhatsApp API
 
 
-    function check_bdmk($city_id,$consignee_address,$check_bdmk){
+    function check_bdmk($city_id,$consignee_address,$check_bdmk,$city_name){
 
         if(isset($city_id)){
 
@@ -5976,7 +6005,8 @@ class APIController extends Controller
                     if($invalid_cities){
                         foreach ($invalid_cities as $key=>$value){
                             if(empty($invalid_cities_string)){
-                                $invalid_cities_string=  $key.':' ." ".$value;
+                                // $invalid_cities_string=  $key.':' ." ".$value;
+                                $invalid_cities_string=  "Dear user, the area ". trim($value) ." is actually present in $key instead of $city_name. For assistance, Call: 021-38772222.";
                             }else{
                                 $invalid_cities_string= $invalid_cities_string . ", ".  $key.':' ." ".$value;
                             }
