@@ -13,7 +13,7 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <div class="alert alert-danger" id="consignee_address_error" style="display: none">
+                            <div class="alert bg-info" id="consignee_address_error" style="display: none">
                             </div>
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
@@ -317,6 +317,7 @@
     <script>
         function bdmk(){
             var city_id = $('#consignee_city').val();
+            var city_name = $('#consignee_city option:selected').text();
             var consignee_address = $('#consignee_address').val();
 
 
@@ -330,12 +331,12 @@
             }).done(function (data) {
 
                 if (data) {
-                    var er = "";
+                    var er = "Dear user, <br>";
                     if (data.invalid_cities) {
                         $.each(data.invalid_cities, function (key, value) {
-                            er +=  "Select " + key + " in destination for " + value+"<br>";
+                            er +=  "The area <strong>" + value + "</strong> is actually present in <strong>" + key + "</strong> instead of <strong>" + city_name +"</strong>. <br>";
                         });
-                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
+                        $('#consignee_address_error').html(er.trim() + " For Assistance Call 021-111-118-729");
                         $('#consignee_address_error').show();
 
                     }else{
@@ -638,43 +639,6 @@
                 successClass: 'success',
                 rules: {
                     consignee_address: {
-                        {{--remote: {--}}
-                        {{--    url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',--}}
-                        {{--    data: {--}}
-                        {{--        city_id: function () {--}}
-                        {{--            return $("#consignee_city").val();--}}
-                        {{--        },--}}
-                        {{--    },--}}
-                        {{--    dataFilter: function(data) {--}}
-                        {{--        // var json = JSON.parse(data);--}}
-                        {{--        // if(json.status === "true") {--}}
-                        {{--        //     return true;--}}
-                        {{--        // }--}}
-                        {{--        // return "\"" + json.error + "\"";--}}
-
-                        {{--        return true;--}}
-
-
-                        {{--    },--}}
-                        {{--    complete: function (data) {--}}
-                        {{--        if (data.responseText) {--}}
-                        {{--            var json = JSON.parse(data.responseText);--}}
-                        {{--            var er = "";--}}
-                        {{--            if (json.invalid_cities) {--}}
-                        {{--                $.each(json.invalid_cities, function (key, value) {--}}
-                        {{--                    er +=  "Select " + key + " in destination for " + value+"<br>";--}}
-                        {{--                });--}}
-                        {{--                $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");--}}
-                        {{--                $('#consignee_address_error').show();--}}
-
-                        {{--            }else{--}}
-                        {{--                $('#consignee_address_error').html('');--}}
-                        {{--                $('#consignee_address_error').hide();--}}
-                        {{--            }--}}
-                        {{--        }--}}
-                        {{--    }--}}
-
-                        {{--},--}}
                         maxlength: 255,
                     },
                 },

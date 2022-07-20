@@ -5975,7 +5975,7 @@ class APIController extends Controller
         if(isset($city_id)){
 
             $str_arr = null;
-            $str_arr = preg_split('/[\s]+/', $consignee_address);
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
             $found_keyword = array();
             $result = array();
             foreach ($check_bdmk as $nsa) {
