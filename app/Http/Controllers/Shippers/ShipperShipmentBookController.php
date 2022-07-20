@@ -2270,7 +2270,8 @@ class ShipperShipmentBookController extends Controller
                 //delivery location watermark start
                             $msg_string = null;
                             $str_arr = null;
-                            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+                            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
                             foreach ($check as $nsa) {
                                 foreach ($str_arr as $arr_value) {
                                     if (strtolower($nsa) == strtolower($arr_value)) {
