@@ -1393,6 +1393,7 @@ class DeliveryController extends Controller
       ';
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
+            $total_weight = 0;
             $total_shipments = 0;
             $total_cod_amount = 0;
             $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('ordering', 'asc', 'shipment_id', 'asc')->get();
@@ -1421,6 +1422,7 @@ class DeliveryController extends Controller
             foreach ($shipments as $parcel) {
                 $total_shipments++;
                 $shipment = Shipment::find($parcel->shipment_id);
+                $total_weight += (float)$shipment->actual_weight;
                 $class = null;
                 $details_change_class = null;
                 if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
@@ -1646,6 +1648,10 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg) (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
                       </table>
@@ -3929,7 +3935,7 @@ class DeliveryController extends Controller
       ';
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
-
+            $total_weight = 0;
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
@@ -3954,6 +3960,7 @@ class DeliveryController extends Controller
 //
             foreach ($filtered_shipments as $shipment) {
                 $total_shipments++;
+                $total_weight += (float)$shipment->actual_weight;
 ////                    $shipment = Shipment::find($parcel->shipment_id);
 //                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
 //                if($check_walk_in['setting_value'] == $shipment->user->id){
@@ -4055,6 +4062,10 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>DNCC Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
                       </table>
