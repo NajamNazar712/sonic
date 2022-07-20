@@ -362,6 +362,11 @@ class AdminPackagingMaterialController extends Controller
                 $requests = $requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
+
+        if (session('department_id') == 8) {
+            $requests = $requests->where('s.shipment_type',2);
+        }
+
         $datatables =  Datatables::of($requests)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');

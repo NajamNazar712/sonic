@@ -179,6 +179,10 @@ class DeliveryController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         if ($hub = $request->get('search_hub')) {
             $shipments = $shipments->where('h.id', '=', $hub);
         }

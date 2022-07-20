@@ -140,6 +140,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
+
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
