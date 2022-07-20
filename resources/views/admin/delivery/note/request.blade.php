@@ -31,7 +31,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Rider ID</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Delivery Note</th>
@@ -69,17 +69,17 @@
                         @method('POST')
                         @csrf
                         <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6">
                             <label><strong>Rider</strong></label>
                                 <fieldset class="form-group">
                                     <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                         @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                            <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-3">
                                 <div class="form-group">
                                     <label><strong>Pending DNCC</strong></label>
                                     <input type="text" name="dncc" id="dncc" class="form-control" {{--placeholder="Pending DNCC"--}} readonly>
@@ -87,7 +87,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-3">
                                 <div class="form-group">
                                     <label><strong>COD Amount</strong></label>
                                     <input type="text" name="amount" id="amount" class="form-control"  {{--placeholder="Amount"--}} readonly>
@@ -256,7 +256,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Rider ID');
+                            head.push('Employee ID');
                             head.push('Rider');
                             head.push('Hub');
                             head.push('Delivery Note');
@@ -273,7 +273,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.rider_id);
+                                row.push(values.trax_id);
                                 row.push(values.rider);
                                 row.push(values.hub);
                                 row.push(values.delivery_note);
@@ -350,7 +350,7 @@
                             return '';
                         }
                     },
-                    {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
+                    {data: 'trax_id', name: 'r.trax_id', class: 'align-middle trax_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'delivery_note', name: 'delivery_note_requests.delivery_note', class: 'align-middle delivery_note'},

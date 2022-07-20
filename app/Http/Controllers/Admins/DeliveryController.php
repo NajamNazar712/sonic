@@ -336,9 +336,13 @@ class DeliveryController extends Controller
     public function check_rider_dncc_status(Request $request)
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::where(['rider_id' => $request->rider_id, 'dncc_status' => 0])->where('status', '!=', 4)
-            ->whereDate('created_at', '>', $datetime)
-            ->whereDate('created_at', '!=', Carbon::today());
+        $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+        ->where('r.id' ,$request->rider_id)
+        ->where('delivery_notes.dncc_status',0)
+        ->where('delivery_notes.status', '!=', 4)
+        ->whereDate('delivery_notes.created_at', '>', $datetime)
+        ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
+        ->where('r.operation_rider_id',1);
 
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -448,7 +452,6 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                         }
                     }
-
                 }
                 elseif($rider_default_type->rider_category_id == 2)
                 {
@@ -726,6 +729,7 @@ class DeliveryController extends Controller
     }
 
 
+
     public function get_piece_details(Request $request)
     {
         $shipment_id = $request->shipment_id;
@@ -969,6 +973,7 @@ class DeliveryController extends Controller
         }
 
     }
+
 
     public function delivery_note_receive_index()
     {
@@ -2527,10 +2532,24 @@ class DeliveryController extends Controller
     public function rider_category_bypass_request()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
-        if (session('role_id') != 1) {
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
+        /*if (session('role_id') != 1) {
+            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
+            $riders = Rider::join('cities as c')->where('rstatus', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
+          
         } else {
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
+        }*/
+        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->where('riders.status', 1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        if ($riders) {
+            $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name','rider_category_id')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $rider_cat = RiderCategory::whereIn('id',[1,2])->get();
@@ -2546,7 +2565,7 @@ class DeliveryController extends Controller
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id']);
+            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
         }
@@ -2561,9 +2580,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('rider_type', function ($result) {
                 if ($result->rider_type == 1) {
-                    return 'light';
+                    return 'Light';
                 } else {
-                    return 'heavy';
+                    return 'Heavy';
                 }
             })
             ->filterColumn('rider_type', function($query, $keyword) {
@@ -8031,11 +8050,23 @@ class DeliveryController extends Controller
     public function request_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
-        if (session('role_id') != 1) {
-
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
+       /* if (session('role_id') != 1) {
+            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
+            $riders = Rider::where('status', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name')->get();
         } else {
             $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
+        }*/
+        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->where('riders.status', 1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        if ($riders) {
+            $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         return view('admin.delivery.note.request')->with(['riders' => $riders, 'hubs' => $hubs]);
@@ -8050,7 +8081,7 @@ class DeliveryController extends Controller
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub']);
+            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub','r.trax_id as trax_id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
         }

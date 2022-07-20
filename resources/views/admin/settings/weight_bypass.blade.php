@@ -90,7 +90,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select yes to update weight bypass shipper!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
