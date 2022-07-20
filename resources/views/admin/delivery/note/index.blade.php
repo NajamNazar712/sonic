@@ -11,42 +11,6 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
- <div id="camera_scan" class="d-none">
-                    <div id="camera_view" class="camera_view"></div>
-                </div>
-
-                
-                <div class="row mb-2 justify-content-center">
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
-                                @foreach($operation_rider_category as $category)
-                                    <option value="{{$category->id}}">{{$category->name}}</option>
-                                @endforeach
-                            </select>
-                            <div class="danger" id="operation_error" style="display:none;">This field is required</div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <select name="rider_name" id="rider_name" class="form-control select2" required>
-                              
-                            </select>
-                            <div class="danger" id="rider_error" style="display:none;">This field is required</div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <select name="route" id="route" class="form-control select2" required>
-                                @foreach($routes as $route)
-                                    <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
-                            </select>
-                            <div class="danger" id="route_error" style="display:none;">This field is required</div>
-                        </fieldset>
-                    </div>
-
-                </div>
                 <div id="camera_scan" class="d-none">
                     <div id="camera_view" class="camera_view"></div>
                 </div>
@@ -66,6 +30,39 @@
                         </div>
                     </div>
                 </form>
+
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                @foreach($operation_rider_category as $category)
+                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                @endforeach
+                            </select>
+                            <div class="danger" id="operation_error" style="display:none;">This field is required</div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="rider_name" id="rider_name" class="form-control select2" required>
+
+                            </select>
+                            <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="route" id="route" class="form-control select2" required>
+                                @foreach($routes as $route)
+                                    <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                @endforeach
+                            </select>
+                            <div class="danger" id="route_error" style="display:none;">This field is required</div>
+                        </fieldset>
+                    </div>
+
+                </div>
+
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -92,15 +89,15 @@
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                     <div class="row justify-content-center">
-                            <div class="col-2 text-center">
-                                <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
-                                <div class="form-group">
-                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
-                                    <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
-                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
-                                </div>
+                        <div class="col-2 text-center">
+                            <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
+                            <div class="form-group">
+                                <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
+                                <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
+                                <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
                             </div>
                         </div>
+                    </div>
                     <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
@@ -131,23 +128,23 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Special Rider</h4>
-                    
+
                 </div>
                 <form id="special_rider_form" class="justify-content-center" novalidate="novalidate">
                     <div class="modal-body text-center">
-                        
-                            <div class="form-group">
-                                <input type="text" name="special_rider_name" id="special_rider_name_input" class="form-control" placeholder="Special Rider Name" data-rule-required="true" data-msg-required="Rider Nume is required">
-                            </div>
-                            <div class="form-group">
-                                <input type="text" name="special_rider_phone" id="special_rider_phone_input" class="form-control phone" placeholder="Special Rider Phone" data-rule-required="true" data-msg-required="Phone Number is required">
-                            </div>
-                       
+
+                        <div class="form-group">
+                            <input type="text" name="special_rider_name" id="special_rider_name_input" class="form-control" placeholder="Special Rider Name" data-rule-required="true" data-msg-required="Rider Nume is required">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="special_rider_phone" id="special_rider_phone_input" class="form-control phone" placeholder="Special Rider Phone" data-rule-required="true" data-msg-required="Phone Number is required">
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary width-100" id="add_special_rider_button">Add</button>
                     </div>
-            </form>
+                </form>
             </div>
         </div>
     </div>
@@ -320,7 +317,7 @@
                     $('#otp_submit').attr('disabled', true);
                 }
             });
-           @if(session('print'))
+                    @if(session('print'))
             var pid = '{{ session('print') }}';
             print(pid);
             function print(id) {
@@ -351,7 +348,7 @@
                         }
                     });
             }
-                    @endif
+            @endif
 
             $('#add_shipment_pieces_form input.scan_piece').inputmask({
                 'alias': 'integer',
@@ -464,7 +461,7 @@
                             table.button('.select_all_rider_informations').enable();
                         }
                     },
-                    ],
+                ],
                 scrollX: true,
                 paging:false,
                 columns: [
@@ -534,7 +531,7 @@
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
-                rider_dncc_check = false;
+                rider_dncc_check  = false;
                 if(rider_id != null){
                     $.ajax({
                         url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
@@ -547,7 +544,6 @@
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
                             $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false);
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
                             rider_dncc_check = true;
                         }
@@ -565,11 +561,11 @@
                 }
 
             });
-            $('#scan_tracking').attr("disabled","disabled");
+
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
-            
+
             var rowsCount = 0;
             // function  countRows() {
             //     rowsCount = table.row().count();
@@ -580,7 +576,6 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                var rider_id = $('#rider_name').val();
                 if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
@@ -592,7 +587,6 @@
                             method:'POST',
                             data: {
                                 'tracking':tracking,
-                                'rider_id':rider_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -654,7 +648,7 @@
 
                                 }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
                                 }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
@@ -745,7 +739,6 @@
 
                         });
                     } else {
-                        var rider_id = $('#rider_name').val();
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
                             blockPagePermanently();
@@ -756,7 +749,6 @@
                                 data: {
                                     'tracking':tracking,
                                     'hub_id':hub_id,
-                                    'rider_id':rider_id,
                                     '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
@@ -817,12 +809,12 @@
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     if(data.is_open_box==1){
-                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                        var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
 
-                                }else{
+                                    }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-                                }
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -900,7 +892,7 @@
                                         });
 
                                     }
-                                    }
+                                }
                                 scan.val('');
                                 scan.attr('disabled', false);
                                 scan.focus();
@@ -1252,11 +1244,11 @@
             }
 
 
-            
+
             $('#create_delivery_note_form').on('submit', function(event) {
 
                 event.preventDefault();
-                
+
                 var count = 0;
                 this_form = this;
                 count = table.rows().count();
@@ -1266,7 +1258,7 @@
                 var route = $('#route').val();
                 var operation_id = $('#operation_rider_id').val();
                 var special = parseInt($('#rider_name').find(':selected').data('special'));
-                
+
 
                 if (rider !== '' && rider !== null) {
 
@@ -1290,7 +1282,7 @@
 
                     $('#operation_error').css('display', 'none');
                     $('#operation_rider_type_for_attendance').val(operation_id);
-                    
+
                 } else {
                     var error = "Category not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1317,7 +1309,7 @@
                                 }
                             }
                         }
-                        
+
                     }
                 }else{
                     var error = "Select at-least one shipment!";
@@ -1342,7 +1334,7 @@
                 }
             });
 
-        $('#special_rider_form').validate({
+            $('#special_rider_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -1471,12 +1463,12 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                     if(data.is_open_box==1){
-                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                        var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
 
-                                }else{
+                                    }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-                                }
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -1555,7 +1547,7 @@
 
                                 }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
                                 }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
@@ -1616,8 +1608,8 @@
                 piece_table.clear().draw();
             });
             $('#OtpModal').on('shown.bs.modal', function () {
-            $('#otp_input').focus();
-            }); 
+                $('#otp_input').focus();
+            });
         });
 
         function camera_scan_detected(tracking_number) {

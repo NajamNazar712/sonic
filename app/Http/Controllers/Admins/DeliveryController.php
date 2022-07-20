@@ -406,50 +406,6 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-//        todo: bypasses rider category
-        if ($request->tracking != '' && $request->rider_id != '' )
-        {
-            $tracking_number = $request->tracking;
-            $rider_id = $request->rider_id;
-
-            $rider_default_type = Rider::where('id',$rider_id)->where('operation_rider_id',1)->first();
-            if($rider_default_type) {
-
-                $shipment = Shipment::where('tracking_number', $tracking_number)->select('actual_weight')->first();
-
-                $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
-
-                if ($shipment->actual_weight > $weight->text) {
-                    $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 2)->select('rider_category_id', 'id')->latest()->first();
-
-                    if ($rider_bypass_type) {
-                        $rider_bypass_id = $rider_bypass_type->id;
-                        if ($rider_bypass_type->rider_category_id != 2) {
-
-                            return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
-                        }
-                    } elseif ($rider_default_type->rider_category_id == 1) {
-                        return ['status' => 1, 'error' => 'Shipment is heavy weighted and the selected rider type is light weighted !'];
-                    }
-                } elseif ($shipment->actual_weight <= $weight->text) {
-                    $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 1)->select('rider_category_id', 'id')->latest()->first();
-
-                    if ($rider_bypass_type) {
-                        $rider_bypass_id = $rider_bypass_type->id;
-                        if ($rider_bypass_type->rider_category_id != 1) {
-                            if ($rider_default_type->rider_category_id == 2) {
-                                return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
-                            }
-                        }
-
-                    } elseif ($rider_default_type->rider_category_id == 2) {
-                        return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
-                    }
-                }
-            }
-        }
-//        todo: bypasses rider category end
-
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -460,7 +416,7 @@ class DeliveryController extends Controller
                 $shipment = $shipment->first();
                 $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                 if(!$dispute_check){
-                    return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute, please resolve dispute first!'];
                 }
 
                 if ($shipment->shipment_detail()->exists()) {
@@ -716,8 +672,7 @@ class DeliveryController extends Controller
             }
         }
     }
-
-
+    
     public function get_piece_details(Request $request)
     {
         $shipment_id = $request->shipment_id;
@@ -946,13 +901,6 @@ class DeliveryController extends Controller
             }
             //rider attendance end
 
-            //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
-            $rider_bypass_type = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('status', 1)->select('rider_category_id', 'id')->latest()->first();
-            if ($rider_bypass_type) {
-                $rider_bypass_id = $rider_bypass_type->id;
-                $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
-            }
-            //todo end
 
             return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
         } else {
@@ -961,6 +909,7 @@ class DeliveryController extends Controller
         }
 
     }
+
 
     public function delivery_note_receive_index()
     {
