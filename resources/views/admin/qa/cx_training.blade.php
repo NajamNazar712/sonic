@@ -18,11 +18,14 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S No.</th>
-                                        <th class="border-primary border-darken-1">Shipper</th>
-                                        <th class="border-primary border-darken-1">City</th>
-                                        <th class="border-primary border-darken-1">Sales Person</th>
-                                        <th class="border-primary border-darken-1">High Alert By</th>
-                                        <th class="border-primary border-darken-1">Description</th>
+                                        <th class="border-primary border-darken-1">Agent Name</th>
+                                        <th class="border-primary border-darken-1">Unit</th>
+                                        <th class="border-primary border-darken-1">Joining Date</th>
+                                        <th class="border-primary border-darken-1">Requested Date</th>
+                                        <th class="border-primary border-darken-1">Requested By</th>
+                                        <th class="border-primary border-darken-1">Aging</th>
+                                        <th class="border-primary border-darken-1">Training By</th>
+                                        <th class="border-primary border-darken-1">Status Updated At</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
@@ -47,9 +50,9 @@
                     <div class="modal-body text-center">
                         @csrf
                         <div class="form-group">
-                            <select class="form-control" name="shipper_id" id="shipper_select" data-rule-required="true" data-msg-required="Shipper is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                            <select name="agent_id" class="select2" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -82,9 +85,9 @@
                     <div class="modal-body text-center">
                         @csrf
                         <div class="form-group">
-                            <select class="form-control" name="shipper_id" id="edit_shipper_select" data-rule-required="true" data-msg-required="Shipper is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                            <select name="agent_id" class="select2" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -159,16 +162,20 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.qa.high_alert.shippers.list') }}',
+                        url: '{{ route('admin.qa.cx_training.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
+
                             head.push('S.No');
-                            head.push('Shipper');
-                            head.push('City');
-                            head.push('Sales Person');
-                            head.push('High Alert By');
-                            head.push('Description');
+                            head.push('Agent Name');
+                            head.push('Unit');
+                            head.push('Joining Date');
+                            head.push('Requested Date');
+                            head.push('Requested By');
+                            head.push('Aging');
+                            head.push('Training By');
+                            head.push('Status Updated At');
                             head.push('Status');
 
                             $.each(result.data, function (index, values) {
@@ -222,7 +229,7 @@
                 },
                 serverSide: true,
 
-                ajax: '{{ route('admin.qa.high_alert.shippers.list') }}',
+                ajax: '{{ route('admin.qa.cx_training.list') }}',
                 order: [[1, 'desc']],
                 rowId: 'id',
                 columns: [
