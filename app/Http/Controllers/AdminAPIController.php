@@ -8773,10 +8773,11 @@ class AdminAPIController extends Controller
                     $shipment["shipper"] = ($shipment->booking_type_id == 4) ? $shipment->shipper . ' (' . $shipment->poc . ')' : $shipment->shipper;
                     $shipment["return_address"] = ($shipment->return_address_location != NULL) ? $shipment->return_address_location : $shipment->address;
                     $shipment["return_city"] = ($shipment->return_city_name != NULL) ? $shipment->return_city_name : $shipment->destination;
-                    $shipment["remarks"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? $shipment->remarks : NULL;
+                    $shipment["remarks"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? ($shipment->remarks != null) ? $shipment->remarks : "-" : NULL;
                     $shipment["reason"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? "-" : NULL;
-                    $shipment["received_or_refused_by"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? $shipment->received_or_refused_by : NULL;
+                    $shipment["received_or_refused_by"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? ($shipment->received_or_refused_by != null) ? $shipment->received_or_refused_by : "-" : NULL;
                     $shipment["clear_button"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? 0 : 1;
+                    $shipment["check_box"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? 0 : 1;
 
                     if (in_array($shipment->shipper_status_id, $delivered_array)) {
                         $statuses = [['id' => $shipment->shipper_status_id, 'name' => $shipment->current_status_name]];
