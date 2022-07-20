@@ -79,8 +79,6 @@ class AdminShipmentHandoverController extends Controller
 
             
             $delivery_area = null;
-            // dump($request->delivery_location_mapping);
-            // dump($msg_string);
             if($msg_string != null){
                 $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
                             ->select('dlm.area_name as area_name','dlm.id')
