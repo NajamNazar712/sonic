@@ -87,16 +87,23 @@ class AdminShipmentHandoverController extends Controller
                 if($found->exists()){
                     $found = $found->get()->first();
                     $delivery_area = $found->id;
+                    if($request->delivery_location_mapping != null){
+                      if($request->delivery_location_mapping != $delivery_area){
+                        return ['status' => 1, 'error' => 'Delivery Location is different'];
+                      }
+                    }
                 }
-                if($request->delivery_location_mapping != null){
-                  if($request->delivery_location_mapping != $delivery_area){
-                    return ['status' => 1, 'error' => 'Delivery Location is different'];
-                  }
-                }else{
+                else{
                   $delivery_area = 0;
-                    if($request->delivery_location_mapping != 0){
+                  if($request->delivery_location_mapping != null){
+                    if($request->delivery_location_mapping != $delivery_area){
                       return ['status' => 1, 'error' => 'Delivery Location is different'];
                     }
+                  }else{
+                    if($request->delivery_location_mapping != 0){
+                        return ['status' => 1, 'error' => 'Delivery Location is different'];
+                    }
+                  }
                 }
             }else{
               $delivery_area = 0;
