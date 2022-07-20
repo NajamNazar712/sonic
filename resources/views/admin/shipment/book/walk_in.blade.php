@@ -97,7 +97,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*"  rows="5"></textarea>
+                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" onchange="bdmk()" rows="5"></textarea>
                                         </div>
 
                                         <div class="form-group">
@@ -315,7 +315,38 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script>
+        function bdmk(){
+            var city_id = $('#consignee_city').val();
+            var consignee_address = $('#consignee_address').val();
 
+
+            $.ajax({
+                url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',
+                method: 'get',
+                data: {
+                    'city_id': city_id,
+                    'consignee_address': consignee_address
+                }
+            }).done(function (data) {
+
+                if (data) {
+                    var er = "";
+                    if (data.invalid_cities) {
+                        $.each(data.invalid_cities, function (key, value) {
+                            er +=  "Select " + key + " in destination for " + value+"<br>";
+                        });
+                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
+                        $('#consignee_address_error').show();
+
+                    }else{
+                        $('#consignee_address_error').html('');
+                        $('#consignee_address_error').hide();
+                    }
+                }
+
+            });
+
+        }
         $(document).ready(function() {
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
@@ -607,43 +638,43 @@
                 successClass: 'success',
                 rules: {
                     consignee_address: {
-                        remote: {
-                            url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',
-                            data: {
-                                city_id: function () {
-                                    return $("#consignee_city").val();
-                                },
-                            },
-                            dataFilter: function(data) {
-                                // var json = JSON.parse(data);
-                                // if(json.status === "true") {
-                                //     return true;
-                                // }
-                                // return "\"" + json.error + "\"";
+                        {{--remote: {--}}
+                        {{--    url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',--}}
+                        {{--    data: {--}}
+                        {{--        city_id: function () {--}}
+                        {{--            return $("#consignee_city").val();--}}
+                        {{--        },--}}
+                        {{--    },--}}
+                        {{--    dataFilter: function(data) {--}}
+                        {{--        // var json = JSON.parse(data);--}}
+                        {{--        // if(json.status === "true") {--}}
+                        {{--        //     return true;--}}
+                        {{--        // }--}}
+                        {{--        // return "\"" + json.error + "\"";--}}
 
-                                return true;
+                        {{--        return true;--}}
 
 
-                            },
-                            complete: function (data) {
-                                if (data.responseText) {
-                                    var json = JSON.parse(data.responseText);
-                                    var er = "";
-                                    if (json.invalid_cities) {
-                                        $.each(json.invalid_cities, function (key, value) {
-                                            er +=  "Select " + key + " in destination for " + value+"<br>";
-                                        });
-                                        $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");
-                                        $('#consignee_address_error').show();
+                        {{--    },--}}
+                        {{--    complete: function (data) {--}}
+                        {{--        if (data.responseText) {--}}
+                        {{--            var json = JSON.parse(data.responseText);--}}
+                        {{--            var er = "";--}}
+                        {{--            if (json.invalid_cities) {--}}
+                        {{--                $.each(json.invalid_cities, function (key, value) {--}}
+                        {{--                    er +=  "Select " + key + " in destination for " + value+"<br>";--}}
+                        {{--                });--}}
+                        {{--                $('#consignee_address_error').html("Address Anomaly detected Keyword "+"<br>"+er.trim() + " For Assistance Call 021-111-118-729");--}}
+                        {{--                $('#consignee_address_error').show();--}}
 
-                                    }else{
-                                        $('#consignee_address_error').html('');
-                                        $('#consignee_address_error').hide();
-                                    }
-                                }
-                            }
+                        {{--            }else{--}}
+                        {{--                $('#consignee_address_error').html('');--}}
+                        {{--                $('#consignee_address_error').hide();--}}
+                        {{--            }--}}
+                        {{--        }--}}
+                        {{--    }--}}
 
-                        },
+                        {{--},--}}
                         maxlength: 255,
                     },
                 },
@@ -674,6 +705,8 @@
                     form.submit();
                 }
             });
+
+
 
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',

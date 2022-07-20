@@ -10,13 +10,13 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     {{--                    {{dd($nsa_error)}}--}}
-                    Book a Shipment (NSA Shipments)
+                    Book a Shipment
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <div class="alert alert-info">In case of, <br> Out of Service Area: Additional charges may apply. <br> Non Service Area: Shipment may be returned. <br> For assistance, Call: 021-38772222</div>
+                            <div class="alert alert-info">Destination Address of the Selected Cities, <br> May have the Following Issues. <br> For assistance, Call: 021-38772222</div>
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate_excel_store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <input type="hidden" name="excel_nsa" value="1">
@@ -55,7 +55,7 @@
                                             {{--{{dd($key)}}--}}
                                             <div class="d-none">{!! $no=$no+1!!}</div>
                                             <tr>
-                                                @if(isset($nsa_error[$key+2]['msg']))
+                                                @if(isset($bdmk_error[$key+2]['msg']))
                                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
@@ -65,7 +65,7 @@
                                                     <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
                                                     <td><input type="text" name="form[{{$no}}][consignee_city_name]" class="form-control text" value="{{$ro['consignee_city_name']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][consignee_name]" class="form-control text" value="{{$ro['consignee_name']}}" readonly="readonly"></td>
-                                                    <td><textarea type="text" name="form[{{$no}}][consignee_address]" class="form-control text" readonly="readonly">{{$ro['consignee_address']}}</textarea><font color="red">{{$nsa_error[$key+2]['msg']}}</font></td>
+                                                    <td><textarea type="text" name="form[{{$no}}][consignee_address]" class="form-control text" readonly="readonly">{{$ro['consignee_address']}}</textarea><font color="red"><?php echo  $bdmk_error[$key+2]['msg'];?></font></td>
                                                     <td><input type="text" name="form[{{$no}}][consignee_phone_number_1]" class="form-control phone" value="{{$ro['consignee_phone_number_1']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
