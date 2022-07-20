@@ -413,9 +413,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@return_create_index')->name('index');
                 Route::post('get_riders', 'AdminAPIController@get_riders_by_hub')->name('get_riders');
                 Route::post('get_shipment_details', 'AdminAPIController@get_shipment_details')->name('get_shipment_details');
+                Route::post('create', 'AdminAPIController@return_note_create')->name('create');
                 Route::get('receive_list', 'AdminAPIController@get_return_note_list')->name('receive_list');
                 Route::post('shipments_list', 'AdminAPIController@return_note_shipments_list')->name('shipments_list');
-                Route::post('create', 'AdminAPIController@return_note_create')->name('create');
+                Route::post('reason', 'AdminAPIController@return_reason')->name('reason');
             });
 
         });

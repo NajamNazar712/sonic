@@ -8702,7 +8702,6 @@ class AdminAPIController extends Controller
     }
 
     public function get_return_note_list(Request $request){
-
         $role_id = $request->role_id;
         $admin_id = $request->admin_id;
         $admin_hubs = AdminHub::where('admin_id',$admin_id)->pluck('hub_id')->toArray();
@@ -8817,6 +8816,27 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "Shipments Not Found!"]);
             }
         }
+    }
+
+    public function return_reason(Request $request)
+    {
+        $rules = [
+            'status_id' => ['required']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $status_id = $request->status_id;
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+            if (!$statuses->isEmpty()) {
+                return response()->json(['status' => 0, 'reasons' => $statuses]);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'No reasons are defined for this status!']);
+            }
+        }
+
     }
 
 }
