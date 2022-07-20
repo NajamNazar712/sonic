@@ -8295,7 +8295,7 @@ class AdminAPIController extends Controller
                                     $details['tracking_number'] = $shipment->tracking_number;
                                     $details['pieces_count'] = $shipment->pieces;
                                     $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                    return ['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details];
+                                    return ['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1];
                                 }
                             }
                             return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
@@ -8375,7 +8375,7 @@ class AdminAPIController extends Controller
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
+                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                     }
                                 }
                                 return response()->json(['status' => 0,"shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
@@ -8457,7 +8457,7 @@ class AdminAPIController extends Controller
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
+                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                     }
                                 }
                                 return response()->json(['status' => 0, "shipment_details" => ['shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
@@ -8535,7 +8535,7 @@ class AdminAPIController extends Controller
                                             $details['tracking_number'] = $shipment->tracking_number;
                                             $details['pieces_count'] = $shipment->pieces;
                                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                            return response()->json(['status' => 2, 'message' => 'Shipment Piece(s) found!', 'details' => $details]);
+                                            return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                         }
                                     }
                                     return response()->json(['status' => 0,"shipment_details" => ['shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
@@ -8559,21 +8559,37 @@ class AdminAPIController extends Controller
 
     public function get_piece_details(Request $request)
     {
-        $shipment_id = $request->shipment_id;
-        $shipment_piece_id = $request->piece_id;
-
-        $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
-        if ($shipment_piece->exists()) {
-            $shipment_piece = $shipment_piece->first();
-            if ($shipment_piece->shipment_id == $shipment_id) {
-                $scanned_shipment_piece = $shipment_piece->tracking_number;
-                return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
-            } else {
-                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
-            }
-
+        $rules = [
+            'tracking' => ['required'],
+            'piece_id' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
+            $tracking = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+                $shipment_id = $shipment->id;
+                $shipment_piece_id = $request->piece_id;
+                $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+                if ($shipment_piece->exists()) {
+                    $shipment_piece = $shipment_piece->first();
+                    if ($shipment_piece->shipment_id == $shipment_id) {
+                        $scanned_shipment_piece = $shipment_piece->tracking_number;
+                        return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'No Shipment Found!']);
+            }
         }
     }
 
