@@ -676,7 +676,7 @@ class AdminHumanResourseController extends Controller
 
             $employee_log = new EmployeeLog();
             $employee_log->employee_id = $request->employee_id;
-            $employee_log->employee_type_id = $employee->employee_type_id;
+//            $employee_log->employee_type_id = $employee->employee_type_id;
             $employee_log->update_pin = 1;
             $employee_log->updated_by = auth()->id();
             $employee_log->save();
@@ -813,7 +813,7 @@ class AdminHumanResourseController extends Controller
 
         $employee_log = new EmployeeLog();
         $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
+//        $employee_log->employee_type_id = 2;
         $employee_log->status_id = 2;
         $employee_log->blacklist = 1;
         $employee_log->updated_by = auth()->id();
