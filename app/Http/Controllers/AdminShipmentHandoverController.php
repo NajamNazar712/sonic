@@ -82,7 +82,8 @@ class AdminShipmentHandoverController extends Controller
                 $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
                             ->select('dlm.area_name as area_name','dlm.id')
                             ->where('delivery_location_mapping_keywords.keyword',$msg_string)
-                            ->where('dlm.city_id',$shipment->consignee_city_id);
+                            ->where('dlm.city_id',$shipment->consignee_city_id)
+                            ->where('status',1);
                 if($found->exists()){
                     $found = $found->get()->first();
                     $delivery_area = $found->area_name;
@@ -93,13 +94,13 @@ class AdminShipmentHandoverController extends Controller
                   }
                 }
             }else{
-              $delivery_area = 0;
+              $delivery_area = '0';
               if($request->delivery_location_mapping != null){
                 if($request->delivery_location_mapping != $delivery_area){
                   return ['status' => 1, 'error' => 'Delivery Location is different'];
                 }
               }else{
-                if($request->delivery_location_mapping != 0){
+                if($request->delivery_location_mapping != $delivery_area){
                     return ['status' => 1, 'error' => 'Delivery Location is different'];
                 }
               }
