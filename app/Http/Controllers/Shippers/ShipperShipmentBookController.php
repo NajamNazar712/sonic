@@ -7171,9 +7171,9 @@ class ShipperShipmentBookController extends Controller
                     if($invalid_cities){
                         foreach ($invalid_cities as $key=>$value){
                             if(empty($invalid_cities_string)){
-                                $invalid_cities_string=  $key.':' ." ".$value;
+                                $invalid_cities_string=  'Area <strong>'.$value.'</strong> is in <strong>'.$key.'</strong>';
                             }else{
-                                $invalid_cities_string= $invalid_cities_string . "<br />".  $key.':' ." ".$value;
+                                $invalid_cities_string= $invalid_cities_string . "<br />". 'Area<strong>'.$value.'</strong> is in <strong>'.$key.'</strong>';
                             }
 
                         }
