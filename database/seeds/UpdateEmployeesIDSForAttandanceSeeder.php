@@ -15,7 +15,7 @@ class UpdateEmployeesIDSForAttandanceSeeder extends Seeder
      */
     public function run()
     {
-        $employees = \App\Http\Models\HR\Employee::whereNotNull('trax_id')->get();
+        /*$employees = \App\Http\Models\HR\Employee::whereNotNull('trax_id')->get();
 
         foreach ($employees as $employee) {
 
@@ -29,8 +29,33 @@ class UpdateEmployeesIDSForAttandanceSeeder extends Seeder
             if($user->exists()){
                 $user = $user->first();
                 EmployeeAttendance::where('employee_id', $user->id)->where('employee_type', $employee->employee_type_id)->where('id', '<', 993198)->update(['employee_id' => $employee->id]);
-//                EmployeeAttendanceActionLog::where('employee_id', $user_id)->where('employee_type', $employee_type)->update(['employee_id' => $employee->id]);
+                EmployeeAttendanceActionLog::where('employee_id', $user->id)->where('employee_type', $employee->employee_type_id)->update(['employee_id' => $employee->id]);
+            }
+        }*/
+
+        $employee_attendance = EmployeeAttendance::groupBy('employee_id')->get();
+
+        foreach ($employee_attendance as $emp)
+        {
+            $user = NULL;
+            if($emp->employee_type == 1)
+            {
+                $user = Admin::find($emp->employee_id);
+            }
+            else if($emp->employee_type == 2){
+                $user = Rider::find($emp->employee_id);
+            }
+
+            if($user && ($user->status == 1))
+            {
+
+                if($user->employee_id != null)
+                {
+                    EmployeeAttendance::where('employee_id', $emp->employee_id)->where('employee_type', $emp->employee_type)->update(['employee_id' => $user->employee_id]);
+                }
             }
         }
+
+
     }
 }
