@@ -8609,7 +8609,7 @@ class AdminAPIController extends Controller
         } else {
             $tracking_numbers = explode(',', $request->trackings);
             $open_box_ids = explode(',', $request->open_box);
-            $trackings = Shipments::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+            $trackings = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
             $rider = $request->rider_id;
             $route = $request->route_id;
             $hub_id = $request->hub_id;
