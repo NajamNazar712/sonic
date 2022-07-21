@@ -6006,12 +6006,12 @@ class APIController extends Controller
                         foreach ($invalid_cities as $key=>$value){
                             if(empty($invalid_cities_string)){
                                 // $invalid_cities_string=  $key.':' ." ".$value;
-                                $invalid_cities_string=  "Dear user, the area ". trim($value) ." is actually present in $key instead of $city_name. For assistance, Call: 021-38772222.";
+                                $invalid_cities_string=  "Dear user, The area ". trim($value) ." is actually present in $key instead of $city_name";
                             }else{
-                                $invalid_cities_string= $invalid_cities_string . ", ".  $key.':' ." ".$value;
+                                $invalid_cities_string= $invalid_cities_string . " and the area ". trim($value) ." is actually present in $key instead of $city_name";
                             }
-
                         }
+                        $invalid_cities_string .= ". For assistance, Call: 021-38772222";
                         return $result = array('status'=>'false','invalid_cities'=>trim($invalid_cities_string),'error'=>'Invalid Address');
                     }
                 }
