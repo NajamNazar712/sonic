@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Rider;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

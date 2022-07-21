@@ -298,28 +298,9 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-//        $riders = Rider::where('status', 1);
-
-//        if (session('role_id') != 1) {
-//            $riders = $riders->whereHas('city', function ($query) {
-//                $query->whereIn('hub_id', session('hubs'));
-//            });
-//        }
-//
-//        $riders = $riders->get();
-
-        $routes = Route::where('status', 1);
-
-        if (session('role_id') != 1) {
-            $routes = $routes->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
     }
 
     public function get_adjustment_reference(Request $request)
@@ -335,6 +316,16 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
+
+        $routes = Route::where('status', 1);
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
         ->where('r.id' ,$request->rider_id)
@@ -351,14 +342,15 @@ class DeliveryController extends Controller
                 $delivery_note_request->save();
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
-                return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+
+                return response()->json(['status' => 1,'routes' => $routes, 'ccd_rider' => $ccd_rider]);
             } else {
                 return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
             }
         } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
-            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider,'routes' => $routes]);
         }
     }
 
@@ -406,6 +398,14 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
+        $rules = [
+            'tracking' => ['required', 'exists:shipments,tracking_number']
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return ['status' => 1, 'error' => 'Invalid Tracking Number'];
+        } else {
 //        todo: bypasses rider category
         if ($request->tracking != '' && $request->rider_id != '' )
         {
@@ -460,7 +460,6 @@ class DeliveryController extends Controller
             }
         }
 //        todo: bypasses rider category end
-
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -726,6 +725,7 @@ class DeliveryController extends Controller
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
         }
+        }
     }
 
 
@@ -769,6 +769,7 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -965,6 +966,13 @@ class DeliveryController extends Controller
                 $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
             }
             //todo end
+
+            $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->selected_rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
+            if ($delivery_note_request) {
+                $delivery_note_request->completed = 1;
+                $delivery_note_request->save();
+            }
+
 
             return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
         } else {
@@ -2667,7 +2675,7 @@ class DeliveryController extends Controller
         $rider_bypass = RiderCategoryByPass::where('rider_id',$request->rider_id)->where('status',0)->latest()->first();
         if($rider_bypass)
         {
-            return redirect()->route('admin.delivery.note.rider_category_request')->with(['error' => 'Request Already Present']);
+            return redirect()->back()->with(['error' => 'Request Already Present']);
         }
         else
         {
@@ -7906,8 +7914,7 @@ class DeliveryController extends Controller
     Public function operation_riders(Request $request)
     {
 
-
-        $operation_id = $request->operation_rider_id;
+        $operation_id = $request->operation_rider_type;
 
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
