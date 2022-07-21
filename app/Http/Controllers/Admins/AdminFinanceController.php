@@ -916,6 +916,10 @@ class AdminFinanceController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('s.shipment_type',2);
+        }
+
         $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
         if ($check_lost_shipments_admins->exists()) {
             $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
