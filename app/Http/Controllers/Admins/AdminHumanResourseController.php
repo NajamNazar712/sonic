@@ -899,13 +899,6 @@ class AdminHumanResourseController extends Controller
         $employee->first_inactive = 1;
         $employee->save();
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 1;
-        $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
-
         $this->employee_log_save($employee_id,1,null,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
@@ -936,13 +929,6 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
-
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 1;
-        $employee_log->status_id = 2;
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
 
         $this->employee_log_save($employee_id,1,null,2,null,null,null,auth()->id());
 
