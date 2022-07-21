@@ -332,7 +332,7 @@ class DeliveryController extends Controller
         ->where('delivery_notes.dncc_status',0)
         ->where('delivery_notes.status', '!=', 4)
         ->whereDate('delivery_notes.created_at', '>', $datetime)
-       /* ->whereDate('delivery_notes.created_at', '!=', Carbon::today())*/
+        ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
         ->where('r.operation_rider_id',1);
 
         if ($delivery_note->exists()) {
