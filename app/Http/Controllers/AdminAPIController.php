@@ -8872,6 +8872,7 @@ class AdminAPIController extends Controller
         $remarks = $request->remarks;
         $reasonId = $request->reason_id;
         $statusId = $request->status_id;
+        $received_or_refused_by = $request->received_or_refused_by;
         if ($return_note_id != '') {
             $return_note_details = ReturnNote::find($return_note_id);
             $parcel = Shipment::where('id', $shipment)->first();
