@@ -663,7 +663,7 @@
             }).done(function (data) {
 
                 if (data) {
-                    var er = "Dear user, <br>";
+                    var er = "Dear User, <br>";
                     if (data.invalid_cities) {
                         $.each(data.invalid_cities, function (key, value) {
                             er +=  "The area <strong>" + value + "</strong> is actually present in <strong>" + key + "</strong> instead of <strong>" + city_name +"</strong>. <br>";

@@ -129,7 +129,7 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.booking_destination_keyword.list') }}',
+                ajax: '{{ route('admin.settings.booking_destination_keyword.list') }}', 
                 rowId: 'id',
                 order: [[0, 'desc']],
                 columns: [
