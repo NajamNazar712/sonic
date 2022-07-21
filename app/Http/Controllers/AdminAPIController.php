@@ -117,6 +117,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -8854,6 +8855,74 @@ class AdminAPIController extends Controller
             }
         }
 
+    }
+
+    public function return_status_submit_individual(Request $request)
+    {
+        $new_return_note_shipments = NULL;
+        $shipments_updated_flag = FALSE;
+        $shipment = $request->shipment_id;
+        $open_box = $request->is_open_box;
+        $return_note_id = $request->return_note_id;
+        $array_returned = array(25, 31, 38);
+        $array_returned_status = array(24, 29, 35, 47, 48, 60);
+//        $actual_date = $request->actual_date_formatted;
+        $actual_date = Carbon::now()->format("Y-m-d H:i:s");
+        $admin_id = $request->admin_id;
+        $remarks = $request->remarks;
+        $reasonId = $request->reason_id;
+        $statusId = $request->status_id;
+        if ($return_note_id != '') {
+            $return_note_details = ReturnNote::find($return_note_id);
+            $parcel = Shipment::where('id', $shipment)->first();
+            if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $return_note_id)->where('shipment_id', $shipment)->exists()) {
+                if ($open_box == 1) {
+                    $parcel->open_box = 1;
+                    $parcel->save();
+                    ShipmentOpenBoxJourneyController::add($shipment, 7, Auth::id());
+                }
+                if (!in_array($parcel->shipper_status_id, $array_returned)) {
+                    if (in_array($statusId, $array_returned_status)) {
+                        if ($statusId != $parcel->shipper_status_id) {
+                            ShipmentsJourneyController::add($shipment, $statusId, NULL, ($reasonId != null) ? $reasonId : null, $remarks, NULL, $admin_id, $return_note_id);
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => $statusId]);
+                            ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                            $shipments_updated_flag = TRUE;
+                        }
+                    }
+
+                }
+            } else {
+                $new_return_note_shipments .= $parcel->tracking_number . ' ';
+            }
+            $shipment_status = ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'status' => 0])->count();
+            if ($shipment_status == 0) {
+                if ($return_note_details->completion_status == 0) {
+                    $return_note_details->status = 1;
+                    $return_note_details->updated_by = $admin_id;
+                } else {
+                    $return_note_details->status = 3;
+                    $return_note_details->updated_by = $admin_id;
+                }
+                $return_note_details->actual_date = $actual_date;
+                $return_note_details->save();
+            }
+
+            NotificationsController::send(15, $return_note_id);
+            NotificationsController::send(16, $return_note_id);
+
+            if ($new_return_note_shipments != null) {
+                if ($shipments_updated_flag) {
+                    return response()->json(['status' => 0, 'message' => 'Return Note Status Has Been Updated', 'error' => 'Following shipments are already in new return note ' . $new_return_note_shipments]);
+
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Following shipments are already in new return note ' . $new_return_note_shipments]);
+
+                }
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Return Note Status Has Been Updated']);
+            }
+        }
     }
 
 }

@@ -418,6 +418,7 @@ Route::name('api.')->group(function () {
                 Route::get('receive_list', 'AdminAPIController@get_return_note_list')->name('receive_list');
                 Route::post('shipments_list', 'AdminAPIController@return_note_shipments_list')->name('shipments_list');
                 Route::post('reason', 'AdminAPIController@return_reason')->name('reason');
+                Route::post('submit_individual', 'AdminAPIController@return_status_submit_individual')->name('submit_individual');
             });
 
         });
