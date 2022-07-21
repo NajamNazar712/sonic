@@ -8145,7 +8145,7 @@ class AdminAPIController extends Controller
     public function get_riders_by_hub(Request $request)
     {
         $rules = [
-            'hub_id' => ['required']
+            'hub_id' => ['required','integer', 'digits_between:1,10', 'exists:cities,id']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -8177,7 +8177,7 @@ class AdminAPIController extends Controller
 
     public function get_shipment_details(Request $request){
         $rules = [
-            'tracking' => ['required']
+            'tracking' => ['required', 'exists:shipments,tracking_number']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -8599,7 +8599,7 @@ class AdminAPIController extends Controller
             'rider_id' => ['required'],
             'route_id' => ['required'],
             'hub_id' => ['required'],
-            'open_box' => ['required'],
+            'open_box' => ['nullable'],
             'trackings' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
