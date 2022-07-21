@@ -117,7 +117,6 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -130,7 +129,8 @@ class AdminAPIController extends Controller
 {
     use SendsPasswordResetEmails;
 
-    public function broker(){
+    public function broker()
+    {
         return Password::broker('admins');
     }
 
@@ -181,7 +181,7 @@ class AdminAPIController extends Controller
         $start_date = Carbon::parse($start_date);
         $end_date = Carbon::parse($end_date);
         $dates = [];
-        for($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+        for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
             $dates[] = $date->format('Y-m-d');
         }
 
@@ -234,7 +234,7 @@ class AdminAPIController extends Controller
             $password = substr($request->input('password'), 2);
             if ($user->exists()) {
                 $user = $user->first();
-                if($user->status == 0){
+                if ($user->status == 0) {
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
                 if (Hash::check($password, $user->password)) {
@@ -248,13 +248,13 @@ class AdminAPIController extends Controller
                     $information['cargo_user'] = ($user->role_id == 11) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
-                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                        $information['address'] = ($employee->address) ? $employee->address : "";
                     } else {
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
 
-                    if($request->has('device_token')){
+                    if ($request->has('device_token')) {
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                         $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
                             ->where('employee_type_id', 1);
@@ -278,7 +278,7 @@ class AdminAPIController extends Controller
                         $information['distance'] = $reporting_location->radius;
                         $information['lat'] = $reporting_location->lat;
                         $information['long'] = $reporting_location->long;
-                    }else{
+                    } else {
                         $information['distance'] = 0;
                         $information['lat'] = 0;
                         $information['long'] = 0;
@@ -306,65 +306,64 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function return_note_details(Request $request){
+    public function return_note_details(Request $request)
+    {
         $admin_id = $request->admin_id;
         $return_note_id = $request->return_note_id;
-        if($return_note_id){
+        if ($return_note_id) {
             $return_note = ReturnNote::find($return_note_id);
-            if($return_note){
-                if($return_note->status == 1 || $return_note->status == 3){
-                    if($return_note->image !== null){
+            if ($return_note) {
+                if ($return_note->status == 1 || $return_note->status == 3) {
+                    if ($return_note->image !== null) {
                         $details = array();
                         $img_url = '';
                         $url = 'uploads/return_notes/' . $return_note->image;
-                        if(file_exists($url)){
+                        if (file_exists($url)) {
                             $img_url = asset('uploads/return_notes/' . $return_note->image);
-                        }
-                        else{
-                            $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note->image);
-                            if($exists){
-                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note->image, now()->addMinutes(5));
+                        } else {
+                            $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note->image);
+                            if ($exists) {
+                                $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note->image, now()->addMinutes(5));
                             }
                         }
                         $details['return_note_id'] = $return_note_id;
-                        $details['images'] = array('id' => 0,'image'=> $img_url);
+                        $details['images'] = array('id' => 0, 'image' => $img_url);
                         return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
-                    }else{
+                    } else {
                         $return_note_images = ReturnNoteImage::where('return_note_id', $return_note_id);
-                        if($return_note_images->exists()){
+                        if ($return_note_images->exists()) {
                             $return_note_images = $return_note_images->get();
                             $details = array();
                             foreach ($return_note_images as $return_note_image) {
                                 $img_url = '';
                                 $url = 'uploads/return_notes/' . $return_note_image->image;
-                                if(file_exists($url)){
+                                if (file_exists($url)) {
                                     $img_url = asset('uploads/return_notes/' . $return_note_image->image);
-                                }else{
-                                    $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
-                                    if($exists){
-                                        $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
-                                    }
-                                    else{
-                                        $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
-                                        if($exists){
-                                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                } else {
+                                    $exists = Storage::disk('public')->exists('uploads/return_notes/' . $return_note_image->image);
+                                    if ($exists) {
+                                        $img_url = asset('storage/uploads/return_notes/' . $return_note_image->image);
+                                    } else {
+                                        $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                        if ($exists) {
+                                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note_image->image, now()->addMinutes(5));
                                         }
                                     }
                                 }
-                                $details['images'][] = array('id' => $return_note_image->id,'image'=> $img_url);
+                                $details['images'][] = array('id' => $return_note_image->id, 'image' => $img_url);
                             }
                             return response()->json(['status' => 0, 'message' => 'Images found', 'information' => $details]);
-                        }else{
+                        } else {
                             return response()->json(['status' => 0, 'message' => 'No images found!', 'information' => '']);
                         }
                     }
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Return Note not ready for image upload!']);
                 }
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Return Note Image not found!']);
             }
-        }else {
+        } else {
             return response()->json(['status' => 1, 'message' => 'No return note scanned!']);
         }
     }
@@ -374,7 +373,7 @@ class AdminAPIController extends Controller
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'pictures' => ['array','nullable'],
+            'pictures' => ['array', 'nullable'],
             'pictures.*image' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048'],
             'old_image_ids' => ['array', 'min:0']
         ];
@@ -385,14 +384,14 @@ class AdminAPIController extends Controller
         }
         $admin_id = $request->admin_id;
         $old_image_ids = array();
-        $old_image_ids = ($request->old_image_ids != '')? $request->old_image_ids:[];
+        $old_image_ids = ($request->old_image_ids != '') ? $request->old_image_ids : [];
         $return_note_id = $request->return_note_id;
         $return_note = ReturnNote::find($return_note_id);
         if ($return_note) {
             $present = false;
 
             $pictures = array();
-            if($request->has('pictures')){
+            if ($request->has('pictures')) {
                 $pictures = $request->pictures;
             }
             $return_note_image_ids = ReturnNoteImage::where('return_note_id', $return_note_id)->pluck('id')->toArray();
@@ -404,12 +403,11 @@ class AdminAPIController extends Controller
                             $url = 'uploads/return_notes/' . $return_note_image->image;
                             if (file_exists($url)) {
                                 File::delete($url);
-                            }
-                            else {
-                                $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
-                                if($exists){
-                                    Storage::disk('public')->delete('uploads/return_notes/'.$return_note_image->image);
-                                }else{
+                            } else {
+                                $exists = Storage::disk('public')->exists('uploads/return_notes/' . $return_note_image->image);
+                                if ($exists) {
+                                    Storage::disk('public')->delete('uploads/return_notes/' . $return_note_image->image);
+                                } else {
                                     $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
                                     if ($exists) {
                                         Storage::disk('s3')->delete('return_note_images/' . $return_note_image->image);
@@ -475,7 +473,7 @@ class AdminAPIController extends Controller
             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                 ->join('admins as a', 'e.id', 'a.employee_id')
                 ->where('a.id', $admin_id);
-            if($reporting_location->exists()){
+            if ($reporting_location->exists()) {
                 $reporting_location = $reporting_location->first();
                 $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
@@ -2102,7 +2100,7 @@ class AdminAPIController extends Controller
                 $attachments->cheque = implode(',', $cheque_array);
             }
 
-            if($request->has('attachment_update')){
+            if ($request->has('attachment_update')) {
                 $employees->attachment_update = $request->attachment_update;
                 $employees->save();
             }
@@ -2487,8 +2485,7 @@ class AdminAPIController extends Controller
                     }
                     return response()->json(['status' => 0, 'data' => $experience_certificate_array]);
                 }
-            }
-            else {
+            } else {
                 $attachment_type = $request->attachment_type;
                 if ($attachment_type == 'cv') {
                     $cv_array = [];
@@ -2735,9 +2732,10 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
     }
 
-    public function retail_index(Request $request){
+    public function retail_index(Request $request)
+    {
         $admin_default_hub = Admin::where('id', $request->admin_id)->select('default_hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->where('status', 1)->select('name','code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->where('status', 1)->select('name', 'code', 'pickup_address_id')->get();
         $products = Product::all();
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
@@ -2750,11 +2748,12 @@ class AdminAPIController extends Controller
         return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers, 'international_cities' => $international_cities]);
     }
 
-    public function retail_bank_info(Request $request){
+    public function retail_bank_info(Request $request)
+    {
         $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)
             ->select('iban', 'account_number', 'cheque_image', 'bank_id');
         $shipment_count = RetailShipment::where('shipper_phone_no', $request->shipper_phone_no)->where('shipping_mode', 3)->count();
-        if($shipper_info->exists()){
+        if ($shipper_info->exists()) {
             $shipper_info = $shipper_info->get();
             return response()->json(["status" => 0, "shipper_bank_info" => $shipper_info, "shipment_count" => $shipment_count]);
         }
@@ -2803,12 +2802,12 @@ class AdminAPIController extends Controller
         if ($shipping_mode_check == 3) {
             $amount = str_replace(',', '', $request->input('cod_amount'));
             $r_amount = 0;
-            if($charges_mode_id == 2){
+            if ($charges_mode_id == 2) {
                 $amount = $amount + $total_charges;
             }
         } else {
             $amount = 0;
-            if($charges_mode_id == 2){
+            if ($charges_mode_id == 2) {
                 $amount = $total_charges;
             }
             $r_amount = 0;
@@ -2833,7 +2832,7 @@ class AdminAPIController extends Controller
 
         $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
-        if($business_category_id == 2) {
+        if ($business_category_id == 2) {
             $international_shipment_booking = new InternationalShipment();
             $international_shipment_booking->shipment_id = $shipment_id;
             $international_shipment_booking->postal_code = 00000;
@@ -2939,15 +2938,14 @@ class AdminAPIController extends Controller
 
         $date = Carbon::today()->toDateString();
         $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
-        if($cash_deposit->exists()){
+        if ($cash_deposit->exists()) {
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
             $total_cash = $cash_deposit->total_cash + $total_charges;
             $cash_deposit->total_cn = $total_shipments;
             $cash_deposit->total_cash = $total_cash;
             $cash_deposit->save();
-        }
-        else{
+        } else {
             $cash_deposit = new RetailCashDeposit();
             $cash_deposit->category = 3;
             $cash_deposit->admin_id = $admin_id;
@@ -3022,7 +3020,7 @@ class AdminAPIController extends Controller
                     $data[] = $datum;
                 }
             }
-            if(!empty($data)){
+            if (!empty($data)) {
                 return response()->json(['status' => 0, 'data' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "No cargo found!"]);
@@ -3048,7 +3046,7 @@ class AdminAPIController extends Controller
     {
         $bag_id = $request->bag_no;
         $bags = CargoManifestBag::where('seal_number', $bag_id)
-            ->whereIn('status_id',[2, 4, 6, 8, 9, 10]);
+            ->whereIn('status_id', [2, 4, 6, 8, 9, 10]);
 
         if ($bags->exists()) {
             $bags = $bags->latest()->first();
@@ -3093,7 +3091,7 @@ class AdminAPIController extends Controller
                 }
                 if ($junctions->exists()) {
                     $junctions = $junctions->pluck('junction_id')->toArray();
-                    foreach ($admin_hubs as $admin_hub){
+                    foreach ($admin_hubs as $admin_hub) {
                         if (in_array($admin_hub, $junctions)) {
                             $datum["misroute"] = 0;
                         }
@@ -3435,7 +3433,7 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admins = Admin::find($admin_id);
-        if($admins){
+        if ($admins) {
             $response = array();
             $admin_shift = EmployeeShift::where('id', $admins->shift_id);
             if ($admin_shift->exists()) {
@@ -3443,18 +3441,17 @@ class AdminAPIController extends Controller
                 $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
                 if ($shift_time->lt(Carbon::now())) {
                     $date = Carbon::now()->format("Y-m-d");
-                } else{
-                    if(Carbon::now()->format("l") == "Monday"){
+                } else {
+                    if (Carbon::now()->format("l") == "Monday") {
                         $date = Carbon::now()->subDays(2)->format("Y-m-d");
-                    }
-                    else{
+                    } else {
                         $date = Carbon::now()->subDays(1)->format("Y-m-d");
                     }
                     $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                         ->where('employee_type', 1)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
-                    if($last_action_log->exists()){
+                    if ($last_action_log->exists()) {
                         $last_action_log = $last_action_log->first();
-                        if($last_action_log->action_id == 2){
+                        if ($last_action_log->action_id == 2) {
                             $date = Carbon::now()->format("Y-m-d");
                         }
                     }
@@ -3462,13 +3459,12 @@ class AdminAPIController extends Controller
                 }
             }
             $response["status"] = 0;
-            if ($admin_shift->exists()){
+            if ($admin_shift->exists()) {
                 $admin_shift = $admin_shift->first();
                 $response["shift_name"] = $admin_shift->name;
                 $response["start_time"] = $admin_shift->start_time;
                 $response["end_time"] = $admin_shift->end_time;
-            }
-            else{
+            } else {
                 $response["shift_name"] = "default";
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
@@ -3518,7 +3514,7 @@ class AdminAPIController extends Controller
                         if ($attendance->clock_in_datetime) {
                             $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                             $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
-                            if($attendance_date == $clock_in_date){
+                            if ($attendance_date == $clock_in_date) {
                                 $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
                                 $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
                                 if ($time_diff > $shift->grace_time) {
@@ -3526,8 +3522,7 @@ class AdminAPIController extends Controller
                                 } else {
                                     $datum["status"] = 1;//Present
                                 }
-                            }
-                            else{
+                            } else {
                                 $datum["status"] = 2;//Late
                             }
                         } else {
@@ -3747,7 +3742,7 @@ class AdminAPIController extends Controller
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
                 $admin = $admin->first();
-                if($admin->status == 0){
+                if ($admin->status == 0) {
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
                 $this->sendResetLinkEmail($request);
@@ -3900,7 +3895,7 @@ class AdminAPIController extends Controller
             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                 ->join('admins as a', 'e.id', 'a.employee_id')
                 ->where('a.id', $admin_id);
-            if($reporting_location->exists()){
+            if ($reporting_location->exists()) {
                 $reporting_location = $reporting_location->first();
                 $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
@@ -3918,10 +3913,10 @@ class AdminAPIController extends Controller
             $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->whereDate('attendance_date', $attendance_date)
                 ->where('employee_type', 1)->select('action_date')->orderBy('id', 'DESC');
-            if($admin_attendance_action->exists()){
+            if ($admin_attendance_action->exists()) {
                 $admin_attendance_action = $admin_attendance_action->first();
                 $last_action = Carbon::parse($admin_attendance_action->action_date);
-                if(Carbon::now()->diffInSeconds($last_action) < 15){
+                if (Carbon::now()->diffInSeconds($last_action) < 15) {
                     return response()->json(['status' => 1, 'message' => 'Wait for 15 Seconds']);
                 }
             }
@@ -4027,12 +4022,11 @@ class AdminAPIController extends Controller
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $admins->phone_number;
-                $payslip_pdf = PayslipPdf::where('payslip_id',$payslip->id);
+                $payslip_pdf = PayslipPdf::where('payslip_id', $payslip->id);
                 if ($payslip_pdf->exists()) {
                     $payslip_pdf = $payslip_pdf->first();
                     $file_url = $payslip_pdf->file_path;
-                }
-                else {
+                } else {
                     $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) : '-';
                     $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) : '-';
                     $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) : '-';
@@ -4370,7 +4364,7 @@ class AdminAPIController extends Controller
 
                     $pdf = SnappyPDF::loadHTML($html);
 
-                    $filename = 'payslip_'. $payslip->id .  Carbon::now()->format('Uu') . '-' . $payroll_month . '.pdf';
+                    $filename = 'payslip_' . $payslip->id . Carbon::now()->format('Uu') . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
                     $result = $pdf->download($filename);
                     Storage::disk('public')->put($path, $result);
@@ -4396,7 +4390,7 @@ class AdminAPIController extends Controller
                 if ($leave->employee_type_id == 1) {
                     $admin = Admin::find($leave->employee_id);
                     if ($admin) {
-                        if(!$admin->role->department->department_head_id){
+                        if (!$admin->role->department->department_head_id) {
                             return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                         }
                         $data = array();
@@ -4422,7 +4416,7 @@ class AdminAPIController extends Controller
                     $department = AdminDepartment::find(6);
                     if ($department) {
                         if ($rider) {
-                            if(!$department->department_head_id){
+                            if (!$department->department_head_id) {
                                 return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                             }
                             $data = array();
@@ -4446,7 +4440,7 @@ class AdminAPIController extends Controller
             $admin_id = $request->admin_id;
             $admin = Admin::find($admin_id);
             if ($admin) {
-                if(!$admin->role->department->department_head_id){
+                if (!$admin->role->department->department_head_id) {
                     return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                 }
                 $data = array();
@@ -4554,11 +4548,11 @@ class AdminAPIController extends Controller
                 $datum['rejected_reason'] = $employee_leave->rejected_reason;
                 $datum['status_id'] = $employee_leave->status_id;
                 $datum['status'] = $employee_leave->status;
-                if($employee_leave->to){
+                if ($employee_leave->to) {
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
                     $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
-                }else{
+                } else {
                     $datum['days_count'] = 1;
                 }
                 $data[] = $datum;
@@ -4597,16 +4591,16 @@ class AdminAPIController extends Controller
                     $datum['rejected_reason'] = $employee_leave->rejected_reason;
                     $datum['status_id'] = $employee_leave->status_id;
                     $datum['status'] = $employee_leave->status;
-                    if ($admin_role == 63){
+                    if ($admin_role == 63) {
                         $datum['role'] = 0;
-                    }else{
+                    } else {
                         $datum['role'] = 1;
                     }
-                    if($employee_leave->to){
+                    if ($employee_leave->to) {
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
                         $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
-                    }else{
+                    } else {
                         $datum['days_count'] = 1;
                     }
                     if ($employee_leave->type_id == 1) {
@@ -4655,75 +4649,75 @@ class AdminAPIController extends Controller
                     if ($employee_leaves->status == 2) {
                         $employee_leaves->status = 4;
                         $employee_leaves->updated_by = $admin_id;
-                        if($employee_leaves->employee_id == 1){
+                        if ($employee_leaves->employee_id == 1) {
                             $user = Admin::find($employee_leaves->employee_id);
-                        }else{
+                        } else {
                             $user = Rider::find($employee_leaves->employee_id);
                         }
-                        if(!$user){
+                        if (!$user) {
                             return response()->json(['status' => 1, 'message' => "Invalid Employee ID"]);
                         }
                         $shift = EmployeeShift::find($user->shift_id);
-                        if($employee_leaves->to) {
+                        if ($employee_leaves->to) {
                             $dates = $this->generateDateRange($employee_leaves->from, $employee_leaves->to);
-                        }else {
+                        } else {
                             $dates[] = $employee_leaves->from;
                         }
-                            foreach ($dates as $date){
-                                $date = Carbon::parse($date)->format("Y-m-d");
-                                $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
-                                    ->where('employee_type', $employee_leaves->employee_type_id)
-                                    ->whereDate('attendance_date', $date);
-                                if ($mark_attendance->exists()){
-                                    $mark_attendance = $mark_attendance->first();
-                                }else{
-                                    $mark_attendance = new EmployeeAttendance();
-                                }
-                                $mark_attendance->attendance_date = $date;
-                                $mark_attendance->employee_id = $employee_leaves->employee_id;
-                                $mark_attendance->employee_type = $employee_leaves->employee_type_id;
-                                $mark_attendance->clock_in_latitude = "24.85758065592256";
-                                $mark_attendance->clock_in_longitude = "67.12476908400743";
-                                $mark_attendance->clock_out_latitude = "24.85758065592256";
-                                $mark_attendance->clock_out_longitude = "67.12476908400743";
-                                if($shift){
-                                    $mark_attendance->clock_in_datetime = $date.' '.$shift->start_time;
-                                    $mark_attendance->clock_out_datetime = $date.' '.$shift->end_time;
-                                }else{
-                                    $mark_attendance->clock_in_datetime = $date.' 09:00:00';
-                                    $mark_attendance->clock_out_datetime = $date.' 18:00:00';
-                                }
-                                $mark_attendance->leave_status = 1;
-                                $mark_attendance->save();
-
-                                $attendance_action = new EmployeeAttendanceActionLog();
-                                $attendance_action->employee_id = $mark_attendance->employee_id;
-                                $attendance_action->employee_type = $mark_attendance->employee_type;
-                                $attendance_action->action_id = 1;
-                                $attendance_action->action_date = $mark_attendance->clock_in_datetime;
-                                $attendance_action->attendance_date = $date;
-                                $attendance_action->latitude = $mark_attendance->clock_in_latitude;
-                                $attendance_action->longitude = $mark_attendance->clock_in_longitude;
-                                $attendance_action->save();
-
-                                $attendance_action = new EmployeeAttendanceActionLog();
-                                $attendance_action->employee_id = $mark_attendance->employee_id;
-                                $attendance_action->employee_type = $mark_attendance->employee_type;
-                                $attendance_action->action_id = 2;
-                                $attendance_action->action_date = $mark_attendance->clock_out_datetime;
-                                $attendance_action->attendance_date = $date;
-                                $attendance_action->latitude = $mark_attendance->clock_out_latitude;
-                                $attendance_action->longitude = $mark_attendance->clock_out_longitude;
-                                $attendance_action->save();
+                        foreach ($dates as $date) {
+                            $date = Carbon::parse($date)->format("Y-m-d");
+                            $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
+                                ->where('employee_type', $employee_leaves->employee_type_id)
+                                ->whereDate('attendance_date', $date);
+                            if ($mark_attendance->exists()) {
+                                $mark_attendance = $mark_attendance->first();
+                            } else {
+                                $mark_attendance = new EmployeeAttendance();
                             }
+                            $mark_attendance->attendance_date = $date;
+                            $mark_attendance->employee_id = $employee_leaves->employee_id;
+                            $mark_attendance->employee_type = $employee_leaves->employee_type_id;
+                            $mark_attendance->clock_in_latitude = "24.85758065592256";
+                            $mark_attendance->clock_in_longitude = "67.12476908400743";
+                            $mark_attendance->clock_out_latitude = "24.85758065592256";
+                            $mark_attendance->clock_out_longitude = "67.12476908400743";
+                            if ($shift) {
+                                $mark_attendance->clock_in_datetime = $date . ' ' . $shift->start_time;
+                                $mark_attendance->clock_out_datetime = $date . ' ' . $shift->end_time;
+                            } else {
+                                $mark_attendance->clock_in_datetime = $date . ' 09:00:00';
+                                $mark_attendance->clock_out_datetime = $date . ' 18:00:00';
+                            }
+                            $mark_attendance->leave_status = 1;
+                            $mark_attendance->save();
+
+                            $attendance_action = new EmployeeAttendanceActionLog();
+                            $attendance_action->employee_id = $mark_attendance->employee_id;
+                            $attendance_action->employee_type = $mark_attendance->employee_type;
+                            $attendance_action->action_id = 1;
+                            $attendance_action->action_date = $mark_attendance->clock_in_datetime;
+                            $attendance_action->attendance_date = $date;
+                            $attendance_action->latitude = $mark_attendance->clock_in_latitude;
+                            $attendance_action->longitude = $mark_attendance->clock_in_longitude;
+                            $attendance_action->save();
+
+                            $attendance_action = new EmployeeAttendanceActionLog();
+                            $attendance_action->employee_id = $mark_attendance->employee_id;
+                            $attendance_action->employee_type = $mark_attendance->employee_type;
+                            $attendance_action->action_id = 2;
+                            $attendance_action->action_date = $mark_attendance->clock_out_datetime;
+                            $attendance_action->attendance_date = $date;
+                            $attendance_action->latitude = $mark_attendance->clock_out_latitude;
+                            $attendance_action->longitude = $mark_attendance->clock_out_longitude;
+                            $attendance_action->save();
+                        }
 
                     } elseif ($employee_leaves->status == 1) {
                         $employee_leaves->status = 2;
                         $employee_leaves->updated_by = $admin_id;
                         $hr_admins = Admin::where('role_id', 63);
-                        if($hr_admins->exists()){
+                        if ($hr_admins->exists()) {
                             $hr_admins = $hr_admins->get();
-                            foreach ($hr_admins as $hr_admin){
+                            foreach ($hr_admins as $hr_admin) {
                                 NotificationsController::app_notification(13, $hr_admin->id, 1, $employee_leaves->id);
                             }
                         }
@@ -4881,7 +4875,7 @@ class AdminAPIController extends Controller
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
                 $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
-                if(!$dispute_check){
+                if (!$dispute_check) {
                     return response()->json(false);
                 }
                 // arrive function
@@ -4895,22 +4889,22 @@ class AdminAPIController extends Controller
                     }
                 }
 
-                
+
                 if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 63) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
-                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                    if ($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0) {
                         return response()->json(false);
 
                     }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
-                    if($volume_weight < 0.01){
+                    if ($volume_weight < 0.01) {
                         $volume_weight = 0.01;
                     }
                     $dense_weight = $request->weight;
-                    if($dense_weight < 0.01){
+                    if ($dense_weight < 0.01) {
                         $dense_weight = 0.01;
                     }
-                    $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
-                    if($retail_shipment->exists()){
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if ($retail_shipment->exists()) {
 //                        if ($dense_weight < $volume_weight) {
 //                            $actual_weight = $volume_weight;
 //                        } else {
@@ -4918,12 +4912,11 @@ class AdminAPIController extends Controller
 //                        }
                         $retail_flag = true;
                         $dws_charges_status = 1;
-                    }
-                    else{
+                    } else {
                         $retail_flag = false;
                     }
 
-                    if($retail_flag == false){
+                    if ($retail_flag == false) {
                         if ($shipment->business_category_id == 2) {
                             if ($dense_weight < $volume_weight) {
                                 $actual_weight = $volume_weight;
@@ -4960,7 +4953,7 @@ class AdminAPIController extends Controller
 
                                 $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
                                 $not_include_shippers = [6693, 12412];
-                                $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+                                $not_include_shippers = array_merge($not_include_shippers, $not_include_shippers1);
 
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
@@ -4968,21 +4961,19 @@ class AdminAPIController extends Controller
                                     if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
                                         $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
-                                        if($shipment_estimated_weight->exists()){
+                                        if ($shipment_estimated_weight->exists()) {
                                             $shipment_estimated_weight = $shipment_estimated_weight->first();
-                                        }
-                                        else{
+                                        } else {
                                             $shipment_estimated_weight = new ShipmentsEstimatedWeight();
                                         }
                                         $shipment_estimated_weight->shipment_id = $shipment->id;
                                         $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
-                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        $shipment_estimated_weight->actual_weight = $actual_weight;
                                         if ($volume_weight) {
                                             $shipment_estimated_weight->length = $request->dimension_l;
                                             $shipment_estimated_weight->breadth = $request->dimension_w;
                                             $shipment_estimated_weight->height = $request->dimension_h;
-                                        }
-                                        else{
+                                        } else {
                                             $shipment_estimated_weight->length = null;
                                             $shipment_estimated_weight->breadth = null;
                                             $shipment_estimated_weight->height = null;
@@ -5019,7 +5010,7 @@ class AdminAPIController extends Controller
 
                                 $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
                                 $not_include_shippers = [6693, 12412];
-                                $not_include_shippers = array_merge($not_include_shippers,$not_include_shippers1);
+                                $not_include_shippers = array_merge($not_include_shippers, $not_include_shippers1);
 
                                 if (!in_array($shipment->user_id, $not_include_shippers)) {
                                     $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
@@ -5027,21 +5018,19 @@ class AdminAPIController extends Controller
                                     if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
 
                                         $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
-                                        if($shipment_estimated_weight->exists()){
+                                        if ($shipment_estimated_weight->exists()) {
                                             $shipment_estimated_weight = $shipment_estimated_weight->first();
-                                        }
-                                        else{
+                                        } else {
                                             $shipment_estimated_weight = new ShipmentsEstimatedWeight();
                                         }
                                         $shipment_estimated_weight->shipment_id = $shipment->id;
                                         $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
-                                        $shipment_estimated_weight->actual_weight= $actual_weight;
+                                        $shipment_estimated_weight->actual_weight = $actual_weight;
                                         if ($volume_weight) {
                                             $shipment_estimated_weight->length = $request->dimension_l;
                                             $shipment_estimated_weight->breadth = $request->dimension_w;
                                             $shipment_estimated_weight->height = $request->dimension_h;
-                                        }
-                                        else{
+                                        } else {
                                             $shipment_estimated_weight->length = null;
                                             $shipment_estimated_weight->breadth = null;
                                             $shipment_estimated_weight->height = null;
@@ -5105,7 +5094,7 @@ class AdminAPIController extends Controller
                         // }
 
                         $pickup_note_request = $pickup_request->pickup_note_request;
-                        if($pickup_note_request){
+                        if ($pickup_note_request) {
                             $pickup_note_id = $pickup_note_request->pickup_note_id;
                             $reference_2_id = $pickup_note_id;
                         }
@@ -5115,7 +5104,7 @@ class AdminAPIController extends Controller
                     if ($pickup_request && $pickup_request->current_rider_id == null) {
                         $rider_id = $pickup_rider_id;
                     }
-                    if($retail_flag == false){
+                    if ($retail_flag == false) {
                         if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                             $receiving_sheet_shipment->status = 1;
                             $receiving_sheet_shipment->save();
@@ -5158,7 +5147,7 @@ class AdminAPIController extends Controller
 
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
-                    if($retail_flag == false){
+                    if ($retail_flag == false) {
                         if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
                             if ($shipment->booking_type_id == 4) {
                                 ShipmentChargesController::walkin_weight($shipment_id);
@@ -5296,7 +5285,7 @@ class AdminAPIController extends Controller
 
                     }
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    if($pickup_request){
+                    if ($pickup_request) {
                         if ($pickup_request->received >= 1) {
                             $pickup_note_request = $pickup_request->pickup_note_request;
                             if ($pickup_note_request) {
@@ -5329,7 +5318,7 @@ class AdminAPIController extends Controller
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
-                    }else{
+                    } else {
                         $link = null;
                     }
 
@@ -5380,7 +5369,7 @@ class AdminAPIController extends Controller
                         $dws_detail->dws_date = $request->date;
                         $dws_detail->save();
                     }
-                    if($pickup_note_id != NULL){
+                    if ($pickup_note_id != NULL) {
                         $this->dws_pickup_note($pickup_note_id, $rider_id);
                     }
 
@@ -5400,14 +5389,14 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function dws_pickup_note($pickup_note_id, $rider_id){
+    public function dws_pickup_note($pickup_note_id, $rider_id)
+    {
         $dws_pickup_note = DwsPickupNote::where('pickup_note_id', $pickup_note_id);
-        if($dws_pickup_note->exists()){
+        if ($dws_pickup_note->exists()) {
             $dws_pickup_note = $dws_pickup_note->first();
             $dws_pickup_note->shipments_count = $dws_pickup_note->shipments_count + 1;
             $dws_pickup_note->save();
-        }
-        else{
+        } else {
             $dws_pickup_note = new DwsPickupNote();
             $dws_pickup_note->pickup_note_id = $pickup_note_id;
             $dws_pickup_note->rider_id = $rider_id;
@@ -5453,15 +5442,15 @@ class AdminAPIController extends Controller
                     ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if($attendance->leave_status == 2){
+                    if ($attendance->leave_status == 2) {
                         $datum["status"] = 4;
-                    }else{
+                    } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
                                 $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                                 $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
                                 if ($attendance_date == $clock_in_date) {
-                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date . $shift->start_time)->addMinutes((int)$shift->grace_time);
                                     $clock_in = Carbon::parse($attendance->clock_in_datetime);
                                     $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
                                     if ($time_diff > 0) {
@@ -5475,12 +5464,10 @@ class AdminAPIController extends Controller
                             } else {
                                 $datum["status"] = 3;//Absent
                             }
-                        }
-                        else {
+                        } else {
                             if ($attendance->clock_in_datetime) {
                                 $datum["status"] = 1;//Present
-                            }
-                            else{
+                            } else {
                                 $datum["status"] = 3;//Absent
                             }
                         }
@@ -5510,10 +5497,10 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($user->exists()) {
                 $user = $user->first();
-                if($user->status == 0){
+                if ($user->status == 0) {
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
                 if (Hash::check($request->input('pin'), $user->password)) {
@@ -5524,23 +5511,23 @@ class AdminAPIController extends Controller
                     $information['name'] = $user->name;
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
-                    $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
-                    if($user->designation_id){
+                    $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                    if ($user->designation_id) {
                         $user_department = $user->Edesignation->department_id;
-                    }else{
+                    } else {
                         $user_department = $user->role->department_id;
                     }
                     $information['sales_person'] = ($user_department == 7) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
-                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                        $information['address'] = ($employee->address) ? $employee->address : "";
                     } else {
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
-                    if($request->has('device_token')){
+                    if ($request->has('device_token')) {
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
@@ -5557,7 +5544,7 @@ class AdminAPIController extends Controller
                         $information['distance'] = $reporting_location->radius;
                         $information['lat'] = $reporting_location->lat;
                         $information['long'] = $reporting_location->long;
-                    }else{
+                    } else {
                         $information['distance'] = 0;
                         $information['lat'] = 0;
                         $information['long'] = 0;
@@ -5598,16 +5585,16 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($admins->exists()) {
                 $admins = $admins->first();
-                if($admins->status == 1){
+                if ($admins->status == 1) {
                     $pin = rand(100000, 999999);
                     $admins->reset_pin_otp = $pin;
                     $admins->save();
                     NotificationsController::send(162, $admins->id, $request->phone_number);
                     return response()->json(['status' => 0, 'message' => 'Otp has been sent to your phone number', 'otp' => $pin]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
             } else {
@@ -5631,18 +5618,17 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($admin->exists()) {
                 $admin = $admin->first();
-                if($request->input('otp') == $admin->reset_pin_otp){
+                if ($request->input('otp') == $admin->reset_pin_otp) {
                     $admin->password = bcrypt($request->pin);
                     $admin->dummy_pin = $request->pin;
                     $admin->reset_pin_otp = NULL;
                     $admin->save();
 
-                    $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
-                    if($employee->exists())
-                    {
+                    $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
+                    if ($employee->exists()) {
                         $employee = $employee->first();
                         $employee->pin = $request->pin;
                         $employee->update();
@@ -5650,7 +5636,7 @@ class AdminAPIController extends Controller
                     $admin->reset_pin_status = 1;
                     $admin->save();
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
-                }else {
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
                 }
             } else {
@@ -5689,7 +5675,7 @@ class AdminAPIController extends Controller
                 'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
-                'line_manager_id' => ['nullable',  'integer', 'digits_between:1,10'],
+                'line_manager_id' => ['nullable', 'integer', 'digits_between:1,10'],
 
                 //BankInformation
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
@@ -5784,7 +5770,7 @@ class AdminAPIController extends Controller
                         $employee_request->line_manager_id = $request->line_manager_id;
                         $employee_request->save();
 
-                        if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
+                        if ($request->has("bank_id") && $request->has("account_title") && $request->has("iban")) {
                             $employee_bank_info = new EmployeeBankInformation();
                             $employee_bank_info->employee_id = $employee_request->id;
                             $employee_bank_info->account_title = $request->account_title;
@@ -5819,7 +5805,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = "Welcome to TRAX ".$request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
+                        $message = "Welcome to TRAX " . $request->name . "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -5904,7 +5890,7 @@ class AdminAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = "Welcome to TRAX ".$employee_request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
+                        $message = "Welcome to TRAX " . $employee_request->name . "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -5931,14 +5917,14 @@ class AdminAPIController extends Controller
     public function admin_profile(Request $request)
     {
         $admin_id = $request->admin_id;
-        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+        $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
             ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'e.official_phone_number as official_phone_number', 'e.personal_email as personal_email')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
-        $admin_profile = $admin_profile->get();
+            $admin_profile = $admin_profile->get();
             return response()->json(['status' => 0, 'admin' => $admin_profile]);
         } else {
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
@@ -6020,14 +6006,14 @@ class AdminAPIController extends Controller
     public function check_profile(Request $request)
     {
         $admin_id = $request->admin_id;
-        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+        $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
             ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
-            if(!$admin_profile->blood_group_id || !$admin_profile->emergency_contact_no || !$admin_profile->emergency_contact_person){
+            if (!$admin_profile->blood_group_id || !$admin_profile->emergency_contact_no || !$admin_profile->emergency_contact_person) {
                 return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => "Profile already updated"]);
             }
         } else {
@@ -6039,7 +6025,7 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $blood_group_list = EmployeeBloodGroup::all();
-        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+        $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
             ->select('e.id as employee_id', 'bg.name as blood_group_name', 'bg.id as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('admins.id', $admin_id);
@@ -6080,11 +6066,12 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function check_pin(Request $request){
+    public function check_pin(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
-            if($admin->reset_pin_status == 1){
+        if ($admin) {
+            if ($admin->reset_pin_status == 1) {
                 return response()->json(['status' => 0, 'pin_status' => 1]);
             }
             return response()->json(['status' => 0, 'pin_status' => 0]);
@@ -6092,11 +6079,12 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'pin_status' => 0]);
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
-            if($admin->reset_pin_status == 1){
+        if ($admin) {
+            if ($admin->reset_pin_status == 1) {
                 $admin->reset_pin_status = 0;
                 $admin->save();
                 return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
@@ -6106,7 +6094,8 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
     }
 
-    public function leads_list(Request $request){
+    public function leads_list(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
 
@@ -6117,33 +6106,32 @@ class AdminAPIController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
+            ->select('leads.id as lead_id', 'leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service', 'leads.brand as brand', 'ad.name as sale_person');
 
-        if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
+        if ($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60) {
             $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
         }
 
-        if($request->city_id){
+        if ($request->city_id) {
             $leads = $leads->where('leads.city_id', $request->city_id);
         }
-        if($request->status_id){
+        if ($request->status_id) {
             $leads = $leads->where('leads.status_id', $request->status_id);
         }
-        if($request->date_from){
-            if($request->date_to){
-                $from = $request->date_from.' 00:00:00';
-                $to = $request->date_to.' 23:59:59';
+        if ($request->date_from) {
+            if ($request->date_to) {
+                $from = $request->date_from . ' 00:00:00';
+                $to = $request->date_to . ' 23:59:59';
                 $leads = $leads->whereBetween('leads.requested_date', [$from, $to]);
-            }
-            else{
+            } else {
                 $leads = $leads->whereDate('leads.requested_date', $request->date_from);
             }
         }
-        if($leads->exists()){
+        if ($leads->exists()) {
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
             $data = array();
-            foreach ($leads as $lead){
+            foreach ($leads as $lead) {
                 $datum = array();
                 $datum["lead_id"] = $lead->lead_id;
                 $datum["contact_person"] = $lead->contact_person;
@@ -6160,12 +6148,13 @@ class AdminAPIController extends Controller
                 $data[] = $datum;
             }
             return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }
     }
 
-    public function add_remarks(Request $request){
+    public function add_remarks(Request $request)
+    {
         $rules = [
             'remarks' => ['required', 'max:500'],
             'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
@@ -6182,26 +6171,26 @@ class AdminAPIController extends Controller
             $lead_id = $request->lead_id;
             $lead = Lead::find($lead_id);
             $remarks = $request->remarks;
-            if($remarks != NULL){
+            if ($remarks != NULL) {
                 $lead_remarks = new LeadRemark();
                 $lead_remarks->lead_id = $lead->id;
                 $lead_remarks->remarks = $remarks;
                 $lead_remarks->updated_by = $admin_id;
                 $lead_remarks->save();
-                if($lead->sale_person_id){
-                    if($lead->sale_person_id != $admin_id){
+                if ($lead->sale_person_id) {
+                    if ($lead->sale_person_id != $admin_id) {
                         NotificationsController::app_notification(15, $lead->sale_person_id, 1, $lead_id);
                     }
                 }
                 return response()->json(['status' => 0, 'message' => 'Remarks added Successfully!']);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Remarks!']);
             }
         }
     }
 
-    public function view_remarks(Request $request){
+    public function view_remarks(Request $request)
+    {
         $rules = [
             'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
         ];
@@ -6217,7 +6206,7 @@ class AdminAPIController extends Controller
                 ->select('lead_remarks.id as id', 'lead_remarks.remarks as remarks', 'lead_remarks.created_at as created_at', 'a.name as updated_by')
                 ->where('lead_id', $lead_id)
                 ->orderBy('lead_remarks.created_at', 'ASC');
-            if($lead_remarks->exists()){
+            if ($lead_remarks->exists()) {
                 $lead_remarks = $lead_remarks->get();
                 return response()->json(['status' => 0, 'data' => $lead_remarks]);
             }
@@ -6246,8 +6235,8 @@ class AdminAPIController extends Controller
                     ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
-                    ->where('e.name', 'like','%' . $request->search_param . '%')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
+                    ->where('e.name', 'like', '%' . $request->search_param . '%')
                     ->where('admins.status', 1);
 
             } elseif ($request->search_with == 2) {
@@ -6256,7 +6245,7 @@ class AdminAPIController extends Controller
                     ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
                     ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
                     ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
                     ->where('admins.status', 1);
@@ -6266,7 +6255,7 @@ class AdminAPIController extends Controller
                     ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
                     ->where('e.trax_id', $request->search_param)
                     ->where('admins.status', 1);
             } else {
@@ -6285,19 +6274,19 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
+        if ($admin) {
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
+                if (!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name || !$admin_profile->address || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id) {
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
         }
 
@@ -6307,7 +6296,7 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
+        if ($admin) {
             $blood_group_list = EmployeeBloodGroup::all();
             $gender_list = EmployeeGender::all();
             $religion_list = EmployeeReligion::all();
@@ -6323,7 +6312,7 @@ class AdminAPIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
         }
     }
@@ -6359,7 +6348,7 @@ class AdminAPIController extends Controller
             $employee_request = Employee::find($request->employee_id);
             if ($employee_request) {
                 $admin = Admin::where('trax_id', $employee_request->trax_id);
-                if($admin->exists()){
+                if ($admin->exists()) {
                     $admin = $admin->first();
                     $city = City::find($employee_request->city_id);
                     $employee_request->zone_id = $city->zone_id;
@@ -6426,12 +6415,10 @@ class AdminAPIController extends Controller
                     $employee_request->save();
                     $admin->save();
                     return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
-                }
-                else {
+                } else {
                     return response()->json(['status' => 1, 'message' => 'User not found!']);
                 }
-            }
-            else {
+            } else {
                 return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
         }
@@ -6450,17 +6437,17 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            if(!$request->has('status_id')){
+            if (!$request->has('status_id')) {
                 $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
                 return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
-            }else{
+            } else {
                 $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
                     ->select('lead_reasons.id as id', 'lead_reasons.name as name')
                     ->where('lsr.status_id', $request->status_id);
-                if($lead_reason->exists()){
+                if ($lead_reason->exists()) {
                     $lead_reason = $lead_reason->get();
                     return response()->json(['status' => 0, 'reasons' => $lead_reason]);
-                }else{
+                } else {
                     return response()->json(['status' => 0, 'reasons' => []]);
                 }
             }
@@ -6485,10 +6472,10 @@ class AdminAPIController extends Controller
         } else {
             $lead = Lead::find($request->lead_id);
             $admin_id = $request->admin_id;
-            if($lead){
-                if($lead->sale_person_id){
+            if ($lead) {
+                if ($lead->sale_person_id) {
                     $reason_id = NULL;
-                    if($request->has('reason_id')){
+                    if ($request->has('reason_id')) {
                         $reason_id = $request->reason_id;
                     }
                     $lead_log = new LeadLog();
@@ -6517,10 +6504,10 @@ class AdminAPIController extends Controller
                     }
                     $lead_status = LeadStatus::find($request->status_id);
                     return response()->json(['status' => 0, 'message' => 'Status updated Successfully!', 'status_name' => $lead_status->name]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Sales Person not Tagged']);
                 }
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
             }
         }
@@ -6624,7 +6611,7 @@ class AdminAPIController extends Controller
             $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp', 'wms_picklist_items.pending_picking_id', '=', 'wpp.id')
                 ->where('wms_picklist_items.picklist_id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
 
-            $product = WmsProductBarcode::where('picklist_id', $request->picklist_id)->where('status', 3)->whereIn('product_id',$product_ids)->where(function ($query) use($barcode) {
+            $product = WmsProductBarcode::where('picklist_id', $request->picklist_id)->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
                 $query->where('barcode', '=', $barcode)
                     ->orWhere('id', '=', $barcode);
             });
@@ -6658,7 +6645,7 @@ class AdminAPIController extends Controller
                     $shipment_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
                     $courier_order_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
                     Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 8]);
-                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=' , 7)->update(['status' => 3]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=', 7)->update(['status' => 3]);
                     $picklist->status = 1;
                     $picklist->save();
                     foreach ($picklist->items as $item) {
@@ -6738,12 +6725,12 @@ class AdminAPIController extends Controller
             $permissions['return_note_create'] = (in_array(48, $user_permissions)) ? 1 : 0;
             $permissions['return_note_view'] = (in_array(49, $user_permissions)) ? 1 : 0;
             $permissions['return_note_receive'] = (in_array(50, $user_permissions)) ? 1 : 0;
-            $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
-            if($global_settings->exists()){
+            $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
+            if ($global_settings->exists()) {
                 $global_settings = $global_settings->first();
-                return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value,'permissions' => $permissions]);
-            }else{
-                return response()->json(['status' => 0, 'app_version' => 24,'permissions' => $permissions]);
+                return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value, 'permissions' => $permissions]);
+            } else {
+                return response()->json(['status' => 0, 'app_version' => 24, 'permissions' => $permissions]);
             }
         }
     }
@@ -6755,13 +6742,14 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses, 'shippers' => $shippers]);
     }
 
-    public function shipper_details(Request $request){
+    public function shipper_details(Request $request)
+    {
 
-        $shipper_detail = User::where('status', 3)->where('id', $request->shipper_id)->select('name','poc','address','email','phone');
-        if($shipper_detail){
+        $shipper_detail = User::where('status', 3)->where('id', $request->shipper_id)->select('name', 'poc', 'address', 'email', 'phone');
+        if ($shipper_detail) {
             $shipper_detail = $shipper_detail->get();
             return response()->json(['status' => 0, 'shipper_detail' => $shipper_detail]);
-        }else {
+        } else {
             return response()->json(['status' => 1, 'message' => "Invalid Shipper!"]);
         }
     }
@@ -6786,17 +6774,17 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }else{
-            try{
+        } else {
+            try {
                 $daily_visit = new DailyVisit();
                 $daily_visit->shipper_id = $request->shipper_id;
-                $daily_visit->company_name = str_replace('"',"",$request->company_name);
-                $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
-                $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
-                $daily_visit->phone_no = str_replace('"',"",$request->phone_no);
-                $daily_visit->email = str_replace('"',"",$request->email_address);
+                $daily_visit->company_name = str_replace('"', "", $request->company_name);
+                $daily_visit->customer_name = str_replace('"', "", $request->customer_name);
+                $daily_visit->customer_address = str_replace('"', "", $request->customer_address);
+                $daily_visit->phone_no = str_replace('"', "", $request->phone_no);
+                $daily_visit->email = str_replace('"', "", $request->email_address);
                 $daily_visit->lead_status_id = $request->lead_status;
-                $daily_visit->feedback = str_replace('"',"",$request->feedback);
+                $daily_visit->feedback = str_replace('"', "", $request->feedback);
                 $daily_visit->latitude = $request->latitude;
                 $daily_visit->longitude = $request->longitude;
                 $daily_visit->admin_id = $request->admin_id;
@@ -6817,8 +6805,7 @@ class AdminAPIController extends Controller
                     $daily_visit->save();
                 }
                 return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Submitted']);
-            }
-            catch (Exception $ex){
+            } catch (Exception $ex) {
                 return response()->json(['status' => 1, 'message' => 'Error ', 'errors' => $ex]);
             }
         }
@@ -6826,38 +6813,37 @@ class AdminAPIController extends Controller
 
     public function daily_visit_report(Request $request)
     {
-        if ($request->isMethod('get')){
+        if ($request->isMethod('get')) {
             $sale_users_bypass = array();
             $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
             if ($settings->exists()) {
                 $settings = $settings->first();
                 $sale_users_bypass = explode(',', $settings->text);
             }
-            if(in_array($request->admin_id,$sale_users_bypass)){
+            if (in_array($request->admin_id, $sale_users_bypass)) {
                 $admin_list = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
-            }
-            else {
+            } else {
                 $admin_list = Admin::where('status', 1)->where('id', $request->admin_id)->select('id', 'name')->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
         }
-        if ($request->isMethod('post')){
+        if ($request->isMethod('post')) {
             $daily_visit = DB::connection('reports')->table('daily_visits')
                 ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
                 ->join('admins as a', 'a.id', '=', 'daily_visits.admin_id')
                 ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image')
                 ->orderBy('daily_visits.created_at', 'DESC');
-            if($request->from_date){
-                if($request->to_date){
-                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date.' 00:00:00', $request->to_date.' 23:59:59']);
-                }else{
+            if ($request->from_date) {
+                if ($request->to_date) {
+                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date . ' 00:00:00', $request->to_date . ' 23:59:59']);
+                } else {
                     $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
                 }
             }
-            if(!$request->admin_id){
+            if (!$request->admin_id) {
                 $daily_visit = $daily_visit->where('a.id', $request->user_id);
-            }else{
+            } else {
                 $daily_visit = $daily_visit->where('a.id', $request->admin_id);
             }
             if ($daily_visit->exists()) {
@@ -6872,10 +6858,10 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
-            if($request->has('device_token')){
+        if ($admin) {
+            if ($request->has('device_token')) {
                 EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$admin->id)->delete();
+                EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $admin->id)->delete();
                 $employee_device_token = new EmployeeDeviceToken();
                 $employee_device_token->employee_id = $admin->id;
                 $employee_device_token->employee_type_id = 1;
@@ -6887,21 +6873,22 @@ class AdminAPIController extends Controller
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
+                if (!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name || !$admin_profile->address || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id) {
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
         }
 
     }
 
-    public function store_dws_image(Request $request){
+    public function store_dws_image(Request $request)
+    {
         $rules = [
             'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')],
             'picture' => ['required', 'mimes:png,jpeg,jpg']
@@ -6916,9 +6903,9 @@ class AdminAPIController extends Controller
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
             $shipment_details = ShipmentDetail::where('shipment_id', $shipment->id);
-            if($shipment_details->exists()){
+            if ($shipment_details->exists()) {
                 $shipment_details = $shipment_details->first();
-                if($shipment_details->dws_status == 1 && $shipment_details->dws_image == null){
+                if ($shipment_details->dws_status == 1 && $shipment_details->dws_image == null) {
                     $date = Carbon::now()->format('Y_m_d');
                     $file = $request->file('picture');
                     $filename = 'image_' . $shipment->id . '_' . $date . '.' . $file->extension();
@@ -6952,14 +6939,14 @@ class AdminAPIController extends Controller
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
         $staff_categories = StaffCategory::select('id', 'name')->get();
-        $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
+        $shifts = EmployeeShift::where('id', '!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $shift_data = array();
-        foreach($shifts as $shift){
+        foreach ($shifts as $shift) {
             $datum = array();
             $datum['id'] = $shift->id;
-            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
+            $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
             $shift_data[] = $datum;
         }
         return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
@@ -6983,10 +6970,10 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $attendance_date = Carbon::createFromFormat('Y-m-d', $request->attendance_date);
             $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->where('employee_type', 1)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
-            if($last_action_log->exists()){
+            if ($last_action_log->exists()) {
                 $last_action_log = $last_action_log->first();
                 if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
                     $attendance_date = $attendance_date->addDays(1);
@@ -7006,7 +6993,7 @@ class AdminAPIController extends Controller
             }
             $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
-                if($admin_attendance->clock_in_datetime == null){
+                if ($admin_attendance->clock_in_datetime == null) {
                     $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                     $admin_attendance->clock_in_latitude = $request->latitude;
                     $admin_attendance->clock_in_longitude = $request->longitude;
@@ -7025,8 +7012,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
-            }
-            elseif ($request->action == 2) {
+            } elseif ($request->action == 2) {
                 $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                     ->where('employee_type', 1)->orderBy('id', 'DESC')->where('action_id', 1)->first();
                 $attendance_date = $last_clockin_action->attendance_date;
@@ -7062,7 +7048,7 @@ class AdminAPIController extends Controller
                 if ($leave->employee_type_id == 1) {
                     $admin = Admin::find($leave->employee_id);
                     if ($admin) {
-                        if(!$admin->role->department->department_head_id){
+                        if (!$admin->role->department->department_head_id) {
                             return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                         }
                         $data = array();
@@ -7088,7 +7074,7 @@ class AdminAPIController extends Controller
                     $department = AdminDepartment::find(6);
                     if ($department) {
                         if ($rider) {
-                            if(!$department->department_head_id){
+                            if (!$department->department_head_id) {
                                 return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                             }
                             $data = array();
@@ -7108,12 +7094,11 @@ class AdminAPIController extends Controller
                     return response()->json(['status' => 1, 'message' => "Failed"]);
                 }
             }
-        }
-        else {
+        } else {
             $admin_id = $request->admin_id;
             $admin = Admin::find($admin_id);
             if ($admin) {
-                if(!$admin->role->department->department_head_id){
+                if (!$admin->role->department->department_head_id) {
                     return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                 }
                 $data = array();
@@ -7170,8 +7155,7 @@ class AdminAPIController extends Controller
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Adjustment Request ID']);
                     }
-                }
-                else {
+                } else {
                     $leave = EmployeeAttendanceAdjustment::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('date', $request->date);
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Adjustment Request Already Submitted & Pending for Approval']);
@@ -7406,14 +7390,14 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($user->exists()) {
                 $user = $user->first();
-                if($user->status == 0){
+                if ($user->status == 0) {
 
-                    if($user->first_login == 0){
-                        return response()->json(['status' => 1, 'message' => "Dear ".$user->name ."- Your request is in process and is pending for approval from HR."]);
-                    }else{
+                    if ($user->first_login == 0) {
+                        return response()->json(['status' => 1, 'message' => "Dear " . $user->name . "- Your request is in process and is pending for approval from HR."]);
+                    } else {
                         return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                     }
                 }
@@ -7425,23 +7409,23 @@ class AdminAPIController extends Controller
                     $information['name'] = $user->name;
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
-                    $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
-                    if($user->designation_id){
+                    $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                    if ($user->designation_id) {
                         $user_department = $user->Edesignation->department_id;
-                    }else{
+                    } else {
                         $user_department = $user->role->department_id;
                     }
                     $information['sales_person'] = ($user_department == 7) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
-                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                        $information['address'] = ($employee->address) ? $employee->address : "";
                     } else {
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
-                    if($request->has('device_token')){
+                    if ($request->has('device_token')) {
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
@@ -7458,7 +7442,7 @@ class AdminAPIController extends Controller
                         $information['distance'] = $reporting_location->radius;
                         $information['lat'] = $reporting_location->lat;
                         $information['long'] = $reporting_location->long;
-                    }else{
+                    } else {
                         $information['distance'] = 0;
                         $information['lat'] = 0;
                         $information['long'] = 0;
@@ -7477,9 +7461,9 @@ class AdminAPIController extends Controller
                     }
 
                     $information['welcome_bit'] = 0;
-                    if(!$user->first_login){
+                    if (!$user->first_login) {
                         $information['welcome_bit'] = 1;
-                        $information['welcome_message'] = "Welcome to TRAX ".$user->name;
+                        $information['welcome_message'] = "Welcome to TRAX " . $user->name;
                     }
                     $user->first_login = 1;
                     $user->save();
@@ -7488,11 +7472,11 @@ class AdminAPIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
                 }
             } else {
-                $employee = Employee::whereIn('request_status_id',[1,2])->where('employee_type_id',1)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
-                if($employee->exists()){
+                $employee = Employee::whereIn('request_status_id', [1, 2])->where('employee_type_id', 1)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                if ($employee->exists()) {
                     $employee = $employee->first();
-                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ."- Your request is in process and is pending for approval from HR."]);
-                }else{
+                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
             }
@@ -7558,13 +7542,13 @@ class AdminAPIController extends Controller
                 ->where('is_line_manager', 1)
                 ->where('department_id', $request->department_id)
                 ->select(['employees.name as name', 'employees.trax_id as trax_id', 'employees.id as id', 'h.name as hub as hub']);
-            if($line_managers->exists()){
+            if ($line_managers->exists()) {
                 $line_managers = $line_managers->get();
                 $data = array();
-                foreach ($line_managers as $line_manager){
+                foreach ($line_managers as $line_manager) {
                     $datum = array();
                     $datum["id"] = $line_manager->id;
-                    $datum["name"] = $line_manager->name." "."(".$line_manager->trax_id. " | ".$line_manager->hub.")";
+                    $datum["name"] = $line_manager->name . " " . "(" . $line_manager->trax_id . " | " . $line_manager->hub . ")";
                     $data[] = $datum;
                 }
                 return response()->json(['status' => 0, 'line_managers' => $data]);
@@ -7574,7 +7558,8 @@ class AdminAPIController extends Controller
 
     }
 
-    public function leads_list_v2(Request $request){
+    public function leads_list_v2(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
 
@@ -7585,36 +7570,35 @@ class AdminAPIController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
+            ->select('leads.id as lead_id', 'leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id as status_id', 'ls.name as status', 'c.name as city', 'sl.name as service', 'leads.brand as brand', 'ad.name as sale_person');
 
-        if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
+        if ($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60) {
             $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
         }
 
-        if($request->lead_id){
+        if ($request->lead_id) {
             $leads = $leads->where('leads.id', $request->lead_id);
         }
-        if($request->city_id){
+        if ($request->city_id) {
             $leads = $leads->where('leads.city_id', $request->city_id);
         }
-        if($request->status_id){
+        if ($request->status_id) {
             $leads = $leads->where('leads.status_id', $request->status_id);
         }
-        if($request->date_from){
-            if($request->date_to){
-                $from = $request->date_from.' 00:00:00';
-                $to = $request->date_to.' 23:59:59';
+        if ($request->date_from) {
+            if ($request->date_to) {
+                $from = $request->date_from . ' 00:00:00';
+                $to = $request->date_to . ' 23:59:59';
                 $leads = $leads->whereBetween('leads.requested_date', [$from, $to]);
-            }
-            else{
+            } else {
                 $leads = $leads->whereDate('leads.requested_date', $request->date_from);
             }
         }
-        if($leads->exists()){
+        if ($leads->exists()) {
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->paginate(10);
             $data = array();
-            foreach ($leads as $lead){
+            foreach ($leads as $lead) {
                 $datum = array();
                 $datum["lead_id"] = $lead->lead_id;
                 $datum["contact_person"] = $lead->contact_person;
@@ -7631,7 +7615,7 @@ class AdminAPIController extends Controller
                 $data[] = $datum;
             }
             return response()->json(['status' => 0, 'message' => "Leads Found!", 'data' => $data, 'cities' => $cities, 'lead_status' => $lead_statuses]);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }
     }
@@ -7829,7 +7813,7 @@ class AdminAPIController extends Controller
 
     public function employee_leave_list_v2(Request $request)
     {
-        if(!$request->has('admin_employee')){
+        if (!$request->has('admin_employee')) {
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
         }
         $admin_employee = $request->admin_employee;
@@ -7852,11 +7836,11 @@ class AdminAPIController extends Controller
                 $datum['status'] = $employee_leave->status;
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
-                if($employee_leave->to){
+                if ($employee_leave->to) {
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
                     $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
-                }else{
+                } else {
                     $datum['days_count'] = 1;
                 }
                 $data[] = $datum;
@@ -7877,7 +7861,7 @@ class AdminAPIController extends Controller
             $admin_role = $admin->role_id;
             $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
             $employee = $admin->employee;
-            if(!$employee){
+            if (!$employee) {
                 return response()->json(['status' => 1, 'message' => "Employee profile not found!"]);
             }
             if (in_array($admin_id, $department_head_ids)) {
@@ -7885,10 +7869,10 @@ class AdminAPIController extends Controller
                     ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where(function ($query) use($admin_id) {
+                    ->where(function ($query) use ($admin_id) {
                         $query->where('employee_leaves.reporter_id', $admin_id);
                     })
-                    ->orwhere(function ($query) use($employee) {
+                    ->orwhere(function ($query) use ($employee) {
                         $query->where('employee_leaves.status', 6)
                             ->where('employee_leaves.leave_type', '<>', 1)
                             ->where('emp.department_id', $employee->department_id);
@@ -7900,15 +7884,13 @@ class AdminAPIController extends Controller
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.reporter_id', $admin_id);
                 $is_line_manger = true;
-            }
-            elseif (in_array($admin_role,[63, 69, 70])) {
+            } elseif (in_array($admin_role, [63, 69, 70])) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.status', 2);
                 $is_hr = true;
-            }
-            else {
+            } else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
             if ($employee_leaves->exists()) {
@@ -7931,18 +7913,16 @@ class AdminAPIController extends Controller
                         } else {
                             $datum['role'] = 2;
                         }
-                    }
-                    elseif ($is_line_manger){
+                    } elseif ($is_line_manger) {
                         $datum['role'] = 2;
-                    }
-                    elseif ($is_hr){
+                    } elseif ($is_hr) {
                         $datum['role'] = 0;
                     }
-                    if($employee_leave->to){
+                    if ($employee_leave->to) {
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
                         $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
-                    }else{
+                    } else {
                         $datum['days_count'] = 1;
                     }
                     $datum['name'] = $leave_employee->name;
@@ -7971,12 +7951,12 @@ class AdminAPIController extends Controller
                 $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
                     if ($admin->employee->is_line_manager) {
-                        if(in_array($admin_id, $department_head_ids)){
+                        if (in_array($admin_id, $department_head_ids)) {
                             $employee_leaves->status = 2;
-                        } else{
+                        } else {
                             $employee_leaves->status = 6;
                         }
-                        if($employee_leaves->leave_type != 1){
+                        if ($employee_leaves->leave_type != 1) {
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
                             NotificationsController::app_notification(11, $employee_leaves->employee->admin->id, $employee_leaves->employee_type_id, $employee_leaves->id);
@@ -8090,29 +8070,26 @@ class AdminAPIController extends Controller
                     $admin_profile = $employee_leaves->employee;
                     if ($employee_leaves->status == 2) {
                         $employee_leaves->status = 5;
-                    }
-                    elseif ($employee_leaves->status == 1) {
-                        if($employee_leaves->leave_type == 1){
+                    } elseif ($employee_leaves->status == 1) {
+                        if ($employee_leaves->leave_type == 1) {
                             $working_days = $admin_profile->department->working_days;
 
                             $old_start_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->from);
                             $old_end_date = Carbon::createFromFormat('Y-m-d', $employee_leaves->to);
 
                             if ($working_days == 1) {
-                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([ Carbon::SUNDAY]));
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                             } else {
-                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                                $old_diffDays = $old_start_date->diffInWeekdays($old_end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                             }
                             $old_diffDays++;
                             $admin_profile->leave_count = $admin_profile->leave_count + $old_diffDays;
                             $admin_profile->save();
                         }
                         $employee_leaves->status = 7;
-                    }
-                    else if (in_array($employee_leaves->status == 6)) {
+                    } else if (in_array($employee_leaves->status == 6)) {
                         $employee_leaves->status = 3;
-                    }
-                    else {
+                    } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
                     $employee_leaves->rejected_reason = $request->rejection_reason;
@@ -8126,27 +8103,28 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function return_create_index(Request $request){
+    public function return_create_index(Request $request)
+    {
         $role_id = $request->role_id;
         $admin_id = $request->admin_id;
-        $admin_hubs = AdminHub::where('admin_id',$admin_id)->pluck('hub_id')->toArray();
+        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
         $routes = Route::where('status', 1);
-        $hubs = City::where([['status',1],['hub',1]]);
+        $hubs = City::where([['status', 1], ['hub', 1]]);
         if ($role_id != 1) {
-            $routes = $routes->whereHas('city', function ($query) use($admin_hubs) {
+            $routes = $routes->whereHas('city', function ($query) use ($admin_hubs) {
                 $query->whereIn('hub_id', $admin_hubs);
             });
-            $hubs = $hubs->WhereIn('id',session('hubs'));
+            $hubs = $hubs->WhereIn('id', session('hubs'));
         }
         $routes = $routes->get();
-        $hubs = $hubs->get(['id','name']);
-        return response()->json(['status'=> 0, 'routes'=>$routes,'hubs'=>$hubs]);
+        $hubs = $hubs->get(['id', 'name']);
+        return response()->json(['status' => 0, 'routes' => $routes, 'hubs' => $hubs]);
     }
 
     public function get_riders_by_hub(Request $request)
     {
         $rules = [
-            'hub_id' => ['required','integer', 'digits_between:1,10', 'exists:cities,id']
+            'hub_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -8158,16 +8136,16 @@ class AdminAPIController extends Controller
                 ->whereHas('city', function ($query) use ($hub_id) {
                     $query->where('hub_id', $hub_id);
                 })->select('id', 'name', 'route_id', 'trax_id');
-            if($riders->exists()){
+            if ($riders->exists()) {
                 $riders = $riders->get();
                 $data = array();
-                foreach ($riders as $rider){
+                foreach ($riders as $rider) {
                     $datum = array();
                     $datum["id"] = $rider->id;
                     $datum["name"] = $rider->name;
                     $datum["route_id"] = $rider->route_id;
                     $datum["trax_id"] = $rider->trax_id;
-                    $datum["router_name"] = ($rider->route_id) ? $rider->route->code." (".$rider->route->start." to ".$rider->route->end.")" : NULL;
+                    $datum["router_name"] = ($rider->route_id) ? $rider->route->code . " (" . $rider->route->start . " to " . $rider->route->end . ")" : NULL;
                     $data[] = $datum;
                 }
                 return response()->json(['status' => 0, 'riders' => $data]);
@@ -8176,7 +8154,8 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function get_shipment_details(Request $request){
+    public function get_shipment_details(Request $request)
+    {
         $rules = [
             'tracking' => ['required', 'exists:shipments,tracking_number']
         ];
@@ -8187,44 +8166,42 @@ class AdminAPIController extends Controller
         } else {
             $role_id = $request->role_id;
             $admin_id = $request->admin_id;
-            $admin_hubs = AdminHub::where('admin_id',$admin_id)->pluck('hub_id')->toArray();
+            $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
             $different_city_statuses_2 = array(22, 24, 27, 29, 33, 35, 42, 44, 45, 46, 47, 48, 60);
             $different_city_statuses = array(22, 24, 27, 29, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
-            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
+            $allowed_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $return_note_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
-            $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
+            $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $allowed_statuses);
             $status = '';
-            if($shipment->exists()) {
+            if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
-                if(!$dispute_check){
+                if (!$dispute_check) {
                     return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, $admin_id, null,null);
-                if($request->shipper_id != null){
+                ShipmentScanningJourneyController::add($shipment->id, 7, 1, $admin_id, null, null);
+                if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
-                    if($request->shipper_id != $shipment->user_id){
-                        if (in_array($request->shipper_id, $mandatory_shipper) || in_array($shipment->user_id, $mandatory_shipper)){
+                    if ($request->shipper_id != $shipment->user_id) {
+                        if (in_array($request->shipper_id, $mandatory_shipper) || in_array($shipment->user_id, $mandatory_shipper)) {
                             return response()->json(['status' => 1, 'message' => 'Different Shipper, scan shipments of same shipper!.']);
                         }
                     }
                 }
-                if($shipment->return_address_id != NULL){
+                if ($shipment->return_address_id != NULL) {
                     $destination_id = $shipment->return_address->city_id;
-                }
-                else{
+                } else {
                     $destination_id = $shipment->pickup_address->city_id;
                 }
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
                 $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
-                if($role_id == 1 || in_array($destination_id, $admin_hubs)){
+                if ($role_id == 1 || in_array($destination_id, $admin_hubs)) {
                     $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
-                    if(!$request->has('hub_id')){
+                    if (!$request->has('hub_id')) {
                         if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $return_note_statuses))) {
-                            if($shipment->return_address_id != NULL){
+                            if ($shipment->return_address_id != NULL) {
                                 $destination_city_id = $shipment->return_address->city_id;
-                            }
-                            else{
+                            } else {
                                 $destination_city_id = $shipment->pickup_address->city_id;
                             }
 
@@ -8250,13 +8227,12 @@ class AdminAPIController extends Controller
                                     $status = ' - ';
                                 }
                             }
-                            if($shipment->booking_type_id != 4) {
+                            if ($shipment->booking_type_id != 4) {
                                 $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
                                 if ($settings->exists()) {
                                     $settings = $settings->first();
                                     $role_ids = array_map('intval', explode(',', $settings->text));
-                                }
-                                else {
+                                } else {
                                     $role_ids = array();
                                 }
                                 array_push($role_ids, 1);
@@ -8283,11 +8259,11 @@ class AdminAPIController extends Controller
                                 }
                             }
                             $crm_row = 0;
-                            if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                            if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                 $crm_row = 1;
                             }
-                            if(!$request->has('pieces_confirm')){
-                                if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                            if (!$request->has('pieces_confirm')) {
+                                if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                     $details = array();
                                     $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
@@ -8303,10 +8279,9 @@ class AdminAPIController extends Controller
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
-                                if($shipment->return_address_id != NULL){
+                                if ($shipment->return_address_id != NULL) {
                                     $destination_city_id = $shipment->return_address->city_id;
-                                }
-                                else{
+                                } else {
                                     $destination_city_id = $shipment->pickup_address->city_id;
                                 }
 
@@ -8333,7 +8308,7 @@ class AdminAPIController extends Controller
                                         $status = ' - ';
                                     }
                                 }
-                                if($shipment->booking_type_id != 4) {
+                                if ($shipment->booking_type_id != 4) {
                                     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
                                     if ($settings->exists()) {
@@ -8363,11 +8338,11 @@ class AdminAPIController extends Controller
                                     }
                                 }
                                 $crm_row = 0;
-                                if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                     $crm_row = 1;
                                 }
-                                if(!$request->has('pieces_confirm')){
-                                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                if (!$request->has('pieces_confirm')) {
+                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                         $details = array();
                                         $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
@@ -8379,19 +8354,18 @@ class AdminAPIController extends Controller
                                         return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                     }
                                 }
-                                return response()->json(['status' => 0,"shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
                             }
-                    }else
-                        if($request->has('hub_id') && ($destination_id == $request->hub_id)){
+                    } else
+                        if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
                             $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
                             if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
-                                if($shipment->return_address_id != NULL){
+                                if ($shipment->return_address_id != NULL) {
                                     $destination_city_id = $shipment->return_address->city_id;
-                                }
-                                else{
+                                } else {
                                     $destination_city_id = $shipment->pickup_address->city_id;
                                 }
 
@@ -8417,7 +8391,7 @@ class AdminAPIController extends Controller
                                         $status = ' - ';
                                     }
                                 }
-                                if($shipment->booking_type_id != 4) {
+                                if ($shipment->booking_type_id != 4) {
                                     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
                                     if ($settings->exists()) {
                                         $settings = $settings->first();
@@ -8446,11 +8420,11 @@ class AdminAPIController extends Controller
                                     }
                                 }
                                 $crm_row = 0;
-                                if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                     $crm_row = 1;
                                 }
-                                if(!$request->has('pieces_confirm')){
-                                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                if (!$request->has('pieces_confirm')) {
+                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                         $details = array();
                                         $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
@@ -8461,14 +8435,13 @@ class AdminAPIController extends Controller
                                         return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                     }
                                 }
-                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                             } else
                                 if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
-                                    if($shipment->return_address_id != NULL){
+                                    if ($shipment->return_address_id != NULL) {
                                         $destination_city_id = $shipment->return_address->city_id;
-                                    }
-                                    else{
+                                    } else {
                                         $destination_city_id = $shipment->pickup_address->city_id;
                                     }
                                     $destination_city = City::find($destination_city_id);
@@ -8494,7 +8467,7 @@ class AdminAPIController extends Controller
                                             $status = ' - ';
                                         }
                                     }
-                                    if($shipment->booking_type_id != 4) {
+                                    if ($shipment->booking_type_id != 4) {
                                         $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
                                         if ($settings->exists()) {
@@ -8524,11 +8497,11 @@ class AdminAPIController extends Controller
                                         }
                                     }
                                     $crm_row = 0;
-                                    if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
+                                    if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $crm_row = 1;
                                     }
-                                    if(!$request->has('pieces_confirm')){
-                                        if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                    if (!$request->has('pieces_confirm')) {
+                                        if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                             $details = array();
                                             $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
@@ -8539,18 +8512,18 @@ class AdminAPIController extends Controller
                                             return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                         }
                                     }
-                                    return response()->json(['status' => 0,"shipment_details" => ['shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+                                    return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
 
                                 } else {
                                     return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
                                 }
-                        }else{
+                        } else {
                             return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);
                         }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
                 }
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'No Shipment with given Tracking Number is present, Check tracking!']);
             }
 
@@ -8571,7 +8544,7 @@ class AdminAPIController extends Controller
         } else {
             $tracking = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking);
-            if($shipment->exists()){
+            if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
                 $shipment_piece_id = $request->piece_id;
@@ -8587,8 +8560,7 @@ class AdminAPIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
                 }
-            }
-            else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'No Shipment Found!']);
             }
         }
@@ -8718,22 +8690,23 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function get_return_note_list(Request $request){
+    public function get_return_note_list(Request $request)
+    {
         $role_id = $request->role_id;
         $admin_id = $request->admin_id;
-        $admin_hubs = AdminHub::where('admin_id',$admin_id)->pluck('hub_id')->toArray();
+        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
 
         $deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
-            ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count', 'return_notes.status',DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
-            ->where('return_notes.status',0);
+            ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
+            ->select(['return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assignee', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.status', DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
+            ->where('return_notes.status', 0);
 
         if ($role_id != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', $admin_hubs);
         }
 
-        if($deliveries->exists()){
+        if ($deliveries->exists()) {
             $deliveries = $deliveries->get();
             return response()->json(['status' => 0, "return_notes" => $deliveries]);
         }
@@ -8923,6 +8896,128 @@ class AdminAPIController extends Controller
             } else {
                 return response()->json(['status' => 0, 'update_message' => 'Return Note Status Has Been Updated']);
             }
+        }
+    }
+
+    public function return_status_submit_all(Request $request)
+    {
+        $rules = [
+            'shipments' => ['required'],
+            'shipment_status' => ['required'],
+            'shipment_reason' => ['required'],
+            'remarks' => ['required'],
+            'received_or_refused_by' => ['required'],
+            'open_box' => ['nullable'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment_ids = explode(',', $request->shipments);
+            $shipment_status = $request->shipment_status;
+            $shipment_reason = ($request->shipment_reason == -1) ? NULL : $request->shipment_reason;
+            $actual_date = Carbon::now()->format("Y-m-d H:i:s");
+            $shipment_status_mandatory = array(24, 47, 48);
+            $shipment_remark = $request->remarks;
+            $admin_id = $request->admin_id;
+            $received_or_refused_by = $request->received_or_refused_by;
+            $open_box_ids = array();
+            if ($request->has('open_box')) {
+                $open_box_ids = explode(',', $request->open_box);;
+            }
+            $return_note_details = ReturnNote::find($request->return_note_id);
+            if (in_array($shipment_status, $shipment_status_mandatory)) {
+                return response()->json(['status' => 1, 'message' => 'Reason is Mandatory for Selected Status']);
+            }
+            if ($shipment_status == 25) {
+                foreach ($shipment_ids as $shipment_id) {
+                    $parcel = Shipment::where('id', $shipment_id)->first();
+                    if (count($open_box_ids) > 0) {
+                        if (in_array($shipment_id, $open_box_ids)) {
+                            $parcel->open_box = 1;
+                            $parcel->save();
+                            ShipmentOpenBoxJourneyController::add($shipment_id, 7, $admin_id);
+                        }
+                    }
+                    if (!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id', '>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
+
+                        if ($parcel->booking_type_id == 2) {
+                            $shipper_status_id = 31;
+                            $consignee_status_id = 31;
+                            if (in_array($parcel->shipper_status_id, [23, 24])) {
+                                $shipper_status_id = 25;
+                                $consignee_status_id = 25;
+                            }
+                            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, $shipment_reason, $shipment_remark, NULL, $admin_id, $request->return_note_id, NULL, 1, $received_or_refused_by);
+
+                            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $consignee_status_id]);
+
+                        } else if ($parcel->booking_type_id == 3) {
+                            ShipmentsJourneyController::add($shipment_id, 38, 38, $shipment_reason, $shipment_remark, NULL, $admin_id, $request->return_note_id, NULL, 1, $received_or_refused_by);
+
+                            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 38, 'consignee_status_id' => 38]);
+
+                        } else {
+                            ShipmentsJourneyController::add($shipment_id, 25, 25, $shipment_reason, $shipment_remark, NULL, $admin_id, $request->return_note_id, NULL, 1, $received_or_refused_by);
+
+                            Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
+                        }
+                    }
+                    ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                    if ($return_note_details->completion_status == 0) {
+                        $return_note_details->completion_status = 1;
+                        $return_note_details->save();
+                    }
+                }
+                $shipment_status_count = ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'status' => 0])->count();
+                if ($shipment_status_count == 0) {
+                    $return_note_details->updated_by = $admin_id;
+                    $return_note_details->status = 3;
+                }
+                $return_note_details->actual_date = $actual_date;
+                $return_note_details->save();
+
+                NotificationsController::send(15, $request->return_note_id);
+                NotificationsController::send(16, $request->return_note_id);
+                return response()->json(['status' => 0, 'bulk_update_message' => 'Return note shipments status are updated to : Delivered to Shipper']);
+            } else {
+                $remarks = $request->remarks;
+                foreach ($shipment_ids as $shipment_id) {
+                    $shipment = Shipment::find($shipment_id);
+
+                    $shipment->shipper_status_id = $shipment_status;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, $admin_id, $request->return_note_id);
+
+                    ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                    if (count($open_box_ids) > 0) {
+                        if (in_array($shipment_id, $open_box_ids)) {
+                            $shipment->open_box = 1;
+                            $shipment->save();
+                            ShipmentOpenBoxJourneyController::add($shipment_id, 7, $admin_id);
+                        }
+                    }
+                }
+                $shipment_status = ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'status' => 0])->count();
+                if ($shipment_status == 0) {
+                    if ($return_note_details->completion_status == 0) {
+                        $return_note_details->status = 1;
+                        $return_note_details->updated_by = $admin_id;
+
+                    } else {
+                        $return_note_details->status = 3;
+                        $return_note_details->updated_by = $admin_id;
+                    }
+                    $return_note_details->actual_date = $actual_date;
+                    $return_note_details->save();
+
+                }
+                NotificationsController::send(15, $request->return_note_id);
+                NotificationsController::send(16, $request->return_note_id);
+                return response()->json(['status' => 0, 'bulk_update_message' => 'Return Note Status Has Been Updated']);
+            }
+
         }
     }
 
