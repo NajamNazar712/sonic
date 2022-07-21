@@ -6006,7 +6006,7 @@ class APIController extends Controller
                         foreach ($invalid_cities as $key=>$value){
                             if(empty($invalid_cities_string)){
                                 // $invalid_cities_string=  $key.':' ." ".$value;
-                                $invalid_cities_string=  "Dear user, The area ". trim($value) ." is actually present in $key instead of $city_name";
+                                $invalid_cities_string=  "Dear User, The area ". trim($value) ." is actually present in $key instead of $city_name";
                             }else{
                                 $invalid_cities_string= $invalid_cities_string . " and the area ". trim($value) ." is actually present in $key instead of $city_name";
                             }
