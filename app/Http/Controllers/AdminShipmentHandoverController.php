@@ -66,7 +66,8 @@ class AdminShipmentHandoverController extends Controller
 
             $msg_string = null;
             $str_arr = null;
-            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
             foreach ($check as $nsa) {
                 foreach ($str_arr as $arr_value) {
                     if (strtolower($nsa) == strtolower($arr_value)) {
@@ -85,35 +86,25 @@ class AdminShipmentHandoverController extends Controller
                             ->where('dlm.city_id',$shipment->consignee_city_id)
                             ->where('status',1);
                 if($found->exists()){
-                    $found = $found->get()->first();
+                    $found = $found->first();
                     $delivery_area = $found->id;
                     if($request->delivery_location_mapping != null){
                       if($request->delivery_location_mapping != $delivery_area){
-                        return ['status' => 1, 'error' => 'Delivery Location is different'];
+                            return ['status' => 1, 'error' => 'Delivery Location is different'];
                       }
                     }
                 }
                 else{
-                  $delivery_area = 0;
-                  if($request->delivery_location_mapping != null){
+                    $delivery_area = 0;
                     if($request->delivery_location_mapping != $delivery_area){
                       return ['status' => 1, 'error' => 'Delivery Location is different'];
                     }
-                  }else{
-                    if($request->delivery_location_mapping != 0){
-                        return ['status' => 1, 'error' => 'Delivery Location is different'];
-                    }
-                  }
                 }
             }else{
               $delivery_area = 0;
               if($request->delivery_location_mapping != null){
                 if($request->delivery_location_mapping != $delivery_area){
                   return ['status' => 1, 'error' => 'Delivery Location is different'];
-                }
-              }else{
-                if($request->delivery_location_mapping != 0){
-                    return ['status' => 1, 'error' => 'Delivery Location is different'];
                 }
               }
             }
