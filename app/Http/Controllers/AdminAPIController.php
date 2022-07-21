@@ -8914,14 +8914,14 @@ class AdminAPIController extends Controller
 
             if ($new_return_note_shipments != null) {
                 if ($shipments_updated_flag) {
-                    return response()->json(['status' => 0, 'message' => 'Return Note Status Has Been Updated', 'error' => 'Following shipments are already in new return note ' . $new_return_note_shipments]);
+                    return response()->json(['status' => 0, 'update_message' => 'Return Note Status Has Been Updated', 'error' => 'Following shipments are already in new return note ' . $new_return_note_shipments]);
 
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Following shipments are already in new return note ' . $new_return_note_shipments]);
 
                 }
             } else {
-                return response()->json(['status' => 0, 'message' => 'Return Note Status Has Been Updated']);
+                return response()->json(['status' => 0, 'update_message' => 'Return Note Status Has Been Updated']);
             }
         }
     }
