@@ -16,7 +16,7 @@ class UpdateEmployeesIDSForAttandanceSeeder extends Seeder
     public function run()
     {
 
-        EmployeeAttendance::whereDate('id', '>', 993198)->whereNull('link_id')->whereDate('attendance_date', '<','2022-07-20')->delete();
+        EmployeeAttendance::where('id', '>', 993197)->whereDate('attendance_date', '<','2022-07-20')->whereNull('link_id')->delete();
 
         /*$employees = \App\Http\Models\HR\Employee::whereNotNull('trax_id')->get();
 
