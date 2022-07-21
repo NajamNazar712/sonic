@@ -20,9 +20,8 @@ class CreateCxTrainingsTable extends Migration
             $table->date('joining_date')->nullable();
             $table->date('requested_date');
             $table->integer('requested_by')->index();
-            $table->integer('aging');
             $table->integer('training_by')->index()->nullable();
-            $table->integer('status');  // 1 Requested, 2 Inprocess, 3 Completed
+            $table->integer('status')->default(1);  // 1 Requested, 2 Inprocess, 3 Completed
             $table->timestamps();
         });
     }
