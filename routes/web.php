@@ -2648,8 +2648,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('mms')->name('mms.')->group(function (){
-            Route::get('', 'Admins\MMSReportController@index')->name('index');
-            Route::post('list', 'Admins\MMSReportController@list')->name('list');
+            Route::get('', 'Admins\Reports\MMSReportController@index')->name('index');
+            Route::post('list', 'Admins\Reports\MMSReportController@list')->name('list');
         });
     });
 
