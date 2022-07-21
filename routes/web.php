@@ -2647,6 +2647,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@crm_special_approval_list')->name('list');
         });
 
+        Route::prefix('mms')->name('mms.')->group(function (){
+            Route::get('', 'Admins\MMSReportController@index')->name('index');
+            Route::post('list', 'Admins\MMSReportController@list')->name('list');
+        });
     });
 
     //Reports end
