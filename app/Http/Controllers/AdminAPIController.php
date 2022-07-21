@@ -8708,7 +8708,7 @@ class AdminAPIController extends Controller
                     }
                     EmployeeAttendanceController::riders_attendance_mark($rider);
 
-                    return response()->json(['status' => 0, 'message' => "Return note has been created with Return Note Number:" . $note->id]);
+                    return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
                 }
 
             } else {
@@ -8783,6 +8783,7 @@ class AdminAPIController extends Controller
                 $delivered_array = array(25, 31, 38);
                 $return_array = array(23, 25);
                 $data = array();
+                $bulk_statuses = ShipmentStatus::whereIn('id', [24, 25, 29, 35, 47, 48, 60])->select('id', 'name')->get();
                 foreach ($deliveries as $shipment) {
                     $shipment["crm_row"] = ($shipment->complaint != null) ? 1 : 0;
                     $shipment["shipper"] = ($shipment->booking_type_id == 4) ? $shipment->shipper . ' (' . $shipment->poc . ')' : $shipment->shipper;
