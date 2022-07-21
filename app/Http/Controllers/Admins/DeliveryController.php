@@ -338,8 +338,8 @@ class DeliveryController extends Controller
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
             if ($delivery_note_request) {
-               /* $delivery_note_request->completed = 1;
-                $delivery_note_request->save();*/
+                $delivery_note_request->completed = 1;
+                $delivery_note_request->save();
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
 
