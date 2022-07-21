@@ -4937,6 +4937,8 @@ class AdminAPIController extends Controller
 //                        } else {
 //                            $actual_weight = $dense_weight;
 //                        }
+                        $shipment->actual_weight = $shipment->estimated_weight;
+                        $shipment->save();
                         $retail_flag = true;
                         $dws_charges_status = 1;
                     }
