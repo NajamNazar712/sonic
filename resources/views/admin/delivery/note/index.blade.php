@@ -559,7 +559,7 @@
                             var html = "";
                             $.each(data.routes, function(key,v) {
 
-                                html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.code} - (${v.start} - to  ${v.end})</option>`
+                                html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.code} - (${v.start}  to  ${v.end})</option>`
 
                             });
                             $('#route').html(html);
