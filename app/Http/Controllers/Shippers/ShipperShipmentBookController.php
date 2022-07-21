@@ -3172,7 +3172,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
-//            dd($nsa_error);
+//            dd($service_type_check_id);
             if (empty($errors)) {
                 if (empty($nsa_error)) {
                     if (empty($bdmk_error)) {

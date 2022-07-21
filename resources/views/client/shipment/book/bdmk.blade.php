@@ -21,6 +21,7 @@
                                 {{ csrf_field() }}
                                 <input type="hidden" name="excel_nsa" value="1">
                                 <input type="hidden" name="excel_bdmk" value="1">
+                                <input type="hidden" name="service_type_check_id" value="{{$service_type_check_id}}">
                                 <div class="table-responsive">
                                     <table class='table table-bordered' id='tbl'>
                                         <thead>
