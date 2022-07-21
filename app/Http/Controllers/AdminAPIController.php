@@ -8839,8 +8839,7 @@ class AdminAPIController extends Controller
         $return_note_id = $request->return_note_id;
         $array_returned = array(25, 31, 38);
         $array_returned_status = array(24, 29, 35, 47, 48, 60);
-//        $actual_date = $request->actual_date_formatted;
-        $actual_date = Carbon::now()->format("Y-m-d H:i:s");
+        $actual_date = $request->date;
         $admin_id = $request->admin_id;
         $remarks = $request->remarks;
         $reasonId = $request->reason_id;
@@ -8908,6 +8907,7 @@ class AdminAPIController extends Controller
             'remarks' => ['required'],
             'received_or_refused_by' => ['required'],
             'open_box' => ['nullable'],
+            'date' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -8917,7 +8917,7 @@ class AdminAPIController extends Controller
             $shipment_ids = explode(',', $request->shipments);
             $shipment_status = $request->shipment_status;
             $shipment_reason = ($request->shipment_reason == -1) ? NULL : $request->shipment_reason;
-            $actual_date = Carbon::now()->format("Y-m-d H:i:s");
+            $actual_date = $request->date;
             $shipment_status_mandatory = array(24, 47, 48);
             $shipment_remark = $request->remarks;
             $admin_id = $request->admin_id;
