@@ -28,7 +28,7 @@ class UpdateEmployeesIDSForAttandanceSeeder extends Seeder
             }
             if($user){
                 $user_id = $user->id;
-                EmployeeAttendance::where('employee_id', $user_id)->where('employee_type', $employee_type)->where('id', '=<', 993197)->update(['employee_id' => $employee->id]);
+                EmployeeAttendance::where('employee_id', $user_id)->where('employee_type', $employee_type)->where('id', '<', 993198)->update(['employee_id' => $employee->id]);
 //                EmployeeAttendanceActionLog::where('employee_id', $user_id)->where('employee_type', $employee_type)->update(['employee_id' => $employee->id]);
             }
         }
