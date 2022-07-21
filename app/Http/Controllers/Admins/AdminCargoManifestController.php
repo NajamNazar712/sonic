@@ -411,6 +411,10 @@ class AdminCargoManifestController extends Controller
             });
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
