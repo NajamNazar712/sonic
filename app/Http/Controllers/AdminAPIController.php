@@ -8629,7 +8629,7 @@ class AdminAPIController extends Controller
                 }
                 if ($shipments_count != 0) {
 
-                    $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
+                    $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
 
                     if ($note) {
                         foreach ($valid_shipments as $index => $shipment_id) {
