@@ -19,7 +19,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                            <select name="operation_rider_type" id="operation_rider_type" class="form-control select2" required>
                                 @foreach($operation_rider_category as $category)
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
@@ -64,6 +64,8 @@
                                 <i class="ft-camera h1"></i>
                             </a>
                         </div>
+                        <input type="hidden" id="rider_id" name="rider_id">
+                        <input type="hidden" id="operation_rider_type_id" name="operation_rider_type_id">
                     </div>
                 </form>
 
@@ -495,16 +497,17 @@
                 placeholder:'Select Rider*',
             });
 
-            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#operation_rider_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Category*',
             }).bind('select2:select', function () {
                 if(this.value){
+                    var id = this.value;
                     $.ajax({
                         url: '{!! route('admin.delivery.note.operation_riders') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'operation_rider_id': this.value,
+                            'operation_rider_type': this.value,
                         }
                     }).done(function(data){
 
@@ -518,6 +521,9 @@
                             });
                             $('#rider_name').html(html);
                             $('#rider_name').val('').trigger('change');
+                            $('#operation_rider_type_id').val(id);
+                            $('#operation_rider_type').attr('disabled',true);
+                            console.log(id);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -549,6 +555,8 @@
                             $('#route').val(route).trigger('change');
                             $('#scan_tracking').attr("disabled", false);
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                            $("#rider_id").val(rider_id);
+                            $("#rider_name").attr('disabled',true);
                             rider_dncc_check = true;
                         }
                         else {
@@ -580,7 +588,7 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                var rider_id = $('#rider_name').val();
+                var rider_id = $('#rider_id').val();
                 if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
@@ -745,7 +753,7 @@
 
                         });
                     } else {
-                        var rider_id = $('#rider_name').val();
+                        var rider_id = $('#rider_id').val();
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
                             blockPagePermanently();
@@ -973,7 +981,7 @@
             });
 
             function otp_generation(){
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
                 if(rider){
 
                     $.ajax({
@@ -1003,7 +1011,7 @@
 
             function otp_verification() {
                 var otp = $('#otp_input').val();
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
 
                 if (otp.length == 6) {
                     $.ajax({
@@ -1035,7 +1043,8 @@
             var special_rider_flag = false;
             var this_form;
             function create_delivery_note(){
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
+                console.log(rider);
                 var route = $('#route').val();
                 var ccd_flag = true;
                 if(ccd_shipment_ids.length > 0){
@@ -1155,6 +1164,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                            console.log($('#create_delivery_note_form input#selected_rider_id').val());
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
                                                 $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
@@ -1262,10 +1272,10 @@
                 count = table.rows().count();
 
                 var errors = 0;
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
                 var route = $('#route').val();
-                var operation_id = $('#operation_rider_id').val();
-                var special = parseInt($('#rider_name').find(':selected').data('special'));
+                var operation_id = $('#operation_rider_type_id').val();
+                var special = parseInt($('#rider_id').find(':selected').data('special'));
 
 
                 if (rider !== '' && rider !== null) {

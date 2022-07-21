@@ -347,8 +347,8 @@ class DeliveryController extends Controller
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
             if ($delivery_note_request) {
-                $delivery_note_request->completed = 1;
-                $delivery_note_request->save();
+               /* $delivery_note_request->completed = 1;
+                $delivery_note_request->save();*/
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
                 return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
@@ -769,6 +769,7 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -7906,8 +7907,7 @@ class DeliveryController extends Controller
     Public function operation_riders(Request $request)
     {
 
-
-        $operation_id = $request->operation_rider_id;
+        $operation_id = $request->operation_rider_type;
 
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
