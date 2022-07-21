@@ -56,7 +56,7 @@ class UpdateEmployeesIDSForAttandanceSeeder extends Seeder
 
                 if($user->employee_id != null)
                 {
-                    EmployeeAttendance::where('employee_id', $emp)->where('employee_type', $employee_types[$index])->where('id', '<', 993198)->update(['employee_id' => $user->employee_id]);
+                    EmployeeAttendance::where('employee_id', $emp)->where('employee_type', $employee_types[$index])->where('id', '<', 993198)->whereNull('link_id')->update(['link_id' => $emp, 'employee_id' => $user->employee_id]);
                 }
             }
         }
