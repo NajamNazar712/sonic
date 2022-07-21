@@ -338,8 +338,8 @@ class DeliveryController extends Controller
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
             if ($delivery_note_request) {
-                $delivery_note_request->completed = 1;
-                $delivery_note_request->save();
+               /* $delivery_note_request->completed = 1;
+                $delivery_note_request->save();*/
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
 
@@ -966,6 +966,13 @@ class DeliveryController extends Controller
                 $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
             }
             //todo end
+
+            $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->selected_rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
+            if ($delivery_note_request) {
+                $delivery_note_request->completed = 1;
+                $delivery_note_request->save();
+            }
+
 
             return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
         } else {
