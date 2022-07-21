@@ -583,6 +583,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Employee Type</th>
                             <th class="border-primary border-darken-1">Employee Status</th>
+                            <th class="border-primary border-darken-1">Employee Rejoin</th>
                             <th class="border-primary border-darken-1">Pin Update</th>
                             <th class="border-primary border-darken-1">Blacklist</th>
                             <th class="border-primary border-darken-1">Updated By</th>
@@ -1873,10 +1874,12 @@
                                     <td>${index+1}</td>
                                     <td>${value.employee_type}</td>
                                     <td>${value.employee_status}</td>
+                                    <td>${value.rejoin_employee}</td>
                                     <td>${value.pin_update}</td>
                                     <td>${value.blacklist}</td>
                                     <td>${value.updated_by}</td>
                                     <td>${value.updated_at}</td>
+
                                 </tr>
                             `
                         });
