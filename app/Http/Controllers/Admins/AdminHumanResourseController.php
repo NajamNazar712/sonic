@@ -725,12 +725,7 @@ class AdminHumanResourseController extends Controller
                         $employee->rider_type_id = 2;
                         $employee->update();
 
-                        $employee_log = new EmployeeLog();
-                        $employee_log->employee_id = $employee_id;
-                        $employee_log->employee_type_id = 2;
-                        $employee_log->rider_type_id = 2;
-                        $employee_log->updated_by = auth()->id();
-                        $employee_log->save();
+                        $this->employee_log_save($employee_id,2,null,null,null,2,null,auth()->id());
 
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
@@ -776,12 +771,7 @@ class AdminHumanResourseController extends Controller
                         $employee->rider_type_id = 1;
                         $employee->update();
 
-                        $employee_log = new EmployeeLog();
-                        $employee_log->employee_id = $employee_id;
-                        $employee_log->employee_type_id = 2;
-                        $employee_log->rider_type_id = 1; // rider permanent
-                        $employee_log->updated_by = auth()->id();
-                        $employee_log->save();
+                        $this->employee_log_save($employee_id,2,null,null,null,1,null,auth()->id());
 
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
@@ -819,13 +809,7 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->update();
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
-        $employee_log->status_id = 2;
-        $employee_log->blacklist = 1;
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
+        $this->employee_log_save($employee_id,2,null,2,1,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
@@ -855,13 +839,7 @@ class AdminHumanResourseController extends Controller
         $employee->first_inactive = 1;
         $employee->save();
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
-//        $employee_log->first_inactive = 1;
-        $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
+        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
@@ -892,12 +870,7 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee_id;
-        $employee_log->employee_type_id = 2;
-        $employee_log->status_id = 2;
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
+        $this->employee_log_save($employee->id,2,null,2,null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
@@ -932,6 +905,8 @@ class AdminHumanResourseController extends Controller
         $employee_log->status_id = self::GetStatusOfEmployee($employee->id);
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
+
+        $this->employee_log_save($employee_id,1,null,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
@@ -968,6 +943,8 @@ class AdminHumanResourseController extends Controller
         $employee_log->status_id = 2;
         $employee_log->updated_by = auth()->id();
         $employee_log->save();
+
+        $this->employee_log_save($employee_id,1,null,2,null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
@@ -4213,12 +4190,7 @@ class AdminHumanResourseController extends Controller
             'converted_by' => Auth::id(),
         ]);
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee->id;
-        $employee_log->employee_type_id = 1; //staff
-        $employee_log->staff_category_id = 1; // staff not intern
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
+        $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
 
         return back()->with("success","Rider Converted To Staff Successfully");
     }
@@ -4249,12 +4221,7 @@ class AdminHumanResourseController extends Controller
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
 
-                    $employee_log = new EmployeeLog();
-                    $employee_log->employee_id = $employee->id;
-                    $employee_log->employee_type_id = 1;
-                    $employee_log->staff_category_id = 1;
-                    $employee_log->updated_by = auth()->id();
-                    $employee_log->save();
+                    $this->employee_log_save($employee->id,2,1,null,null,null,null,auth()->id());
 
                     return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
@@ -4511,6 +4478,19 @@ class AdminHumanResourseController extends Controller
             ->update(['line_manager_id' => $request->new_line_manager_id]);
 
         return back()->with(['success' => 'Line Manager Updated Successfully','info' => $info ]);
+    }
+
+    function employee_log_save($emp_id,$emp_type_id,$staff_category_id,$status_id,$blacklist,$rider_type_id,$pin,$updated_by){
+        $employee_log = new EmployeeLog();
+        $employee_log->employee_id = $emp_id;
+        $employee_log->employee_type_id = $emp_type_id; //staff or rider
+        $employee_log->staff_category_id = $staff_category_id; // staff not intern
+        $employee_log->status_id = $status_id; //active or inactive
+        $employee_log->blacklist = $blacklist;
+        $employee_log->rider_type_id = $rider_type_id;
+        $employee_log->update_pin = $pin;
+        $employee_log->updated_by = $updated_by;
+        $employee_log->save();
     }
 
 }
