@@ -8885,7 +8885,7 @@ class AdminAPIController extends Controller
                 if (!in_array($parcel->shipper_status_id, $array_returned)) {
                     if (in_array($statusId, $array_returned_status)) {
                         if ($statusId != $parcel->shipper_status_id) {
-                            ShipmentsJourneyController::add($shipment, $statusId, NULL, ($reasonId != null) ? $reasonId : null, $remarks, NULL, $admin_id, $return_note_id);
+                            ShipmentsJourneyController::add($shipment, $statusId, NULL, ($reasonId != null) ? $reasonId : null, $remarks, NULL, $admin_id, $return_note_id, NULL, 1, $received_or_refused_by);
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $statusId]);
                             ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             $shipments_updated_flag = TRUE;
