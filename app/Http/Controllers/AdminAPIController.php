@@ -8880,7 +8880,7 @@ class AdminAPIController extends Controller
                 if ($open_box == 1) {
                     $parcel->open_box = 1;
                     $parcel->save();
-                    ShipmentOpenBoxJourneyController::add($shipment, 7, Auth::id());
+                    ShipmentOpenBoxJourneyController::add($shipment, 7, $admin_id);
                 }
                 if (!in_array($parcel->shipper_status_id, $array_returned)) {
                     if (in_array($statusId, $array_returned_status)) {
