@@ -28,7 +28,7 @@
                     </form>
                     <div class="row mb-2 justify-content-center">
 
-                        <div class="col-3">
+                        <div class="col-2">
                             <fieldset class="form-group">
                                 <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
                                  required>
@@ -40,7 +40,7 @@
                             </fieldset>
 
                         </div>
-                        <div class="col-3">
+                        <div class="col-2">
                             <fieldset class="form-group">
                                 <select name="from" id="from" class="form-control select2" required>
                                 </select>
@@ -48,11 +48,25 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-3">
+                        <div class="col-2">
+                            <fieldset class="form-group">
+                                <input type="text" name="from_dept_area_desg" id="from_dept_area_desg" class="form-control from_dept_area_desg" placeholder="From Person Department*">
+                                <div class="danger" id="from_dept_area_desg_error" style="display:none;">This field is required</div>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-2">
                             <fieldset class="form-group">
                                 <select name="to" id="to" class="form-control select2" required>
                                 </select>
                                 <div class="danger" id="to_error" style="display:none;">This field is required</div>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-2">
+                            <fieldset class="form-group">
+                                <input type="text" name="to_dept_area_desg" id="to_dept_area_desg" class="form-control to_dept_area_desg" placeholder="To Person Department*">
+                                <div class="danger" id="to_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
                         </div>
                         {{ csrf_field() }}
@@ -78,7 +92,9 @@
                         <input type="hidden" name="shipment_ids" class="shipment_ids">
                         <input type="hidden" name="hub_id" class="hub_id">
                         <input type="hidden" name="from" class="from">
+                        <input type="hidden" name="from_dept_area_desg" class="from_dept_area_desg">
                         <input type="hidden" name="to" class="to">
+                        <input type="hidden" name="to_dept_area_desg" class="to_dept_area_desg">
 
                         <div class="form-group ml-1">
                             <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
@@ -322,41 +338,67 @@
                 e.preventDefault();
                 hub_id =  $('#hub :selected').val();
                 from =  $('#from :selected').val();
+                from_dept_area_desg =  $('#from_dept_area_desg').val();
                 to =  $('#to :selected').val();
+                to_dept_area_desg =  $('#to_dept_area_desg').val();
                 errors = 0;
                
                 if (hub_id !== '' && hub_id !== null) {
-                    $('#rider_error').css('display', 'none');
+                    $('#hub_error').css('display', 'none');
                 }
                 else {
                     var error = "Hub not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#hub_error').css('display', 'block');
                 } 
                 if (from !== '' && from !== null) {
-                    $('#rider_error').css('display', 'none');
+                    $('#from_error').css('display', 'none');
                 }
                 else{
                     var error = "From not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#from_error').css('display', 'block');
                 }
+
+                if (from_dept_area_desg !== '' && from_dept_area_desg !== null) {
+                    $('#from_dept_area_desg_error').css('display', 'none');
+                }
+                else{
+                    var error = "From Person Designation Required";
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#from_dept_area_desg_error').css('display', 'block');
+                }
+
                 if (to !== '' && to !== null) {
-                    $('#rider_error').css('display', 'none');
+                    $('#to_error').css('display', 'none');
                 }
                 else {
                     var error = "To not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#to_error').css('display', 'block');
+                } 
+
+                if (to_dept_area_desg !== '' && to_dept_area_desg !== null) {
+                    $('#to_dept_area_desg_error').css('display', 'none');
+                }
+                else {
+                    var error = "Person Designation Required";
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#to_dept_area_desg_error').css('display', 'block');
                 } 
                 
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
                 $('#arrival_of_shipments_form input.hub_id').val(hub_id);
+                $('#arrival_of_shipments_form input.from_dept_area_desg').val(from_dept_area_desg);
                 $('#arrival_of_shipments_form input.from').val(from);
                 $('#arrival_of_shipments_form input.to').val(to);
+                $('#arrival_of_shipments_form input.to_dept_area_desg').val(to_dept_area_desg);
+                
                 var form = this;
             //    console.log('hub_id '+hub_id);
             if(errors !=1){
