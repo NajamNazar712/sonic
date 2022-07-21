@@ -406,6 +406,14 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
+        $rules = [
+            'tracking' => ['required', 'exists:shipments,tracking_number']
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return ['status' => 1, 'error' => 'Invalid Tracking Number'];
+        } else {
 //        todo: bypasses rider category
         if ($request->tracking != '' && $request->rider_id != '' )
         {
@@ -460,7 +468,6 @@ class DeliveryController extends Controller
             }
         }
 //        todo: bypasses rider category end
-
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -725,6 +732,7 @@ class DeliveryController extends Controller
             } else {
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
+        }
         }
     }
 
