@@ -8793,7 +8793,7 @@ class AdminAPIController extends Controller
                     $shipment["remarks"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? ($shipment->remarks != null) ? $shipment->remarks : "-" : NULL;
                     $shipment["reason"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? "-" : NULL;
                     $shipment["received_or_refused_by"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? ($shipment->received_or_refused_by != null) ? $shipment->received_or_refused_by : "-" : NULL;
-                    $shipment["clear_button"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? 0 : 1;
+                    $shipment["hide_dropdowns"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? 1 : 0;
                     $shipment["check_box"] = (in_array($shipment->shipper_status_id, $delivered_array)) ? 0 : 1;
 
                     if (in_array($shipment->shipper_status_id, $delivered_array)) {
