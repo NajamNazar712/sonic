@@ -1255,8 +1255,11 @@ class Permission
 			'settings.pickup.weight_bypass' => 761,			'delivery.note.rider_category_bypass_request' => 757,
             'delivery.note.rider_category_bypass_weight' =>758,
 
-            'vigilance.verification.index' => 770,
+			'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
+
+            'admin.settings.booking_destination_keyword.index' => 772,
+            'admin.settings.booking_destination_keyword.add' => 773
         ],
 
         'shipper' => [

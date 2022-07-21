@@ -1451,6 +1451,10 @@
                                         <li><a class="menu-item" href="{{route('admin.settings.delivery_area_keyword.index')}}">Delivery Area Keyword</a></li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(772, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.booking_destination_keyword.index')}}">Booking Destination Keyword</a></li>
+                                    @endif
+
                                     
                                 </ul>
                             </li>

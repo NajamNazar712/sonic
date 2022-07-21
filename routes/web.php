@@ -88,6 +88,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
+            Route::get('address_verify', 'Shippers\ShipperShipmentBookController@address_verify')->name('address_verify');
             Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::get('restrict_order_id', 'Shippers\ShipperShipmentBookController@restrict_order_id')->name('restrict_order_id');
@@ -1195,6 +1196,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
+                Route::post('onelinkpayment','Admins\DeliveryController@one_link_payments')->name('onelinkpayment');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
                 Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
@@ -1821,6 +1823,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCargoManifestController@manifest_draft_update')->name('update');
         });
 
+        Route::post('/total_bags', 'Admins\AdminCargoManifestController@total_bags_info')->name('total_bags');
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
@@ -3392,7 +3395,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@delivery_area_keyword_update')->name('update');
         });
 
-
+        Route::prefix('booking_destination_keyword')->name('booking_destination_keyword.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@booking_destination_keyword')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@booking_destination_keyword_list')->name('list');
+            Route::get('add', 'Admins\GlobalSettingsController@booking_destination_keyword_add')->name('add');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@booking_destination_keyword_edit')->name('edit');
+            Route::get('view/{id}', 'Admins\GlobalSettingsController@booking_destination_keyword_view')->name('view');
+            Route::post('store', 'Admins\GlobalSettingsController@booking_destination_keyword_store')->name('store');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@booking_destination_keyword_enable_disable')->name('enable_disable');
+            Route::post('update', 'Admins\GlobalSettingsController@booking_destination_keyword_update')->name('update');
+            Route::get('address_verify', 'Admins\GlobalSettingsController@address_verify')->name('address_verify');
+        });
 
 	});
 
@@ -4063,6 +4076,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
             Route::get('/excel', 'Retail\RetailShipmentBookController@excel_index')->name('excel');
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
+            Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
+            // address_verify
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
