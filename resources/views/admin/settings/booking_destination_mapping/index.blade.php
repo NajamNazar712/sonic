@@ -134,11 +134,11 @@
                 order: [[0, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'city_name', name: 'ct.name', class: 'align-middle city_name'},
                     {data: 'added_by', name: 'ad.name', class: 'align-middle added_by'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'delivery_location_mappings.updated_at', class: 'align-middle updated_at'},
-                    {data: 'status', name: 'delivery_location_mappings.status', class: 'align-middle status'},
+                    {data: 'updated_at', name: 'booking_destination_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'status', name: 'booking_destination_mappings.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
