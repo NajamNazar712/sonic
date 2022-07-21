@@ -2675,7 +2675,7 @@ class DeliveryController extends Controller
         $rider_bypass = RiderCategoryByPass::where('rider_id',$request->rider_id)->where('status',0)->latest()->first();
         if($rider_bypass)
         {
-            return redirect()->route('admin.delivery.note.rider_category_request')->with(['error' => 'Request Already Present']);
+            return redirect()->back()->with(['error' => 'Request Already Present']);
         }
         else
         {
