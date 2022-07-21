@@ -571,12 +571,12 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="employee_log">Employee Log<span></span></h4>
+                    <h4 class="modal-title" id="">Employee Log<span></span></h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body employee_log" id="employee_log" style="height: 350px;overflow: scroll">
+                <div class="modal-body employee_log_body" id="employee_log_body" style="height: 350px;overflow: scroll">
                     <table class="table table-bordered datatable" id="employee_log_header">
                         <thead>
                         <tr role="row" class="bg-primary white">
