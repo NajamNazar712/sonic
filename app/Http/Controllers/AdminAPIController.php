@@ -8927,7 +8927,7 @@ class AdminAPIController extends Controller
                 $open_box_ids = explode(',', $request->open_box);;
             }
             $return_note_details = ReturnNote::find($request->return_note_id);
-            if (in_array($shipment_status, $shipment_status_mandatory)) {
+            if (in_array($shipment_status, $shipment_status_mandatory) && $shipment_reason == -1) {
                 return response()->json(['status' => 1, 'message' => 'Reason is Mandatory for Selected Status']);
             }
             if ($shipment_status == 25) {
