@@ -38,9 +38,9 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                @foreach($routes as $route)
+                              {{--  @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
+                                @endforeach--}}
                             </select>
                             <div class="danger" id="route_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -66,6 +66,7 @@
                         </div>
                         <input type="hidden" id="rider_id" name="rider_id">
                         <input type="hidden" id="operation_rider_type_id" name="operation_rider_type_id">
+                        <input type="hidden" id="route_id" name="route_id">
                     </div>
                 </form>
 
@@ -538,7 +539,7 @@
                 placeholder:'Select Route*',
             });
             $('#rider_name').on('change',function () {
-                var route = $(this).find(":selected").data("id");
+                //var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
                 rider_dncc_check = false;
                 if(rider_id != null){
@@ -552,11 +553,18 @@
                     }).done(function(data){
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
-                            $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false);
-                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
                             $("#rider_id").val(rider_id);
                             $("#rider_name").attr('disabled',true);
+
+                            var html = "";
+                            $.each(data.routes, function(key,v) {
+
+                                html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.code} - (${v.start} - to  ${v.end})</option>`
+
+                            });
+                            $('#route').html(html);
+                            $('#route').val('').trigger('change');
+
                             rider_dncc_check = true;
                         }
                         else {
@@ -568,11 +576,22 @@
                         }
                     });
                 }
-                else{
+               /* else{
                     $('#route').val(route).trigger('change');
-                }
+                }*/
 
             });
+
+            $('#route').on('change',function () {
+                if(this.value){
+                    $('#route_id').val(this.value);
+                    $('#route').attr('disabled',true);
+                    $('#scan_tracking').attr("disabled", false);
+                    $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                }
+            });
+
+
             $('#scan_tracking').attr("disabled","disabled");
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
@@ -1044,8 +1063,7 @@
             var this_form;
             function create_delivery_note(){
                 var rider = $('#rider_id').val();
-                console.log(rider);
-                var route = $('#route').val();
+                var route = $('#route_id').val();
                 var ccd_flag = true;
                 if(ccd_shipment_ids.length > 0){
                     if(ccd_rider != 1){
@@ -1273,7 +1291,7 @@
 
                 var errors = 0;
                 var rider = $('#rider_id').val();
-                var route = $('#route').val();
+                var route = $('#route_id').val();
                 var operation_id = $('#operation_rider_type_id').val();
                 var special = parseInt($('#rider_id').find(':selected').data('special'));
 

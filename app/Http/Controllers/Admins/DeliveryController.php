@@ -298,28 +298,9 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-//        $riders = Rider::where('status', 1);
-
-//        if (session('role_id') != 1) {
-//            $riders = $riders->whereHas('city', function ($query) {
-//                $query->whereIn('hub_id', session('hubs'));
-//            });
-//        }
-//
-//        $riders = $riders->get();
-
-        $routes = Route::where('status', 1);
-
-        if (session('role_id') != 1) {
-            $routes = $routes->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
     }
 
     public function get_adjustment_reference(Request $request)
@@ -335,6 +316,16 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
+
+        $routes = Route::where('status', 1);
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
         ->where('r.id' ,$request->rider_id)
@@ -351,14 +342,15 @@ class DeliveryController extends Controller
                 $delivery_note_request->save();*/
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
-                return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+
+                return response()->json(['status' => 1,'routes' => $routes, 'ccd_rider' => $ccd_rider]);
             } else {
                 return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
             }
         } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
-            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider,'routes' => $routes]);
         }
     }
 
