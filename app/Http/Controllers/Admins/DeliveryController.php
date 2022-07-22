@@ -967,13 +967,6 @@ class DeliveryController extends Controller
             }
             //todo end
 
-            $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->selected_rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
-            if ($delivery_note_request) {
-                $delivery_note_request->completed = 1;
-                $delivery_note_request->save();
-            }
-
-
             return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
         } else {
             return redirect()->back()->with(['error' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
@@ -2540,13 +2533,6 @@ class DeliveryController extends Controller
     public function rider_category_bypass_request()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
-        /*if (session('role_id') != 1) {
-            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
-            $riders = Rider::join('cities as c')->where('rstatus', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
-          
-        } else {
-            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
-        }*/
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
             ->where('riders.status', 1);
@@ -2574,6 +2560,12 @@ class DeliveryController extends Controller
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
             ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id']);
+
+        if(session('role_id') != 1){
+            $deliveries = $request->whereIn('c.hub_id', session('hubs'));
+        }
+
+
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
         }
