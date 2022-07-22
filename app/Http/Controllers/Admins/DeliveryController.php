@@ -2559,7 +2559,7 @@ class DeliveryController extends Controller
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id']);
+            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id','c.name as hub']);
 
         if(session('role_id') != 1){
             $request = $request->whereIn('c.hub_id', session('hubs'));
@@ -8044,12 +8044,7 @@ class DeliveryController extends Controller
     public function request_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
-       /* if (session('role_id') != 1) {
-            $cities = City::whereIn('hub_id',session('hubs'))->pluck('id')->toArray();
-            $riders = Rider::where('status', 1)->whereIn('city_id', $cities)->where('blacklist', 0)->select('id', 'name')->get();
-        } else {
-            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
-        }*/
+
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
             ->where('riders.status', 1);
