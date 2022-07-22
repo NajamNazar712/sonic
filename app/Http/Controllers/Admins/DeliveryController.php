@@ -2562,12 +2562,7 @@ class DeliveryController extends Controller
             ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id']);
 
         if(session('role_id') != 1){
-            $deliveries = $request->whereIn('c.hub_id', session('hubs'));
-        }
-
-
-        if ($requests->search_hub) {
-            $request = $request->where('c.hub_id', $requests->search_hub);
+            $request = $request->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($request)
