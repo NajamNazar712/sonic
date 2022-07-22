@@ -2830,7 +2830,7 @@ class AdminCargoManifestController extends Controller
 
                     if ($bag->type == 1) {
                         if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
-                            ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                            //ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
                             $shipper_status_id = 15;
                             $consignee_status_id = 15;
                         } else {

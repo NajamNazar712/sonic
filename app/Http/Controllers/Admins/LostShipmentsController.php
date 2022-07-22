@@ -421,6 +421,11 @@ class LostShipmentsController extends Controller
                                     $bag->completed = 1;
                                     $bag->receiver_id = 346; //global_admin
                                     $bag->save();
+
+                                    $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
+                                    if($manifest){
+                                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+                                    }
                                 }
                             }
                         }
