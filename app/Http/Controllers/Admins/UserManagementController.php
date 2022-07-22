@@ -813,20 +813,22 @@ class UserManagementController extends Controller
         $permission_ids = $request->permission_ids; 
 
         foreach($roles as $role){
+            if ($request->has('permission_ids')) {
+                foreach($permission_ids as $permission_id) {
 
-            foreach($permission_ids as $permission_id) {
-
-                $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id);
-
-                if(!$check_exists->exists()){
-
-                    $admin_role_module_permission = new AdminRoleModulePermission();
-                    $admin_role_module_permission->role_id = $role;
-                    $admin_role_module_permission->permission_id = $permission_id;
-                    $admin_role_module_permission->save();
-
+                    $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id);
+    
+                    if(!$check_exists->exists()){
+    
+                        $admin_role_module_permission = new AdminRoleModulePermission();
+                        $admin_role_module_permission->role_id = $role;
+                        $admin_role_module_permission->permission_id = $permission_id;
+                        $admin_role_module_permission->save();
+    
+                    }
                 }
             }
+            
         }
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Roles has been updated!']);
@@ -845,15 +847,18 @@ class UserManagementController extends Controller
         
         $roles =explode(',' , $request->ids);
         $permission_ids = $request->permission_ids; 
+        if ($request->has('permission_ids')) {
+            foreach($roles as $role){
 
-        foreach($roles as $role){
-
-            foreach($permission_ids as $permission_id) {
-
-                $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id)->delete();
-              
+                foreach($permission_ids as $permission_id) {
+    
+                    $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id)->delete();
+                  
+                }
             }
         }
+
+        
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Roles has been updated!']);
 
