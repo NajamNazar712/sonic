@@ -8699,8 +8699,8 @@ class AdminAPIController extends Controller
         $deliveries = ReturnNote::join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
-            ->select(['return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assignee', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.status', DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
-            ->where('return_notes.status', 0);
+            ->select(['return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assignee', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.status as status_id', DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
+            ->whereIn('return_notes.status', [0, 3])->orderBy('return_notes.id', 'DESC');
 
         if ($role_id != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', $admin_hubs);
@@ -8708,7 +8708,12 @@ class AdminAPIController extends Controller
 
         if ($deliveries->exists()) {
             $deliveries = $deliveries->get();
-            return response()->json(['status' => 0, "return_notes" => $deliveries]);
+            $data = array();
+            foreach ($deliveries as $notes){
+                $notes['status_name'] = ($notes->status_id == 0) ? "Created" : "Updated";
+                $data[] = $notes;
+            }
+            return response()->json(['status' => 0, "return_notes" => $data]);
         }
         return response()->json(['status' => 1, 'message' => 'No Return Note Found!']);
     }
