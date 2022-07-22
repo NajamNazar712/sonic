@@ -9030,8 +9030,7 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'images' => ['array', 'required'],
-            'images.*image' => ['nullable', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'images' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
