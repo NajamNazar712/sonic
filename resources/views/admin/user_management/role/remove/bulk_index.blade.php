@@ -69,8 +69,8 @@
 															<div class="row">
 																<div class="col-12">
 																	<div class=" text-center mt-2">
-																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Select All</button>
-																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Unselect All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="selectAll btn btn-primary" >Unselect All</button>
+																		<button type="button" data-module_id="{{$module->id}}"  class="unselectAll btn btn-primary">Select All</button>
 																	</div>
 																</div>
 															</div>
