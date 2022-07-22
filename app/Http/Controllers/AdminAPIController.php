@@ -9030,7 +9030,7 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'pictures' => ['required'],
+            'images' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -9043,8 +9043,8 @@ class AdminAPIController extends Controller
         if ($return_note) {
             $present = false;
             $pictures = array();
-            if ($request->has('pictures')) {
-                $pictures = explode(',', $request->pictures);
+            if ($request->has('images')) {
+                $pictures = explode(',', $request->images);
             }
             if (count($pictures) > 0) {
                 foreach ($pictures as $picture) {
