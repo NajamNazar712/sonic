@@ -9030,7 +9030,7 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'images' => ['nullable'],
+            'images' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -9043,7 +9043,7 @@ class AdminAPIController extends Controller
         if ($return_note) {
             $present = true;
             $pictures = array();
-            /*if ($request->has('images')) {
+            if ($request->has('images')) {
                 $images = json_decode($request->images, true);
                 foreach ($images as $image) {
                     $pictures[] = $image['image'];
@@ -9067,7 +9067,7 @@ class AdminAPIController extends Controller
             }
             else{
                 return response()->json(['status' => 1, 'message' => 'Images are not provided!']);
-            }*/
+            }
             if ($present && in_array($return_note->status, [1, 3])) {
                 $return_note->updated_by = $admin_id;
                 $return_note->status = 1;
