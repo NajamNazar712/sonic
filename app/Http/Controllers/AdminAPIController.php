@@ -9038,45 +9038,45 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         }
-        $admin_id = $request->admin_id;
-        $return_note_id = $request->return_note_id;
-        $return_note = ReturnNote::find($return_note_id);
-        if ($return_note) {
-            $present = true;
-            $pictures = array();
-            if ($request->has('images')) {
-                $pictures = $request->images;
-            }
-            if (count($pictures) > 0) {
-                foreach ($pictures as $picture) {
-                    $image = $picture;
-                    $extension = 'png';
-                    $random = rand(1000, 100000);
-                    $now = Carbon::now();
-                    $time = $now->year . '_' . $now->month;
-                    $generated_image_name = $time . $random . $admin_id . '.' . $extension;
-                    Storage::disk('public')->put('uploads/return_notes/' . $generated_image_name, file_get_contents($image));
-                    $return_note_image = new ReturnNoteImage();
-                    $return_note_image->return_note_id = $return_note_id;
-                    $return_note_image->image = $generated_image_name;
-                    $return_note_image->save();
+        else {
+            $admin_id = $request->admin_id;
+            $return_note_id = $request->return_note_id;
+            $return_note = ReturnNote::find($return_note_id);
+            $present = false;
+            if ($return_note) {
+                $pictures = array();
+                if ($request->has('images')) {
+                    $pictures = $request->images;
                 }
-                $present = true;
+                if (count($pictures) > 0) {
+                    foreach ($pictures as $picture) {
+                        $image = $picture;
+                        $extension = 'png';
+                        $random = rand(1000, 100000);
+                        $now = Carbon::now();
+                        $time = $now->year . '_' . $now->month;
+                        $generated_image_name = $time . $random . $admin_id . '.' . $extension;
+                        Storage::disk('public')->put('uploads/return_notes/' . $generated_image_name, file_get_contents($image));
+                        $return_note_image = new ReturnNoteImage();
+                        $return_note_image->return_note_id = $return_note_id;
+                        $return_note_image->image = $generated_image_name;
+                        $return_note_image->save();
+                    }
+                    $present = true;
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Images are not provided!']);
+                }
+                if ($present && in_array($return_note->status, [1, 3])) {
+                    $return_note->updated_by = $admin_id;
+                    $return_note->status = 1;
+                    $return_note->save();
+                    return response()->json(['status' => 0, 'message' => 'Images inserted successfully!']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Failed to upload Images!']);
+                }
             }
-            else{
-                return response()->json(['status' => 1, 'message' => 'Images are not provided!']);
-            }
-            if ($present && in_array($return_note->status, [1, 3])) {
-                $return_note->updated_by = $admin_id;
-                $return_note->status = 1;
-                $return_note->save();
-                return response()->json(['status' => 0, 'message' => 'Images inserted successfully!']);
-            }
-            else{
-                return response()->json(['status' => 1, 'message' => 'Failed to upload Images!']);
-            }
+            return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
         }
-        return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
     }
 
 }
