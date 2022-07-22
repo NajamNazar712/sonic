@@ -9030,7 +9030,7 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'images' => ['array', 'nullable'],
+            'images' => ['array', 'required'],
             'images.*image' => ['nullable', 'mimes:jpeg,png,jpg', 'max:2048'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -9045,7 +9045,10 @@ class AdminAPIController extends Controller
             $present = false;
             $pictures = array();
             if ($request->has('images')) {
-                $pictures = $request->images;
+                $images = json_decode($request->images, true);
+                foreach ($images as $image) {
+                    $pictures[] = $image['image'];
+                }
             }
             if (count($pictures) > 0) {
                 foreach ($pictures as $picture) {
@@ -9063,12 +9066,18 @@ class AdminAPIController extends Controller
                 }
                 $present = true;
             }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Images are not provided!']);
+            }
             if ($present && in_array($return_note->status, [1, 3])) {
                 $return_note->updated_by = $admin_id;
                 $return_note->status = 1;
                 $return_note->save();
+                return response()->json(['status' => 0, 'message' => 'Images inserted successfully!']);
             }
-            return response()->json(['status' => 0, 'message' => 'Images inserted successfully!']);
+            else{
+                return response()->json(['status' => 1, 'message' => 'Failed to upload Images!']);
+            }
         }
         return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
     }
