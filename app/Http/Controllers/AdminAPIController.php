@@ -9030,7 +9030,8 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
-            'images' => ['required'],
+            'images' => ['array', 'nullable'],
+            'images.*image' => ['nullable', 'mimes:jpeg,png,jpg', 'max:2048'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -9044,21 +9045,10 @@ class AdminAPIController extends Controller
             $present = false;
             $pictures = array();
             if ($request->has('images')) {
-                $pictures = explode(',', $request->images);
+                $pictures = $request->images;
             }
-            $image = $request->images;
-            $extension = 'png';
-            $random = rand(1000, 100000);
-            $now = Carbon::now();
-            $time = $now->year . '_' . $now->month;
-            $generated_image_name = $time . $random . $admin_id . '.' . $extension;
-            Storage::disk('public')->put('uploads/return_notes/' . $generated_image_name, file_get_contents($image));
-            $return_note_image = new ReturnNoteImage();
-            $return_note_image->return_note_id = $return_note_id;
-            $return_note_image->image = $generated_image_name;
-            $return_note_image->save();
             if (count($pictures) > 0) {
-                /*foreach ($pictures as $picture) {
+                foreach ($pictures as $picture) {
                     $image = $picture;
                     $extension = 'png';
                     $random = rand(1000, 100000);
@@ -9070,7 +9060,7 @@ class AdminAPIController extends Controller
                     $return_note_image->return_note_id = $return_note_id;
                     $return_note_image->image = $generated_image_name;
                     $return_note_image->save();
-                }*/
+                }
                 $present = true;
             }
             if ($present && in_array($return_note->status, [1, 3])) {
@@ -9078,7 +9068,7 @@ class AdminAPIController extends Controller
                 $return_note->status = 1;
                 $return_note->save();
             }
-            return response()->json(['status' => 0, 'message' => 'Image insert successfully!']);
+            return response()->json(['status' => 0, 'message' => 'Images inserted successfully!']);
         }
         return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
     }
