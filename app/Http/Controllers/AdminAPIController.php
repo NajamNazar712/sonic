@@ -9046,8 +9046,19 @@ class AdminAPIController extends Controller
             if ($request->has('images')) {
                 $pictures = explode(',', $request->images);
             }
+            $image = $request->images;
+            $extension = 'png';
+            $random = rand(1000, 100000);
+            $now = Carbon::now();
+            $time = $now->year . '_' . $now->month;
+            $generated_image_name = $time . $random . $admin_id . '.' . $extension;
+            Storage::disk('public')->put('uploads/return_notes/' . $generated_image_name, file_get_contents($image));
+            $return_note_image = new ReturnNoteImage();
+            $return_note_image->return_note_id = $return_note_id;
+            $return_note_image->image = $generated_image_name;
+            $return_note_image->save();
             if (count($pictures) > 0) {
-                foreach ($pictures as $picture) {
+                /*foreach ($pictures as $picture) {
                     $image = $picture;
                     $extension = 'png';
                     $random = rand(1000, 100000);
@@ -9059,7 +9070,7 @@ class AdminAPIController extends Controller
                     $return_note_image->return_note_id = $return_note_id;
                     $return_note_image->image = $generated_image_name;
                     $return_note_image->save();
-                }
+                }*/
                 $present = true;
             }
             if ($present && in_array($return_note->status, [1, 3])) {
