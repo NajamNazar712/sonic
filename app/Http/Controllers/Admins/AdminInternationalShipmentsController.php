@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
@@ -413,7 +415,21 @@ class AdminInternationalShipmentsController extends Controller
 
                                 $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
                                 if($manifest){
+                                    $manifest->status = 1;
+                                    $manifest->save();
+
+                                    $total_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->count();
+                                    $total_received_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->where('status',1)->count();
+
                                     CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+
+                                    $cargo_manifest = CargoManifest::find($manifest->cargo_manifest_id);
+                                    if($total_manifest_bags == $total_received_manifest_bags){
+                                        $cargo_manifest->status_id = 2;
+                                        $cargo_manifest->received_by = 346;
+                                        $cargo_manifest->received_bags = $total_received_manifest_bags;
+                                        $cargo_manifest->save();
+                                    }
                                 }
                             }
                         }

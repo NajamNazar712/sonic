@@ -375,7 +375,7 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-
+        //dd($request);
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -425,6 +425,7 @@ class LostShipmentsController extends Controller
                                     $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
                                     if($manifest){
                                         CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+
                                     }
                                 }
                             }
@@ -433,7 +434,7 @@ class LostShipmentsController extends Controller
 
                     $shipment_details->shipper_status_id = 18;
                     $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
+                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment_details->id],NULL,Auth::id());
                     $lost_shipments_array[] = $shipment;
                 }
             }
