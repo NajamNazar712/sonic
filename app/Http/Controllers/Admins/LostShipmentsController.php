@@ -413,9 +413,11 @@ class LostShipmentsController extends Controller
 
                                 if($bag_total_shipments == ($bag_lost_shipments + $bag_received_shipments)){
                                     foreach($bag->shipment as $shipment){
-                                        $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment->shipment_id)->first();
-                                        $bag_shipment->status = 1;
-                                        $bag_shipment->save();
+                                        $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment->shipment_id)->where('status',0)->first();
+                                        if($bag_shipment){
+                                            $bag_shipment->status = 1;
+                                            $bag_shipment->save();
+                                        }
                                     }
                                     $bag->status_id = 7;
                                     $bag->completed = 1;
@@ -425,7 +427,13 @@ class LostShipmentsController extends Controller
                                     $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
                                     if($manifest){
                                         CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
-
+                                    }
+                                }
+                                else{
+                                    $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_details->id)->where('status',0)->first();
+                                    if($bag_shipment){
+                                        $bag_shipment->status = 1;
+                                        $bag_shipment->save();
                                     }
                                 }
                             }

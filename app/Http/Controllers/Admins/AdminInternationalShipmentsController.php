@@ -391,54 +391,57 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
                         $international_shipment->sync = 0;
                         $international_shipment->save();
-
-                        $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
-                        if($manifest_shipment->exists()){
-                            $received_shipments = 0;
-                            $manifest_shipment = $manifest_shipment->first();
-                            $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
-                            if($bag){
-                                $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('cargo_manifest_bag_id',$bag->id)->first();
-                                if($bag_shipment){
-                                    $bag_shipment->status = 1;
-                                    $bag_shipment->save();
-                                }
-                                $received_shipments = $bag->shipment->where('status',1)->count();
-                            }
-
-                            if($bag->shipments == $received_shipments){
-                                $bag->received_shipments = $received_shipments;
-                                $bag->status_id = 7;
-                                $bag->completed = 1;
-                                $bag->receiver_id = 346; //global_admin
-                                $bag->save();
-
-                                $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
-                                if($manifest){
-                                    $manifest->status = 1;
-                                    $manifest->save();
-
-                                    $total_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->count();
-                                    $total_received_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->where('status',1)->count();
-
-                                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
-
-                                    $cargo_manifest = CargoManifest::find($manifest->cargo_manifest_id);
-                                    if($total_manifest_bags == $total_received_manifest_bags){
-                                        $cargo_manifest->status_id = 2;
-                                        $cargo_manifest->received_by = 346;
-                                        $cargo_manifest->received_bags = $total_received_manifest_bags;
-                                        $cargo_manifest->save();
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
                 else{
                     foreach ($shipments as $shipment_id){
                         Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+
+                        if($shipper_status_id == 4){
+                            $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
+                            if($manifest_shipment->exists()){
+                                $received_shipments = 0;
+                                $manifest_shipment = $manifest_shipment->first();
+                                $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
+                                if($bag){
+                                    $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('cargo_manifest_bag_id',$bag->id)->first();
+                                    if($bag_shipment){
+                                        $bag_shipment->status = 1;
+                                        $bag_shipment->save();
+                                    }
+                                    $received_shipments = $bag->shipment->where('status',1)->count();
+                                }
+
+                                if($bag->shipments == $received_shipments){
+                                    $bag->received_shipments = $received_shipments;
+                                    $bag->status_id = 7;
+                                    $bag->completed = 1;
+                                    $bag->receiver_id = 346; //global_admin
+                                    $bag->save();
+
+                                    $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
+                                    if($manifest){
+                                        $manifest->status = 1;
+                                        $manifest->save();
+
+                                        $cargo_manifest = CargoManifest::find($manifest->cargo_manifest_id);
+
+                                        $total_manifest_bags = $cargo_manifest->bags;
+                                        $total_received_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->where('status',1)->count();
+
+                                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+
+                                        if($total_manifest_bags == $total_received_manifest_bags){
+                                            $cargo_manifest->status_id = 2;
+                                            $cargo_manifest->received_by = 346;
+                                            $cargo_manifest->received_bags = $total_received_manifest_bags;
+                                            $cargo_manifest->save();
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                     }
                 }
