@@ -8157,7 +8157,7 @@ class AdminAPIController extends Controller
     public function get_shipment_details(Request $request)
     {
         $rules = [
-            'tracking' => ['required', 'exists:shipments,tracking_number']
+            'tracking' => ['required']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
