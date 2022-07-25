@@ -8604,8 +8604,8 @@ class AdminAPIController extends Controller
                         }
                     }
                 }
-                if($invalid_shipments != null){
-                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s)"]);
+                if(!empty($invalid_shipments)){
+                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) ".implode(',', $invalid_shipments)]);
                 }
                 elseif($shipments_count != 0) {
 
@@ -8859,7 +8859,7 @@ class AdminAPIController extends Controller
         $remarks = $request->remarks;
         $reasonId = $request->reason_id;
         $statusId = $request->status_id;
-        $received_or_refused_by = $request->received_or_refused_by;
+        $received_or_refused_by = ($request->has("received_or_refused_by")) ? $request->received_or_refused_by : NULL;
         if ($return_note_id != '') {
             $return_note_details = ReturnNote::find($return_note_id);
             $parcel = Shipment::where('id', $shipment)->first();
@@ -8920,7 +8920,7 @@ class AdminAPIController extends Controller
             'shipment_status' => ['required'],
             'shipment_reason' => ['required'],
             'remarks' => ['required'],
-            'received_or_refused_by' => ['required'],
+            'received_or_refused_by' => ['nullable'],
             'open_box' => ['nullable'],
             'date' => ['required'],
         ];
@@ -8936,7 +8936,7 @@ class AdminAPIController extends Controller
             $shipment_status_mandatory = array(24, 47, 48);
             $shipment_remark = $request->remarks;
             $admin_id = $request->admin_id;
-            $received_or_refused_by = $request->received_or_refused_by;
+            $received_or_refused_by = ($request->has("received_or_refused_by")) ? $request->received_or_refused_by : NULL;
             $open_box_ids = array();
             if ($request->has('open_box')) {
                 $open_box_ids = explode(',', $request->open_box);;
