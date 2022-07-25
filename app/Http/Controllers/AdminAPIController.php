@@ -8589,7 +8589,7 @@ class AdminAPIController extends Controller
             $return_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $valid_shipments = array();
             $shipments_count = 0;
-            $invalid_shipments = NULL;
+            $invalid_shipments = array();
             if (!empty($trackings)) {
                 foreach ($trackings as $shipment_id) {
                     $shipment_details = Shipment::where('tracking_number', $shipment_id);
@@ -8600,12 +8600,12 @@ class AdminAPIController extends Controller
                             $shipments_count++;
                         }
                         else{
-                            $invalid_shipments .= PHP_EOL.$shipment_details->tracking_number;
+                            array_push($invalid_shipments, $shipment_details->tracking_number);
                         }
                     }
                 }
                 if($invalid_shipments != null){
-                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s)".$invalid_shipments]);
+                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s)"]);
                 }
                 elseif($shipments_count != 0) {
 
