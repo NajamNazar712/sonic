@@ -334,7 +334,7 @@ class AdminAttendanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),454);
         }
 
-        $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
+        $attendances = EmployeeAttendance::leftjoin('employees as a', 'a.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc','rc.id','=','r.city_id')
