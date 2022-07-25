@@ -8596,7 +8596,7 @@ class AdminAPIController extends Controller
                     if ($shipment_details->exists()) {
                         $shipment_details = $shipment_details->first();
                         if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
-                            $valid_shipments[] = $shipment_id;
+                            $valid_shipments[] = $shipment_details->id;
                             $shipments_count++;
                         }
                         else{
