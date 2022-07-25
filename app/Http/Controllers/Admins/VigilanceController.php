@@ -50,9 +50,16 @@ class VigilanceController extends Controller
             $delivery_note->where('delivery_notes.id', '=', $delivery_note_id);
         }
 
+
         if ($rider_id = $request->get('search_rider')) {
 
             $delivery_note->where('delivery_notes.rider_id', '=', $rider_id);
+        }
+
+        if(($request->get('search_delivery_note_id') == NULL) && ($request->get('search_rider') == NULL)){
+
+            $delivery_note->whereRaw('false');
+
         }
 
         $datatables = Datatables::of($delivery_note)
@@ -84,7 +91,7 @@ class VigilanceController extends Controller
                     $data['amount'] = $shipment->amount;
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment->id);
                     if($delivery_note_shipment->exists()){
-                        $data['verify'] = 'Verify';
+                        $data['verify'] = 'Verified';
                         $data['verify_id'] = 1;
                     }
                     else{

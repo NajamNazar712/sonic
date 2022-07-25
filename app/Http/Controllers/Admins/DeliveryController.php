@@ -24,6 +24,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -171,7 +172,13 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->leftjoin('shipment_items as si', function ($join)  {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.id', '=',
+                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
@@ -4468,11 +4475,12 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
 
+        
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
@@ -4487,6 +4495,14 @@ class DeliveryController extends Controller
             ->editColumn('transactions_amount', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('one_link_payment_count', function ($deliveries) {
+                if($deliveries->one_link_payment_count != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 }
                 else{
                     return '-';
@@ -6282,6 +6298,40 @@ class DeliveryController extends Controller
         } else {
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
+    }
+
+    public function one_link_payments(Request $request)
+    {
+        
+
+        $delivery_note_id = $request->delivery_note_id;
+        $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','amount','tran_date_formated','tran_time_formated','created_at']);
+
+        if($payment_transaction_data->exists())
+        {
+            $payment_transaction_data = $payment_transaction_data->get();
+            return response()->json(['status' => 1, 'transaction_data' => $payment_transaction_data]);
+            
+        }
+        else{
+            return response()->json(['status' => 0, 'transaction_data' => []]);
+        }
+
+
+        // dd($payment_transaction_data);
+        // $delivery_note_id = $request->input('delivery_note_id');
+        // $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        // $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
+        // $shipments = array();
+        // if ($delivery_note_shipments->count() != 0) {
+        //     foreach ($delivery_note_shipments as $delivery_note_shipment) {
+        //         $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+        //         $shipments[] = $shipment->tracking_number;
+        //     }
+        //     return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        // } else {
+        //     return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        // }
     }
 
     public function cash_collection_shipments_delivered(Request $request)

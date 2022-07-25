@@ -518,6 +518,13 @@ Route::name('api.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
             Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
         });
+
+        Route::prefix('1link')->name('1link.')->group(function () {
+            Route::prefix('payments')->name('payments.')->group(function () {
+            Route::post('billinquiry', 'APIController@onelink_payment_billinquiry')->name('billinquiry');
+            Route::post('billpayment', 'APIController@onelink_payment_billpayment')->name('billpayment');
+            });
+        });
     });
     //Hbl Konnect
     
