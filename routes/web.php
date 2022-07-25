@@ -4018,6 +4018,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             });
         });
+        
+        Route::prefix('cx_training')->name('cx_training.')->group(function (){
+            Route::get('/','Admins\QualityAssuranceController@cx_training_index')->name('index');
+            Route::get('/list','Admins\QualityAssuranceController@cx_training_list')->name('list');
+            Route::post('/add','Admins\QualityAssuranceController@cx_training_add')->name('add');
+            Route::post('/update_status','Admins\QualityAssuranceController@cx_training_update_status')->name('update_status');
+            
+        });
+
+        
     });
     Route::prefix('nps')->name('nps.')->group(function (){
         Route::get('/','Admins\NpsController@index')->name('index');
