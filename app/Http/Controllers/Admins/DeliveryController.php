@@ -7901,7 +7901,7 @@ class DeliveryController extends Controller
     Public function operation_riders(Request $request)
     {
 
-        $operation_id = $request->operation_rider_type;
+        $operation_id = $request->operation_rider_id;
 
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
