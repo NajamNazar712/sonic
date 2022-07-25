@@ -450,18 +450,18 @@ class AdminAttendanceController extends Controller
             }
 
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type',1);
+            $datatable->where('a.id', $search_admin)->where('employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider)->where('employee_type',2);
+            $datatable->where('r.id', $search_rider)->where('employee_type_id',2);
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+                $datatable->where('ad.id', $search_department)->where('employee_type_id',1);
             }
             else{
                 $datatable->where(function($query) use($search_department){
-                    $query->where('employee_type',2)
+                    $query->where('employee_type_id',2)
                         ->orWhere('ad.id', $search_department);
                 });
             }
@@ -469,8 +469,8 @@ class AdminAttendanceController extends Controller
 
         if ($search_trax_id = $request->get('search_trax_id')) {
             $datatable->where(function($q) use ($search_trax_id){
-                $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
-                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+                $q->where([['a.trax_id', $search_trax_id],['employee_type_id',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type_id',2]]);
             });
         }
 
