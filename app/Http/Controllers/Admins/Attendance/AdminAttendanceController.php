@@ -116,19 +116,20 @@ class AdminAttendanceController extends Controller
 
         if(in_array(session('role_id'), [1, 63, 70])){
             $departments = AdminDepartment::select('id','name')->get();
-            $users = Admin::where('status', 1)->select('id','name')->get();
-            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+            $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
+            $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
             $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
         }
         else{
             $departments = AdminDepartment::select('id','name')->where('id', session('department_id'))->get();
-            $users = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+            $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')
+                ->join('admin_roles as ar','ar.id','=','admins.role_id')
                 ->join('admin_departments as ad','ad.id','=','ar.department_id')
                 ->where('ad.id', session('department_id'))
-                ->select('admins.id','admins.name')->get();
-            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+                ->select('e.id','e.name')->get();
+            $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
             $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
