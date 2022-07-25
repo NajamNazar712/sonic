@@ -602,6 +602,9 @@ class Permission
             'reports.rider_unresponsive_report.index' => 705,
             'reports.rider_unresponsive_report.list' => 705,
 
+            'reports.mms.index' => 780,
+            'reports.mms.list' => 780,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
@@ -1020,6 +1023,7 @@ class Permission
             'international.tracking_upload.list' => 398,
 
             'international.shipment_status.index' => 508,
+            'international.extra_service_charges.index' => 750,
 
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,
@@ -1240,16 +1244,22 @@ class Permission
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
 			'settings.undelivered_sms_hub_wise.index' => 714,
-            'settings.delivery_area_keyword.index' => 747,            
+			'settings.delivery_area_keyword.index' => 747,
             'nps.index' => 751,
             'nps.add' => 752,
             'nps.response.report' => 755,
             'nps.consolidate.report' => 756,
 
-            'accounts.disable.account.intimation.survey.index' => 762,
+			'accounts.disable.account.intimation.survey.index' => 762,
 			'accounts.disable.account.intimation.survey.report' => 768,
-			'settings.pickup.weight_bypass' => 556
-            
+			'settings.pickup.weight_bypass' => 761,			'delivery.note.rider_category_bypass_request' => 757,
+            'delivery.note.rider_category_bypass_weight' =>758,
+
+			'vigilance.verification.index' => 770,
+            'vigilance.verification.history.index' => 771,
+
+            'admin.settings.booking_destination_keyword.index' => 772,
+            'admin.settings.booking_destination_keyword.add' => 773
         ],
 
         'shipper' => [

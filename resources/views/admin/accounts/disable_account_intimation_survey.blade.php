@@ -86,7 +86,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										<th class="border-primary border-darken-1">Q.ID</th>
+										<th class="border-primary border-darken-1">S.No.</th>
 										<th class="border-primary border-darken-1">Question</th>
 										<th class="border-primary border-darken-1">Option 1</th>
 										<th class="border-primary border-darken-1">Option 2</th>
@@ -277,7 +277,7 @@
                         success: function (result) {
                             head = [];
 							
-                            head.push('Q.ID');
+                            head.push('S.No.');
                             head.push('Questions');
                             head.push('Option 1');
                             head.push('Option 2');
@@ -290,7 +290,7 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                row.push(values.id);
+                                row.push(index+1);
                                 row.push(values.questions);
                                 row.push(values.option1);
                                 row.push(values.option2);
@@ -366,7 +366,8 @@
 				rowId: 'id',
 				order: [[8, 'Desc']],
 				columns: [
-					{data: 'id', name: 'id', class: 'align-middle id',sortable:false,orderable:false},
+					// {data: 'id', name: 'id', class: 'align-middle id',sortable:false,orderable:false},
+					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'questions', name: 'questions', class: 'align-middle questions'},
 					{data: 'option1', name: 'option1', class: 'align-middle option1'},
 					{data: 'option2', name: 'option2', class: 'align-middle option2'},
@@ -379,6 +380,9 @@
 					{data: 'action', name: 'action', class: 'align-middle action',sortable:false,orderable:false}
 				],
 				rowCallback: function(row, data, index) {
+
+					var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
 					if(data.status == "Enabled")
 					{
