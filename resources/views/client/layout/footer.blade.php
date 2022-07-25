@@ -13,6 +13,7 @@
   <script src="{{asset('app-assets/js/core/app.js')}}" type="text/javascript"></script>
   <!-- END MODERN JS-->
 
+
 @if (isset($ticker))
   <script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>
 
@@ -229,13 +230,35 @@
                                              </td>
                                              <td>${values.question}</td>
                                              <td>
-                                                <div style="display: contents">
-                                                    <input title="1" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="1" type="radio" name="ratting[${index}]">
-                                                    <input title="2" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="2" type="radio" name="ratting[${index}]">
-                                                    <input title="3" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="3" type="radio" name="ratting[${index}]">
-                                                    <input title="4" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="4" type="radio" name="ratting[${index}]">
-                                                    <input title="5" style="width: 20px;height: 20px;cursor:pointer" class="radio radio_nps" value="5" type="radio" name="ratting[${index}]">
-                                                 </div>
+                                             <div id="checkboxgroup_nps">
+                                              <div class="checkboxgroup_nps">
+
+                                                <input title="1" style="width: 14px;height: 14px;cursor:pointer" class="radio radio_nps" value="1" type="radio" name="ratting[${index}]">
+                                                 <label for="my_radio_button_id1">1</label>
+                                              </div>
+                                              <div class="checkboxgroup_nps">
+
+                                                <input title="2" style="width: 14px;height: 14px;cursor:pointer" class="radio radio_nps" value="2" type="radio" name="ratting[${index}]">
+                                                <label for="my_radio_button_id2">2</label>
+
+                                              </div>
+                                              <div class="checkboxgroup_nps">
+
+                                                  <input title="3" style="width: 14px;height: 14px;cursor:pointer" class="radio radio_nps" value="3" type="radio" name="ratting[${index}]">
+                                                   <label for="my_radio_button_id3">3</label>
+                                              </div>
+                                              <div class="checkboxgroup_nps">
+
+                                                    <input title="4" style="width: 14px;height: 14px;cursor:pointer" class="radio radio_nps" value="4" type="radio" name="ratting[${index}]">
+                                                     <label for="my_radio_button_id4">4</label>
+                                              </div>
+                                              <div class="checkboxgroup_nps">
+
+                                                    <input title="5" style="width: 14px;height: 14px;cursor:pointer" class="radio radio_nps" value="5" type="radio" name="ratting[${index}]">
+                                                     <label for="my_radio_button_id5">5</label>
+                                              </div>
+                                            </div>
+
 
                                             </td>
                                             </tr>

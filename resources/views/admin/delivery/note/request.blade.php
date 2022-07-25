@@ -213,15 +213,20 @@
                     }
                 }).done(function (data) {
 
+                    $('#dnid').val('');
+                    $('#dncc').val('');
+                    $('#amount').val('');
+                    $('#form_btn').attr('disabled' , true);
+
                     if (data.status == 1) {
                         var value ='';
                         var delivery_note = data.note.id;
                         if(data.note.received_cod_amount == null){
                             value = 0;  
                         }
-                      else{
-                         value = data.note.received_cod_amount
-                      }
+                        else{
+                            value = data.note.received_cod_amount
+                        }
                       $('#dnid').val(delivery_note);
                       $('#dncc').val(value);
                       $('#amount').val(data.note.total_cod_amount);

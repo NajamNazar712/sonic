@@ -13,7 +13,8 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <div class="alert bg-info" id="consignee_address_error" style="display: none">
+                            </div>
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
@@ -96,7 +97,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="5"></textarea>
+                                            <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" onchange="bdmk()" rows="5"></textarea>
                                         </div>
 
                                         <div class="form-group">
@@ -286,6 +287,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('css')
@@ -313,7 +315,39 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script>
+        function bdmk(){
+            var city_id = $('#consignee_city').val();
+            var city_name = $('#consignee_city option:selected').text();
+            var consignee_address = $('#consignee_address').val();
 
+
+            $.ajax({
+                url: '{{route('admin.settings.booking_destination_keyword.address_verify')}}',
+                method: 'get',
+                data: {
+                    'city_id': city_id,
+                    'consignee_address': consignee_address
+                }
+            }).done(function (data) {
+
+                if (data) {
+                    var er = "Dear User, <br>";
+                    if (data.invalid_cities) {
+                        $.each(data.invalid_cities, function (key, value) {
+                            er +=  "The area <strong>" + value + "</strong> is actually present in <strong>" + key + "</strong> instead of <strong>" + city_name +"</strong>. <br>";
+                        });
+                        $('#consignee_address_error').html(er.trim() + " For Assistance Call 021-111-118-729");
+                        $('#consignee_address_error').show();
+
+                    }else{
+                        $('#consignee_address_error').html('');
+                        $('#consignee_address_error').hide();
+                    }
+                }
+
+            });
+
+        }
         $(document).ready(function() {
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
@@ -603,6 +637,17 @@
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                rules: {
+                    consignee_address: {
+                        maxlength: 255,
+                    },
+                },
+                messages: {
+                    consignee_address: {
+                        required: "Address Is Required",
+                        maxlength :"Address can be maximum 255 characters",
+                    },
+                },
                 normalizer: function(value) {
                     return $.trim(value);
                 },
@@ -624,6 +669,8 @@
                     form.submit();
                 }
             });
+
+
 
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
