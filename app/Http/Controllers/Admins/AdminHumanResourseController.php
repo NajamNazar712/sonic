@@ -369,11 +369,7 @@ class AdminHumanResourseController extends Controller
         $employee->joining_date = $request->joining_date_formatted;
         $employee->save();
 
-        $employee_log = new EmployeeLog();
-        $employee_log->employee_id = $employee->id;
-        $employee_log->status_id = 4;
-        $employee_log->updated_by = auth()->id();
-        $employee_log->save();
+        $this->employee_log_save($employee->id,$employee->employee_type_id,null,4,null,null,null,auth()->id());
 
 
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);

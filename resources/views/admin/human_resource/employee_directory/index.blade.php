@@ -568,7 +568,7 @@
     </div>
 
     <div class="modal fade text-left" id="employee_log" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="employee_log" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document" style="overflow-y: scroll; max-height:85%;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Employee Log<span></span></h4>
@@ -576,7 +576,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body employee_log_body" id="employee_log_body" style="height: 350px;overflow: scroll">
+                <div class="modal-body employee_log_body" id="employee_log_body">
                     <table class="table table-bordered datatable" id="employee_log_header">
                         <thead>
                         <tr role="row" class="bg-primary white">
