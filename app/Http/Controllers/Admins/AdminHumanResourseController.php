@@ -1211,7 +1211,6 @@ class AdminHumanResourseController extends Controller
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
             ->where('is_line_manager', 1)
-            ->whereIn('department_id', [$employee->department_id, 5])
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
@@ -4599,10 +4598,9 @@ class AdminHumanResourseController extends Controller
                 return response()->json(['status' => 1, 'error' => 'Invalid Line Manager']);
             }
 
-            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+            $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
-                ->whereIn('department_id', [$line_manager->department_id, 5])
                 ->where('employees.id', '!=', $line_manager->id)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
                 ->get();

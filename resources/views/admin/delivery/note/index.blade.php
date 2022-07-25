@@ -19,7 +19,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                            <select name="operation_rider_type" id="operation_rider_type" class="form-control select2" required>
                                 @foreach($operation_rider_category as $category)
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
@@ -38,9 +38,9 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                @foreach($routes as $route)
+                              {{--  @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
+                                @endforeach--}}
                             </select>
                             <div class="danger" id="route_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -64,6 +64,9 @@
                                 <i class="ft-camera h1"></i>
                             </a>
                         </div>
+                        <input type="hidden" id="rider_id" name="rider_id">
+                        <input type="hidden" id="operation_rider_type_id" name="operation_rider_type_id">
+                        <input type="hidden" id="route_id" name="route_id">
                     </div>
                 </form>
 
@@ -495,16 +498,17 @@
                 placeholder:'Select Rider*',
             });
 
-            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#operation_rider_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Category*',
             }).bind('select2:select', function () {
                 if(this.value){
+                    var id = this.value;
                     $.ajax({
                         url: '{!! route('admin.delivery.note.operation_riders') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'operation_rider_id': this.value,
+                            'operation_rider_type': this.value,
                         }
                     }).done(function(data){
 
@@ -518,6 +522,9 @@
                             });
                             $('#rider_name').html(html);
                             $('#rider_name').val('').trigger('change');
+                            $('#operation_rider_type_id').val(id);
+                            $('#operation_rider_type').attr('disabled',true);
+                            console.log(id);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -532,7 +539,7 @@
                 placeholder:'Select Route*',
             });
             $('#rider_name').on('change',function () {
-                var route = $(this).find(":selected").data("id");
+                //var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
                 rider_dncc_check = false;
                 if(rider_id != null){
@@ -546,9 +553,18 @@
                     }).done(function(data){
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
-                            $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false);
-                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                            $("#rider_id").val(rider_id);
+                            $("#rider_name").attr('disabled',true);
+
+                            var html = "";
+                            $.each(data.routes, function(key,v) {
+
+                                html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.code} - (${v.start}  to  ${v.end})</option>`
+
+                            });
+                            $('#route').html(html);
+                            $('#route').val('').trigger('change');
+
                             rider_dncc_check = true;
                         }
                         else {
@@ -560,11 +576,22 @@
                         }
                     });
                 }
-                else{
+               /* else{
                     $('#route').val(route).trigger('change');
-                }
+                }*/
 
             });
+
+            $('#route').on('change',function () {
+                if(this.value){
+                    $('#route_id').val(this.value);
+                    $('#route').attr('disabled',true);
+                    $('#scan_tracking').attr("disabled", false);
+                    $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                }
+            });
+
+
             $('#scan_tracking').attr("disabled","disabled");
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
@@ -580,7 +607,7 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                var rider_id = $('#rider_name').val();
+                var rider_id = $('#rider_id').val();
                 if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
@@ -745,7 +772,7 @@
 
                         });
                     } else {
-                        var rider_id = $('#rider_name').val();
+                        var rider_id = $('#rider_id').val();
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
                             blockPagePermanently();
@@ -973,7 +1000,7 @@
             });
 
             function otp_generation(){
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
                 if(rider){
 
                     $.ajax({
@@ -1003,7 +1030,7 @@
 
             function otp_verification() {
                 var otp = $('#otp_input').val();
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
 
                 if (otp.length == 6) {
                     $.ajax({
@@ -1035,8 +1062,8 @@
             var special_rider_flag = false;
             var this_form;
             function create_delivery_note(){
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
+                var rider = $('#rider_id').val();
+                var route = $('#route_id').val();
                 var ccd_flag = true;
                 if(ccd_shipment_ids.length > 0){
                     if(ccd_rider != 1){
@@ -1155,6 +1182,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                            console.log($('#create_delivery_note_form input#selected_rider_id').val());
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
                                                 $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
@@ -1262,10 +1290,10 @@
                 count = table.rows().count();
 
                 var errors = 0;
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
-                var operation_id = $('#operation_rider_id').val();
-                var special = parseInt($('#rider_name').find(':selected').data('special'));
+                var rider = $('#rider_id').val();
+                var route = $('#route_id').val();
+                var operation_id = $('#operation_rider_type_id').val();
+                var special = parseInt($('#rider_id').find(':selected').data('special'));
 
 
                 if (rider !== '' && rider !== null) {

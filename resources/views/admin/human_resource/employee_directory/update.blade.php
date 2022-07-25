@@ -284,8 +284,8 @@
                                         @endif
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Sub Department <span class="text-danger">*</span></label>
-                                                <input type="text" id="sub_department" data-rule-required="true"  data-msg-required="Sub Department is required" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
+                                                <label>Sub Department</label>
+                                                <input type="text" id="sub_department" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
                                             </div>
                                         </div>
                                         <div class="col-md-12">
