@@ -22,11 +22,9 @@ class MMSReportController extends Controller
     public function index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
-        if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
-        } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324])->whereIn('status', [3, 4])->select('id', 'name')->get();
-        }
+
+        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])->whereIn('status', [3, 4])->select('id', 'name')->get();
+
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
