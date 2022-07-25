@@ -305,9 +305,7 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     
-                    // console.log($('tr', row));
-                    console.log(row);
-                    if(data.aging == 2 && data.status == 1){
+                    if(data.aging >= 2 && data.status == 1){
                         row.classList.add('bg-danger')
                         row.classList.add('text-white')
                     }
@@ -403,7 +401,6 @@
 
             $('#datatable tbody').on('click', 'td.action button', function (){
                 if($(this).hasClass('update_status')){
-                    console.log('aa');
                     var id = $(this).parents('tr').attr('id');
                     if(id){
 

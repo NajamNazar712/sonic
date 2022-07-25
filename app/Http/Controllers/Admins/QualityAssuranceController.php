@@ -24,7 +24,7 @@ class QualityAssuranceController extends Controller
 
     public function cx_training_index(){
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(),516);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),568);
 
         $agents = Admin::whereIn('role_id', [50, 49, 37.29, 28, 26, 21, 74, 13, 37])->where('status', 1)->get();
         $units = CxTrainingUnit::all();
@@ -33,7 +33,7 @@ class QualityAssuranceController extends Controller
 
     public function cx_training_list(Request $request){
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),517);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),569);
         }
 
         $training = CxTraining::join('admins', 'admins.id', '=', 'cx_trainings.agent_id')
