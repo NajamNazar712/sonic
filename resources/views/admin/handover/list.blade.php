@@ -31,9 +31,9 @@
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">From</th>
-                        <th class="border-primary border-darken-1">From Person Designation</th>
+                        <th class="border-primary border-darken-1">From Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">To</th>
-                        <th class="border-primary border-darken-1">To Person Designation</th>
+                        <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -330,7 +330,7 @@
                 },  
                 {
                     extend: 'excelHtml5',
-                    title: 'Received Cargo Report',
+                    title: 'Handover List',
                     text:'<i class="la la-file-excel-o"></i> Excel',
                     }
 

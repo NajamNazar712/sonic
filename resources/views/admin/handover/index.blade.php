@@ -50,7 +50,7 @@
 
                         <div class="col-2">
                             <fieldset class="form-group">
-                                <input type="text" name="from_dept_area_desg" id="from_dept_area_desg" class="form-control from_dept_area_desg" placeholder="From Person Department*">
+                                <input type="text" name="from_dept_area_desg" id="from_dept_area_desg" class="form-control from_dept_area_desg width-215" placeholder="From Person Dept/Area/DES*">
                                 <div class="danger" id="from_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
                         </div>
@@ -65,7 +65,7 @@
 
                         <div class="col-2">
                             <fieldset class="form-group">
-                                <input type="text" name="to_dept_area_desg" id="to_dept_area_desg" class="form-control to_dept_area_desg" placeholder="To Person Department*">
+                                <input type="text" name="to_dept_area_desg" id="to_dept_area_desg" class="form-control to_dept_area_desg" placeholder=" To Person Dept/Area/DES*">
                                 <div class="danger" id="to_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
                         </div>
