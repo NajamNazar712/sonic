@@ -1657,7 +1657,7 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Total Weight (Kg) (Kg)</strong></td>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
                             <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
