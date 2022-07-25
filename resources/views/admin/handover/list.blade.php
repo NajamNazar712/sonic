@@ -190,9 +190,9 @@
                             head.push('Created At');
                             head.push('Created By');
                             head.push('From');
-                            head.push('From Person Designation');
+                            head.push('From Person Dept/Area/DES');
                             head.push('To');
-                            head.push('To Person Designation');
+                            head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
                             head.push('Shipment(s)');
