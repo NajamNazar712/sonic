@@ -103,6 +103,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
+                                    <th class="border-primary border-darken-1">Father Name</th>
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -120,6 +121,7 @@
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1">Joining Date</th>
+                                    <th class="border-primary border-darken-1">Last Working Date</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -1154,6 +1156,7 @@
                             head.push('S.No');
                             head.push('Employee ID');
                             head.push('Employee Name');
+                            head.push('Father Name');
                             head.push('Gender');
                             head.push('Hub');
                             head.push('City');
@@ -1171,12 +1174,14 @@
                             head.push('Employee Status');
                             head.push('Requested At');
                             head.push('Joining Date');
+                            head.push('Last Working Date');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.trax_id);
                                 row.push(values.employee_name);
+                                row.push(values.father_name);
                                 row.push(values.gender);
                                 row.push(values.employee_hub);
                                 row.push(values.city);
@@ -1194,6 +1199,7 @@
                                 row.push(values.status);
                                 row.push(values.requested_at);
                                 row.push(values.joining_date);
+                                row.push(values.last_working_date);
                                 body.push(row);
                             });
                         },
@@ -1441,7 +1447,7 @@
                         d.filter_line_manager = $('#filter_line_manager').val();
                     }
                 },
-                order: [[18, 'desc']],
+                order: [[19, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -1449,6 +1455,7 @@
                     },
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
+                    {data: 'father_name', name: 'employees.father_name', class: 'align-middle father_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
@@ -1466,6 +1473,7 @@
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
+                    {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
