@@ -4725,7 +4725,7 @@ class ReturnController extends Controller
                 $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
                 $shipment->shipper_status_id = 47;
                 $shipment->save();
-                ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+                ShipmentsJourneyController::add($shipment_id, 47, 47, null, "Shipment Reverted", null, Auth::id());
 
                 $return_revert_log = new ReturnRevertLog;
                 $return_revert_log->return_note = $return_note_id->return_note_id;

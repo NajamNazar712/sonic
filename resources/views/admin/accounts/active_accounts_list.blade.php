@@ -64,6 +64,7 @@
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Region</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
@@ -725,6 +726,7 @@
                         head.push('Company Name');
                         head.push('Contact Person');
                         head.push('Address');
+                        head.push('Region');
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
@@ -772,6 +774,7 @@
                             row.push(values.name);
                             row.push(values.poc);
                             row.push(values.address);
+                            row.push(values.zone);
                             row.push(values.city);
                             row.push(values.territory);
                             row.push(values.product_type);
@@ -1409,7 +1412,7 @@
             serverSide: true,
            deferLoading: 0,
             rowId: 'id',
-            order: [[26, 'desc']],
+            order: [[27, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                 method: 'post',
@@ -1432,6 +1435,7 @@
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 {data: 'address', name: 'users.address', class: 'align-middle address'},
+                {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},

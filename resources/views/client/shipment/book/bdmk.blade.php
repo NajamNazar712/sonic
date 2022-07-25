@@ -10,16 +10,17 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     {{--                    {{dd($nsa_error)}}--}}
-                    Book a Shipment (NSA Shipments)
+                    Book a Shipment
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <div class="alert alert-info">In case of, <br> Out of Service Area: Additional charges may apply. <br> Non Service Area: Shipment may be returned. <br> For assistance, Call: 021-38772222</div>
-                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate_excel_store') }}" novalidate="novalidate">
+                            <div class="alert alert-info">Destination Address of the Selected Cities, <br> May have the Following Issues. <br> For assistance, Call: 021-38772222</div>
+                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <input type="hidden" name="excel_nsa" value="1">
+                                <input type="hidden" name="excel_bdmk" value="1">
                                 <input type="hidden" name="service_type_check_id" value="{{$service_type_check_id}}">
                                 <div class="table-responsive">
                                     <table class='table table-bordered' id='tbl'>
@@ -32,9 +33,11 @@
                                             <th>Consignee Phone Number 1 (03000000000)</th>
                                             <th>Order ID</th>
                                             <th>Order Date (YYYY-MM-DD)</th>
-                                            <th>Item Product Type ID</th>
-                                            <th>Item Description</th>
-                                            <th>Item Quantity</th>
+                                            @if($service_type_check_id != 3 || $service_type_check_id == null)
+                                                <th>Item Product Type ID</th>
+                                                <th>Item Description</th>
+                                                <th>Item Quantity</th>
+                                            @endif
                                             @if($service_type_check_id == 2 || $service_type_check_id == null)
                                                 <th>Replacement Item Product Type ID</th>
                                                 <th>Replacement Item Description</th>
@@ -55,35 +58,38 @@
                                             {{--{{dd($key)}}--}}
                                             <div class="d-none">{!! $no=$no+1!!}</div>
                                             <tr>
-                                                @if(isset($nsa_error[$key+2]['msg']))
+                                                @if(isset($bdmk_error[$key+2]['msg']))
                                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][return_address_id]" value="{{$ro['return_address_id']}}">
 
-
                                                     <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
                                                     <td><input type="text" name="form[{{$no}}][consignee_city_name]" class="form-control text" value="{{$ro['consignee_city_name']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][consignee_name]" class="form-control text" value="{{$ro['consignee_name']}}" readonly="readonly"></td>
-                                                    <td><textarea type="text" name="form[{{$no}}][consignee_address]" class="form-control text" readonly="readonly">{{$ro['consignee_address']}}</textarea><font color="red">{{$nsa_error[$key+2]['msg']}}</font></td>
+                                                    <td><textarea type="text" name="form[{{$no}}][consignee_address]" class="form-control text" readonly="readonly">{{$ro['consignee_address']}}</textarea><font color="red"><?php echo  $bdmk_error[$key+2]['msg'];?></font></td>
                                                     <td><input type="text" name="form[{{$no}}][consignee_phone_number_1]" class="form-control phone" value="{{$ro['consignee_phone_number_1']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
-                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][open_shipment]" value="{{$ro['open_shipment']}}">
                                                     <td><input type="text" name="form[{{$no}}][order_id]" class="form-control text" value="{{$ro['order_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][order_date]" class="form-control text" value="{{$ro['order_date']}}" readonly="readonly"></td>
-                                                    <td><input type="text" name="form[{{$no}}][item_product_type_id]" class="form-control number" value="{{$ro['item_product_type_id']}}" readonly="readonly"></td>
-                                                    <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
-                                                    <td><input type="text" name="form[{{$no}}][item_quantity]" class="form-control number" value="{{$ro['item_quantity']}}" readonly="readonly"></td>
-                                                    <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
+                                                    @if($service_type_check_id != 3 || $service_type_check_id == null)
+                                                        <td><input type="text" name="form[{{$no}}][item_product_type_id]" class="form-control number" value="{{$ro['item_product_type_id']}}" readonly="readonly"></td>
+                                                        <td><input type="text" name="form[{{$no}}][item_description]" class="form-control text" value="{{$ro['item_description']}}" readonly="readonly"></td>
+                                                        <td><input type="text" name="form[{{$no}}][item_quantity]" class="form-control number" value="{{$ro['item_quantity']}}" readonly="readonly"></td>
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
+                                                    @endif
                                                     @if($service_type_check_id == 2 || $service_type_check_id == null)
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_product_type_id]" class="form-control number" value="{{$ro['replacement_item_product_type_id']}}" readonly="readonly"></td>
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
                                                     @endif
-                                                    @if($service_type_check_id == 3)
+                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
@@ -110,19 +116,18 @@
                                                         <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                     @endif
-                                                    <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text" readonly="readonly">{{$ro['special_instructions']}}</textarea></td>
+                                                    <td><textarea type="text" name="form[{{$no}}][special_instructions]" class="form-control text">{{$ro['special_instructions']}}</textarea></td>
                                                     <td><input type="text" name="form[{{$no}}][estimated_weight]" class="form-control number" value="{{$ro['estimated_weight']}}" readonly="readonly"></td>
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][same_day_timing_id]" value="{{$ro['same_day_timing_id']}}">
                                                     @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                                         <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
                                                     @endif
-                                                    @if($service_type_check_id == 3)
-                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
-                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
-                                                    <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
+                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][pieces_quantity]" value="{{$ro['pieces_quantity']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipper_reference_number_1]" value="{{$ro['shipper_reference_number_1']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipper_reference_number_2]" value="{{$ro['shipper_reference_number_2']}}">
@@ -139,21 +144,20 @@
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_1]" value="{{$ro['consignee_phone_number_1']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
-                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][open_shipment]" value="{{$ro['open_shipment']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_id]" value="{{$ro['order_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_date]" value="{{$ro['order_date']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_product_type_id]" value="{{$ro['item_product_type_id']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_description]" value="{{$ro['item_description']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
-                                                    <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
-                                                    @if($service_type_check_id == 2 || $service_type_check_id == null)
-                                                        <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
-                                                        <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
-                                                        <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
+                                                    @if($service_type_check_id != 3 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][item_product_type_id]" value="{{$ro['item_product_type_id']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_description]" value="{{$ro['item_description']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_quantity]" value="{{$ro['item_quantity']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_insurance]" value="{{$ro['item_insurance']}}">
+                                                        <input type="hidden" name="form[{{$no}}][item_price]" value="{{$ro['item_price']}}">
                                                     @endif
-                                                    @if($service_type_check_id == 3)
+                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
@@ -180,6 +184,11 @@
                                                         <input type="hidden" name="form[{{$no}}][item_insurance_5]" value="{{$ro['item_insurance_5']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_price_5]" value="{{$ro['item_price_5']}}">
                                                     @endif
+                                                    @if($service_type_check_id == 2 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_product_type_id]" value="{{$ro['replacement_item_product_type_id']}}">
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
+                                                        <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][special_instructions]" value="{{$ro['special_instructions']}}">
                                                     <input type="hidden" name="form[{{$no}}][estimated_weight]" value="{{$ro['estimated_weight']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipping_mode_id]" value="{{$ro['shipping_mode_id']}}">
@@ -187,12 +196,11 @@
                                                     @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                                         <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
                                                     @endif
-                                                    @if($service_type_check_id == 3)
-                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
-                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][charges_mode_id]" value="{{$ro['charges_mode_id']}}">
-                                                    <input type="hidden" name="form[{{$no}}][delivery_type_id]" value="{{$ro['delivery_type_id']}}">
+                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][pieces_quantity]" value="{{$ro['pieces_quantity']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipper_reference_number_1]" value="{{$ro['shipper_reference_number_1']}}">
                                                     <input type="hidden" name="form[{{$no}}][shipper_reference_number_2]" value="{{$ro['shipper_reference_number_2']}}">
