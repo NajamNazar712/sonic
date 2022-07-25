@@ -339,7 +339,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc','rc.id','=','r.city_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
-            ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation')
+            ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->select('employee_attendances.employee_id','a.name as admin_name', 'a.trax_id as trax_id','ed.name as designation_name', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type','c.hub_id');
 
