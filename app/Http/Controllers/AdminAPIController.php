@@ -8580,9 +8580,8 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $tracking_numbers = explode(',', $request->trackings);
+            $trackings = explode(',', $request->trackings);
             $open_box_ids = explode(',', $request->open_box);
-            $trackings = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
             $rider = $request->rider_id;
             $route = $request->route_id;
             $hub_id = $request->hub_id;
@@ -8590,17 +8589,25 @@ class AdminAPIController extends Controller
             $return_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $valid_shipments = array();
             $shipments_count = 0;
+            $invalid_shipments = NULL;
             if (!empty($trackings)) {
                 foreach ($trackings as $shipment_id) {
-                    $shipment_details = Shipment::find($shipment_id);
-                    if ($shipment_details) {
+                    $shipment_details = Shipment::whereIn('tracking_number', $shipment_id);
+                    if ($shipment_details->exists()) {
+                        $shipment_details = $shipment_details->first();
                         if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
                             $valid_shipments[] = $shipment_id;
                             $shipments_count++;
                         }
+                        else{
+                            $invalid_shipments .= PHP_EOL.$shipment_details->tracking_number;
+                        }
                     }
                 }
-                if ($shipments_count != 0) {
+                if($invalid_shipments != null){
+                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s)".$invalid_shipments]);
+                }
+                elseif($shipments_count != 0) {
 
                     $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
 
@@ -8682,6 +8689,9 @@ class AdminAPIController extends Controller
                     EmployeeAttendanceController::riders_attendance_mark($rider);
 
                     return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => "Failed to Create Return Note"]);
                 }
 
             } else {
