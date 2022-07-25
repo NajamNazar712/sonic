@@ -799,7 +799,7 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->update();
 
-        $this->employee_log_save($employee_id,2,null,2,1,null,null,auth()->id());
+        $this->employee_log_save($employee_id,2,$employee->staff_category_id,2,1,$employee->rider_type_id,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
