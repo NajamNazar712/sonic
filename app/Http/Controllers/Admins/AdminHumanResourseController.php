@@ -678,7 +678,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            $this->employee_log_save($request->employee_id,$employee->employee_type_id,null,null,null,$employee->rider_type_id,1,auth()->id());
+            $this->employee_log_save($request->employee_id,$employee->employee_type_id,$employee->staff_category_id,null,null,$employee->rider_type_id,1,auth()->id());
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
         return back()->with(['error' => 'Employee Not Found']);
