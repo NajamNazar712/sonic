@@ -369,7 +369,7 @@ class AdminHumanResourseController extends Controller
         $employee->joining_date = $request->joining_date_formatted;
         $employee->save();
 
-        $this->employee_log_save($employee->id,$employee->employee_type_id,null,4,null,null,null,auth()->id());
+        $this->employee_log_save($employee->id,$employee->employee_type_id,null,4,null,$employee->rider_type_id,null,auth()->id());
 
 
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
@@ -678,13 +678,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            $employee_log = new EmployeeLog();
-            $employee_log->employee_id = $request->employee_id;
-//            $employee_log->employee_type_id = $employee->employee_type_id;
-            $employee_log->update_pin = 1;
-            $employee_log->updated_by = auth()->id();
-            $employee_log->save();
-
+            $this->employee_log_save($request->employee_id,$employee->employee_type_id,null,null,null,$employee->rider_type_id,1,auth()->id());
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
         return back()->with(['error' => 'Employee Not Found']);
@@ -835,7 +829,7 @@ class AdminHumanResourseController extends Controller
         $employee->first_inactive = 1;
         $employee->save();
 
-        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
@@ -866,7 +860,7 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
 
-        $this->employee_log_save($employee->id,2,null,2,null,null,null,auth()->id());
+        $this->employee_log_save($employee->id,2,null,2,null,$employee->rider_type_id,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
