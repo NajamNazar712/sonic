@@ -4197,7 +4197,7 @@ class AdminHumanResourseController extends Controller
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
 
-                    $this->employee_log_save($employee->id,2,1,null,null,null,null,auth()->id());
+                    $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
 
                     return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
