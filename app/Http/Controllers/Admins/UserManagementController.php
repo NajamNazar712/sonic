@@ -852,7 +852,7 @@ class UserManagementController extends Controller
 
                 foreach($permission_ids as $permission_id) {
     
-                    $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id)->delete();
+                    AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id)->delete();
                   
                 }
             }
