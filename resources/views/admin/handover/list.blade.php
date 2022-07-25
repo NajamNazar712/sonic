@@ -207,9 +207,9 @@
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.from);
-                                row.push(values.from);
+                                row.push(values.from_dept_area_desg);
                                 row.push(values.to);
-                                row.push(values.to);
+                                row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
