@@ -889,7 +889,7 @@ class AdminHumanResourseController extends Controller
         $employee->first_inactive = 1;
         $employee->save();
 
-        $this->employee_log_save($employee_id,1,null,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
@@ -920,7 +920,7 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
 
-        $this->employee_log_save($employee_id,1,null,2,null,null,null,auth()->id());
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,2,null,null,null,auth()->id());
 
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
