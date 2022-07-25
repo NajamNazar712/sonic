@@ -340,7 +340,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
             ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'a.rider_type_id')
-            ->select('employee_attendances.employee_id','a.name as admin_name', 'a.trax_id as trax_id','ed.name as designation_name', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type','c.hub_id');
+            ->select('employee_attendances.employee_id','a.name as name', 'a.trax_id as trax_id','ed.name as designation_name', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type','c.hub_id');
 
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
