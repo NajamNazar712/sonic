@@ -3487,8 +3487,8 @@ class AdminReportsController extends Controller
 //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
 //        }
 
-        if (session('role_id') != 1) {
-            if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             } else {
                 $sales = $sales->whereIn('dc.hub_id', session('hubs'));

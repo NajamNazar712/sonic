@@ -3326,7 +3326,6 @@ class RiderAPIController extends Controller
 
     public function pickups_history_v2(Request $request)
     {
-
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
@@ -3336,7 +3335,6 @@ class RiderAPIController extends Controller
         if ($from_date == null && $to_date == null && $pickup_request_id == null && $pickup_note_id == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
-
             $rider_pickups = V2PickupNote::join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
                 ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
                 ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id and pickup_type = 1) as rider_picked'), DB::raw('sum(pr.received) as arrived'), 'v2_pickup_notes.created_at as created_at')
