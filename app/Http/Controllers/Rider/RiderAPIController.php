@@ -3341,6 +3341,7 @@ class RiderAPIController extends Controller
         if ($from_date == null && $to_date == null && $pickup_request_id == null && $pickup_note_id == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
+
             $rider_pickups = V2PickupNote::select('v2_pickup_notes.id as pickup_note_id', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipments'), DB::raw('(SELECT SUM(vrp.shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) as rider_picked'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from_date . '" and "' . $to_date . '") as arrived'), 'v2_pickup_notes.created_at as created_at')
                 ->groupBy('v2_pickup_notes.id')
                 ->where('v2_pickup_notes.rider_id', '=', $rider_id)
