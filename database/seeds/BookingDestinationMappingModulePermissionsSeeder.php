@@ -23,8 +23,8 @@ class BookingDestinationMappingModulePermissionsSeeder extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Last Mile > Booking Destination Keywords List', 'url'=>'admin.settings.booking_destination_keyword.index', 'permission_id' => 772),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Last Mile > Add Booking Destination Keywords', 'url'=>'admin.settings.booking_destination_keyword.add', 'permission_id' => 773),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Last Mile > Booking Destination Keywords', 'url'=>'admin.settings.booking_destination_keyword.index', 'permission_id' => 772),
+//            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Last Mile > Add Booking Destination Keywords', 'url'=>'admin.settings.booking_destination_keyword.add', 'permission_id' => 773),
         ));
     }
 }
