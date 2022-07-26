@@ -451,6 +451,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::put('bulk_revert', 'Shippers\ShipperShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
+
+    Route::prefix('cancelled_shipments_arrival')->name('cancelled_shipments_arrival.')->group(function (){
+            Route::get('','Shippers\ShipperShipmentCancelController@cancelled_shipments_arrival_index')->name('cancelled_shipments_arrival_index');
+            Route::post('cancelled_shipments_arrival','Shippers\ShipperShipmentCancelController@cancelled_shipments_arrival')->name('cancelled_shipments_arrival');
+        });
+
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');

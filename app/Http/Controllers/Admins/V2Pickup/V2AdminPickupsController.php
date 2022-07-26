@@ -15,6 +15,7 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
@@ -36,6 +37,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
@@ -1423,6 +1425,20 @@ class V2AdminPickupsController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            //todo: now checking canceled shipment arrival
+                $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+                if($user->shipper_status_id == 17)
+                {
+                    $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                    if($canceled_shipment)
+                    {
+                        return ['status' => 1, 'error' => 'Shipment is not allowed to arrival !'];
+                    }
+                }
+            //todo: now checking canceled shipment arrival end
+
+
             $pickup_request_id = null;
             $rider = null;
             $rider_assigned_flag = false;

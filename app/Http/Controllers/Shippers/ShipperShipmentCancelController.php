@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Product;
@@ -182,5 +183,36 @@ class ShipperShipmentCancelController extends Controller
             return ['status' => 1, 'error' => 'Warehouse Shipment can not be reverted from Sonic!'];
         }
 
+    }
+
+    public function cancelled_shipments_arrival_index()
+    {
+        $shipper = CancelledShipmentArrival::where('shipper_id',auth()->id())->first();
+        return view('client.cancelled_shipments_arrival.cancelled_shipments_arrival')->with(['shipper' => $shipper]);;
+    }
+    public function cancelled_shipments_arrival(Request $request)
+    {
+        $id = $request->id;
+        $shipper = auth()->id();
+
+        if($id == 0)
+        {
+            $shipper = CancelledShipmentArrival::where('shipper_id',auth()->id());
+            if ((!$shipper->exists()))
+            {
+//                dd('hi');
+                $cancel_arrival_shippers = new CancelledShipmentArrival();
+                $cancel_arrival_shippers->shipper_id = auth()->id();
+                $cancel_arrival_shippers->save();
+
+                return response()->json(['status' => '1', 'success' => 'Updated']);
+            }
+        }
+        else
+        {
+            CancelledShipmentArrival::where('shipper_id',$shipper)->delete();
+
+            return response()->json(['status' => '1', 'success' => 'Updated1']);
+        }
     }
 }

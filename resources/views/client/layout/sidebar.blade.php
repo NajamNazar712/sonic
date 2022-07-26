@@ -47,6 +47,9 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+
+                        <li><a class="menu-item" href="{{ route('cod.cancelled_shipments_arrival.cancelled_shipments_arrival_index') }}">Cancelled Shipment Arrival Allowed</a></li>
+
 {{--                        @if(session('user_id') == 3324)--}}
 {{--                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>--}}
 {{--                        @endif--}}
