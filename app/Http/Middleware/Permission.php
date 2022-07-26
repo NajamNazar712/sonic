@@ -1258,8 +1258,8 @@ class Permission
             'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
 
-            'admin.settings.booking_destination_keyword.index' => 772,
-            'admin.settings.booking_destination_keyword.add' => 773,
+            'settings.booking_destination_keyword.index' => 772,
+            'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
             'qa.cx_training.list' =>777,
         ],
