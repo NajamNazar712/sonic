@@ -398,6 +398,7 @@ class LostShipmentsController extends Controller
                     }
 
                     if(in_array($shipment_details->shipper_status_id,$shipment_status_for_bags)){
+                        //shipment receive huyi phr lost laga (only for manifest)
                         $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
                         if($cargo_manifest_bag_shipments->exists()){
                             $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
@@ -408,10 +409,9 @@ class LostShipmentsController extends Controller
                                 $bag->save();
 
                                 $bag_total_shipments = $bag->shipments;
-                                $bag_lost_shipments = $bag->lost_shipments;
-                                $bag_received_shipments = $bag->received_shipments;
+                                $total_shipments = $bag->lost_shipments +  $bag->received_shipments;
 
-                                if($bag_total_shipments == ($bag_lost_shipments + $bag_received_shipments)){
+                                if($bag_total_shipments == $total_shipments){
                                     foreach($bag->shipment as $shipment){
                                         $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment->shipment_id)->where('status',0)->first();
                                         if($bag_shipment){
@@ -421,15 +421,34 @@ class LostShipmentsController extends Controller
                                     }
                                     $bag->status_id = 7;
                                     $bag->completed = 1;
+                                    $bag->short_received_shipments = 0;
+                                    $bag->received_shipments = $total_shipments;
                                     $bag->receiver_id = 346; //global_admin
                                     $bag->save();
 
                                     $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
                                     if($manifest){
-                                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+                                        $manifest->status = 1;
+                                        $manifest->save();
+
+                                        $cargo_manifest = CargoManifest::find($manifest->cargo_manifest_id);
+
+                                        $total_manifest_bags = $cargo_manifest->bags;
+                                        $total_received_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->where('status',1)->count();
+
+                                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->cargo_manifest_id);
+
+                                        if($total_manifest_bags == $total_received_manifest_bags){
+                                            $cargo_manifest->status_id = 2;
+                                            $cargo_manifest->received_by = 346;
+                                            $cargo_manifest->received_bags = $total_received_manifest_bags;
+                                            $cargo_manifest->save();
+                                        }
+
                                     }
                                 }
                                 else{
+                                    //pehle lost laga phr baaqi ki shipment receive huyi (only for manifest)
                                     $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_details->id)->where('status',0)->first();
                                     if($bag_shipment){
                                         $bag_shipment->status = 1;
