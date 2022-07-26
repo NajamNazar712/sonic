@@ -6336,7 +6336,7 @@ class AdminReportsController extends Controller
             ->groupBy('crm_requests.id');
 
         if (session('department_id') == 8) {
-            $crm = $crm->where('shipments.shipment_type',2);
+            $crm = $crm->where('s.shipment_type',2);
         }
 
         $datatable = Datatables::of($crm)
