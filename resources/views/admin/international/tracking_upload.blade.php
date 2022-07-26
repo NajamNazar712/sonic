@@ -171,6 +171,26 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="shipment_log_modal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="shipment_log_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Shipment Logs</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 @section('css')
@@ -348,7 +368,7 @@
             $('#datatable tbody').on('click', 'tr td.action button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if(id){
-                    if($(this).hasClass('remove')){
+                    if($(this).hasClass('edit')){
 
                         $.ajax({
                             url: '{!! route('admin.international.tracking_upload.edit') !!}',
@@ -367,6 +387,42 @@
                                     $("#edit_actual_weight").prop("readonly", true);
                                 }
                                 $('#EditTrackingModal').modal('show');
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                    else if($(this).hasClass('view_logs')){
+                        $.ajax({
+                            url: '{!! route('admin.international.tracking_upload.logs') !!}',
+                            data: {
+                                'shipment_id': id
+                            }
+                        }).done(function(data) {
+                            if(data.status == 0) {
+
+                                $('#shipment_log_modal').modal('show');
+                                $('#shipment_log_modal .modal-body').html('');
+                                var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">S No.</th><th class="border-primary border-darken-1 align-middle text-center">Weight</th><th class="border-primary border-darken-1 align-middle text-center">3PL Tracking</th><th class="border-primary border-darken-1 align-middle text-center">Updated By</th><th class="border-primary border-darken-1 align-middle text-center">Date</th></tr></thead><tbody>';
+
+                                var serial = 1;
+                                $.each(data.logs, function (index, detail) {
+                                    details += '<tr>';
+                                    details += '<td class="align-middle text-center">' + serial + '</td>';
+                                    details += '<td class="align-middle text-center">' + detail.weight + '</td>';
+                                    details += '<td class="align-middle text-center">' + detail.tracking + '</td>';
+                                    details += '<td class="align-middle text-center">' + detail.updated_by + '</td>';
+                                    details += '<td class="align-middle text-center">' + detail.date + '</td>';
+                                    details += '</tr>';
+                                    serial++;
+                                });
+
+                                details += '</tbody></table>';
+
+                                $('#shipment_log_modal .modal-body').html(details);
+
+                            }else if(data.status == 1){
+                                toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }

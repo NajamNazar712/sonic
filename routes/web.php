@@ -3638,6 +3638,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
             Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
+            Route::get('logs', 'Admins\AdminInternationalShipmentsController@tracking_logs')->name('logs');
         });
         Route::prefix('shipment_status')->name('shipment_status.')->group(function () {
             Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
