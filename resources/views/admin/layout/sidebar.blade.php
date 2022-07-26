@@ -914,7 +914,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301,319, 327,328,337,356, 401, 437, 444,472,476,493,502,524, 532, 555,613,614,624, 642, 647,653,679, 673,676,688,705,717], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 319, 327, 328, 337, 356, 401, 437, 444, 472, 476, 493, 502, 524, 532, 555, 613, 614, 624, 642, 647, 653, 679, 673, 676, 688, 705, 717, 780], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -1160,6 +1160,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(705, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.reports.rider_unresponsive_report.index')}}">Rider Unresponsive Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(780, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.reports.mms.index')}}">MMS</a></li>
                         @endif
                     </ul>
                 </li>
@@ -1446,6 +1449,10 @@
 
                                     @if (session('role_id') == 1 || in_array(747, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.delivery_area_keyword.index')}}">Delivery Area Keyword</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(772, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.booking_destination_keyword.index')}}">Booking Destination Keyword</a></li>
                                     @endif
 
                                     
@@ -1872,7 +1879,7 @@
                     @endif
                 </ul>
             </li>
-            @if (session('role_id') == 1 || count(array_intersect([535,648, 692, 702], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([535,648, 692, 702, 777], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Quality Assurance</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(535, session('permissions')))
@@ -1904,6 +1911,9 @@
                             </li>
                         @endif
                     </ul>
+                    @if (session('role_id') == 1 || in_array(777, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.qa.cx_training.index')}}">CX Training</a></li>
+                    @endif
 
                 </ul>
             </li>

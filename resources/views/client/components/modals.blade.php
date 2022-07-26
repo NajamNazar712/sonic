@@ -171,7 +171,7 @@
                                 <tr>
                                     <th width="20">S.No </th>
                                     <th width="800">Questions</th>
-                                    <th width="300">Ratting Scale</th>
+                                    <th width="300">Rating Scale</th>
                                 </tr>
                             </thead>
                             <tbody>
