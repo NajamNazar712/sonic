@@ -9,6 +9,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\Http\Models\Blacklist\BlacklistSetting;
@@ -71,6 +72,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Admin\BookingDestinationMapping;
 
 use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
@@ -419,7 +421,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
-
+        // dd(1);
         return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
     }
 
@@ -2872,6 +2874,14 @@ class ShipperShipmentBookController extends Controller
             $check = NonServiceArea::pluck('name')->toArray();
             $blacklist_errors = array();
             $blacklist_found_categories = array();
+            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+            $bdmk_error = array();
+            $bdmk_result = array();
+
 
             if (Session::has('prefix')) {
                 $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
@@ -3064,6 +3074,13 @@ class ShipperShipmentBookController extends Controller
                             if (isset($con_nsa[$row_id])) {
                                 $nsa_error[$row_id]['msg'] = "A Possible Address Anomaly: " . $msg_string . " Detected!";
                             }
+                        };
+                        if(!$request->excel_bdmk) {
+                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
+//                        dd($bdmk_result[$row_id]);
+                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+                            }
                         }
 
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
@@ -3156,46 +3173,50 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
-
+//            dd($service_type_check_id);
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                    if (TRUE || empty($blacklist_errors)) {
-                        foreach ($rows as $key => $row) {
-                            $row['user_id'] = $user_id;
-                            $row['account_type_id'] = 1;
-                            $row['nsas'] = $check;
-                            $row['nsa'] = $request->excel_nsa;
-                            if (session('user_type') == 2) {
-                                $row['substitute_user_id'] = Auth::id();
-                            } else {
-                                $row['substitute_user_id'] = null;
-                            }
+                    if (empty($bdmk_error)) {
+                        if (TRUE || empty($blacklist_errors)) {
+                            foreach ($rows as $key => $row) {
+                                $row['user_id'] = $user_id;
+                                $row['account_type_id'] = 1;
+                                $row['nsas'] = $check;
+                                $row['nsa'] = $request->excel_nsa;
+                                if (session('user_type') == 2) {
+                                    $row['substitute_user_id'] = Auth::id();
+                                } else {
+                                    $row['substitute_user_id'] = null;
+                                }
 
-                            if (Session::has('prefix')) {
-                                $row['prefix'] = session('prefix');
-                            } else {
-                                $row['prefix'] = NULL;
-                            }
-                            $row['business_category_id'] = 1;
+                                if (Session::has('prefix')) {
+                                    $row['prefix'] = session('prefix');
+                                } else {
+                                    $row['prefix'] = NULL;
+                                }
+                                $row['business_category_id'] = 1;
 
-                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] == 1;
-                            }
-                            if ($row['service_type_id'] != 5) {
-                                if ($row['payment_mode_id'] == 4) {
-                                    $row['amount'] = 0;
+                                if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                    $row['payment_mode_id'] == 1;
+                                }
+                                if ($row['service_type_id'] != 5) {
+                                    if ($row['payment_mode_id'] == 4) {
+                                        $row['amount'] = 0;
+                                    }
+                                }
+                                if ($user_id != 3324) {
+                                    dispatch(new ProcessShipmentBookingDB($row));
+                                } else {
+                                    dispatch(new ProcessShipmentBookingDBPriority($row));
                                 }
                             }
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            } else {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            }
-                        }
 
-                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
-                    } else {
-                        return view('client.shipment.book.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
+                            return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        } else {
+                            return view('client.shipment.book.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
+                        }
+                    }else{
+                        return view('client.shipment.book.bdmk')->with(['data' => $rows, 'bdmk_error' => $bdmk_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                     }
                 } else {
                     return view('client.shipment.book.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
@@ -4818,6 +4839,14 @@ class ShipperShipmentBookController extends Controller
             $blacklist_errors = array();
             $blacklist_found_categories = array();
 
+            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+            $bdmk_error = array();
+            $bdmk_result = array();
+
             if (Session::has('prefix')) {
                 $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -5041,6 +5070,13 @@ class ShipperShipmentBookController extends Controller
                             }
                         }
 
+                        if(!$request->excel_bdmk) {
+                            $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
+                            if (isset($bdmk_result[$row_id]['invalid_cities'])) {
+                                $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
+                            }
+                        }
+
                         if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
                             $errors[$row_id]['consignee_city_name'] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
                         }
@@ -5134,47 +5170,50 @@ class ShipperShipmentBookController extends Controller
 
             if (empty($errors)) {
                 if (empty($nsa_error)) {
-                    if (TRUE || empty($blacklist_errors)) {
-                        $tracking_numbers = array();
+                    if (empty($bdmk_error)) {
+                        if (TRUE || empty($blacklist_errors)) {
+                            $tracking_numbers = array();
 
-                        foreach ($rows as $key => $row) {
-                            $row['user_id'] = $user_id;
-                            $row['account_type_id'] = 2;
-                            $row['nsas'] = $check;
-                            $row['nsa'] = $request->excel_nsa;
-                            if (Session::has('prefix')) {
-                                $row['prefix'] = session('prefix');
-                            } else {
-                                $row['prefix'] = NULL;
+                            foreach ($rows as $key => $row) {
+                                $row['user_id'] = $user_id;
+                                $row['account_type_id'] = 2;
+                                $row['nsas'] = $check;
+                                $row['nsa'] = $request->excel_nsa;
+                                if (Session::has('prefix')) {
+                                    $row['prefix'] = session('prefix');
+                                } else {
+                                    $row['prefix'] = NULL;
+                                }
+                                if (session('user_type') == 2) {
+                                    $row['substitute_user_id'] = Auth::id();
+                                } else {
+                                    $row['substitute_user_id'] = null;
+                                }
+                                $row['business_category_id'] = 1;
+                                if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                    $row['payment_mode_id'] = 1;
+                                }
+                                if (!isset($row['payment_mode_id'])) {
+                                    $rows[$key]['payment_mode_id'] = 1;
+                                    $row['payment_mode_id'] = 1;
+                                }
+                                if ($row['payment_mode_id'] == 4) {
+                                    $row['amount'] = 0;
+                                }
+                                if ($user_id != 3324) {
+                                    dispatch(new ProcessShipmentBookingDB($row));
+                                } else {
+                                    dispatch(new ProcessShipmentBookingDBPriority($row));
+                                }
                             }
-                            if (session('user_type') == 2) {
-                                $row['substitute_user_id'] = Auth::id();
-                            } else {
-                                $row['substitute_user_id'] = null;
-                            }
-                            $row['business_category_id'] = 1;
-                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] = 1;
-                            }
-                            if (!isset($row['payment_mode_id'])) {
-                                $rows[$key]['payment_mode_id'] = 1;
-                                $row['payment_mode_id'] = 1;
-                            }
-                            if ($row['payment_mode_id'] == 4) {
-                                $row['amount'] = 0;
-                            }
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            } else {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            }
+
+                            return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        } else {
+                            return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
                         }
-
-                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
-                    } else {
-                        return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
+                    }else{
+                        return view('client.shipment.book.corporate.bdmk')->with(['data' => $rows, 'bdmk_error' => $bdmk_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                     }
-
                 } else {
                     return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                 }
@@ -5562,6 +5601,7 @@ class ShipperShipmentBookController extends Controller
             $check = NonServiceArea::pluck('name')->toArray();
             $blacklist_errors = array();
             $blacklist_found_categories = array();
+
 
             if (Session::has('prefix')) {
                 $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
@@ -7095,6 +7135,104 @@ class ShipperShipmentBookController extends Controller
             }
 
         }
+
+    }
+    function check_bdmk($city_id,$consignee_address,$check_bdmk){
+
+        if(isset($city_id)){
+
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
+            $found_keyword = array();
+            $result = array();
+            foreach ($check_bdmk as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            $invalid_cities  = array();
+            $invalid_cities_string = "";
+            if($found_keyword) {
+                $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
+                    ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
+                    ->whereIn('booking_destination_mapping_keywords.keyword', $found_keyword);
+                if ($data_found->exists()) {
+                    $data_found =$data_found->get();
+
+                    foreach ($data_found as $value){
+                        if($value->city_id != $city_id){
+                            $dd = isset($invalid_cities[$value->city_name]) ? $invalid_cities[$value->city_name] : '';
+                            $invalid_cities[$value->city_name] = trim($dd)." ".$value->keyword;
+                        }
+                    }
+                    if($invalid_cities){
+                        foreach ($invalid_cities as $key=>$value){
+                            if(empty($invalid_cities_string)){
+                                $invalid_cities_string=  'Area <strong>'.$value.'</strong> is in <strong>'.$key.'</strong>';
+                            }else{
+                                $invalid_cities_string= $invalid_cities_string . "<br />". 'Area<strong>'.$value.'</strong> is in <strong>'.$key.'</strong>';
+                            }
+
+                        }
+                        return $result = array('status'=>'false','invalid_cities'=>trim($invalid_cities_string),'error'=>'Invalid Address');
+                    }
+                }
+            }
+            return $result;
+        }
+    }
+
+    public function address_verify(Request $request){
+        if(isset($request->city_id)){
+
+
+            $city_id = $request->city_id;
+            $consignee_address = $request->consignee_address;
+            $check = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
+            $found_keyword = array();
+            foreach ($check as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            $invalid_cities  = array();
+            if($found_keyword) {
+                $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
+                    ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
+                    ->whereIn('booking_destination_mapping_keywords.keyword', $found_keyword);
+                if ($data_found->exists()) {
+                    $data_found =$data_found->get();
+
+                    foreach ($data_found as $value){
+                        if($value->city_id != $city_id){
+                            $dd = isset($invalid_cities[$value->city_name]) ? $invalid_cities[$value->city_name] : '';
+                            $invalid_cities[$value->city_name] = trim($dd)." ".$value->keyword;
+                        }
+                    }
+                    if($invalid_cities){
+                        return response()->json(['status'=>'false','invalid_cities'=>$invalid_cities,'error'=>'Invalid Address']);
+                    }
+                }
+            }
+            return response()->json(['status'=>'true']);
+
+        }
+        return response()->json(['status'=>'true']);
 
     }
 

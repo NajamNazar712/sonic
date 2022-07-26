@@ -140,6 +140,16 @@ class V2AdminPickupsController extends Controller
                 $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
+
+        if (session('department_id') == 8) {
+            $id = GlobalSettings::where('type','=','retail_store')->select('setting_value');
+            if($id->exists())
+            {
+                $id = $id->first();
+                $pickup_requests = $pickup_requests->where('u.id',$id->setting_value);
+            }
+        }
+
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {

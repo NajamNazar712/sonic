@@ -172,12 +172,22 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->leftjoin('shipment_items as si', function ($join)  {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.id', '=',
+                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
         }
 
         if ($hub = $request->get('search_hub')) {
@@ -1400,6 +1410,7 @@ class DeliveryController extends Controller
       ';
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
+            $total_weight = 0;
             $total_shipments = 0;
             $total_cod_amount = 0;
             $shipments = DeliveryNoteShipment::where('delivery_note_id', $request->id)->select('shipment_id')->orderBy('ordering', 'asc', 'shipment_id', 'asc')->get();
@@ -1428,6 +1439,7 @@ class DeliveryController extends Controller
             foreach ($shipments as $parcel) {
                 $total_shipments++;
                 $shipment = Shipment::find($parcel->shipment_id);
+                $total_weight += (float)$shipment->actual_weight;
                 $class = null;
                 $details_change_class = null;
                 if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
@@ -1653,6 +1665,10 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
                       </table>
@@ -3944,7 +3960,7 @@ class DeliveryController extends Controller
       ';
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
-
+            $total_weight = 0;
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
@@ -3969,6 +3985,7 @@ class DeliveryController extends Controller
 //
             foreach ($filtered_shipments as $shipment) {
                 $total_shipments++;
+                $total_weight += (float)$shipment->actual_weight;
 ////                    $shipment = Shipment::find($parcel->shipment_id);
 //                $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
 //                if($check_walk_in['setting_value'] == $shipment->user->id){
@@ -4070,6 +4087,10 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>DNCC Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
                       </table>

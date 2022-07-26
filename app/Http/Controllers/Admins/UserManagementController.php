@@ -551,7 +551,10 @@ class UserManagementController extends Controller
     public function role_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),374);
         $departments = AdminDepartment::all();
-        return view('admin.user_management.role.index')->with(['departments'=>$departments]);
+        $modules = Module::all();
+        $permissions = ModulePermission::all();
+
+        return view('admin.user_management.role.index')->with(['departments'=>$departments, 'modules' => $modules, 'permissions' => $permissions]);
     }
 
     public function role_list(Request $request) {
@@ -797,5 +800,71 @@ class UserManagementController extends Controller
         $datatable = Datatables::of($riders);
         return $datatable->make(true);
     }
+
+    public function role_bulk_add_index($ids){
+
+        $modules = Module::with('permissions')->get();
+
+        return view('admin.user_management.role.add.bulk_index')->with(['modules' => $modules, 'ids' => $ids]);
+    }
+
+    public function role_bulk_add_store(Request $request){
+        $roles =explode(',' , $request->ids);
+        $permission_ids = $request->permission_ids; 
+
+        foreach($roles as $role){
+            if ($request->has('permission_ids')) {
+                foreach($permission_ids as $permission_id) {
+
+                    $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id);
+    
+                    if(!$check_exists->exists()){
+    
+                        $admin_role_module_permission = new AdminRoleModulePermission();
+                        $admin_role_module_permission->role_id = $role;
+                        $admin_role_module_permission->permission_id = $permission_id;
+                        $admin_role_module_permission->save();
+    
+                    }
+                }
+            }
+            
+        }
+
+        return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Roles has been updated!']);
+
+    }
+
+
+    public function role_bulk_remove_index($ids){
+
+        $modules = Module::with('permissions')->get();
+
+        return view('admin.user_management.role.remove.bulk_index')->with(['modules' => $modules, 'ids' => $ids]);
+    }
+
+    public function role_bulk_remove_store(Request $request){
+        
+        $roles =explode(',' , $request->ids);
+        $permission_ids = $request->permission_ids; 
+        if ($request->has('permission_ids')) {
+            foreach($roles as $role){
+
+                foreach($permission_ids as $permission_id) {
+    
+                    AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id)->delete();
+                  
+                }
+            }
+        }
+
+        
+
+        return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Roles has been updated!']);
+
+    }
+    
+
+    
 
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNote;
@@ -1189,7 +1190,22 @@ class APIController extends Controller
                         }
                     }
                 }
+            }           
+            
+            $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                ->where('bdm.status',1)
+                ->select(['booking_destination_mapping_keywords.keyword'])
+                ->pluck('keyword')
+                ->toArray();
+            $bdmk_error = "";
+            $bdmk_result = array();
+
+            $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk,$consignee_city->name);
+            if (isset($bdmk_result['invalid_cities'])) {
+                $bdmk_error = $bdmk_result['invalid_cities'];
             }
+           
+
             if ($user_type['logo_status'] == 1) {
                 $shipment = Shipment::find($shipment_id);
                 $shipment->shipment_invoice_status = 1;
@@ -1216,19 +1232,47 @@ class APIController extends Controller
                 FTLController::FTLRequestStatusHistory($ftl_request_id, 5, $user_id);
             }
 
+            $return_array = array(
+                'status' => 0,
+                'message' => 'Shipment has been Booked!',
+                'tracking_number' => $tracking_number
+            );
+
             if ($msg_string != null && $blacklist_message == null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
                 $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
+                $return_array['non_service_area'] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
             }
             if ($msg_string == null && $blacklist_message != null) {
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
+                $return_array['blacklisted_consignee'] = $blacklist_message;
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
                 $msg_string = "A Possible Address Anomaly: " . $msg_string . " Detected!";
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.', 'blacklisted_consignee' => $blacklist_message]);
+                $return_array['non_service_area'] = $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
+                $return_array['blacklisted_consignee'] = $blacklist_message;
             }
+
+            // bdmk work
+
+            if ($bdmk_error != null && $blacklist_message == null) {
+                $bdmk_error = $bdmk_error;
+                $return_array['bdmk_message'] = $bdmk_error;
+            }
+            if ($bdmk_error == null && $blacklist_message != null) {
+                $return_array['blacklisted_consignee'] = $blacklist_message ;
+            }
+            if ($bdmk_error != null && $blacklist_message != null) {
+                $bdmk_error = $bdmk_error;
+                $return_array['bdmk_message'] = $bdmk_error;
+            }
+
+            if(isset($return_array['non_service_area']) || isset($return_array['blacklisted_consignee']) || isset($return_array['bdmk_message']))
+            {
+                return response()->json($return_array);
+            }
+
+            // bdmk work end
 
             NotificationsController::send(2, $shipment_id);
             $now = Carbon::now()->format('H:i:s');
@@ -5924,4 +5968,55 @@ class APIController extends Controller
 //        }
     }
     //BOTSIFY WhatsApp API
+
+
+    function check_bdmk($city_id,$consignee_address,$check_bdmk,$city_name){
+
+        if(isset($city_id)){
+
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
+            $found_keyword = array();
+            $result = array();
+            foreach ($check_bdmk as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            $invalid_cities  = array();
+            $invalid_cities_string = "";
+            if($found_keyword) {
+                $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+                    ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
+                    ->select('bdm.city_id','c.name as city_name','booking_destination_mapping_keywords.keyword')
+                    ->whereIn('booking_destination_mapping_keywords.keyword', $found_keyword);
+                if ($data_found->exists()) {
+                    $data_found =$data_found->get();
+
+                    foreach ($data_found as $value){
+                        if($value->city_id != $city_id){
+                            $dd = isset($invalid_cities[$value->city_name]) ? $invalid_cities[$value->city_name] : '';
+                            $invalid_cities[$value->city_name] = trim($dd)." ".$value->keyword;
+                        }
+                    }
+                    if($invalid_cities){
+                        foreach ($invalid_cities as $key=>$value){
+                            if(empty($invalid_cities_string)){
+                                // $invalid_cities_string=  $key.':' ." ".$value;
+                                $invalid_cities_string=  "Dear User, The area ". trim($value) ." is actually present in $key instead of $city_name";
+                            }else{
+                                $invalid_cities_string= $invalid_cities_string . " and the area ". trim($value) ." is actually present in $key instead of $city_name";
+                            }
+                        }
+                        $invalid_cities_string .= ". For assistance, Call: 021-38772222";
+                        return $result = array('status'=>'false','invalid_cities'=>trim($invalid_cities_string),'error'=>'Invalid Address');
+                    }
+                }
+            }
+            return $result;
+        }
+    }
 }

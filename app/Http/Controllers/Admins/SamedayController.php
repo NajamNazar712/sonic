@@ -88,6 +88,10 @@ class SamedayController extends Controller
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
         }
 
+                if (session('department_id') == 8) {
+                    $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         return Datatables::of($shipments)
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');

@@ -161,6 +161,11 @@ class ReturnController extends Controller
                 });
             }
         }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             if (in_array(317, session('permissions'))) {
@@ -1313,6 +1318,10 @@ class ReturnController extends Controller
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
             }
+        }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
         }
 
         if (session('role_id') != 1) {
@@ -4725,7 +4734,7 @@ class ReturnController extends Controller
                 $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
                 $shipment->shipper_status_id = 47;
                 $shipment->save();
-                ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+                ShipmentsJourneyController::add($shipment_id, 47, 47, null, "Shipment Reverted", null, Auth::id());
 
                 $return_revert_log = new ReturnRevertLog;
                 $return_revert_log->return_note = $return_note_id->return_note_id;

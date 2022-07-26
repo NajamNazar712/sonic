@@ -31,7 +31,9 @@
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">From</th>
+                        <th class="border-primary border-darken-1">From Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">To</th>
+                        <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
@@ -188,7 +190,9 @@
                             head.push('Created At');
                             head.push('Created By');
                             head.push('From');
+                            head.push('From Person Dept/Area/DES');
                             head.push('To');
+                            head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
                             head.push('Shipment(s)');
@@ -203,7 +207,9 @@
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.from);
+                                row.push(values.from_dept_area_desg);
                                 row.push(values.to);
+                                row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
@@ -324,7 +330,7 @@
                 },  
                 {
                     extend: 'excelHtml5',
-                    title: 'Received Cargo Report',
+                    title: 'Handover List',
                     text:'<i class="la la-file-excel-o"></i> Excel',
                     }
 
@@ -358,7 +364,9 @@
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'from', name: 'hr.name', class: 'align-middle from'},
+                    {data: 'from_dept_area_desg', name: 'handovers.from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
                     {data: 'to', name: 'hor.name', class: 'align-middle to'},
+                    {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},

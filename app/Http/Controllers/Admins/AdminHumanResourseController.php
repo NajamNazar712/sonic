@@ -13,6 +13,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
@@ -365,6 +366,10 @@ class AdminHumanResourseController extends Controller
         $employee->trax_id = $trax_id;
         $employee->joining_date = $request->joining_date_formatted;
         $employee->save();
+
+        $this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
+
+
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
     }
 
@@ -598,8 +603,11 @@ class AdminHumanResourseController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
                         }
                     }
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+ $dropdown .= '<button type="button" class="dropdown-item employee_log" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Employee Log</div></button>';
 
-                    $dropdown .= '
+                    }
+                        $dropdown .= '
                 </div>
               </div>
             ';
@@ -655,8 +663,8 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            return back()->with(['success' => 'Employee Pin Updated Successfully']);
-        }
+			$this->employee_log_save($request->employee_id,$employee->employee_type_id,$employee->staff_category_id,null,null,$employee->rider_type_id,1,auth()->id());
+            return back()->with(['success'=>'Employee Pin Updated Successfully']);        }
         return back()->with(['error' => 'Employee Not Found']);
     }
 
@@ -687,6 +695,9 @@ class AdminHumanResourseController extends Controller
 
                         $employee->rider_type_id = 2;
                         $employee->update();
+
+                        $this->employee_log_save($employee_id,2,null,null,null,2,null,auth()->id());
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
 
@@ -729,6 +740,9 @@ class AdminHumanResourseController extends Controller
                         $employee->trax_id = $trax_id;
                         $employee->rider_type_id = 1;
                         $employee->update();
+
+                        $this->employee_log_save($employee_id,2,null,null,null,1,null,auth()->id());
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
 
@@ -764,6 +778,9 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = 2;
         $employee->update();
+
+        $this->employee_log_save($employee_id,2,$employee->staff_category_id,2,1,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
     }
@@ -791,6 +808,9 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
     }
@@ -819,6 +839,9 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $this->employee_log_save($employee->id,2,null,2,null,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
 
@@ -845,6 +868,9 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
     }
@@ -873,6 +899,9 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,2,null,null,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
@@ -4442,8 +4471,9 @@ class AdminHumanResourseController extends Controller
             'converted_by' => Auth::id(),
         ]);
 
-        return back()->with("success", "Rider Converted To Staff Successfully");
-    }
+		$this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
+        return back()->with("success","Rider Converted To Staff Successfully");    }
 
     public function convert_intern_to_staff(Request $request)
     {
@@ -4470,6 +4500,9 @@ class AdminHumanResourseController extends Controller
 
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
+
+                    $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
                     return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
@@ -4490,6 +4523,78 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'logs' => $designation_logs]);
         } else {
             return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
+        }
+    }
+
+    public function employee_log(Request $request)
+    {
+        $details = array();
+        $employee_logs = EmployeeLog::leftjoin('employee_types as et','employee_logs.employee_type_id','=','et.id')
+            ->leftjoin('employee_statuses as es','employee_logs.status_id','=','es.id')
+            ->leftjoin('rider_types as rt','rt.id','=','employee_logs.rider_type_id')
+            ->leftjoin('staff_categories as sc','employee_logs.staff_category_id','=','sc.id')
+            ->leftjoin('admins as a','employee_logs.updated_by','=','a.id')
+            ->select('employee_logs.employee_type_id as employee_type_id','et.name as employee_type','employee_logs.staff_category_id as staff_category_id','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist as blacklist','employee_logs.update_pin as pin_update','employee_logs.created_at as updated_at','a.name as updated_by','employee_logs.status_id as rejoin_employee')
+            ->where('employee_logs.employee_id', $request->employee_id)
+            ->orderBy('employee_logs.created_at', 'DESC');
+
+
+
+        if($employee_logs->exists()) {
+            $employee_logs = $employee_logs->get();
+//            dd($employee_logs->count());
+            foreach ($employee_logs as $key=> $employee_log) {
+                if ($employee_log->employee_type_id == 1) {
+                    if ($employee_log->staff_category_id == 2) {
+                        $details[$key]['employee_type'] = 'Intern';
+                    } else {
+                        $details[$key]['employee_type'] = 'Staff';
+                    }
+
+                } elseif($employee_log->employee_type_id == 2) {
+                    $details[$key]['employee_type'] = $employee_log->employee_type;
+                    if ($employee_log->rider_type != null) {
+                        $details[$key]['employee_type'] .= ' - ' . $employee_log->rider_type;
+                    }
+                }
+                else
+                {
+                    $details[$key]['employee_type'] = '-';
+                }
+
+                if ($employee_log->employee_status) {
+                    $details[$key]['employee_status'] = $employee_log->employee_status;
+                } else {
+                    $details[$key]['employee_status'] = '-';
+                }
+
+                if ($employee_log->pin_update == 1) {
+                    $details[$key]['pin_update'] = 'Updated';
+                } else {
+                    $details[$key]['pin_update'] = '-';
+                }
+
+                if ($employee_log->blacklist == 1) {
+                    $details[$key]['blacklist'] = 'Updated';
+                } else {
+                    $details[$key]['blacklist'] = '-';
+                }
+
+                if ($employee_log->rejoin_employee == 4) {
+                    $details[$key]['rejoin_employee'] = 'Rejoin';
+                } else {
+                    $details[$key]['rejoin_employee'] = '-';
+                }
+
+                $details[$key]['updated_at'] = date('Y-m-d H:i:s',strtotime($employee_log->updated_at));
+
+                $details[$key]['updated_by'] = $employee_log->updated_by;
+            }
+            return response()->json(['status' => 1, 'logs' => $details]);
+        }
+        else
+            {
+            return response()->json(['status' => 0, 'error' => "Employee Log not found"]);
         }
     }
 
@@ -4631,6 +4736,19 @@ class AdminHumanResourseController extends Controller
             ->update(['line_manager_id' => $request->new_line_manager_id]);
 
         return back()->with(['success' => 'Line Manager Updated Successfully', 'info' => $info]);
+    }
+
+    function employee_log_save($emp_id,$emp_type_id,$staff_category_id,$status_id,$blacklist,$rider_type_id,$pin,$updated_by){
+        $employee_log = new EmployeeLog();
+        $employee_log->employee_id = $emp_id;
+        $employee_log->employee_type_id = $emp_type_id; //staff or rider
+        $employee_log->staff_category_id = $staff_category_id; // staff not intern
+        $employee_log->status_id = $status_id; //active or inactive
+        $employee_log->blacklist = $blacklist;
+        $employee_log->rider_type_id = $rider_type_id;
+        $employee_log->update_pin = $pin;
+        $employee_log->updated_by = $updated_by;
+        $employee_log->save();
     }
 
 }
