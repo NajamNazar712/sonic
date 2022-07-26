@@ -530,6 +530,10 @@ class OrderManagementController extends Controller
             });
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
