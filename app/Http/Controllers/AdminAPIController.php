@@ -461,7 +461,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -3432,7 +3432,7 @@ class AdminAPIController extends Controller
     public function employee_shift(Request $request)
     {
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $admins = Admin::find($admin_id);
         if ($admins) {
             $response = array();
@@ -3630,7 +3630,7 @@ class AdminAPIController extends Controller
             'attendance_date' => ['required']
         ];
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -3663,7 +3663,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -4425,7 +4425,7 @@ class AdminAPIController extends Controller
                 }
             }
         } else {
-            $employee_id = $request->employee_id;
+            $employee_id = $request->admin_employee;
             $employee = Employee::find($employee_id);
             if($employee) {
                 if($employee->line_manager_id == null || $employee->line_manager_id == 0){
@@ -4464,7 +4464,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -4524,7 +4524,7 @@ class AdminAPIController extends Controller
 
     public function employee_leave_list(Request $request)
     {
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)
@@ -4557,7 +4557,7 @@ class AdminAPIController extends Controller
 
     public function approver_leave_list(Request $request)
     {
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $admin = Employee::find($employee_id);
         if ($admin) {
             $admin_role = $request->admin_role_id;
@@ -5454,7 +5454,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
             $admin_id = $request->admin_id;
-            $employee_id = $request->employee_id;
+            $employee_id = $request->admin_employee;
             $dates = $this->generateDateRange($request->first_day, $request->last_day);
             $data = array();
             $shift = EmployeeShift::join('employees as a', 'employee_shifts.id', '=', 'a.shift_id')
@@ -6997,7 +6997,7 @@ class AdminAPIController extends Controller
             'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
         ];
 
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -7113,7 +7113,7 @@ class AdminAPIController extends Controller
                 }
             }
         } else {
-            $employee_id = $request->employee_id;
+            $employee_id = $request->admin_employee;
             $employee = Employee::find($employee_id);
             if ($employee) {
                 if($employee->line_manager_id == null){
@@ -7149,7 +7149,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -7226,7 +7226,7 @@ class AdminAPIController extends Controller
 
     public function employee_adjustment_list(Request $request)
     {
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
             ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)
@@ -7251,7 +7251,7 @@ class AdminAPIController extends Controller
 
     public function approver_adjustment_list(Request $request)
     {
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $admin = Employee::find($employee_id);
         if ($admin) {
             $admin_role = $request->admin_role_id;
@@ -7300,7 +7300,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -7403,7 +7403,7 @@ class AdminAPIController extends Controller
         ];
 
         $admin_id = $request->admin_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->admin_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -8180,7 +8180,7 @@ class AdminAPIController extends Controller
 
     public function return_create_index(Request $request)
     {
-        $role_id = $request->role_id;
+        $role_id = $request->admin_role_id;
         $admin_id = $request->admin_id;
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
         $routes = Route::where('status', 1);
@@ -8239,7 +8239,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $role_id = $request->role_id;
+            $role_id = $request->admin_role_id;
             $admin_id = $request->admin_id;
             $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
             $different_city_statuses_2 = array(22, 24, 27, 29, 33, 35, 42, 44, 45, 46, 47, 48, 60);
@@ -8777,7 +8777,7 @@ class AdminAPIController extends Controller
 
     public function get_return_note_list(Request $request)
     {
-        $role_id = $request->role_id;
+        $role_id = $request->admin_role_id;
         $admin_id = $request->admin_id;
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
 
@@ -8813,7 +8813,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $role_id = $request->role_id;
+            $role_id = $request->admin_role_id;
             $admin_id = $request->admin_id;
             $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
             $deliveries = ReturnNote::join('return_note_shipments as dns', 'dns.return_note_id', '=', 'return_notes.id')

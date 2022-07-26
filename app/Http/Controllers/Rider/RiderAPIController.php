@@ -9684,7 +9684,7 @@ class RiderAPIController extends Controller
             'attendance_date' => ['required']
         ];
         $rider_id = $request->rider_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -10575,7 +10575,7 @@ class RiderAPIController extends Controller
     }
 
     public function leave_index(Request $request){
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $employee = Employee::find($employee_id);
         if($employee){
             if($employee->line_manager_id == null){
@@ -10604,7 +10604,7 @@ class RiderAPIController extends Controller
         ];
 
         $rider_id = $request->rider_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
 
@@ -10655,7 +10655,7 @@ class RiderAPIController extends Controller
     public function employee_leave_list(Request $request)
     {
         $rider_id = $request->rider_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)
@@ -10737,7 +10737,7 @@ class RiderAPIController extends Controller
             $message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
-            $employee_id = $request->employee_id;
+            $employee_id = $request->rider_employee;
             $dates = $this->generateDateRange($request->first_day, $request->last_day);
             $data = array();
             $shift = EmployeeShift::join('employees as r', 'employee_shifts.id', '=', 'r.shift_id')
@@ -11440,7 +11440,7 @@ class RiderAPIController extends Controller
             'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
         ];
 
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -11683,7 +11683,7 @@ class RiderAPIController extends Controller
     }
 
     public function adjustment_index(Request $request){
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $rider = Employee::find($employee_id);
         if($rider){
             if($rider->line_manager_id == null){
@@ -11711,7 +11711,7 @@ class RiderAPIController extends Controller
         ];
 
         $rider_id = $request->rider_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
 
@@ -11761,7 +11761,7 @@ class RiderAPIController extends Controller
     public function employee_adjustment_list(Request $request)
     {
         $rider_id = $request->rider_id;
-        $employee_id = $request->employee_id;
+        $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
             ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)

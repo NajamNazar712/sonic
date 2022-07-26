@@ -26,15 +26,20 @@ class AdminAPIToken
                 $admin = $admin->first();
 
                 if ($admin->status) {
-                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id')->first();
-                    $employee_id = null;
-                    if($employee)
+                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
+                    if($employee->exists())
                     {
-                        $employee_id = $employee->id;
+                        $employee = $employee->first();
+                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id]);
+                        return $next($request);
+                    } else{
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Employee Not Found.'
+                        ]);
                     }
-                    $request->request->add(['admin_id' => $admin->id,'employee_id' => $employee_id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee_id]);
 
-                    return $next($request);
+
                 }
                 else {
                     return response()->json([
