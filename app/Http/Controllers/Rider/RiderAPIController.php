@@ -3327,8 +3327,14 @@ class RiderAPIController extends Controller
     public function pickups_history_v2(Request $request)
     {
         $rider_id = $request->rider_id;
-        $from_date = $request->get('from_date');
+        $from_date = explode(" ",$request->get('from_date'))[0]." 06:00:00";
         $to_date = $request->get('to_date');
+        if($to_date == null){
+            $to_date = strval(Carbon::parse($from_date)->addDay());
+        }else{
+            $to = explode(" ",$request->get('to_date'))[0]." 06:00:00";
+            $to_date = strval(Carbon::parse($to)->addDay());
+        }
         $pickup_request_id = $request->get('pickup_request_id');
         $pickup_note_id = $request->get('pickup_note_id');
 
