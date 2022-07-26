@@ -50,6 +50,10 @@
                                 </div>
                             </form>
 
+                            <div id="information" class="information text-center">
+                                <button type="button" name="info_button" class="btn btn-dark info_button" id="info_button">Scanned: <span class="scanned">{{$scanned_bags}}</span>/<span class="total">{{$total_bags}}</span></button>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -166,6 +170,22 @@
         </div>
     </div>
 
+    <div class="modal fade" id="total_bag_details" role="dialog" aria-labelledby="total_bag_details_title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="cargo_details_title">Total Bags Details</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -183,6 +203,8 @@
 
     <script>
         $(document).ready(function() {
+            var total_bags = @json($total_bags);
+            var scanned_bags = @json($scanned_bags);
             @if (session('print'))
             $.ajax({
                 url: '{!! route('admin.cargo_manifest.print') !!}',
@@ -290,12 +312,12 @@
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 30000,
-                            error: function (data) {
-                                $('#add_bag_form button.add').prop('disabled', false);
-                                UnblockPagePermanently();
-                                scan_sound(2);
-                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            },
+                            // error: function (data) {
+                            //     $('#add_bag_form button.add').prop('disabled', false);
+                            //     UnblockPagePermanently();
+                            //     scan_sound(2);
+                            //     toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            // },
                             success: function(data) {
                                 if (data.status == 0) {
                                     id = data.details.id;
@@ -307,11 +329,16 @@
                                        // $('#datatable').DataTable().draw();
                                         bag_ids.push(data.details.id);
                                         manifest_bag_weight.push(data.details.bag_weight);
+                                        total_bags = data.details.total_bags;
+                                        scanned_bags = scanned_bags + 1;
                                         scan_sound(1);
 
                                         $('#add_bag_form button.add').prop('disabled', false);
 
                                         $('#master_cargo_consignment_confirm').prop('disabled', false);
+
+                                        $('#information .scanned').html(scanned_bags);
+                                        $('#information .total').html(total_bags);
                                         UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
@@ -590,6 +617,12 @@
                             bag_ids.splice(index,1);
                         }
 
+
+                        total_bags = data.total_bags;
+                        scanned_bags = scanned_bags - 1;
+                        $('#information .scanned').html(scanned_bags);
+                        $('#information .total').html(total_bags);
+
                         if(bag_ids.length == 0){
 
                             $('#add_bag_form button.add').prop('disabled', false);
@@ -601,6 +634,40 @@
                         }
                     });
 
+                }
+            });
+
+            $('#info_button').on('click', function () {
+                $('#total_bag_details .modal-body').html('');
+                if(bag_ids.length > 0){
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.total_bags') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                        }
+                    })
+                        .done(function (data) {
+                            var html = '';
+                            html += '<table class="table table-sm datatable text-center">';
+                            html += '<thead><tr><th>S No.</th><th><strong>Seal Number</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong></th><th><strong>Status</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            var ind = 0;
+                            $.each(data.details, function (index, value) {
+                                ind = ind + 1;
+                                html += '<tr class="' + value.class + '"><td>' + ind + '</td>';
+                                html += '<td>' + value.seal_number + '</td>';
+                                html += '<td>' + value.origin + '</td>';
+                                html += '<td>' + value.destination + '</td>';
+                                html += '<td>' + value.status + '</td></tr>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            $('#total_bag_details .modal-body').html(html);
+
+                            $('#total_bag_details').modal('show');
+                        });
                 }
             });
 

@@ -22,6 +22,8 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\OneLink\OneLink;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -5024,6 +5026,359 @@ class APIController extends Controller
         }
         else{
             return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
+
+    public function onelink_payment_billinquiry(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if(in_array($ip_address, $valid_ip_addresses)){
+                $flag = true;
+            }
+            else{
+                $flag = false;
+            }
+        }
+        else{
+            $flag = true;
+        }
+        if($flag){
+
+            $username = $request->header('username');
+            $password = $request->header('password');
+
+            $return_data['response_Code'] = "";
+            $return_data['consumer_Detail'] = "";
+            $return_data['bill_status'] = "";
+            $return_data['due_date'] = "";
+            $return_data['amount_within_dueDate'] = "";
+            $return_data['amount_after_dueDate'] = "";
+            $return_data['billing_month'] = "";
+            $return_data['date_paid'] = "";
+            $return_data['amount_paid'] = "";
+            $return_data['tran_auth_Id'] = "";
+            $return_data['reserved'] = "";
+
+            // getting body data
+            $request_data['consumer_number'] = $request->input('consumer_number');
+            $request_data['bank_mnemonic'] = $request->input('bank_mnemonic');
+            $request_data['reserved'] = $request->input('reserved');
+
+            if(isset($username) && isset($password) && isset($request_data['consumer_number']) && isset($request_data['bank_mnemonic']))
+            {
+                $authenticate = OneLink::where("username",$username)->where("active",0)->first();
+                
+                if($authenticate)
+                {
+                    if(Hash::check($password, $authenticate->password) && $authenticate->bank_mnemonic == $request_data['bank_mnemonic'])
+                    {
+                        
+
+                        // explode consumer_prefx from consumer_number
+                        $consumer_prefx  = substr($request_data['consumer_number'],0,6);
+
+                        // explode tracking number from consumer_number
+                        $tracking_no  = substr($request_data['consumer_number'],6);
+
+                        // getting shipment data according to tracking no provided via body parameter $tracking_no
+                        $shipment_data = Shipment::join('shipment_status as ss','shipments.shipper_status_id','=','ss.id')
+                        ->where('shipments.tracking_number',$tracking_no)
+                        ->select('shipments.*','ss.code as status_code','ss.name as status_name','ss.description as status_desc','ss.status as status_status','ss.id as status_id')
+                        ->first();  
+
+                        // blocked shipments ids are mentioned in $blocked_shipments
+                        $blocked_shipments = array(17,20,21,22,23,24,25,44,47,48,50,57,60);
+
+                        if($shipment_data)
+                        {
+                            if(!in_array($shipment_data->status_id,$blocked_shipments))
+                            {
+                                if($shipment_data->amount > 0)
+                                {
+                                    // response_code 00 work
+                                    $return_data['response_Code'] = "00";
+                                    $return_data['consumer_Detail'] = $shipment_data->consignee_name;
+
+                                    // check bill status
+                                    if($shipment_data->amount == $shipment_data->received_amount)
+                                    {
+                                        // Bill paid status
+                                        $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                                        
+                                        $return_data['response_Code'] = "06";
+                                        $return_data['bill_status'] = "P";
+                                        $return_data['date_paid'] = isset($transaction_data->tran_date)?$transaction_data->tran_date : ""; // getting date from 1link transaction table after creating migration
+                                        $return_data['amount_paid'] = isset($transaction_data->transaction_amount)?$transaction_data->transaction_amount : ""; // getting paid amount from 1link transaction table after creating migration
+                                        $return_data['tran_auth_Id'] = isset($transaction_data->tran_auth_id)?$transaction_data->tran_auth_id : ""; // getting tran_auth_Id from 1link transaction table after creating migration
+                                        $return_data['reserved'] = "bill already paid";
+                                    }
+                                    else{
+                                        // Bill Unpaid status
+                                        $return_data['bill_status'] = "U";
+                                    }
+
+                                    // creating due date yyyMMdd
+                                    $return_data['due_date'] = Carbon::parse($shipment_data->created_at)->format('Ymd');
+
+                                    // creating amount -- will always set + prefix if amount is not negative otherwise - if negative
+                                    // total length is 14 
+                                    // 1 for + or - prefix
+                                    // 11 digit for amount
+                                    // 2 last digit for decimal values
+                                    // example amount is 120 filling length +0000000012000
+
+                                    $amount_length = strlen($shipment_data->amount);
+                                    
+                                    // prefix + because we only have possitive value to be collected
+                                    $return_data['amount_within_dueDate'] .= "+";
+
+                                    // adding 0 before amount to fill required length
+                                    for ($i=1; $i <= 11 - $amount_length ; $i++) { 
+                                        $return_data['amount_within_dueDate'] .= "0";
+                                    }
+
+                                    $return_data['amount_within_dueDate'] .= $shipment_data->amount;
+
+                                    // adding 00 for decimal value Required for 1Link API
+                                    $return_data['amount_within_dueDate'] .="00";
+
+                                    // $return_data['amount_after_dueDate'] is same as $return_data['amount_within_dueDate'] because Trax is not charging for late payment
+                                    $return_data['amount_after_dueDate'] = $return_data['amount_within_dueDate'];
+
+                                    // creating billing month
+                                    $return_data['billing_month'] = Carbon::parse($shipment_data->created_at)->format('ym');
+
+                                    // reserved field is optional
+                                    $return_data['reserved'] = $shipment_data->status_desc;
+                                }
+                                else{
+                                    // if shipment amount is 0 or less
+                                    $return_data['response_Code'] = "01";
+                                    $return_data['reserved'] = "consumer number does not exist";
+                                }
+
+                            }
+                            else{
+                               // if shipment is blocked response_Code return 02
+                                $return_data['response_Code'] = "02";
+                                $return_data['consumer_Detail'] = $shipment_data->consignee_name;
+                                $return_data['bill_status'] = "B";
+                                $return_data['reserved'] = "consumer number block";
+
+                            }
+
+                        }
+                        else{
+
+                             // if shipment is not exist in DB 
+                             $return_data['response_Code'] = "01";
+                             $return_data['reserved'] = "consumer number does not exist";
+
+                        }
+
+                        // return status 200 due to sucessfully Inquiry
+                        return json_encode(['status' => 200, 'message' => 'Inquiry Data Found', 'result' =>  $return_data]);
+                    }
+                    else{
+                        // Unauthorized when password is incorrect
+                        $return_data['response_Code'] = "04";
+                        $return_data['reserved'] = "invalid username or password or bank mnemonic";
+
+                        return json_encode(['status' => 200, 'message' => 'Invalid Data', 'result' =>  $return_data]);
+                    }
+                }
+                else{
+                    // Unauthorized! Invalid username or password when username and password both are incorrect
+                
+                    $return_data['response_Code'] = "04";
+                    $return_data['reserved'] = "invalid username or password";
+
+                    return json_encode(['status' => 200, 'message' => 'Invalid Data', 'result' =>  $return_data]);
+                }
+            }
+            else{
+                $return_data['response_Code'] = "03";
+                $return_data['reserved'] = "unknown error/bad transaction";
+
+                return json_encode(['status' => 200, 'message' => 'Invalid Data', 'result' =>  $return_data]);
+            }
+        }
+        else{
+            // Access Forbidden! when ip is not not matched with given in above code in production environment
+            return ['status' => 403, 'message' => 'Access Forbidden!'];
+        }
+    }
+
+    public function onelink_payment_billpayment(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if(in_array($ip_address, $valid_ip_addresses)){
+                $flag = true;
+            }
+            else{
+                $flag = false;
+            }
+        }
+        else{
+            $flag = true;
+        }
+        if($flag){
+
+            $username = $request->header('username');
+            $password = $request->header('password');
+
+            $return_data['response_Code'] = "";
+            $return_data['Identification_parameter'] = "";
+            $return_data['reserved'] = "";
+
+            // getting body data
+            $request_data['consumer_number'] = $request->input('consumer_number');
+            $request_data['tran_auth_id'] = $request->input('tran_auth_id');
+            $request_data['transaction_amount'] = $request->input('transaction_amount');
+            $request_data['tran_date'] = $request->input('tran_date');
+            $request_data['tran_time'] = $request->input('tran_time');
+            $request_data['bank_mnemonic'] = $request->input('bank_mnemonic');
+            $request_data['reserved'] = $request->input('reserved');
+
+            if(isset($username) && isset($password) && isset($request_data['consumer_number']) && isset($request_data['tran_auth_id']) && isset($request_data['transaction_amount']) && isset($request_data['tran_date']) && isset($request_data['tran_time']) && isset($request_data['bank_mnemonic']))
+            {
+                $authenticate = OneLink::where("username",$username)->where("active",0)->first();
+                
+                if($authenticate)
+                {
+                    // return json_encode($request_data);
+                    if(Hash::check($password, $authenticate->password) && $authenticate->bank_mnemonic == $request_data['bank_mnemonic'])
+                    {
+                        // explode consumer_prefx from consumer_number
+                        $consumer_prefx  = substr($request_data['consumer_number'],0,6);
+
+                        // explode tracking number from consumer_number
+                        $tracking_no  = substr($request_data['consumer_number'],6);
+
+                        // getting shipment data according to tracking no provided via body parameter $tracking_no
+                        $shipment_data = Shipment::join('shipment_status as ss','shipments.shipper_status_id','=','ss.id')
+                        ->where('shipments.tracking_number',$tracking_no)
+                        ->select('shipments.*','ss.code as status_code','ss.name as status_name','ss.description as status_desc','ss.status as status_status','ss.id as status_id')
+                        ->first();
+
+                        // blocked shipments ids are mentioned in $blocked_shipments
+                        // $blocked_shipments = array(17,20,21,22,23,24,25,44,47,48,50,57,60);
+
+                        if($shipment_data)
+                        {
+                            // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                            $transaction_data = OneLinkPaymentTransaction::where('tracking_no',$tracking_no)->first();
+                            
+                            if($transaction_data)
+                            {
+                                if($transaction_data->consumer_number == $request_data['consumer_number'] && $transaction_data->tran_auth_id == $request_data['tran_auth_id'] && $transaction_data->tran_date == $request_data['tran_date'] && $transaction_data->tran_time == $request_data['tran_time'])
+                                {
+                                    $return_data['response_Code'] = "03";
+                                    $return_data['reserved'] = "duplicate transaction";
+                                }
+                                else{
+                                    $return_data['response_Code'] = "06";
+                                    $return_data['reserved'] = "bill already paid";
+                                } 
+                            }
+                            else{
+
+                                if($shipment_data->amount == $shipment_data->received_amount)
+                                {
+                                    // response_code 00 work
+                                    $return_data['response_Code'] = "06";
+                                    $return_data['reserved'] = "bill already paid";
+                                }
+                                else{
+
+                                    $transfer_amount =((int)$request_data['transaction_amount']) / 100 ;
+                                    $tran_date_formated = Carbon::parse($request_data['tran_date'])->format('Y-m-d');
+                                    $tran_time_formated = Carbon::parse($request_data['tran_time'])->format('h:i:s');
+
+                                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_data->id)->orderBy('delivery_note_id', 'desc')->first();
+                                    $delivery_note = $delivery_note_shipment->delivery_note_id;
+
+                                    $delivery_note_data = DeliveryNote::where('id', $delivery_note)->first();
+
+                                    $update_count = $delivery_note_data->one_link_payment_count + 1;
+
+                                    DeliveryNote::where('id', $delivery_note)->update(['one_link_payment_count' => $update_count]);
+
+
+                                    $request_data['consumer_prefx'] = $consumer_prefx;
+                                    $request_data['tracking_no'] = $tracking_no;
+                                    $request_data['shipment_id'] = $shipment_data->id;
+                                    $request_data['amount'] = $transfer_amount;
+                                    $request_data['tran_date_formated'] = $tran_date_formated;
+                                    $request_data['tran_time_formated'] = $tran_time_formated;
+                                    $request_data['delivery_note_id'] = $delivery_note;
+                                    
+                                    $upload_transaction = OneLinkPaymentTransaction::create($request_data);
+
+                                    if($upload_transaction)
+                                    {
+                                        $return_data['response_Code'] = "00";
+                                        $return_data['Identification_parameter'] = $shipment_data->consignee_name;
+                                        $return_data['reserved'] = "successful bill payment";
+                                        Shipment::where('tracking_number', $tracking_no)->update(['received_amount' => $transfer_amount]);
+
+                                        return json_encode(['status' => 200, 'message' => 'Successful Bill Payment', 'result' =>  $return_data]);
+                                    }
+                                    else{
+                                        $return_data['response_Code'] = "02";
+                                        $return_data['reserved'] = "unknown error / bad transaction";
+
+                                        return json_encode(['status' => 200, 'message' => 'Unknown Error / Bad Transaction', 'result' =>  $return_data]);
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            // if shipment is not exist in DB 
+                            $return_data['response_Code'] = "01";
+                            $return_data['reserved'] = "consumer number does not exist";
+                        }
+                        // return status 200 due to sucessfully Inquiry
+                        return json_encode(['status' => 200, 'message' => 'Inquiry Data Found', 'result' =>  $return_data]);
+                    }
+                    else{
+                        // Unauthorized when password is incorrect
+                        $return_data['response_Code'] = "04";
+                        $return_data['reserved'] = "invalid username or password or bank mnemonic";
+
+                        return json_encode(['status' => 200, 'message' => 'Invalid Data', 'result' =>  $return_data]);
+                    }
+                }
+                else{
+                    // Unauthorized! Invalid username or password when username and password both are incorrect
+                    $return_data['response_Code'] = "04";
+                    $return_data['reserved'] = "invalid username or password";
+
+                    return json_encode(['status' => 200, 'message' => 'Invalid Data', 'result' =>  $return_data]);
+                }
+            }
+            else{
+                $return_data['response_Code'] = "02";
+                $return_data['reserved'] = "unknown error / bad transaction";
+
+                return json_encode(['status' => 200, 'message' => 'Unknown Error / Bad Transaction', 'result' =>  $return_data]);
+            }
+        }
+        else{
+            // Access Forbidden! when ip is not not matched with given in above code in production environment
+            return ['status' => 403, 'message' => 'Access Forbidden!'];
         }
     }
 

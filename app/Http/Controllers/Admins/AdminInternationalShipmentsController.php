@@ -116,7 +116,7 @@ class AdminInternationalShipmentsController extends Controller
                 $query->whereIn('shipper_status_id', [2,3,4,5,6,7,8,9,10,11,12,13,15,18,49,51,52,54,55,56]);
             })],
             'international_tracking_number' => ['required'],
-            'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'actual_weight' => ['required', 'numeric', 'between:0.1,100000'],
             'service_provider_id' => ['required', 'numeric', 'between:1,7', 'exists:international_shipment_service_providers,id']
         ];
 

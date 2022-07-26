@@ -11,15 +11,15 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
- <div id="camera_scan" class="d-none">
+                <div id="camera_scan" class="d-none">
                     <div id="camera_view" class="camera_view"></div>
                 </div>
 
-                
+
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                            <select name="operation_rider_type" id="operation_rider_type" class="form-control select2" required>
                                 @foreach($operation_rider_category as $category)
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
@@ -30,7 +30,7 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="rider_name" id="rider_name" class="form-control select2" required>
-                              
+
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -38,9 +38,9 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                @foreach($routes as $route)
+                              {{--  @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
+                                @endforeach--}}
                             </select>
                             <div class="danger" id="route_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -64,6 +64,9 @@
                                 <i class="ft-camera h1"></i>
                             </a>
                         </div>
+                        <input type="hidden" id="rider_id" name="rider_id">
+                        <input type="hidden" id="operation_rider_type_id" name="operation_rider_type_id">
+                        <input type="hidden" id="route_id" name="route_id">
                     </div>
                 </form>
 
@@ -92,15 +95,15 @@
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                     <div class="row justify-content-center">
-                            <div class="col-2 text-center">
-                                <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
-                                <div class="form-group">
-                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
-                                    <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
-                                    <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
-                                </div>
+                        <div class="col-2 text-center">
+                            <label class="font-medium-2 font-weight-bold block">Delivery Note Shipment(s) Order</label>
+                            <div class="form-group">
+                                <label for="order_checkbox" class="font-medium-2 text-bold-600 mr-1">Default</label>
+                                <input type="checkbox" name="order_checkbox" id="order_checkbox" class="switchery order_checkbox" data-color="info" data-size="sm" data-switchery="true">
+                                <label for="order_checkbox" class="font-medium-2 text-bold-600 ml-1">Scanned</label>
                             </div>
                         </div>
+                    </div>
                     <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
@@ -131,23 +134,23 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Special Rider</h4>
-                    
+
                 </div>
                 <form id="special_rider_form" class="justify-content-center" novalidate="novalidate">
                     <div class="modal-body text-center">
-                        
-                            <div class="form-group">
-                                <input type="text" name="special_rider_name" id="special_rider_name_input" class="form-control" placeholder="Special Rider Name" data-rule-required="true" data-msg-required="Rider Nume is required">
-                            </div>
-                            <div class="form-group">
-                                <input type="text" name="special_rider_phone" id="special_rider_phone_input" class="form-control phone" placeholder="Special Rider Phone" data-rule-required="true" data-msg-required="Phone Number is required">
-                            </div>
-                       
+
+                        <div class="form-group">
+                            <input type="text" name="special_rider_name" id="special_rider_name_input" class="form-control" placeholder="Special Rider Name" data-rule-required="true" data-msg-required="Rider Nume is required">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="special_rider_phone" id="special_rider_phone_input" class="form-control phone" placeholder="Special Rider Phone" data-rule-required="true" data-msg-required="Phone Number is required">
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary width-100" id="add_special_rider_button">Add</button>
                     </div>
-            </form>
+                </form>
             </div>
         </div>
     </div>
@@ -320,7 +323,7 @@
                     $('#otp_submit').attr('disabled', true);
                 }
             });
-           @if(session('print'))
+                    @if(session('print'))
             var pid = '{{ session('print') }}';
             print(pid);
             function print(id) {
@@ -351,7 +354,7 @@
                         }
                     });
             }
-                    @endif
+            @endif
 
             $('#add_shipment_pieces_form input.scan_piece').inputmask({
                 'alias': 'integer',
@@ -464,7 +467,7 @@
                             table.button('.select_all_rider_informations').enable();
                         }
                     },
-                    ],
+                ],
                 scrollX: true,
                 paging:false,
                 columns: [
@@ -495,16 +498,17 @@
                 placeholder:'Select Rider*',
             });
 
-            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#operation_rider_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Category*',
             }).bind('select2:select', function () {
                 if(this.value){
+                    var id = this.value;
                     $.ajax({
                         url: '{!! route('admin.delivery.note.operation_riders') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'operation_rider_id': this.value,
+                            'operation_rider_type': this.value,
                         }
                     }).done(function(data){
 
@@ -518,6 +522,9 @@
                             });
                             $('#rider_name').html(html);
                             $('#rider_name').val('').trigger('change');
+                            $('#operation_rider_type_id').val(id);
+                            $('#operation_rider_type').attr('disabled',true);
+                            console.log(id);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -532,7 +539,7 @@
                 placeholder:'Select Route*',
             });
             $('#rider_name').on('change',function () {
-                var route = $(this).find(":selected").data("id");
+                //var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
                 rider_dncc_check = false;
                 if(rider_id != null){
@@ -546,9 +553,18 @@
                     }).done(function(data){
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
-                            $('#route').val(route).trigger('change');
-                            $('#scan_tracking').attr("disabled", false);
-                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                            $("#rider_id").val(rider_id);
+                            $("#rider_name").attr('disabled',true);
+
+                            var html = "";
+                            $.each(data.routes, function(key,v) {
+
+                                html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.code} - (${v.start}  to  ${v.end})</option>`
+
+                            });
+                            $('#route').html(html);
+                            $('#route').val('').trigger('change');
+
                             rider_dncc_check = true;
                         }
                         else {
@@ -560,16 +576,27 @@
                         }
                     });
                 }
-                else{
+               /* else{
                     $('#route').val(route).trigger('change');
-                }
+                }*/
 
             });
+
+            $('#route').on('change',function () {
+                if(this.value){
+                    $('#route_id').val(this.value);
+                    $('#route').attr('disabled',true);
+                    $('#scan_tracking').attr("disabled", false);
+                    $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                }
+            });
+
+
             $('#scan_tracking').attr("disabled","disabled");
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
-            
+
             var rowsCount = 0;
             // function  countRows() {
             //     rowsCount = table.row().count();
@@ -580,7 +607,7 @@
                 var scan = $('#scan_tracking');
                 var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
-                var rider_id = $('#rider_name').val();
+                var rider_id = $('#rider_id').val();
                 if (tracking !== '' && Number.isNaN(tracking) == false) {
                     scan.attr('disabled', true);
                     //countRows();
@@ -654,7 +681,7 @@
 
                                 }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
                                 }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
@@ -745,7 +772,7 @@
 
                         });
                     } else {
-                        var rider_id = $('#rider_name').val();
+                        var rider_id = $('#rider_id').val();
                         var is_indexed = $.inArray(tracking, tracking_ids);
                         if(is_indexed === -1){
                             blockPagePermanently();
@@ -817,12 +844,12 @@
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     if(data.is_open_box==1){
-                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                        var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
 
-                                }else{
+                                    }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-                                }
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -900,7 +927,7 @@
                                         });
 
                                     }
-                                    }
+                                }
                                 scan.val('');
                                 scan.attr('disabled', false);
                                 scan.focus();
@@ -973,7 +1000,7 @@
             });
 
             function otp_generation(){
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
                 if(rider){
 
                     $.ajax({
@@ -1003,7 +1030,7 @@
 
             function otp_verification() {
                 var otp = $('#otp_input').val();
-                var rider = $('#rider_name').val();
+                var rider = $('#rider_id').val();
 
                 if (otp.length == 6) {
                     $.ajax({
@@ -1035,8 +1062,8 @@
             var special_rider_flag = false;
             var this_form;
             function create_delivery_note(){
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
+                var rider = $('#rider_id').val();
+                var route = $('#route_id').val();
                 var ccd_flag = true;
                 if(ccd_shipment_ids.length > 0){
                     if(ccd_rider != 1){
@@ -1155,6 +1182,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                            console.log($('#create_delivery_note_form input#selected_rider_id').val());
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
                                                 $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
@@ -1252,21 +1280,21 @@
             }
 
 
-            
+
             $('#create_delivery_note_form').on('submit', function(event) {
 
                 event.preventDefault();
-                
+
                 var count = 0;
                 this_form = this;
                 count = table.rows().count();
 
                 var errors = 0;
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
-                var operation_id = $('#operation_rider_id').val();
-                var special = parseInt($('#rider_name').find(':selected').data('special'));
-                
+                var rider = $('#rider_id').val();
+                var route = $('#route_id').val();
+                var operation_id = $('#operation_rider_type_id').val();
+                var special = parseInt($('#rider_id').find(':selected').data('special'));
+
 
                 if (rider !== '' && rider !== null) {
 
@@ -1290,7 +1318,7 @@
 
                     $('#operation_error').css('display', 'none');
                     $('#operation_rider_type_for_attendance').val(operation_id);
-                    
+
                 } else {
                     var error = "Category not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1317,7 +1345,7 @@
                                 }
                             }
                         }
-                        
+
                     }
                 }else{
                     var error = "Select at-least one shipment!";
@@ -1342,7 +1370,7 @@
                 }
             });
 
-        $('#special_rider_form').validate({
+            $('#special_rider_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -1471,12 +1499,12 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                     if(data.is_open_box==1){
-                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                        var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
 
-                                }else{
+                                    }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
-                                }
+                                        var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -1555,7 +1583,7 @@
 
                                 }else{
 
-                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
                                 }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
@@ -1616,8 +1644,8 @@
                 piece_table.clear().draw();
             });
             $('#OtpModal').on('shown.bs.modal', function () {
-            $('#otp_input').focus();
-            }); 
+                $('#otp_input').focus();
+            });
         });
 
         function camera_scan_detected(tracking_number) {
@@ -1627,3 +1655,4 @@
         }
     </script>
 @endsection
+

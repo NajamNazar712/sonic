@@ -27,13 +27,22 @@ class RiderAPIToken
                 $rider = $rider->first();
 
                 if ($rider->status) {
-                    if($rider->employee){
-                        $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id, 'rider_employee' => $rider->employee->id]);
+                    $employee = Employee::where('trax_id',$rider->trax_id)->whereNotNull('trax_id');
+                    $employee_id = null;
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee_id = $employee->id;
+                        $request->request->add(['rider_id' => $rider->id,'employee_id' => $employee_id, 'rider_employee' => $rider->employee->id, 'trax_id' => $rider->trax_id]);
+                        return $next($request);
                     }
-                    else{
-                        $request->request->add(['rider_id' => $rider->id, 'trax_id' => $rider->trax_id]);
+                    else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Employee Not Found!'
+                        ]);
                     }
-                    return $next($request);
+
                 }
                 else {
                     return response()->json([
