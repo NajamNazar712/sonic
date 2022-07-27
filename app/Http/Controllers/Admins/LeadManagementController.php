@@ -813,7 +813,7 @@ class LeadManagementController extends Controller
                 $lead->status_id = 15;
                 $lead->save();
 
-                LeadTaggingController::auto_tagging($lead->id,386);
+                LeadTaggingController::auto_tagging($lead->id,Auth::id());
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');
