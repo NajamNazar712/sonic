@@ -8,6 +8,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
@@ -15,6 +16,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
@@ -41,6 +43,19 @@ class V2AdminArrivalServiceController extends Controller
         if($shipment->exists()) {
 
             $shipment = $shipment->first();
+
+            //todo: now checking canceled shipment arrival
+            $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+            if($user->shipper_status_id == 17)
+            {
+                $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                if($canceled_shipment)
+                {
+                    return ['status' => 1, 'error' => 'Shipment is not allowed to arrival because shipper cancelled this shipment !'];
+                }
+            }
+            //todo: now checking canceled shipment arrival end
+
             $amount = NULL;
             $shipment_origin = $shipment->pickup_address->city->hub_id;
             if(session('role_id') != 1){
