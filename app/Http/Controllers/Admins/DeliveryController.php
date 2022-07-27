@@ -186,6 +186,10 @@ class DeliveryController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         if ($hub = $request->get('search_hub')) {
             $shipments = $shipments->where('h.id', '=', $hub);
         }
@@ -304,28 +308,9 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-//        $riders = Rider::where('status', 1);
-
-//        if (session('role_id') != 1) {
-//            $riders = $riders->whereHas('city', function ($query) {
-//                $query->whereIn('hub_id', session('hubs'));
-//            });
-//        }
-//
-//        $riders = $riders->get();
-
-        $routes = Route::where('status', 1);
-
-        if (session('role_id') != 1) {
-            $routes = $routes->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
     }
 
     public function get_adjustment_reference(Request $request)
@@ -341,10 +326,24 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
+
+        $routes = Route::where('status', 1);
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::where(['rider_id' => $request->rider_id, 'dncc_status' => 0])->where('status', '!=', 4)
-            ->whereDate('created_at', '>', $datetime)
-            ->whereDate('created_at', '!=', Carbon::today());
+        $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+        ->where('r.id' ,$request->rider_id)
+        ->where('delivery_notes.dncc_status',0)
+        ->where('delivery_notes.status', '!=', 4)
+        ->whereDate('delivery_notes.created_at', '>', $datetime)
+        ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
+        ->where('r.operation_rider_id',1);
 
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -353,14 +352,15 @@ class DeliveryController extends Controller
                 $delivery_note_request->save();
                 $rider = Rider::find($request->rider_id);
                 $ccd_rider = $rider->ccd;
-                return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+
+                return response()->json(['status' => 1,'routes' => $routes, 'ccd_rider' => $ccd_rider]);
             } else {
                 return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
             }
         } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
-            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider,'routes' => $routes]);
         }
     }
 
@@ -408,6 +408,14 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
+        $rules = [
+            'tracking' => ['required', 'exists:shipments,tracking_number']
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return ['status' => 1, 'error' => 'Invalid Tracking Number'];
+        } else {
 //        todo: bypasses rider category
         if ($request->tracking != '' && $request->rider_id != '' )
         {
@@ -454,7 +462,6 @@ class DeliveryController extends Controller
                             return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                         }
                     }
-
                 }
                 elseif($rider_default_type->rider_category_id == 2)
                 {
@@ -463,7 +470,6 @@ class DeliveryController extends Controller
             }
         }
 //        todo: bypasses rider category end
-
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -729,7 +735,9 @@ class DeliveryController extends Controller
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
         }
+        }
     }
+
 
 
     public function get_piece_details(Request $request)
@@ -771,6 +779,7 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -975,6 +984,7 @@ class DeliveryController extends Controller
         }
 
     }
+
 
     public function delivery_note_receive_index()
     {
@@ -1657,7 +1667,7 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Total Weight (Kg) (Kg)</strong></td>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
                             <td>' . $total_weight . '</td>
                           </tr>
                         </tbody>
@@ -2539,10 +2549,17 @@ class DeliveryController extends Controller
     public function rider_category_bypass_request()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 552);
+        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->where('riders.status', 1);
+
         if (session('role_id') != 1) {
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
-        } else {
-            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name','rider_category_id')->get();
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        if ($riders) {
+            $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name','rider_category_id')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $rider_cat = RiderCategory::whereIn('id',[1,2])->get();
@@ -2558,9 +2575,10 @@ class DeliveryController extends Controller
             ->leftjoin('admins as a','a.id','=','rider_category_by_passes.requested_by')
             ->leftjoin('admins as ad','ad.id','=','rider_category_by_passes.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id']);
-        if ($requests->search_hub) {
-            $request = $request->where('c.hub_id', $requests->search_hub);
+            ->select(['r.id as rider_id','r.name as rider', 'rider_category_by_passes.reason as reason', 'rider_category_by_passes.requested_at as requested_at','a.name as requested_by', 'rider_category_by_passes.approved_at as approved_at', 'ad.name as approved_by', 'rider_category_by_passes.status as status','rider_category_by_passes.rider_category_id as rider_type','rider_category_by_passes.id as id','r.trax_id as trax_id','c.name as hub']);
+
+        if(session('role_id') != 1){
+            $request = $request->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($request)
@@ -2573,9 +2591,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('rider_type', function ($result) {
                 if ($result->rider_type == 1) {
-                    return 'light';
+                    return 'Light';
                 } else {
-                    return 'heavy';
+                    return 'Heavy';
                 }
             })
             ->filterColumn('rider_type', function($query, $keyword) {
@@ -2660,7 +2678,7 @@ class DeliveryController extends Controller
         $rider_bypass = RiderCategoryByPass::where('rider_id',$request->rider_id)->where('status',0)->latest()->first();
         if($rider_bypass)
         {
-            return redirect()->route('admin.delivery.note.rider_category_request')->with(['error' => 'Request Already Present']);
+            return redirect()->back()->with(['error' => 'Request Already Present']);
         }
         else
         {
@@ -7684,13 +7702,13 @@ class DeliveryController extends Controller
                             $attendance_time = Carbon::now()->format('H:i:s');
                             // $city_id_location = City::find($delivery_note->hub_id);
 
-                            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                            $rider_attendance = EmployeeAttendance::where('employee_id', $rider->employee_id)
                                 ->whereDate('attendance_date', $attendance_date)
                                 ->where('employee_type', 2);
 
                             if (!$rider_attendance->exists()) {
                                 $rider_attendance = new EmployeeAttendance();
-                                $rider_attendance->employee_id = $rider_id;
+                                $rider_attendance->employee_id = $rider->employee_id;
                                 $rider_attendance->employee_type = 2;
                                 $rider_attendance->attendance_date = $attendance_date;
                                 $rider_attendance->clock_in_datetime = $attendance_datetime;
@@ -7699,7 +7717,7 @@ class DeliveryController extends Controller
                                 $rider_attendance->save();
 
                                 $rider_attendance_action = new EmployeeAttendanceActionLog();
-                                $rider_attendance_action->employee_id = $rider_id;
+                                $rider_attendance_action->employee_id = $rider->employee_id;
                                 $rider_attendance_action->employee_type = 2;
                                 $rider_attendance_action->action_id = 1;
                                 $rider_attendance_action->attendance_date = $attendance_date;
@@ -7715,7 +7733,7 @@ class DeliveryController extends Controller
 
 
                                     $rider_attendance_action = new EmployeeAttendanceActionLog();
-                                    $rider_attendance_action->employee_id = $rider_id;
+                                    $rider_attendance_action->employee_id = $rider->employee_id;
                                     $rider_attendance_action->employee_type = 2;
                                     $rider_attendance_action->action_id = 1;
                                     $rider_attendance_action->attendance_date = $attendance_date;
@@ -7904,8 +7922,7 @@ class DeliveryController extends Controller
     Public function operation_riders(Request $request)
     {
 
-
-        $operation_id = $request->operation_rider_id;
+        $operation_id = $request->operation_rider_type;
 
         $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
@@ -8048,11 +8065,18 @@ class DeliveryController extends Controller
     public function request_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 269);
-        if (session('role_id') != 1) {
 
-            $riders = Rider::where('status', 1)->whereIn('city_id', session('hubs'))->where('blacklist', 0)->select('id', 'name')->get();
-        } else {
-            $riders = Rider::where('status', 1)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->where('riders.status', 1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+        if ($riders) {
+            $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
         }
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         return view('admin.delivery.note.request')->with(['riders' => $riders, 'hubs' => $hubs]);
@@ -8067,7 +8091,7 @@ class DeliveryController extends Controller
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub']);
+            ->select(['delivery_note_requests.id as id', 'r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount', 'delivery_note_requests.amount as amount', 'delivery_note_requests.reason as reason', 'delivery_note_requests.requested_at as requested_at', 'delivery_note_requests.approved_at as approved_at', 'a.name as requested_by', 'ad.name as approved_by', 'delivery_note_requests.status as status', 'r.id as rider_id', 'delivery_note_requests.delivery_note as delivery_note', 'c.name as hub','r.trax_id as trax_id']);
         if ($requests->search_hub) {
             $request = $request->where('c.hub_id', $requests->search_hub);
         }

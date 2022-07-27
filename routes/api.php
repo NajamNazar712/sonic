@@ -409,6 +409,20 @@ Route::name('api.')->group(function () {
                 Route::any('report', 'AdminAPIController@daily_visit_report')->name('report');
             });
 
+            Route::prefix('return')->name('return.')->group(function () {
+                Route::get('index', 'AdminAPIController@return_create_index')->name('index');
+                Route::post('get_riders', 'AdminAPIController@get_riders_by_hub')->name('get_riders');
+                Route::post('get_shipment_details', 'AdminAPIController@get_shipment_details')->name('get_shipment_details');
+                Route::post('get_piece_details', 'AdminAPIController@get_piece_details')->name('get_piece_details');
+                Route::post('create', 'AdminAPIController@return_note_create')->name('create');
+                Route::get('receive_list', 'AdminAPIController@get_return_note_list')->name('receive_list');
+                Route::post('shipments_list', 'AdminAPIController@return_note_shipments_list')->name('shipments_list');
+                Route::post('reason', 'AdminAPIController@return_reason')->name('reason');
+                Route::post('submit_individual', 'AdminAPIController@return_status_submit_individual')->name('submit_individual');
+                Route::post('submit_all', 'AdminAPIController@return_status_submit_all')->name('submit_all');
+                Route::post('image_upload', 'AdminAPIController@return_image_upload')->name('image_upload');
+            });
+
         });
 
     });

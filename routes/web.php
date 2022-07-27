@@ -1927,6 +1927,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_update_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_update_store')->name('store');
             });
+            Route::get('bulk_add/{id}', 'Admins\UserManagementController@role_bulk_add_index')->name('bulk_add');
+            Route::post('bulk_add', 'Admins\UserManagementController@role_bulk_add_store')->name('bulk_add.store');
+
+            Route::get('bulk_remove/{id}', 'Admins\UserManagementController@role_bulk_remove_index')->name('bulk_remove');
+            Route::post('bulk_remove', 'Admins\UserManagementController@role_bulk_remove_store')->name('bulk_remove.store');
+            
+            
         });
 
         Route::prefix('user_requests')->name('user_requests.')->group(function() {
@@ -3808,6 +3815,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
             Route::post('designation_logs', 'Admins\AdminHumanResourseController@designation_change_logs')->name('designation_logs');
+            Route::post('employee_log', 'Admins\AdminHumanResourseController@employee_log')->name('employee_log');
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');

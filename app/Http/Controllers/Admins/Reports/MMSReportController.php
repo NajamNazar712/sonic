@@ -22,11 +22,9 @@ class MMSReportController extends Controller
     public function index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
-        if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
-        } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324])->whereIn('status', [3, 4])->select('id', 'name')->get();
-        }
+
+        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])->whereIn('status', [3, 4])->select('id', 'name')->get();
+
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
@@ -86,9 +84,9 @@ class MMSReportController extends Controller
                     ->where('si.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by')
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
-            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324])
+            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])
             ->whereBetween('sj.created_at', [$from,$to]);
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
@@ -120,7 +118,15 @@ class MMSReportController extends Controller
         }
 
         $datatable = Datatables::of($sales)
-
+            ->addColumn('aging', function ($shipments){
+                $from = Carbon::parse($shipments->arrival_date);
+                $days = Carbon::now()->diffInDays($from);
+                if ($days == 0) {
+                    return "-";
+                } else {
+                    return $days;
+                }
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
