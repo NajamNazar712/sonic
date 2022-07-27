@@ -11,6 +11,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\International\InternationalShipmentServiceProvider;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\InternationalShipmentsLog;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -120,7 +121,7 @@ class AdminInternationalShipmentsController extends Controller
                 $query->whereIn('shipper_status_id', [2,3,4,5,6,7,8,9,10,11,12,13,15,18,49,51,52,54,55,56]);
             })],
             'international_tracking_number' => ['required'],
-            'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'actual_weight' => ['required', 'numeric', 'between:0.1,100000'],
             'service_provider_id' => ['required', 'numeric', 'between:1,7', 'exists:international_shipment_service_providers,id']
         ];
 
@@ -227,6 +228,7 @@ class AdminInternationalShipmentsController extends Controller
                                 }
 
                             }
+                            $this->shipment_update_log($shipment_id, Auth::id(), $international_shipment_weight);
                         }
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
@@ -294,6 +296,8 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->save();
                         $shipment->actual_weight = $actual_weight;
                         $shipment->save();
+
+                        $this->shipment_update_log($shipment->id, Auth::id(), $actual_weight);
                         return redirect()->back()->with('success', 'Shipment successfully updated!');
                     }
                     return redirect()->back()->with('error', 'Shipment with this tracking number Not found!');
@@ -487,5 +491,13 @@ class AdminInternationalShipmentsController extends Controller
 
         }
         return redirect()->back()->with('error', 'Shipment Status not selected!');
+    }
+
+    public function shipment_update_log($shipment_id, $admin_id, $weight = NULL){
+        $shipment_log = new InternationalShipmentsLog();
+        $shipment_log->shipment_id = $shipment_id;
+        $shipment_log->weight = $weight;
+        $shipment_log->updated_by = $admin_id;
+        $shipment_log->save();
     }
 }

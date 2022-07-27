@@ -27,6 +27,7 @@ use App\Http\Models\CRM\CrmRequestChannel;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\InvoiceUploadSlip;
@@ -3439,7 +3440,16 @@ class AdminFinanceController extends Controller
             $details['status'] = $shipment->status_shipper->name;
 
             $details['service_type'] = $shipment->booking_type->booking_type;
-            $details['shipping_mode'] = $shipment->shipping_mode->mode;
+            if($shipment->shipment_type == 1){
+
+                $details['shipping_mode'] = $shipment->shipping_mode->mode;
+            }
+            else{
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                if($retail_shipment){
+                    $details['shipping_mode'] = $retail_shipment->shipping_modes->name;
+                }
+            }
             $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
             $details['payment_mode'] = $shipment->payment_mode->mode;
@@ -3592,11 +3602,10 @@ class AdminFinanceController extends Controller
         }
 
         $amount = $shipment->amount;
-
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
-                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
@@ -7007,29 +7016,6 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                /*if ($generate) {
-                    if ($user->invoice_group_by == 0) {
-                        $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-
-                        if ($pending_invoice_shipments->exists()) {
-                            self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
-                        }
-                    }
-                    else {
-                        foreach ($cities as $city) {
-                            $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment.pickup_address', function ($query) use ($user_id, $city) {
-                                $query->where('shipments.user_id', $user_id)
-                                    ->where('user_shipping_infos.city_id', $city->id);
-                            });
-
-                            if ($pending_invoice_shipments->exists()) {
-                                self::invoice_creation($user_id, $billing_period_from_date, $due_date_days, $pending_invoice_shipments);
-                            }
-                        }
-                    }
-                }*/
 
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id', $user_id)->where('status', 1)->first();
                 if ($packaging_invoice_toggle_on && $generate) {
@@ -7339,85 +7325,6 @@ class AdminFinanceController extends Controller
             ';
         }
 
-        /*$html .= '
-                    <div class="row align-items-start justify-content-between summary">
-                        <div class="col-6">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Account No.</strong></td>
-                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
-                                </tr>';
-                                if($account_type_id == 2){
-                                    $html .= '<tr>
-                                        <td class="color secondary"><strong>Shipper Name</strong></td>
-                                        <td>' . $shipper->name . '</td>
-                                    </tr>';
-                                }
-                                $html .= '<tr>
-                                    <td class="color secondary"><strong>Name</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Address</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>NTN</strong></td>
-                                  <td>' . $shipper->ntn_no . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>STRN</strong></td>
-                                  <td>' . $shipper->strn_no . '</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-
-                        <div class="col-4">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary"><strong>NTN</strong></td>
-                                    <td>7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>SNTN</strong></td>
-                                    <td>S-7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>PNTN</strong></td>
-                                    <td>P-7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice No.</strong></td>
-                                    <td>' . $invoice->invoice_number . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                    </div>
-        ';*/
-
         $html .= '<div>
           <div class="p-1">';
 
@@ -7526,6 +7433,7 @@ class AdminFinanceController extends Controller
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
 
+
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
                 if ($shipment_journey->exists()) {
@@ -7564,6 +7472,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
@@ -7616,11 +7525,17 @@ class AdminFinanceController extends Controller
                     $total_adjustment_charges[$origin] = 0;
                 }
 
+                if (!isset($total_extra_service_charges[$origin])) {
+                    $total_extra_service_charges[$origin] = 0;
+                }
+
+
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -7648,7 +7563,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -7662,6 +7577,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
                             <th class="color secondary">Packaging Charges (PKR)</th>
+                            <th class="color secondary">Extra Service Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
                         </tr>
                       </thead>
@@ -7682,6 +7598,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                         </tr>
             ';
@@ -7763,7 +7680,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -7778,6 +7695,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Packaging Charges (PKR)</th>
+                          <th class="color secondary">Extra Service Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -8544,14 +8462,22 @@ class AdminFinanceController extends Controller
                     $total_invoice_amount[$origin] = 0;
                 }
 
+
+                if (!isset($total_extra_service_charges[$origin])) {
+                    $total_extra_service_charges[$origin] = 0;
+                }
+
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
+
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
+
 
                     $total_weight_charges[$origin] += $shipment->weight_charges;
 
@@ -8715,7 +8641,7 @@ class AdminFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="11">' . $shipment_counts[$origin] . '</td>
+                            <td rowspan="12">' . $shipment_counts[$origin] . '</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -8757,6 +8683,10 @@ class AdminFinanceController extends Controller
                         <tr>
                             <td>Adjustments</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                        </tr>
+                         <tr>
+                            <td>Extra Service Charges</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -9502,7 +9432,7 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
-
+            
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -9561,6 +9491,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
                           <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
@@ -9609,6 +9540,10 @@ class AdminFinanceController extends Controller
                 $total_adjustment_charges[$origin] = 0;
             }
 
+            if (!isset($total_extra_service_charges[$origin])) {
+                $total_extra_service_charges[$origin] = 0;
+            }
+
             if (!isset($total_charges[$gst])) {
                 $total_charges[$gst] = 0;
             }
@@ -9630,6 +9565,7 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                    $total_extra_service_charges[$origin] += $shipment->esc_charges;
                 } else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
@@ -9747,7 +9683,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="11" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -9761,6 +9697,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
+                            <th class="color secondary">Extra Service Charges (PKR)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -9780,6 +9717,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                 ';
                 }
@@ -9854,7 +9792,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -9869,6 +9807,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Packaging Charges (PKR)</th>
+                          <th class="color secondary">Extra Service Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -9965,7 +9904,7 @@ class AdminFinanceController extends Controller
                     $html .= '<table class="table table-sm table-bordered border">
           <thead>
             <tr>
-                <th colspan="12" class="color primary text-center">Invoice Summary</th>
+                <th colspan="11" class="color primary text-center">Invoice Summary</th>
             </tr>
             <tr>
                 <th class="color secondary">Origin</th>
@@ -10447,7 +10386,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="11" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -14958,11 +14897,16 @@ class AdminFinanceController extends Controller
                     $total_adjustment_charges[$origin] = 0;
                 }
 
+                if (!isset($total_extra_service_charges[$origin])) {
+                    $total_extra_service_charges[$origin] = 0;
+                }
+
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                        $total_extra_service_charges[$origin] += $shipment->esc_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -15141,7 +15085,7 @@ class AdminFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="11">' . $shipment_counts[$origin] . '</td>
+                            <td rowspan="12">' . $shipment_counts[$origin] . '</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -15183,6 +15127,10 @@ class AdminFinanceController extends Controller
                         <tr>
                             <td>Adjustments</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                        </tr>
+                         <tr>
+                            <td>Extra Service Charges</td>
+                            <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -15362,5 +15310,66 @@ class AdminFinanceController extends Controller
 
     }
 
+    static public function update_esc_charges($shipment_id,$type){
+        $shipment = Shipment::find($shipment_id);
+        if ($shipment->shipment_type == 1) {
+            if (!$shipment->packaging_material_request) {
+                if ($type == 0) {
+                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+                }
+            } else {
+                $charges = $shipment->packaging_material_charges;
+                $gst = 0;
+            }
 
+
+            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id',$shipment_id)->where('type',0);
+            if($pending_invoice_shipment->exists()){
+                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+                $pending_invoice_shipment->type = $type;
+                $pending_invoice_shipment->charges = $charges;
+                $pending_invoice_shipment->gst = $gst;
+                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                $pending_invoice_shipment->save();
+            }
+            else{
+                $invoice_shipment = InvoiceShipment::where('shipment_id',$shipment_id)->where('type',0);
+                if($invoice_shipment->exists()){
+                    $invoice_shipment = $invoice_shipment->latest()->first();
+                    if($invoice_shipment) {
+                        $invoice = Invoice::find($invoice_shipment->invoice_id);
+                        if ($invoice->status_id != 3) {
+
+                            $total_charges = 0;
+                            $total_gst = 0;
+                            $total_invoice_amount = 0;
+
+                            $invoice_shipment->charges = $charges;
+                            $invoice_shipment->gst = $gst;
+                            $invoice_shipment->invoice_amount = $charges + $gst;
+                            $invoice_shipment->save();
+
+                            foreach ($invoice->invoice_shipments as $shipments) {
+
+                                $total_charges = $total_charges + $shipments->charges;
+                                $total_gst = $total_gst + $shipments->gst;
+                                $total_invoice_amount = $total_invoice_amount + $shipments->invoice_amount;
+                            }
+
+                            $invoice->total_charges = $total_charges;
+                            $invoice->total_gst = $total_gst;
+                            $invoice->total_invoice_amount = $total_invoice_amount;
+                            $invoice->save();
+
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

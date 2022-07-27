@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
 use Closure;
 
 class AdminAPIToken
@@ -25,7 +26,13 @@ class AdminAPIToken
                 $admin = $admin->first();
 
                 if ($admin->status) {
-                    $request->request->add(['admin_id' => $admin->id]);
+                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id')->first();
+                    $employee_id = null;
+                    if($employee)
+                    {
+                        $employee_id = $employee->id;
+                    }
+                    $request->request->add(['admin_id' => $admin->id,'employee_id' => $employee_id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $admin->employee->id]);
 
                     return $next($request);
                 }

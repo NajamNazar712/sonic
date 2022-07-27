@@ -285,11 +285,11 @@ class AdminShipmentCancelController extends Controller
         return $datatables->make(true);
     }
 
-    public function revert(Request $request) {
+    public function bulk_revert(Request $request) {
         foreach ($request->shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if ($shipment->shipper_status_id == 17) {
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
                 $shipment->shipper_status_id = 1;
                 $shipment->consignee_status_id = 1;
 
@@ -323,6 +323,27 @@ class AdminShipmentCancelController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Invalid Shipper']);
         }
+    }
+
+    public function revert(Request $request) {
+
+            $shipment = Shipment::find($request->shipment_id);
+
+            if ($shipment->shipper_status_id == 17 && $shipment->warehouse == 0) {
+                $shipment->shipper_status_id = 1;
+                $shipment->consignee_status_id = 1;
+
+                $shipment->save();
+
+                AdminPickupsController::generate($shipment->id);
+
+                ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
+                return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
+            }
+            else{
+                return ['status' => 1, 'error' => 'Warehouse Shipment can not be reverted from Sonic!'];
+            }
+
     }
 
 

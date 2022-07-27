@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+               <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                     {{ csrf_field() }}
 
                     <div class="row align-items-center justify-content-center">
@@ -72,6 +72,7 @@
                         </div>
                     </div>
                 </form>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -116,7 +117,7 @@
                         </div>
                         <div class="form-group">
                             <label class="label" for="actual_weight">Actual Weight</label>
-                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
+                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight" data-rule-required="true" data-msg-required="Shipment weight is required">
                         </div>
 
                         <div class="form-group">

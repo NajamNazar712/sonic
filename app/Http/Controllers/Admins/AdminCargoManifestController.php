@@ -1023,6 +1023,7 @@ class AdminCargoManifestController extends Controller
             $bag->transport_mode_id = 2;
             $bag->status_id = 1;
             $bag->completed = 0;
+            $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
             CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1148,6 +1149,7 @@ class AdminCargoManifestController extends Controller
                 $bag->status_id = 1;
                 $bag->open_bag = 1;
                 $bag->completed = 0;
+                $bag->current_hub_id = Auth::user()->default_hub_id;
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1336,12 +1338,24 @@ class AdminCargoManifestController extends Controller
         $shipping_modes = ShippingMode::all();
         //$draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->pluck('bag_id','weight')->toArray();
         $draft_bags = CargoManifestDraftBags::where('added_by', Auth::id())->get();
-        return view('admin.cargo.manifest.create', compact('shipping_modes', 'draft_bags'));
+        $bag_destinations = array();
+        $total_bags = 0;
+        $scanned_bags = count($draft_bags);
+        if(count($draft_bags) > 0){
+            foreach ($draft_bags as $draft_bag){
+                if(!in_array($draft_bag->destination_id, $bag_destinations)){
+                    $bag_destinations[] = $draft_bag->destination_id;
+                }
+            }
+            $total_bags = CargoManifestBag::whereIn('destination_hub_id', $bag_destinations)->whereIn('status_id', [1, 3, 5])->where('current_hub_id', Auth::user()->default_hub_id)->count();
+        }
+        return view('admin.cargo.manifest.create', compact('shipping_modes', 'draft_bags', 'bag_destinations', 'total_bags', 'scanned_bags'));
     }
 
     public function bag_details(Request $request)
     {
         $bag = CargoManifestBag::where('seal_number', $request->bag_number);
+        $bag_destinations = $request->bag_destinations;
 
         if ($bag->exists()) {
             $bag = $bag->latest()->first();
@@ -1375,6 +1389,28 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
+                        $draft_bags = CargoManifestDraftBags::where('added_by', Auth::id())->get();
+                        $bag_destinations = array();
+                        if(count($draft_bags) > 0){
+                            foreach ($draft_bags as $draft_bag){
+                                if(!in_array($draft_bag->destination_id, $bag_destinations)){
+                                    $bag_destinations[] = $draft_bag->destination_id;
+                                }
+                            }
+                        }
+                        if(is_array($bag_destinations)){
+                            if(!in_array($bag->destination_hub_id, $bag_destinations)){
+                                $bag_destinations[] = $bag->destination_hub_id;
+                            }
+                        }
+                        else{
+                            $bag_destinations[] = $bag->destination_hub_id;
+                        }
+                        $total_bags = CargoManifestBag::whereIn('destination_hub_id', $bag_destinations)->whereIn('status_id', [1, 3, 5])->where('current_hub_id', Auth::user()->default_hub_id)->count();
+                        $details['bag_destinations'] = $bag_destinations;
+                        $details['total_bags'] = $total_bags;
+
+
                         CargoManifestDraftBags::create(['bag_id' => $bag->id, 'seal_number' => $bag->seal_number, 'shipments_count' => $bag->shipments, 'origin_id' => $origin->id, 'destination_id' => $destination->id, 'added_by' => Auth::id(), 'weight' => $bag->shipments_weight]);
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
@@ -1390,6 +1426,37 @@ class AdminCargoManifestController extends Controller
         } else {
             return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
         }
+    }
+
+    public function total_bags_info(Request $request){
+        $draft_bags = CargoManifestDraftBags::where('added_by', Auth::id())->get();
+        $bag_destinations = array();
+        $bag_ids = array();
+        if(count($draft_bags) > 0){
+            foreach ($draft_bags as $draft_bag){
+                if(!in_array($draft_bag->destination_id, $bag_destinations)){
+                    $bag_destinations[] = $draft_bag->destination_id;
+                }
+                $bag_ids[] = $draft_bag->bag_id;
+            }
+        }
+        $total_bags = CargoManifestBag::whereIn('destination_hub_id', $bag_destinations)->whereIn('status_id', [1, 3, 5])->where('current_hub_id', Auth::user()->default_hub_id)->orderBy('destination_hub_id')->get();
+        $details = array();
+        foreach ($total_bags as $total_bag){
+            $details[$total_bag->id]['seal_number'] = $total_bag->seal_number;
+            $details[$total_bag->id]['origin'] = $total_bag->origin_hub->name;
+            $details[$total_bag->id]['destination'] = $total_bag->destination_hub->name;
+            $details[$total_bag->id]['status'] = $total_bag->status->name;
+
+            if(in_array($total_bag->id, $bag_ids)){
+                $details[$total_bag->id]['class'] = 'bg-success white';
+            }
+            else{
+                $details[$total_bag->id]['class'] = '';
+            }
+
+        }
+        return ['status' => 0, 'details' => $details];
     }
 
     public function cargo_details(Request $request)
@@ -1569,6 +1636,7 @@ class AdminCargoManifestController extends Controller
                         $master_cargo->junction_mapping_id = $bag->junction_mapping_id;
                         $master_cargo->update();
                     }
+                    $bag->current_hub_id = Auth::user()->default_hub_id;
                     $bag->update();
 
                     CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1);
@@ -2348,6 +2416,7 @@ class AdminCargoManifestController extends Controller
                                 $shipment_table->update();
                             }
                         }
+                        $bag->current_hub_id = Auth::user()->default_hub_id;
 
                         $bag->update();
 
@@ -2389,6 +2458,7 @@ class AdminCargoManifestController extends Controller
                         if (!in_array($manifest_bag->cargo_manifest_bag_id, $bag_short_received)) {
                             $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                             $short_received_bag->status_id = 9;
+                            $bag->current_hub_id = Auth::user()->default_hub_id;
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
@@ -2436,6 +2506,7 @@ class AdminCargoManifestController extends Controller
                         if (!in_array($manifest_bag->cargo_manifest_bag_id, $bag_short_received)) {
                             $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                             $short_received_bag->status_id = 9;
+                            $bag->current_hub_id = Auth::user()->default_hub_id;
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
@@ -3102,7 +3173,19 @@ class AdminCargoManifestController extends Controller
         $draft = CargoManifestDraftBags::where('bag_id', $bag_id)->where('added_by', Auth::id())->first();
         if ($draft) {
             $draft->delete();
-            return response()->json(['status' => 1]);
+            $draft_bags = CargoManifestDraftBags::where('added_by', Auth::id())->get();
+            $bag_destinations = array();
+            $total_bags = 0;
+            $scanned_bags = count($draft_bags);
+            if(count($draft_bags) > 0){
+                foreach ($draft_bags as $draft_bag){
+                    if(!in_array($draft_bag->destination_id, $bag_destinations)){
+                        $bag_destinations[] = $draft_bag->destination_id;
+                    }
+                }
+                $total_bags = CargoManifestBag::whereIn('destination_hub_id', $bag_destinations)->whereIn('status_id', [1, 3, 5])->where('current_hub_id', Auth::user()->default_hub_id)->count();
+            }
+            return response()->json(['status' => 1, 'total_bags' => $total_bags, 'scanned_bags' => $scanned_bags, 'bag_destinations' => $bag_destinations]);
         } else {
             return response()->json(['status' => 0]);
         }

@@ -12,6 +12,7 @@ use App\Http\Models\Handover\HandoverResponsibilities;
 use App\Http\Models\Handover\HandoverStatus;
 use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
@@ -44,9 +45,7 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function arrival_bulk_shipment_details(Request $request){
-
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
-
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
@@ -62,6 +61,56 @@ class AdminShipmentHandoverController extends Controller
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
             ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL);
+
+            $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+
+            $msg_string = null;
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+            foreach ($check as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                       
+                            $msg_string = $arr_value;
+                    }
+                }
+            }
+
+            
+            $delivery_area = null;
+            if($msg_string != null){
+                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                            ->select('dlm.area_name as area_name','dlm.id')
+                            ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                            ->where('dlm.city_id',$shipment->consignee_city_id)
+                            ->where('status',1);
+                if($found->exists()){
+                    $found = $found->first();
+                    $delivery_area = $found->id;
+                    if($request->delivery_location_mapping != null){
+                      if($request->delivery_location_mapping != $delivery_area){
+                            return ['status' => 1, 'error' => 'Delivery Location is different'];
+                      }
+                    }
+                }
+                else{
+                    $delivery_area = 0;
+                    if($request->delivery_location_mapping != $delivery_area){
+                      return ['status' => 1, 'error' => 'Delivery Location is different'];
+                    }
+                }
+            }else{
+              $delivery_area = 0;
+              if($request->delivery_location_mapping != null){
+                if($request->delivery_location_mapping != $delivery_area){
+                  return ['status' => 1, 'error' => 'Delivery Location is different'];
+                }
+              }
+            }
+
+            $details['delivery_area'] = $delivery_area;
+            
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
         } else {

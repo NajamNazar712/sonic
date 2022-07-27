@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 
 use Closure;
@@ -26,9 +27,22 @@ class RiderAPIToken
                 $rider = $rider->first();
 
                 if ($rider->status) {
-                    $request->request->add(['rider_id' => $rider->id]);
+                    $employee = Employee::where('trax_id',$rider->trax_id)->whereNotNull('trax_id');
+                    $employee_id = null;
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee_id = $employee->id;
+                        $request->request->add(['rider_id' => $rider->id,'employee_id' => $employee_id, 'rider_employee' => $rider->employee->id, 'trax_id' => $rider->trax_id]);
+                        return $next($request);
+                    }
+                    else {
+                        return response()->json([
+                            'status' => 1,
+                            'message' => 'Employee Not Found!'
+                        ]);
+                    }
 
-                    return $next($request);
                 }
                 else {
                     return response()->json([

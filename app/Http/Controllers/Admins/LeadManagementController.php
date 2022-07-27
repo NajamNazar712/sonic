@@ -20,10 +20,11 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadTagging;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use DB;
+use Auth;
+use Exception;
 
 class LeadManagementController extends Controller
 {
@@ -168,7 +169,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -223,7 +224,15 @@ class LeadManagementController extends Controller
                 if ($days == 0) {
                     return "-";
                 } else {
-                    return $days;
+                    return $days.' d';
+                }
+            })
+            ->addColumn('sale_person_tagged_aging', function ($lead) {
+                $days = Carbon::now()->diffInDays($lead->sale_person_tagged_time);
+                if ($days == 0) {
+                    return "-";
+                } else {
+                    return $days.'  d';
                 }
             })
             ->editColumn('reason_id', function ($lead) {
@@ -528,6 +537,15 @@ class LeadManagementController extends Controller
                         LeadTaggingController::notification_unresponsive($lead->id);
                     }
                 }
+                if($status == 11)
+                {
+                    $detail = array();
+                    $detail['name'] = $lead->contact_person;
+                    $detail['contact_number'] = $lead->phone_number;
+                    $reason = LeadReason::where('id',$lead->reason)->select('name')->first();
+                    $detail['reason'] = $reason->name;
+                    NotificationsController::send(181, $detail);
+                }
 
                 return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
             } else {
@@ -574,6 +592,16 @@ class LeadManagementController extends Controller
                         } elseif ($status == 2) {
                             LeadTaggingController::notification_unresponsive($lead->id);
                         }
+                    }
+
+                    if($status == 11)
+                    {
+                        $detail = array();
+                        $detail['name'] = $lead->contact_person;
+                        $detail['contact_number'] = $lead->phone_number;
+                        $reason1 = LeadReason::where('id',$lead->reason)->select('name')->first();
+                        $detail['reason'] = $reason1->name;
+                        NotificationsController::send(181, $detail);
                     }
 
                 } else {
@@ -791,5 +819,35 @@ class LeadManagementController extends Controller
             return redirect()->back()->with('error', 'Lead not found!');
         }
         return redirect()->back()->with('error', 'Something went wrong!');
+    }
+
+    public function add(Request $request){
+
+        try {
+
+            $new_lead = new Lead();
+            $new_lead->contact_person = $request->contact_person;
+            $new_lead->phone_number = $request->phone_number;
+            $new_lead->email_address = $request->email_address;
+            $new_lead->city_id = $request->city_id;
+            $new_lead->requested_date = Carbon::now();
+            $new_lead->service_id = $request->service_id;
+            $new_lead->reference_id = 7;
+            $new_lead->territory_id = $request->territory_id;
+            $new_lead->territory_area_id = $request->territory_area_id;
+            $new_lead->brand = $request->brand;
+            $new_lead->company = $request->company;
+            $new_lead->save();
+
+            return redirect()->back()->with('success', 'Lead added successfully');
+
+        } catch (Exception $e) {
+
+            return $e->getMessage();
+        }
+
+
+
+
     }
 }

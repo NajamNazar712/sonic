@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\CrmSmsLog;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
@@ -26,6 +27,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
@@ -71,6 +73,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\GlobalSettingsController;
@@ -243,7 +246,7 @@ class NotificationsController extends Controller
                     $shipper = User::find($reference_1_id);
                     $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
                     $cc = array();
-//                    $bcc = array();
+                    //                    $bcc = array();
                     $sale_person_email = Admin::find($sales_person->admin_id)->email;
                     if($sale_person_email){
                         $cc[] = $sale_person_email;
@@ -489,7 +492,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[arrival_at]', $today, $body);
                         }
 
-//              $to = $shipper->email;
+                            //              $to = $shipper->email;
 
                         if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
                             $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
@@ -9258,8 +9261,10 @@ class NotificationsController extends Controller
                     $crm_comment = CrmComments::find($crm_comment_id);
                     if($crm_comment){
                         $crm_request = CrmRequest::find($crm_comment->crm_request_id);
+                        $agent_id = $crm_request->agent_id;
                         if($crm_request){
                             $type = $reference_1_id;
+
                             if($type == 1){
                                     $shipper =  User::find($crm_request->shipper_id);
                                     if($shipper){
@@ -9296,6 +9301,17 @@ class NotificationsController extends Controller
                         $flag = false;
                     }
                     if($flag){
+//                        dd($name,$crm_request->id,$crm_comment->comment);
+                        //todo : now yahan p log savekrne k lye code krna h
+
+                        $agent = Admin::where('id',$agent_id)->select('name')->first();
+
+                        $crm_log = new CrmSmsLog();
+                        $crm_log->crm_request_id = $crm_request->id;
+                        $crm_log->agent = isset($agent->name) ? $agent->name : '-';
+                        $crm_log->massage = $crm_comment->comment;
+                        $crm_log->save();
+
                         if (strpos($body, '[name]') !== FALSE) {
                             $body = str_replace('[name]', $name, $body);
                         }
@@ -9384,10 +9400,10 @@ class NotificationsController extends Controller
                     
 
                 }
-                else if ($id == 178) {
+else if ($id == 178) {
 
                     $shipment = Shipment::find($reference_1_id);
-//                    dd($shipment);
+                    // dd($shipment);
                     if ($shipment) {
                         if (strpos($body, '[name]') !== FALSE) {
                             $body = str_replace('[name]', $shipment->consignee_name, $body);
@@ -9400,6 +9416,83 @@ class NotificationsController extends Controller
                             self::sms($body, $to);
                         }
                     }
+                }
+
+                else if ($id == 179) {
+                    
+                    if($reference_1_id != null){
+
+                        foreach($reference_1_id as $key => $val)
+                        {
+                            // $body = $notification->body;
+                            $random_id = date("dmy") . $val->id . date("his");
+                            $send_by = Auth::id();
+                            $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+                            $link = url("/survey_form/$random_id");
+                            
+                            $survey_record = new DisableAccountIntimationSendSurvey();
+                            $survey_record->shipper_id = $val->id;
+                            $survey_record->random_id = $random_id;
+                            $survey_record->send_by = $send_by;
+                            $survey_record->send_via = "email";
+                            $survey_record->url = $link;
+                            $survey_record->status = 0;
+                            $survey_record->created_at = $timestamp;
+                            $survey_record->updated_at = $timestamp;
+                            $survey_record->save();
+
+                            
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $email_body = str_replace('[link]', $link, $body);
+                            }
+
+                            self::email($subject, $email_body,$val->email);
+                        }
+                    }
+                }
+                else if ($id == 180) {
+
+                    if($reference_1_id != null){
+
+                        foreach($reference_1_id as $key => $val)
+                        {
+                            $random_id = date("his") . $val->id . date("dmy");
+                            $send_by = Auth::id();
+                            $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+                            $link = url("/survey_form/$random_id");
+                            
+                            $survey_record = new DisableAccountIntimationSendSurvey();
+                            $survey_record->shipper_id = $val->id;
+                            $survey_record->random_id = $random_id;
+                            $survey_record->send_by = $send_by;
+                            $survey_record->send_via = "sms";
+                            $survey_record->url = $link;
+                            $survey_record->status = 0;
+                            $survey_record->created_at = $timestamp;
+                            $survey_record->updated_at = $timestamp;
+                            $survey_record->save();
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $sms_body= str_replace('[link]', $link, $body);
+                            }
+
+                            self::sms($sms_body, $val->phone);
+                        }
+                    }
+                }
+				else if ($id == 181) {
+				$detail = $reference_1_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $detail['name'], $body);
+                    }
+
+                    if (strpos($body, '[reason]') !== FALSE) {
+                        $body = str_replace('[reason]', $detail['reason'], $body);
+                    }
+                    $phone_number = $detail['contact_number'];
+                    $to = $phone_number;
+                    self::sms($body, $to);
                 }
             }
         }
@@ -9601,11 +9694,7 @@ class NotificationsController extends Controller
                 else if ($id == 12) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
-                        if($leave->employee_type_id == 1){
-                            $user = Admin::find($leave->employee_id);
-                        }else{
-                            $user = Rider::find($leave->employee_id);
-                        }
+                        $user = Employee::find($leave->employee_id);
                         if (strpos($body, '[employee_name]') !== FALSE) {
                             $body = str_replace('[employee_name]', $user->name, $body);
                         }
@@ -9730,11 +9819,7 @@ class NotificationsController extends Controller
                 else if ($id == 18) {
                     $leave = EmployeeAttendanceAdjustment::find($reference1_id);
                     if($leave){
-                        if($leave->employee_type_id == 1){
-                            $user = Admin::find($leave->employee_id);
-                        }else{
-                            $user = Rider::find($leave->employee_id);
-                        }
+                        $user = Employee::find($leave->employee_id);
                         if (strpos($body, '[employee_name]') !== FALSE) {
                             $body = str_replace('[employee_name]', $user->name, $body);
                         }

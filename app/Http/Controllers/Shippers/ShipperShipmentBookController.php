@@ -65,6 +65,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
@@ -1182,6 +1183,9 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
+                        .page-breaker{
+                            page-break-after: always;
+                        }
                     </style>
                   </head>
                   <body>
@@ -1286,9 +1290,12 @@ class ShipperShipmentBookController extends Controller
         if ($settings->exists()) {
             $settings = $settings->first();
             $prints = $settings->print_count;
+            $page_break = $settings->page_breaker;
         } else {
             $prints = 1;
+            $page_break = 0;
         }
+        $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
         foreach ($ids as $id) {
             $shipment = Shipment::find($id);
@@ -1855,6 +1862,9 @@ class ShipperShipmentBookController extends Controller
                       <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
+                        if($shipment->pieces  <=1 && $page_break == 1) {
+                            $table_end .= '<div class="page-breaker"></div>';
+                        }
                     }
 
                     if ($shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
@@ -2016,7 +2026,9 @@ class ShipperShipmentBookController extends Controller
 
                         }
 
-
+                        if($shipment->pieces  > 0 && $page_break == 1) {
+                            $shipment_pieces .= '<div class="page-breaker"></div>';
+                        }
                         $shipment_details .= $shipment_pieces;
                     }
 
@@ -2255,6 +2267,79 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                 }
+                //delivery location watermark start
+                            $msg_string = null;
+                            $str_arr = null;
+                            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+                            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                            foreach ($check as $nsa) {
+                                foreach ($str_arr as $arr_value) {
+                                    if (strtolower($nsa) == strtolower($arr_value)) {
+                                            $msg_string = $arr_value;
+                                    }
+                                }
+                            }
+
+                            $delivery_area = null;
+                            if($msg_string != null){
+                                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                                ->select('dlm.area_name as area_name','dlm.id')
+                                ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                                ->where('dlm.city_id',$shipment->consignee_city_id);
+                                if($found->exists()){
+                                    $found = $found->first();
+                                    $delivery_area = $found->area_name;
+                                }
+                            }
+
+                            if($delivery_area != null){
+                                for($i=0; $i<10; $i++){
+                                    $delivery_area.= ' '.$delivery_area;
+                                    if(strlen($delivery_area)>25){
+                                        break;
+                                    }
+                                }
+                                if($page_break){
+                                    $shipment_details .= '
+                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -1200px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: #000000; 
+                                      font-stretch: extra-expanded;"     
+                                      > ' . $delivery_area . '  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }else{
+                                    $shipment_details .= '
+                                    <div id="delivery_area_watermark" class="delivery_area_watermark">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -290px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: #000000; 
+                                      font-stretch: extra-expanded;"     
+                                      > ' . $delivery_area . '  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }
+                                
+                            }
+                            
+            //delivery location watermark end
             }
             if ($user_type == 3) {
                 $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
@@ -2268,8 +2353,10 @@ class ShipperShipmentBookController extends Controller
             for ($i = 1; $i < $prints; $i++) {
                 $overall_shipment_details .= $shipment_details;
             }
-
             $shipment_details = '';
+            //a
+            // $overall_shipment_details .=$delivery_area_watermark;
+            
         }
 
         $html .= $overall_shipment_details;
@@ -2288,6 +2375,7 @@ class ShipperShipmentBookController extends Controller
                 </script>
                 ';
             }
+            
 
             if ($watermark_flag) {
                 $html .= '
@@ -2308,9 +2396,11 @@ class ShipperShipmentBookController extends Controller
                     
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                   </div>
+                  
                 </html>
             ';
             }
+
         }
 
         return $html;
