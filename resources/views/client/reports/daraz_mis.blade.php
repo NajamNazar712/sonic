@@ -50,6 +50,30 @@
                         </div>
 
                     </div>
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="booking_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="booking_date_from" placeholder="Booking Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-3 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="booking_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="booking_date_to" placeholder="Booking Date (To)">
+                        </div>
+
+                    </div>
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -217,11 +241,17 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
+                        // var selected_date = new Date(context.select);
+                        // var max_selected_date = moment(selected_date).add(31, 'days');
+
                         $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        // $('#search_form #search_date_to').pickadate('picker').set({'max':max_selected_date.toDate()},{muted: true});
+
                     }
                 }
             });
             $('#search_form #search_date_to').pickadate({
+                
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -230,7 +260,41 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
+                        
+
                         $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var today = '{{ Carbon\Carbon::today() }}';
+            
+            $('#search_form #booking_date_from').pickadate({
+                max: today,
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #booking_date_to').pickadate('picker').set('min', $('#search_form #booking_date_from').pickadate('picker').get('select'));
+
+                    }
+                }
+            });
+            $('#search_form #booking_date_to').pickadate({
+                max: today,
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+
+                    if (context.select) {
+                        $('#search_form #booking_date_from').pickadate('picker').set('max', $('#search_form #booking_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -319,6 +383,9 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.booking_date_from = $('input[name="booking_date_from_formatted"]').val();
+                        d.booking_date_to = $('input[name="booking_date_to_formatted"]').val();
+                        
                         d.search_user = $('#search_user').val();
 
                     }

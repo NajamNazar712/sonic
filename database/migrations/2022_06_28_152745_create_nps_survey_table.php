@@ -22,7 +22,7 @@ class CreateNpsSurveyTable extends Migration
             $table->integer('all_shipper')->default(0)->nullable();
             $table->string('shipper_ids',500)->nullable();
             $table->integer('status')->default(0);
-            $table->integer('admin_id');
+            $table->integer('admin_id')->index();
             $table->timestamps();
         });
     }

@@ -29,6 +29,8 @@ class AdminShipmentHandoverController extends Controller
     public function handover_create_index(){
         $hub=HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
+
+        // dd($hub);
         return view('admin.handover.index')->with(['hubs'=>$hub]);
     }
 
@@ -36,7 +38,7 @@ class AdminShipmentHandoverController extends Controller
         $value = $request->get('value');
         // $dependent = $request->get('dependent');-
         $dependent = "select From Person";
-        $data = HandoverResponsibilities::where('hub_id',$value)->get();
+        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
@@ -66,17 +68,13 @@ class AdminShipmentHandoverController extends Controller
 
             $msg_string = null;
             $str_arr = null;
-            $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
             foreach ($check as $nsa) {
                 foreach ($str_arr as $arr_value) {
                     if (strtolower($nsa) == strtolower($arr_value)) {
-                        $con_nsa = $arr_value;
-                        
-                        // if ($msg_string != null) {
-                        //     $msg_string = $msg_string . ', ' . $arr_value;
-                        // } else {
+                       
                             $msg_string = $arr_value;
-                        // }
                     }
                 }
             }
@@ -87,25 +85,31 @@ class AdminShipmentHandoverController extends Controller
                 $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
                             ->select('dlm.area_name as area_name','dlm.id')
                             ->where('delivery_location_mapping_keywords.keyword',$msg_string)
-                            ->where('dlm.city_id',$shipment->consignee_city_id);
+                            ->where('dlm.city_id',$shipment->consignee_city_id)
+                            ->where('status',1);
                 if($found->exists()){
                     $found = $found->first();
-                    $delivery_area = $found->area_name;
+                    $delivery_area = $found->id;
+                    if($request->delivery_location_mapping != null){
+                      if($request->delivery_location_mapping != $delivery_area){
+                            return ['status' => 1, 'error' => 'Delivery Location is different'];
+                      }
+                    }
                 }
-                if($request->delivery_location_mapping != null){
-                  if($request->delivery_location_mapping != $delivery_area){
-                    return ['status' => 1, 'error' => 'Delivery Location is different'];
-                  }
+                else{
+                    $delivery_area = 0;
+                    if($request->delivery_location_mapping != $delivery_area){
+                      return ['status' => 1, 'error' => 'Delivery Location is different'];
+                    }
                 }
             }else{
               $delivery_area = 0;
               if($request->delivery_location_mapping != null){
+                if($request->delivery_location_mapping != $delivery_area){
                   return ['status' => 1, 'error' => 'Delivery Location is different'];
+                }
               }
             }
-            // dump($delivery_area);
-            // dd($request->delivery_location_mapping);
-
 
             $details['delivery_area'] = $delivery_area;
             
@@ -151,7 +155,9 @@ class AdminShipmentHandoverController extends Controller
             $handover = new Handover();
             $handover->created_by = Auth::id();
             $handover->from = $request->from;
+            $handover->from_dept_area_desg = $request->from_dept_area_desg;
             $handover->to = $request->to;
+            $handover->to_dept_area_desg = $request->to_dept_area_desg;
             $handover->hub = $request->hub_id;
             $handover->status_id = 1 ;
             $handover->shipments =$total;
@@ -235,7 +241,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining')]);
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining')]);
 
         $datatable = Datatables::of($handover_list)
 

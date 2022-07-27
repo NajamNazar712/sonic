@@ -42,7 +42,10 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Weight</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Product Type</th>
+                        <th class="border-primary border-darken-1">Product Description</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -172,7 +175,11 @@
                         head.push('Hub');
                         head.push('Consignee Name');
                         head.push('Reattempted By');
-                        head.push('Address');                        head.push('Collection Amount');
+                        head.push('Address');
+                        head.push('Weight');
+                        head.push('Collection Amount');
+                        head.push('Product Type');
+                        head.push('Product Description');
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Status');
@@ -192,7 +199,11 @@
                             row.push(values.hub);
                             row.push(values.consignee_name);
                             row.push(values.agent);
-                            row.push(values.consignee_address);                            row.push(values.amount);
+                            row.push(values.consignee_address);
+                            row.push(values.weight);
+                            row.push(values.amount);
+                            row.push(values.product_type);
+                            row.push(values.shipment_description);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
@@ -240,7 +251,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[15, 'desc']],
+            order: [[18, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -250,7 +261,11 @@
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                {data: 'weight', name: 'shipments.actual_weight', class: 'align-middle weight'},
+                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                {data: 'product_type', name: 'prod.product_name', class: 'align-middle product_type'},
+                {data: 'shipment_description', name: 'si.description', class: 'align-middle shipment_description',orderable: false, searchable: false},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -281,7 +296,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.shipment_description')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

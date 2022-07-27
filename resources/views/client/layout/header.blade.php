@@ -51,7 +51,16 @@ rel="stylesheet">
         filter: grayscale(0);
         font-size: 4rem;
     }
+    .checkboxgroup_nps {
+        display: inline-block;
+        text-align: center;
+    }
+    .checkboxgroup_nps label {
+        display: block;
+        font-size: 10px;
+    }
 </style>
+
 @yield('css')
 
 <link rel="stylesheet" type="text/css" href="{{asset('css/custom.css')}}">

@@ -13,7 +13,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <!-- <div class="row justify-content-end">
+                <div class="row justify-content-end">
                     <div class="col-5">
                         <div class="card">
                             <div class="card-header">
@@ -71,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                </form>-->
+                </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -117,7 +117,7 @@
                         </div>
                         <div class="form-group">
                             <label class="label" for="actual_weight">Actual Weight</label>
-                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
+                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight" data-rule-required="true" data-msg-required="Shipment weight is required">
                         </div>
 
                         <div class="form-group">

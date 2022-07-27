@@ -1089,6 +1089,10 @@ class AdminWalkInBookShipmentController extends Controller
         if (!in_array(session('role_id'), [1, 2, 3, 4, 5, 6])){
             $shipments = $shipments->where('sj.admin_id', Auth::id());
         }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
             $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');

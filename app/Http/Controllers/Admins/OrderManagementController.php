@@ -96,6 +96,10 @@ class OrderManagementController extends Controller
             });
         }
 
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -524,6 +528,10 @@ class OrderManagementController extends Controller
             $shipments = $shipments->where(function ($query) {
                 $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
             });
+        }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type',2);
         }
 
         $datatable = Datatables::of($shipments)

@@ -36,8 +36,15 @@
                             </div>
 
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <input type="hidden" name="shipment_bag_type" id="shipment_bag_type">
+                                <div class="form-group mr-2">
+                                    <select name="bag_type" id="bag_type" class="form-control select2" data-rule-required="true">
+                                       <option value="1">Normal</option>
+                                       <option value="2">Return</option>
+                                    </select>
+                                </div>
                                 <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required" disabled>
 
                                     <div class="d-inline-block ml-1">
                                         <a href="#" id="camera_scan_initiate" tabindex="-1">
@@ -156,6 +163,18 @@
             scan_sound(2);
             @endif
 
+            $("#bag_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Bag Type",
+                width:'100%',
+            }).bind('change', function() {
+              $('#shipment_bag_type').val(this.value);
+              console.log( $('#shipment_bag_type').val());
+              $('.tracking_number').attr('disabled',false);
+              $('#bag_type').attr('disabled',true);
+        });
+
+
+
             var shipment_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
@@ -204,6 +223,7 @@
                     $('#add_shipment_form button.add').prop('disabled', true);
 
                     var tracking_number = $(form).find('input.tracking_number').val();
+                    var shipment_bag_type = $(form).find('input#shipment_bag_type').val();
 
                     form.reset();
 
@@ -214,6 +234,7 @@
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
+                                'bag_type': shipment_bag_type,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })

@@ -562,7 +562,7 @@
                     {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
-                    {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
+                    {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {
                         data: 'employee_type',

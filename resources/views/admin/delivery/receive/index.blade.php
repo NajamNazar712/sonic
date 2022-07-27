@@ -558,7 +558,7 @@
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'operation_rider_id': this.value,
+                            'operation_rider_type': this.value,
                         }
                     }).done(function (data) {
 

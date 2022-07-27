@@ -589,7 +589,7 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 132)
         {
-            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp'];
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp', 'consignee_name'];
         }
 		else if ($id == 133)
         {
@@ -601,7 +601,7 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 135)
         {
-            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp'];
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp', 'consignee_name'];
         }
         else if ($id == 136)
         {

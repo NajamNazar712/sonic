@@ -13,6 +13,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
@@ -365,6 +366,10 @@ class AdminHumanResourseController extends Controller
         $employee->trax_id = $trax_id;
         $employee->joining_date = $request->joining_date_formatted;
         $employee->save();
+
+        $this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
+
+
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
     }
 
@@ -598,8 +603,11 @@ class AdminHumanResourseController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
                         }
                     }
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+ $dropdown .= '<button type="button" class="dropdown-item employee_log" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Employee Log</div></button>';
 
-                    $dropdown .= '
+                    }
+                        $dropdown .= '
                 </div>
               </div>
             ';
@@ -655,8 +663,8 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            return back()->with(['success' => 'Employee Pin Updated Successfully']);
-        }
+			$this->employee_log_save($request->employee_id,$employee->employee_type_id,$employee->staff_category_id,null,null,$employee->rider_type_id,1,auth()->id());
+            return back()->with(['success'=>'Employee Pin Updated Successfully']);        }
         return back()->with(['error' => 'Employee Not Found']);
     }
 
@@ -687,6 +695,9 @@ class AdminHumanResourseController extends Controller
 
                         $employee->rider_type_id = 2;
                         $employee->update();
+
+                        $this->employee_log_save($employee_id,2,null,null,null,2,null,auth()->id());
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
 
@@ -729,6 +740,9 @@ class AdminHumanResourseController extends Controller
                         $employee->trax_id = $trax_id;
                         $employee->rider_type_id = 1;
                         $employee->update();
+
+                        $this->employee_log_save($employee_id,2,null,null,null,1,null,auth()->id());
+
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
 
@@ -764,6 +778,9 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = 2;
         $employee->update();
+
+        $this->employee_log_save($employee_id,2,$employee->staff_category_id,2,1,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
     }
@@ -791,6 +808,9 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
     }
@@ -819,6 +839,9 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $this->employee_log_save($employee->id,2,null,2,null,$employee->rider_type_id,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
     }
 
@@ -845,6 +868,9 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
         $employee->save();
+
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
     }
@@ -873,6 +899,9 @@ class AdminHumanResourseController extends Controller
         $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
         $employee->status_id = 2;
         $employee->save();
+
+        $this->employee_log_save($employee_id,1,$employee->staff_category_id,2,null,null,null,auth()->id());
+
         return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
@@ -917,6 +946,7 @@ class AdminHumanResourseController extends Controller
             $rider->dummy_pin = $request->pin;
             $rider->created_by = Auth::id();
             $rider->trax_id = $trax_id;
+            $rider->employee_id = $employee->id;
             $rider->shift_id = $request->shift_id;
             if ($request->rider_type == 1) {
                 $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
@@ -1210,7 +1240,6 @@ class AdminHumanResourseController extends Controller
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
             ->where('is_line_manager', 1)
-            ->whereIn('department_id', [$employee->department_id, 5])
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
@@ -3704,14 +3733,21 @@ class AdminHumanResourseController extends Controller
     {
         
         ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
-        $users = Admin::where('status', 1)->select('id', 'name')->get();
+        $users = Admin::join('employees as e','e.trax_id','admins.trax_id')
+            ->where('admins.status', 1)
+            ->whereNotNull('e.trax_id')
+            ->select('e.id', 'e.name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $trax_ids = array_merge($trax_id, $rider_trax_id);
         $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
         $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
         $cnic = array_merge($admin_cnic, $rider_cnic);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $riders = Rider::join('employees as e','e.trax_id','riders.trax_id')
+            ->where('riders.status', 1)
+            ->whereNotNull('e.trax_id')
+            ->select('e.id', 'e.name')
+            ->get();
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
         $admin_profile = Employee::where('trax_id', Auth::user()->trax_id);
         if ($admin_profile->exists()) {
@@ -4144,7 +4180,25 @@ class AdminHumanResourseController extends Controller
 
                         $employee_leaves->save();
                     }
-                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    $notify = false;
+                    if($employee_leaves->employee_type_id == 1) {
+                        $user = Admin::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($user) {
+                            $user_id = $user->id;
+                            $notify = true;
+                        }
+                    }
+                    else if($employee_leaves->employee_type_id == 2)
+                    {
+                        $user = Rider::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($user) {
+                            $user_id = $user->id;
+                            $notify = true;
+                        }
+                    }
+                    if($notify) {
+                        NotificationsController::app_notification(11, $user_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    }
                     return redirect()->back()->with('success', 'Leave Approved Successfully');
                 } else {
                     return redirect()->back()->with('error', 'Leave Already Approved');
@@ -4417,8 +4471,9 @@ class AdminHumanResourseController extends Controller
             'converted_by' => Auth::id(),
         ]);
 
-        return back()->with("success", "Rider Converted To Staff Successfully");
-    }
+		$this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
+        return back()->with("success","Rider Converted To Staff Successfully");    }
 
     public function convert_intern_to_staff(Request $request)
     {
@@ -4445,6 +4500,9 @@ class AdminHumanResourseController extends Controller
 
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
+
+                    $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
                     return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
@@ -4468,19 +4526,98 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public function employee_log(Request $request)
+    {
+        $details = array();
+        $employee_logs = EmployeeLog::leftjoin('employee_types as et','employee_logs.employee_type_id','=','et.id')
+            ->leftjoin('employee_statuses as es','employee_logs.status_id','=','es.id')
+            ->leftjoin('rider_types as rt','rt.id','=','employee_logs.rider_type_id')
+            ->leftjoin('staff_categories as sc','employee_logs.staff_category_id','=','sc.id')
+            ->leftjoin('admins as a','employee_logs.updated_by','=','a.id')
+            ->select('employee_logs.employee_type_id as employee_type_id','et.name as employee_type','employee_logs.staff_category_id as staff_category_id','es.name as employee_status','sc.name as staff_cat','rt.name as rider_type','employee_logs.blacklist as blacklist','employee_logs.update_pin as pin_update','employee_logs.created_at as updated_at','a.name as updated_by','employee_logs.status_id as rejoin_employee')
+            ->where('employee_logs.employee_id', $request->employee_id)
+            ->orderBy('employee_logs.created_at', 'DESC');
+
+
+
+        if($employee_logs->exists()) {
+            $employee_logs = $employee_logs->get();
+//            dd($employee_logs->count());
+            foreach ($employee_logs as $key=> $employee_log) {
+                if ($employee_log->employee_type_id == 1) {
+                    if ($employee_log->staff_category_id == 2) {
+                        $details[$key]['employee_type'] = 'Intern';
+                    } else {
+                        $details[$key]['employee_type'] = 'Staff';
+                    }
+
+                } elseif($employee_log->employee_type_id == 2) {
+                    $details[$key]['employee_type'] = $employee_log->employee_type;
+                    if ($employee_log->rider_type != null) {
+                        $details[$key]['employee_type'] .= ' - ' . $employee_log->rider_type;
+                    }
+                }
+                else
+                {
+                    $details[$key]['employee_type'] = '-';
+                }
+
+                if ($employee_log->employee_status) {
+                    $details[$key]['employee_status'] = $employee_log->employee_status;
+                } else {
+                    $details[$key]['employee_status'] = '-';
+                }
+
+                if ($employee_log->pin_update == 1) {
+                    $details[$key]['pin_update'] = 'Updated';
+                } else {
+                    $details[$key]['pin_update'] = '-';
+                }
+
+                if ($employee_log->blacklist == 1) {
+                    $details[$key]['blacklist'] = 'Updated';
+                } else {
+                    $details[$key]['blacklist'] = '-';
+                }
+
+                if ($employee_log->rejoin_employee == 4) {
+                    $details[$key]['rejoin_employee'] = 'Rejoin';
+                } else {
+                    $details[$key]['rejoin_employee'] = '-';
+                }
+
+                $details[$key]['updated_at'] = date('Y-m-d H:i:s',strtotime($employee_log->updated_at));
+
+                $details[$key]['updated_by'] = $employee_log->updated_by;
+            }
+            return response()->json(['status' => 1, 'logs' => $details]);
+        }
+        else
+            {
+            return response()->json(['status' => 0, 'error' => "Employee Log not found"]);
+        }
+    }
+
     public function attendance_adjustment_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 533);
-        $users = Admin::where('status', 1)->select('id', 'name')->get();
+        $users = Admin::join('employees as e','e.trax_id','admins.trax_id')
+            ->where('admins.status', 1)
+            ->whereNotNull('e.trax_id')
+            ->select('e.id', 'e.name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $trax_ids = array_merge($trax_id, $rider_trax_id);
         $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
         $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
         $cnic = array_merge($admin_cnic, $rider_cnic);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        $leave_statuses = LeaveStatus::whereIn('id', [1, 2, 3])->select('id', 'name')->get();
-        return view('admin.human_resource.attendance_adjustment')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic]);
+        $riders = Rider::join('employees as e','e.trax_id','riders.trax_id')
+            ->where('riders.status', 1)
+            ->whereNotNull('e.trax_id')
+            ->select('e.id', 'e.name')
+            ->get();
+        $leave_statuses = LeaveStatus::whereIn('id', [1,2,3])->select('id', 'name')->get();
+        return view('admin.human_resource.attendance_adjustment')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
     }
 
     public function attendance_adjustment_list(Request $request)
@@ -4488,36 +4625,18 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 534);
         }
-        $employee_leaves = EmployeeAttendanceAdjustment::leftjoin('admins as a', 'a.id', 'employee_attendance_adjustments.employee_id')
+        $employee_leaves = EmployeeAttendanceAdjustment::leftjoin('employees as a', 'a.id', 'employee_attendance_adjustments.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_attendance_adjustments.updated_by')
             ->join('leave_statuses as ls', 'ls.id', 'employee_attendance_adjustments.status')
-            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
-            ->leftjoin('riders as r', 'r.id', 'employee_attendance_adjustments.employee_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendance_adjustments.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.id as adjustment_id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.created_at as requested_date', 'employee_attendance_adjustments.updated_at as updated_at', 'u.name as updated_by', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as reject_reason');
+            ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
+            ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
+            ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'employee_attendance_adjustments.employee_type_id as employee_type',  'a.cnic as cnic', 'ls.name as status', 'ls.id as status_id', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.id as adjustment_id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.created_at as requested_date', 'employee_attendance_adjustments.updated_at as updated_at', 'u.name as updated_by', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as reject_reason');
 
-        if (!in_array(session('role_id'), [58, 70, 63])) {
-            $employee_leaves = $employee_leaves->where('employee_attendance_adjustments.reporter_id', Auth::id());
-        }
+//        if(!in_array(session('role_id'), [58, 70, 63])) {
+//            $employee_leaves = $employee_leaves->where('employee_attendance_adjustments.reporter_id', Auth::user()->employee_id);
+//        }
 
         $datatable = Datatables::of($employee_leaves)
-            ->editColumn('trax_id', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_trax_id;
-                } else {
-                    return $employee->trax_id;
-                }
-            })
-            ->editColumn('adjustment_id', function ($employee) {
-                return $employee->adjustment_id;
-            })
-            ->editColumn('name', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_name;
-                } else {
-                    return $employee->admin_name;
-                }
-            })
             ->editColumn('employee_type', function ($employee) {
                 if ($employee->employee_type == 2) {
                     return "Rider";
@@ -4539,13 +4658,6 @@ class AdminHumanResourseController extends Controller
                     return $employee->department;
                 }
             })
-            ->editColumn('cnic', function ($employee) {
-                if ($employee->employee_type == 2) {
-                    return $employee->rider_cnic;
-                } else {
-                    return $employee->admin_cnic;
-                }
-            })
             ->editColumn('requested', function ($employee) {
                 $date = Carbon::parse($employee->requested_date)->format("Y-m-d");
                 return $date;
@@ -4561,21 +4673,19 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('employee_type_id', 1);
+            $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider)->where('employee_type_id', 2);
+            $datatable->where('a.id', $search_rider)->where('a.employee_type_id',2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function ($q) use ($search_trax_id) {
-                $q->where([['a.trax_id', $search_trax_id], ['employee_type_id', 1]])
-                    ->orWhere([['r.trax_id', $search_trax_id], ['employee_type_id', 2]]);
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where('a.trax_id', $search_trax_id);
             });
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function ($q) use ($search_cnic) {
-                $q->where([['a.cnic', $search_cnic], ['employee_type_id', 1]])
-                    ->orWhere([['r.cnic', $search_cnic], ['employee_type_id', 2]]);
+            $datatable->where(function($q) use ($search_cnic){
+                $q->where('a.cnic', $search_cnic);
             });
         }
         return $datatable->make(true);
@@ -4593,10 +4703,9 @@ class AdminHumanResourseController extends Controller
                 return response()->json(['status' => 1, 'error' => 'Invalid Line Manager']);
             }
 
-            $line_managers = $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+            $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
                 ->leftjoin('cities as h', 'h.id', 'c.hub_id')
                 ->where('is_line_manager', 1)
-                ->whereIn('department_id', [$line_manager->department_id, 5])
                 ->where('employees.id', '!=', $line_manager->id)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
                 ->get();
@@ -4627,6 +4736,19 @@ class AdminHumanResourseController extends Controller
             ->update(['line_manager_id' => $request->new_line_manager_id]);
 
         return back()->with(['success' => 'Line Manager Updated Successfully', 'info' => $info]);
+    }
+
+    function employee_log_save($emp_id,$emp_type_id,$staff_category_id,$status_id,$blacklist,$rider_type_id,$pin,$updated_by){
+        $employee_log = new EmployeeLog();
+        $employee_log->employee_id = $emp_id;
+        $employee_log->employee_type_id = $emp_type_id; //staff or rider
+        $employee_log->staff_category_id = $staff_category_id; // staff not intern
+        $employee_log->status_id = $status_id; //active or inactive
+        $employee_log->blacklist = $blacklist;
+        $employee_log->rider_type_id = $rider_type_id;
+        $employee_log->update_pin = $pin;
+        $employee_log->updated_by = $updated_by;
+        $employee_log->save();
     }
 
 }
