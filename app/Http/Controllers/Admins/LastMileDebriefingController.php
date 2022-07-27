@@ -1060,7 +1060,9 @@ class LastMileDebriefingController extends Controller
                         $agent_call_monitoring->save();
                     }
                     $updated_shipments = TRUE;
-                    NotificationsController::send(145, $shipment_id, $delivery_note_id);
+                    if($shipment_journey->shipper_status_id != 7){
+                        NotificationsController::send(145, $shipment_id, $delivery_note_id);
+                    }
                 }
 
             }
