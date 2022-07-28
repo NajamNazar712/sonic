@@ -487,7 +487,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Contact Person Name*" data-rule-required="true"  data-msg-required="Contact Person Name is required">
+                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Full Name*" data-rule-required="true"  data-msg-required="Full Name is required">
                                 </div>
                             </div>
                             <div class="col-6">
@@ -593,6 +593,8 @@
                             <th>Email</th>
                             <th>Brand</th>
                             <th>Company</th>
+                            <th>Reference</th>
+
                         </tr>
                         </thead>
                     </table>
@@ -2113,11 +2115,14 @@
                     {name: 'email_address', class: 'align-middle destination', orderable: false, searchable: false},
                     {name: 'brand', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'company', class: 'align-middle open_box', orderable: false, searchable: false},
+                    {name: 'reference', class: 'align-middle reference', orderable: false, searchable: false},
+
                 ],
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
             });
+
             $('#datatable tbody').on('click', 'tr button.edit', function (){
                 var lead_id = parseInt($(this).parents('tr').attr('id'));
 
@@ -2134,7 +2139,7 @@
 
                             lead_table.clear();
                             var details = data.details;
-                            lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company]).node().id = lead_id;
+                            lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company,details.reference]).node().id = lead_id;
                             lead_table.draw(true);
                             if(details.city_id){
                                 $('#edit_city').val(details.city_id).trigger('change');
@@ -2155,6 +2160,7 @@
                             $('#edit_lead_form #edit_brand').val(details.brand);
                             $('#edit_lead_form #edit_company').val(details.company);
                             $('#edit_lead_form #edit_territory').trigger('change');
+                            $('#edit_lead_form #edit_reference_id').val(details.reference_id).trigger('change');
                             $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 

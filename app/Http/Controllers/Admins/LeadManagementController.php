@@ -789,10 +789,19 @@ class LeadManagementController extends Controller
                 $details['area_id'] = $lead->territory_area_id;
             }
 
+            $details['reference'] = '';
+            $details['reference_id'] = '';
+            if($lead->reference_id){
+                $details['reference'] = LeadReference::find($lead->reference_id)->name;
+                $details['reference_id'] = $lead->reference_id;
+            }
+
+
             $details['phone_number'] = $lead->phone_number;
             $details['email_address'] = $lead->email_address;
             $details['brand'] = $lead->brand;
             $details['company'] = $lead->company;
+
             return response()->json(['status' => 0, 'details' => $details]);
         }
         else{
@@ -813,6 +822,7 @@ class LeadManagementController extends Controller
                 $lead->email_address = $request->email_address;
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
+                $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
                 $lead->save();
 
@@ -840,6 +850,7 @@ class LeadManagementController extends Controller
             $new_lead->territory_area_id = $request->territory_area_id;
             $new_lead->brand = $request->brand;
             $new_lead->company = $request->company;
+            $new_lead->status_id = 1;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
