@@ -257,7 +257,6 @@
                         <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
-                        <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Brand</th>
                         <th class="border-primary border-darken-1">Company</th>
@@ -1038,7 +1037,6 @@
                             head.push('Area');
                             head.push('Phone No');
                             head.push('Email Address');
-                            head.push('Message');
                             head.push('Service');
                             head.push('Brand');
                             head.push('Company');
@@ -1066,7 +1064,6 @@
                                 row.push(values.area);
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
-                                row.push(values.message);
                                 row.push(values.service);
                                 row.push(values.brand);
                                 row.push(values.company);
@@ -1226,7 +1223,7 @@
                     }
                 },
                 rowId: 'leadid',
-                order: [[14, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1237,7 +1234,6 @@
                     {data: 'area', name: 'at.name', class: 'align-middle area'},
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
-                    {data: 'message', name: 'leads.message', class: 'align-middle message'},
                     {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
                     {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
