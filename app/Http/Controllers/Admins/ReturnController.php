@@ -4853,24 +4853,46 @@ class ReturnController extends Controller
     }
 
     public function manual_rcp_sms(Request $request){
-        if($request->id){
-            $shipment = Shipment::find($request->id)->id;
-            if($shipment){
-                $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
-                if($rcp_sms->exists()){
-                    $rcp_sms = $rcp_sms->latest('id')->first();
-                    $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
 
-                    if ($rcp_sms->count <= $limit->text){
-                        dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+        if($request->id){
+            if($request->send_via == 'auto'){
+                $shipment = Shipment::find($request->id)->id;
+                if($shipment){
+                    $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
+                    if($rcp_sms->exists()){
+                        $rcp_sms = $rcp_sms->latest('id')->first();
+                        $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+
+                        if ($rcp_sms->count <= $limit->text){
+                            dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
                     }
                 }
                 else{
-                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
                 }
+
             }
-            else{
-                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+            else if($request->send_via == 'manual'){
+                $shipment = Shipment::find($request->id);
+                if($shipment){
+                    if($request->send_to == 'shipper'){
+                        $sms_to = $shipment->user->phone;
+                    }
+                    else{
+                        $sms_to = $shipment->consignee_phone_number_1;
+                    }
+                    $message = $request->message;
+                    RCPSmsToConsignee::send_manual_sms($message,$sms_to);
+
+                    return response()->json(['status' => 0, 'success' => 'SMS Send Sucessfully']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+                }
             }
         }
     }
