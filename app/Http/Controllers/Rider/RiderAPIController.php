@@ -8863,19 +8863,20 @@ class RiderAPIController extends Controller
                             $receiver_name = str_replace('"', '', $request->receiver_name);
                             $received_by = $receiver_name;
                         }
+
                         $cnic = str_replace('"', '', $request->cnic);
                         if ($cnic != "Empty") {
                             $rider_delivery->cnic = $cnic;
-                            $received_by .= ' | ' . $cnic;
+                        }else{
+                            $cnic = NULL;
                         }
+
                         $relation = str_replace('"', '', $request->relation);
                         if($relation != "Empty"){
                             $rider_delivery->relation = $relation;
+                        }else{
+                            $relation = NULL;
                         }
-
-//                if($request->has('receiver_name')){
-//                    $rider_delivery->receiver_name = $request->receiver_name;
-//                }
 
                         $shipment = Shipment::find($request->shipment_id);
 
@@ -8971,7 +8972,7 @@ class RiderAPIController extends Controller
                                     $shipment->received_amount = round($request->total_cod_amount);
                                     $shipment->amount = round($request->total_cod_amount);
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-                                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                 }
                             } elseif ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
@@ -8979,7 +8980,7 @@ class RiderAPIController extends Controller
 
                                 $shipment->received_amount = $shipment->amount;
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
-                                ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                             } else if ($shipment->booking_type_id == 3) {
                                 $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
                                 $item_ids = explode(',', $res);
@@ -11357,7 +11358,7 @@ class RiderAPIController extends Controller
                                             $remarks_id = $request->remarks_id;
                                         }
 
-                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, $remarks_id);
+                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id,NULL,NULL, $remarks_id);
                                         if($request->shipper_status_id != 7){
                                             NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                         }

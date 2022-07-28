@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\PamLead;
 use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\LeadReference;
 use App\Http\Models\Admin\Territory;
 use App\Http\Models\City;
 use App\Models\Admin\Lead\LeadReason;
@@ -151,7 +152,9 @@ class LeadManagementController extends Controller
 
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
-        return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
+        $lead_references = LeadReference::select('id', 'name')->get();
+
+        return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates, 'lead_references' => $lead_references]);
     }
 
     public function list(Request $request)
@@ -832,11 +835,8 @@ class LeadManagementController extends Controller
             $new_lead->city_id = $request->city_id;
             $new_lead->requested_date = Carbon::now();
             $new_lead->service_id = $request->service_id;
-            $new_lead->reference_id = 7;
-            $new_lead->territory_id = $request->territory_id;
-            $new_lead->territory_area_id = $request->territory_area_id;
-            $new_lead->brand = $request->brand;
-            $new_lead->company = $request->company;
+            $new_lead->reference_id = $request->reference_id;
+            $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
             return redirect()->back()->with('success', 'Lead added successfully');
