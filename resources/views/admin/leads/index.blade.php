@@ -487,7 +487,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Contact Person Name*" data-rule-required="true"  data-msg-required="Contact Person Name is required">
+                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Full Name*" data-rule-required="true"  data-msg-required="Full Name is required">
                                 </div>
                             </div>
                             <div class="col-6">
@@ -521,28 +521,14 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="territory_id" id="add_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <select name="territory_area_id" id="add_area" class="form-control select2">
+                                    <select name="referene_id" id="add_reference" class="form-control select2" data-rule-required="true"  data-msg-required="Reference is required">
+                                        @foreach($lead_references as $reference)
+                                            <option value="{{ $reference->id }}"> {{ $reference->name }} </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
 
-
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="company" id="add_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
-                                </div>
-                            </div>
                         </div>
 
                         <div class="modal-footer">
@@ -1968,12 +1954,8 @@
                 width: '100%'
             });
 
-            $("#add_territory").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Territory*",
-                width: '100%'
-            });
-            $("#add_area").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Area",
+            $("#add_reference").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reference*",
                 width: '100%'
             });
 
@@ -2197,72 +2179,8 @@
             $('#add_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder:'Select City*',
-            }).bind('change', function () {
-                var id = $(this).val();
-                if(id) {
-                    $.ajax({
-                        url: '{!! route('cod.territory') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-
-                        if (data.status == 0) {
-                            $('#add_territory').empty();
-                            $.each(data.territory, function (key, value) {
-                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                $('#add_territory').append(newOption);
-                            });
-                            $('#add_territory').val(territory).trigger('change');
-
-                        } else {
-                            $('#add_territory').empty();
-                            var error = 'No Territory found for the selected city';
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-
-                    });
-                }
             });
-            $('#add_territory').on('change',function () {
-                var territory_id = $(this).val();
-                if(territory_id){
-                    $.ajax({
-                        url: '{!! route('cod.area') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': territory_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
 
-                            if (data.status == 0) {
-
-                                $('#add_area').empty();
-                                $.each(data.area, function (key, value) {
-                                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                    $('#add_area').append(newOption);
-                                });
-                                $('#add_area').val(area).trigger('change');
-                            }
-                            else{
-                                $('#add_area').empty();
-                                var error = 'No Area found for the selected Territory';
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        });
-                }
-
-            });
 
             $('#add_lead_form').validate({
                 ignore: [],
