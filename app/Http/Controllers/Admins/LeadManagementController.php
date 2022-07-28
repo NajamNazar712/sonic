@@ -836,6 +836,10 @@ class LeadManagementController extends Controller
             $new_lead->requested_date = Carbon::now();
             $new_lead->service_id = $request->service_id;
             $new_lead->reference_id = $request->reference_id;
+            $new_lead->territory_id = $request->territory_id;
+            $new_lead->territory_area_id = $request->territory_area_id;
+            $new_lead->brand = $request->brand;
+            $new_lead->company = $request->company;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 

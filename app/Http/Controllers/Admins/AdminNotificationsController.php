@@ -511,7 +511,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['preview'];
         }
         else if ($id == 113){
-            $details['fields'] = ['contact_person', 'link'];
+            $details['fields'] = ['contact_person', 'link','sales_person','sales_person_contact'];
         }
         else if ($id == 114){
             $details['fields'] = ['code'];
