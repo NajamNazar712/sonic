@@ -6790,6 +6790,13 @@ class NotificationsController extends Controller
                     if ($lead != null) {
                         $sales_person = Admin::find($lead->sale_person_id);
 
+                        if($sales_person->official_phone_number != null){
+                            $phone_number = $sales_person->official_phone_number;
+                        }
+                        else{
+                            $phone_number =  $sales_person->phone_number;
+                        }
+
                         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
                     <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
@@ -6805,7 +6812,7 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($body, '[sales_person_contact]') !== FALSE) {
-                            $body = str_replace('[sales_person_contact]', $sales_person->phone_number, $body);
+                            $body = str_replace('[sales_person_contact]', $phone_number, $body);
                         }
 
                         $link = '<div style="margin-top: 20px"><a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Click To Register</a></div>';

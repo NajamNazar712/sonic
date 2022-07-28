@@ -80,7 +80,7 @@
                         </div>
 
                     </div>
-                    <div class="col-3">
+                 {{--   <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -99,7 +99,7 @@
                             </div>
                             <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
                         </div>
-                    </div>
+                    </div>--}}
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -113,6 +113,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -230,7 +231,7 @@
                 allowClear:true
             });
 
-            $('.arrival_time_from').pickatime({
+          /*  $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
                 interval: 30,
@@ -266,7 +267,7 @@
                         }
                     }
                 }
-            });
+            });*/
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -341,6 +342,7 @@
                             head.push('Order ID');
                             head.push('Consignee Name');
                             head.push('Status');
+                            head.push('Reason');
                             head.push('Booking Date');
                             head.push('Destination');
                             head.push('Hub');
@@ -357,6 +359,7 @@
                                 row.push(values.order_id);
                                 row.push(values.consignee_name);
                                 row.push(values.current_status);
+                                row.push(values.reason);
                                 row.push(values.booking_date);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -412,7 +415,7 @@
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
-                order: [[6, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -420,6 +423,7 @@
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data: 'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'reason' ,name: 'ssr.name', class: 'align-middle reason'},
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
