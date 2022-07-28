@@ -384,24 +384,36 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_update(Request $request){
         $shipper_status_id = $request->shipment_status_id;
+        $in_transit_array = array();
+        $updated_array = array();
         if($shipper_status_id){
             $shipments = explode(',', $request->shipment_ids);
             if(count($shipments) > 0){
                 if($shipper_status_id == 14){
                     foreach ($shipments as $shipment_id){
-                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
-                        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
-                        AdminFinanceController::add_payment($shipment_id, 0);
-                        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
-                        $international_shipment->sync = 0;
-                        $international_shipment->save();
+                        $shipment = Shipment::where('id', $shipment_id)->first();
+                        if($shipment->shipper_status_id != 3) {
+                            $shipment->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+                            AdminFinanceController::add_payment($shipment_id, 0);
+                            $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+                            $international_shipment->sync = 0;
+                            $international_shipment->save();
+
+                            array_push($updated_array,$shipment->tracking_number);
+                        }
+                        else{
+                            array_push($in_transit_array,$shipment->tracking_number);
+                        }
                     }
                 }
                 else{
                     foreach ($shipments as $shipment_id){
-                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                        $shipment = Shipment::where('id', $shipment_id)->first();
+                        $shipment->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
 
+                        array_push($updated_array,$shipment->tracking_number);
                         if($shipper_status_id == 4){
                             $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
                             if($manifest_shipment->exists()){
@@ -450,7 +462,26 @@ class AdminInternationalShipmentsController extends Controller
                     }
                 }
 
-                return redirect()->back()->with('success', 'Shipments updated successfully!');
+                $in_transit_html = '';
+                if (count($in_transit_array) > 0) {
+                    $in_transit_html = "Following Shipments(s) did not arrive at destination.<br><ul>";
+                    foreach ($in_transit_array as $v) {
+                        $in_transit_html .= "<li>" . $v . "</li>";
+                    }
+                    $in_transit_html .= "</ul>";
+                }
+
+                $updated_html = '';
+                if (count($updated_array) > 0) {
+                    $updated_html = "Following Shipments(s) updated successfully.<br><ul>";
+                    foreach ($updated_array as $v) {
+                        $updated_html .= "<li>" . $v . "</li>";
+                    }
+                    $updated_html .= "</ul>";
+                }
+
+                return back()->with(['updated_html' => $updated_html, 'in_transit_html' => $in_transit_html]);
+
             }
             return redirect()->back()->with('error', 'No shipment selected!');
 
