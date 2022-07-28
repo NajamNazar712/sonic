@@ -703,6 +703,11 @@ class AdminCargoManifestController extends Controller
                 return ['status' => 1, 'error' => 'Bag Already Created'];
             }
 
+
+            if($shipment->consignee_city->hub_city->id ==  Auth::user()->default_hub_id){
+                return ['status' => 1, 'error' => 'Cannot create bag with same origin and destination'];
+            }
+
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
