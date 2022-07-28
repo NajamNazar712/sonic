@@ -24,6 +24,7 @@ use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
@@ -9749,7 +9750,7 @@ class AdminReportsController extends Controller
             ->leftjoin('delivery_notes as dn', 'shipments_journey.reference_1_id', '=', 'dn.id')
             ->leftjoin('return_notes as rn', 'shipments_journey.reference_1_id', '=', 'rn.id')
             ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
-            ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id','dpt.name as status_marked_by_department']);
+            ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id','dpt.name as status_marked_by_department','shipments_journey.status_reason_id as reason']);
             
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -9784,7 +9785,22 @@ class AdminReportsController extends Controller
                     return '';
                 }
 
+            })
+            ->editColumn('reason', function($shipments)
+            {
+                $reason = $shipments->reason;
+                if($reason)
+                {
+                    $reason = ShipmentStatusReason::where('id',$reason);
+                    if($reason->exists())
+                    {
+                        $reason = $reason->first();
+                        $reason_name = $reason->name;
+                        return isset($reason_name) ? $reason_name : '-';
+                    }
+                }
             });
+
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
         }

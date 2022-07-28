@@ -111,6 +111,7 @@
                         <th class="border-primary border-darken-1">CN</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Status Marked</th>
+                        <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Status Marking Date</th>
                         <th class="border-primary border-darken-1">Status Marked By</th>
                         <th class="border-primary border-darken-1">Status Marked By Department</th>
@@ -319,6 +320,7 @@
                             head.push('CN');
                             head.push('Shipper');
                             head.push('Status Marked');
+                            head.push('Reason');
                             head.push('Status Marking Date');
                             head.push('Status Marked By');
                             head.push('Status Marked By Depertment');
@@ -332,6 +334,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
                                 row.push(values.status_marked);
+                                row.push(values.reason);
                                 row.push(values.status_marking_date);
                                 row.push(values.status_marked_by);
                                 row.push(values.status_marked_by_department);
@@ -387,12 +390,13 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'sh.tracking_number', class: 'align-middle tracking_number_link', searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'status_marked', name: 'ss.id', class: 'align-middle status_marked'},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason'},
                     {data: 'status_marking_date', name: 'shipments_journey.created_at', class: 'align-middle status_marking_date'},
                     {data: 'status_marked_by', name: 'ad.name', class: 'align-middle status_marked_by'},
                     {data: 'status_marked_by_department', name: 'dpt.name', class: 'align-middle status_marked_by_department'},
