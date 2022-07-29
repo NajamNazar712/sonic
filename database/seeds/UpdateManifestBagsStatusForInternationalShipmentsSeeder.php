@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use Illuminate\Database\Seeder;
@@ -28,13 +29,17 @@ class UpdateManifestBagsStatusForInternationalShipmentsSeeder extends Seeder
                         $bag_shipment->save();
                     }
                }
-               $received_shipments_count = CargoManifestBagShipments::where('cargo_manifest_bag_id',$bags->id)->where('status',1)->count();
-               if($bags->shipments == $received_shipments_count){
-                  $bags->received_shipments = $received_shipments_count;
-                  $bags->completed = 1;
-                  $bags->save();
-               }
            }
+            $received_shipments_count = CargoManifestBagShipments::where('cargo_manifest_bag_id',$bags->id)->where('status',1)->count();
+            if($bags->shipments == $received_shipments_count){
+                $bags->received_shipments = $received_shipments_count;
+                $bags->status_id = 7;
+                $bags->completed = 1;
+                $bags->receiver_id = 346; //global_admin
+                $bags->save();
+
+                CargoManifestBagJourneyController::add($bags->id, $bags->seal_number, $bags->status_id, 346);
+            }
         }
 
     }
