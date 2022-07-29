@@ -212,7 +212,7 @@ class ShipperShipmentCancelController extends Controller
         {
             CancelledShipmentArrival::where('shipper_id',$shipper)->delete();
 
-            return response()->json(['status' => '1', 'success' => 'Updated1']);
+            return response()->json(['status' => '1', 'success' => 'Updated']);
         }
     }
 }

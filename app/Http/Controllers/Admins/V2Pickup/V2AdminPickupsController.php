@@ -749,7 +749,7 @@ class V2AdminPickupsController extends Controller
                 $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
                 if($canceled_shipment)
                 {
-                    return ['status' => 1, 'error' => 'Shipment is not allowed to arrival because shipper cancelled this shipment !'];
+                    return ['status' => 1, 'error' => 'Shipment is not allowed for arrival because shipper cancelled this shipment !'];
                 }
             }
             //todo: now checking canceled shipment arrival end
@@ -1446,7 +1446,7 @@ class V2AdminPickupsController extends Controller
                     $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
                     if($canceled_shipment)
                     {
-                        return ['status' => 1, 'error' => 'Shipment is not allowed to arrival because shipper cancelled this shipment !'];
+                        return ['status' => 1, 'error' => 'Shipment is not allowed for arrival because shipper cancelled this shipment !'];
                     }
                 }
             //todo: now checking canceled shipment arrival end

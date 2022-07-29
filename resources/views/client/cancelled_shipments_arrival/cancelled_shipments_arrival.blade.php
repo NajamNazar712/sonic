@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Cancelled Shipments Arrival
+        Cancelled Shipment Arrival
     </h1>
 
     <div class="card">
@@ -14,7 +14,7 @@
                     <div class="row">
                         <div class="col-md-6 offset-4">
                             <label class="font-medium-2 font-weight-bold block">Cancelled Shipment Arrival
-                                Allowed</label>
+                            </label>
                             <div class="form-group">
                                 <div class="ml-5">
                                     <label class="font-medium-2 text-bold-600 mr-1">No</label>
