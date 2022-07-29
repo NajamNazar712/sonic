@@ -3,6 +3,7 @@
 use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Shipment;
 use Illuminate\Database\Seeder;
 
 class UpdateManifestBagsStatusForInternationalShipmentsSeeder extends Seeder
