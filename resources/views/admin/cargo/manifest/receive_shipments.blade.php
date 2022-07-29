@@ -491,6 +491,7 @@
                         data: {
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
+                            'bag_type':  $('#shipment_bag_type').val(),
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -500,10 +501,19 @@
 
                                 var index = $.inArray(id, shipment_ids);
 
+                                if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
+
+
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]).node().id = data.details.id;
+                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type,open_box]).node().id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     scan_sound(1);

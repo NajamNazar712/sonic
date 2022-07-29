@@ -2738,6 +2738,7 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_shipments_details(Request $request)
     {
+        
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
