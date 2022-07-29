@@ -158,6 +158,8 @@ class RCPSmsToConsignee implements ShouldQueue
                 $sms->status = 3;
 
                 $sms->save();
+
+                return $sms->id;
             }
             else {
                 $sms->status = 2;
@@ -168,11 +170,14 @@ class RCPSmsToConsignee implements ShouldQueue
                 $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                return $sms->id;
             }
         } catch (RequestException $e) {
             $sms->status = 1;
 
             $sms->save();
+
+            return $sms->id;
         }
     }
 }

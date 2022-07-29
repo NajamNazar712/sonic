@@ -23,6 +23,7 @@
                         <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Date/Time</th>
                         <th class="border-primary border-darken-1">Agent name</th>
+                        <th class="border-primary border-darken-1">Status</th>
                     </tr>
                     </thead>
                 </table>
@@ -88,6 +89,16 @@
         .goldClass{
             background-color: gold;
         }
+
+        .show_message
+        {
+            display: block;
+            width: 200px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: default;
+        }
     </style>
 @endsection
 
@@ -126,6 +137,7 @@
                             head.push('Message');
                             head.push('Date/Time');
                             head.push('Agent name');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -139,6 +151,7 @@
                                 row.push(values.message);
                                 row.push(values.datetime);
                                 row.push(values.agent_name);
+                                row.push(values.status);
                                 body.push(row);
                             });
                         },
@@ -186,6 +199,7 @@
                     {data: 'message', name: 'rcp_manual_sms.message', class: 'align-middle message',orderable: false},
                     {data: 'datetime', name: 'rcp_manual_sms.created_at', class: 'align-middle text-center datetime'},
                     {data: 'agent_name', name: 'agent.name', class: 'align-middle text-center agent_name'},
+                    {data: 'status', name: 'sms.status', class: 'align-middle text-center status',orderable: false},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -202,6 +216,10 @@
                     '<option value="shipper">Shipper</option>' +
                     '<option value="consignee">Consignee</option>' +
                     '</select>';
+                    var sms_status = '<select name="sms_status" id="sms_status" class="select2 form-control">'+
+                    '<option value="delivered">Delivered</option>' +
+                    '<option value="not_delivered">Not Delivered</option>' +
+                    '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -210,6 +228,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.recepient')){
                             $(recepient_drop).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.status')){
+                            $(sms_status).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -226,6 +250,13 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Shipper",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $("#sms_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
