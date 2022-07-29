@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Database\Seeder;
 
 class UpdateTraxAlflahShipmentJourneySeeder extends Seeder
