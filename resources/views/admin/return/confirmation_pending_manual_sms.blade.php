@@ -182,6 +182,7 @@
                 order: [[6, 'desc']],
                 scrollX: false, scrollY: '500px',
                 buttons: [
+                    @if (session('role_id') == 1 || count(array_intersect([782], session('permissions'))) !== 0)
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
@@ -189,6 +190,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
 
                     },
+                    @endif
                 ],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, class: 'align-middle text-center serial_number',targets: 0, render: function (data, type, row) {return '';}},

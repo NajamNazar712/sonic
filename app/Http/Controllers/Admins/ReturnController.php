@@ -4854,14 +4854,14 @@ class ReturnController extends Controller
     }
 
     public function confirmation_pending_manual_sms_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),502);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),568);
         return view('admin.return.confirmation_pending_manual_sms');
      }
  
      public function confirmation_pending_manual_sms_list(Request $request){
          if($request->get('excel') && $request->get('excel') == true)
          {
-            //  ActivityTrailController::createActivityTrailLog(Auth::id(),503);
+             ActivityTrailController::createActivityTrailLog(Auth::id(),569);
          }
         $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
             ->join('sms', 'sms.id', '=', 'rcp_manual_sms.sms_id')
