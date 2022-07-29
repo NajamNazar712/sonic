@@ -6293,7 +6293,18 @@ class AdminAPIController extends Controller
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
                     ->where('e.trax_id', $request->search_param)
                     ->where('admins.status', 1);
-            } else {
+            }
+            elseif ($request->search_with == 4) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
+                    ->where('e.city_id', $request->search_param)
+                    ->where('admins.status', 1);
+            }
+            else {
                 return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
             }
             if ($admin_profile->exists()) {
@@ -9162,6 +9173,11 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
         }
+    }
+
+    public function trax_directory_index(Request $request){
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select('id', 'name')->get();
+        return response()->json(['status' => 0, 'cities' => $cities]);
     }
 
 }
