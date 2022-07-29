@@ -1,9 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\International\InternationalShipmentServiceProvider;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalShipmentsLog;
@@ -306,7 +311,7 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),441);
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18,21,22,23,24,25])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [4,14,17,18,21,22,23,24,25])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -318,6 +323,14 @@ class AdminInternationalShipmentsController extends Controller
             if($default_status_id == 0){
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', [1, 2, 17])->where('business_category_id', 2);
                 if ($shipment->exists()) {
+                    $bag = CargoManifestBag::where('seal_number',$tracking_number);
+                    if($bag->exists()){
+                        $bag = $bag->first();
+                        if($bag->status_id == 1 && $bag->type == 1 && !ManifestBag::where('cargo_manifest_bag_id',$bag->id)->exists()){
+                            return response()->json(['status' => 0, 'error' =>'Please Create Manifest For This Shipment!']);
+                        }
+                    }
+
                     $data = array();
                     $shipment = $shipment->first();
 
@@ -371,29 +384,104 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_update(Request $request){
         $shipper_status_id = $request->shipment_status_id;
+        $in_transit_array = array();
+        $updated_array = array();
         if($shipper_status_id){
             $shipments = explode(',', $request->shipment_ids);
             if(count($shipments) > 0){
                 if($shipper_status_id == 14){
                     foreach ($shipments as $shipment_id){
-                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
-                        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
-                        AdminFinanceController::add_payment($shipment_id, 0);
-                        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
-                        $international_shipment->sync = 0;
-                        $international_shipment->save();
+                        $shipment = Shipment::where('id', $shipment_id)->first();
+                        if($shipment->shipper_status_id != 3) {
+                            $shipment->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+                            AdminFinanceController::add_payment($shipment_id, 0);
+                            $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+                            $international_shipment->sync = 0;
+                            $international_shipment->save();
 
+                            array_push($updated_array,$shipment->tracking_number);
+                        }
+                        else{
+                            array_push($in_transit_array,$shipment->tracking_number);
+                        }
                     }
                 }
                 else{
                     foreach ($shipments as $shipment_id){
-                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                        $shipment = Shipment::where('id', $shipment_id)->first();
+                        $shipment->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+
+                        array_push($updated_array,$shipment->tracking_number);
+                        if($shipper_status_id == 4){
+                            $manifest_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id);
+                            if($manifest_shipment->exists()){
+                                $received_shipments = 0;
+                                $manifest_shipment = $manifest_shipment->first();
+                                $bag = CargoManifestBag::where('id',$manifest_shipment->cargo_manifest_bag_id)->first();
+                                if($bag){
+                                    $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('cargo_manifest_bag_id',$bag->id)->first();
+                                    if($bag_shipment){
+                                        $bag_shipment->status = 1;
+                                        $bag_shipment->save();
+                                    }
+                                    $received_shipments = $bag->shipment->where('status',1)->count();
+                                }
+
+                                if($bag->shipments == $received_shipments){
+                                    $bag->received_shipments = $received_shipments;
+                                    $bag->status_id = 7;
+                                    $bag->completed = 1;
+                                    $bag->receiver_id = 346; //global_admin
+                                    $bag->save();
+
+                                    $manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
+                                    if($manifest){
+                                        $manifest->status = 1;
+                                        $manifest->save();
+
+                                        $cargo_manifest = CargoManifest::find($manifest->cargo_manifest_id);
+
+                                        $total_manifest_bags = $cargo_manifest->bags;
+                                        $total_received_manifest_bags = ManifestBag::where('cargo_manifest_id',$manifest->cargo_manifest_id)->where('status',1)->count();
+
+                                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, 346, $manifest->id);
+
+                                        if($total_manifest_bags == $total_received_manifest_bags){
+                                            $cargo_manifest->status_id = 2;
+                                            $cargo_manifest->received_by = 346;
+                                            $cargo_manifest->received_bags = $total_received_manifest_bags;
+                                            $cargo_manifest->save();
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                     }
                 }
 
-                return redirect()->back()->with('success', 'Shipments updated successfully!');
+                $in_transit_html = '';
+                if (count($in_transit_array) > 0) {
+                    $in_transit_html = "Following Shipments(s) did not arrive at destination.<br><ul>";
+                    foreach ($in_transit_array as $v) {
+                        $in_transit_html .= "<li>" . $v . "</li>";
+                    }
+                    $in_transit_html .= "</ul>";
+                }
+
+                $updated_html = '';
+                if (count($updated_array) > 0) {
+                    $updated_html = "Following Shipments(s) updated successfully.<br><ul>";
+                    foreach ($updated_array as $v) {
+                        $updated_html .= "<li>" . $v . "</li>";
+                    }
+                    $updated_html .= "</ul>";
+                }
+
+                return back()->with(['updated_html' => $updated_html, 'in_transit_html' => $in_transit_html]);
+
             }
             return redirect()->back()->with('error', 'No shipment selected!');
 
@@ -401,7 +489,7 @@ class AdminInternationalShipmentsController extends Controller
         return redirect()->back()->with('error', 'Shipment Status not selected!');
     }
     public function shipment_status_update_modal(Request $request){
-       
+
         $shipper_status_id = $request->shipment_status_id;
         $seal_number = $request->seal_number;
         if($shipper_status_id){
