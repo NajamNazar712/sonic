@@ -699,7 +699,7 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             
-            if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->whereIn('status_id',[1,6])->exists()){
+            if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists() || $shipment->shipper_status_id == 49){
                 return ['status' => 1, 'error' => 'Bag Already Created'];
             }
 
@@ -724,13 +724,13 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-            if ($shipment->shipper_status_id == 49) {
+          /*  if ($shipment->shipper_status_id == 49) {
                 $misrouted_history = MisroutedHistory::where('shipment_id', $shipment->id)->latest()->first();
                 if ($misrouted_history) {
                     $city = City::where('id', $misrouted_history->old_consignee_city_id)->first();
                     $misrouted_history_hub = $city->hub_id;
                 }
-            }
+            }*/
 
 
             if (
@@ -738,7 +738,7 @@ class AdminCargoManifestController extends Controller
 
                 || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55 && $shipment->shipper_status_id != 49) && in_array($shipment->pickup_address->city->hub_id, session('hubs')))
 
-                || ($shipment->shipper_status_id == 55 && in_array($intercept_re_book_history_hub, session('hubs'))) || ($shipment->shipper_status_id == 49 && in_array($misrouted_history_hub, session('hubs')))
+                || ($shipment->shipper_status_id == 55 && in_array($intercept_re_book_history_hub, session('hubs'))  /* || ($shipment->shipper_status_id == 49 && in_array($misrouted_history_hub, session('hubs'))*/)
             ) {
 
 
