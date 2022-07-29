@@ -198,12 +198,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var recepient = '<select name="status_select" id="status_select" class="select2 form-control">'+
+                    var recepient_drop = '<select name="status_select" id="status_select" class="select2 form-control">'+
                     '<option value="shipper">Shipper</option>' +
                     '<option value="consignee">Consignee</option>' +
                     '</select>';
-                   /* var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';*/
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -211,21 +209,11 @@
                         if ($(header).is('.serial_number')|| $(header).is('.message')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.recepient')){
-                            $(recepient).appendTo($(search))
+                            $(recepient_drop).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }/*else if($(header).is('.mode')){
-                            $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
-                            $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }*/
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -236,17 +224,15 @@
                             }
                         }
                     });
-
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Shipper",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }
-            });
-
-            $("#status_select").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select a Status",
-                width:'100%',
-                containerCssClass: 'select-xs',
-                dropdownCssClass: 'form-control-sm p-0'
             });
         });
     </script>
