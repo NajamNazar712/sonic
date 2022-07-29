@@ -703,14 +703,14 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             
-            if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists() || $shipment->shipper_status_id == 49){
+           /* if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists()){
                 return ['status' => 1, 'error' => 'Bag Already Created'];
             }
 
 
             if($shipment->consignee_city->hub_city->id ==  Auth::user()->default_hub_id){
                 return ['status' => 1, 'error' => 'Cannot create bag with same origin and destination'];
-            }
+            }*/
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if(!$dispute_check){
@@ -718,9 +718,9 @@ class AdminCargoManifestController extends Controller
             }
 
             if ($shipment->shipper_status_id == 55) {
-                /*   if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                   if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
                        return ['status' => 1, 'error' => 'Cannot create bag for same hub'];
-                   }*/
+                   }
 
                 $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->latest()->first();
                 if ($intercept_rebook_history) {
@@ -728,13 +728,13 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-          /*  if ($shipment->shipper_status_id == 49) {
+            if ($shipment->shipper_status_id == 49) {
                 $misrouted_history = MisroutedHistory::where('shipment_id', $shipment->id)->latest()->first();
                 if ($misrouted_history) {
                     $city = City::where('id', $misrouted_history->old_consignee_city_id)->first();
                     $misrouted_history_hub = $city->hub_id;
                 }
-            }*/
+            }
 
 
             if (
@@ -742,7 +742,7 @@ class AdminCargoManifestController extends Controller
 
                 || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55 && $shipment->shipper_status_id != 49) && in_array($shipment->pickup_address->city->hub_id, session('hubs')))
 
-                || ($shipment->shipper_status_id == 55 && in_array($intercept_re_book_history_hub, session('hubs'))  /* || ($shipment->shipper_status_id == 49 && in_array($misrouted_history_hub, session('hubs'))*/)
+                || (($shipment->shipper_status_id == 55 && in_array($intercept_re_book_history_hub, session('hubs'))) || ($shipment->shipper_status_id == 49 && in_array($misrouted_history_hub, session('hubs'))))
             ) {
 
 
@@ -2047,7 +2047,7 @@ class AdminCargoManifestController extends Controller
             ->where(function ($query) {
                 $query->where('cargo_manifest_bags.shipments', '!=', DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'))
                     ->orWhere('cargo_manifest_bags.completed', 0);
-                    //->orWhere('cargo_manifest_bags.lost_shipments', '!=','cargo_manifest_bags.shipments');
+                
             });
 
 
