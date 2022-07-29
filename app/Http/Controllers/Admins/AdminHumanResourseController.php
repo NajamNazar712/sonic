@@ -1314,6 +1314,9 @@ class AdminHumanResourseController extends Controller
         $employee->fuel = $request->fuel;
         $employee->employee_nature_id = $request->employee_nature_id;
         $employee->sub_department = $request->sub_department;
+        if($request->has('employee_confirmation_status')){
+            $employee->confirmation_status = $request->employee_confirmation_status;
+        }
         $employee->update();
 
         if ($employee->employee_type_id == 1) {
