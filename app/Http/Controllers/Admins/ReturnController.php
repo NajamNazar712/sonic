@@ -43,6 +43,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
@@ -4851,6 +4852,29 @@ class ReturnController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function confirmation_pending_manual_sms_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),502);
+        return view('admin.return.confirmation_pending_manual_sms');
+     }
+ 
+     public function confirmation_pending_manual_sms_list(Request $request){
+         if($request->get('excel') && $request->get('excel') == true)
+         {
+            //  ActivityTrailController::createActivityTrailLog(Auth::id(),503);
+         }
+        $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
+            ->select('rcp_manual_sms.id','rcp_manual_sms.tracking_number','rcp_manual_sms.recepient','rcp_manual_sms.recepient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name');
+
+            // dd($rcpmannualsms->get());
+ 
+        $datatable = DataTables::of($rcpmannualsms);
+            // ->editColumn('message', function ($rcpmannualsms) {
+            //     return $rcpmannualsms->message;
+            // });
+ 
+         return $datatable->make(true);
+     }
 
     public function manual_rcp_sms(Request $request){
 

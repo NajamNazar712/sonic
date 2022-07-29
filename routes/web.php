@@ -1439,6 +1439,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');
         Route::get('/confirmation_pending/sms','Admins\ReturnController@confirmation_pending_sms_index')->name('confirmation_pending_sms');
         Route::get('/confirmation_pending/sms/list','Admins\ReturnController@confirmation_pending_sms_list')->name('confirmation_pending_sms_list');
+        Route::get('/confirmation_pending/manual/sms','Admins\ReturnController@confirmation_pending_manual_sms_index')->name('confirmation_pending_manual_sms');
+        Route::get('/confirmation_pending/manual/sms/list','Admins\ReturnController@confirmation_pending_manual_sms_list')->name('confirmation_pending_manual_sms_list');
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');

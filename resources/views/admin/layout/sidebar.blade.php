@@ -466,6 +466,9 @@
                                     @if (session('role_id') == 1 || in_array(675, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.return.confirmation_pending_sms') }}">RCP SMS</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(675, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.return.confirmation_pending_manual_sms') }}">RCP Manual SMS Log</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
