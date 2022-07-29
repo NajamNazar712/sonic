@@ -24,7 +24,6 @@ class AdminAPIToken
 
             if ($admin->exists()) {
                 $admin = $admin->first();
-
                 if ($admin->status) {
                     $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
                     if($employee->exists())

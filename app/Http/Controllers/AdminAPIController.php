@@ -4893,7 +4893,6 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-
             return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
