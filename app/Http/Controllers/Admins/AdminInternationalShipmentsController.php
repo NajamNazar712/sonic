@@ -323,13 +323,13 @@ class AdminInternationalShipmentsController extends Controller
             if($default_status_id == 0){
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', [1, 2, 17])->where('business_category_id', 2);
                 if ($shipment->exists()) {
-                    $bag = CargoManifestBag::where('seal_number',$tracking_number);
+                    /*$bag = CargoManifestBag::where('seal_number',$tracking_number);
                     if($bag->exists()){
                         $bag = $bag->first();
                         if($bag->status_id == 1 && $bag->type == 1 && !ManifestBag::where('cargo_manifest_bag_id',$bag->id)->exists()){
                             return response()->json(['status' => 0, 'error' =>'Please Create Manifest For This Shipment!']);
                         }
-                    }
+                    }*/
 
                     $data = array();
                     $shipment = $shipment->first();
