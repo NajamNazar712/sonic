@@ -122,6 +122,7 @@
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1">Last Working Date</th>
+                                    <th class="border-primary border-darken-1">Confirmation Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -1175,6 +1176,7 @@
                             head.push('Requested At');
                             head.push('Joining Date');
                             head.push('Last Working Date');
+                            head.push('Confirmation Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -1200,6 +1202,8 @@
                                 row.push(values.requested_at);
                                 row.push(values.joining_date);
                                 row.push(values.last_working_date);
+                                row.push(values.confirmation_status);
+
                                 body.push(row);
                             });
                         },
@@ -1474,6 +1478,7 @@
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
+                    {data: 'confirmation_status', name: 'employees.confirmation_status', class: 'align-middle confirmation_status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1495,6 +1500,12 @@
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
 
+
+                        
+                    var employee_confirmation_status = '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' +
+                        '<option value="2">Probation</option>'+
+                        '<option value="1">Permanent</option>'+
+                    '</select>';
                     var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
                         '</select>';
 
@@ -1532,6 +1543,13 @@
                         else if($(header).is('.rider_main_category'))
                         {
                             $(rider_main_categories).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.confirmation_status'))
+                        {
+                            $(employee_confirmation_status).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -1576,6 +1594,14 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
 
                     var zone_data = $.map({!! $employee_zones !!}, function (obj) {
                         obj.text = obj.name;
