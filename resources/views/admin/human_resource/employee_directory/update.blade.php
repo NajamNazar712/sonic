@@ -383,7 +383,29 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                        </div> 
+                                        @if($employee->employee_type_id == 1)
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Employee Type<span class="text-danger">*</span></label>
+                                                <select name="employee_confirmation_status" id="employee_confirmation_status" data-rule-required="true"  data-msg-required="Employee Type is required" class="select2 form-control " style="width: 100%">
+                                                   @if ($employee->confirmation_status == 2)
+                                                        <option value="2" selected>Probation</option>
+                                                        <option value="1">Permanent</option>
+                                                        
+                                                    @elseif ($employee->confirmation_status == 1)
+                                                        <option value="2" selected>Probation</option>
+                                                        <option value="1">Permanent</option>
+                                                    @else
+                                                        <option value="2">Probation</option>
+                                                        <option value="1">Permanent</option>
+
+                                                    @endif
+                                                </select>
+                                            </div>
                                         </div>
+                                        @endif
                                     </div>
                                     <div class="d-none" id="replacement_info_div">
                                         <h4 class="form-section">Replacement Info</h4>
@@ -2380,6 +2402,12 @@
                 width:'100%',
             });
             $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
+            
+            $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Employee Type",
+                width:'100%',
+            });
+            $("#employee_confirmation_status").val("{{$employee->confirmation_status ?? ''}}").trigger('change');
 
             $("#employee_nature_list").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Employee Nature",

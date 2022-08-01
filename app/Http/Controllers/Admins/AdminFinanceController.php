@@ -3377,7 +3377,7 @@ class AdminFinanceController extends Controller
             ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
         } else {
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if ($retail_shipment->shipping_mode == 3) {
+            if (in_array($adjustment_type, [2, 6, 7, 8, 9, 10, 11, 15, 16])) {
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
