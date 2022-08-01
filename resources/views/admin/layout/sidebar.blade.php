@@ -1164,6 +1164,9 @@
                         @if (session('role_id') == 1 || in_array(780, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.reports.mms.index')}}">MMS Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(780, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.reports.crm_agent_vise_report.crm_agent_vise_report_index')}}">CRM Agent Vise Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

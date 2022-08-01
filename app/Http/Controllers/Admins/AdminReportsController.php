@@ -10561,5 +10561,19 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function crm_agent_vise_report_index()
+    {
+        return view('admin.reports.crm_agent_vise_report.crm_agent_vise_report');
+    }
+
+    public  function crm_agent_vise_report_list(Request $request)
+    {
+        $test_array = array();
+
+        $admins = Admin::where('status',1)->select('name','email','phone_number','cnic','trax_id');
+
+        return  $admins;
+    }
 }
 
