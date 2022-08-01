@@ -2652,9 +2652,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');
         });
-        Route::prefix('crm_agent_vise_report')->name('crm_agent_vise_report.')->group(function (){
-            Route::get('crm_agent_vise_report_index', 'Admins\AdminReportsController@crm_agent_vise_report_index')->name('crm_agent_vise_report_index');
-            Route::post('crm_agent_vise_report_list', 'Admins\AdminReportsController@crm_agent_vise_report_list')->name('crm_agent_vise_report_list');
+        Route::prefix('crm_agent_wise_report')->name('crm_agent_wise_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_agent_wise_report_index')->name('index');
+            Route::post('crm_agent_wise_report_list', 'Admins\AdminReportsController@crm_agent_wise_report_list')->name('list');
         });
         Route::prefix('crm_special_approval')->name('crm_special_approval.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@crm_special_approval_index')->name('index');
