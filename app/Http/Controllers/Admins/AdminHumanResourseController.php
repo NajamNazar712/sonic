@@ -808,6 +808,7 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
+        $employee->last_working_date = NULL;
         $employee->save();
 
         $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
@@ -868,6 +869,7 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
+        $employee->last_working_date = NULL;
         $employee->save();
 
         $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
@@ -1354,6 +1356,7 @@ class AdminHumanResourseController extends Controller
                 $admin->default_hub_id = $employee->city->hub_city->id;
                 $admin->password = bcrypt($employee->pin);
                 $admin->dummy_pin = $employee->pin;
+                $admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
                 $admin->update();
 
@@ -1374,6 +1377,7 @@ class AdminHumanResourseController extends Controller
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
                 $rider->route_id = $request->rider_route;
+                $rider->updated_by = Auth::id();
                 $rider->save();
             }
         }
