@@ -4869,7 +4869,10 @@ class ReturnController extends Controller
 
         $datatable = DataTables::of($rcpmannualsms)
             ->editColumn('message', function ($rcpmannualsms) {
-                return '<u><span class="show_message" title="'.$rcpmannualsms->message.'"> '.$rcpmannualsms->message.' </span> </u>';
+                return '<span class="show_message" title="'.$rcpmannualsms->message.'"> '.$rcpmannualsms->message.' </span>';
+            })
+            ->editColumn('message_excel', function ($rcpmannualsms) {
+                return $rcpmannualsms->message;
             })
             ->editColumn('status', function ($rcpmannualsms) {
                 if($rcpmannualsms->status == 3){

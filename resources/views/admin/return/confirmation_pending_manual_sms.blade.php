@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmation Pending SMS
+        Return Confirmation Pending Manual SMS Log
     </h1>
 
     <div class="card">
@@ -148,7 +148,7 @@
                                 row.push(values.recepient);
                                 row.push(values.recepient_name);
                                 row.push(values.phone);
-                                row.push(values.message);
+                                row.push(values.message_excel);
                                 row.push(values.datetime);
                                 row.push(values.agent_name);
                                 row.push(values.status);
