@@ -189,6 +189,7 @@
                         d.search_name = $('#search_name').val();
                         d.search_phone = $('#search_phone_number').val();
                         d.search_trax_id = $('#search_trax_id').val();
+                        d.search_city_id = $('#search_city').val();
 
                     }
                 },

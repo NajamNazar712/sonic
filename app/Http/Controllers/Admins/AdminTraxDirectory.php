@@ -46,6 +46,9 @@ class AdminTraxDirectory extends Controller
                 }
             });
 
+        if($request->search_city_id){
+            $datatable->where('e.city_id', $request->search_city_id);
+        }
         if($request->search_name){
             $datatable->where('e.name', 'like','%' . $request->search_name . '%');
         }
@@ -55,9 +58,6 @@ class AdminTraxDirectory extends Controller
         }
         if($request->search_trax_id){
             $datatable->where('e.trax_id', $request->search_trax_id);
-        }
-        if($request->search_city){
-            $datatable->where('e.city_id', $request->search_city);
         }
 
         return $datatable->make(true);
