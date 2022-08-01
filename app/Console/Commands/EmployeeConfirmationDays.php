@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeConfirmation;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class EmployeeConfirmationDays extends Command
@@ -38,11 +40,20 @@ class EmployeeConfirmationDays extends Command
      */
     public function handle()
     {
-        $employees = Employee::where('confirmation_status',2)->where('status',1)->get();
+        $employees = Employee::where('confirmation_status',2)->where('status_id',1)->get();
 
         if($employees){
             foreach ($employees as $employee) {
-                
+                $now = Carbon::now();
+                $difference = $now->diffInDays($employee->joining_date);
+                if($difference >= 85) {
+                    $check_employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id);
+                    if(!$check_employee_confirmation->exists()){
+                        $employee_confirmation = new EmployeeConfirmation();
+                        $employee_confirmation->employee_id = $employee->id;
+                        $employee_confirmation->save();
+                    }
+                }
             }
         }
     }

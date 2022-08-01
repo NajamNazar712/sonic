@@ -1262,6 +1262,10 @@ class Permission
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
             'qa.cx_training.list' =>777,
+
+            'human_resource.employee_confirmation.index' => 783,
+            'human_resource.employee_confirmation.list' => 783,
+            
         ],
 
         'shipper' => [

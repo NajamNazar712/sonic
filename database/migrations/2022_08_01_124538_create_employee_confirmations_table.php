@@ -22,11 +22,11 @@ class CreateEmployeeConfirmationsTable extends Migration
             $table->integer('increment')->default(0);
             $table->string('approve_reason')->nullable();
             $table->string('reject_reason')->nullable();
-            $table->integer('approve_by_lm')->default(0);
+            $table->integer('approve_by_lm')->index()->nullable();
             $table->date('approve_by_lm_at')->nullable();
-            $table->integer('approve_by_hod')->default(0);
+            $table->integer('approve_by_hod')->index()->nullable();
             $table->date('approve_by_hod_at')->nullable();
-            $table->integer('approve_by_hr')->default(0);
+            $table->integer('approve_by_hr')->index()->nullable();
             $table->date('approve_by_hr_at')->nullable();
             $table->timestamps();
         });

@@ -3946,6 +3946,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
         });
+
+        Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_confirmation_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_confirmation_list')->name('list');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
