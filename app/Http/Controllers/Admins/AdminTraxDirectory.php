@@ -20,7 +20,8 @@ class AdminTraxDirectory extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),52);
         $hubs=City::select('id','name')->where('hub',1)->get();
-        return view('admin.trax_directory.index')->with(['hubs'=>$hubs]);
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select('id', 'name')->get();
+        return view('admin.trax_directory.index')->with(['cities'=>$cities]);
     }
 
     public function list(Request $request)
@@ -54,6 +55,9 @@ class AdminTraxDirectory extends Controller
         }
         if($request->search_trax_id){
             $datatable->where('e.trax_id', $request->search_trax_id);
+        }
+        if($request->search_city){
+            $datatable->where('e.city_id', $request->search_city);
         }
 
         return $datatable->make(true);

@@ -21,20 +21,30 @@
                                 <div class="col-12">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                        <div class="col-4 mt-1">
+                                        <div class="col-6 mt-1">
                                             <fieldset class="form-group input-group">
                                                 <input type="text" class="form-control" name="search_name" id="search_name" placeholder="Search Employee Name">
                                             </fieldset>
                                         </div>
-                                        <div class="col-4 mt-1">
+                                        <div class="col-6 mt-1">
                                             <fieldset class="form-group input-group">
                                                 <input type="text" class="form-control" name="search_phone_number" id="search_phone_number" placeholder="Search Phone Number">
                                             </fieldset>
                                         </div>
 
-                                        <div class="col-4 mt-1">
+                                        <div class="col-6 mt-1">
                                             <fieldset class="form-group input-group">
                                                 <input type="text" class="form-control" name="search_trax_id" id="search_trax_id" placeholder="Search Employee ID">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="col-6 mt-1">
+                                            <fieldset class="form-group input-group">
+                                                <select name="search_city" id="search_city" class="select2 form-control " style="width: 100%">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </fieldset>
                                         </div>
 
@@ -99,6 +109,13 @@
             $('#search_form #search_phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
+            });
+
+            $("#search_form #search_city").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select City",
+                width: '100%',
+                clear: true,
+                dropdownParent: $('#search_form'),
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -227,7 +244,8 @@
                var search_name = $('#search_name').val();
                var search_phone = $('#search_phone_number').val();
                var search_trax_id = $('#search_trax_id').val();
-               if(search_name == '' && search_phone == '' && search_trax_id == ''){
+               var search_city_id = $('#search_city').val();
+               if(search_name == '' && search_phone == '' && search_trax_id == '' && search_city_id == ''){
                    toastr.error("Provide atleast one parameter", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                }else{
                    $('.datatable_excel_btn').removeClass('d-none');
