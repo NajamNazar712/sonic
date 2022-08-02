@@ -257,7 +257,6 @@
                         <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
-                        <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Brand</th>
                         <th class="border-primary border-darken-1">Company</th>
@@ -487,7 +486,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Contact Person Name*" data-rule-required="true"  data-msg-required="Contact Person Name is required">
+                                    <input name="contact_person" id="add_name" class="form-control select2" placeholder="Full Name*" data-rule-required="true"  data-msg-required="Full Name is required">
                                 </div>
                             </div>
                             <div class="col-6">
@@ -535,12 +534,21 @@
 
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                    <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand*" data-rule-required="true"  data-msg-required="Brand is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="company" id="add_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                    <input type="text" class="form-control" name="company" id="add_company" placeholder="Company*" data-rule-required="true"  data-msg-required="Company Name is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="reference_id" id="reference_id" class="form-control select2" data-rule-required="true"  data-msg-required="Reference is required">
+                                        @foreach($lead_references as $references)
+                                            <option value="{{ $references->id }}"> {{ $references->name }} </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -576,15 +584,17 @@
                 <div class="modal-body text-center">
                     <table class="table table-bordered datatable text-center" id="lead_info_table">
                         <thead>
-                            <tr>
-                                <th>City</th>
-                                <th>Territory</th>
-                                <th>Area</th>
-                                <th>Phone Number</th>
-                                <th>Email</th>
-                                <th>Brand</th>
-                                <th>Company</th>
-                            </tr>
+                        <tr>
+                            <th>City</th>
+                            <th>Territory</th>
+                            <th>Area</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Brand</th>
+                            <th>Company</th>
+                            <th>Reference</th>
+
+                        </tr>
                         </thead>
                     </table>
 
@@ -626,12 +636,21 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="brand" id="edit_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                    <input type="text" class="form-control" name="brand" id="edit_brand" placeholder="Brand*" data-rule-required="true"  data-msg-required="Brand is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="company" id="edit_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                    <input type="text" class="form-control" name="company" id="edit_company" placeholder="Company*" data-rule-required="true"  data-msg-required="Company Name is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="edit_reference_id" id="edit_reference_id" class="form-control select2" data-rule-required="true"  data-msg-required="Reference is required">
+                                        @foreach($lead_references as $references)
+                                            <option value="{{ $references->id }}"> {{ $references->name }} </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -952,6 +971,16 @@
                 width: '100%'
             });
 
+            $("#reference_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reference*",
+                width: '100%'
+            });
+
+            $("#edit_reference_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reference*",
+                width: '100%'
+            });
+
             $("#search_sale_person").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Sale Person",
                 width: '100%'
@@ -1008,7 +1037,6 @@
                             head.push('Area');
                             head.push('Phone No');
                             head.push('Email Address');
-                            head.push('Message');
                             head.push('Service');
                             head.push('Brand');
                             head.push('Company');
@@ -1036,7 +1064,6 @@
                                 row.push(values.area);
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
-                                row.push(values.message);
                                 row.push(values.service);
                                 row.push(values.brand);
                                 row.push(values.company);
@@ -1196,7 +1223,7 @@
                     }
                 },
                 rowId: 'leadid',
-                order: [[14, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1207,7 +1234,6 @@
                     {data: 'area', name: 'at.name', class: 'align-middle area'},
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
-                    {data: 'message', name: 'leads.message', class: 'align-middle message'},
                     {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
                     {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
@@ -1960,7 +1986,7 @@
 
 
             $("#edit_territory").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Territory",
+                placeholder: "Select Territory*",
                 width: '100%'
             });
             $("#edit_area").prepend('<option value="" selected></option>').select2({
@@ -1992,7 +2018,7 @@
 
             $('#edit_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder:'Select City',
+                placeholder:'Select City*',
             }).bind('change', function () {
                 var id = $(this).val();
                 if(id) {
@@ -2036,26 +2062,26 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     })
-                    .done(function (data) {
+                        .done(function (data) {
 
-                        if (data.status == 0) {
+                            if (data.status == 0) {
 
-                            $('#edit_area').empty();
-                            $.each(data.area, function (key, value) {
-                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                $('#edit_area').append(newOption);
-                            });
-                            $('#edit_area').val(area).trigger('change');
-                        }
-                        else{
-                            $('#edit_area').empty();
-                            var error = 'No Area found for the selected Territory';
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
+                                $('#edit_area').empty();
+                                $.each(data.area, function (key, value) {
+                                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                    $('#edit_area').append(newOption);
+                                });
+                                $('#edit_area').val(area).trigger('change');
+                            }
+                            else{
+                                $('#edit_area').empty();
+                                var error = 'No Area found for the selected Territory';
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
                 }
 
             });
@@ -2085,28 +2111,31 @@
                     {name: 'email_address', class: 'align-middle destination', orderable: false, searchable: false},
                     {name: 'brand', class: 'align-middle amount', orderable: false, searchable: false},
                     {name: 'company', class: 'align-middle open_box', orderable: false, searchable: false},
+                    {name: 'reference', class: 'align-middle reference', orderable: false, searchable: false},
+
                 ],
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
             });
-            $('#datatable tbody').on('click', 'tr button.edit', function (){
-               var lead_id = parseInt($(this).parents('tr').attr('id'));
 
-               if(lead_id){
-                   $.ajax({
-                       url: "{{route('admin.leads.info')}}",
-                       method: 'POST',
-                       data: {
-                           'lead_id': lead_id,
-                           '_token': '{{ csrf_token() }}'
-                       }
-                   }).done(function (data) {
+            $('#datatable tbody').on('click', 'tr button.edit', function (){
+                var lead_id = parseInt($(this).parents('tr').attr('id'));
+
+                if(lead_id){
+                    $.ajax({
+                        url: "{{route('admin.leads.info')}}",
+                        method: 'POST',
+                        data: {
+                            'lead_id': lead_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
                         if(data.status == 0){
 
                             lead_table.clear();
                             var details = data.details;
-                            lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company]).node().id = lead_id;
+                            lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company,details.reference]).node().id = lead_id;
                             lead_table.draw(true);
                             if(details.city_id){
                                 $('#edit_city').val(details.city_id).trigger('change');
@@ -2127,20 +2156,21 @@
                             $('#edit_lead_form #edit_brand').val(details.brand);
                             $('#edit_lead_form #edit_company').val(details.company);
                             $('#edit_lead_form #edit_territory').trigger('change');
+                            $('#edit_lead_form #edit_reference_id').val(details.reference_id).trigger('change');
                             $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 
 
                         }
-                   });
-               }
-               else{
-                   var error = 'Invalid Lead ID!';
-                   toastr.error(error, 'Error!', {
-                       positionClass: 'toast-top-center',
-                       containerId: 'toast-top-center'
-                   });
-               }
+                    });
+                }
+                else{
+                    var error = 'Invalid Lead ID!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
             });
 
 

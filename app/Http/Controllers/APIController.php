@@ -5060,8 +5060,15 @@ class APIController extends Controller
                         $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
                     }
                     $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
-
-                    return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount]);
+                    $rider_id = $delivery_note->rider_id;
+                    $rider = Rider::where('id',$rider_id);
+                    if($rider->exists())
+                    {
+                        $rider = $rider->first();
+                        $rider_name = $rider->name;
+                        $rider_trax_id = $rider->trax_id;
+                    }
+                    return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'rider_name' => $rider_name, 'rider_trax_id' =>$rider_trax_id]);
                 }
                 else{
                     return response()->json(['status' => 0, 'message' => 'Delivery Note Not Found!']);

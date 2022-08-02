@@ -261,7 +261,17 @@ class AdminTrackingController extends Controller
                         $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                         $journey_details['user'] = $user;
                         $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
-                        $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+                        $received_or_refused_by = '';
+                        if($journey->received_or_refused_by){
+                            $received_or_refused_by = $journey->received_or_refused_by;
+                        }
+                        if($journey->cnic){
+                            $received_or_refused_by .= "|".$journey->cnic;
+                        }
+                        if($journey->relation){
+                            $received_or_refused_by .= "|".$journey->relation;
+                        }
+                        $journey_details['received_or_refused_by'] = $received_or_refused_by;
                         $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                         $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
@@ -1238,7 +1248,17 @@ class AdminTrackingController extends Controller
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
                             $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';;
-                            $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+                            $received_or_refused_by = '';
+                            if($journey->received_or_refused_by){
+                                $received_or_refused_by = $journey->received_or_refused_by;
+                            }
+                            if($journey->cnic){
+                                $received_or_refused_by .= "|".$journey->cnic;
+                            }
+                            if($journey->relation){
+                                $received_or_refused_by .= "|".$journey->relation;
+                            }
+                            $journey_details['received_or_refused_by'] = $received_or_refused_by;
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 

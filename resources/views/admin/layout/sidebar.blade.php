@@ -1165,7 +1165,7 @@
                         <li><a class="menu-item" href="{{route('admin.reports.rider_unresponsive_report.index')}}">Rider Unresponsive Report</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(780, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.reports.mms.index')}}">MMS</a></li>
+                            <li><a class="menu-item" href="{{route('admin.reports.mms.index')}}">MMS Report</a></li>
                         @endif
                     </ul>
                 </li>
