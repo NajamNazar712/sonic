@@ -25,7 +25,7 @@
                                         <div class="form-group">
 
                                             <div class="input-group">
-                                                <input type="number" name="debriefing_time" class="form-control bg-primary border-primary white rounded-right debriefing_time" min="1"  max="23" placeholder="Debriefing Time*" data-rule-required="true" data-msg-required="Debriefing Time is required" value="{{$time}}" >
+                                                <input type="text" name="debriefing_time" class="form-control border-primary rounded-right debriefing_time" min="1"  max="23" placeholder="Debriefing Time*" data-rule-required="true" data-msg-required="Debriefing Time is required" value="{{$time}}" >
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
@@ -50,10 +50,20 @@
     <script>
         $(document).ready(function() {
             $('#settings_form input.debriefing_time').inputmask({
-                
-                'allowMinus': false,
-                'allowPlus': false
-            });
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 1,
+            'min': 0,
+            'max': 23
+        });
+            // $('#settings_form input.debriefing_time').inputmask({
+            //     'max': 23,
+            //     'min': 1,
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
 
             $('#settings_form').validate({
                 errorClass: 'danger',
