@@ -605,6 +605,8 @@ class Permission
             'reports.mms.index' => 780,
             'reports.mms.list' => 780,
 
+            'reports.crm_agent_wise_report.index' => 784,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,

@@ -10569,6 +10569,8 @@ class AdminReportsController extends Controller
 
     public function crm_agent_wise_report_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),574);
+
         // $agents = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
         //     ->select('crm_agents.id as id', 'ad.name as name')
         //     ->get();
@@ -10581,9 +10583,9 @@ class AdminReportsController extends Controller
 
     public  function crm_agent_wise_report_list(Request $request)
     {
-        // if ($request->get('excel') && $request->get('excel') == true) {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 500);
-        // }
+         if ($request->get('excel') && $request->get('excel') == true) {
+             ActivityTrailController::createActivityTrailLog(Auth::id(), 575);
+         }
 
         $from = $request->search_date_from;
         $agent_id = $request->agent_id;

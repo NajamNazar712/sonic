@@ -213,6 +213,7 @@
                             scrollX: true, scrollY: '500px',
                             dom: '<"d-inline-block"><"pull-right"B>t',
                             buttons: [
+                                    @if (session('role_id') == 1 || in_array(784, session('permissions')))
                                 {
                                     extend: 'excelHtml5',
                                     footer: true,
@@ -233,6 +234,7 @@
                                     },
 
                                 },
+                                    @endif
                             ],
                             paging:false,
                             ordering: false,
