@@ -23,8 +23,10 @@ class AdminAPIToken
             $admin = Admin::where('api_token', $api_token);
 
             if ($admin->exists()) {
+                dd('ho');
                 $admin = $admin->first();
                 if ($admin->status) {
+                    dd('hp');
                     $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
                     if($employee->exists())
                     {
@@ -42,6 +44,7 @@ class AdminAPIToken
 
                 }
                 else {
+                    dd('hn');
                     return response()->json([
                         'status' => 2,
                         'message' => 'Your Account is not Activate.'
