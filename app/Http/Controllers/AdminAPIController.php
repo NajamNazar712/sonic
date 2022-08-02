@@ -4910,14 +4910,23 @@ class AdminAPIController extends Controller
 
                 //todo: now checking canceled shipment arrival
                 $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
-                if($user->shipper_status_id == 17)
+                if($user->exists())
                 {
-                    $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
-                    if($canceled_shipment)
+                    dd(hi);
+                    if($user->shipper_status_id == 17)
                     {
-                        return response()->json(['status' => 1, 'message' => 'Shipment is not allowed for arrival because shipper cancelled this shipment!']);
+                        $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                        if($canceled_shipment)
+                        {
+                            return response()->json(['status' => 1, 'message' => 'Shipment is not allowed for arrival because shipper cancelled this shipment!']);
+                        }
                     }
                 }
+                else
+                {
+                    dd('tata');
+                }
+
                 //todo: now checking canceled shipment arrival end
 
                 $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
