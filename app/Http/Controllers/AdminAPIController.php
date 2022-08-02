@@ -6264,8 +6264,6 @@ class AdminAPIController extends Controller
             }
             if ($request->has("city_id")) {
                 $admin_profile = $admin_profile->where('e.city_id', $request->city_id);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
             }
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->get();
