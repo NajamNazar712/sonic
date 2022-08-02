@@ -4915,10 +4915,11 @@ class AdminAPIController extends Controller
 
                     if($user->shipper_status_id == 17)
                     {
-                        dd('hi');
+
                         $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
                         if($canceled_shipment)
                         {
+                            dd('hi');
                             return response()->json(['status' => 1, 'message' => 'Shipment is not allowed for arrival because shipper cancelled this shipment!']);
                         }
                     }
