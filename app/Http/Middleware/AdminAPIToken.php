@@ -24,13 +24,13 @@ class AdminAPIToken
 
             if ($admin->exists()) {
                 $admin = $admin->first();
-                dd($admin);
+
                 if ($admin->status) {
-                    dd('hp');
+
                     $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
                     if($employee->exists())
                     {
-                        dd('hi');
+
                         $employee = $employee->first();
                         $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id]);
                         return $next($request);
@@ -44,7 +44,7 @@ class AdminAPIToken
 
                 }
                 else {
-                    dd('hn');
+                    
                     return response()->json([
                         'status' => 2,
                         'message' => 'Your Account is not Activate.'
