@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\PamLead;
 use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\LeadReference;
 use App\Http\Models\Admin\Territory;
 use App\Http\Models\City;
 use App\Models\Admin\Lead\LeadReason;
@@ -151,7 +152,9 @@ class LeadManagementController extends Controller
 
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
-        return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
+        $lead_references = LeadReference::select('id', 'name')->get();
+
+        return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates, 'lead_references' => $lead_references]);
     }
 
     public function list(Request $request)
@@ -264,7 +267,7 @@ class LeadManagementController extends Controller
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
-                if ((session('role_id') == 1 || in_array(696, session('permissions')))) {
+                if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id ,[9, 12]))))) {
                     $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 }
 
@@ -786,10 +789,19 @@ class LeadManagementController extends Controller
                 $details['area_id'] = $lead->territory_area_id;
             }
 
+            $details['reference'] = '';
+            $details['reference_id'] = '';
+            if($lead->reference_id){
+                $details['reference'] = LeadReference::find($lead->reference_id)->name;
+                $details['reference_id'] = $lead->reference_id;
+            }
+
+
             $details['phone_number'] = $lead->phone_number;
             $details['email_address'] = $lead->email_address;
             $details['brand'] = $lead->brand;
             $details['company'] = $lead->company;
+
             return response()->json(['status' => 0, 'details' => $details]);
         }
         else{
@@ -810,10 +822,11 @@ class LeadManagementController extends Controller
                 $lead->email_address = $request->email_address;
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
+                $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
                 $lead->save();
 
-                LeadTaggingController::auto_tagging($lead->id,386);
+                LeadTaggingController::auto_tagging($lead->id,Auth::id());
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');
@@ -832,11 +845,13 @@ class LeadManagementController extends Controller
             $new_lead->city_id = $request->city_id;
             $new_lead->requested_date = Carbon::now();
             $new_lead->service_id = $request->service_id;
-            $new_lead->reference_id = 7;
+            $new_lead->reference_id = $request->reference_id;
             $new_lead->territory_id = $request->territory_id;
             $new_lead->territory_area_id = $request->territory_area_id;
             $new_lead->brand = $request->brand;
             $new_lead->company = $request->company;
+            $new_lead->status_id = 1;
+            $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
             return redirect()->back()->with('success', 'Lead added successfully');

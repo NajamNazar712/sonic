@@ -307,9 +307,17 @@ class ShipperTrackingController extends Controller
                                 }else{
                                     $journey_details['status_remarks'] = '';
                                 }
-
-
-                                $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+                                $received_or_refused_by = '';
+                                if($journey->received_or_refused_by){
+                                    $received_or_refused_by = $journey->received_or_refused_by;
+                                }
+                                if($journey->cnic){
+                                    $received_or_refused_by .= "|".$journey->cnic;
+                                }
+                                if($journey->relation){
+                                    $received_or_refused_by .= "|".$journey->relation;
+                                }
+                                $journey_details['received_or_refused_by'] = $received_or_refused_by;
 //                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
                                 $details['tracking_history'][] = $journey_details;
@@ -593,9 +601,18 @@ class ShipperTrackingController extends Controller
                                     }else{
                                         $journey_details['status_remarks'] = '';
                                     }
-
-
-                                    $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+                                    
+                                    $received_or_refused_by = '';
+                                    if($journey->received_or_refused_by){
+                                        $received_or_refused_by = $journey->received_or_refused_by;
+                                    }
+                                    if($journey->cnic){
+                                        $received_or_refused_by .= "|".$journey->cnic;
+                                    }
+                                    if($journey->relation){
+                                        $received_or_refused_by .= "|".$journey->relation;
+                                    }
+                                    $journey_details['received_or_refused_by'] = $received_or_refused_by;
 //                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
                                     $details['tracking_history'][] = $journey_details;
