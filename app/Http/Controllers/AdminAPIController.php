@@ -6235,8 +6235,8 @@ class AdminAPIController extends Controller
     public function trax_directory_v2(Request $request)
     {
         $rules = [
-            'search_param' => ['required', 'min:3'],
-            'search_with' => ['required'],
+            'search_param' => ['nullable', 'min:3'],
+            'search_with' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
