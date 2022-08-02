@@ -4922,6 +4922,10 @@ class AdminAPIController extends Controller
                             dd('hi');
                             return response()->json(['status' => 1, 'message' => 'Shipment is not allowed for arrival because shipper cancelled this shipment!']);
                         }
+                        else
+                        {
+                            dd('tabah');
+                        }
                     }
                 }
                 else
