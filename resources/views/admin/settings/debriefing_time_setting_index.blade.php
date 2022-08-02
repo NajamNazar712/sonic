@@ -58,12 +58,7 @@
             'min': 0,
             'max': 23
         });
-            // $('#settings_form input.debriefing_time').inputmask({
-            //     'max': 23,
-            //     'min': 1,
-            //     'allowMinus': false,
-            //     'allowPlus': false
-            // });
+            
 
             $('#settings_form').validate({
                 errorClass: 'danger',
