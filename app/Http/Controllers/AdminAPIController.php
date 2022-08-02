@@ -6257,8 +6257,10 @@ class AdminAPIController extends Controller
             if ($request->search_with == 1) {
                 $admin_profile = $admin_profile->where('e.name', 'like', '%' . $request->search_param . '%');
             } elseif ($request->search_with == 2) {
-                $admin_profile = $admin_profile->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
-                    ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0));
+                $admin_profile = $admin_profile->where(function ($query) use ($request) {
+                    $query->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                        ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0));
+                });
             } elseif ($request->search_with == 3) {
                 $admin_profile = $admin_profile->where('e.trax_id', $request->search_param);
             }
