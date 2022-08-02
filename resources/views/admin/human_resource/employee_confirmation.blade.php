@@ -245,6 +245,7 @@
                     {data: 'approve_by_hod_at', name: 'employee_confirmations.approve_by_hod_at', class: 'align-middle approve_by_hod_at'},
                     {data: 'approve_by_hr', name: 'hr.name', class: 'align-middle approve_by_hr'},
                     {data: 'approve_by_hr_at', name: 'employee_confirmations.approve_by_hr_at', class: 'align-middle approve_by_hr_at'},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false }
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
