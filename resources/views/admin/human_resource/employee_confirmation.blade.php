@@ -106,17 +106,29 @@
                                         <th>Location</th>
                                         <th>Manager</th>
                                         <th>Review Period</th>
-
                                     </tr>
                                     </thead>
                                     <tbody>
-
                                     </tbody>
                                 </table>
                             </div>
 
                             <div class="row justify-content-center">
                                 <h4>Rating</h4>
+                            </div>
+                            <div class="row justify-content-center p-1">
+                                <table class="table table-sm table-bordered border employee_rating">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>1 - Poor</th>
+                                        <th>2 - Fair</th>
+                                        <th>3 - Satisfactory</th>
+                                        <th>4 - Good</th>
+                                        <th>5 - Excellent</th>
+                                    </tr>
+                                    </thead>
+                                </table>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -369,9 +381,9 @@
 
          /*   $('body').on('click', '#datatable .add_probation_form', function () {*/
             $('#datatable tbody').on('click','.add_probation_form', function() {
-                var trax_id = parseInt($(this).parents('tr').data('trax_id'));
+              
+                var trax_id =  $(this).closest('tr').find('.trax_id').text();
                 var id = parseInt($(this).parents('tr').attr('id'));
-                console.log(trax_id);
 
                 $.ajax({
                     url: '{!! route('admin.human_resource.employee_confirmation.get_info') !!}',
@@ -385,19 +397,19 @@
                        if(data.status == 1){
                            var html = $('.employee_information tbody');
                           /* html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';*/
-                           $.each(data.details, function(index, employee) {
+
                                html += '<tr>';
-                               html += '<td>'+ employee.name +'</td>';
-                               html += '<td>'+ employee.trax_id +'</td>';
-                               html += '<td>'+ employee.designation +'</td>';
-                               html += '<td>'+ employee.department +'</td>';
-                               html += '<td>'+ employee.city +'</td>';
-                               html += '<td>'+ employee.manager +'</td>';
-                               html += '<td>'+ employee.review_period +'</td>';
+                               html += '<td>'+ data.details.name +'</td>';
+                               html += '<td>'+ data.details.trax_id +'</td>';
+                               html += '<td>'+ data.details.designation +'</td>';
+                               html += '<td>'+ data.details.department +'</td>';
+                               html += '<td>'+ data.details.city +'</td>';
+                               html += '<td>'+ data.details.manager +'</td>';
+                               html += '<td>'+ data.details.review_period +'</td>';
                                html += '</tr>';
-                           });
+                       
                            //html += '</tbody></table>';
-                           $('#osa_modal .modal-body').html(html);
+                           $('#evaluation_modal .modal-body .employee_information tbody ').html(html);
                        }
                     });
 

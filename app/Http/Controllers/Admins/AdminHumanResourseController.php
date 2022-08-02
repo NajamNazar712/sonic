@@ -4918,11 +4918,10 @@ class AdminHumanResourseController extends Controller
     }
 
     public function get_employee_info(Request $request){
-        dd($request->trax_id);
+      
         $employee = Employee::where('trax_id',$request->trax_id);
         if($employee->exists()){
             $employee = $employee->first();
-            dd($employee);
             $details = array();
             $details['name'] = $employee->name;
             $details['trax_id'] = $employee->designation->name;
