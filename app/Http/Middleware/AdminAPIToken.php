@@ -23,7 +23,6 @@ class AdminAPIToken
             $admin = Admin::where('api_token', $api_token);
 
             if ($admin->exists()) {
-                dd('ho');
                 $admin = $admin->first();
                 if ($admin->status) {
                     dd('hp');
