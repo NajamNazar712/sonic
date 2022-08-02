@@ -6235,7 +6235,7 @@ class AdminAPIController extends Controller
     public function trax_directory_v2(Request $request)
     {
         $rules = [
-            'search_param' => ['nullable', 'min:3'],
+            'search_param' => ['nullable'],
             'search_with' => ['nullable'],
         ];
 
