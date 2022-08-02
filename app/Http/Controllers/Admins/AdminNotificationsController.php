@@ -747,10 +747,14 @@ class AdminNotificationsController extends Controller
 		else if ($id == 178)
         {
             $details['fields'] = ['name'];
-        }		else if ($id == 181)
+        }else if ($id == 181)
         {
             $details['fields'] = ['name','reason'];
-        }		return $details;
+        }else if ($id == 182)
+        {
+            $details['fields'] = ['link','emp_id','name','designation','joining_date'];
+        }		
+        return $details;
     }
 
     public function edit(Request $request) {

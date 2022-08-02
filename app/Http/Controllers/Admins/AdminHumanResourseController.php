@@ -4764,6 +4764,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_confirmation_index(){
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 572);
         
         $users = Admin::join('employees as e','e.trax_id','admins.trax_id')
