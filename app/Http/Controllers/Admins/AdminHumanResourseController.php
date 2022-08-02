@@ -4844,7 +4844,7 @@ class AdminHumanResourseController extends Controller
             })->editColumn('probation_form', function ($employee) {
                 if ($employee->probation_form == 0 && $employee->status_id == 1) {
 
-                    return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1"> Add </div></button>';
+                    return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1 pl-1"> Add </div></button>';
                 } else {
                     return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1"> View</div></button>';
                 }
@@ -4914,6 +4914,29 @@ class AdminHumanResourseController extends Controller
         
         
         return $datatable->make(true);
+    }
+
+    public function get_employee_info(Request $request){
+        dd($request->trax_id);
+        $employee = Employee::where('trax_id',$request->trax_id);
+        if($employee->exists()){
+            $employee = $employee->first();
+            dd($employee);
+            $details = array();
+            $details['name'] = $employee->name;
+            $details['trax_id'] = $employee->designation->name;
+            $details['designation'] = $employee->designation->name;
+            $details['department'] = $employee->department->name;
+            $details['city'] = $employee->department->name;
+            $details['manager'] = ($employee->line_manager_id != null) ? $employee->department->name:'-';
+            $employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id)->first();
+            $details['review_period'] = $employee->joining_date . ' - ' .$employee_confirmation->probation_end_date;
+
+            return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+        }
     }
 
 }

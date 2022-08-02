@@ -80,6 +80,51 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="evaluation_modal" data-backdrop="static" role="dialog" aria-labelledby="evaluation_modal" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="delivered_shipments_modal_title">Employee Evaluation</h4>
+
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div class="row justify-content-center">
+                                <h4>Employee Information</h4>
+                            </div>
+                            <div class="row justify-content-center p-1">
+                                <table class="table table-sm table-bordered border employee_information">
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Employee Id</th>
+                                        <th>Job Title</th>
+                                        <th>Department</th>
+                                        <th>Location</th>
+                                        <th>Manager</th>
+                                        <th>Review Period</th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <h4>Rating</h4>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -320,6 +365,47 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw(true);
             });
+
+         /*   $('body').on('click', '#datatable .add_probation_form', function () {*/
+            $('#datatable tbody').on('click','.add_probation_form', function() {
+                var trax_id = parseInt($(this).parents('tr').data('trax_id'));
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(trax_id);
+
+                $.ajax({
+                    url: '{!! route('admin.human_resource.employee_confirmation.get_info') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'trax_id': trax_id
+                    }
+                })
+                    .done(function(data) {
+                       if(data.status == 1){
+                           var html = $('.employee_information tbody');
+                          /* html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';*/
+                           $.each(data.details, function(index, employee) {
+                               html += '<tr>';
+                               html += '<td>'+ employee.name +'</td>';
+                               html += '<td>'+ employee.trax_id +'</td>';
+                               html += '<td>'+ employee.designation +'</td>';
+                               html += '<td>'+ employee.department +'</td>';
+                               html += '<td>'+ employee.city +'</td>';
+                               html += '<td>'+ employee.manager +'</td>';
+                               html += '<td>'+ employee.review_period +'</td>';
+                               html += '</tr>';
+                           });
+                           //html += '</tbody></table>';
+                           $('#osa_modal .modal-body').html(html);
+                       }
+                    });
+
+                $('#evaluation_modal').modal('show');
+            });
+
+
+
+
         });
     </script>
 
