@@ -4910,7 +4910,7 @@ class AdminAPIController extends Controller
 
                 //todo: now checking canceled shipment arrival
                 $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
-                if($user->exists())
+                if($user)
                 {
                     if($user->shipper_status_id == 17)
                     {
