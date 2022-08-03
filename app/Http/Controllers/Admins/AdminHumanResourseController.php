@@ -4764,6 +4764,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_confirmation_index(){
+
         
         ActivityTrailController::createActivityTrailLog(Auth::id(), 572);
         
@@ -4799,22 +4800,22 @@ class AdminHumanResourseController extends Controller
             ->join('employee_confirmation_statuses as sn', 'sn.id', 'employee_confirmations.status')
             ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'a.joining_date',  'a.cnic as cnic', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.increment as increment', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'lm.name as approve_by_lm', 'hod.name as approve_by_hod', 'hr.name as approve_by_hr', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','employee_confirmations.probation_form','a.line_manager_id as line_manager_id','a.confirmation_status as confirmation_status');
 
-            // $employee_confirmation->where(function ($query) use ($emp_id) {
-            //     if($emp_id){
-            //         $query->where('a.trax_id', Auth::user()->trax_id)
-            //         ->orWhere('a.line_manager_id', $emp_id);
-            //     }else{
-            //         $query->where('a.trax_id', Auth::user()->trax_id);
-            //     }
-            // })->orWhere(function ($query){
-            //     $query->whereIn('sn.id',[2,4,5])
-            //         ->where('ad.department_head_id', Auth::user()->id);
-            // })
-            // ->orWhere(function ($query){
-            //     if ((in_array(session('role_id'), [63, 69, 70]))) {
-            //         $query->whereIn('sn.id',[2,4,6,7]);
-            //     }
-            // });
+            $employee_confirmation->where(function ($query) use ($emp_id) {
+                if($emp_id){
+                    $query->where('a.trax_id', Auth::user()->trax_id)
+                    ->orWhere('a.line_manager_id', $emp_id);
+                }else{
+                    $query->where('a.trax_id', Auth::user()->trax_id);
+                }
+            })->orWhere(function ($query){
+                $query->whereIn('sn.id',[2,4,5])
+                    ->where('ad.department_head_id', Auth::user()->id);
+            })
+            ->orWhere(function ($query){
+                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                    $query->whereIn('sn.id',[2,4,6,7]);
+                }
+            });
 
             if ($search_admin = $request->get('search_admin')) {
                 $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
@@ -4861,8 +4862,8 @@ class AdminHumanResourseController extends Controller
                             $emp_id = $emp_id->first();
                             if ($employee->line_manager_id == $emp_id->id) {
 
-                                $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
-                                $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item approve_lm" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item reject_lm" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                                 
                                 $dropdown .= '
@@ -4878,8 +4879,8 @@ class AdminHumanResourseController extends Controller
                 elseif ($employee->status_id == 4) {
                     if ((in_array(session('role_id'), [63, 69, 70]))) {
 
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item approve_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item reject_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel=""><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                         $dropdown .= '
@@ -4894,8 +4895,8 @@ class AdminHumanResourseController extends Controller
 
                         if ($employee->department_head == Auth::id()) {
 
-                            $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item approve_hod" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject_hod" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel=""><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                             $dropdown .= '
@@ -4915,6 +4916,49 @@ class AdminHumanResourseController extends Controller
         
         
         return $datatable->make(true);
+    }
+
+    public function employee_confirmation_edit(Request $request){
+        $employee_confirmation = EmployeeConfirmation::find($request->confirmation_id);
+        if($employee_confirmation){
+            if($request->probation_extention == 'on'){
+                $employee_confirmation->probation_end_date = $request->probation_end_date;
+            }
+
+            $employee_confirmation->approve_reason = $request->add_reason;
+            $employee_confirmation->save();
+
+            return redirect()->back()->with('success', 'Employee Probation Edit Successfully');
+
+        }else{
+            return redirect()->back()->with('error', 'Employee Probation Not Found');
+
+        }
+    }
+
+    public function employee_confirmation_reject(Request $request){
+
+        $employee_confirmation = EmployeeConfirmation::find($request->reject_confirmation_id);
+        if($employee_confirmation){
+            if($request->reject_by == 'lm'){
+                $employee_confirmation->status = 3;
+            }
+            if($request->reject_by == 'hod'){
+                $employee_confirmation->status = 5;
+            }
+            if($request->reject_by == 'hr'){
+                $employee_confirmation->status = 7;
+            }
+
+            $employee_confirmation->reject_reason = $request->reject_reason;
+            $employee_confirmation->save();
+
+            return redirect()->back()->with('success', 'Employee Probation Rejected Successfully');
+
+        }else{
+            return redirect()->back()->with('error', 'Employee Probation Not Found');
+
+        }
     }
 
 }

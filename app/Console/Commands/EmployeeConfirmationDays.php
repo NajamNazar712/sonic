@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeConfirmation;
+use App\Mail\Notifications;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -46,12 +48,17 @@ class EmployeeConfirmationDays extends Command
             foreach ($employees as $employee) {
                 $now = Carbon::now();
                 $difference = $now->diffInDays($employee->joining_date);
-                if($difference >= 85) {
+                if($difference == 85) {
                     $check_employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id);
                     if(!$check_employee_confirmation->exists()){
+                        
+                        $probation_end_date = Carbon::today()->addDays(5)->toDateString();
                         $employee_confirmation = new EmployeeConfirmation();
                         $employee_confirmation->employee_id = $employee->id;
+                        $employee_confirmation->probation_end_date = $probation_end_date;
                         $employee_confirmation->save();
+
+                        NotificationsController::send(182,$employee->id);
                     }
                 }
             }

@@ -9502,18 +9502,40 @@ else if ($id == 178) {
                     self::sms($body, $to);
                 }
 				else if ($id == 182) {
-				$detail = $reference_1_id;
 
-                    if (strpos($body, '[name]') !== FALSE) {
-                        $body = str_replace('[name]', $detail['name'], $body);
+                    $employee = Employee::find($reference_1_id);
+                    if($employee){
+                        $link = route('admin.human_resource.employee_confirmation.index');
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        if (strpos($body, '[emp_id]') !== FALSE) {
+                            $body = str_replace('[emp_id]', $employee->trax_id, $body);
+                        }
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $employee->name, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $employee->designation->name, $body);
+                        }
+                        if (strpos($body, '[joining_date]') !== FALSE) {
+                            $body = str_replace('[joining_date]', $employee->joining_date, $body);
+                        }
+
+                        if (strpos($subject, '[emp_id]') !== FALSE) {
+                            $subject = str_replace('[emp_id]', $employee->trax_id, $subject);
+                        }
+
+                        if (strpos($subject, '[name]') !== FALSE) {
+                            $subject = str_replace('[name]', $employee->name, $subject);
+                        }
+
+                        $to = ['asd@trax.pk','zxc@trax.pk'];
+
+                        self::email($subject, $body, $to);
                     }
 
-                    if (strpos($body, '[reason]') !== FALSE) {
-                        $body = str_replace('[reason]', $detail['reason'], $body);
-                    }
-                    $phone_number = $detail['contact_number'];
-                    $to = $phone_number;
-                    self::sms($body, $to);
                 }
             }
         }

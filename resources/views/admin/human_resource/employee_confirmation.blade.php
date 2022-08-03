@@ -82,6 +82,170 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="editEmployeeConfirmationModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="editEmployeeConfirmationModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Edit Employee Confirmation</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_confirmation.edit')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="editConfirmationForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="confirmation_id" id="confirmation_id">
+                        <div class="row mb-2 justify-content-center">
+                           
+                            
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="employee_name">Employee Name</label>
+                                  <input type="text" class="form-control" id="employee_name" name="employee_name" disabled>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="employee_id">Employee Id</label>
+                                  <input type="text" class="form-control" id="employee_id" name="employee_id" disabled>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="designation">Designation</label>
+                                  <input type="text" class="form-control" id="designation" name="designation" disabled>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="designation">Department</label>
+                                  <input type="text" class="form-control" id="department" name="department" disabled>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                    <h2 for="">Probation Extention</h2>
+                                   
+                            </div> 
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <input type="checkbox" name="probation_extention" id="probation_extention"
+                                    class="switchery probation_extention" data-size="md" data-switchery="true">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="designation">Date of Joining</label>
+                                  <input type="text" class="form-control" id="joining_date" name="joining_date" disabled>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="designation">Date of Probation</label>
+                                  <input type="text" class="form-control" id="probation_end_date" name="probation_end_date"  data-rule-required="true" data-msg-required="Date of Probation is required">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">Reason</label>
+                                    <input type="text" name="add_reason" id="add_reason"
+                                    class="form-control">
+                                </div>
+                            </div>
+                          
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width">Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="rejectEmployeeConfirmationModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="rejectEmployeeConfirmationModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Reject</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_confirmation.reject')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectConfirmationForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="reject_confirmation_id" id="reject_confirmation_id">
+                        <input type="hidden" name="reject_by" id="reject_by">
+
+                        <div class="row mb-2 justify-content-center">
+                           
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">Reason</label>
+                                    <textarea class="form-control" name="reject_reason" id="reject_reason" cols="30" rows="10" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                   
+                                </div>
+                            </div>
+                          
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width">Reject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="approveEmployeeConfirmationModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="approveEmployeeConfirmationModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Approve</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_confirmation.reject')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectConfirmationForm"
+                          novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="reject_confirmation_id" id="reject_confirmation_id">
+                        <input type="hidden" name="reject_by" id="reject_by">
+
+                        <div class="row mb-2 justify-content-center">
+                           
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">Reason</label>
+                                    <textarea class="form-control" name="reject_reason" id="reject_reason" cols="30" rows="10" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                                   
+                                </div>
+                            </div>
+                          
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width">Approve
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -108,26 +272,23 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#probation_end_date').attr('disabled', true);
+
+            
+
+
             $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Staff',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
-                width:'100%',
-                allowClear:true
-            });
+        
             $('#search_trax_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Employee ID',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search CNIC',
-                width:'100%',
-                allowClear:true
-            });
+         
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -320,6 +481,175 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw(true);
+            });
+            $('body').on('click', '.edit', function (e) {
+                var id = $(this).data('target-id');
+
+                var employee_name = table.row($(this).parents('tr')).data().name;
+                var emp_id = table.row($(this).parents('tr')).data().trax_id;
+                var designation = table.row($(this).parents('tr')).data().designation;
+                var department = table.row($(this).parents('tr')).data().department;
+                var joining_date = table.row($(this).parents('tr')).data().joining_date;
+                var probation_end_date = table.row($(this).parents('tr')).data().probation_end_date;
+                $('#confirmation_id').val(id);
+                $('#employee_name').val(employee_name);
+                $('#employee_id').val(emp_id);
+                $('#designation').val(designation);
+                $('#department').val(department);
+                $('#joining_date').val(joining_date);
+                $('#probation_end_date').val(probation_end_date);
+                
+                // $('#edit_reason').val(reason);
+                // $('#edit_leave_type').val(leave_type_id).trigger('change');
+                
+                $('#editEmployeeConfirmationModal').modal('show');
+            });
+
+            $("#probation_extention").on('change', function () {
+               
+                if (this.checked == true) {
+
+                    $('#probation_end_date').attr('disabled', false);
+                }else{
+                    $('#probation_end_date').attr('disabled', true);
+
+                }
+                $('#probation_end_date').pickadate({
+                    firstDay: 1,
+                    format:'yyyy-mm-dd',
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd',
+                    hiddenSuffix: '_formatted',
+                    // min: '{{ Carbon\Carbon::now()}}',
+
+                });
+            });
+
+            $("#editConfirmationForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Probation is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+            $("#rejectConfirmationForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Reject Confirmation!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
+            
+
+
+            $('body').on('click', '.reject_lm', function (e) {
+                var id = $(this).data('target-id');
+                $('#reject_confirmation_id').val(id);
+                $('#reject_by').val('lm');
+                
+                $('#rejectEmployeeConfirmationModal').modal('show');
+            });
+            $('body').on('click', '.reject_hod', function (e) {
+                var id = $(this).data('target-id');
+                $('#confirmation_id').val(id);
+                $('#reject_by').val('hod');
+                
+                $('#rejectEmployeeConfirmationModal').modal('show');
+            });
+            $('body').on('click', '.reject_hr', function (e) {
+                var id = $(this).data('target-id');
+                $('#confirmation_id').val(id);
+                $('#reject_by').val('hr');
+                
+                $('#rejectEmployeeConfirmationModal').modal('show');
+            });
+            
+            $('#rejectEmployeeConfirmationModal').on('hide.bs.modal', function () {
+                $('#confirmation_id').val('');
+                $('#reject_by').val('');
+                $('#reject_reason').val('');
+            });
+            $('#editEmployeeConfirmationModal').on('hide.bs.modal', function () {
+                $('#confirmation_id').val('');
+                $('#employee_name').val('');
+                $('#employee_id').val('');
+                $('#designation').val('');
+                $('#department').val('');
+                $('#joining_date').val('');
+                $('#probation_end_date').val('');
+                $('#add_reason').val('');
+                
+            });
+
+            
+            $('body').on('click', '.approve_lm', function (e) {
+                var id = $(this).data('target-id');
+                $('#reject_confirmation_id').val(id);
+                $('#reject_by').val('lm');
+                
+                $('#approveEmployeeConfirmationModal').modal('show');
+            });
+            $('body').on('click', '.approve_hod', function (e) {
+                var id = $(this).data('target-id');
+                $('#confirmation_id').val(id);
+                $('#reject_by').val('hod');
+                
+                $('#approveEmployeeConfirmationModal').modal('show');
+            });
+            $('body').on('click', '.approve_hr', function (e) {
+                var id = $(this).data('target-id');
+                $('#confirmation_id').val(id);
+                $('#reject_by').val('hr');
+                
+                $('#approveEmployeeConfirmationModal').modal('show');
+            });
+            
+            $('#approveEmployeeConfirmationModal').on('hide.bs.modal', function () {
+                $('#confirmation_id').val('');
+                $('#reject_by').val('');
+                $('#reject_reason').val('');
             });
         });
     </script>

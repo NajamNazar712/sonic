@@ -3950,6 +3950,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@employee_confirmation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_confirmation_list')->name('list');
+            Route::post('edit', 'Admins\AdminHumanResourseController@employee_confirmation_edit')->name('edit');
+            Route::post('reject', 'Admins\AdminHumanResourseController@employee_confirmation_reject')->name('reject');
         });
     });
 
