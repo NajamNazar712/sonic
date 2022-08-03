@@ -3427,8 +3427,9 @@ class AdminReportsController extends Controller
         })
         ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
             $join->on('sjr.shipment_id', '=', 'shipments.id')
+                ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
                 ->where('sjr.id','=',
-                    DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60))'));
+                    DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
         ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
