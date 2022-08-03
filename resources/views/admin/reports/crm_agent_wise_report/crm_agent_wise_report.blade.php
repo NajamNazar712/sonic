@@ -129,6 +129,7 @@
             $("#agent_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
+                allowClear: true,
                 containerCssClass: 'select-md',
                 dropdownCssClass: 'form-control-sm p-0'
             });
