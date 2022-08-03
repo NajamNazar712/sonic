@@ -21,6 +21,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -4892,11 +4893,11 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-
             return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
+
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -4906,6 +4907,22 @@ class AdminAPIController extends Controller
 
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
+
+                //todo: now checking canceled shipment arrival
+                $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+                if($user)
+                {
+                    if($user->shipper_status_id == 17)
+                    {
+                        $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                        if($canceled_shipment)
+                        {
+                            return response()->json(false);
+                        }
+                    }
+                }
+                //todo: now checking canceled shipment arrival end
+
                 $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
                 if (!$dispute_check) {
                     return response()->json(false);
