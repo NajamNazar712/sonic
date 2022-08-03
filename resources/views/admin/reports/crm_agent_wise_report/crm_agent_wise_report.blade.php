@@ -240,7 +240,7 @@
                             paging:false,
                             ordering: false,
                             columns: [
-                                {name: 'serial_number', class: 'align-middle serial_number'},
+                                {name: 'serial_number', class: 'align-middle serial_number',orderable: true},
                                 {name: 'agent', class: 'align-middle agent'},
                                 {name: 'pending', class: 'align-middle pending'},
                                 {name: 'new_assign', class: 'align-middle new_assign'},
