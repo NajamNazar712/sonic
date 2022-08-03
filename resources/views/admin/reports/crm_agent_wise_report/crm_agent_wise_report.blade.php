@@ -189,9 +189,9 @@
                             console.log(details);
                             counter++;
                             shipment += '<tr><td class="align-middle serial_number">'+counter+'</td>';
-                            shipment += '<td class="align-middle serial_number">'+details.name+'</td>';
+                            shipment += '<td class="align-middle agent">'+details.name+'</td>';
                             shipment += '<td class="align-middle pending">'+details.pending+'</td>';
-                            shipment += '<td class="align-middle new_launched">'+details.new_assign+'</td>';
+                            shipment += '<td class="align-middle new_assign">'+details.new_assign+'</td>';
                             shipment += '<td class="align-middle total">'+details.total+'</td>';
                             shipment += '<td class="align-middle closed">'+details.closed+'</td>';
                             shipment += '<td class="align-middle remaining">'+(details.total - details.closed)+'</td>';
@@ -241,9 +241,9 @@
                             ordering: false,
                             columns: [
                                 {name: 'serial_number', class: 'align-middle serial_number'},
-                                {name: 'date', class: 'align-middle date'},
+                                {name: 'agent', class: 'align-middle agent'},
                                 {name: 'pending', class: 'align-middle pending'},
-                                {name: 'new_launched', class: 'align-middle new_launched'},
+                                {name: 'new_assign', class: 'align-middle new_assign'},
                                 {name: 'total', class: 'align-middle total'},
                                 {name: 'closed', class: 'align-middle closed'},
                                 {name: 'remaining', class: 'align-middle remaining'},
