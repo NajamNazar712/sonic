@@ -27,6 +27,7 @@ use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeConfirmationRating;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDesignationHub;
 use App\Http\Models\HR\EmployeeDesignationLog;
@@ -4845,7 +4846,7 @@ class AdminHumanResourseController extends Controller
             })->editColumn('probation_form', function ($employee) {
                 if ($employee->probation_form == 0 && $employee->status_id == 1) {
 
-                    return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1 pl-1"> Add </div></button>';
+                    return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div></button>';
                 } else {
                     return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1"> View</div></button>';
                 }
@@ -4924,10 +4925,10 @@ class AdminHumanResourseController extends Controller
             $employee = $employee->first();
             $details = array();
             $details['name'] = $employee->name;
-            $details['trax_id'] = $employee->designation->name;
+            $details['trax_id'] = $employee->trax_id;
             $details['designation'] = $employee->designation->name;
             $details['department'] = $employee->department->name;
-            $details['city'] = $employee->department->name;
+            $details['city'] = $employee->city->name;
             $details['manager'] = ($employee->line_manager_id != null) ? $employee->department->name:'-';
             $employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id)->first();
             $details['review_period'] = $employee->joining_date . ' - ' .$employee_confirmation->probation_end_date;
@@ -4936,6 +4937,34 @@ class AdminHumanResourseController extends Controller
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+        }
+    }
+
+    public function submit_employee_rating(Request $request){
+
+        if($request->has('employee_confirmation_id')){
+           $rating = new EmployeeConfirmationRating();
+           $rating->employee_confirmation_id = $request->employee_confirmation_id;
+           $rating->job = $request->job_knowledge;
+           $rating->job_comments = $request->job_comments;
+           $rating->quality = $request->work_quality;
+           $rating->quality_comments = $request->quality_comment;
+           $rating->attendance = $request->attendance;
+           $rating->attendance_comments = $request->attendance_comment;
+           $rating->initiative = $request->initiative;
+           $rating->initiative_comments = $request->initiative_comment;
+           $rating->communication = $request->communication;
+           $rating->communication_comments = $request->communication_comment;
+           $rating->dependability = $request->dependability;
+           $rating->dependability_comments = $request->dependability_comment;
+           $rating->overall_rating = $request->rating_comment;
+           $rating->evaluation_comments = $request->evaluation_comment;
+           $rating->added_by = Auth::id();
+           $rating->save();
+            return redirect()->back()->with(['success' => 'Rating added successfully']);
+        }
+        else{
+            return redirect()->back()->with(['error' => 'No Data Found']);
         }
     }
 
