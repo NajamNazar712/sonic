@@ -3671,7 +3671,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('received_or_refused_by', function ($sale) {
-                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25, 22, 23, 24, 44, 47, 48, 57, 60])) {
                     $received_or_refused_by = '';
                     if($sale->received_or_refused_by){
                         $received_or_refused_by = $sale->received_or_refused_by;
