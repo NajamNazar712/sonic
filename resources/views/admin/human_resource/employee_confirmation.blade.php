@@ -80,6 +80,156 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="evaluation_modal" data-backdrop="static" role="dialog" aria-labelledby="evaluation_modal" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="delivered_shipments_modal_title">Employee Evaluation</h4>
+
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <form id="employee_rating_form" method="post" action="{{route('admin.human_resource.employee_confirmation.rating')}}">
+                        <div class="modal-body text-center">
+                            <div class="row justify-content-center">
+                                <h4>Employee Information</h4>
+                            </div>
+                                @csrf
+                            <input type="hidden" name="employee_confirmation_id" id="employee_confirmation_id">
+                                <div class="row justify-content-center p-1">
+                                    <table class="table table-sm table-bordered border employee_information">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Employee Id</th>
+                                            <th>Job Title</th>
+                                            <th>Department</th>
+                                            <th>Location</th>
+                                            <th>Manager</th>
+                                            <th>Review Period</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <h4>Rating</h4>
+                                </div>
+
+                                <div class="row justify-content-center p-1">
+                                        <table class="table table-sm table-bordered border employee_rating">
+                                            <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>1 - Poor</th>
+                                                <th>2 - Fair</th>
+                                                <th>3 - Satisfactory</th>
+                                                <th>4 - Good</th>
+                                                <th>5 - Excellent</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Job Knowledge</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" name="job_knowledge" class="job_knowledge"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" name="job_knowledge" class="job_knowledge"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" name="job_knowledge" class="job_knowledge"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" name="job_knowledge" class="job_knowledge"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" name="job_knowledge" class="job_knowledge"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="job_comments"></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Work Quality</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="work_quality" name="work_quality" ></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="work_quality" name="work_quality" ></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="work_quality" name="work_quality" ></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="work_quality" name="work_quality" ></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="work_quality" name="work_quality" ></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="quality_comment"></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Attendance</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" name="attendance" class="attendance"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" name="attendance" class="attendance"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" name="attendance" class="attendance"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" name="attendance" class="attendance"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" name="attendance" class="attendance"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="attendance_comment"></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Initiative</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="initiative" name="initiative"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="initiative" name="initiative"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="initiative" name="initiative"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="initiative" name="initiative"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="initiative" name="initiative"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="initiative_comment"></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Communication</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="communication" name="communication"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="communication" name="communication"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="communication" name="communication"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="communication" name="communication"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="communication" name="communication"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="communication_comment"></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Dependability</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="dependability" name="dependability"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="dependability" name="dependability"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="dependability" name="dependability"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="dependability" name="dependability"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="dependability" name="dependability"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" name="dependability_comment"></textarea></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Overall Rating</strong></td>
+                                                    <td colspan="5">
+                                                        <div class="form-group">
+                                                            <input class="form-control input-lg rating_comment" type="text" name="rating_comment">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="justify-content-center">
+                                                    <td><strong>Evaluation</strong></td>
+                                                    <td colspan="5"><textarea class="w-100" name="evaluation_comment"></textarea></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
     <div class="modal fade text-left" id="editEmployeeConfirmationModal" data-backdrop="static" tabindex="-1" role="dialog"
@@ -290,6 +440,17 @@
             });
          
 
+
+            $('.rating_comment').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 200
+            });
+
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -387,7 +548,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     
-                    {data: 'probation_form', name: 'probation_form', class: 'align-middle probation_form', searchable: false},
+                    {data: 'probation_form', name: 'probation_form', class: 'text-center probation_form', searchable: false},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
@@ -536,6 +697,76 @@
                     swal({
                         title: 'Please Wait!',
                         text: 'Probation is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+            $('#datatable tbody').on('click','.add_probation_form', function() {
+              
+              var trax_id =  $(this).closest('tr').find('.trax_id').text();
+              var id = parseInt($(this).parents('tr').attr('id'));
+              $('#employee_confirmation_id').val(id);
+
+              $.ajax({
+                  url: '{!! route('admin.human_resource.employee_confirmation.get_info') !!}',
+                  method: 'POST',
+                  data: {
+                      '_token': '{{ csrf_token() }}',
+                      'trax_id': trax_id
+                  }
+              })
+                  .done(function(data) {
+                     if(data.status == 1){
+                         var html = $('.employee_information tbody');
+                        /* html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';*/
+
+                             html += '<tr>';
+                             html += '<td>'+ data.details.name +'</td>';
+                             html += '<td>'+ data.details.trax_id +'</td>';
+                             html += '<td>'+ data.details.designation +'</td>';
+                             html += '<td>'+ data.details.department +'</td>';
+                             html += '<td>'+ data.details.city +'</td>';
+                             html += '<td>'+ data.details.manager +'</td>';
+                             html += '<td>'+ data.details.review_period +'</td>';
+                             html += '</tr>';
+
+                         $('#evaluation_modal .modal-body .employee_information tbody ').html(html);
+                     }
+                  });
+
+              $('#evaluation_modal').modal('show');
+          });
+          
+          $('#employee_rating_form').validate({
+              ignore: [],
+              errorClass: 'danger',
+              successClass: 'success',
+              normalizer: function(value) {
+                  return $.trim(value);
+              },
+              submitHandler: function(form) {
+
+                  if (($('.job_knowledge').filter(':checked').length < 1) || ($('.work_quality').filter(':checked').length < 1) || ($('.attendance').filter(':checked').length < 1) || ($('.initiative').filter(':checked').length < 1)|| ($('.communication').filter(':checked').length < 1) || ($('.dependability').filter(':checked').length < 1) ){
+                     var error = "Please Check at least one rating for each row";
+                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      return false;
+                  }
+                  else if($('.rating_comment').val() == '' || $('.rating_comment').val() == null ){
+                      var error = "Overall rating required";
+                      toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      return false;
+                  }
+
+                  $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                  swal({
+                      title: 'Please Wait!',
+                      text: 'Rating is being added!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

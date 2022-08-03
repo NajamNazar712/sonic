@@ -3952,6 +3952,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@employee_confirmation_list')->name('list');
             Route::post('edit', 'Admins\AdminHumanResourseController@employee_confirmation_edit')->name('edit');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_confirmation_reject')->name('reject');
+            Route::post('get_info', 'Admins\AdminHumanResourseController@get_employee_info')->name('get_info');
+            Route::post('submit', 'Admins\AdminHumanResourseController@submit_employee_rating')->name('rating');
         });
     });
 
