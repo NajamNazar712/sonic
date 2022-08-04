@@ -5079,34 +5079,27 @@ class AdminHumanResourseController extends Controller
     }
 
     public function view_employee_confirmation(Request $request){
-        $employee = Employee::where('trax_id',$request->trax_id);
-        if($employee->exists()){
-            $employee = $employee->first();
-            $details = array();
-            $details['name'] = $employee->name;
-            $details['trax_id'] = $employee->trax_id;
-            $details['designation'] = $employee->designation->name;
-            $details['department'] = $employee->department->name;
-            $details['city'] = $employee->city->name;
-            $details['manager'] = ($employee->line_manager_id != null) ? $employee->department->name:'-';
-            $employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id)->first();
-            $details['review_period'] = $employee->joining_date . ' - ' .$employee_confirmation->probation_end_date;
+        $employee_confirmation = EmployeeConfirmation::find($request->confirmation_id);
+        if($employee_confirmation){
+            $employee = Employee::find($employee_confirmation->employee_id);
+            if($employee){
+                $details = array();
+                $details['name'] = $employee->name;
+                $details['trax_id'] = $employee->trax_id;
+                $details['designation'] = $employee->designation->name;
+                $details['department'] = $employee->department->name;
+                $details['city'] = $employee->city->name;
+                $details['manager'] = ($employee->line_manager_id != null) ? $employee->department->name:'-';
+                $details['review_period'] = $employee->joining_date . ' - ' .$employee_confirmation->probation_end_date;
+                $details['rating'] = $employee_confirmation->employee_confirmation_rating;
+                
 
-
-            $confirmation = EmployeeConfirmation::where('employee_id',$employee->id);
-            if($confirmation->exists()){
-                $confirmation = $employee_confirmation->latest()->first();
-                $rating = $confirmation->employee_confirmation;
-                dd($rating);
-
-
+    
+    
+                return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
             }
-            else{
-                return response()->json(['status' => 0, 'error' => 'Employee not found!']);
-            }
-
-            return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
         }
+        
         else{
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
         }

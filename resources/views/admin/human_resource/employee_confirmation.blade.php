@@ -230,6 +230,156 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="view_evaluation_modal" data-backdrop="static" role="dialog" aria-labelledby="view_evaluation_modal" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="delivered_shipments_modal_title">Employee Evaluation</h4>
+
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <form id="employee_rating_form" method="post" action="">
+                        <div class="modal-body text-center">
+                            <div class="row justify-content-center">
+                                <h4>Employee Information</h4>
+                            </div>
+                                @csrf
+                            <input type="hidden" name="employee_confirmation_id" id="employee_confirmation_id">
+                                <div class="row justify-content-center p-1">
+                                    <table class="table table-sm table-bordered border employee_information">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Employee Id</th>
+                                            <th>Job Title</th>
+                                            <th>Department</th>
+                                            <th>Location</th>
+                                            <th>Manager</th>
+                                            <th>Review Period</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <h4>Rating</h4>
+                                </div>
+
+                                <div class="row justify-content-center p-1">
+                                        <table class="table table-sm table-bordered border employee_rating">
+                                            <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>1 - Poor</th>
+                                                <th>2 - Fair</th>
+                                                <th>3 - Satisfactory</th>
+                                                <th>4 - Good</th>
+                                                <th>5 - Excellent</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Job Knowledge</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" name="job_knowledge" class="view_job_knowledge" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" name="job_knowledge" class="view_job_knowledge" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" name="job_knowledge" class="view_job_knowledge" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" name="job_knowledge" class="view_job_knowledge" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" name="job_knowledge" class="view_job_knowledge" onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_job_comments" name="view_job_comments" readonly></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Work Quality</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="view_work_quality" name="work_quality"  onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="view_work_quality" name="work_quality"  onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="view_work_quality" name="work_quality"  onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="view_work_quality" name="work_quality" onclick="return false;" ></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="view_work_quality" name="work_quality"  onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_quality_comment" name="view_quality_comment" readonly></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Attendance</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" name="attendance" class="view_attendance" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" name="attendance" class="view_attendance" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" name="attendance" class="view_attendance" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" name="attendance" class="view_attendance" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" name="attendance" class="view_attendance" onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_attendance_comment"  name="view_attendance_comment" readonly></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Initiative</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="view_initiative" name="initiative" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="view_initiative" name="initiative" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="view_initiative" name="initiative" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="view_initiative" name="initiative" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="view_initiative" name="initiative" onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_initiative_comment" name="view_initiative_comment" readonly></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Communication</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="view_communication" name="communication" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="view_communication" name="communication" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="view_communication" name="communication" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="view_communication" name="communication" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="view_communication" name="communication" onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_communication_comment" name="view_communication_comment" readonly></textarea></td>
+                                                </tr>
+                                                <tr class="justify-content-center p-1">
+                                                    <td><strong>Dependability</strong></td>
+                                                    <td class="p-1"> <input type="radio" value="1" class="view_dependability" name="dependability" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="2" class="view_dependability" name="dependability" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="3" class="view_dependability" name="dependability" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="4" class="view_dependability" name="dependability" onclick="return false;"></td>
+                                                    <td class="p-1"> <input type="radio" value="5" class="view_dependability" name="dependability" onclick="return false;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Comments</td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_dependability_comment" name="view_dependability_comment" readonly></textarea></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Overall Rating</strong></td>
+                                                    <td colspan="5">
+                                                        <div class="form-group">
+                                                            <input class="form-control input-lg rating_comment" type="text" name="view_rating_comment" readonly>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="justify-content-center">
+                                                    <td><strong>Evaluation</strong></td>
+                                                    <td colspan="5"><textarea class="w-100" id="view_evaluation_comment" name="view_evaluation_comment" readonly></textarea></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
     <div class="modal fade text-left" id="editEmployeeConfirmationModal" data-backdrop="static" tabindex="-1" role="dialog"
@@ -439,6 +589,7 @@
                     // min: '{{ Carbon\Carbon::now()}}',
 
                 });
+                // probation_end_date.set('disable');
             $('#probation_end_date').attr('disabled', true);
             $('#salary_increment_input').attr('disabled', true);
 
@@ -468,6 +619,12 @@
                 'max': 200
             });
 
+
+            // probation_end_date
+            $('#probation_end_date').inputmask({
+                'mask': '9999-99-99',
+                'clearIncomplete': true
+            });
             $('#salary_increment_input').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -698,7 +855,7 @@
                     $('#probation_end_date').removeAttr('readonly');
                 }else{
                     $('#probation_end_date').attr('disabled', true);
-                    // $('#probation_end_date').attr('readonly', true);
+                    $('#probation_end_date').attr('readonly', true);
 
                 }
                 
@@ -774,19 +931,45 @@
 
             $('#datatable tbody').on('click','.view_probation_form', function() {
 
-                var trax_id =  $(this).closest('tr').find('.trax_id').text();
-                var id = parseInt($(this).parents('tr').attr('id'));
+                // var trax_id =  $(this).closest('tr').find('.trax_id').text();
+                var id = $(this).data('target-id');
+                
 
                 $.ajax({
                     url: '{!! route('admin.human_resource.employee_confirmation.view') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'trax_id': trax_id
+                        'confirmation_id': id
                     }
                 })
                     .done(function(data) {
                         if(data.status == 1){
+                            console.log(data.details.rating);
+                            console.log($('.view_job_knowledge')[0]);
+                            
+                            $('.view_job_knowledge')[data.details.rating.job-1].checked = true;
+                            $(' #view_job_comments').val(data.details.rating.job_comments);
+
+                            $('.view_work_quality')[data.details.rating.quality-1].checked = true;
+                            $('#view_quality_comment').val(data.details.rating.quality_comments);
+
+                            $('.view_attendance')[data.details.rating.attendance-1].checked = true;
+                            $('#view_attendance_comment').val(data.details.rating.attendance_comments);
+
+                            $('.view_initiative')[data.details.rating.initiative-1].checked = true;
+                            $('#view_initiative_comment').val(data.details.rating.initiative_comments);
+
+                            $('.view_communication')[data.details.rating.communication-1].checked = true;
+                            $('#view_communication_comment').val(data.details.rating.communication_comments);
+
+                            $('.view_dependability')[data.details.rating.dependability-1].checked = true;
+                            $('#view_dependability_comment').val(data.details.rating.dependability_comments);
+
+                            $('input[name="view_rating_comment').val(data.details.rating.overall_rating);
+                            $('#view_evaluation_comment').val(data.details.rating.evaluation_comments);
+
+                            
                             var html = $('.employee_information tbody');
                             /* html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';*/
 
@@ -800,11 +983,11 @@
                             html += '<td>'+ data.details.review_period +'</td>';
                             html += '</tr>';
 
-                            $('#evaluation_modal .modal-body .employee_information tbody ').html(html);
+                            $('#view_evaluation_modal .modal-body .employee_information tbody ').html(html);
                         }
                     });
 
-                $('#evaluation_modal').modal('show');
+                $('#view_evaluation_modal').modal('show');
             });
           
           $('#employee_rating_form').validate({
