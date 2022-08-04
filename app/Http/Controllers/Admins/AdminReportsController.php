@@ -10563,11 +10563,15 @@ class AdminReportsController extends Controller
     }
 
     public function employee_confirmation_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),523);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),576);
         return view('admin.reports.employee_confirmation');
     }
 
     public function employee_confirmation_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),577);
+        }
         $employee_confirmation = DB::connection('reports')->table('employee_confirmations')
         ->join('employees as a', 'a.id', 'employee_confirmations.employee_id')
         ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')

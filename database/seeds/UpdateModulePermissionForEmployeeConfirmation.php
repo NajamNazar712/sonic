@@ -21,6 +21,8 @@ class UpdateModulePermissionForEmployeeConfirmation extends Seeder
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 572, 'screen_name' => 'Employee Confirmation', 'action'=> 'View'),
             array('id' => 573, 'screen_name' => 'Employee Confirmation', 'action'=> 'Excel Download'),
+            array('id' => 576, 'screen_name' => 'Employee Confirmation Report', 'action'=> 'View'),
+            array('id' => 577, 'screen_name' => 'Employee Confirmation Report', 'action'=> 'Excel Download'),
         ));
     }
 }
