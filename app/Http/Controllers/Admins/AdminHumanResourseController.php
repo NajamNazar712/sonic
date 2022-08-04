@@ -4801,12 +4801,9 @@ class AdminHumanResourseController extends Controller
             ->join('employee_confirmation_statuses as sn', 'sn.id', 'employee_confirmations.status')
             ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'a.joining_date',  'a.cnic as cnic', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.increment as increment', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'lm.name as approve_by_lm', 'hod.name as approve_by_hod', 'hr.name as approve_by_hr', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','employee_confirmations.probation_form','a.line_manager_id as line_manager_id','a.confirmation_status as confirmation_status','ad.department_head_id as department_head','employee_confirmations.increment_amount');
 
-           /* $employee_confirmation->where(function ($query) use ($emp_id) {
+            $employee_confirmation->where(function ($query) use ($emp_id) {
                 if($emp_id){
-                    $query->where('a.trax_id', Auth::user()->trax_id)
-                    ->orWhere('a.line_manager_id', $emp_id);
-                }else{
-                    $query->where('a.trax_id', Auth::user()->trax_id);
+                    $query->where('a.line_manager_id', $emp_id);
                 }
             })->orWhere(function ($query){
                 $query->whereIn('sn.id',[2,4,5,6,7])
@@ -4816,7 +4813,7 @@ class AdminHumanResourseController extends Controller
                 if ((in_array(session('role_id'), [63, 69, 70]))) {
                     $query->whereIn('sn.id',[2,4,6,7]);
                 }
-            });*/
+            });
 
             if ($search_admin = $request->get('search_admin')) {
                 $employee_confirmation->where('a.id', $search_admin)->where('a.employee_type_id',1);
