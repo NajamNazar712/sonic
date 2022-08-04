@@ -26,6 +26,7 @@ class CreateEmployeeConfirmationsTable extends Migration
             $table->date('approve_by_lm_at')->nullable();
             $table->integer('approve_by_hod')->index()->nullable();
             $table->date('approve_by_hod_at')->nullable();
+            $table->integer('increment_amount')->nullable();
             $table->integer('approve_by_hr')->index()->nullable();
             $table->date('approve_by_hr_at')->nullable();
             $table->timestamps();

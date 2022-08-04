@@ -2661,6 +2661,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Reports\MMSReportController@index')->name('index');
             Route::post('list', 'Admins\Reports\MMSReportController@list')->name('list');
         });
+        Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@employee_confirmation_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@employee_confirmation_list')->name('list');
+        });
+        
     });
 
     //Reports end
@@ -3954,6 +3959,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_confirmation_reject')->name('reject');
             Route::post('get_info', 'Admins\AdminHumanResourseController@get_employee_info')->name('get_info');
             Route::post('submit', 'Admins\AdminHumanResourseController@submit_employee_rating')->name('rating');
+            Route::post('approve', 'Admins\AdminHumanResourseController@employee_confirmation_approve')->name('approve');
         });
     });
 

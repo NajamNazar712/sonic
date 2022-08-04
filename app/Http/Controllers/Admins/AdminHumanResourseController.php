@@ -3820,7 +3820,7 @@ class AdminHumanResourseController extends Controller
                     ->where('lt.id','<>',1);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
                     $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
                 }
             });
@@ -4799,7 +4799,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
             ->join('employee_confirmation_statuses as sn', 'sn.id', 'employee_confirmations.status')
-            ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'a.joining_date',  'a.cnic as cnic', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.increment as increment', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'lm.name as approve_by_lm', 'hod.name as approve_by_hod', 'hr.name as approve_by_hr', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','employee_confirmations.probation_form','a.line_manager_id as line_manager_id','a.confirmation_status as confirmation_status');
+            ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'a.joining_date',  'a.cnic as cnic', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.increment as increment', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'lm.name as approve_by_lm', 'hod.name as approve_by_hod', 'hr.name as approve_by_hr', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','employee_confirmations.probation_form','a.line_manager_id as line_manager_id','a.confirmation_status as confirmation_status','ad.department_head_id as department_head','employee_confirmations.increment_amount');
 
             $employee_confirmation->where(function ($query) use ($emp_id) {
                 if($emp_id){
@@ -4809,20 +4809,20 @@ class AdminHumanResourseController extends Controller
                     $query->where('a.trax_id', Auth::user()->trax_id);
                 }
             })->orWhere(function ($query){
-                $query->whereIn('sn.id',[2,4,5])
+                $query->whereIn('sn.id',[2,4,5,6,7])
                     ->where('ad.department_head_id', Auth::user()->id);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                if ((in_array(session('role_id'), [63, 69, 70,17]))) {
                     $query->whereIn('sn.id',[2,4,6,7]);
                 }
             });
 
             if ($search_admin = $request->get('search_admin')) {
-                $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
+                $employee_confirmation->where('a.id', $search_admin)->where('a.employee_type_id',1);
             }
             if ($search_trax_id = $request->get('search_trax_id')) {
-                $datatable->where(function($q) use ($search_trax_id){
+                $employee_confirmation->where(function($q) use ($search_trax_id){
                     $q->where('a.trax_id', $search_trax_id);
                 });
             }
@@ -4845,11 +4845,16 @@ class AdminHumanResourseController extends Controller
                 }
                 
             })->editColumn('probation_form', function ($employee) {
-                if ($employee->probation_form == 0 && $employee->status_id == 1) {
-
+                if ($employee->probation_form == 0 && in_array($employee->status_id, [1, 3])) {
                     return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div></button>';
                 } else {
-                    return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1"> View</div></button>';
+                    return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div></button>';
+                }
+            })->editColumn('increment_amount', function ($employee) {
+                if ((in_array(session('role_id'), [63, 69, 70,17])) || $employee->department_head == Auth::id()) {
+                    return $employee->increment_amount;
+                }else{
+                    return '-';
                 }
             })->addColumn("action", function ($employee) {
                 $dropdown = '
@@ -4878,7 +4883,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif ($employee->status_id == 4) {
-                    if ((in_array(session('role_id'), [63, 69, 70]))) {
+                    if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -4985,28 +4990,93 @@ class AdminHumanResourseController extends Controller
     public function submit_employee_rating(Request $request){
 
         if($request->has('employee_confirmation_id')){
-           $rating = new EmployeeConfirmationRating();
-           $rating->employee_confirmation_id = $request->employee_confirmation_id;
-           $rating->job = $request->job_knowledge;
-           $rating->job_comments = $request->job_comments;
-           $rating->quality = $request->work_quality;
-           $rating->quality_comments = $request->quality_comment;
-           $rating->attendance = $request->attendance;
-           $rating->attendance_comments = $request->attendance_comment;
-           $rating->initiative = $request->initiative;
-           $rating->initiative_comments = $request->initiative_comment;
-           $rating->communication = $request->communication;
-           $rating->communication_comments = $request->communication_comment;
-           $rating->dependability = $request->dependability;
-           $rating->dependability_comments = $request->dependability_comment;
-           $rating->overall_rating = $request->rating_comment;
-           $rating->evaluation_comments = $request->evaluation_comment;
-           $rating->added_by = Auth::id();
-           $rating->save();
-            return redirect()->back()->with(['success' => 'Rating added successfully']);
+
+            $employee_confirmation = EmployeeConfirmation::find($request->employee_confirmation_id);
+            if($employee_confirmation){
+                $employee_confirmation->probation_form = 1;
+                $employee_confirmation->save();
+                $rating = new EmployeeConfirmationRating();
+                $rating->employee_confirmation_id = $request->employee_confirmation_id;
+                $rating->job = $request->job_knowledge;
+                $rating->job_comments = $request->job_comments;
+                $rating->quality = $request->work_quality;
+                $rating->quality_comments = $request->quality_comment;
+                $rating->attendance = $request->attendance;
+                $rating->attendance_comments = $request->attendance_comment;
+                $rating->initiative = $request->initiative;
+                $rating->initiative_comments = $request->initiative_comment;
+                $rating->communication = $request->communication;
+                $rating->communication_comments = $request->communication_comment;
+                $rating->dependability = $request->dependability;
+                $rating->dependability_comments = $request->dependability_comment;
+                $rating->overall_rating = $request->rating_comment;
+                $rating->evaluation_comments = $request->evaluation_comment;
+                $rating->added_by = Auth::id();
+                $rating->save();
+                
+                return redirect()->back()->with(['success' => 'Rating added successfully']);
+            }else{
+                return redirect()->back()->with(['error' => 'No Data Found']);
+            }
         }
         else{
             return redirect()->back()->with(['error' => 'No Data Found']);
+        }
+    }
+
+    public function employee_confirmation_approve(Request $request){
+        $today = Carbon::today()->toDateString(); 
+        
+        $employee_confirmation = EmployeeConfirmation::find($request->approve_confirmation_id);
+        if($employee_confirmation){
+            
+            if($request->approve_by == 'hod'){
+                if($employee_confirmation->probation_end_date > $today){
+                    return redirect()->back()->with('error', 'Probation Period End Date is '.$employee_confirmation->probation_end_date);
+                }
+                if($request->salary_increment == 'on'){
+                    $employee_confirmation->increment_amount = $request->salary_increment_input;
+                }
+                $employee_confirmation->status = 4;
+                $employee_confirmation->approve_by_hod = Auth::id();
+                $employee_confirmation->approve_by_hod_at = Carbon::now();
+                $employee_confirmation->save();
+                return redirect()->back()->with('success', 'Employee Confirmation Approved!');
+
+            }else{
+                if($employee_confirmation->probation_end_date > $today){
+                    return response()->json(['status' => 0, 'msg' => 'Probation Period End Date is '.$employee_confirmation->probation_end_date]);
+                }
+                if($employee_confirmation->probation_form == 0 ){
+                    return response()->json(['status' => 0, 'msg' => 'Please Fill The Probation Form !']);
+                }
+                if($request->approve_by == 'lm'){
+                    
+                    $employee_confirmation->status = 2;
+                    $employee_confirmation->approve_by_lm = Auth::id();
+                    $employee_confirmation->approve_by_lm_at = Carbon::now();
+                }
+                if($request->approve_by == 'hr'){
+                    $employee = Employee::find($employee_confirmation->employee_id);
+                    if($employee){
+                        $employee->confirmation_status = 1;
+                        $employee->save();
+                    }
+                    $employee_confirmation->status = 6;
+                    $employee_confirmation->approve_by_hr = Auth::id();
+                    $employee_confirmation->approve_by_hr_at = Carbon::now();
+                }
+            }
+            $employee_confirmation->save();
+            return response()->json(['status' => 1, 'msg' => 'Employee Confirmation Approved!']);
+
+        }else{
+            if($request->approve_by == 'hod'){
+                return redirect()->back()->with('error', 'Employee not found!');
+            }else{
+                return response()->json(['status' => 0, 'msg' => 'Employee not found!']);
+            }
+
         }
     }
 

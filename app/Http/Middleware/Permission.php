@@ -1266,6 +1266,10 @@ class Permission
             'human_resource.employee_confirmation.index' => 783,
             'human_resource.employee_confirmation.list' => 783,
             
+            'reports.employee_confirmation.index' => 786,
+            'reports.employee_confirmation.list' => 786,
+
+            
         ],
 
         'shipper' => [

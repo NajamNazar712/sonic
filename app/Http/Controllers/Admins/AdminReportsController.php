@@ -10561,5 +10561,35 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function employee_confirmation_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),523);
+        return view('admin.reports.employee_confirmation');
+    }
+
+    public function employee_confirmation_list(Request $request){
+        $employee_confirmation = DB::connection('reports')->table('employee_confirmations')
+        ->join('employees as a', 'a.id', 'employee_confirmations.employee_id')
+        ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
+        ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
+        ->join('employee_confirmation_statuses as sn', 'sn.id', 'employee_confirmations.status')
+        ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
+        ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','a.confirmation_status as confirmation_status','ad.department_head_id as department_head','a.city_id','employee_confirmations.created_at');
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $employee_confirmation->whereBetween('employee_confirmations.created_at', [$from, $to]);
+        }
+
+        $datatable = Datatables::of($employee_confirmation)
+        ->addColumn('employee_hub', function ($user) {
+            return City::where('id', $user->city_id)->first()->hub_city->name ?? "";
+        });
+
+
+        return $datatable->make(true);
+
+    }
 }
 

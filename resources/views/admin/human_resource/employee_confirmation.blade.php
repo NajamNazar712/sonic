@@ -362,30 +362,36 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Approve</h4>
+                    <h4 class="modal-title" id="myModalLabel8">Approve Employee</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.employee_confirmation.reject')}}"
-                          class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectConfirmationForm"
+                    <form action="{{route('admin.human_resource.employee_confirmation.approve')}}"
+                          class="form-horizontal mb-1 justify-content-center" method="POST" id="approveConfirmationForm"
                           novalidate="novalidate">
                         {{csrf_field()}}
-                        <input type="hidden" name="reject_confirmation_id" id="reject_confirmation_id">
-                        <input type="hidden" name="reject_by" id="reject_by">
+                        <input type="hidden" name="approve_confirmation_id" id="approve_confirmation_id">
+                        <input type="hidden" name="approve_by" id="approve_by">
 
                         <div class="row mb-2 justify-content-center">
-                           
+                            <div class="col-12">
+                                <h2 for="">Salary Increment</h2>
+                               
+                            </div> 
                             <div class="col-12">
                                 <div class="form-group">
-                                    <label for="">Reason</label>
-                                    <textarea class="form-control" name="reject_reason" id="reject_reason" cols="30" rows="10" data-rule-required="true" data-msg-required="Reason is required"></textarea>
-                                   
+                                    <input type="checkbox" name="salary_increment" id="salary_increment"
+                                    class="switchery salary_increment" data-size="md" data-switchery="true">
                                 </div>
                             </div>
-                          
-
+                            <div class="col-12">
+                                <div class="form-group">
+                                  <input type="text" class="form-control" id="salary_increment_input" name="salary_increment_input"  data-rule-required="true" data-msg-required="Amount is required" placeholder="Amount">
+                                </div>
+                            </div>
+                            
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary btn-min-width">Approve
@@ -423,6 +429,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#probation_end_date').attr('disabled', true);
+            $('#salary_increment_input').attr('disabled', true);
 
             
 
@@ -448,6 +455,13 @@
                 'rightAlign': false,
                 'min': 0,
                 'max': 200
+            });
+
+            $('#salary_increment_input').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
             });
 
 
@@ -494,7 +508,7 @@
                                 row.push(values.cnic);
                                 row.push(values.joining_date);
                                 row.push(values.status);
-                                row.push(values.increment);
+                                row.push(values.increment_amount);
                                 row.push(values.probation_end_date);
                                 row.push(values.approve_reason);
                                 row.push(values.reject_reason);
@@ -538,7 +552,6 @@
                     data: function (d) {
 
                         d.search_admin = $('#search_admin').val();
-                        d.search_rider = $('#search_rider').val();
                         d.search_trax_id = $('#search_trax_id').val();
                     }
                 },
@@ -557,7 +570,7 @@
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
                     {data: 'joining_date', name: 'a.joining_date', class: 'align-middle joining_date', orderable: false, searchable: false},
                     {data: 'status', name: 'sn.id', class: 'align-middle status'},
-                    {data: 'increment', name: 'employee_confirmations.increment', class: 'align-middle increment', orderable: false},
+                    {data: 'increment_amount', name: 'employee_confirmations.increment_amount', class: 'align-middle increment_amount'},
                     {data: 'probation_end_date', name: 'employee_confirmations.probation_end_date', class: 'align-middle probation_end_date', orderable: false},
                     {data: 'approve_reason', name: 'employee_confirmations.approve_reason', class: 'align-middle approve_reason', orderable: false},
                     {data: 'reject_reason', name: 'employee_confirmations.employee_attendance_adjustments.rejected_reason', class: 'align-middle reject_reason', orderable: false},
@@ -687,6 +700,20 @@
 
                 });
             });
+            
+
+            $("#salary_increment").on('change', function () {
+               
+               if (this.checked == true) {
+
+                   $('#salary_increment_input').attr('disabled', false);
+               }else{
+                   $('#salary_increment_input').attr('disabled', true);
+
+               }
+           });
+
+            
 
             $("#editConfirmationForm").validate({
                 errorClass: "danger",
@@ -812,6 +839,41 @@
                 }
             });
 
+            $("#approveConfirmationForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Approve Confirmation!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
             
 
 
@@ -824,21 +886,21 @@
             });
             $('body').on('click', '.reject_hod', function (e) {
                 var id = $(this).data('target-id');
-                $('#confirmation_id').val(id);
+                $('#reject_confirmation_id').val(id);
                 $('#reject_by').val('hod');
                 
                 $('#rejectEmployeeConfirmationModal').modal('show');
             });
             $('body').on('click', '.reject_hr', function (e) {
                 var id = $(this).data('target-id');
-                $('#confirmation_id').val(id);
+                $('#reject_confirmation_id').val(id);
                 $('#reject_by').val('hr');
                 
                 $('#rejectEmployeeConfirmationModal').modal('show');
             });
             
             $('#rejectEmployeeConfirmationModal').on('hide.bs.modal', function () {
-                $('#confirmation_id').val('');
+                $('#reject_confirmation_id').val('');
                 $('#reject_by').val('');
                 $('#reject_reason').val('');
             });
@@ -857,30 +919,106 @@
             
             $('body').on('click', '.approve_lm', function (e) {
                 var id = $(this).data('target-id');
-                $('#reject_confirmation_id').val(id);
-                $('#reject_by').val('lm');
+                swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Approve Confirmation!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.human_resource.employee_confirmation.approve') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'approve_confirmation_id': id,
+                                    'approve_by': 'lm',
+                                }
+                            }).done(function(data) {
+                                if(data.status == 1){
+                                    toastr.success(data.msg, 'Success!', {positionClass: 'toast-bottom-center',containerId: 'toast-bottom-center'});
+                                }else{
+                                    toastr.error(data.msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                table.draw();
+                            });
+                        }
+                    });
                 
-                $('#approveEmployeeConfirmationModal').modal('show');
             });
             $('body').on('click', '.approve_hod', function (e) {
                 var id = $(this).data('target-id');
-                $('#confirmation_id').val(id);
-                $('#reject_by').val('hod');
+                $('#approve_confirmation_id').val(id);
+                $('#approve_by').val('hod');
                 
                 $('#approveEmployeeConfirmationModal').modal('show');
             });
             $('body').on('click', '.approve_hr', function (e) {
                 var id = $(this).data('target-id');
-                $('#confirmation_id').val(id);
-                $('#reject_by').val('hr');
-                
-                $('#approveEmployeeConfirmationModal').modal('show');
+                swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Approve Confirmation!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.human_resource.employee_confirmation.approve') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'approve_confirmation_id': id,
+                                    'approve_by': 'hr',
+                                }
+                            }).done(function(data) {
+                                if(data.status == 1){
+                                    toastr.success(data.msg, 'Success!', {positionClass: 'toast-bottom-center',containerId: 'toast-bottom-center'});
+                                }else{
+                                    toastr.error(data.msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                table.draw();
+                            });
+                        }
+                    });
             });
             
             $('#approveEmployeeConfirmationModal').on('hide.bs.modal', function () {
-                $('#confirmation_id').val('');
-                $('#reject_by').val('');
-                $('#reject_reason').val('');
+                $('#approve_confirmation_id').val('');
+                $('#approve_by').val('');
+                $('#salary_increment_input').val('');
+                
             });
         });
     </script>
