@@ -2,6 +2,8 @@
 
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Database\Seeder;
 
 class UpdateManifestBagShipmentsForDispute extends Seeder
@@ -13,41 +15,29 @@ class UpdateManifestBagShipmentsForDispute extends Seeder
      */
     public function run()
     {
-        $bags = CargoManifestBag::where('status_id', 8)->whereHas('destination_hub', function ($query) {
-            $query->where('business_category_id',1);
-        });
-        $cargo_manifest_bags = $bags->get();
-        foreach($cargo_manifest_bags as $bags) {
-            $bag_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bags->id);
-            if ($bag_shipments->exists()) {
-                $bag_shipments = $bag_shipments->get();
-                $not_received_count = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bags->id)->where('status', 0)->count();
-                if ($not_received_count == 0) {
-                    foreach ($bag_shipments as $bag_shipment) {
-                        $shipment = Shipment::where('id', $bag_shipment->shipment_id)->first();
-                        if ($shipment->shipper_status_id == 49) {
-                            $mis_fwd = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',49)->orderBy('id','desc')->first();
-                            if($mis_fwd){
-                                $mis_fwd->delete();
-                            }
-                            $mis = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',11)->orderBy('id','desc')->first();
-                            if($mis){
-                                $mis->delete();
-                            }
-                            $journey = ShipmentsJourney::where('shipment_id',$shipment->id)->orderBy('id','desc')->first();
-                            $shipment->shipper_status_id = $journey->shipper_status_id;
-                            $shipment->shipper_status_id= $journey->consignee_status_id;
-                            $shipment->save();
+
+        $shipment_ids = array(11740530, 11772441, 11816919, 17281301, 17314135, 17403628, 17410421, 17426066, 17443723, 17529615, 17544674, 17599708, 17601330, 17607235, 17608818, 17612805, 17620134, 17639640, 17649212, 17656725, 17656786, 17662940, 17667297, 17671310, 17672098, 17675217, 17681866, 17682337, 17688877, 17692020, 17692021, 17694799, 17694841, 17695019, 17695395, 17696831, 17697109, 17702063, 17702517, 17703323, 17708308, 17710064, 17710209, 17710222, 17711911, 17711921, 17715202, 17715576, 17718022, 17723466, 17725251, 17725523, 17729288, 17736950, 17737703, 17738512, 17738569, 17738957, 17745249, 17752873, 17752874, 17753906, 17755551, 17758963, 17759829, 17762449, 17763689, 17765587, 17766035, 17769116, 17769586, 17776217, 17776372, 17777443, 17779450, 17780888, 17796504, 17796582, 17802045, 17805719, 17831322, 17832436, 17836180, 17839714, 17846879, 17857297, 17864091, 17865188, 17866529, 17874073, 17874874, 17879111, 17879711, 17883693, 17883774, 17883852, 17884387, 17888326, 17891811, 17892379, 17892394, 17893899, 17895201, 17895649, 17896708, 17900262, 17900406, 17901882, 17902828, 17913140, 17919685, 17921657, 17921993, 17923191, 17925351, 17934229, 17934260, 17937692, 17955348, 17956063, 17959938, 17965294, 17971662, 17976760, 17982874, 17984510, 17989986, 17991892, 17993564, 18001604, 18002503, 18004847, 18006595, 18007112, 18020960, 18030179, 18036938, 18046861, 18049417, 18060861, 18064464, 18064843, 18069736, 18071681, 18076492, 18076512, 18077901, 18078318, 18078404, 18080314, 18080372, 18081016, 18086593, 18088473, 18090526, 18091155, 18091589, 18091906, 18099088, 18107060, 18109076, 18112348, 18114253, 18117185, 18117233, 18122185, 18122253, 18126762, 18129795, 18161027, 18161707, 18168555, 18169463, 18171026, 18171266, 18171444, 18172184, 18172458, 18172571, 18173176, 18174276, 18174388, 18174468, 18174623, 18174850, 18174936, 18175158, 18175971, 18176193, 18176822, 18176855, 18177432, 18177558, 18177591, 18177656, 18178475, 18179136, 18179256, 18180382, 18180954, 18181938, 18182087, 18182170, 18182221, 18184993, 18185430, 18186229, 18186262, 18186581, 18187116, 18187783, 18188009, 18188221, 18188241, 18188244, 18188245, 18188311, 18188496, 18188580, 18188771, 18188888, 18189340, 18189389, 18189564, 18189655, 18190330, 18190747, 18190754, 18191333, 18191341, 18192675, 18192714, 18192738, 18192940, 18193034, 18193072, 18193079, 18193193, 18193659, 18193989, 18193990, 18194053, 18194589, 18194623, 18194888, 18195411, 18195671, 18195789, 18196028, 18196558, 18197000, 18197297, 18197690, 18197830, 18198556, 18199301, 18199519, 18199566, 18199641, 18200567, 18200622, 18200670, 18200673, 18200845, 18200880, 18200898, 18200945, 18200956, 18201917, 18201919, 18201922, 18201977, 18202648, 18202792, 18202872, 18209190, 18209465, 18209590, 18211877, 18211894, 18211991, 18212358, 18212694, 18214317, 18214879, 18217050, 18217851, 18218025, 18218106, 18218250, 18218257, 18218283, 18221018, 18221211, 18221632, 18223520, 18226295, 18227433, 18227443, 18227861, 18227893, 18228187, 18230021, 18233267, 18234177, 18236819, 18240960, 18240985, 18244673, 18244758, 18246492, 18248116, 18248344, 18250399, 18250730, 18252440, 18253609, 18253693, 18253704, 18254221, 18254428, 18258585, 18259597, 18260934, 18262216, 18263708, 18264060, 18268041, 18268547, 18268610, 18269974, 18270117, 18270197, 18270422, 18271802, 18271838, 18271871, 18276502, 18283470, 18285481, 18285847, 18286182, 18286554, 18286611, 18287479, 18287507, 18288582, 18289609, 18289692, 18290345, 18292309, 18292764, 18293585, 18294818, 18294838, 18295802, 18296081, 18296139, 18298097, 18298472);
+
+        foreach ($shipment_ids as $shipment_id) {
+            $bag_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('status',1);
+            if($bag_shipment->exists()) {
+                $shipment = Shipment::find($shipment_id);
+                if ($shipment) {
+                    if ($shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 11) {
+                        $mis_fwd = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 49)->orderBy('id', 'desc')->first();
+                        if ($mis_fwd) {
+                            $mis_fwd->delete();
                         }
-
+                        $mis = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 11)->orderBy('id', 'desc')->first();
+                        if ($mis) {
+                            $mis->delete();
+                        }
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->orderBy('id', 'desc')->first();
+                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $journey->shipper_status_id, 'consignee_status_id' => $journey->consignee_status_id]);
                     }
-                    $bags->status_id = 7;
-                    $bags->save();
-
-                }
-
                 }
 
             }
         }
     }
+}
