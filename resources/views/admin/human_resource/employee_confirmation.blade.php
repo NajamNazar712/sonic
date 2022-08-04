@@ -768,6 +768,41 @@
 
               $('#evaluation_modal').modal('show');
           });
+
+            $('#datatable tbody').on('click','.view_probation_form', function() {
+
+                var trax_id =  $(this).closest('tr').find('.trax_id').text();
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                $.ajax({
+                    url: '{!! route('admin.human_resource.employee_confirmation.view') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'trax_id': trax_id
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var html = $('.employee_information tbody');
+                            /* html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';*/
+
+                            html += '<tr>';
+                            html += '<td>'+ data.details.name +'</td>';
+                            html += '<td>'+ data.details.trax_id +'</td>';
+                            html += '<td>'+ data.details.designation +'</td>';
+                            html += '<td>'+ data.details.department +'</td>';
+                            html += '<td>'+ data.details.city +'</td>';
+                            html += '<td>'+ data.details.manager +'</td>';
+                            html += '<td>'+ data.details.review_period +'</td>';
+                            html += '</tr>';
+
+                            $('#evaluation_modal .modal-body .employee_information tbody ').html(html);
+                        }
+                    });
+
+                $('#evaluation_modal').modal('show');
+            });
           
           $('#employee_rating_form').validate({
               ignore: [],
