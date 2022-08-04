@@ -9531,7 +9531,7 @@ else if ($id == 178) {
                             $subject = str_replace('[name]', $employee->name, $subject);
                         }
 
-                        $to = ['asd@trax.pk','zxc@trax.pk'];
+                        $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
 
                         self::email($subject, $body, $to);
                     }

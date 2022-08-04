@@ -171,10 +171,7 @@
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
                 },
-                onSet: function(context) {
-                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
-                }
+               
             });
 
 
@@ -189,7 +186,7 @@
                     params.excel = true;
                     
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.dws_report.list') }}',
+                        url: '{{ route('admin.reports.employee_confirmation.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -216,7 +213,7 @@
                                 row.push(values.name);
                                 row.push(values.designation);
                                 row.push(values.department);
-                                row.push(values.hub);
+                                row.push(values.employee_hub);
                                 row.push(values.zone);
                                 row.push(values.created_at);
                                 row.push(values.approve_by_lm_at);
