@@ -23,7 +23,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today()->subMonths(1)  }}">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" >
                         </div>
                     </div>
                     <div class="col-5">
@@ -33,7 +33,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today()}}">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >
                         </div>
                     </div>
                    
@@ -242,7 +242,6 @@
                         extend: 'excel',
                         title: 'Employee Confirmation Report',
                         className: 'btn btn-primary excel',
-                        enabled:false,
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -254,7 +253,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                deferLoading: [50, 0],
                 ajax: {
                     url: '{{ route('admin.reports.employee_confirmation.list') }}',
                     data: function (d) {
@@ -271,8 +269,8 @@
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'hub', name: 'hub', class: 'align-middle hub'},
-                    {data: 'zone', name: 'zone', class: 'align-middle zone'},
+                    {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub'},
+                    {data: 'zone', name: 'ez.name', class: 'align-middle zone'},
                     {data: 'created_at', name: 'employee_confirmation.created_at', class: 'align-middle created_at'},
                     {data: 'approve_by_lm_at', name: 'employee_confirmation.approve_by_lm_at', class: 'align-middle approve_by_lm_at'},
                     {data: 'approve_by_hod_at', name: 'employee_confirmation.approve_by_hod_at', class: 'align-middle approve_by_hod_at'},
@@ -291,7 +289,6 @@
 
 
             $('#search_filter_btn').on('click',function () {
-               table.button('.excel').enable();
                table.draw();
             });
 

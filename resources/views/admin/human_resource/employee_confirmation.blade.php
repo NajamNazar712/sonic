@@ -428,6 +428,17 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#probation_end_date').pickadate({
+                    firstDay: 1,
+                    format:'yyyy-mm-dd',
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd',
+                    hiddenSuffix: '_formatted',
+                    // min: '{{ Carbon\Carbon::now()}}',
+
+                });
             $('#probation_end_date').attr('disabled', true);
             $('#salary_increment_input').attr('disabled', true);
 
@@ -684,21 +695,13 @@
                 if (this.checked == true) {
 
                     $('#probation_end_date').attr('disabled', false);
+                    $('#probation_end_date').removeAttr('readonly');
                 }else{
                     $('#probation_end_date').attr('disabled', true);
+                    // $('#probation_end_date').attr('readonly', true);
 
                 }
-                $('#probation_end_date').pickadate({
-                    firstDay: 1,
-                    format:'yyyy-mm-dd',
-                    clear: '',
-                    selectYears: true,
-                    selectMonths: true,
-                    formatSubmit: 'yyyy-mm-dd',
-                    hiddenSuffix: '_formatted',
-                    // min: '{{ Carbon\Carbon::now()}}',
-
-                });
+                
             });
             
 

@@ -3820,7 +3820,7 @@ class AdminHumanResourseController extends Controller
                     ->where('lt.id','<>',1);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
+                if ((in_array(session('role_id'), [63, 69, 70]))) {
                     $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
                 }
             });
@@ -4813,7 +4813,7 @@ class AdminHumanResourseController extends Controller
                     ->where('ad.department_head_id', Auth::user()->id);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70,17]))) {
+                if ((in_array(session('role_id'), [63, 69, 70]))) {
                     $query->whereIn('sn.id',[2,4,6,7]);
                 }
             });
@@ -4851,7 +4851,7 @@ class AdminHumanResourseController extends Controller
                     return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div></button>';
                 }
             })->editColumn('increment_amount', function ($employee) {
-                if ((in_array(session('role_id'), [63, 69, 70,17])) || $employee->department_head == Auth::id()) {
+                if ((in_array(session('role_id'), [63, 69, 70])) || $employee->department_head == Auth::id()) {
                     return $employee->increment_amount;
                 }else{
                     return '-';
@@ -4883,7 +4883,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif ($employee->status_id == 4) {
-                    if ((in_array(session('role_id'), [63, 69, 70, 17]))) {
+                    if ((in_array(session('role_id'), [63, 69, 70]))) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
