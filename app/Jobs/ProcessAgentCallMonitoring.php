@@ -51,7 +51,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
             if ($settings->exists()) {
                 $settings = $settings->first();
-                $time = (int)$settings->text;
+                $time = $settings->text;
             }
             else {
                 $time = 0;
@@ -75,7 +75,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
 //            if(count($admin_ids) > 0){
 
-              // $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();previous
+               $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
                
 //                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
 //                ->whereIn('admins.id', $admin_ids)
