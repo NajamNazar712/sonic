@@ -51,7 +51,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
             if ($settings->exists()) {
                 $settings = $settings->first();
-                $time = $settings->text;
+                $time = (int)$settings->text;
             }
             else {
                 $time = 0;
