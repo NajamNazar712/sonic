@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AgentDayLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
@@ -18,7 +19,11 @@ use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestRating;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CrmAgent;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
@@ -10562,6 +10567,142 @@ class AdminReportsController extends Controller
         }
 
         return $datatable->make(true);
+    }
+
+    public function crm_agent_wise_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),574);
+
+        // $agents = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
+        //     ->select('crm_agents.id as id', 'ad.name as name')
+        //     ->get();
+
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)->get();
+
+        return view('admin.reports.crm_agent_wise_report.crm_agent_wise_report')->with(['agents' => $agents]);
+    }
+
+    public  function crm_agent_wise_report_list(Request $request)
+    {
+         if ($request->get('excel') && $request->get('excel') == true) {
+             ActivityTrailController::createActivityTrailLog(Auth::id(), 575);
+         }
+
+        $from = $request->search_date_from;
+        $agent_id = $request->agent_id;
+
+        $filter_data =  CrmRequestAgentHistory::join('admins as ad','ad.id','crm_request_agent_histories.agent_id')
+        ->join('crm_requests as crm_req','crm_req.id', 'crm_request_agent_histories.crm_request_id')
+        ->join('crm_request_status_histories as crmsh','crmsh.crm_request_id', 'crm_request_agent_histories.crm_request_id')
+        ->select(
+            'ad.id',
+            'ad.name',
+            DB::raw('sum(case when crmsh.status_id in (2) then 1 else 0 end) AS pending'),
+            DB::raw('sum(case when crmsh.status_id in (1,5) then 1 else 0 end) AS new_assign'),
+            DB::raw('sum(case when crmsh.status_id in (1,2,5) then 1 else 0 end) AS total'),
+            DB::raw('sum(case when crmsh.status_id in (3,4) then 1 else 0 end) AS closed')
+            )
+        ->groupBy('ad.name')
+        ->where(function ($query) use($from){
+            if($from != null || $from != '' )
+            {
+                $query->where('crmsh.created_at','like', $from.'%');
+            }
+        })
+        ->where(function ($query) use($agent_id){
+            if($agent_id != null || $agent_id != '')
+            {
+                $query->where('ad.id', $agent_id);
+            }
+        })
+        ->orderBy('ad.name')
+        ->get();
+
+        // dd($filter_data);
+
+        // $agents =  CrmRequestStatusHistory::join('crm_requests as crm_req','crm_req.id','crm_request_status_histories.crm_request_id')
+        // ->join('crm_request_agent_histories as crmah','crmah.crm_request_id', 'crm_request_status_histories.crm_request_id')
+        // ->join('admins as ad','ad.id', 'crmah.agent_id')
+        // ->select(
+        //     'ad.id',
+        //     'ad.name',
+        //     DB::raw('sum(case when crm_request_status_histories.status_id in (2,5) then 1 else 0 end) AS pending'),
+        //     DB::raw('sum(case when crm_request_status_histories.status_id in (1,3) then 1 else 0 end) AS new_assign'),
+        //     DB::raw('sum(case when crm_request_status_histories.status_id in (1,2,3,5) then 1 else 0 end) AS total'),
+        //     DB::raw('sum(case when crm_request_status_histories.status_id in (4) then 1 else 0 end) AS closed')
+        //     )
+        // ->groupBy('ad.name')
+        // // ->where(function ($query) use($from){
+        // //     if($from != null || $from != '' )
+        // //     {
+        // //         $query->where('crm_request_status_histories.created_at', $from);
+        // //     }
+        // // })
+        // // ->where(function ($query) use($agent_id){
+        // //     if($agent_id != null || $agent_id != '')
+        // //     {
+        // //         $query->where('crm_request_status_histories.agent_id', $agent_id);
+        // //     }
+        // // })
+        // ->get();
+
+        // dd($filter_data);
+
+        // $from = $request->search_date_from;
+        // $agent_id = $request->agent_id;
+
+        // $crm_count_data = array();
+
+        // if ($request->search_date_from ) {
+        //     $crm_count_records = CRMCount::where('date', $from)->get();
+        // } else {
+        //     $crm_count_records = CRMCount::all();
+        // }
+
+        // $crm_count_records = $crm_count_records->groupBy(function ($date) {
+        //     return Carbon::parse($date->date)->format('W');
+        // });
+        // foreach ($crm_count_records as $key => $value) {
+        //     $remaining_count_val = 0;
+            
+        //     $crm_count_data[$key]['count_days'] = $value->count();
+        //     $avg_closed = 0;
+        //     $avg_remaining = 0;
+        //     foreach ($value as $item) {
+        //         if((($item->pending + $item->new_launched) - $item->closed) < 0){
+        //             $remaining_count_val = 0;
+
+        //         }else{
+        //             $remaining_count_val = (($item->pending + $item->new_launched) - $item->closed);
+
+        //         }
+        //         if ($item->pending + $item->new_launched == 0) {
+        //             $avg_closed += 0;
+        //             $avg_remaining += 0;
+        //             $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
+        //             $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
+        //         } else {
+        //             $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
+        //             $avg_remaining += number_format((( $remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
+        //             $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
+        //             $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((($remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
+        //         }
+        //         $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+        //         $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+        //         $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+        //         $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+        //         $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+        //         $crm_count_data[$key]['data'][$item->id]['remaining'] = $remaining_count_val;
+        //         $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
+        //         $inner_pending = $item->pending;
+        //     }
+        //     $crm_count_data[$key]['weekly_close'] = number_format($avg_closed / $value->count(), 2);
+        //     $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining / $value->count(), 2);
+        // }
+
+
+        return $filter_data;
     }
 }
 

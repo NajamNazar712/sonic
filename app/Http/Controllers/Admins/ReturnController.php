@@ -43,6 +43,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
@@ -4852,25 +4853,107 @@ class ReturnController extends Controller
         return $datatable->make(true);
     }
 
-    public function manual_rcp_sms(Request $request){
-        if($request->id){
-            $shipment = Shipment::find($request->id)->id;
-            if($shipment){
-                $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
-                if($rcp_sms->exists()){
-                    $rcp_sms = $rcp_sms->latest('id')->first();
-                    $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+    public function confirmation_pending_manual_sms_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),568);
+        return view('admin.return.confirmation_pending_manual_sms');
+     }
+ 
+     public function confirmation_pending_manual_sms_list(Request $request){
+         if($request->get('excel') && $request->get('excel') == true)
+         {
+             ActivityTrailController::createActivityTrailLog(Auth::id(),569);
+         }
+        $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
+            ->join('sms', 'sms.id', '=', 'rcp_manual_sms.sms_id')
+            ->select('rcp_manual_sms.id','rcp_manual_sms.tracking_number','rcp_manual_sms.recepient','rcp_manual_sms.recepient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
 
-                    if ($rcp_sms->count <= $limit->text){
-                        dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+        $datatable = DataTables::of($rcpmannualsms)
+            ->editColumn('message', function ($rcpmannualsms) {
+                return '<span class="show_message" title="'.$rcpmannualsms->message.'"> '.$rcpmannualsms->message.' </span>';
+            })
+            ->editColumn('message_excel', function ($rcpmannualsms) {
+                return $rcpmannualsms->message;
+            })
+            ->editColumn('status', function ($rcpmannualsms) {
+                if($rcpmannualsms->status == 3){
+                    return 'Delivered';
+                }
+                else{
+                    return 'Not Delivered';
+                }
+            })
+            ->filterColumn('sms.status', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    if($keyword == 'delivered')
+                    {
+                        $sub_query->where('sms.status', 3);
+                    }
+                    else{
+                        $sub_query->where('sms.status','!=', 3);
+                    }
+                   
+                });
+            });
+ 
+         return $datatable->make(true);
+     }
+
+    public function manual_rcp_sms(Request $request){
+
+        if($request->id){
+            if($request->send_via == 'auto'){
+                $shipment = Shipment::find($request->id)->id;
+                if($shipment){
+                    $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
+                    if($rcp_sms->exists()){
+                        $rcp_sms = $rcp_sms->latest('id')->first();
+                        $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+
+                        if ($rcp_sms->count <= $limit->text){
+                            dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
                     }
                 }
                 else{
-                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
                 }
+
             }
-            else{
-                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+            else if($request->send_via == 'manual'){
+                $shipment = Shipment::find($request->id);
+                if($shipment){
+
+                    if($request->send_to == 'shipper'){
+                        $sms_to = $shipment->user->phone;
+                        $recepient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
+                    }
+                    else{
+                        $sms_to = $shipment->consignee_phone_number_1;
+                        $recepient_name = $shipment->consignee_name;
+                    }
+
+                    $message = $request->message;
+                    $sms_id = RCPSmsToConsignee::send_manual_sms($message,$sms_to);
+
+                    $rcp_sms_log = new RcpManualSms();
+                    $rcp_sms_log->tracking_number = $shipment->tracking_number;
+                    $rcp_sms_log->sms_id = $sms_id;
+                    $rcp_sms_log->recepient = $request->send_to;
+                    $rcp_sms_log->recepient_name = $recepient_name;
+                    $rcp_sms_log->phone = $sms_to;
+                    $rcp_sms_log->message = $message;
+                    $rcp_sms_log->agent = Auth::id();
+
+                    $rcp_sms_log->save();
+
+                    return response()->json(['status' => 0, 'success' => 'SMS Send Sucessfully']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+                }
             }
         }
     }

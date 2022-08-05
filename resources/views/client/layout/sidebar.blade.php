@@ -47,6 +47,7 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+
 {{--                        @if(session('user_id') == 3324)--}}
 {{--                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>--}}
 {{--                        @endif--}}
@@ -196,8 +197,10 @@
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.receiving_sheet.index')}}">Receiving Sheet (Shipment Description)</a></li>
                         @endif
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{ route('cod.cancelled_shipments_arrival.cancelled_shipments_arrival_index') }}">Restrict Cancelled Shipment Arrival</a></li>
+                        @endif
                     </ul>
-
                 </li>
             @endif
 

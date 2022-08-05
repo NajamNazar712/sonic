@@ -451,6 +451,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::put('bulk_revert', 'Shippers\ShipperShipmentCancelController@bulk_revert')->name('bulk_revert');
         Route::put('revert', 'Shippers\ShipperShipmentCancelController@revert')->name('revert');
     });
+
+    Route::prefix('cancelled_shipments_arrival')->name('cancelled_shipments_arrival.')->group(function (){
+            Route::get('','Shippers\ShipperShipmentCancelController@cancelled_shipments_arrival_index')->name('cancelled_shipments_arrival_index');
+            Route::post('cancelled_shipments_arrival','Shippers\ShipperShipmentCancelController@cancelled_shipments_arrival')->name('cancelled_shipments_arrival');
+        });
+
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
@@ -1439,6 +1445,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');
         Route::get('/confirmation_pending/sms','Admins\ReturnController@confirmation_pending_sms_index')->name('confirmation_pending_sms');
         Route::get('/confirmation_pending/sms/list','Admins\ReturnController@confirmation_pending_sms_list')->name('confirmation_pending_sms_list');
+        Route::get('/confirmation_pending/manual/sms','Admins\ReturnController@confirmation_pending_manual_sms_index')->name('confirmation_pending_manual_sms');
+        Route::get('/confirmation_pending/manual/sms/list','Admins\ReturnController@confirmation_pending_manual_sms_list')->name('confirmation_pending_manual_sms_list');
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -2652,6 +2660,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');
         });
+        Route::prefix('crm_agent_wise_report')->name('crm_agent_wise_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_agent_wise_report_index')->name('index');
+            Route::post('crm_agent_wise_report_list', 'Admins\AdminReportsController@crm_agent_wise_report_list')->name('list');
+        });
         Route::prefix('crm_special_approval')->name('crm_special_approval.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@crm_special_approval_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_special_approval_list')->name('list');
@@ -3645,6 +3657,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\AdminInternationalShipmentsController@tracking_upload_store')->name('store');
             Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
+            Route::get('logs', 'Admins\AdminInternationalShipmentsController@tracking_logs')->name('logs');
         });
         Route::prefix('shipment_status')->name('shipment_status.')->group(function () {
             Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
