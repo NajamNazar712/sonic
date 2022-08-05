@@ -128,4 +128,56 @@ class RCPSmsToConsignee implements ShouldQueue
             $sms->save();
         }
     }
+
+    static function send_manual_sms($body, $to) {
+
+        $sms = new SMS();
+
+        $sms->to = str_replace('-', '', $to);
+        $sms->body = $body;
+
+        $sms->save();
+
+        try {
+            $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+            $response = $client->get('', [
+                'query' => [
+                    'action' => 'sendmessage',
+                    'username' => 'Trax',
+                    'password' => 'Tr@x!101',
+                    'originator' => 87323,
+                    'recipient' => $sms->to,
+                    'messagedata' => $sms->body
+                ]
+            ]);
+
+            $response = simplexml_load_string($response->getBody());
+            $response = json_decode(json_encode($response), true);
+
+            if (isset($response['data']['acceptreport']) && $response['data']['acceptreport']['statuscode'] == 0) {
+                $sms->status = 3;
+
+                $sms->save();
+
+                return $sms->id;
+            }
+            else {
+                $sms->status = 2;
+                $sms->save();
+
+                $to = ['muhammad.yousuf@trax.pk'];
+                $subject = '[Error] SMS API - ITS ';
+                $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+
+                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                return $sms->id;
+            }
+        } catch (RequestException $e) {
+            $sms->status = 1;
+
+            $sms->save();
+
+            return $sms->id;
+        }
+    }
 }

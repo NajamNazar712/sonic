@@ -3,10 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\HR\Employee;
 use Closure;
 
-class AdminAPIToken
+class AdminAPIDWSToken
 {
     /**
      * Handle an incoming request.
@@ -24,27 +23,13 @@ class AdminAPIToken
 
             if ($admin->exists()) {
                 $admin = $admin->first();
-//dd($admin);
+
                 if ($admin->status) {
+                    $request->request->add(['admin_id' => $admin->id]);
 
-                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
-                    if($employee->exists())
-                    {
-
-                        $employee = $employee->first();
-                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id]);
-                        return $next($request);
-                    } else{
-                        return response()->json([
-                            'status' => 1,
-                            'message' => 'Employee Not Found.'
-                        ]);
-                    }
-
-
+                    return $next($request);
                 }
                 else {
-                    
                     return response()->json([
                         'status' => 2,
                         'message' => 'Your Account is not Activate.'

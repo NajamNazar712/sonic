@@ -420,12 +420,17 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_main_categories as rmc', 'rmc.id', '=', 'employees.rider_main_category')
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
+            ->leftjoin('employees as r_emp', 'r_emp.id', '=', 'employees.replacement_employee_id')
             ->leftjoin('employee_bank_informations as eb', function ($join) {
                 $join->on('eb.employee_id', '=', 'employees.id')
                     ->where('eb.id', '=', DB::raw('(select max(id) from employee_bank_informations where employee_bank_informations.employee_id = employees.id)'));
             })
             ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
+<<<<<<< HEAD
             ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id','employees.last_working_date as last_working_date','employees.guardian_name as father_name','employees.confirmation_status'])
+=======
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id','employees.last_working_date as last_working_date','employees.guardian_name as father_name', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name'])
+>>>>>>> sprint_99
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -820,6 +825,7 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
+        $employee->last_working_date = NULL;
         $employee->save();
 
         $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
@@ -880,6 +886,7 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->first_inactive = 1;
+        $employee->last_working_date = NULL;
         $employee->save();
 
         $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
@@ -1327,6 +1334,9 @@ class AdminHumanResourseController extends Controller
         $employee->fuel = $request->fuel;
         $employee->employee_nature_id = $request->employee_nature_id;
         $employee->sub_department = $request->sub_department;
+        if($request->has('employee_confirmation_status')){
+            $employee->confirmation_status = $request->employee_confirmation_status;
+        }
         $employee->update();
 
         if ($employee->employee_type_id == 1) {
@@ -1363,6 +1373,7 @@ class AdminHumanResourseController extends Controller
                 $admin->default_hub_id = $employee->city->hub_city->id;
                 $admin->password = bcrypt($employee->pin);
                 $admin->dummy_pin = $employee->pin;
+                $admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
                 $admin->update();
 
@@ -1383,6 +1394,7 @@ class AdminHumanResourseController extends Controller
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
                 $rider->route_id = $request->rider_route;
+                $rider->updated_by = Auth::id();
                 $rider->save();
             }
         }
