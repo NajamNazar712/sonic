@@ -503,13 +503,21 @@
                         </div>
 
                         <div class="col-md-6">
-                                    <div class="form-group row">
-                                        <div class="col-md-9">
-                                            <label>Brand Name</label>
-                                            <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
-                                        </div>
-                                    </div>
+                            <div class="form-group row">
+                                <div class="col-md-9">
+                                    <label>Brand Name</label>
+                                    <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <div class="col-md-9">
+                                    <label>Average Shipments</label>
+                                    <input type="text" id="avg_shipments" class="form-control border-primary" value="{{$user->average_shipments}}" name="avg_shipments">
+                                </div>
+                            </div>
+                        </div>
 
                         </div>
                         <div class="form-actions right">
