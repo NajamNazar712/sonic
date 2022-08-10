@@ -38,14 +38,14 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Phone</th>
+                        <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Phone</th>
-                        <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -199,14 +199,14 @@
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper Name');
+                            head.push('Phone');
+                            head.push('Address');
                             head.push('Attempt Count');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Return City');
                             head.push('Consignee Name');
-                            head.push('Phone');
-                            head.push('Address');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
@@ -225,15 +225,15 @@
                                 row.push(index + 1);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
-                                row.push(values.shipper);
+                                row.push(values.shipper); 
+                                row.push(values.shipper_phone); // to be changed
+                                row.push(values.shipper_address); // to be changed
                                 row.push(values.total_attempt);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.consignee_name);
-                                row.push(values.phone);
-                                row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.service_type);
@@ -464,14 +464,14 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone', name: 'u.phone', class: 'align-middle shipper_phone'},
+                    {data: 'shipper_address', name: 'u.address', class: 'align-middle shipper_address'},
                     {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city', orderable: false, searchable: false},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
