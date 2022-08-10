@@ -109,6 +109,7 @@ use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\Zone;
 
 class DeliveryController extends Controller
 {
@@ -5151,7 +5152,8 @@ class DeliveryController extends Controller
         $petty_cash_ids = StationDepositNote::where('petty_cash_statement_id', '!=', null)->pluck('petty_cash_statement_id')->toArray();
         $petty_cash_list = PettyCashStatement::whereIn('status', [0, 1, 2, 7])->whereNotIn('id', $petty_cash_ids)->select('id')->get();
         $banks = BanksList::where('affiliate', 1)->get();
-        return view('admin.delivery.sdn.index')->with(['banks' => $banks, 'petty_cash_list' => $petty_cash_list]);
+        $zones = Zone::where('status', 1)->get();
+        return view('admin.delivery.sdn.index')->with(['banks' => $banks, 'petty_cash_list' => $petty_cash_list , 'zones' => $zones]);
     }
 
     public function sdn_list(Request $request)
@@ -5162,14 +5164,16 @@ class DeliveryController extends Controller
 
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('station_deposit_note_adjustments as sdna', function ($join) {
-                $join->on('sdna.sdn_id', '=', 'station_deposit_notes.id')
-                    ->where('sdna.id', '=',
-                        DB::raw('(select max(id) from station_deposit_note_adjustments where station_deposit_note_adjustments.sdn_id = station_deposit_notes.id)'));
-            })
-            ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
-            ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at']);
+        ->join('zone_class_cities AS zcc', 'zcc.city_id', '=', 'oc.id')
+        ->join('zones', 'zones.id', '=', 'zcc.zone_id')
+        ->leftjoin('station_deposit_note_adjustments as sdna', function ($join) {
+            $join->on('sdna.sdn_id', '=', 'station_deposit_notes.id')
+                ->where('sdna.id', '=',
+                    DB::raw('(select max(id) from station_deposit_note_adjustments where station_deposit_note_adjustments.sdn_id = station_deposit_notes.id)'));
+        })
+        ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
+        ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
+        ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at','zones.name as zone']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -5393,6 +5397,19 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             });
+            // ->filterColumn('zone', function ($query, $keyword) {
+            //     if ($keyword == 0) {
+            //         $query->where('station_deposit_notes.status', '=', $keyword);
+            //     } else if ($keyword == 1) {
+            //         $query->where('station_deposit_notes.status', '=', $keyword);
+            //     } else if ($keyword == 2) {
+            //         $query->where('station_deposit_notes.status', '=', $keyword);
+            //     } else if ($keyword == 3) {
+            //         $query->where('station_deposit_notes.status', '=', $keyword);
+            //     } else {
+            //         $query->whereRaw('false');
+            //     }
+            // });
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
                 ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
