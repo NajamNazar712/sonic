@@ -307,6 +307,7 @@ Route::name('api.')->group(function () {
             Route::get('check_permissions', 'AdminAPIController@check_permissions')->name('check_permissions');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
+            Route::post('validate_otp', 'AdminAPIController@validate_otp')->name('validate_otp');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
@@ -436,6 +437,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
         Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
         Route::post('login_v4', 'Retail\RetailAPIController@login')->name('login_v4');
+        Route::post('login_v5', 'Retail\RetailAPIController@login')->name('login_v5');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {

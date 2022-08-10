@@ -9259,4 +9259,79 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function validate_otp(Request $request){
+        $rules = [
+            'otp' => ['required', 'integer', 'digits:6'],
+            'device_token' => ['nullable']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $user = Admin::find($admin_id);
+            if ($user->otp == $request->otp) {
+                $employee = Employee::where('trax_id', $user->trax_id);
+                $information = array();
+                $information['id'] = $user->id;
+                $information['name'] = $user->name;
+                $information['phone'] = $user->phone_number;
+                $information['cnic'] = $user->cnic;
+                $information['api_token'] = $user->api_token;
+                $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                if ($user->designation_id) {
+                    $user_department = $user->Edesignation->department_id;
+                } else {
+                    $user_department = $user->role->department_id;
+                }
+                $information['sales_person'] = ($user_department == 7) ? 1 : 0;
+                if ($employee->exists()) {
+                    $employee = $employee->first();
+                    $information['address'] = ($employee->address) ? $employee->address : "";
+                } else {
+                    $information['address'] = '';
+                }
+                $information['role'] = 'staff';
+                if ($request->has('device_token')) {
+                    EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                    EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
+                    $employee_device_token = new EmployeeDeviceToken();
+                    $employee_device_token->employee_id = $user->id;
+                    $employee_device_token->employee_type_id = 1;
+                    $employee_device_token->device_token = $request->get('device_token');
+                    $employee_device_token->save();
+                }
+
+                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                    ->join('admins as a', 'e.id', 'a.employee_id')
+                    ->where('a.id', $user->id);
+
+                if ($reporting_location->exists()) {
+                    $reporting_location = $reporting_location->first();
+                    $information['distance'] = $reporting_location->radius;
+                    $information['lat'] = $reporting_location->lat;
+                    $information['long'] = $reporting_location->long;
+                } else {
+                    $information['distance'] = 0;
+                    $information['lat'] = 0;
+                    $information['long'] = 0;
+                }
+                $information['welcome_bit'] = 0;
+                if (!$user->first_login) {
+                    $information['welcome_bit'] = 1;
+                    $information['welcome_message'] = "Welcome to TRAX " . $user->name;
+                }
+                $user->first_login = 1;
+                $user->save();
+                return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+            }
+        }
+    }
+
 }
