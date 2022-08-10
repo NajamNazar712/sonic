@@ -2130,7 +2130,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
+            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1)->where('sale_person_targets.status', 1);
 
         $datatable = Datatables::of($targets);
         return $datatable->make(true);
