@@ -104,6 +104,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
         Route::post('login_v3', 'Rider\RiderAPIController@login_v2')->name('login_v3');
         Route::post('login_v4', 'Rider\RiderAPIController@login_v4')->name('login_v4');
+        Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
@@ -274,6 +275,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
         Route::post('login_v4', 'AdminAPIController@login_v4')->name('login_v4');
+        Route::post('login_v5', 'AdminAPIController@login_v5')->name('login_v5');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
         Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
