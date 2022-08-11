@@ -9505,7 +9505,7 @@ else if ($id == 178) {
 
                     $employee = $reference_1_id;
                     if($employee){
-                        $link = '<div style="margin-top: 20px"><a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Click To View</a></div>';
+                        $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank"><u>Click To View</u></a>';
 
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
@@ -9531,9 +9531,7 @@ else if ($id == 178) {
                             $subject = str_replace('[name]', $employee->name, $subject);
                         }
 
-//                        $html = '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">';
-
-                        $body .= $body . '<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50"></p>
+                        $body .=  PHP_EOL. PHP_EOL.'<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">'.PHP_EOL.'</p>
                     </div>
                         <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                     </div>';
@@ -9550,7 +9548,7 @@ else if ($id == 178) {
 
 
 
-                        self::email($subject, $body, $to);
+                        self::email($subject, $html, $to);
                     }
 
                 }
