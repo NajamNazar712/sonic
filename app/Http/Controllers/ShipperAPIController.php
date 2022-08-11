@@ -1105,7 +1105,7 @@ class ShipperAPIController extends Controller
                                 $data["pod_image"] = $pod_image;
                             } else {
                                 $data["pod_image"] = NULL;
-                                array_push($message, "POD for the selected tracking number are not found");
+                                array_push($message, "POD");
                             }
 
                             if ($rider_delivery->cnic_image != null) {
@@ -1118,7 +1118,7 @@ class ShipperAPIController extends Controller
                                 $data["cnic_image"] = $cnic_image;
                             } else {
                                 $data["cnic_image"] = NULL;
-                                array_push($message,"CNIC for the selected tracking number is not found");
+                                array_push($message,"CNIC");
                             }
 
                             if ($rider_delivery->house_image != null) {
@@ -1131,7 +1131,7 @@ class ShipperAPIController extends Controller
                                 $data["house_image"] = $house_image;
                             } else {
                                 $data["house_image"] = NULL;
-                                array_push($message, "House Image for the selected tracking number is not found");
+                                array_push($message, "House Image");
                             }
 
                             if ($rider_delivery->audio_path != null) {
@@ -1144,7 +1144,7 @@ class ShipperAPIController extends Controller
                                 $data["audio"] = $audio_path;
                             } else {
                                 $data["audio"] = NULL;
-                                array_push($message, "Audio for the selected tracking number is not found");
+                                array_push($message, "Audio");
                             }
 
                             if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
@@ -1153,9 +1153,9 @@ class ShipperAPIController extends Controller
                             } else {
                                 $data["latitude"] = NULL;
                                 $data["longitude"] = NULL;
-                                array_push($message, "Location for the selected tracking number is not found");
+                                array_push($message, "Location");
                             }
-                            return response()->json(['status' => 0, 'message' => $message, 'information' => $data]);
+                            return response()->json(['status' => 0, 'message' => implode(',', $message). ' for the selected tracking number is not found', 'information' => $data]);
                         }
                         else{
                             return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
