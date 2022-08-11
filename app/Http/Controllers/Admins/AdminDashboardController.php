@@ -1504,7 +1504,12 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->admin_id = $tag_id;
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
-                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
+
+                $shipper_zone_id = $user->city->zone_id; 
+                $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
+
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ,'zone' => $zone];
+
                 NotificationsController::send(81, $sale_persons, Auth::id());
                 NotificationsController::send(119, $sale_persons, Auth::id());
 
@@ -1548,7 +1553,11 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->user_id = $shipper_id;
                         $sale_person_tag->status = 0;
                         $sale_person_tag->save();
-                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person_data, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
+
+                        $shipper_zone_id = $user->city->zone_id; 
+                        $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
+                        
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person_data, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date,'zone' => $zone];
                     }
                 }
             }
