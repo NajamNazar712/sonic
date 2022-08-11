@@ -1311,7 +1311,7 @@ class ReturnController extends Controller
                 $join->on('cb.id', '=', 'shipments_journey.admin_id')
                     ->where('shipments_journey.shipper_status_id', 20);
             })
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','rsi.phone as shipper_phone','rsi.pickup_address as shipper_return_address', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -1369,6 +1369,24 @@ class ReturnController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('shipper_phone', function($shipment){
+                if($shipment->shipper_phone_omni != null)
+                {
+                    return $shipment->shipper_phone_omni;
+                }
+                else{
+                    return $shipment->shipper_phone;
+                }
+            })
+            ->editColumn('shipper_return_address', function($shipment){
+                if($shipment->shipper_return_address_omni != null)
+                {
+                    return $shipment->shipper_return_address_omni;
+                }
+                else{
+                    return $shipment->shipper_return_address;
+                }
             })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
