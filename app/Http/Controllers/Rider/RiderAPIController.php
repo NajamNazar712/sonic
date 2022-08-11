@@ -8978,12 +8978,10 @@ class RiderAPIController extends Controller
                             elseif ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
                                 $shipment->consignee_status_id = 30;
-
                                 $shipment->received_amount = $shipment->amount;
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                 ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-                                $details = ["tracking_number" => $shipment->tracking_number, "shipper_number_1" => $shipment->user->phone, "shipper_number_2" => $shipment->user->phone2, "consignee" => $shipment->consignee_name, "consignee_number_1" => $shipment->consignee_phone_number_1, "consignee_number_2" => $shipment->consignee_phone_number_2, "shipper_name" => $shipment->user->name];
-                                dd($details);
+                                $details = ['tracking_number' => $shipment->tracking_number, 'shipper_number_1' => $shipment->user->phone, 'shipper_number_2' => $shipment->user->phone2, 'consignee' => $shipment->consignee_name, 'consignee_number_1' => $shipment->consignee_phone_number_1, 'consignee_number_2' => $shipment->consignee_phone_number_2, 'shipper_name' => $shipment->user->name];
                                 NotificationsController::send(183, $details);
                                 NotificationsController::send(184, $details);
                             }
