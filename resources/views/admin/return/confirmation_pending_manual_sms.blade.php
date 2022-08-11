@@ -182,7 +182,7 @@
                 order: [[6, 'desc']],
                 scrollX: false, scrollY: '500px',
                 buttons: [
-                    @if (session('role_id') == 1 || count(array_intersect([782], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([571], session('permissions'))) !== 0)
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
