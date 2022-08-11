@@ -1089,6 +1089,7 @@ class ShipperAPIController extends Controller
                 $shipment = $shipment->first();
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
+                        $message = '';
                         $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
                         if ($rider_delivery->exists()) {
                             $data = array();
@@ -1103,7 +1104,8 @@ class ShipperAPIController extends Controller
                                 }
                                 $data["pod_image"] = $pod_image;
                             } else {
-                                $data["pod_image"] = "POD for the selected tracking number are not found";
+                                $data["pod_image"] = NULL;
+                                $message = "POD for the selected tracking number are not found";
                             }
 
                             if ($rider_delivery->cnic_image != null) {
@@ -1115,7 +1117,8 @@ class ShipperAPIController extends Controller
                                 }
                                 $data["cnic_image"] = $cnic_image;
                             } else {
-                                $data["cnic_image"] = "CNIC for the selected tracking number is not found";
+                                $data["cnic_image"] = NULL;
+                                $message .= PHP_EOL."CNIC for the selected tracking number is not found";
                             }
 
                             if ($rider_delivery->house_image != null) {
@@ -1127,7 +1130,8 @@ class ShipperAPIController extends Controller
                                 }
                                 $data["house_image"] = $house_image;
                             } else {
-                                $data["house_image"] = "House Image for the selected tracking number is not found";
+                                $data["house_image"] = NULL;
+                                $message .= PHP_EOL."House Image for the selected tracking number is not found";
                             }
 
                             if ($rider_delivery->audio_path != null) {
@@ -1139,17 +1143,19 @@ class ShipperAPIController extends Controller
                                 }
                                 $data["audio"] = $audio_path;
                             } else {
-                                $data["audio"] = "Audio for the selected tracking number is not found";
+                                $data["audio"] = NULL;
+                                $message .= PHP_EOL."Audio for the selected tracking number is not found";
                             }
 
                             if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
                                 $data["latitude"] = $rider_delivery->actual_location_latitude;
                                 $data["longitude"] = $rider_delivery->actual_location_longitude;
                             } else {
-                                $data["latitude"] = "Location for the selected tracking number is not found";
-                                $data["longitude"] = "Location for the selected tracking number is not found";
+                                $data["latitude"] = NULL;
+                                $data["longitude"] = NULL;
+                                $message .= PHP_EOL."Location for the selected tracking number is not found";
                             }
-                            return response()->json(['status' => 0, 'information' => $data]);
+                            return response()->json(['status' => 0, 'message' => $message, 'information' => $data]);
                         }
                         else{
                             return response()->json(['status' => 1, 'message' => 'PODs for the selected tracking number are not found']);
