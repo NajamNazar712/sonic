@@ -58,7 +58,7 @@ class EmployeeConfirmationDays extends Command
                         $employee_confirmation->probation_end_date = $probation_end_date;
                         $employee_confirmation->save();
 
-                        NotificationsController::send(182,$employee->id);
+                        NotificationsController::send(182, $employee);
                     }
                 }
             }

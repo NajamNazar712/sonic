@@ -9503,9 +9503,8 @@ else if ($id == 178) {
                 }
 				else if ($id == 182) {
 
-                    $employee = Employee::find($reference_1_id);
+                    $employee = $reference_1_id;
                     if($employee){
-                        
                         $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank">View</a>';
 
                         if (strpos($body, '[link]') !== FALSE) {
