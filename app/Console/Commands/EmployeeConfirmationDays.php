@@ -48,11 +48,11 @@ class EmployeeConfirmationDays extends Command
             foreach ($employees as $employee) {
                 $now = Carbon::now();
                 $difference = $now->diffInDays($employee->joining_date);
-                if($difference >= 85) {
+                if($difference >= 90) {
                     $check_employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id);
                     if(!$check_employee_confirmation->exists()){
 
-                        $probation_end_date = Carbon::today()->addDays(5)->toDateString();
+                        $probation_end_date = Carbon::today()->toDateString();
                         $employee_confirmation = new EmployeeConfirmation();
                         $employee_confirmation->employee_id = $employee->id;
                         $employee_confirmation->probation_end_date = $probation_end_date;
