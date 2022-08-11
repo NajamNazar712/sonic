@@ -9543,6 +9543,12 @@ else if ($id == 178) {
                     if (strpos($body, '[tracking_number]') !== FALSE) {
                         $body = str_replace('[tracking_number]', $detail['tracking_number'], $body);
                     }
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]', $detail['name'], $body);
+                    }
+                    if (strpos($body, '[shipper]') !== FALSE) {
+                        $body = str_replace('[shipper]', $detail['shipper_name'], $body);
+                    }
                     $to = $detail['shipper_number_1'];
                     self::sms($body, $to);
                     if ($detail['shipper_number_2'] != NULL) {

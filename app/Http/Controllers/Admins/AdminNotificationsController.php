@@ -755,7 +755,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['link','emp_id','name','designation','joining_date'];
         }
 		elseif($id == 183){
-            $details['fields'] = ['tracking_number'];
+            $details['fields'] = ['shipper','tracking_number'];
         }
         elseif($id == 184){
             $details['fields'] = ['consignee','tracking_number'];
