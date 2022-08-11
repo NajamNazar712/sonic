@@ -9533,6 +9533,8 @@ else if ($id == 178) {
                         if($employee->line_manager){
                             if($employee->line_manager->official_email){
                                 $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+                            }else{
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
                             }
                         }else{
                             $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
