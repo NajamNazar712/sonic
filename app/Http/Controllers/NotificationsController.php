@@ -9531,8 +9531,14 @@ else if ($id == 178) {
                         if (strpos($subject, '[name]') !== FALSE) {
                             $subject = str_replace('[name]', $employee->name, $subject);
                         }
+                        if($employee->line_manager){
+                            if($employee->line_manager->official_email){
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+                            }
+                        }else{
+                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+                        }
 
-                        $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
 
                         self::email($subject, $body, $to);
                     }
