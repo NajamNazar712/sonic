@@ -1071,7 +1071,7 @@ class ShipperAPIController extends Controller
         }
     }
 
-    public function shipment_location_tracking(Request $request)
+    public function shipment_pod_tracking(Request $request)
     {
         $rules = [
             'tracking_no' => ['required']
@@ -1087,28 +1087,82 @@ class ShipperAPIController extends Controller
             $shipment = Shipment::where('tracking_number', $request->tracking_no);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
-                if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
-                    $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
-                    if($rider_delivery->exists()){
-                        $rider_delivery = $rider_delivery->first();
-                        if ($rider_delivery->picture_path != null) {
-                            $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                            if ($exists) {
-                                //$journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
-                                $image = asset(Storage::url($rider_delivery->picture_path));
-                            }else {
-                                $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                if ($request->shipper_id == $shipment->pickup_address->user->id) {
+                    if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
+                        $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
+                        if ($rider_delivery->exists()) {
+                            $data = array();
+                            $rider_delivery = $rider_delivery->first();
+
+                            if ($rider_delivery->picture_path != null) {
+                                $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                if ($exists) {
+                                    $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                } else {
+                                    $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                }
+                                $data["pod_image"] = $pod_image;
+                            } else {
+                                $data["pod_image"] = "POD for the selected tracking number are not found";
                             }
-                            dd($image);
+
+                            if ($rider_delivery->cnic_image != null) {
+                                $exists = Storage::disk('public')->exists($rider_delivery->cnic_image);
+                                if ($exists) {
+                                    $cnic_image = asset(Storage::url($rider_delivery->cnic_image));
+                                } else {
+                                    $cnic_image = Storage::disk('s3')->temporaryUrl($rider_delivery->cnic_image, now()->addMinutes(15));
+                                }
+                                $data["cnic_image"] = $cnic_image;
+                            } else {
+                                $data["cnic_image"] = "CNIC for the selected tracking number is not found";
+                            }
+
+                            if ($rider_delivery->house_image != null) {
+                                $exists = Storage::disk('public')->exists($rider_delivery->house_image);
+                                if ($exists) {
+                                    $house_image = asset(Storage::url($rider_delivery->house_image));
+                                } else {
+                                    $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->house_image, now()->addMinutes(15));
+                                }
+                                $data["house_image"] = $house_image;
+                            } else {
+                                $data["house_image"] = "House Image for the selected tracking number is not found";
+                            }
+
+                            if ($rider_delivery->audio_path != null) {
+                                $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                if ($exists) {
+                                    $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                } else {
+                                    $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                }
+                                $data["audio"] = $audio_path;
+                            } else {
+                                $data["audio"] = "Audio for the selected tracking number is not found";
+                            }
+
+                            if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                $data["latitude"] = $rider_delivery->actual_location_latitude;
+                                $data["longitude"] = $rider_delivery->actual_location_longitude;
+                            } else {
+                                $data["latitude"] = "Location for the selected tracking number is not found";
+                                $data["longitude"] = "Location for the selected tracking number is not found";
+                            }
+                            return response()->json(['status' => 0, 'information' => $data]);
                         }
+                        else{
+                            return response()->json(['status' => 1, 'message' => 'PODs for the selected tracking number are not found']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not on valid status']);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Shipment is marked as Delivered']);
+                    return response()->json(['status' => 1, 'message' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
             }
-
         }
     }
 }
