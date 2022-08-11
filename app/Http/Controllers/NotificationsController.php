@@ -9548,7 +9548,7 @@ else if ($id == 178) {
 
 
 
-                        self::email($subject, $html, $to);
+                        self::email($subject, $body, $to);
                     }
 
                 }
