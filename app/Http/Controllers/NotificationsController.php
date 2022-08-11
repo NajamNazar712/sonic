@@ -9505,7 +9505,7 @@ else if ($id == 178) {
 
                     $employee = $reference_1_id;
                     if($employee){
-                        $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank">View</a>';
+                        $link = '<div style="margin-top: 20px"><a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Click To View</a></div>';
 
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
@@ -9530,15 +9530,31 @@ else if ($id == 178) {
                         if (strpos($subject, '[name]') !== FALSE) {
                             $subject = str_replace('[name]', $employee->name, $subject);
                         }
-                        if($employee->line_manager){
-                            if($employee->line_manager->official_email){
-                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
-                            }else{
-                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
-                            }
-                        }else{
-                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
-                        }
+
+
+                        $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
+                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                        <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                    </div>';
+
+                        $html .= '<div style="margin-bottom: 0px; background-color: #ffffff; vertical-align: middle;"><p>';
+
+                        $html .= $body . '</p>
+                    </div>
+                        <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
+                    </div>';
+//                        if($employee->line_manager){
+//                            if($employee->line_manager->official_email){
+//                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+//                            }else{
+//                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+//                            }
+//                        }else{
+//                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+//                        }
+                        $to = ['anas.anwer@trax.pk'];
+
 
 
                         self::email($subject, $body, $to);
