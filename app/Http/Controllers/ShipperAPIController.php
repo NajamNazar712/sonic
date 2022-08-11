@@ -1102,21 +1102,6 @@ class ShipperAPIController extends Controller
                             dd($image);
                         }
                     }
-                    $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
-                    if ($shipper_subscription->count() < 5) {
-                        $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
-                        if (!$shipment_exists->exists()) {
-                            $shipper_subscription_obj = new ShipperShipmentsSubscription();
-                            $shipper_subscription_obj->shipper_id = $request->shipper_id;
-                            $shipper_subscription_obj->shipment_id = $shipment->id;
-                            $shipper_subscription_obj->save();
-                            return response()->json(['status' => 0, 'message' => 'Shipment is Added to Subscription List']);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Shipment Already Added in Subscription List']);
-                        }
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Limit of Subscription List is Full']);
-                    }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Shipment is marked as Delivered']);
                 }
