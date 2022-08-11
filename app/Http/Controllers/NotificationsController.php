@@ -9533,18 +9533,16 @@ else if ($id == 178) {
 
                         $body .=  PHP_EOL. PHP_EOL.'<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">
                         <p>Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>';
-//                        if($employee->line_manager){
-//                            if($employee->line_manager->official_email){
-//                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
-//                            }else{
-//                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
-//                            }
-//                        }else{
-//                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
-//                        }
-                        $to = ['anas.anwer@trax.pk'];
 
-
+                        if($employee->line_manager){
+                            if($employee->line_manager->official_email){
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+                            }else{
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+                            }
+                        }else{
+                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+                        }
 
                         self::email($subject, $body, $to);
                     }
