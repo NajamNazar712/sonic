@@ -42,7 +42,7 @@ class EmployeeConfirmationDays extends Command
      */
     public function handle()
     {
-        $employees = Employee::where('confirmation_status',2)->whereIn('status_id',[1,3])->get();
+        $employees = Employee::where('confirmation_status',2)->where('employee_type_id',1)->whereIn('status_id',[1,3])->get();
 
         if($employees){
             foreach ($employees as $employee) {
