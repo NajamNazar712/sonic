@@ -9533,7 +9533,7 @@ else if ($id == 178) {
 
                         $body .=  PHP_EOL. PHP_EOL.'<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50"></p>
                     </div>
-                        <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
+                        <p>Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                     </div>';
 //                        if($employee->line_manager){
 //                            if($employee->line_manager->official_email){
@@ -9544,7 +9544,7 @@ else if ($id == 178) {
 //                        }else{
 //                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
 //                        }
-                        $to = ['anas.anwer95@gmail.com'];
+                        $to = ['anas.anwer@trax.pk'];
 
 
 
