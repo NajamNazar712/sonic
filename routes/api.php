@@ -477,8 +477,8 @@ Route::name('api.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('shipment_location_tracking', 'ShipperAPIController@shipment_location_tracking')->name('shipment_location_tracking');
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
-
             Route::prefix('subscription')->name('subscription.')->group(function () {
                 Route::post('add', 'ShipperAPIController@shipper_subscription_add')->name('add');
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');

@@ -31,6 +31,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
@@ -1045,6 +1046,62 @@ class ShipperAPIController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 if ($shipment->shipper_status_id != 14) {
+                    $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
+                    if ($shipper_subscription->count() < 5) {
+                        $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
+                        if (!$shipment_exists->exists()) {
+                            $shipper_subscription_obj = new ShipperShipmentsSubscription();
+                            $shipper_subscription_obj->shipper_id = $request->shipper_id;
+                            $shipper_subscription_obj->shipment_id = $shipment->id;
+                            $shipper_subscription_obj->save();
+                            return response()->json(['status' => 0, 'message' => 'Shipment is Added to Subscription List']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Shipment Already Added in Subscription List']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Limit of Subscription List is Full']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Shipment is marked as Delivered']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
+            }
+
+        }
+    }
+
+    public function shipment_location_tracking(Request $request)
+    {
+        $rules = [
+            'tracking_no' => ['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_no);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
+                    $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
+                    if($rider_delivery->exists()){
+                        $rider_delivery = $rider_delivery->first();
+                        if ($rider_delivery->picture_path != null) {
+                            $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                            if ($exists) {
+                                //$journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                $image = Storage::disk('public')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                            }else {
+                                $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                            }
+                            dd($image);
+                        }
+                    }
                     $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
                     if ($shipper_subscription->count() < 5) {
                         $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
