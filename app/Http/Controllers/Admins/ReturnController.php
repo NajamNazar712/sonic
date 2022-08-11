@@ -4865,7 +4865,7 @@ class ReturnController extends Controller
          }
         $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
             ->join('sms', 'sms.id', '=', 'rcp_manual_sms.sms_id')
-            ->select('rcp_manual_sms.id','rcp_manual_sms.tracking_number','rcp_manual_sms.recepient','rcp_manual_sms.recepient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
+            ->select('rcp_manual_sms.id','rcp_manual_sms.shipment_id','rcp_manual_sms.recipient','rcp_manual_sms.recipient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
 
         $datatable = DataTables::of($rcpmannualsms)
             ->editColumn('message', function ($rcpmannualsms) {
@@ -4928,21 +4928,21 @@ class ReturnController extends Controller
 
                     if($request->send_to == 'shipper'){
                         $sms_to = $shipment->user->phone;
-                        $recepient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
+                        $recipient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
                     }
                     else{
                         $sms_to = $shipment->consignee_phone_number_1;
-                        $recepient_name = $shipment->consignee_name;
+                        $recipient_name = $shipment->consignee_name;
                     }
 
                     $message = $request->message;
                     $sms_id = RCPSmsToConsignee::send_manual_sms($message,$sms_to);
 
                     $rcp_sms_log = new RcpManualSms();
-                    $rcp_sms_log->tracking_number = $shipment->tracking_number;
+                    $rcp_sms_log->shipment_id = $request->id;
                     $rcp_sms_log->sms_id = $sms_id;
-                    $rcp_sms_log->recepient = $request->send_to;
-                    $rcp_sms_log->recepient_name = $recepient_name;
+                    $rcp_sms_log->recipient = $request->send_to;
+                    $rcp_sms_log->recipient_name = $recipient_name;
                     $rcp_sms_log->phone = $sms_to;
                     $rcp_sms_log->message = $message;
                     $rcp_sms_log->agent = Auth::id();

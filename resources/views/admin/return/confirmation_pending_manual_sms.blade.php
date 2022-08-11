@@ -16,7 +16,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">Shipment ID</th>
                         <th class="border-primary border-darken-1">SMS Recipient</th>
                         <th class="border-primary border-darken-1">Consignee/Shipper Name</th>
                         <th class="border-primary border-darken-1">Consignee/Shipper Phone</th>
@@ -130,7 +130,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('Tracking Number');
+                            head.push('Shipment ID');
                             head.push('SMS Recipient');
                             head.push('Consignee/Shipper Name');
                             head.push('Consignee/Shipper Phone');
@@ -144,9 +144,9 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.recepient);
-                                row.push(values.recepient_name);
+                                row.push(values.shipment_id);
+                                row.push(values.recipient);
+                                row.push(values.recipient_name);
                                 row.push(values.phone);
                                 row.push(values.message_excel);
                                 row.push(values.datetime);
@@ -194,9 +194,9 @@
                 ],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, class: 'align-middle text-center serial_number',targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'rcp_manual_sms.tracking_number', class: 'align-middle text-center tracking_number'},
-                    {data: 'recepient', name: 'rcp_manual_sms.recepient', class: 'align-middle text-center recepient',orderable: false},
-                    {data: 'recepient_name', name: 'rcp_manual_sms.recepient_name', class: 'align-middle text-center recepient_name'},
+                    {data: 'shipment_id', name: 'rcp_manual_sms.shipment_id', class: 'align-middle text-center shipment_id'},
+                    {data: 'recipient', name: 'rcp_manual_sms.recipient', class: 'align-middle text-center recipient',orderable: false},
+                    {data: 'recipient_name', name: 'rcp_manual_sms.recipient_name', class: 'align-middle text-center recipient_name'},
                     {data: 'phone', name: 'rcp_manual_sms.phone', class: 'align-middle text-center phone'},
                     {data: 'message', name: 'rcp_manual_sms.message', class: 'align-middle message',orderable: false},
                     {data: 'datetime', name: 'rcp_manual_sms.created_at', class: 'align-middle text-center datetime'},
@@ -214,7 +214,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var recepient_drop = '<select name="status_select" id="status_select" class="select2 form-control">'+
+                    var recipient_drop = '<select name="status_select" id="status_select" class="select2 form-control">'+
                     '<option value="shipper">Shipper</option>' +
                     '<option value="consignee">Consignee</option>' +
                     '</select>';
@@ -228,8 +228,8 @@
 
                         if ($(header).is('.serial_number')|| $(header).is('.message')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.recepient')){
-                            $(recepient_drop).appendTo($(search))
+                        }else if($(header).is('.recipient')){
+                            $(recipient_drop).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
