@@ -11,10 +11,10 @@ class RCPManualSMSModulePermissionsSeeder extends Seeder
      */
     public function run()
     {
-//        DB::table('module_permissions')->insert(array(
-//            array('id' => 781, 'name' => 'RCP Manual SMS Log - View', 'module_id' => 7),
-//            array('id' => 782, 'name' => 'RCP Manual SMS Log Excel - View', 'module_id' => 7),
-//        ));
+        DB::table('module_permissions')->insert(array(
+            array('id' => 781, 'name' => 'RCP Manual SMS Log - View', 'module_id' => 7),
+            array('id' => 782, 'name' => 'RCP Manual SMS Log Excel - View', 'module_id' => 7),
+        ));
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 570, 'screen_name' => 'RCP Manual SMS Log', 'action'=> 'View'),
