@@ -10320,43 +10320,42 @@ class AdminReportsController extends Controller
 
         foreach ($crm_count_records as $key => $value) {
             $remaining_count_val = 0;
-            
-            $crm_count_data[$key]['count_days'] = $value->count();
-            $avg_closed = 0;
-            $avg_remaining = 0;
-            foreach ($value as $item) {
-                if((($item->pending + $item->new_launched) - $item->closed) < 0){
-                    $remaining_count_val = 0;
+            if(count($value) > 0){
+                $crm_count_data[$key]['count_days'] = count($value);
+                $avg_closed = 0;
+                $avg_remaining = 0;
+                foreach ($value as $item) {
+                    if((($item->pending + $item->new_launched) - $item->closed) < 0){
+                        $remaining_count_val = 0;
 
-                }else{
-                    $remaining_count_val = (($item->pending + $item->new_launched) - $item->closed);
+                    }else{
+                        $remaining_count_val = (($item->pending + $item->new_launched) - $item->closed);
 
+                    }
+                    if ($item->pending + $item->new_launched == 0) {
+                        $avg_closed += 0;
+                        $avg_remaining += 0;
+                        $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
+                        $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
+                    } else {
+                        $avg_closed += ($item->closed / ($item->pending + $item->new_launched)) * 100;
+                        $avg_remaining += ($remaining_count_val / ($item->pending + $item->new_launched)) * 100;
+                        $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
+                        $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((($remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
+                    }
+                    $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+                    $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+                    $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+                    $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+                    $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+                    $crm_count_data[$key]['data'][$item->id]['remaining'] = $remaining_count_val;
+                    $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
+                    $inner_pending = $item->pending;
                 }
-                if ($item->pending + $item->new_launched == 0) {
-                    $avg_closed += 0;
-                    $avg_remaining += 0;
-                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
-                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
-                } else {
-                    $avg_closed += ($item->closed / ($item->pending + $item->new_launched)) * 100;
-                    $avg_remaining += ($remaining_count_val / ($item->pending + $item->new_launched)) * 100;
-                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / ($item->pending + $item->new_launched)) * 100), 2);
-                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format((($remaining_count_val / ($item->pending + $item->new_launched)) * 100), 2);
-                }
-                $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
-                $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
-                $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
-                $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
-                $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
-                $crm_count_data[$key]['data'][$item->id]['remaining'] = $remaining_count_val;
-                $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
-                $inner_pending = $item->pending;
+                $crm_count_data[$key]['weekly_close'] = number_format($avg_closed / $value->count(), 2);
+                $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining / $value->count(), 2);
             }
-            $crm_count_data[$key]['weekly_close'] = number_format($avg_closed / $value->count(), 2);
-            $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining / $value->count(), 2);
         }
-
-
         return $crm_count_data;
     }
 
