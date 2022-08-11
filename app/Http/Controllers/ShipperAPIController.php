@@ -1089,7 +1089,7 @@ class ShipperAPIController extends Controller
                 $shipment = $shipment->first();
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
-                        $message = '';
+                        $message = array();
                         $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
                         if ($rider_delivery->exists()) {
                             $data = array();
@@ -1105,7 +1105,7 @@ class ShipperAPIController extends Controller
                                 $data["pod_image"] = $pod_image;
                             } else {
                                 $data["pod_image"] = NULL;
-                                $message = "POD for the selected tracking number are not found";
+                                array_push($message, "POD for the selected tracking number are not found");
                             }
 
                             if ($rider_delivery->cnic_image != null) {
@@ -1118,7 +1118,7 @@ class ShipperAPIController extends Controller
                                 $data["cnic_image"] = $cnic_image;
                             } else {
                                 $data["cnic_image"] = NULL;
-                                $message .= PHP_EOL."CNIC for the selected tracking number is not found";
+                                array_push($message,"CNIC for the selected tracking number is not found");
                             }
 
                             if ($rider_delivery->house_image != null) {
@@ -1131,7 +1131,7 @@ class ShipperAPIController extends Controller
                                 $data["house_image"] = $house_image;
                             } else {
                                 $data["house_image"] = NULL;
-                                $message .= PHP_EOL."House Image for the selected tracking number is not found";
+                                array_push($message, "House Image for the selected tracking number is not found");
                             }
 
                             if ($rider_delivery->audio_path != null) {
@@ -1144,7 +1144,7 @@ class ShipperAPIController extends Controller
                                 $data["audio"] = $audio_path;
                             } else {
                                 $data["audio"] = NULL;
-                                $message .= PHP_EOL."Audio for the selected tracking number is not found";
+                                array_push($message, "Audio for the selected tracking number is not found");
                             }
 
                             if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
@@ -1153,21 +1153,21 @@ class ShipperAPIController extends Controller
                             } else {
                                 $data["latitude"] = NULL;
                                 $data["longitude"] = NULL;
-                                $message .= PHP_EOL."Location for the selected tracking number is not found";
+                                array_push($message, "Location for the selected tracking number is not found");
                             }
                             return response()->json(['status' => 0, 'message' => $message, 'information' => $data]);
                         }
                         else{
-                            return response()->json(['status' => 1, 'message' => 'PODs for the selected tracking number are not found']);
+                            return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
                         }
                     } else {
-                        return response()->json(['status' => 1, 'message' => 'Shipment is not on valid status']);
+                        return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
+                    return response()->json(['status' => 1, 'error' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
+                return response()->json(['status' => 1, 'error' => 'Invalid Tracking Number']);
             }
         }
     }
