@@ -1095,7 +1095,7 @@ class ShipperAPIController extends Controller
                             $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
                             if ($exists) {
                                 //$journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
-                                $image = Storage::disk('public')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                $image = asset(Storage::url($rider_delivery->picture_path));
                             }else {
                                 $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
                             }
