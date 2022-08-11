@@ -227,7 +227,7 @@
                                 row.push(values.order_id);
                                 row.push(values.shipper); 
                                 row.push(values.shipper_phone); // to be changed
-                                row.push(values.shipper_address); // to be changed
+                                row.push(values.shipper_return_address); // to be changed
                                 row.push(values.total_attempt);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -464,8 +464,8 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'shipper_phone', name: 'u.phone', class: 'align-middle shipper_phone'},
-                    {data: 'shipper_address', name: 'u.address', class: 'align-middle shipper_address'},
+                    {data: 'shipper_phone', name: 'usi.phone', class: 'align-middle shipper_phone'},
+                    {data: 'shipper_return_address', name: 'usi.pickup_address', class: 'align-middle shipper_return_address'},
                     {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
