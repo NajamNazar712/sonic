@@ -1155,7 +1155,7 @@ class ShipperAPIController extends Controller
                                 $data["longitude"] = NULL;
                                 array_push($message, "Location");
                             }
-                            return response()->json(['status' => 0, 'message' => implode(',', $message). ' for the selected tracking number is not found', 'information' => $data]);
+                            return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
                         }
                         else{
                             return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
