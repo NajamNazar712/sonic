@@ -12082,12 +12082,8 @@ class AdminDashboardController extends Controller
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                if($user->corporate_rate_type_id != 3){
                     $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
-                }
-                else{
-                    $old_corporate_account = CorporateDefaultHistoryRateStatus::where('user_id', $user_id);
-                }
+
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_corporate_account_dates as $date) {
