@@ -1272,6 +1272,8 @@ class Permission
             'reports.employee_confirmation.index' => 786,
             'reports.employee_confirmation.list' => 786,
 
+            'settings.complain_portal_shippers.index' => 788,
+            
             
         ],
 

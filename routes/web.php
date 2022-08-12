@@ -433,6 +433,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
             Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
             Route::post('feedback', 'Shippers\ShipperCRMController@customer_feedback')->name('feedback');
+            Route::post('card_data', 'Shippers\ShipperCRMController@card_data')->name('card_data');
 
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
@@ -3430,6 +3431,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@booking_destination_keyword_update')->name('update');
             Route::get('address_verify', 'Admins\GlobalSettingsController@address_verify')->name('address_verify');
         });
+        Route::prefix('complain_portal_shippers')->name('complain_portal_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@complain_portal_shippers')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@complain_portal_shippers_update')->name('update');
+        });
+        
 
 	});
 
