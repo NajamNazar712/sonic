@@ -15,13 +15,6 @@ class DwsWeightChargesController extends Controller
     static public function add($user_id, $shipping_mode_id, $dws_weight_status,$admin_id)
     {
 
-        DwsWeightChargesHistory::create([
-            'user_id' => $user_id,
-            'shipping_mode_id' => $shipping_mode_id,
-            'dws_weight_status' => $dws_weight_status,
-            'admin_id' => $admin_id
-        ]);
-
         PendingDwsWeightCharges::create([
             'user_id' => $user_id,
             'shipping_mode_id' => $shipping_mode_id,
@@ -32,13 +25,6 @@ class DwsWeightChargesController extends Controller
     static public function edit($user_id, $shipping_mode_id, $dws_weight_status,$admin_id)
     {
         PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
-
-        DwsWeightChargesHistory::create([
-            'user_id' => $user_id,
-            'shipping_mode_id' => $shipping_mode_id,
-            'dws_weight_status' => $dws_weight_status,
-            'admin_id' => $admin_id
-        ]);
 
         PendingDwsWeightCharges::create([ 
             'user_id' => $user_id,

@@ -159,6 +159,7 @@ use App\Http\Models\PendingCorporateDefaultDiscountCharge;
 use App\Http\Models\PendingCorporateDefaultInsuranceCharges;
 use App\Http\Models\PendingCorporateDefaultCashHandlingCharges;
 use App\Http\Models\PendingDwsWeightCharges;
+use App\Http\Models\DwsWeightChargesHistory;
 
 class AdminCorporateAccountsController extends Controller
 {
@@ -11477,31 +11478,13 @@ class AdminCorporateAccountsController extends Controller
 
     public function view_rates_index($id,$date =null)
     {
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
-
+        
         $on_dws_charges = null;
         $ol_dws_charges = null;
         $detain_dws_charges = null;
         $sameday_dws_charges = null;
-
-        if($dws_weight->exists()){
-            $dws_weight = $dws_weight->get();
-            foreach ($dws_weight as $value) {
-                if($value->shipping_mode_id == 1){
-                    $on_dws_charges = $value->dws_weight_status;
-
-                }elseif($value->shipping_mode_id == 2){
-                    $ol_dws_charges = $value->dws_weight_status;
-
-                }elseif($value->shipping_mode_id == 3){
-                    $detain_dws_charges = $value->dws_weight_status;
-                    
-                }elseif($value->shipping_mode_id == 4){
-                    $sameday_dws_charges = $value->dws_weight_status;
-                    
-                }
-            }
-        }
+        
+        
 
         $packaging_invoice = null;
         $packaging_invoice = CorporateUserPackagingInvoice::where('user_id',$id);
@@ -11513,6 +11496,25 @@ class AdminCorporateAccountsController extends Controller
         $rate_type = $user->corporate_rate_type_id;
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         if($date == null){
+            $dws_weight = DwsWeightCharges::where('user_id',$id);
+            if($dws_weight->exists()){
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if($value->shipping_mode_id == 1){
+                        $on_dws_charges = $value->dws_weight_status;
+
+                    }elseif($value->shipping_mode_id == 2){
+                        $ol_dws_charges = $value->dws_weight_status;
+
+                    }elseif($value->shipping_mode_id == 3){
+                        $detain_dws_charges = $value->dws_weight_status;
+                        
+                    }elseif($value->shipping_mode_id == 4){
+                        $sameday_dws_charges = $value->dws_weight_status;
+                        
+                    }
+                }
+            }
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             if($rate_type == 1){
@@ -11536,6 +11538,26 @@ class AdminCorporateAccountsController extends Controller
         }
         else{
             $tomorrow = Carbon::parse($date)->addDay(1);
+            
+            $dws_weight = DwsWeightChargesHistory::where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow);
+            if($dws_weight->exists()){
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if($value->shipping_mode_id == 1){
+                        $on_dws_charges = $value->dws_weight_status;
+
+                    }elseif($value->shipping_mode_id == 2){
+                        $ol_dws_charges = $value->dws_weight_status;
+
+                    }elseif($value->shipping_mode_id == 3){
+                        $detain_dws_charges = $value->dws_weight_status;
+                        
+                    }elseif($value->shipping_mode_id == 4){
+                        $sameday_dws_charges = $value->dws_weight_status;
+                        
+                    }
+                }
+            }
             $switches = HistoryCorporateRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $min_weight = HistoryCorporateMinChargeableWeight::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
 
