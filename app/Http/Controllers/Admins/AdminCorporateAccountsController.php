@@ -5220,6 +5220,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -5454,6 +5457,9 @@ class AdminCorporateAccountsController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
+
             }
             //Detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
@@ -5685,6 +5691,9 @@ class AdminCorporateAccountsController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -5913,6 +5922,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
             WmsPendingPerProductCharge::where('user_id', $id)->delete();
@@ -8159,6 +8171,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -8387,6 +8402,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
 
             }
             //Detain
@@ -8617,6 +8635,9 @@ class AdminCorporateAccountsController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -8845,6 +8866,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
             WmsPendingPerProductCharge::where('user_id', $id)->delete();
@@ -13994,6 +14018,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
 
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -14347,6 +14374,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
+
             }
 
             //detain
@@ -14703,6 +14733,9 @@ class AdminCorporateAccountsController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
 
             //sameday
@@ -15055,6 +15088,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
 
             }
 
@@ -15912,6 +15948,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -16133,6 +16172,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
+
             }
             //Detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
@@ -16354,6 +16396,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -16572,6 +16617,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
 
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
@@ -18707,6 +18755,8 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -18926,6 +18976,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
 
             }
             //Detain
@@ -19147,6 +19200,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -19366,6 +19422,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
             WmsPendingPerProductCharge::where('user_id', $id)->delete();
@@ -24665,6 +24724,9 @@ class AdminCorporateAccountsController extends Controller
                 }
 
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
 
             //overland
@@ -25027,6 +25089,9 @@ class AdminCorporateAccountsController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
+
             }
 
             //detain
@@ -25388,6 +25453,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
 
             //sameday
@@ -25712,6 +25780,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
                 $wms_user_info = WmsUserInformation::where('user_id', $id);
@@ -26624,6 +26695,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -26852,6 +26926,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
 
             }
             //Detain
@@ -27082,6 +27159,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -27309,6 +27389,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
 
             WmsPendingUserInformation::where('user_id', $id)->delete();
@@ -29406,6 +29489,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 1);
+
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -29634,6 +29720,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 2);
+
             }
             //Detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
@@ -29861,6 +29950,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 3);
+
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -30086,6 +30178,9 @@ class AdminCorporateAccountsController extends Controller
                 }else{
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
+            }else{
+                DwsWeightChargesController::delete_dws_rate($id, 4);
+
             }
 
             WmsPendingUserInformation::where('user_id', $id)->delete();
