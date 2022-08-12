@@ -37,16 +37,8 @@ class DwsWeightChargesController extends Controller
 
     static public function delete_dws_rate($user_id, $shipping_mode_id)
     {
-        PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
-
-        DwsWeightChargesHistory::create([
-            'user_id' => $user_id,
-            'shipping_mode_id' => $shipping_mode_id,
-            'dws_weight_status' => 0,
-            'admin_id' => 0
-        ]);
-
         
+        PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
 
     }
 
