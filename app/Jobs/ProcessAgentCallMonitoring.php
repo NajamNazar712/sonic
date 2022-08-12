@@ -73,16 +73,16 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                 ->pluck('agent_id')
                 ->toArray();
 
-            if(count($admin_ids) > 0){
+//            if(count($admin_ids) > 0){
 
-              // $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();previous
+               $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
                
-                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
-                ->whereIn('admins.id', $admin_ids)
-                ->where('admins.role_id', 18)
-                ->where('admins.status',1)
-                ->where('ea.clock_out_datetime','=',null)
-                ->whereDate('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->pluck('admins.id')->toArray();
+//                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
+//                ->whereIn('admins.id', $admin_ids)
+//                ->where('admins.role_id', 18)
+//                ->where('admins.status',1)
+//                ->where('ea.clock_out_datetime','=',null)
+//                ->whereDate('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->pluck('admins.id')->toArray();
 
                 $recs = array();
                 if(count($admins) > 0){
@@ -113,7 +113,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                     }
 
                 }
-            }
+//            }
         }
 
     }

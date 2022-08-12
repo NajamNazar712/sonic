@@ -306,7 +306,7 @@ class ShipperReturnController extends Controller
         if($parcel){
             if(!in_array($parcel->shipper_status_id, [20, 52])){
 
-                if (!$parcel->packaging_material_request) {
+//                if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
 
@@ -319,16 +319,16 @@ class ShipperReturnController extends Controller
                     AdminFinanceController::add_payment($request->shipment_id, 1);
                     ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
 
-                }
-                else {
-                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                    ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, NULL, session('user_id'),NULL);
-
-
-//                NotificationsController::send(15, 0, $request->shipment_id);
-//                NotificationsController::send(16, 0, $request->shipment_id);
-                }
+//                }
+//                else {
+//                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+//                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+//                    ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, NULL, session('user_id'),NULL);
+//
+//
+////                NotificationsController::send(15, 0, $request->shipment_id);
+////                NotificationsController::send(16, 0, $request->shipment_id);
+//                }
 
                 
                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
@@ -363,7 +363,7 @@ class ShipperReturnController extends Controller
                     $remark_inp = "remark.$shipment";
 
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-                    if (!$parcel->packaging_material_request) {
+//                    if (!$parcel->packaging_material_request) {
 
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
@@ -375,13 +375,13 @@ class ShipperReturnController extends Controller
 
                         AdminFinanceController::add_payment($shipment, 1);
                         ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
-                    }
-                    else {
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                        ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
-
-                    }
+//                    }
+//                    else {
+//                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+//                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+//                        ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
+//
+//                    }
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
                    if($return_assign_shipment){

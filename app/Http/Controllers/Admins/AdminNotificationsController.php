@@ -511,7 +511,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['preview'];
         }
         else if ($id == 113){
-            $details['fields'] = ['contact_person', 'link'];
+            $details['fields'] = ['contact_person', 'link','sales_person','sales_person_contact'];
         }
         else if ($id == 114){
             $details['fields'] = ['code'];
@@ -747,10 +747,14 @@ class AdminNotificationsController extends Controller
 		else if ($id == 178)
         {
             $details['fields'] = ['name'];
-        }		else if ($id == 181)
+        }else if ($id == 181)
         {
             $details['fields'] = ['name','reason'];
-        }		return $details;
+        }else if ($id == 182)
+        {
+            $details['fields'] = ['link','emp_id','name','designation','joining_date'];
+        }		
+        return $details;
     }
 
     public function edit(Request $request) {

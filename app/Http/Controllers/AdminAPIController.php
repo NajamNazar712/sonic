@@ -22,6 +22,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -4617,14 +4618,14 @@ class AdminAPIController extends Controller
             $leave = EmployeeLeave::find($request->leave_id);
             if ($leave) {
                 $employee = Employee::find($leave->employee_id);
-                if($employee) {
+                if ($employee) {
                     $data['trax_id'] = $employee->trax_id;
                     $data['name'] = $employee->name;
                     if ($leave->employee_type_id == 1) {
                         $data['designation'] = $employee->designation->name;
                         $data['department'] = $employee->department->name;
 
-                        $admin = Admin::where('trax_id',$employee->trax_id)->whereNotNull('trax_id')->first();
+                        $admin = Admin::where('trax_id', $employee->trax_id)->whereNotNull('trax_id')->first();
                         $role_id = $admin->role_id;
                         if ($role_id == 81) {
                             $data['user_type'] = 2;
@@ -4633,28 +4634,25 @@ class AdminAPIController extends Controller
                         } else {
                             $data['user_type'] = 0;
                         }
-                    }
-                    else if($leave->employee_type_id == 2) {
+                    } else if ($leave->employee_type_id == 2) {
                         $data['designation'] = "Rider";
                         $data['department'] = "Operations";
                         $data['user_type'] = 0;
-                    }
-                    else {
+                    } else {
                         return response()->json(['status' => 1, 'message' => "Failed"]);
                     }
                     $data['approver_email'] = $employee->line_manager->email;
-                    $data['approver_name'] =  $employee->line_manager->name;
+                    $data['approver_name'] = $employee->line_manager->name;
                     return response()->json(['status' => 0, 'data' => $data]);
-                }
-                else{
+                } else {
                     return response()->json(['status' => 1, 'message' => "User not found"]);
                 }
             }
         } else {
             $employee_id = $request->admin_employee;
             $employee = Employee::find($employee_id);
-            if($employee) {
-                if($employee->line_manager_id == null || $employee->line_manager_id == 0){
+            if ($employee) {
+                if ($employee->line_manager_id == null || $employee->line_manager_id == 0) {
                     return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
                 }
                 $data = array();
@@ -4663,15 +4661,13 @@ class AdminAPIController extends Controller
                 $data['designation'] = $employee->designation->name;
                 $data['department'] = $employee->department->name;
                 $data['approver_email'] = $employee->line_manager->email;
-                $data['approver_name'] =  $employee->line_manager->name;
+                $data['approver_name'] = $employee->line_manager->name;
                 $role_id = $request->admin_role_id;
                 if ($role_id == 81) {
                     $data['user_type'] = 2;
-                }
-                elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
                     $data['user_type'] = 1;
-                }
-                else {
+                } else {
                     $data['user_type'] = 0;
                 }
                 return response()->json(['status' => 0, 'data' => $data]);
@@ -4736,7 +4732,7 @@ class AdminAPIController extends Controller
                     $leave_request->save();
                     $message = "Leave Request submitted successfully";
                     $reporter = Employee::find($leave_request->reporter_id);
-                    $reporter = Admin::where('trax_id',$reporter->trax_id)->whereNotNull('trax_id')->first();
+                    $reporter = Admin::where('trax_id', $reporter->trax_id)->whereNotNull('trax_id')->first();
                     NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
                     NotificationsController::app_notification(12, $reporter->id, 1, $leave_request->id);
                 }
@@ -4824,14 +4820,12 @@ class AdminAPIController extends Controller
                     }
 
                     $user = Employee::find($employee_leave->employee_id);
-                    if($user) {
+                    if ($user) {
                         $datum['name'] = $user->name;
                         $datum['trax_id'] = $user->trax_id;
-                        if($employee_leave->type_id == 1)
-                        {
+                        if ($employee_leave->type_id == 1) {
                             $datum['designation'] = $user->designation->name;
-                        }
-                        elseif ($employee_leave->type_id == 2) {
+                        } elseif ($employee_leave->type_id == 2) {
                             $datum['designation'] = "Rider";
                         }
 
@@ -4939,27 +4933,22 @@ class AdminAPIController extends Controller
                     }
                     $employee_leaves->save();
                     $notify = false;
-                    if($employee_leaves->employee_type_id == 1)
-                    {
-                        $admin = Admin::where('employee_id',$employee_leaves->employee_id);
-                        if($admin->exists())
-                        {
+                    if ($employee_leaves->employee_type_id == 1) {
+                        $admin = Admin::where('employee_id', $employee_leaves->employee_id);
+                        if ($admin->exists()) {
                             $admin = $admin->first();
                             $user_id = $admin->id;
                             $notify = true;
                         }
-                    }
-                    else if($employee_leaves->employee_type_id == 2)
-                    {
-                        $rider = Rider::where('employee_id',$employee_leaves->employee_id);
-                        if($rider->exists())
-                        {
+                    } else if ($employee_leaves->employee_type_id == 2) {
+                        $rider = Rider::where('employee_id', $employee_leaves->employee_id);
+                        if ($rider->exists()) {
                             $rider = $rider->first();
                             $user_id = $rider->id;
                             $notify = true;
                         }
                     }
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(11, $user_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     }
                     return response()->json(['status' => 0, 'message' => "Leave request has been approved!"]);
@@ -5000,27 +4989,22 @@ class AdminAPIController extends Controller
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
                     $notify = false;
-                    if($employee_leaves->employee_type_id == 1)
-                    {
-                        $admin = Admin::where('employee_id',$employee_leaves->employee_id);
-                        if($admin->exists())
-                        {
+                    if ($employee_leaves->employee_type_id == 1) {
+                        $admin = Admin::where('employee_id', $employee_leaves->employee_id);
+                        if ($admin->exists()) {
                             $admin = $admin->first();
                             $user_id = $admin->id;
                             $notify = true;
                         }
-                    }
-                    else if($employee_leaves->employee_type_id == 2)
-                    {
-                        $rider = Rider::where('employee_id',$employee_leaves->employee_id);
-                        if($rider->exists())
-                        {
+                    } else if ($employee_leaves->employee_type_id == 2) {
+                        $rider = Rider::where('employee_id', $employee_leaves->employee_id);
+                        if ($rider->exists()) {
                             $rider = $rider->first();
                             $user_id = $rider->id;
                             $notify = true;
                         }
                     }
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(11, $user_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     }
                     return response()->json(['status' => 0, 'message' => "Leave request has been rejected!"]);
@@ -5118,11 +5102,11 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-
             return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
+
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -5132,6 +5116,22 @@ class AdminAPIController extends Controller
 
                 $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
+
+                //todo: now checking canceled shipment arrival
+                $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+                if($user)
+                {
+                    if($user->shipper_status_id == 17)
+                    {
+                        $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                        if($canceled_shipment)
+                        {
+                            return response()->json(false);
+                        }
+                    }
+                }
+                //todo: now checking canceled shipment arrival end
+
                 $dispute_check = CheckDisputeShipmentsController::check($shipment_id);
                 if (!$dispute_check) {
                     return response()->json(false);
@@ -6478,8 +6478,8 @@ class AdminAPIController extends Controller
     public function trax_directory_v2(Request $request)
     {
         $rules = [
-            'search_param' => ['required', 'min:3'],
-            'search_with' => ['required'],
+            'search_param' => ['nullable'],
+            'search_with' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -6489,38 +6489,26 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+
+            $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                ->join('cities as c', 'c.id', '=', 'e.city_id')
+                ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
+                ->where('admins.status', 1);
             if ($request->search_with == 1) {
-
-                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
-                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
-                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-                    ->join('cities as c', 'c.id', '=', 'e.city_id')
-                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
-                    ->where('e.name', 'like', '%' . $request->search_param . '%')
-                    ->where('admins.status', 1);
-
+                $admin_profile = $admin_profile->where('e.name', 'like', '%' . $request->search_param . '%');
             } elseif ($request->search_with == 2) {
-                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
-                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
-                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-                    ->join('cities as c', 'c.id', '=', 'e.city_id')
-                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
-                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
-                    ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
-                    ->where('admins.status', 1);
+                $admin_profile = $admin_profile->where(function ($query) use ($request) {
+                    $query->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                        ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0));
+                });
             } elseif ($request->search_with == 3) {
-                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
-                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
-                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-                    ->join('cities as c', 'c.id', '=', 'e.city_id')
-                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
-                    ->where('e.trax_id', $request->search_param)
-                    ->where('admins.status', 1);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
+                $admin_profile = $admin_profile->where('e.trax_id', $request->search_param);
+            }
+            if ($request->has("city_id")) {
+                $admin_profile = $admin_profile->where('e.city_id', $request->city_id);
             }
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->get();
@@ -7307,11 +7295,10 @@ class AdminAPIController extends Controller
             $leave = EmployeeAttendanceAdjustment::find($request->adjustment_id);
             if ($leave) {
                 $user = Employee::find($leave->employee_id);
-                if($user)
-                {
+                if ($user) {
                     $data['trax_id'] = $user->trax_id;
                     $data['name'] = $user->name;
-                    if($leave->employee_type_id == 1) {
+                    if ($leave->employee_type_id == 1) {
                         $data['designation'] = $user->designation->name;
                         $data['department'] = $user->department->name;
                         $role_id = $request->admin_role_id;
@@ -7322,19 +7309,16 @@ class AdminAPIController extends Controller
                         } else {
                             $data['user_type'] = 0;
                         }
-                    }
-                    else if($leave->employee_type_id == 2){
+                    } else if ($leave->employee_type_id == 2) {
                         $data['designation'] = "Rider";
                         $data['department'] = "Operations";
                         $data['user_type'] = 0;
-                    }
-                    else{
+                    } else {
                         return response()->json(['status' => 1, 'message' => "Failed"]);
                     }
                     $data['approver_email'] = $user->line_manager->email;
                     $data['approver_name'] = $user->line_manager->name;
-                }
-                 else {
+                } else {
                     return response()->json(['status' => 1, 'message' => "User not found"]);
                 }
             }
@@ -7342,7 +7326,7 @@ class AdminAPIController extends Controller
             $employee_id = $request->admin_employee;
             $employee = Employee::find($employee_id);
             if ($employee) {
-                if($employee->line_manager_id == null){
+                if ($employee->line_manager_id == null) {
                     return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
                 }
                 $data = array();
@@ -7419,26 +7403,21 @@ class AdminAPIController extends Controller
                     $leave_request->save();
                     $message = "Adjustment Request submitted successfully";
                     $notify = false;
-                    if($leave_request->employee_type_id == 1)
-                    {
-                        $user = Admin::where('employee_id',$reporter_id)->first();
-                        if($user)
-                        {
+                    if ($leave_request->employee_type_id == 1) {
+                        $user = Admin::where('employee_id', $reporter_id)->first();
+                        if ($user) {
                             $user_id = $user->id;
                             $notify = true;
                         }
-                    }
-                    elseif ($leave_request->employee_type_id == 1)
-                    {
-                        $user = Rider::where('employee_id',$reporter_id)->first();
-                        if($user)
-                        {
+                    } elseif ($leave_request->employee_type_id == 1) {
+                        $user = Rider::where('employee_id', $reporter_id)->first();
+                        if ($user) {
                             $user_id = $user->id;
                             $notify = true;
                         }
                     }
                     NotificationsController::app_notification(17, $admin_id, 1, $leave_request->id);
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
                     }
                 }
@@ -7502,7 +7481,7 @@ class AdminAPIController extends Controller
                     $datum['status'] = $employee_leave->status;
 
                     $user = Employee::find($employee_leave->employee_id);
-                    if($user) {
+                    if ($user) {
                         $datum['name'] = $user->name;
                         $datum['trax_id'] = $user->trax_id;
                         if ($employee_leave->type_id == 1) {
@@ -7593,25 +7572,20 @@ class AdminAPIController extends Controller
                     $attendance_action->save();
                     $employee_leaves->save();
                     $notify = false;
-                    if($employee_leaves->employee_type_id == 1)
-                    {
-                        $admin = Admin::where('employee_id',$employee_leaves->employee_id)->first();
-                        if($admin)
-                        {
+                    if ($employee_leaves->employee_type_id == 1) {
+                        $admin = Admin::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($admin) {
                             $user_id = $admin->id;
                             $notify = true;
                         }
-                    }
-                    else if($employee_leaves->employee_type_id == 2)
-                    {
-                        $rider = Rider::where('employee_id',$employee_leaves->employee_id)->first();
-                        if($rider)
-                        {
+                    } else if ($employee_leaves->employee_type_id == 2) {
+                        $rider = Rider::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($rider) {
                             $user_id = $rider->id;
                             $notify = true;
                         }
                     }
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(17, $user_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     }
                     return response()->json(['status' => 0, 'message' => "Adjustment request has been approved!"]);
@@ -7647,25 +7621,20 @@ class AdminAPIController extends Controller
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
                     $notify = false;
-                    if($employee_leaves->employee_type_id == 1)
-                    {
-                        $admin = Admin::where('employee_id',$employee_leaves->employee_id)->first();
-                        if($admin)
-                        {
+                    if ($employee_leaves->employee_type_id == 1) {
+                        $admin = Admin::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($admin) {
                             $user_id = $admin->id;
                             $notify = true;
                         }
-                    }
-                    else if($employee_leaves->employee_type_id == 2)
-                    {
-                        $rider = Rider::where('employee_id',$employee_leaves->employee_id)->first();
-                        if($rider)
-                        {
+                    } else if ($employee_leaves->employee_type_id == 2) {
+                        $rider = Rider::where('employee_id', $employee_leaves->employee_id)->first();
+                        if ($rider) {
                             $user_id = $rider->id;
                             $notify = true;
                         }
                     }
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(17, $user_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     }
                     return response()->json(['status' => 0, 'message' => "Adjustment request has been rejected!"]);
@@ -8899,16 +8868,14 @@ class AdminAPIController extends Controller
                         if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
                             $valid_shipments[] = $shipment_details->id;
                             $shipments_count++;
-                        }
-                        else{
+                        } else {
                             array_push($invalid_shipments, $shipment_details->tracking_number);
                         }
                     }
                 }
-                if(!empty($invalid_shipments)){
-                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) ".implode(',', $invalid_shipments)]);
-                }
-                elseif($shipments_count != 0) {
+                if (!empty($invalid_shipments)) {
+                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) " . implode(',', $invalid_shipments)]);
+                } elseif ($shipments_count != 0) {
 
                     $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
 
@@ -8990,8 +8957,7 @@ class AdminAPIController extends Controller
                     EmployeeAttendanceController::riders_attendance_mark($rider);
 
                     return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
-                }
-                else {
+                } else {
                     return response()->json(['status' => 1, 'message' => "Failed to Create Return Note"]);
                 }
 
@@ -9020,7 +8986,7 @@ class AdminAPIController extends Controller
         if ($deliveries->exists()) {
             $deliveries = $deliveries->get();
             $data = array();
-            foreach ($deliveries as $notes){
+            foreach ($deliveries as $notes) {
                 $notes['status_name'] = ($notes->status_id == 0) ? "Created" : "Updated";
                 $data[] = $notes;
             }
@@ -9348,8 +9314,7 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $admin_id = $request->admin_id;
             $return_note_id = $request->return_note_id;
             $return_note = ReturnNote::find($return_note_id);
@@ -9388,6 +9353,12 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'Return Note not found!']);
         }
+    }
+
+    public function trax_directory_index(Request $request)
+    {
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select('id', 'name')->get();
+        return response()->json(['status' => 0, 'cities' => $cities]);
     }
 
 }

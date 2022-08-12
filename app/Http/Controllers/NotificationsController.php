@@ -6790,6 +6790,13 @@ class NotificationsController extends Controller
                     if ($lead != null) {
                         $sales_person = Admin::find($lead->sale_person_id);
 
+                        if($sales_person->official_phone_number != null){
+                            $phone_number = $sales_person->official_phone_number;
+                        }
+                        else{
+                            $phone_number =  $sales_person->phone_number;
+                        }
+
                         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
                     <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
@@ -6805,7 +6812,7 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($body, '[sales_person_contact]') !== FALSE) {
-                            $body = str_replace('[sales_person_contact]', $sales_person->phone_number, $body);
+                            $body = str_replace('[sales_person_contact]', $phone_number, $body);
                         }
 
                         $link = '<div style="margin-top: 20px"><a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Click To Register</a></div>';
@@ -9493,6 +9500,49 @@ else if ($id == 178) {
                     $phone_number = $detail['contact_number'];
                     $to = $phone_number;
                     self::sms($body, $to);
+                }
+				else if ($id == 182) {
+
+                    $employee = Employee::find($reference_1_id);
+                    if($employee){
+                        
+                        $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank">View</a>';
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        if (strpos($body, '[emp_id]') !== FALSE) {
+                            $body = str_replace('[emp_id]', $employee->trax_id, $body);
+                        }
+                        if (strpos($body, '[name]') !== FALSE) {
+                            $body = str_replace('[name]', $employee->name, $body);
+                        }
+                        if (strpos($body, '[designation]') !== FALSE) {
+                            $body = str_replace('[designation]', $employee->designation->name, $body);
+                        }
+                        if (strpos($body, '[joining_date]') !== FALSE) {
+                            $body = str_replace('[joining_date]', $employee->joining_date, $body);
+                        }
+
+                        if (strpos($subject, '[emp_id]') !== FALSE) {
+                            $subject = str_replace('[emp_id]', $employee->trax_id, $subject);
+                        }
+
+                        if (strpos($subject, '[name]') !== FALSE) {
+                            $subject = str_replace('[name]', $employee->name, $subject);
+                        }
+                        if($employee->line_manager){
+                            if($employee->line_manager->official_email){
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+                            }
+                        }else{
+                            $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
+                        }
+
+
+                        self::email($subject, $body, $to);
+                    }
+
                 }
             }
         }

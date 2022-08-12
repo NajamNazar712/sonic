@@ -385,10 +385,9 @@ Route::name('api.')->group(function () {
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
-            Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
-            Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
             Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
             Route::post('trax_directory_v2', 'AdminAPIController@trax_directory_v2')->name('trax_directory_v2');
+            Route::get('trax_directory_index', 'AdminAPIController@trax_directory_index')->name('trax_directory_index');
 
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::post('list', 'AdminAPIController@leads_list')->name('list');
@@ -429,6 +428,10 @@ Route::name('api.')->group(function () {
 
         });
 
+        Route::middleware('AdminAPIDWSToken')->group(function () {
+            Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
+            Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
+        });
     });
 
     Route::prefix('retail_user')->name('retail_user.')->group(function() {

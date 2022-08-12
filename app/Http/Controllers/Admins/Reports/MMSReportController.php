@@ -71,20 +71,22 @@ class MMSReportController extends Controller
             })
             ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
                 $join->on('sjr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
                     ->where('sjr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,21,22,23,24,25,47,48,60))'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37,38) and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])
             ->whereBetween('sj.created_at', [$from,$to]);
@@ -140,7 +142,17 @@ class MMSReportController extends Controller
             })
             ->editColumn('received_or_refused_by', function ($sale) {
                 if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                    return $sale->received_or_refused_by;
+                    $received_or_refused_by = '';
+                    if($sale->received_or_refused_by){
+                        $received_or_refused_by = $sale->received_or_refused_by;
+                    }
+                    if($sale->cnic){
+                        $received_or_refused_by .= "|".$sale->cnic;
+                    }
+                    if($sale->relation){
+                        $received_or_refused_by .= "|".$sale->relation;
+                    }
+                    return $received_or_refused_by;
                 } else {
                     return '';
                 }

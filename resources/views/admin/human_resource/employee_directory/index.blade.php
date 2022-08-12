@@ -109,6 +109,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
+                                    <th class="border-primary border-darken-1">Official Email</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
                                     <th class="border-primary border-darken-1">Incentive Amount</th>
@@ -117,11 +118,14 @@
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Replacement Trax ID</th>
+                                    <th class="border-primary border-darken-1">Replacement Name</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1">Last Working Date</th>
+                                    <th class="border-primary border-darken-1">Confirmation Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -1162,6 +1166,7 @@
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
+                            head.push('Official Email');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
                             head.push('Incentive Amount');
@@ -1170,11 +1175,14 @@
                             head.push('Line Manager');
                             head.push('IBAN No.');
                             head.push('Zone Name');
+                            head.push('Repalcement Tax ID');
+                            head.push('Repalcement Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
                             head.push('Joining Date');
                             head.push('Last Working Date');
+                            head.push('Confirmation Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -1187,6 +1195,7 @@
                                 row.push(values.city);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
+                                row.push(values.official_email);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
                                 row.push(values.incentive_amount);
@@ -1195,11 +1204,15 @@
                                 row.push(values.line_manager);
                                 row.push(values.iban);
                                 row.push(values.zone_name);
+                                row.push(values.r_trax_id);
+                                row.push(values.r_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
                                 row.push(values.joining_date);
                                 row.push(values.last_working_date);
+                                row.push(values.confirmation_status);
+
                                 body.push(row);
                             });
                         },
@@ -1447,7 +1460,7 @@
                         d.filter_line_manager = $('#filter_line_manager').val();
                     }
                 },
-                order: [[19, 'desc']],
+                order: [[22, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -1461,6 +1474,7 @@
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
+                    {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
                     {data: 'incentive_amount', name: 'r.incentive_amount', class: 'align-middle incentive_amount'},
@@ -1469,11 +1483,14 @@
                     {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
+                    {data: 'r_trax_id', name: 'r_emp.trax_id', class: 'align-middle r_trax_id'},
+                    {data: 'r_name', name: 'r_emp.name', class: 'align-middle r_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
+                    {data: 'confirmation_status', name: 'employees.confirmation_status', class: 'align-middle confirmation_status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1495,6 +1512,12 @@
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
 
+
+                        
+                    var employee_confirmation_status = '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' +
+                        '<option value="2">Probation</option>'+
+                        '<option value="1">Permanent</option>'+
+                    '</select>';
                     var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
                         '</select>';
 
@@ -1532,6 +1555,13 @@
                         else if($(header).is('.rider_main_category'))
                         {
                             $(rider_main_categories).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.confirmation_status'))
+                        {
+                            $(employee_confirmation_status).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -1576,6 +1606,14 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
 
                     var zone_data = $.map({!! $employee_zones !!}, function (obj) {
                         obj.text = obj.name;

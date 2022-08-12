@@ -605,6 +605,8 @@ class Permission
             'reports.mms.index' => 780,
             'reports.mms.list' => 780,
 
+            'reports.crm_agent_wise_report.index' => 784,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
@@ -1262,6 +1264,15 @@ class Permission
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
             'qa.cx_training.list' =>777,
+
+            'return.confirmation_pending_manual_sms' =>781,
+            'human_resource.employee_confirmation.index' => 783,
+            'human_resource.employee_confirmation.list' => 783,
+            
+            'reports.employee_confirmation.index' => 786,
+            'reports.employee_confirmation.list' => 786,
+
+            
         ],
 
         'shipper' => [
