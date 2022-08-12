@@ -160,6 +160,7 @@ use App\Http\Models\PendingCorporateDefaultInsuranceCharges;
 use App\Http\Models\PendingCorporateDefaultCashHandlingCharges;
 use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\DwsWeightChargesHistory;
+use App\Http\Models\DwsWeightCharges;
 
 class AdminCorporateAccountsController extends Controller
 {
