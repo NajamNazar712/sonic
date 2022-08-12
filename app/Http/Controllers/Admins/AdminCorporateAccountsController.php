@@ -2270,7 +2270,6 @@ class AdminCorporateAccountsController extends Controller
     public function edit_rates_submit(Request $request, $id)
     {
 
-
         $user = User::find($id);
         $new_rate_type_id = $user->new_rate_type_id;
 
@@ -13113,6 +13112,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_zone_wise_submit(Request $request, $id){
+       
         $user = User::find($id);
 
         //dd($user['status'],$user['new_rate_type_id']);
@@ -18695,7 +18695,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->sameday_dws_weight == 2){
+                    if($request->on_dws_weight == 2){
                         DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
 
@@ -18914,7 +18914,7 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->sameday_dws_weight == 2){
+                    if($request->ol_dws_weight == 2){
                         DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
 
@@ -19135,7 +19135,7 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->sameday_dws_weight == 2){
+                    if($request->detain_dws_weight == 2){
                         DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
@@ -24652,7 +24652,7 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
+                    if($request->on_dws_weight == 2){
                         DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
                     }else{
