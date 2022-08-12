@@ -73,6 +73,7 @@ class DwsWeightChargesController extends Controller
                 ]);
             }
         }
+        PendingDwsWeightCharges::where('user_id',$user_id)->delete();
        
     }
 }
