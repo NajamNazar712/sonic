@@ -91,6 +91,7 @@
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Sales Person</th>
                                         <th class="border-primary border-darken-1">Start Date</th>
@@ -218,10 +219,74 @@
                     return {body: body, header: head};
                 }
             } );
-
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    @if (session('role_id') == 44 || session('role_id') == 1 )
+
+                    {
+                        text: 'Delete',
+                        className: 'btn btn-primary delete_sale_person',
+                        enabled:false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+
+                                swal({
+                                    text: 'Are you sure, you want to Delete?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+
+                                        $.ajax({
+                                            url: '{!! route('admin.settings.sales.targets.delete') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'sale_person_ids[]': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            if (data.status === 0) {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                            selected_rows = [];
+                                            table.rows().deselect();
+                                            table.draw(true);
+                                            table.button('.delete_sale_person').disable();
+
+                                        });
+                                    }
+                                });
+
+                            }else{
+                                var error = "Not selected any Sale Person!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+
+                    @endif
                     {
                         extend: 'excel',
                         title: 'Sales Person Targets',
@@ -230,6 +295,13 @@
                     },
                     'reset',
                 ],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
+                rowId: 'id',
                 scrollX: true,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -242,6 +314,7 @@
                 ajax: '{{ route('admin.settings.sales.targets.list') }}',
                 order: [[1, 'desc']],
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
                     {data: 'start_date', name: 'sale_person_targets.start_date', class: 'align-middle start_date'},
@@ -254,7 +327,12 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
+
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -267,7 +345,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.per_day_revenue_target') || $(header).is('.per_month_revenue_target')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.per_day_revenue_target') || $(header).is('.per_month_revenue_target')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -284,6 +362,23 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            var id = parseInt($(this).parent('tr').attr('id'));
+            var index = $.inArray(id, selected_rows);
+            if (index === -1) {
+                selected_rows.push(id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+            if (selected_rows.length > 0) {
+                table.button('.delete_sale_person').enable();
+            }
+            else {
+                table.button('.delete_sale_person').disable();
+            }
+        });
 
         @endif
 
