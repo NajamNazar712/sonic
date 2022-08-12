@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -12081,7 +12082,8 @@ class AdminDashboardController extends Controller
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+                    $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_corporate_account_dates as $date) {
