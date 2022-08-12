@@ -1714,8 +1714,15 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_index($id)
     {
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
 
+        $user = User::find($id);
+
+        if($user->rate_status == 0){
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
+
+        }else{
+            $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+        }
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -1748,7 +1755,6 @@ class AdminCorporateAccountsController extends Controller
         }
 
 
-        $user = User::find($id);
         $rate_type = $user->corporate_rate_type_id;
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $commission_percentage = '';
@@ -4459,7 +4465,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1 ,'rates_updated_by' => Auth::id()]);
             if ($request->authorize == 1) {
-                DwsWeightChargesController::approve($id);
+                // DwsWeightChargesController::approve($id);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -15216,7 +15222,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             if ($request->authorize == 1) {
-                DwsWeightChargesController::approve($id);
+                // DwsWeightChargesController::approve($id);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -23331,7 +23337,15 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_default($id){
 
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
+        $user = User::find($id);
+
+        if($user->rate_status == 0){
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
+
+        }else{
+            $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+        }
+
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -23362,7 +23376,6 @@ class AdminCorporateAccountsController extends Controller
             $packaging_invoice = $packaging_invoice->first();
         }
 
-        $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
         $on = null;
@@ -25862,7 +25875,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             if($request->authorize == 1){
-                DwsWeightChargesController::approve($id);
+                // DwsWeightChargesController::approve($id);
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
@@ -35754,7 +35767,7 @@ class AdminCorporateAccountsController extends Controller
     public function default_view_rates_index($id)
     {
         $user = User::find($id);
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
+        $dws_weight = DwsWeightCharges::where('user_id',$id);
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
