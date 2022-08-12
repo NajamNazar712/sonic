@@ -37,7 +37,7 @@ class DwsWeightChargesController extends Controller
 
     static public function delete_dws_rate($user_id, $shipping_mode_id)
     {
-        
+
         PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
 
     }
@@ -46,6 +46,8 @@ class DwsWeightChargesController extends Controller
     {
 
         if($autorize == 1){
+            DwsWeightCharges::where('user_id',$user_id)->delete();
+
             $pending_wight = PendingDwsWeightCharges::where('user_id',$user_id);
             if($pending_wight->exists()){
                 $pending_wight = $pending_wight->get();
@@ -61,6 +63,9 @@ class DwsWeightChargesController extends Controller
                 }
             }
         }else{
+
+            DwsWeightCharges::where('user_id',$user_id)->delete();
+
             $pending_wight = PendingDwsWeightCharges::where('user_id',$user_id);
             if($pending_wight->exists()){
                 $pending_wight = $pending_wight->get();

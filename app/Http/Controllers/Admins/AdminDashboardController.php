@@ -1992,7 +1992,7 @@ class AdminDashboardController extends Controller
 
         $pending_dws = PendingDwsWeightCharges::where('user_id', $id);
         if($pending_dws->exists()){
-            $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+            $dws_weight = $pending_dws;
 
         }else{
             $dws_weight = DwsWeightCharges::where('user_id', $id);
