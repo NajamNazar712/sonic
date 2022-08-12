@@ -1990,12 +1990,12 @@ class AdminDashboardController extends Controller
     {
         $user = User::find($id);
 
-        if($user->rate_status == 0){
-            $dws_weight = DwsWeightCharges::where('user_id', $id);
-
-        }else{
+        $pending_dws = PendingDwsWeightCharges::where('user_id', $id);
+        if($pending_dws->exists()){
             $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
 
+        }else{
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
         }
 
         $on_dws_charges = null;
@@ -4293,7 +4293,7 @@ class AdminDashboardController extends Controller
                 }
             }
             if ($request->authorize == 1) { 
-                DwsWeightChargesController::approve($id);
+                DwsWeightChargesController::approve($id,1);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }

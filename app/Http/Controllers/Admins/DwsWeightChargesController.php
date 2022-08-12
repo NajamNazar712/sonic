@@ -50,27 +50,43 @@ class DwsWeightChargesController extends Controller
 
     }
 
-    static public function approve($user_id)
+    static public function approve($user_id,$autorize = null)
     {
-        DwsWeightCharges::where('user_id',$user_id)->delete();
 
-        $pending_wight = PendingDwsWeightCharges::where('user_id',$user_id);
-        if($pending_wight->exists()){
-            $pending_wight = $pending_wight->get();
-            foreach ($pending_wight as $value) {
-
-                DwsWeightCharges::create([
-                    'user_id' => $value->user_id,
-                    'shipping_mode_id' => $value->shipping_mode_id,
-                    'dws_weight_status' => $value->dws_weight_status,
-                    'admin_id' => $value->admin_id
-                ]);
-                DwsWeightChargesHistory::create([
-                    'user_id' => $value->user_id,
-                    'shipping_mode_id' => $value->shipping_mode_id,
-                    'dws_weight_status' => $value->dws_weight_status,
-                    'admin_id' => $value->admin_id
-                ]);
+        if($autorize == 1){
+            $pending_wight = PendingDwsWeightCharges::where('user_id',$user_id);
+            if($pending_wight->exists()){
+                $pending_wight = $pending_wight->get();
+                foreach ($pending_wight as $value) {
+    
+                    DwsWeightCharges::create([
+                        'user_id' => $value->user_id,
+                        'shipping_mode_id' => $value->shipping_mode_id,
+                        'dws_weight_status' => $value->dws_weight_status,
+                        'admin_id' => $value->admin_id
+                    ]);
+                   
+                }
+            }
+        }else{
+            $pending_wight = PendingDwsWeightCharges::where('user_id',$user_id);
+            if($pending_wight->exists()){
+                $pending_wight = $pending_wight->get();
+                foreach ($pending_wight as $value) {
+    
+                    DwsWeightCharges::create([
+                        'user_id' => $value->user_id,
+                        'shipping_mode_id' => $value->shipping_mode_id,
+                        'dws_weight_status' => $value->dws_weight_status,
+                        'admin_id' => $value->admin_id
+                    ]);
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $value->user_id,
+                        'shipping_mode_id' => $value->shipping_mode_id,
+                        'dws_weight_status' => $value->dws_weight_status,
+                        'admin_id' => $value->admin_id
+                    ]);
+                }
             }
         }
         
