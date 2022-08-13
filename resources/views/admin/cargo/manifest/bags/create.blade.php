@@ -575,7 +575,7 @@
             });
 
             $('#scan_piece').on('change', function () {
-                blockPagePermanently();
+                //blockPagePermanently();
                 var item = parseInt($(this).val());
                 $('#scan_piece').val('').focus();
                 if(item){
@@ -622,7 +622,7 @@
                         toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
-                UnblockPagePermanently
+                //UnblockPagePermanently
             });
             $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
