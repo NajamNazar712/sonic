@@ -8461,7 +8461,7 @@ class NotificationsController extends Controller
                     if ($kam->exists()) {
                         $kam = $kam->first();
                         if ($kam) {
-                            $to[] = Admin::find($kam->kam)->email;
+                            $to[] = Admin::findOrFail($kam->kam)->email;
                         }
                     }
                     $to = array_filter($to);
