@@ -24,5 +24,11 @@ class UpdateModulePermissionForComplaintShipper extends Seeder
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > Complaint Portal Shipper', 'url'=>'admin.settings.complain_portal_shippers.index', 'permission_id' => 788),
         ));
+
+        DB::table('crm_closed_reason_statuses')->insert(array(
+            array('id' => 1, 'name' => 'Shipper at fault'),
+            array('id' => 2, 'name' => 'Consignee at fault'),
+            array('id' => 3, 'name' => 'Trax at fault'),
+        ));
     }
 }

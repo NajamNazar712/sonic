@@ -3563,6 +3563,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print_air_waybill', 'Admins\AdminCRMController@print_air_waybill')->name('print_air_waybill');
             Route::post('resolve', 'Admins\AdminCRMController@consignee_info_resolve')->name('resolve');
         });
+        Route::post('close_reason', 'Admins\AdminCRMController@close_reason')->name('close_reason');
+
+        
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function (){
