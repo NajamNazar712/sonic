@@ -86,6 +86,7 @@ use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
@@ -179,6 +180,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
@@ -956,6 +958,9 @@ class DeliveryController extends Controller
                             NotificationsController::send(12, $note->id, $shipment);
                         }
                     }
+                    $process_one_link['shipemnt_id'] = $shipment;
+                    $process_one_link['delivery_note_id'] = $note->id;
+                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
