@@ -1090,8 +1090,7 @@ class ShipperAPIController extends Controller
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
                         $message = array();
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
-                        $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('rider_status_id', $shipment_journey->shipper_status_id)->where('rider_status_reason_id', $shipment_journey->status_reason_id)->whereDate('created_at', $shipment_journey->created_at)->orderBy('id', 'DESC');
+                        $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
                         if ($rider_delivery->exists()) {
                             $data = array();
                             $rider_delivery = $rider_delivery->first();
