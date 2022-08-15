@@ -16,10 +16,14 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            <div class="alert alert-warning" style="display: none" id="revert_div">
 
+                            </div>
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                <div class="col-lg-4 col-md-4 col-sm-6">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_number" class="tracking_number tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    </div>
                                 </div>
 
                                 <div class="form-group ml-1">
@@ -57,11 +61,16 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -73,11 +82,41 @@
     <script>
         $(document).ready(function() {
 
-            $('#add_shipment_form input.tracking_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
+            // $('#add_shipment_form input.tracking_number').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
+
+            var select = $('.tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
             });
+            var control = select[0].selectize;
 
             $('#add_shipment_form input.tracking_number').focus();
             var shipment_ids = [];
@@ -111,10 +150,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    $('#add_shipment_form button.add').prop('disabled', true);
-
                     var tracking_number = $(form).find('input.tracking_number').val();
-
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
                             url: '{!! route('admin.return.revert.shipment_details') !!}',
@@ -134,45 +170,59 @@
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
                             success: function(data) {
-                                form.reset();
-
-                                $('#add_shipment_form input.tracking_number').val('').focus();
-
                                 remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-
                                 if (data.status == 0) {
-                                    id = data.details.id;
+                                    $.each(data.details, function(index2, values) {
+                                        id = values.id;
 
-                                    var index = $.inArray(id, shipment_ids);
+                                        var index = $.inArray(id, shipment_ids);
 
-                                    if (index === -1) {
-                                        var rowNo = table.rows().count();
-                                        remove_button += '<input type="hidden" value="'+ id +'" class="remove_pickup_request">';
-                                        table.row.add([rowNo + 1, data.details.return_note, data.details.tracking_number, data.details.shipper, remove_button]).node().id = data.details.id;
-                                        table.draw(false);
-                                        table.order([0, 'desc']).draw();
-                                        scan_sound(1);
-                                        shipment_ids.push(data.details.id);
+                                        if (index === -1) {
+                                            var rowNo = table.rows().count();
+                                            remove_button += '<input type="hidden" value="' + id + '" class="remove_pickup_request">';
+                                            table.row.add([rowNo + 1, values.return_note, values.tracking_number, values.shipper, remove_button]).node().id = values.id;
+                                            table.draw(false);
+                                            table.order([0, 'desc']).draw();
+                                            scan_sound(1);
+                                            shipment_ids.push(values.id);
 
-                                        $('#add_shipment_form button.add').prop('disabled', false);
+                                            $('#add_shipment_form button.add').prop('disabled', false);
 
-                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                            $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
 
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                    });
+                                    control.clear();
+
                                 }
-                                else {
-                                    $('#add_shipment_form button.add').prop('disabled', false);
+                                if(data.ids) {
+                                    var er = "";
+                                    $.each(data.ids, function(index3, values) {
+                                        er+=values +" , ";
+                                    });
+                                    if(er) {
+                                        $('#revert_div').html(`CN# ${er} Shipment Status do not match`);
+                                        $('#revert_div').show();
+                                    }else{
+                                        $('#revert_div').hide()
+                                    }
                                     scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    control.clear();
+                                    // $('#add_shipment_form button.add').prop('disabled', false);
+                                    // toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
                         });
                     }
                     else {
-                        $('#add_shipment_form button.add').prop('disabled', false);
+                        // $('#add_shipment_form button.add').prop('disabled', false);
                         scan_sound(2);
-                        $('#add_shipment_form input.tracking_number').val('').focus();
+                        $('#add_shipment_form input.tracking_number').focus();
+                        control.clear();
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
