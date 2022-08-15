@@ -8429,7 +8429,7 @@ class NotificationsController extends Controller
                     self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
-                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th></tr></thead><tbody>';
+                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th></tr></thead><tbody>';
 
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
@@ -8440,7 +8440,7 @@ class NotificationsController extends Controller
                             if ($journey) {
                                 $remarks = $journey->remarks;
                             }
-                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td></tr>';
+                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td></tr>';
 
                         }
                     }
@@ -8451,13 +8451,12 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $table, $body);
                     }
 
-                    $to = array();
+                    $to = array();$other = array();
 
-                    $sales_person = $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
+                    $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
                     if ($sales_person) {
                         $to[] = Admin::find($sales_person->admin_id)->email;
                     }
-
                     $kam = SaleTierTag::where('user_id', $shipper_id);
                     if ($kam->exists()) {
                         $kam = $kam->first();
@@ -8465,6 +8464,9 @@ class NotificationsController extends Controller
                             $to[] = Admin::find($kam->kam)->email;
                         }
                     }
+                    $to = array_filter($to);
+                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk','nayyer.zia@trax.pk'];
+                    $to = array_merge($to,$other);
                     if (count($to) > 0) {
                         self::email($subject, $body, $to);
                     }
