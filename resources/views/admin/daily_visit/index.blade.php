@@ -17,6 +17,13 @@
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
                         <div class="col form-group">
+                            <select name="lead_status" class="select2" id="lead_status" data-rule-required="true" data-msg-required="Lead Status is required">
+                                @foreach($lead_statuses as $lead_status)
+                                    <option value="{{ $lead_status->id }}">{{ $lead_status->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col form-group">
                             <select name="shipper" class="select2" id="shipper" data-rule-required="true" data-msg-required="Shipper is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{ $shipper->id }}" data-company_name="{{$shipper->name}}" data-customer_name="{{$shipper->poc}}" data-customer_address="{{$shipper->address}}" data-phone_no="{{$shipper->phone}}" data-email_address="{{$shipper->email}}">{{ $shipper->name }}</option>
@@ -37,13 +44,6 @@
                         </div>
                         <div class="col form-group">
                             <input type="email" name="email_address" id="email_address" placeholder="Email Address*" class="form-control special_inputs" data-rule-required="true" data-msg-required="Email Address is required">
-                        </div>
-                        <div class="col form-group">
-                            <select name="lead_status" class="select2" id="lead_status" data-rule-required="true" data-msg-required="Lead Status is required">
-                                @foreach($lead_statuses as $lead_status)
-                                    <option value="{{ $lead_status->id }}">{{ $lead_status->name }}</option>
-                                @endforeach
-                            </select>
                         </div>
                         <div class="col form-group">
                             <textarea name="feedback" class="form-control" placeholder="Meeting Feedback*" data-rule-required="true" data-msg-required="Feedback is required" rows="6"></textarea>
@@ -110,6 +110,17 @@
                 placeholder: 'Lead Status*'
             });
 
+            $("#lead_status").on('change',function(){
+                id = $(this).val();
+                if(id == 4 || id == 5){
+                    $('#shipper').val(0).trigger('change');
+                    $('#shipper').attr('disabled', true);
+                } else{
+                    $('#shipper').val('').trigger('change');
+                    $('#shipper').removeAttr('disabled');
+                }
+            });
+
             $('#shipper').prepend('<option value="" selected="selected"></option><option value="0">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Shipper*'
@@ -154,6 +165,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    $('#shipper').removeAttr('disabled');
                     if(latitude == null && longitude == null){
                         swal({
                             title: 'Location Not Found',
