@@ -7346,9 +7346,9 @@ class AdminReportsController extends Controller
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $daily_visit = $daily_visit->where('a.id', Auth::id());
+            $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
         }
-        
+
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr) {
                 $image = '';
