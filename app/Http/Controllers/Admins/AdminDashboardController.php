@@ -9817,9 +9817,10 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $sub_segments = SubCategorySegment::where('segment_id', $user->segment->id)->get();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
     }
 
     public function updateProfile(Request $request)
@@ -9838,6 +9839,7 @@ class AdminDashboardController extends Controller
             'segment_id' => 'required',
             'sub_segment_id' => 'required',
             'avg_shipments' => 'required',
+            'average_shipment_duration_id' => 'required',
 
         ]);
 
@@ -9855,7 +9857,7 @@ class AdminDashboardController extends Controller
         if ($flag == true) {
             if ($request->password == "" || $request->password == null) {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
-                    'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->has('avg_shipments')? $request->avg_shipments : null]);
+                    'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
                 AdminLogs::create([
                     'admin_id' => Auth::id(),
                     'user_id' => $user_id
@@ -9863,7 +9865,7 @@ class AdminDashboardController extends Controller
                 ]);
             } else {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
-                    'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->has('avg_shipments')? $request->avg_shipments : null]);
+                    'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
             }
 
             return redirect()->back()->with(['success' => "Profile Information Successfully Updated"]);
