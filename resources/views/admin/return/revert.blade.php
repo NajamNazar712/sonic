@@ -125,8 +125,9 @@
                 scrollX: true,
                 paging:false,
                 autoWidth:false,
+                "ordering": false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {orderable: false, searchable: false,sortable: false, name: 'serial_number', class: 'align-middle serial_number'},
                     {name: 'return_note', class: 'align-middle return_note', orderable: false, searchable: false},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
