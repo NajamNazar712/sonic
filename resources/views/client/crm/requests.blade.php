@@ -115,7 +115,7 @@
                                         <th class="border-primary border-darken-1">Description</th>
                                         <th class="border-primary border-darken-1">Channel</th>
                                         <th class="border-primary border-darken-1">Request Status</th>
-                                        {{--<th class="border-primary border-darken-1">Agent</th>--}}
+                                        <th class="border-primary border-darken-1">Who's at Fault</th>
                                         <th class="border-primary border-darken-1">Launched By</th>
                                         <th class="border-primary border-darken-1">Launched By Name</th>
                                         {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
@@ -261,7 +261,8 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Request Status');
-                            // head.push('Agent');
+                            head.push('Who\'s at Fault');
+
                             head.push('Launched By');
                             head.push('Launched By Name');
                             head.push('Launched Date');
@@ -279,7 +280,7 @@
                                 row.push(values.descr);
                                 row.push(values.channel);
                                 row.push(values.status);
-                                // row.push(values.agent);
+                                row.push(values.at_fault);
                                 row.push(values.added_by);
                                 row.push(values.launched_by_name);
                                 row.push(values.created_at);
@@ -333,10 +334,10 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'crs.id', class: 'align-middle status'},
-                    // {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
+                    {data: 'at_fault', name: 'crmcr.status_id', class: 'align-middle at_fault'},
                     // {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'launched_by_name', name: 'crm_requests.launched_by_id', class: 'align-middle launched_by_name'},
+                    {data: 'launched_by_name', name: 'crm_requests.launched_by_id', class: 'align-middle launched_by_name',orderable: false, searchable: false},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'closed_at', name: 'crmst.created_at', class: 'align-middle closed_at'},
 
@@ -360,6 +361,7 @@
                     var case_nature = '<select name="case_nature" id="case_nature" class="select2 form-control"></select>';
                     var shipment_status = '<select name="shipment_status" id="shipment_status" class="select2 form-control"></select>';
                     var status = '<select name="status" id="status" class="select2 form-control"></select>';
+                    var close_reason_status = '<select name="close_reason_status" id="close_reason_status" class="select2 form-control"></select>';
                     var channel = '<select name="channel" id="channel" class="select2 form-control"></select>';
                     var case_nature_type = '<select name="case_nature_type" id="case_nature_type" class="select2 form-control"></select>';
                     var added_by = '<select name="launched_by" id="added_by" class="select2 form-control">' +
@@ -372,11 +374,17 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.launched_by_name') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.at_fault')) {
+                            $(close_reason_status).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -499,6 +507,20 @@
 
                     $('#added_by').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Launched By",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var datac = $.map({!! $closed_reason_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $('#close_reason_status').prepend('<option value="" selected></option>').select2({
+                        data:datac,
+                        placeholder: "Select Reason",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

@@ -653,7 +653,8 @@ class AdminCRMController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $zones = Zone::where('status', 1)->get();
-        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'shipment_status' => $shipment_status, 'zones' => $zones]);
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
+        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'shipment_status' => $shipment_status, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
 
     public function launched_re_open_list(Request $request){
@@ -2566,12 +2567,20 @@ class AdminCRMController extends Controller
             }
             if ($crm_request['status_id'] != 4) {
                 if($request->close_reason_status != 0){
+                    $check_exists = CrmClosedReason::where('crm_request_id',$request->req_id);
+                    if(!$check_exists->exists()){
 
-                    $crm_closed_reason = new CrmClosedReason;
-                    $crm_closed_reason->crm_request_id = $request->req_id; 
-                    $crm_closed_reason->status_id = $request->close_reason_status;
-                    $crm_closed_reason->added_by = Auth::id();
-                    $crm_closed_reason->save();
+                        $crm_closed_reason = new CrmClosedReason;
+                        $crm_closed_reason->crm_request_id = $request->req_id; 
+                        $crm_closed_reason->status_id = $request->close_reason_status;
+                        $crm_closed_reason->added_by = Auth::id();
+                        $crm_closed_reason->save();
+                    }else{
+                        $check_exists = $check_exists->first();
+                        $check_exists->status_id = $request->close_reason_status;
+                        $check_exists->added_by = Auth::id();
+                        $check_exists->save();
+                    }
                 }
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
@@ -2613,11 +2622,21 @@ class AdminCRMController extends Controller
         if($request->closed_reason_status != null){
            $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
             foreach ($close_reason_crm_ids as $value) {
-                $crm_closed_reason = new CrmClosedReason;
-                $crm_closed_reason->crm_request_id = $value; 
-                $crm_closed_reason->status_id = $request->closed_reason_status;
-                $crm_closed_reason->added_by = Auth::id();
-                $crm_closed_reason->save();
+                $check_exists = CrmClosedReason::where('crm_request_id',$value);
+                    if(!$check_exists->exists()){
+
+                        $crm_closed_reason = new CrmClosedReason;
+                        $crm_closed_reason->crm_request_id = $value; 
+                        $crm_closed_reason->status_id = $request->closed_reason_status;
+                        $crm_closed_reason->added_by = Auth::id();
+                        $crm_closed_reason->save();
+                    }else{
+                        $check_exists = $check_exists->first();
+                        $check_exists->status_id = $request->closed_reason_status;
+                        $check_exists->added_by = Auth::id();
+                        $check_exists->save();
+                    }
+               
             }
         }
 
@@ -3141,6 +3160,25 @@ class AdminCRMController extends Controller
                             }
                         }
                         elseif ($request->valid == 0){
+                            if($request->closed_reason_status != null){
+                                $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
+                                 foreach ($close_reason_crm_ids as $value) {
+                                    $check_exists = CrmClosedReason::where('crm_request_id',$value);
+                                    if(!$check_exists->exists()){
+                                        $crm_closed_reason = new CrmClosedReason;
+                                        $crm_closed_reason->crm_request_id = $value; 
+                                        $crm_closed_reason->status_id = $request->closed_reason_status;
+                                        $crm_closed_reason->added_by = Auth::id();
+                                        $crm_closed_reason->save();
+                                    }else{
+                                        $check_exists = $check_exists->first();
+                                        $check_exists->status_id = $request->closed_reason_status;
+                                        $check_exists->added_by = Auth::id();
+                                        $check_exists->save();
+                                    }
+                                     
+                                 }
+                             }
                             CrmRequest::where('id', $crm_request->id)->update([
                                 'status_id' => 4,
                             ]);
