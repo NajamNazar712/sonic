@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\DailyVisit;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\DailyVisitLeadStatus;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Yajra\Datatables\Datatables;
 
 class AdminDailyVisitController extends Controller
 {
@@ -23,10 +25,16 @@ class AdminDailyVisitController extends Controller
 
         $this->middleware('Permission');
     }
-    public function daily_visit_index(){
+    public function daily_visit_index(Request $request){
+        $daily_visit = DailyVisit::find(1);
+        /*if($request->has("id")){
+            $daily_visit = DailyVisit::find(1);
+        }else{
+            $daily_visit = null;
+        }*/
         $lead_statuses = DailyVisitLeadStatus::get(['id', 'name']);
         $shippers = User::where('status', 3)->get(['id', 'name','poc','address','email','phone']);
-        return view('admin.daily_visit.index')->with(['lead_statuses' => $lead_statuses,'shippers'=>$shippers]);
+        return view('admin.daily_visit.index')->with(['lead_statuses' => $lead_statuses,'shippers'=>$shippers, 'daily_visit' => $daily_visit]);
     }
 
     public function daily_visit_store(Request $request){
@@ -144,5 +152,81 @@ class AdminDailyVisitController extends Controller
             return null;
         }
     }
+
+    public function daily_visit_list_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 193);
+        $admins = Admin::where('admins.status', 1)
+            ->leftjoin('employee_designations as ed','admins.designation_id','ed.id')
+            ->where('ed.department_id',7)
+            ->get(['admins.id', 'admins.name']);
+        $ratings = CrmRequestRating::all();
+        return view('admin.daily_visit_index')->with(['admins' => $admins,'ratings'=>$ratings]);
+    }
+
+    public function daily_visit_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 194);
+        }
+        $daily_visit = DailyVisit::join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'a.default_hub_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
+            ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
+
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+        }
+
+        $datatables = Datatables::of($daily_visit)
+            ->editColumn('b_c_photo', function ($dvr) {
+                $image = '';
+                if ($dvr->business_card_image != null) {
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.daily_visit.business_card', [$dvr->business_card_image]) . ' target="_blank">View</a></button></div>';
+                    return $image;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('l_photo', function ($dvr) {
+                $image = '';
+                if ($dvr->location_image != null) {
+                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.daily_visit.location_photo', [$dvr->location_image]) . ' target="_blank">View</a></button></div>';
+                    return $image;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('location', function ($dvr) {
+                $location = '<div class="text-center">';
+                if ($dvr->latitude != null && $dvr->longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $dvr->latitude . ',' . $dvr->longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    return $location;
+                } else {
+                    return '-';
+                }
+            });
+
+        //AdminUser Filter
+        if ($team_member = $request->get('team_member')) {
+            $datatables->where('a.id', $team_member);
+        }
+
+        if ($rating = $request->get('rating')) {
+            $datatables->where('daily_visits.rating_id', $rating);
+        }
+        //VisitDate filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$from, $to]);
+        }
+
+        return $datatables->make(true);
+    }
+
+
 
 }
