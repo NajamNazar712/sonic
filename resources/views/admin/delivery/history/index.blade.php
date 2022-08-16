@@ -274,7 +274,7 @@
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
-                                row.push(values.zone);
+                                row.push(values.zone_name);
                                 row.push(values.rider);
                                 row.push(values.rider_type);
                                 row.push(values.route);
