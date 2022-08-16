@@ -5080,6 +5080,62 @@ class APIController extends Controller
         }
     }
 
+    public function out_for_delivery_shipment_payment(Request $request)
+    {
+        $rules = [
+            'consumer_number' => ['required', 'integer'],
+            'transaction_authentication_id' => ['required', 'integer'],
+            'transaction_amount' => ['required'],
+            'transaction_date' => ['required'],
+            'transaction_time' => ['required'],
+            'bank_mnemonic' => ['required'],
+            'reserved' => ['required'],
+            'consumer_prefix' => ['required'],
+            'tracking_number' => ['required'],
+            'shipment_id' => ['required', Rule::exists('shipments', 'id')],
+            'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')],
+            'status' => ['required', 'integer'],
+        ];
+
+        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $consumer_number = $request->consumer_number;
+            $transaction_authentication_id = $request->transaction_authentication_id;
+            $transaction_amount = $request->transaction_amount;
+            $transaction_date = $request->transaction_date;
+            $transaction_time = $request->transaction_time;
+            $bank_mnemonic = $request->bank_mnemonic;
+            $reserved = $request->reserved;
+            $consumer_prefix = $request->consumer_prefix;
+            $tracking_number = $request->tracking_number;
+            $shipment_id = $request->shipment_id;
+            $delivery_note_id = $request->delivery_note_id;
+            $status = $request->status;
+
+            $one_link_payment_transaction = new OneLinkPaymentTransaction();
+            $one_link_payment_transaction->consumer_number = $consumer_number;
+            $one_link_payment_transaction->tran_auth_id = $transaction_authentication_id;
+            $one_link_payment_transaction->transaction_amount = $transaction_amount;
+            $one_link_payment_transaction->tran_date = $transaction_date;
+            $one_link_payment_transaction->tran_time = $transaction_time;
+            $one_link_payment_transaction->bank_mnemonic = $bank_mnemonic;
+            $one_link_payment_transaction->reserved = $reserved;
+            $one_link_payment_transaction->consumer_prefix = $consumer_prefix;
+            $one_link_payment_transaction->tracking_no = $tracking_number;
+            $one_link_payment_transaction->shipment_id = $shipment_id;
+            $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
+            $one_link_payment_transaction->status = $status;
+            $one_link_payment_transaction->save();
+
+            return json_encode(['status' => 0, 'message' => 'Successful Bill Payment']);
+        }
+    }
+
+
     public function onelink_payment_billinquiry(Request $request)
     {
         $valid_ip_addresses = array();

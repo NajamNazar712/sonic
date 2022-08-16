@@ -87,6 +87,7 @@ use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Jobs\ProcessAgentCallMonitoring;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
@@ -958,10 +959,10 @@ class DeliveryController extends Controller
                             NotificationsController::send(12, $note->id, $shipment);
                         }
                     }
-                    $process_one_link['shipemnt_id'] = $shipment;
-                    $process_one_link['delivery_note_id'] = $note->id;
-                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
+                $process_one_link['shipment_ids'] = $valid_shipments;
+                $process_one_link['delivery_note_id'] = $note->id;
+                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
@@ -2539,6 +2540,8 @@ class DeliveryController extends Controller
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
+
+            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             if (count($invalid_reason_shipments) > 0) {
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
