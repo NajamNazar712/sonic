@@ -42,8 +42,8 @@
                                         <th>Consignee Address</th>
                                         <th>Order ID</th>
                                         <th>Trax Box ID</th>
-                                        <th>Weight Charges</th>
-                                        <th>Fuel Surcharge</th>
+                                      {{--  <th>Weight Charges</th>
+                                        <th>Fuel Surcharge</th>--}}
                                         <th>IBAN Number</th>
                                         <th>Account Number</th>
                                         <th>Bank ID</th>
@@ -176,7 +176,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][trax_box_id]', $ro['trax_box_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['weight_charges']))
+                                            {{--@if(isset($errors[$no]['weight_charges']))
                                                 <td>{!! Form::text('form[' . $no . '][weight_charges]', $ro['weight_charges'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['weight_charges']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][weight_charges]', $ro['weight_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
@@ -185,7 +185,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][fuel_surcharge]', $ro['fuel_surcharge'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['fuel_surcharge']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][fuel_surcharge]', $ro['fuel_surcharge'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
-                                            @endif
+                                            @endif--}}
                                             @if(isset($errors[$no]['iban_number']))
                                                 <td>{!! Form::text('form[' . $no . '][iban_number]', $ro['iban_number'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['iban_number']}}</font></td>
                                             @else

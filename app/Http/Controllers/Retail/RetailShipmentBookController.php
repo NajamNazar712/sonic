@@ -231,15 +231,15 @@ class RetailShipmentBookController extends Controller
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
-        $category = $request->input('category');
+        /*$category = $request->input('category');
         $discount = 0;
         if($category == 1){
             $discount = RetailTraxCenter::find($request->input('category_id'));
         }
         else{
             $discount = RetailFranchise::find($request->input('category_id'));
-        }
-
+        }*/
+        $discount =  Auth::user()->store->discount;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
@@ -1730,8 +1730,8 @@ class RetailShipmentBookController extends Controller
             'order_id' => 'Order ID',
 //            'insurance_offered' => 'Insurance Offered',
             'trax_box_id' => 'Trax Box ID',
-            'weight_charges' => 'Weight Charges',
-            'fuel_surcharge' => 'Fuel Surcharge',
+        /*    'weight_charges' => 'Weight Charges',
+            'fuel_surcharge' => 'Fuel Surcharge',*/
             'iban_number' => 'IBAN Number',
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
@@ -1781,8 +1781,8 @@ class RetailShipmentBookController extends Controller
             'order_id' => ['nullable'],
 //            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_box_id' => ['required_if:shipping_mode_id,5', 'nullable', 'integer', Rule::exists('retail_trax_boxes', 'id')],
-            'weight_charges' => ['required', 'numeric'],
-            'fuel_surcharge' => ['required', 'numeric'],
+          /*  'weight_charges' => ['required', 'numeric'],
+            'fuel_surcharge' => ['required', 'numeric'],*/
             'iban_number' => ['nullable', 'between:1,50'],
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
@@ -1797,8 +1797,8 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id', 27 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 28){
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'iban_number', 23 => 'account_number', 24 => 'bank_id', 25 => 'special_instruction'];
+            if (count($spreadsheet[0]) != 26){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -1897,6 +1897,7 @@ class RetailShipmentBookController extends Controller
                         $row['length'] = null;
                         $row['breadth'] = null;
                         $row['height'] = null;
+                        $row['business_category_id'] = null;
                         $rows[$key]['length'] = $row['length'];
                         $rows[$key]['breadth'] = $row['breadth'];
                         $rows[$key]['height'] = $row['height'];
