@@ -404,7 +404,7 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[11, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
