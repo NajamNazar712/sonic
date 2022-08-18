@@ -218,7 +218,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-
+        //dd($request->all());
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -231,14 +231,7 @@ class RetailShipmentBookController extends Controller
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
-        /*$category = $request->input('category');
-        $discount = 0;
-        if($category == 1){
-            $discount = RetailTraxCenter::find($request->input('category_id'));
-        }
-        else{
-            $discount = RetailFranchise::find($request->input('category_id'));
-        }*/
+
         $discount =  Auth::user()->store->discount;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -294,8 +287,8 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight);
-
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$request->cod);
+        //dd($rates);
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
         }
@@ -313,13 +306,13 @@ class RetailShipmentBookController extends Controller
             $amount = str_replace(',', '', $request->input('cod'));
             $r_amount = 0;
             if($charges_mode_id == 2){
-                $amount = $amount + $rates['charges_with_discount'];
+                $amount = $amount + $rates['total_charges'];
             }
         }
         else{
             $amount = 0;
             if($charges_mode_id == 2){
-                $amount = $rates['charges_with_discount'];
+                $amount = $rates['total_charges'];
             }
             $r_amount = 0;
         }
@@ -442,10 +435,12 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
         $retail_shipment->trax_box_id = $request->trax_box;
-      /*  $retail_shipment->total_charges_without_gst = ;
-        $retail_shipment->gst = $gst;*/
-        $retail_shipment->total_charges = $amount;
-        //$retail_shipment->weight_charges = $request->weight_charges;
+        $retail_shipment->total_charges_without_gst = $rates['charges'];
+        $retail_shipment->gst = $rates['gst_charges'];
+        $retail_shipment->total_charges = $rates['total_charges'];
+        $retail_shipment->weight_charges = $rates['charges'];
+        $retail_shipment->discount = $rates['discount_amount'];
+        $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
 //        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
         //$retail_shipment->fuel_surcharge = $request->fuel_surcharge;
         $retail_shipment->shipper_account_no = $shipper_info->id;
@@ -505,6 +500,7 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
+        $cod = $request->cod;
         if($request->weight != null){
 
             $weight = $request->weight;
@@ -512,7 +508,7 @@ class RetailShipmentBookController extends Controller
         else{
             $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
         }
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight);
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$cod);
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
@@ -786,23 +782,27 @@ class RetailShipmentBookController extends Controller
                         <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
                       </tr>
                 ';
-                    $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
+                    $gst = $shipment->retail->gst;
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
-                                <td colspan="2" class="color primary"><strong>Weight</strong></td>
-                                <td colspan="2" class="color primary"><strong>Service Charges</strong></td>
-                                <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
-                                <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                                <td colspan="1" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
+                                <td colspan="1" class="color primary border"><strong>GST</strong></td>
+                                <td colspan="3" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
+                                <td colspan="3" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){

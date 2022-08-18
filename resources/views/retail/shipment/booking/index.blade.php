@@ -192,13 +192,13 @@
                                     </div>
                                 </div>
                                 <div id="external_info" class="ml-1 col border">
-                                    <div class="col pt-5 mt-2 mb-3">
+                                    <div class="col mt-2">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">City Request</label>
                                             <a href="javascript:void(0);" id="add_city_req" class="btn btn-outline-success" >Add</a>
                                         </div>
                                     </div>
-                                    <div class="col mt-2 mb-1">
+                                    <div class="col mt-1">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Bulk Shipment</label>
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
@@ -220,14 +220,25 @@
 {{--                                            </div>--}}
 {{--                                        </div>--}}
 {{--                                    </div>--}}
-                                    <div class="col pt-5">
+                                    <div class="col mt-1">
                                         <div class="form-group">
+                                            <label>Charges</label>
                                             <input type="text" name="charges" id="charges" class="form-control" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
+                                            <label>Discount</label>
                                             <input type="text" name="discount" id="discount" class="form-control" placeholder="Discount" disabled>
                                         </div>
                                         <div class="form-group">
+                                            <label>Charges with Discount</label>
+                                            <input type="text" name="discount" id="charges_with_discount" class="form-control" placeholder="Charges With Discount" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>GST</label>
+                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Total Charges</label>
                                             <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
                                         </div>
                                         <div class="form-group text-center">
@@ -586,7 +597,6 @@
                         $('#shipping_mode').append(newOption);
                     });
 
-
                 }
                 else{
 
@@ -595,8 +605,6 @@
                         var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                         $('#shipping_mode').append(newOption);
                     });
-
-                    
 
                     if(shipping_mode == 1)
                     {
@@ -953,6 +961,8 @@
                         $('#charges').val('');
                         $('#discount').val('');
                         $('#total_charges').val('');
+                        $('#gst').val('');
+                        $('#charges_with_discount').val('');
                         $('#insurance_amount').val('');
                         $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
@@ -1057,6 +1067,7 @@
             var length = null;
             var breadth = null;
             var height = null;
+            var cod = null;
 
             $('#calculate_rates').on('click', function () {
                 var destination = '';
@@ -1082,6 +1093,7 @@
                  length = $('#length').val();
                  breadth = $('#breadth').val();
                  height = $('#height').val();
+                 cod = $('#cod').val();
 
                 if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
                     if(shipping_mode_id == 5 && trax_box == ''){
@@ -1102,6 +1114,7 @@
                             'trax_box': trax_box,
                             'length': length,
                             'breadth': breadth,
+                            'cod': cod,
                             'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -1109,13 +1122,27 @@
                         .done(function (data) {
                             var total_charges = '';
                             if(data.status){
+
+                                if(shipping_mode_id == 3 && (cod == '' || cod == null)){
+                                    var error = 'COD Amount Required';
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                    return false;
+                                }
+
                                 $('#charges').val(data.details.charges);
                                 $('#discount').val(data.details.discount_amount);
-                                if(shipping_mode_id == 3){
-                                   total_charges = data.details.charges_with_discount + (+$('#cod').val());
+                                $('#charges_with_discount').val(data.details.charges_with_discount);
+                                $('#gst').val(data.details.gst_charges);
+
+
+                               /* if(shipping_mode_id == 3){
+                                   total_charges = parseFloat(data.details.charges_with_discount) + parseFloat(data.details.gst_charges) +  (+$('#cod').val());
                                 }
                                 else{
-                                    total_charges = data.details.charges_with_discount;
+                                    total_charges = parseFloat(data.details.charges_with_discount) + parseFloat(data.details.gst_charges) ;
                                 }
 
                                 if(total_charges == 0 ){
@@ -1124,8 +1151,8 @@
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
-                                }
-                                $('#total_charges').val(total_charges);
+                                }*/
+                                $('#total_charges').val(data.details.total_charges);
                             }
                         });
                 }

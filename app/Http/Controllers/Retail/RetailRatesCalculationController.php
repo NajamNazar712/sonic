@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class RetailRatesCalculationController extends Controller
 {
-    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight){
+    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight,$cod = NULL){
         if($discount == null || $discount == ''){
             $discount = 0;
         }
@@ -25,6 +25,9 @@ class RetailRatesCalculationController extends Controller
         $remaining_weight = 0;
         $multiplier = 1;
         $round_additional_weight = 0;
+        $total_charges = 0;
+        $gst_charges = 0;
+
        
         if($business_category_id == 1){
             $destination_city = City::find($destination_id);
@@ -168,8 +171,18 @@ class RetailRatesCalculationController extends Controller
                     }
                 }
             }
-            $discount_amount = $charges * $discount;
-            $charges_with_discount = $charges - $discount_amount;
+
+            $gst = $pickup_city->zone->gst;
+            $gst_charges = number_format($charges * $gst,2);
+            $charges = number_format($charges - $gst_charges,2);
+
+            $discount_amount = number_format($charges * $discount,2);
+            $charges_with_discount = number_format($charges - $discount_amount,2);
+
+            $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
+            if($cod != null){
+                $total_charges = $total_charges + $cod;
+            }
         }
         elseif ($business_category_id == 2){
             $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
@@ -191,6 +204,8 @@ class RetailRatesCalculationController extends Controller
         $rates['charges'] = $charges;
         $rates['discount_amount'] = $discount_amount;
         $rates['charges_with_discount'] = $charges_with_discount;
+        $rates['gst_charges'] = $gst_charges;
+        $rates['total_charges'] = $total_charges;
 
         return $rates;
     }
