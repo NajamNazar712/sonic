@@ -68,11 +68,12 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $city_id = City::where('name', $this->booking['destination'])->first()->id;
 
         $discount = 0;
+        //dd($category);
         if($category == 1){
-            $discount = RetailTraxCenter::find($category_id);
+            $discount = RetailFranchise::find($category_id)->discount;
         }
         else{
-            $discount = RetailFranchise::find($category_id);
+            $discount = RetailTraxCenter::find($category_id)->discount;
         }
 
         $shipping_mode_check = $this->booking['shipping_mode_id'];
