@@ -58,6 +58,7 @@ use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessPaySlipPdfEmail;
 use App\RiderMainCategory;
 use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -3063,6 +3064,22 @@ class AdminHumanResourseController extends Controller
         }
 
         $datatable = Datatables::of($payslips)
+            ->editColumn('total_salary', function ($payslip) {
+                if($payslip->total_salary == null){
+                    return '-';
+                }
+                else{
+                    return $payslip->total_salary;
+                }
+            })
+            ->editColumn('total_deduction', function ($payslip) {
+                if($payslip->total_deduction == null){
+                    return '-';
+                }
+                else{
+                    return $payslip->total_deduction;
+                }
+            })
             ->addColumn('action', function () {
                 $dropdown = '
                 <div class="btn-group">
@@ -3297,6 +3314,7 @@ class AdminHumanResourseController extends Controller
                     $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(24)->toDateString();
 
                     foreach ($rows as $key => $row) {
+                        $payslip_details = array();
                         $payslip = new EmployeePayslip();
                         $payslip->payroll_month = $payroll_month;
                         $payslip->payroll_cut_off_date = $payroll_cut_off_date;
@@ -3318,48 +3336,90 @@ class AdminHumanResourseController extends Controller
                         $payslip->absent_days = trim($row['absent_days']);
                         $payslip->extra_paid_days = trim($row['extra_paid_days']);
                         $payslip->fuel_days = trim($row['fuel_days']);
-                        $payslip->basic_salary = trim($row['basic_salary']);
-                        $payslip->house_rent = trim($row['house_rent']);
-                        $payslip->medical = trim($row['medical']);
-                        $payslip->gross_salary = trim($row['gross_salary']);
-                        $payslip->mobile_allowance = trim($row['mobile_allowance']);
-                        $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
-                        $payslip->fuel_allowance = trim($row['fuel_allowance']);
-                        $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
-                        $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
-                        $payslip->fixed_incentive = trim($row['fixed_incentive']);
-                        $payslip->holiday_allowance = trim($row['holiday_allowance']);
-                        $payslip->overtime = trim($row['overtime']);
-                        $payslip->bonus = trim($row['bonus']);
-                        $payslip->arrears = trim($row['arrears']);
-                        $payslip->pickup_incentive = trim($row['pickup_incentive']);
-                        $payslip->delivery_incentive = trim($row['delivery_incentive']);
-                        $payslip->operation_incentive = trim($row['operation_incentive']);
-                        $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
-                        $payslip->others_addition = trim($row['others_addition']);
-                        $payslip->total_salary = trim($row['total_salary']);
-                        $payslip->paycut = trim($row['paycut']);
-                        $payslip->absent = trim($row['absent']);
-                        $payslip->late_deduction = trim($row['late_deduction']);
-                        $payslip->income_tax = trim($row['income_tax']);
-                        $payslip->eobi = trim($row['eobi']);
-                        $payslip->advance_salary = trim($row['advance_salary']);
-                        $payslip->month_closing = trim($row['month_closing']);
-                        $payslip->loan = trim($row['loan']);
-                        $payslip->fuel_card = trim($row['fuel_card']);
-                        $payslip->open_parcel = trim($row['open_parcel']);
-                        $payslip->phone_call = trim($row['phone_call']);
-                        $payslip->recovery = trim($row['recovery']);
-                        $payslip->auction_sale = trim($row['auction_sale']);
-                        $payslip->penalty = trim($row['penalty']);
-                        $payslip->others_deduction = trim($row['others_deduction']);
-                        $payslip->van_deduction = trim($row['van_deduction']);
-                        $payslip->medical_insurance = trim($row['medical_insurance']);
-                        $payslip->total_deduction = trim($row['total_deduction']);
-                        $payslip->net_salary = trim($row['net_salary']);
+                        if(trim($row['employee_type']) == 2){
+                            $payslip->basic_salary = trim($row['basic_salary']);
+                            $payslip->house_rent = trim($row['house_rent']);
+                            $payslip->medical = trim($row['medical']);
+                            $payslip->gross_salary = trim($row['gross_salary']);
+                            $payslip->mobile_allowance = trim($row['mobile_allowance']);
+                            $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
+                            $payslip->fuel_allowance = trim($row['fuel_allowance']);
+                            $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
+                            $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
+                            $payslip->fixed_incentive = trim($row['fixed_incentive']);
+                            $payslip->holiday_allowance = trim($row['holiday_allowance']);
+                            $payslip->overtime = trim($row['overtime']);
+                            $payslip->bonus = trim($row['bonus']);
+                            $payslip->arrears = trim($row['arrears']);
+                            $payslip->pickup_incentive = trim($row['pickup_incentive']);
+                            $payslip->delivery_incentive = trim($row['delivery_incentive']);
+                            $payslip->operation_incentive = trim($row['operation_incentive']);
+                            $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
+                            $payslip->others_addition = trim($row['others_addition']);
+                            $payslip->total_salary = trim($row['total_salary']);
+                            $payslip->paycut = trim($row['paycut']);
+                            $payslip->absent = trim($row['absent']);
+                            $payslip->late_deduction = trim($row['late_deduction']);
+                            $payslip->income_tax = trim($row['income_tax']);
+                            $payslip->eobi = trim($row['eobi']);
+                            $payslip->advance_salary = trim($row['advance_salary']);
+                            $payslip->month_closing = trim($row['month_closing']);
+                            $payslip->loan = trim($row['loan']);
+                            $payslip->fuel_card = trim($row['fuel_card']);
+                            $payslip->open_parcel = trim($row['open_parcel']);
+                            $payslip->phone_call = trim($row['phone_call']);
+                            $payslip->recovery = trim($row['recovery']);
+                            $payslip->auction_sale = trim($row['auction_sale']);
+                            $payslip->penalty = trim($row['penalty']);
+                            $payslip->others_deduction = trim($row['others_deduction']);
+                            $payslip->van_deduction = trim($row['van_deduction']);
+                            $payslip->medical_insurance = trim($row['medical_insurance']);
+                            $payslip->total_deduction = trim($row['total_deduction']);
+                            $payslip->net_salary = trim($row['net_salary']);
+                        }
+                        $payslip_details['basic_salary'] = trim($row['basic_salary']);
+                        $payslip_details['house_rent'] = trim($row['house_rent']);
+                        $payslip_details['medical'] = trim($row['medical']);
+                        $payslip_details['gross_salary'] = trim($row['gross_salary']);
+                        $payslip_details['mobile_allowance'] = trim($row['mobile_allowance']);
+                        $payslip_details['vehicle_allowance'] = trim($row['vehicle_allowance']);
+                        $payslip_details['fuel_allowance'] = trim($row['fuel_allowance']);
+                        $payslip_details['conveyance_allowance'] = trim($row['conveyance_allowance']);
+                        $payslip_details['vehicle_maintenance'] = trim($row['vehicle_maintenance']);
+                        $payslip_details['fixed_incentive'] = trim($row['fixed_incentive']);
+                        $payslip_details['holiday_allowance'] = trim($row['holiday_allowance']);
+                        $payslip_details['overtime'] = trim($row['overtime']);
+                        $payslip_details['bonus'] = trim($row['bonus']);
+                        $payslip_details['arrears'] = trim($row['arrears']);
+                        $payslip_details['pickup_incentive'] = trim($row['pickup_incentive']);
+                        $payslip_details['delivery_incentive'] = trim($row['delivery_incentive']);
+                        $payslip_details['operation_incentive'] = trim($row['operation_incentive']);
+                        $payslip_details['extra_duty_allowance'] = trim($row['extra_duty_allowance']);
+                        $payslip_details['others_addition'] = trim($row['others_addition']);
+                        $payslip_details['total_salary'] = trim($row['total_salary']);
+                        $payslip_details['paycut'] = trim($row['paycut']);
+                        $payslip_details['absent'] = trim($row['absent']);
+                        $payslip_details['late_deduction'] = trim($row['late_deduction']);
+                        $payslip_details['income_tax'] = trim($row['income_tax']);
+                        $payslip_details['eobi'] = trim($row['eobi']);
+                        $payslip_details['advance_salary'] = trim($row['advance_salary']);
+                        $payslip_details['month_closing'] = trim($row['month_closing']);
+                        $payslip_details['loan'] = trim($row['loan']);
+                        $payslip_details['fuel_card'] = trim($row['fuel_card']);
+                        $payslip_details['open_parcel'] = trim($row['open_parcel']);
+                        $payslip_details['phone_call'] = trim($row['phone_call']);
+                        $payslip_details['recovery'] = trim($row['recovery']);
+                        $payslip_details['auction_sale'] = trim($row['auction_sale']);
+                        $payslip_details['penalty'] = trim($row['penalty']);
+                        $payslip_details['others_deduction'] = trim($row['others_deduction']);
+                        $payslip_details['van_deduction'] = trim($row['van_deduction']);
+                        $payslip_details['medical_insurance'] = trim($row['medical_insurance']);
+                        $payslip_details['total_deduction'] = trim($row['total_deduction']);
+                        $payslip_details['net_salary'] = trim($row['net_salary']);
                         $payslip->iban = trim($row['iban']);
                         $payslip->added_by = Auth::id();
                         $payslip->save();
+                        dispatch(new ProcessPaySlipPdfEmail($payslip_details, $payslip->id));
                         $updated++;
                     }
                     $error_msg = '';
