@@ -7325,9 +7325,12 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 193);
         $admins = Admin::where('admins.status', 1)
-            ->leftjoin('employee_designations as ed','admins.designation_id','ed.id')
-            ->where('ed.department_id',7)
-            ->get(['admins.id', 'admins.name']);
+            ->leftjoin('employee_designations as ed', 'admins.designation_id', 'ed.id')
+            ->where('ed.department_id', 7);
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            $admins = $admins->where('admins.id', Auth::id());
+        }
+        $admins = $admins->get(['admins.id', 'admins.name']);
         $ratings = CrmRequestRating::all();
         return view('admin.reports.daily_visit_report')->with(['admins' => $admins,'ratings'=>$ratings]);
     }

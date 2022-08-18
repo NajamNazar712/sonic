@@ -6789,8 +6789,8 @@ class AdminAPIController extends Controller
             'feedback' => ['required'],
             'latitude' => ['required'],
             'longitude' => ['required'],
-            'business_card_image' => ['required'],
-            'location_image' => ['required'],
+            'business_card_image' => ['nullable'],
+            'location_image' => ['nullable'],
             'shipper_id' => ['nullable', 'integer'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -6799,7 +6799,17 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             try {
-                $daily_visit = new DailyVisit();
+                if($request->has("daily_visit_id")){
+                    $daily_visit = DailyVisit::where('id', $request->daily_visit_id);
+                    if($daily_visit->exists()){
+                        $daily_visit = $daily_visit->first();
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'Invalid Daily Visit ID']);
+                    }
+                } else{
+                    $daily_visit = new DailyVisit();
+                    $daily_visit->admin_id = $request->admin_id;
+                }
                 $daily_visit->shipper_id = $request->shipper_id;
                 $daily_visit->company_name = str_replace('"', "", $request->company_name);
                 $daily_visit->customer_name = str_replace('"', "", $request->customer_name);
@@ -6810,9 +6820,12 @@ class AdminAPIController extends Controller
                 $daily_visit->feedback = str_replace('"', "", $request->feedback);
                 $daily_visit->latitude = $request->latitude;
                 $daily_visit->longitude = $request->longitude;
-                $daily_visit->admin_id = $request->admin_id;
                 $daily_visit->save();
+
                 if ($request->hasFile('business_card_image')) {
+                    if($daily_visit->business_card_image != null){
+                        Storage::disk('public')->delete($daily_visit->business_card_image);
+                    }
                     $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
                     $file = $request->file('business_card_image');
                     Storage::disk('public')->putFileAs('daily_visit\business_card', $file, $filename);
@@ -6821,6 +6834,9 @@ class AdminAPIController extends Controller
                 }
 
                 if ($request->hasFile('location_image')) {
+                    if($daily_visit->location_image != null){
+                        Storage::disk('public')->delete($daily_visit->location_image);
+                    }
                     $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
                     $file = $request->file('location_image');
                     Storage::disk('public')->putFileAs('daily_visit\location', $file, $filename);

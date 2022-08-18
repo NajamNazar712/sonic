@@ -11,9 +11,10 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
-                @csrf
+                    @csrf
 
                     <div class="col justify-content-center">
+                        <input type="hidden" name="daily_visit_id" id="daily_visit_id" value="{{$daily_visit != null ? $daily_visit->id : ''}}">
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
                         <div class="col form-group">
@@ -31,22 +32,22 @@
                             </select>
                         </div>
                         <div class="col form-group">
-                            <input type="text" name="company_name" id="company_name" class="form-control special_inputs" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
+                            <input type="text" name="company_name" id="company_name" class="form-control special_inputs" value="{{$daily_visit != null ? $daily_visit->company_name : ''}}" placeholder="Company Name*" data-rule-required="true" data-msg-required="Company Name is required" data-rule-maxlength="100" data-msg-maxlength="Company Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <input type="text" name="customer_name" id="customer_name" class="form-control special_inputs" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
+                            <input type="text" name="customer_name" id="customer_name" class="form-control special_inputs" value="{{$daily_visit != null ? $daily_visit->customer_name : ''}}" placeholder="Customer Name*" data-rule-required="true" data-msg-required="Customer Name is required" data-rule-maxlength="100" data-msg-maxlength="Customer Name can be maximum 100 characters">
                         </div>
                         <div class="col form-group">
-                            <textarea name="customer_address" id="customer_address" class="form-control special_inputs" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="6"></textarea>
+                            <textarea name="customer_address" id="customer_address" class="form-control special_inputs" placeholder="Customer Address*" data-rule-required="true" data-msg-required="Customer Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" rows="6">{{$daily_visit != null ? $daily_visit->customer_address : ''}}</textarea>
                         </div>
                         <div class="col form-group">
-                            <input type="text" name="phone_no" id="phone_no" class="form-control phone_number special_inputs" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                            <input type="text" name="phone_no" id="phone_no" class="form-control phone_number special_inputs" value="{{$daily_visit != null ? $daily_visit->phone_no : ''}}" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                         </div>
                         <div class="col form-group">
-                            <input type="email" name="email_address" id="email_address" placeholder="Email Address*" class="form-control special_inputs" data-rule-required="true" data-msg-required="Email Address is required">
+                            <input type="email" name="email_address" id="email_address" placeholder="Email Address*" class="form-control special_inputs" value="{{$daily_visit != null ? $daily_visit->email : ''}}" data-rule-required="true" data-msg-required="Email Address is required">
                         </div>
                         <div class="col form-group">
-                            <textarea name="feedback" class="form-control" placeholder="Meeting Feedback*" data-rule-required="true" data-msg-required="Feedback is required" rows="6"></textarea>
+                            <textarea name="feedback" class="form-control" placeholder="Meeting Feedback*" data-rule-required="true" data-msg-required="Feedback is required" rows="6">{{$daily_visit != null ? $daily_visit->feedback : ''}}</textarea>
                         </div>
                         <div class="col form-group">
                             <label for="upload_bc_image"><b>Please upload a photo of the business card:</b></label>
@@ -104,22 +105,11 @@
             var latitude = null;
             var longitude = null;
 
-
             $('#lead_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Lead Status*'
             });
 
-            $("#lead_status").on('change',function(){
-                id = $(this).val();
-                if(id == 4 || id == 5){
-                    $('#shipper').val(0).trigger('change');
-                    $('#shipper').attr('disabled', true);
-                } else{
-                    $('#shipper').val('').trigger('change');
-                    $('#shipper').removeAttr('disabled');
-                }
-            });
 
             $('#shipper').prepend('<option value="" selected="selected"></option><option value="0">Other</option>').select2({
                 width: '100%',
@@ -150,6 +140,28 @@
                     $("#email_address").val('');
                 }
             });
+
+            $("#lead_status").on('change',function(){
+                id = $(this).val();
+                if(id == 4 || id == 5){
+                    $('#shipper').val(0).trigger('change');
+                    $('#shipper').attr('disabled', true);
+                } else{
+                    $('#shipper').val('').trigger('change');
+                    $('#shipper').removeAttr('disabled');
+                }
+            });
+
+            @if($daily_visit != null)
+                $("#lead_status").val("{{$daily_visit->lead_status_id ?? ''}}").trigger('change');
+                $("#shipper").val("{{$daily_visit->shipper_id ?? ''}}").trigger('change');
+                $("#daily_visit_id").val("{{$daily_visit->id}}");
+                $("#company_name").val("{{$daily_visit->company_name}}");
+                $("#customer_name").val("{{$daily_visit->customer_name}}");
+                $("#customer_address").val("{{$daily_visit->customer_address}}");
+                $("#phone_no").val("{{$daily_visit->phone_no}}");
+                $("#email_address").val("{{$daily_visit->email}}");
+            @endif
 
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',

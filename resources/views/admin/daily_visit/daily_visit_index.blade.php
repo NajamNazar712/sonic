@@ -87,6 +87,7 @@
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
                         <th class="border-primary border-darken-1">Shipper Rating</th>
                         <th class="border-primary border-darken-1">Shipper Feedback</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -320,12 +321,33 @@
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
                     { data:'rating' ,name: 'rate.name', class: 'align-middle rating_code'},
                     { data:'rating_comment' ,name: 'daily_visits.comment', class: 'align-middle rating_comment'},
+                    {data: 'action', name: '', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    this.api().columns().every(function (column_id) {
+                        var column = this;
+                        var header = column.header();
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select') || $(header).is('.location') || $(header).is('.l_photo') || $(header).is('.b_c_photo')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
                     this.api().table().columns.adjust();
                 }
             });

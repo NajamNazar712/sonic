@@ -760,8 +760,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('business_card/{business_card}', 'Admins\AdminDailyVisitController@business_card')->name('business_card');
         Route::get('location_photo/{location_photo}', 'Admins\AdminDailyVisitController@location_photo')->name('location_photo');
         Route::prefix('screen')->name('screen.')->group(function () {
-            Route::get('', 'Admins\AdminDailyVisitController@daily_visit_list_index')->name('');
-            Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
+            Route::get('', 'Admins\AdminDailyVisitController@daily_visit_list_index')->name('index');
+            Route::get('list', 'Admins\AdminDailyVisitController@daily_visit_list')->name('list');
+            Route::get('{id}/edit', 'Admins\AdminDailyVisitController@daily_visit_edit')->name('edit');
         });
     });
 
