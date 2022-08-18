@@ -1931,6 +1931,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('duplicate_role', 'Admins\UserManagementController@role_duplicate')->name('duplicate_role');
             });
 
+            Route::prefix('permissions')->name('permissions.')->group(function() {
+                Route::get('', 'Admins\UserManagementController@role_permission_index')->name('index');
+                Route::post('module_permission', 'Admins\UserManagementController@module_permission')->name('modulepermission');
+                Route::post('list', 'Admins\UserManagementController@role_permission_list')->name('list');
+            });
+
             Route::prefix('update/{id}')->name('update.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@role_update_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@role_update_store')->name('store');
