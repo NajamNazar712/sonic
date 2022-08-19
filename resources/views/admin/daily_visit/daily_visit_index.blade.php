@@ -87,6 +87,7 @@
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
                         <th class="border-primary border-darken-1">Shipper Rating</th>
                         <th class="border-primary border-darken-1">Shipper Feedback</th>
+                        <th class="border-primary border-darken-1">Last Updated By</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -248,6 +249,7 @@
                             head.push('Meeting Feedback');
                             head.push('Shipper Rating');
                             head.push('Shipper Feedback');
+                            head.push('Last Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -264,6 +266,7 @@
                                 row.push(values.feedback);
                                 row.push(values.rating_text);
                                 row.push(values.rating_comment);
+                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
@@ -321,6 +324,7 @@
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
                     { data:'rating' ,name: 'rate.name', class: 'align-middle rating_code'},
                     { data:'rating_comment' ,name: 'daily_visits.comment', class: 'align-middle rating_comment'},
+                    { data:'updated_by' ,name: 'ua.name', class: 'align-middle updated_by'},
                     {data: 'action', name: '', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

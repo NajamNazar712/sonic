@@ -6803,6 +6803,7 @@ class AdminAPIController extends Controller
                     $daily_visit = DailyVisit::where('id', $request->daily_visit_id);
                     if($daily_visit->exists()){
                         $daily_visit = $daily_visit->first();
+                        $daily_visit->updated_by = $request->admin_id;
                     }else{
                         return response()->json(['status' => 1, 'message' => 'Invalid Daily Visit ID']);
                     }
