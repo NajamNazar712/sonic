@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Storage;
 class ProcessPaySlipPdfEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    protected $payslip_details;
+    protected $payslip_id;
     /**
      * Create a new job instance.
      *
