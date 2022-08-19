@@ -1089,10 +1089,9 @@ class ShipperAPIController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
-                    if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
-                        $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->orderBy('id', 'DESC')->first();
                         $message = array();
-                        if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
+                        if (in_array($journey->shipper_status_id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
                             $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
                             if ($rider_delivery->exists()) {
                                 $data = array();
@@ -1164,7 +1163,7 @@ class ShipperAPIController extends Controller
                                 return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
                             }
                         }
-                        else if (in_array($shipment->shipper_status_id, [47, 24, 48, 60, 25, 31, 38])) {
+                        else if (in_array($journey->shipper_status_id, [47, 24, 48, 60, 25, 31, 38])) {
                             $rider_delivery = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
                             if ($rider_delivery->exists()) {
                                 $data = array();
@@ -1226,9 +1225,6 @@ class ShipperAPIController extends Controller
                         else{
                             return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
                         }
-                    } else {
-                        return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
-                    }
                 } else {
                     return response()->json(['status' => 1, 'error' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
                 }

@@ -6799,11 +6799,13 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             try {
+                $edit = 0;
                 if($request->has("daily_visit_id")){
                     $daily_visit = DailyVisit::where('id', $request->daily_visit_id);
                     if($daily_visit->exists()){
                         $daily_visit = $daily_visit->first();
                         $daily_visit->updated_by = $request->admin_id;
+                        $edit = 1;
                     }else{
                         return response()->json(['status' => 1, 'message' => 'Invalid Daily Visit ID']);
                     }
@@ -6844,7 +6846,7 @@ class AdminAPIController extends Controller
                     $daily_visit->location_image = $filename;
                     $daily_visit->save();
                 }
-                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Submitted']);
+                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Submitted', 'edit' => $edit]);
             } catch (Exception $ex) {
                 return response()->json(['status' => 1, 'message' => 'Error ', 'errors' => $ex]);
             }
