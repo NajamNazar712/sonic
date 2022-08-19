@@ -31,6 +31,7 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
@@ -1089,76 +1090,141 @@ class ShipperAPIController extends Controller
                 $shipment = $shipment->first();
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     if (in_array($shipment->shipper_status_id, [14, 30, 36, 37, 7, 8, 9, 12, 15, 18, 56, 24, 25, 47, 48, 60, 31, 38])) {
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
                         $message = array();
-                        $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
-                        if ($rider_delivery->exists()) {
-                            $data = array();
-                            $rider_delivery = $rider_delivery->first();
+                        if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
+                            $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
+                            if ($rider_delivery->exists()) {
+                                $data = array();
+                                $rider_delivery = $rider_delivery->first();
 
-                            if ($rider_delivery->picture_path != null) {
-                                $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                if ($exists) {
-                                    $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                if ($rider_delivery->picture_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                    if ($exists) {
+                                        $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                    } else {
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                    }
+                                    $data["pod_image"] = $pod_image;
                                 } else {
-                                    $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                    $data["pod_image"] = NULL;
+                                    array_push($message, "POD");
                                 }
-                                $data["pod_image"] = $pod_image;
-                            } else {
-                                $data["pod_image"] = NULL;
-                                array_push($message, "POD");
+
+                                if ($rider_delivery->cnic_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->cnic_image);
+                                    if ($exists) {
+                                        $cnic_image = asset(Storage::url($rider_delivery->cnic_image));
+                                    } else {
+                                        $cnic_image = Storage::disk('s3')->temporaryUrl($rider_delivery->cnic_image, now()->addMinutes(15));
+                                    }
+                                    $data["cnic_image"] = $cnic_image;
+                                } else {
+                                    $data["cnic_image"] = NULL;
+                                    array_push($message,"CNIC");
+                                }
+
+                                if ($rider_delivery->house_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->house_image);
+                                    if ($exists) {
+                                        $house_image = asset(Storage::url($rider_delivery->house_image));
+                                    } else {
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->house_image, now()->addMinutes(15));
+                                    }
+                                    $data["house_image"] = $house_image;
+                                } else {
+                                    $data["house_image"] = NULL;
+                                    array_push($message, "House Image");
+                                }
+
+                                if ($rider_delivery->audio_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                    if ($exists) {
+                                        $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                    } else {
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                    }
+                                    $data["audio"] = $audio_path;
+                                } else {
+                                    $data["audio"] = NULL;
+                                    array_push($message, "Audio");
+                                }
+
+                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                    $data["latitude"] = $rider_delivery->actual_location_latitude;
+                                    $data["longitude"] = $rider_delivery->actual_location_longitude;
+                                } else {
+                                    $data["latitude"] = NULL;
+                                    $data["longitude"] = NULL;
+                                    array_push($message, "Location");
+                                }
+                                return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
                             }
-
-                            if ($rider_delivery->cnic_image != null) {
-                                $exists = Storage::disk('public')->exists($rider_delivery->cnic_image);
-                                if ($exists) {
-                                    $cnic_image = asset(Storage::url($rider_delivery->cnic_image));
-                                } else {
-                                    $cnic_image = Storage::disk('s3')->temporaryUrl($rider_delivery->cnic_image, now()->addMinutes(15));
-                                }
-                                $data["cnic_image"] = $cnic_image;
-                            } else {
+                            else{
+                                return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
+                            }
+                        }
+                        else if (in_array($shipment->shipper_status_id, [47, 24, 48, 60, 25, 31, 38])) {
+                            $rider_delivery = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
+                            if ($rider_delivery->exists()) {
+                                $data = array();
+                                $rider_delivery = $rider_delivery->first();
                                 $data["cnic_image"] = NULL;
-                                array_push($message,"CNIC");
-                            }
-
-                            if ($rider_delivery->house_image != null) {
-                                $exists = Storage::disk('public')->exists($rider_delivery->house_image);
-                                if ($exists) {
-                                    $house_image = asset(Storage::url($rider_delivery->house_image));
+                                if ($rider_delivery->picture_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                    if ($exists) {
+                                        $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                    } else {
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                    }
+                                    $data["pod_image"] = $pod_image;
                                 } else {
-                                    $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->house_image, now()->addMinutes(15));
+                                    $data["pod_image"] = NULL;
+                                    array_push($message, "POD");
                                 }
-                                $data["house_image"] = $house_image;
-                            } else {
-                                $data["house_image"] = NULL;
-                                array_push($message, "House Image");
-                            }
 
-                            if ($rider_delivery->audio_path != null) {
-                                $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
-                                if ($exists) {
-                                    $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                if ($rider_delivery->pod_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->pod_image);
+                                    if ($exists) {
+                                        $house_image = asset(Storage::url($rider_delivery->pod_image));
+                                    } else {
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->pod_image, now()->addMinutes(15));
+                                    }
+                                    $data["house_image"] = $house_image;
                                 } else {
-                                    $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                    $data["house_image"] = NULL;
+                                    array_push($message, "House Image");
                                 }
-                                $data["audio"] = $audio_path;
-                            } else {
-                                $data["audio"] = NULL;
-                                array_push($message, "Audio");
-                            }
 
-                            if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
-                                $data["latitude"] = $rider_delivery->actual_location_latitude;
-                                $data["longitude"] = $rider_delivery->actual_location_longitude;
-                            } else {
-                                $data["latitude"] = NULL;
-                                $data["longitude"] = NULL;
-                                array_push($message, "Location");
+                                if ($rider_delivery->audio_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                    if ($exists) {
+                                        $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                    } else {
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                    }
+                                    $data["audio"] = $audio_path;
+                                } else {
+                                    $data["audio"] = NULL;
+                                    array_push($message, "Audio");
+                                }
+
+                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                    $data["latitude"] = $rider_delivery->actual_location_latitude;
+                                    $data["longitude"] = $rider_delivery->actual_location_longitude;
+                                } else {
+                                    $data["latitude"] = NULL;
+                                    $data["longitude"] = NULL;
+                                    array_push($message, "Location");
+                                }
+                                return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
                             }
-                            return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
+                            else{
+                                return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
+                            }
                         }
                         else{
-                            return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
+                            return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
                         }
                     } else {
                         return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
