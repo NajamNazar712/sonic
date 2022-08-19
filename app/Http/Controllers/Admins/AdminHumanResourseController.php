@@ -3826,7 +3826,9 @@ class AdminHumanResourseController extends Controller
                 $name = $payslip->name . '-' . $month . '.pdf';
                 $payslip_pdf = $payslip_pdf->first();
                 $file_url = $payslip_pdf->file_path;
-                $file= public_path(). "/storage/". $file_url;
+                $file= Storage::disk('public')->url('/'.$payslip_pdf->file_path);;
+//                $file= public_path(). "/storage/". $file_url;
+//                dd($file);
 
                 $headers = array(
                     'Content-Type: application/pdf',
