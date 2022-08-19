@@ -203,8 +203,8 @@ class RetailShipmentBookController extends Controller
     public function index(){
         $products = Product::all();
         $business_categories = BusinessCategory::all();
-        $shipping_modes = RetailShippingMode::all();
-        $retail_international_shipping_modes =  RetailInternationalShippingMode::all();
+        $shipping_modes = RetailShippingMode::whereNotIn('id',[8,9,10])->get();
+        $retail_international_shipping_modes =  RetailShippingMode::whereIn('id',[8,9,10])->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
@@ -1689,7 +1689,7 @@ class RetailShipmentBookController extends Controller
     public function excel_index() {
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', 1)->get();
-        $shipping_modes = RetailShippingMode::where('id', '!=', 3)->get();
+        $shipping_modes = RetailShippingMode::whereNotIn('id', [3,8,9,10])->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
