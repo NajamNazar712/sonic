@@ -131,7 +131,7 @@
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC">
+                                        <input type="text" name="shipper_cnic" id="shipper_cnic" class="form-control cnic" placeholder="Shipper CNIC" data-rule-required="true" data-msg-required="Shipper CNIC is required">
                                     </div>
                                     <div class="form-group col">
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
@@ -146,11 +146,11 @@
                                         <input type="text" name="consignee_name" id="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_cnic" id="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC">
+                                        <input type="text" name="consignee_cnic" id="consignee_cnic" class="form-control cnic" placeholder="Consignee CNIC" data-rule-required="true" data-msg-required="Consignee CNIC is required">
                                     </div>
                                     <div class="form-group col">
                                         {{-- <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea> --}}
-                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*" onchange="bdmk()" rows="5"></textarea>
+                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*" onchange="bdmk()" rows="5" data-rule-required="true" data-msg-required="Consignee Address is required"></textarea>
                                     </div>
                                     <div class="col">
                                         <div class="row d-none" id="cod_check">
