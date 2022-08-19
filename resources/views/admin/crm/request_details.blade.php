@@ -259,7 +259,9 @@
                                                                     </button>
                                                                 @endif
                                                             @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
-                                                                <button id="valid" type="submit"
+                                                            <input type="hidden" id="valid_close_reason" name="valid_close_reason"
+                                                                   value="0">    
+                                                            <button id="valid" type="submit"
                                                                         class="btn btn-success mr-1">
                                                     <span class="d-none d-lg-block">
                                                     Re-Open
@@ -2369,7 +2371,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var close_reason = $('#close_reason').val();
+                    var close_reason = $('#valid_close_reason').val();
                     var crm_request_id = $('#crm_request_id').val();
                     if(close_reason == 1){
                         $.ajax({
