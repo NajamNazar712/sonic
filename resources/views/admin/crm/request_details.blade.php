@@ -286,13 +286,11 @@
                                                         @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 5)
                                                             <input type="hidden" id="close" name="close"
                                                                value="0">
-                                                               <input type="hidden" id="close_reason" name="close_reason"
-                                                                   value="0">
+                                                               
                                                         @else
                                                             <input type="hidden" id="close" name="close"
                                                                    value="1">
-                                                                   <input type="hidden" id="close_reason" name="close_reason"
-                                                                   value="1">
+                                                                   
                                                         @endif
                                                         @if($crm_details['status_id'] != 4)
                                                         <input type="hidden" id="close_reason" name="close_reason"
