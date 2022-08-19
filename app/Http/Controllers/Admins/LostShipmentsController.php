@@ -311,7 +311,7 @@ class LostShipmentsController extends Controller
     public function get_shipment_info(Request $request)
     {
             $shipment_status_for_bags = array(3,21,26,32,49);
-            $status_array = array(1, 5, 11, 14, 17, 21, 25, 26, 30, 31, 32, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);
