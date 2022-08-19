@@ -186,6 +186,17 @@ class RetailRatesCalculationController extends Controller
             }*/
         }
         elseif ($business_category_id == 2){
+
+            if($shipping_mode_id == 8){
+                $shipping_mode_id = 1;
+            }
+            else if($shipping_mode_id == 9){
+                $shipping_mode_id = 2;
+            }
+            else{
+                $shipping_mode_id = 3;
+            }
+
             $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             if($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
