@@ -5437,8 +5437,8 @@ class DeliveryController extends Controller
                     $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
                     ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
                     ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-                    ->where('s.tracking_number', '=', $tracking_number)
+                    ->join('shipments as rs', 'rpns.shipment_id', '=', 'rs.id')
+                    ->where('rs.tracking_number', '=', $tracking_number)
                     ->groupBy('station_deposit_notes.id');
                 // }
             }
