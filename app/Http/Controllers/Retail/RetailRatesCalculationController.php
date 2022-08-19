@@ -181,9 +181,9 @@ class RetailRatesCalculationController extends Controller
             $charges_with_discount = number_format($charges - $discount_amount,2);
 
             $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
-            if($cod != null){
+           /* if($cod != null){
                 $total_charges = $total_charges + intval($cod);
-            }
+            }*/
         }
         elseif ($business_category_id == 2){
             $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
@@ -207,9 +207,9 @@ class RetailRatesCalculationController extends Controller
                     $charges_with_discount = number_format($charges - $discount_amount,2);
 
                     $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
-                    if($cod != null){
+                   /* if($cod != null){
                         $total_charges = $total_charges + intval($cod);
-                    }
+                    }*/
                     
                 }
             }

@@ -1093,7 +1093,7 @@
                  length = $('#length').val();
                  breadth = $('#breadth').val();
                  height = $('#height').val();
-                 cod = $('#cod').val();
+                 //cod = $('#cod').val();
 
                 if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
                     if(shipping_mode_id == 5 && trax_box == ''){
@@ -1114,7 +1114,7 @@
                             'trax_box': trax_box,
                             'length': length,
                             'breadth': breadth,
-                            'cod': cod,
+                          /*  'cod': cod,*/
                             'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -1123,35 +1123,11 @@
                             var total_charges = '';
                             if(data.status){
 
-                                if(shipping_mode_id == 3 && (cod == '' || cod == null)){
-                                    var error = 'COD Amount Required';
-                                    toastr.error(error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                    return false;
-                                }
-
                                 $('#charges').val(data.details.charges);
                                 $('#discount').val(data.details.discount_amount);
                                 $('#charges_with_discount').val(data.details.charges_with_discount);
                                 $('#gst').val(data.details.gst_charges);
 
-
-                               /* if(shipping_mode_id == 3){
-                                   total_charges = parseFloat(data.details.charges_with_discount) + parseFloat(data.details.gst_charges) +  (+$('#cod').val());
-                                }
-                                else{
-                                    total_charges = parseFloat(data.details.charges_with_discount) + parseFloat(data.details.gst_charges) ;
-                                }
-
-                                if(total_charges == 0 ){
-                                    var error = 'No charges set for the given kg-range/No zone found';
-                                    toastr.error(error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }*/
                                 $('#total_charges').val(data.details.total_charges);
                             }
                         });
