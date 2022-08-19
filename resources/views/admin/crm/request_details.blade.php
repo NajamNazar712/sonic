@@ -295,6 +295,8 @@
                                                                    value="1">
                                                         @endif
                                                         @if($crm_details['status_id'] != 4)
+                                                        <input type="hidden" id="close_reason" name="close_reason"
+                                                                   value="1">
                                                             @if($crm_details['status_id'] == 3)
                                                                 <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                     <span class="d-none d-lg-block">
