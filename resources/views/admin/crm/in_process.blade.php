@@ -542,7 +542,6 @@
                         className: 'btn btn-danger close_request',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            // var closed_reason_status = parseInt($('#closed_reason_status').val());
                             
                             $.ajax({
                                 url: '{!! route('admin.crm.close_reason') !!}',

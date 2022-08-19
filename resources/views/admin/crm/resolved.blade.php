@@ -235,6 +235,28 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Who’s at Fault</h4>
+                </div>
+                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
+                <div class="modal-body">
+                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
+                        @foreach($closed_reason_statuses as $closed_reason_status)
+                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -553,65 +575,23 @@
                         className: 'btn btn-danger close_requests',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                                swal({
-                                    text: 'Are you sure, you want to Close these Request(s)?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    swal({
-                                        title: 'Please Wait!',
-                                        text: 'Request(s) are being marked Closed.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.crm.close') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'crm_request_ids[]': selected_rows,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        })
-                                            .done(function (data) {
-                                                if (data.status == 0) {
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
-                                                    });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                selected_rows = [];
-
-                                                table.rows().deselect();
-
-                                                table.draw('false');
-                                                swal.close();
-                                            });
-                                    }
-                                });
+                            $.ajax({
+                                url: '{!! route('admin.crm.close_reason') !!}',
+                                method: 'POST',
+                                data: {
+                                    // 'closed_reason_status':closed_reason_status,
+                                    'crm_request_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function (data) {
+                                if(data.status == 1){
+                                    $('#close_reason_crm_ids').val(data.crm_ids);
+                                    $('#CloseReasonModal').modal('show');
+                                }else{
+                                    mark_close();
+                                }
+                            });
                         }
                     },
                         @endif
@@ -1057,6 +1037,16 @@
                 width:'100%',
                 dropdownParent:$('#AssignAgentModal')
             });
+            $("#closed_reason_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width:'100%',
+                dropdownParent:$('#CloseReasonModal')
+            });
+
+            $('#closed_reason_submit').on('click',function () {
+                //mark_close
+                mark_close();
+            });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -1205,6 +1195,10 @@
                 $('#admin_tag_div').addClass('d-none');
                 $('#department_tag_div').addClass('d-none');
             });
+            $('#CloseReasonModal').on('hide.bs.modal', function (e) {
+                $('#closed_reason_status').val('').trigger('change');
+                $('#close_reason_crm_ids').val('');
+            });
             $('#tag_adminSubmit').on('click', function () {
                 var type = parseInt($('#tag_type').val());
                 var tag_hub = null;
@@ -1275,6 +1269,8 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
+
+
             });
             {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}
                 {{--$('#AssignAgentModal').modal('show');--}}
@@ -1316,6 +1312,73 @@
 
                 {{--});--}}
             {{--});--}}
+
+            function mark_close(){
+                var closed_reason_status = $('#closed_reason_status').val();
+                var close_reason_crm_ids = $('#close_reason_crm_ids').val();
+                swal({
+                                    text: 'Are you sure, you want to Close these Request(s)?',
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Request(s) are being marked Closed.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.close') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids[]': selected_rows,
+                                                'closed_reason_status': closed_reason_status,
+                                                'close_reason_crm_ids': close_reason_crm_ids,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function (data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                } else {
+                                                    toastr.error(data.error, 'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                                }
+                                                selected_rows = [];
+
+                                                table.rows().deselect();
+                                                $('#CloseReasonModal').modal('hide');
+
+                                                table.draw('false');
+                                                swal.close();
+                                            });
+                                    }
+                                });
+            }
         });
     </script>
 @endsection
