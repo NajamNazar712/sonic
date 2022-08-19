@@ -143,7 +143,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
 //        else{
             $amount = 0;
             if($charges_mode_id == 2){
-                $amount = $rates['charges_with_discount'];
+                $amount = $rates['total_charges'];
             }
             $r_amount = 0;
 //        }
