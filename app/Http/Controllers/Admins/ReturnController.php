@@ -4722,24 +4722,27 @@ class ReturnController extends Controller
     }
     public function return_revert_shipment_details(Request $request)
     {
-        $shipment = Shipment::where('tracking_number', $request->tracking_number)->whereIn('shipper_status_id', [25,31,38])->first();
-        if($shipment)
-        {
-            $details = array();
+        $tracking_number = explode(',',$request->tracking_number);
+        $tr_e  = array();
+        $details = array();
+        foreach ($tracking_number as $key=>$t_n) {
+            $shipment = Shipment::where('tracking_number', $t_n)->whereIn('shipper_status_id', [25, 31, 38])->first();
+            if ($shipment) {
+                $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
+                $details[$key]['id'] = $shipment->id;
+                $details[$key]['tracking_number'] = $shipment->tracking_number;
+                $details[$key]['shipper'] = isset($shipment->user->name) ? $shipment->user->name : '';
+                $details[$key]['return_note'] = $return_note_id->return_note_id;
 
-            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
+                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null, null);
 
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['shipper'] = $shipment->user->name;
-            $details['return_note'] = $return_note_id->return_note_id;
+            } else {
+                $tr_e[] = $t_n;
+            }
+        }
 
-            ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
-            
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-        } 
-        else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is on another status'];
+        if(count($details) > 0 || count($tr_e) > 0){
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details,'ids'=>$tr_e];
         }
     }
     public function return_revert_submit(Request $request)
