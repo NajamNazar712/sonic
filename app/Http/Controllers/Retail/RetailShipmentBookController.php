@@ -288,7 +288,7 @@ class RetailShipmentBookController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$request->cod);
-        //dd($rates);
+       
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
         }
@@ -500,7 +500,7 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
-        $cod = $request->cod;
+        $cod = intval(str_replace(',', '', $request->cod));
         if($request->weight != null){
 
             $weight = $request->weight;

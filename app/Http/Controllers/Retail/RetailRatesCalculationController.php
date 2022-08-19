@@ -19,6 +19,7 @@ class RetailRatesCalculationController extends Controller
         else{
             $discount = $discount / 100;
         }
+        
         $charges = 0;
         $discount_amount = 0;
         $charges_with_discount = 0;
@@ -181,7 +182,7 @@ class RetailRatesCalculationController extends Controller
 
             $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
             if($cod != null){
-                $total_charges = $total_charges + $cod;
+                $total_charges = $total_charges + intval($cod);
             }
         }
         elseif ($business_category_id == 2){
@@ -196,8 +197,20 @@ class RetailRatesCalculationController extends Controller
                     $zone = $international_zone->zone_name;
                     $zone_id = 'zone_'.$zone;
                     $charges = $weight_charge[$zone_id];
-                    $discount_amount = $charges * $discount;
-                    $charges_with_discount = $charges - $discount_amount;
+
+                    $city = City::find($pickup_city_id);
+                    $gst = $city->zone->gst;
+                    $gst_charges = number_format($charges * $gst,2);
+                    $charges = number_format($charges - $gst_charges,2);
+
+                    $discount_amount = number_format($charges * $discount,2);
+                    $charges_with_discount = number_format($charges - $discount_amount,2);
+
+                    $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
+                    if($cod != null){
+                        $total_charges = $total_charges + intval($cod);
+                    }
+                    
                 }
             }
         }

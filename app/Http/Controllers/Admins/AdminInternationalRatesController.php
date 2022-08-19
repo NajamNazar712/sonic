@@ -1540,7 +1540,7 @@ class AdminInternationalRatesController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down','Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1617,7 +1617,7 @@ class AdminInternationalRatesController extends Controller
                     $created = 0;
                     $not_updated = 0;
                     $shipping_mode_id = 1;
-                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
+                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
@@ -1634,31 +1634,30 @@ class AdminInternationalRatesController extends Controller
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
 
-                            $standard_rate = new InternationalStandardRetailRates();
-                            $standard_rate->range_up = $range_up;
-                            $standard_rate->range_down = $range_down;
-                            $standard_rate->shipping_mode_id = $shipping_mode_id;
-                            $standard_rate->zone_1 = $zone_1;
-                            $standard_rate->zone_2 = $zone_2;
-                            $standard_rate->zone_3 = $zone_3;
-                            $standard_rate->zone_4 = $zone_4;
-                            $standard_rate->zone_5 = $zone_5;
-                            $standard_rate->zone_6 = $zone_6;
-                            $standard_rate->zone_7 = $zone_7;
-                            $standard_rate->zone_8 = $zone_8;
-                            $standard_rate->zone_9 = $zone_9;
-                            $standard_rate->zone_10 = $zone_10;
-                            $standard_rate->zone_11 = $zone_11;
-                            $standard_rate->save();
-                            $created++;
-                        
+                        $standard_rate = new InternationalStandardRetailRates();
+                        $standard_rate->range_up = $range_up;
+                        $standard_rate->range_down = $range_down;
+                        $standard_rate->shipping_mode_id = $shipping_mode_id;
+                        $standard_rate->zone_1 = $zone_1;
+                        $standard_rate->zone_2 = $zone_2;
+                        $standard_rate->zone_3 = $zone_3;
+                        $standard_rate->zone_4 = $zone_4;
+                        $standard_rate->zone_5 = $zone_5;
+                        $standard_rate->zone_6 = $zone_6;
+                        $standard_rate->zone_7 = $zone_7;
+                        $standard_rate->zone_8 = $zone_8;
+                        $standard_rate->zone_9 = $zone_9;
+                        $standard_rate->zone_10 = $zone_10;
+                        $standard_rate->zone_11 = $zone_11;
+                        $standard_rate->save();
+                        $created++;
+
 
                     }
                     $error_msg = '';
                     if ($not_updated > 1) {
                         $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    }
-                    else if($created > 1) {
+                    } else if ($created > 1) {
                         $updated = $created;
                     }
 
@@ -1682,7 +1681,7 @@ class AdminInternationalRatesController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down','Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1759,7 +1758,7 @@ class AdminInternationalRatesController extends Controller
                     $created = 0;
                     $not_updated = 0;
                     $shipping_mode_id = 2;
-                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
+                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $range_up = trim($row['range_up']);
@@ -1798,8 +1797,7 @@ class AdminInternationalRatesController extends Controller
                     $error_msg = '';
                     if ($not_updated > 1) {
                         $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    }
-                    else if($created > 1) {
+                    } else if ($created > 1) {
                         $updated = $created;
                     }
 
@@ -1823,7 +1821,7 @@ class AdminInternationalRatesController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down','Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1901,7 +1899,7 @@ class AdminInternationalRatesController extends Controller
                     $not_updated = 0;
 
                     $shipping_mode_id = 3;
-                    InternationalStandardRetailRates::where('shipping_mode_id',$shipping_mode_id)->delete();
+                    InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->delete();
 
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
@@ -1941,8 +1939,7 @@ class AdminInternationalRatesController extends Controller
                     $error_msg = '';
                     if ($not_updated > 1) {
                         $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
-                    }
-                    else if($created > 1) {
+                    } else if ($created > 1) {
                         $updated = $created;
                     }
 
@@ -1960,7 +1957,9 @@ class AdminInternationalRatesController extends Controller
             }
 
         }
-public function extra_service_charges_index(){
+    }
+
+    public function extra_service_charges_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),555);
         return view('admin.international.service_charges');
     }
@@ -2042,8 +2041,5 @@ public function extra_service_charges_index(){
         }
     }
 
-
-
-    }
 
 }
