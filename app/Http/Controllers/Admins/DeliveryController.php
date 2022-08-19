@@ -5405,22 +5405,12 @@ class DeliveryController extends Controller
         if ($tracking_number = $request->get('search_tracking')) {
             $shipment = Shipment::where('tracking_number',$tracking_number)->get()->first();
             if($shipment){
-                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
-                if($retail_shipment->exists()){
-                    $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-                    ->where('s.tracking_number', '=', $tracking_number)
-                    ->groupBy('station_deposit_notes.id');
-                }else{
                     $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
                         ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
                         ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
                         ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
                         ->where('s.tracking_number', '=', $tracking_number)
                         ->groupBy('station_deposit_notes.id');
-                }
             }
             // $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
             //     ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
@@ -5439,6 +5429,23 @@ class DeliveryController extends Controller
                
 
         }
+        if ($tracking_number = $request->get('search_tracking_retail')) {
+            $shipment = Shipment::where('tracking_number',$tracking_number)->get()->first();
+            if($shipment){
+                // $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
+                // if($retail_shipment->exists()){
+                    $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number)
+                    ->groupBy('station_deposit_notes.id');
+                // }
+            }
+
+        }
+
+        
         if ($dncc = $request->get('scan_dncc')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
                 ->where('dnsdns.delivery_note_id', '=', $dncc)

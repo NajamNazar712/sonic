@@ -14,7 +14,7 @@
                 <form id="track_form" class="justify-content-center m-2" novalidate="novalidate">
                     <div class="row mb-2 justify-content-center">
 
-                        <div class="col-4">
+                        <div class="col-2">
 {{--                            <fieldset class="position-relative has-icon-left">--}}
 
 {{--                                <div class="form-control-position">--}}
@@ -22,35 +22,43 @@
 {{--                                </div>--}}
 {{--                            </fieldset>--}}
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Scan SDN" name="scan_sdn"
+                                <input type="text" class="form-control" placeholder="Search By SDN" name="scan_sdn"
                                        id="scan_sdn"  data-tags-input-name="scan_sdn">
                             </div>
 
                         </div>
                         <div class="col-2">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc"
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By DNCC" name="scan_dncc"
                                        id="scan_dncc">
                                 <div class="form-control-position">
-                                    <i class="ft-search"></i>
+                                    
                                 </div>
                             </fieldset>
                         </div>
                         <div class="col-2">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Scan RNCC" name="scan_rncc"
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By RNCC" name="scan_rncc"
                                        id="scan_rncc">
                                 <div class="form-control-position">
-                                    <i class="ft-search"></i>
+                                   
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-4">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                        <div class="col-3">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By COD Tracking Number"
                                        name="search_tracking" id="search_tracking">
                                 <div class="form-control-position">
-                                    <i class="ft-search"></i>
+                                    
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By Retail Tracking Number"
+                                       name="search_tracking_retail" id="search_tracking_retail">
+                                <div class="form-control-position">
                                 </div>
                             </fieldset>
                         </div>
@@ -1027,6 +1035,8 @@
                         d.scan_dncc = $('#scan_dncc').val();
                         d.scan_rncc = $('#scan_rncc').val();
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_tracking_retail = $('#search_tracking_retail').val();
+                        
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_date_from_deposited = $('input[name="search_date_from_deposited_formatted"]').val();
@@ -1051,7 +1061,7 @@
                         }
                     },
                     {data: 'sdn', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
-                    {data: 'sdn_type', name: 'station_deposit_notes.sdn_type', class: 'align-middle text-center sdn_type'},
+                    {data: 'sdn_type', name: 'station_deposit_notes.sdn_type', class: 'align-middle sdn_type', orderable: false, searchable: false},
                     
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {
@@ -1238,7 +1248,7 @@
                 }
             });
             var select = $('#track_form #scan_sdn').selectize({
-                placeholder: 'Scan SDN(s)*',
+                placeholder: 'Search SDN(s)',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
@@ -1269,6 +1279,18 @@
                     table.draw();
                 }
             });
+
+            $('#search_tracking_retail').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function () {
+                if (this.value.length == 0 || this.value.length >= 6) {
+                    table.draw();
+                }
+            });
+
+            
 
             $('#scan_dncc').inputmask({
                 'alias': 'integer',
