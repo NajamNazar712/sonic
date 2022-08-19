@@ -8984,6 +8984,7 @@ class RiderAPIController extends Controller
                                 $details = ['tracking_number' => $shipment->tracking_number, 'shipper_number_1' => $shipment->user->phone, 'shipper_number_2' => $shipment->user->phone2, 'name' => $shipment->consignee_name, 'consignee_number_1' => $shipment->consignee_phone_number_1, 'consignee_number_2' => $shipment->consignee_phone_number_2, 'shipper_name' => $shipment->user->name];
                                 NotificationsController::send(183, $details);
                                 NotificationsController::send(184, $details);
+                                $rider_delivery->rider_status_id = 30;
                             }
                             else if ($shipment->booking_type_id == 3) {
                                 $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
@@ -9002,9 +9003,11 @@ class RiderAPIController extends Controller
                                 if ($total_parcels == $delivered_parcels) {
                                     Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                    $rider_delivery->rider_status_id = 36;
                                 } else {
                                     Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                     ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                    $rider_delivery->rider_status_id = 37;
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
                             }
@@ -9077,7 +9080,7 @@ class RiderAPIController extends Controller
                         $delivery_note_data->last_updated_at = Carbon::now();
                         $delivery_note_data->status_updated_at = Carbon::now();
                         $delivery_note_data->save();
-
+                        $rider_delivery->save();
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 } else {
