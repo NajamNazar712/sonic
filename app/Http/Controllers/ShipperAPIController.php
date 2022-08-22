@@ -733,6 +733,7 @@ class ShipperAPIController extends Controller
                                 'new_consignee_email' => $request->consignee_email,
                                 'old_amount' => $shipment->amount,
                                 'new_amount' => $amount,
+                                'intercept_type' => $intercept_type,
                                 'shipper_id' => $user_id,
                             ]);
                             $shipment->consignee_status_id = 55;

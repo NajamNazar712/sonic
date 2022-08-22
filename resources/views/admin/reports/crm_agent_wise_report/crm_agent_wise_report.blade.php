@@ -22,7 +22,7 @@
                                     </span>
                                 </div>
 
-                                <input type="text" name="date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="date_from" placeholder="Date (From)">
+                                <input type="text" name="date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="date_from" placeholder="Date">
                             </div>
                         </div>
 
@@ -257,7 +257,7 @@
                     UnblockPagePermanently();
                 }else{
                     UnblockPagePermanently();
-                    var error = "Select Date From!";
+                    var error = "Select Date!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 

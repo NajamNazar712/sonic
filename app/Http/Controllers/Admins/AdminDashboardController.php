@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -163,6 +164,7 @@ use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Rates\PendingWeightCharge;
 use App\Http\Models\Rates\PendingBookingTypeCharges;
@@ -1823,32 +1825,34 @@ class AdminDashboardController extends Controller
     {
 
         $user = User::find($id);
-        $dws_weight = DwsWeightCharges::where('user_id', $id);
-
         $on_dws_charges = null;
         $ol_dws_charges = null;
         $detain_dws_charges = null;
         $sameday_dws_charges = null;
 
-        if ($dws_weight->exists()) {
-            $dws_weight = $dws_weight->get();
-            foreach ($dws_weight as $value) {
-                if ($value->shipping_mode_id == 1) {
-                    $on_dws_charges = $value->dws_weight_status;
+        
+        if ($date == null) {
+            
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
 
-                } elseif ($value->shipping_mode_id == 2) {
-                    $ol_dws_charges = $value->dws_weight_status;
+            if ($dws_weight->exists()) {
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if ($value->shipping_mode_id == 1) {
+                        $on_dws_charges = $value->dws_weight_status;
 
-                } elseif ($value->shipping_mode_id == 3) {
-                    $detain_dws_charges = $value->dws_weight_status;
+                    } elseif ($value->shipping_mode_id == 2) {
+                        $ol_dws_charges = $value->dws_weight_status;
 
-                } elseif ($value->shipping_mode_id == 4) {
-                    $sameday_dws_charges = $value->dws_weight_status;
+                    } elseif ($value->shipping_mode_id == 3) {
+                        $detain_dws_charges = $value->dws_weight_status;
 
+                    } elseif ($value->shipping_mode_id == 4) {
+                        $sameday_dws_charges = $value->dws_weight_status;
+
+                    }
                 }
             }
-        }
-        if ($date == null) {
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1863,6 +1867,27 @@ class AdminDashboardController extends Controller
 
         } else {
             $tomorrow = Carbon::parse($date)->addDay(1);
+
+            $dws_weight = DwsWeightChargesHistory::where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow);
+
+            if ($dws_weight->exists()) {
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if ($value->shipping_mode_id == 1) {
+                        $on_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 2) {
+                        $ol_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 3) {
+                        $detain_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 4) {
+                        $sameday_dws_charges = $value->dws_weight_status;
+
+                    }
+                }
+            }
             $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
@@ -1973,7 +1998,15 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id)
     {
-        $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+        $user = User::find($id);
+
+        $pending_dws = PendingDwsWeightCharges::where('user_id', $id);
+        if($pending_dws->exists()){
+            $dws_weight = $pending_dws;
+
+        }else{
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
+        }
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -1998,7 +2031,6 @@ class AdminDashboardController extends Controller
                 }
             }
         }
-        $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
         $on = null;
@@ -4270,8 +4302,8 @@ class AdminDashboardController extends Controller
                     }
                 }
             }
-            if ($request->authorize == 1) {
-                DwsWeightChargesController::approve($id);
+            if ($request->authorize == 1) { 
+                DwsWeightChargesController::approve($id,1);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -12062,7 +12094,8 @@ class AdminDashboardController extends Controller
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+                    $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_corporate_account_dates as $date) {

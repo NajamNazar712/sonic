@@ -17,7 +17,7 @@ class CreateEmployeeConfirmationsTable extends Migration
             $table->increments('id');
             $table->integer('employee_id')->index();
             $table->integer('probation_form')->default(0);
-            $table->integer('status')->default(1); 
+            $table->integer('status')->index()->default(1);
             $table->date('probation_end_date')->nullable();
             $table->integer('increment')->default(0);
             $table->string('approve_reason')->nullable();
