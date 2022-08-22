@@ -3025,6 +3025,13 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 35) {
                     $shipment = Shipment::find($reference_1_id);
+                    //yep sms
+                    if($shipment->user_id == 12613){
+                        $body = 'Your YAP Debit card has been successfully delivered.'. PHP_EOL .' Thankyou';
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to);
+                    }
+                    //yep sms end
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('verification', 1)->latest('id')->first();
 
 
@@ -7629,7 +7636,35 @@ class NotificationsController extends Controller
 
                     $shipment = Shipment::find($reference_2_id);
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+                    //yap sms
+                    if($shipment->user_id == 12613){
+                        $refusal_otp= '';
+                        $rider= '';
+                        if ($shipment_otp->exists()) {
+                            $shipment_otp = $shipment_otp->first();
 
+                            $refusal_otp = $shipment_otp->otp;
+                            
+                        }
+                        if ($delivery_note->special_rider) {
+                            if (strpos($body, '[rider]') !== FALSE) {
+                                if ($delivery_note_shipment->rider_information) {
+                                    $rider =  substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->special_rider_phone);
+                                }
+                            }
+                        } else {
+                            if (strpos($body, '[rider]') !== FALSE) {
+                                if ($delivery_note_shipment->rider_information) {
+                                    $rider = substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->rider->phone);
+                                }
+                            }
+                        }
+                        $body = 'Your YAP debit card is on route and will be delivered between [Start Time] – [End time] Please keep your CNIC ready for verification purposes.'. PHP_EOL .  PHP_EOL . 'AWB: '.$shipment->tracking_number. PHP_EOL .  PHP_EOL . 'Rider: '. $rider. PHP_EOL .  PHP_EOL . 'Refusal OTP: '.$refusal_otp. PHP_EOL .  PHP_EOL . 'Helpline: 021-111-118-729';
+                        $to = $shipment->consignee_phone_number_1;
+                        
+                        self::sms($body, $to);
+                    }
+                    //yap sms end
                     $shipper = $shipment->user;
 
                     $to = $shipment->consignee_phone_number_1;
@@ -9113,6 +9148,14 @@ class NotificationsController extends Controller
 
                     $shipment_id = $reference_1_id;
                     $shipment = Shipment::find($shipment_id);
+                    //yep sms
+                    if($shipment->user_id == 12613){
+                        $body = 'Your YAP Debit Card is marked for return. Reply with TRAX YES '.$shipment->tracking_number.' to receive it or TRAX NO '.$shipment->tracking_number.' to return';
+                        $to = $shipment->consignee_phone_number_1;
+                        $data = array($body, $to);
+                        return $data;
+                    }
+                    //yep sms start
                     $shipper_name = NULL;
                     if($shipment->user->brand_name != null){
                         $shipper_name = $shipment->user->brand_name;
