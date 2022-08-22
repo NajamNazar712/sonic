@@ -259,7 +259,9 @@
                                                                     </button>
                                                                 @endif
                                                             @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
-                                                                <button id="valid" type="submit"
+                                                            <input type="hidden" id="valid_close_reason" name="valid_close_reason"
+                                                                   value="0">    
+                                                            <button id="valid" type="submit"
                                                                         class="btn btn-success mr-1">
                                                     <span class="d-none d-lg-block">
                                                     Re-Open
@@ -275,6 +277,8 @@
                                                     <form id="invalid_form" method="post"
                                                           action="{{route('admin.crm.invalid')}}">
                                                         @csrf
+                                                        <input type="hidden" id="close_reason_status" name="close_reason_status"
+                                                                   value="0">
                                                         <input type="hidden" id="req_id" name="req_id"
                                                                value="{{$crm_details->id}}">
                                                         <input type="hidden" id="prev_status" name="prev_status"
@@ -282,17 +286,22 @@
                                                         @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 5)
                                                             <input type="hidden" id="close" name="close"
                                                                value="0">
+                                                               
                                                         @else
                                                             <input type="hidden" id="close" name="close"
                                                                    value="1">
+                                                                   
                                                         @endif
                                                         @if($crm_details['status_id'] != 4)
+                                                        <input type="hidden" id="close_reason" name="close_reason"
+                                                                   value="1">
                                                             @if($crm_details['status_id'] == 3)
                                                                 <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                     <span class="d-none d-lg-block">
                                                                         Close
                                                                     </span>
                                                                 </button>
+                                                               
                                                             @endif
                                                             <button id="invalid" type="submit" class="btn btn-danger">
                                                                 <span class="d-none d-lg-block">
@@ -1053,6 +1062,28 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Who’s at Fault</h4>
+                </div>
+                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
+                <div class="modal-body">
+                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
+                        @foreach($closed_reason_statuses as $closed_reason_status)
+                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
             <div class="card">
@@ -1582,7 +1613,11 @@
                 width: '100%',
                 dropdownParent: $('#tagModal')
             });
-
+            $("#closed_reason_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width:'100%',
+                dropdownParent:$('#CloseReasonModal')
+            });
             $("#admin_tag_department , #admin_tag_hub").on('change',function (){
                 let dept = $("#admin_tag_department").val();
                 let hub = $("#admin_tag_hub").val();
@@ -2326,12 +2361,85 @@
             });
 
 
-            $('#valid_form').on('submit', function (e) {
-                blockPagePermanently();
+            $('#valid_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var close_reason = $('#valid_close_reason').val();
+                    var crm_request_id = $('#crm_request_id').val();
+                    if(close_reason == 1){
+                        $.ajax({
+                        url: '{!! route('admin.crm.close_reason') !!}',
+                        method: 'POST',
+                        data: {
+                            'crm_request_id': crm_request_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                        }).done(function (data) {
+                            if(data.status == 1){
+                                $('#CloseReasonModal').modal('show');
+                            }else{
+                                form.submit();
+                            }
+                        });
+                    }else{
+                        form.submit();
+                    }
+                    
+                }
             });
-            $('#invalid_form').on('submit', function (e) {
-                blockPagePermanently();
-            })
+            // $('#valid_form').on('submit', function (e) {
+            //     blockPagePermanently();
+            // });
+
+
+            $('#invalid_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var close_reason = $('#close_reason').val();
+                    var crm_request_id = $('#crm_request_id').val();
+                    if(close_reason == 1){
+                        $.ajax({
+                        url: '{!! route('admin.crm.close_reason') !!}',
+                        method: 'POST',
+                        data: {
+                            'crm_request_id': crm_request_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                        }).done(function (data) {
+                            if(data.status == 1){
+                                $('#CloseReasonModal').modal('show');
+                            }else{
+                                form.submit();
+                            }
+                        });
+                    }else{
+                        form.submit();
+                    }
+                    
+                }
+            });
+            // $('#invalid_form').on('submit', function (e) {
+                
+            //     var close_reason = $('#close_reason').val();
+            //     if(close_reason == 1){
+
+            //     }
+            //     blockPagePermanently();
+            // })
 
             @foreach($comments as $comment)
             @if($comment->comment_by == 0)
@@ -2613,7 +2721,20 @@
             $('#special_request_modal').on('hide.bs.modal', function (e) {
                 $('.form-check-input').prop('checked', false);
             });
+            $('#CloseReasonModal').on('hide.bs.modal', function (e) {
+                $('#closed_reason_status').val('').trigger('change');
+            });
 
+            $('#closed_reason_submit').on('click',function () {
+                //mark_close
+                
+                $('#close_reason_status').val($('#closed_reason_status').val());
+                $('#CloseReasonModal').modal('hide');
+                $('#close_reason').val("0");
+                $('form#invalid_form').submit();
+            });
+
+            
         });
 
 

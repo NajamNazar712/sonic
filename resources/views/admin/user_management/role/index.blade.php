@@ -96,6 +96,15 @@
 				
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [
+						@if (session('role_id') == 1 || in_array(789, session('permissions')))	
+					{
+						text: 'Search Role Permissions',
+						className: 'btn btn-primary add',
+						action: function (e, dt, node, config) {
+							window.location = '{{ route('admin.user_management.roles.permissions.index') }}';
+						}
+					},
+					@endif
 						@if (session('role_id') == 1 || in_array(86, session('permissions')))	
 					{
 						text: 'Add',

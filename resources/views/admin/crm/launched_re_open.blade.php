@@ -251,6 +251,28 @@
             {{--</div>--}}
         {{--</div>--}}
     {{--</div>--}}
+    <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Who’s at Fault</h4>
+                </div>
+                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
+                <div class="modal-body">
+                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
+                        @foreach($closed_reason_statuses as $closed_reason_status)
+                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -392,115 +414,32 @@
                         className: 'btn btn-primary valid',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                                swal({
-                                    text: 'Are you sure, you want to Mark these Request(s) Valid?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'crm_request_ids[]': selected_rows,
-                                                'valid': 1,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        })
-                                            .done(function (data) {
-                                                if (data.status == 1) {
-                                                    $('#AssignAgentModal').modal('hide');
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
-                                                    });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                selected_rows = [];
 
-                                                table.rows().deselect();
-
-                                                table.draw();
-                                            });
-                                        }
-                                    });
+                            mark_valid_invalid(1);
+                                
                         }
                     },{
                         text: 'In-Valid',
                         className: 'btn btn-danger in_valid',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                                swal({
-                                    text: 'Are you sure, you want to Mark these Request(s) In-Valid?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'crm_request_ids[]': selected_rows,
-                                                'valid': 0,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                                if (data.status == 1) {
-                                                    $('#AssignAgentModal').modal('hide');
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
-                                                    });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                selected_rows = [];
-
-                                                table.rows().deselect();
-
-                                                table.draw();
-                                            });
-                                        }
-                                    });
+                            $.ajax({
+                                url: '{!! route('admin.crm.close_reason') !!}',
+                                method: 'POST',
+                                data: {
+                                    // 'closed_reason_status':closed_reason_status,
+                                    'crm_request_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function (data) {
+                                if(data.status == 1){
+                                    $('#close_reason_crm_ids').val(data.crm_ids);
+                                    $('#CloseReasonModal').modal('show');
+                                }else{
+                                    mark_valid_invalid(0);
+                                }
+                            });
                         }
                     },
                         @endif
@@ -947,6 +886,9 @@
                 });
 
             });
+            $('#closed_reason_submit').on('click',function () {
+                mark_valid_invalid(0);
+            });
 
             $('#bulkcommentSubmit').on('click',function () {
                 var comment = $('#BulkExternalCommentModal #bulk_comment').val();
@@ -1052,6 +994,15 @@
                 placeholder: "Select Agent",
                 width:'100%',
                 dropdownParent:$('#AssignAgentModal')
+            });
+            $("#closed_reason_status").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width:'100%',
+                dropdownParent:$('#CloseReasonModal')
+            });
+            $('#CloseReasonModal').on('hide.bs.modal', function (e) {
+                $('#closed_reason_status').val('').trigger('change');
+                $('#close_reason_crm_ids').val('');
             });
 
             //Selectize
@@ -1331,7 +1282,74 @@
                     {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
                 {{--}--}}
             {{--});--}}
+            function mark_valid_invalid(valid){
+                
+                if(valid == 0){
+                    valid_text = 'Invalid';
+                }else{
+                    valid_text = 'Valid';
 
+                }
+                
+                var closed_reason_status = $('#closed_reason_status').val();
+                var close_reason_crm_ids = $('#close_reason_crm_ids').val();
+                swal({
+                text: 'Are you sure, you want to Mark these Request(s) '+valid_text+'?',
+                icon: 'info',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
+                        method: 'POST',
+                        data: {
+                            'crm_request_ids[]': selected_rows,
+                            'closed_reason_status': closed_reason_status,
+                            'close_reason_crm_ids': close_reason_crm_ids,
+                            'valid': valid,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#AssignAgentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw();
+                            $('#CloseReasonModal').modal('hide');
+
+                        });
+                    }
+                });
+            }
         });
     </script>
 @endsection
