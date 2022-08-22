@@ -129,8 +129,9 @@ class RetailRatesCalculationController extends Controller
                         // = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
                         $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('trax_box_id', $trax_box_id)->where('id', '<', $weight_charges->id)->orderby('id','desc')->first();
                         if($charges){
-                            $remaining_weight = intval($weight - $charges->range_down);
+                            $remaining_weight = $weight - $charges->range_down;
                         }
+
                     }
 
                     if($remaining_weight > 0){
