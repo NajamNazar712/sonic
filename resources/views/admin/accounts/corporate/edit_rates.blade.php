@@ -2496,7 +2496,7 @@
                                                                         @if ($detain_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
-                                                                        @elseif ($detain_dws_charges == 3)
+                                                                        @elseif ($detain_dws_charges == 2)
                                                                         <option value="1" >High</option>
                                                                         <option value="2" selected>Low</option>
                                                                         @else

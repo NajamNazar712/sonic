@@ -17,8 +17,8 @@ class RCPManualSMSModulePermissionsSeeder extends Seeder
         ));
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 568, 'screen_name' => 'RCP Manual SMS Log', 'action'=> 'View'),
-            array('id' => 569, 'screen_name' => 'RCP Manual SMS Log Excel', 'action'=> 'Download'),
+            array('id' => 570, 'screen_name' => 'RCP Manual SMS Log', 'action'=> 'View'),
+            array('id' => 571, 'screen_name' => 'RCP Manual SMS Log Excel', 'action'=> 'Download'),
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
