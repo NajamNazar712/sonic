@@ -14,7 +14,7 @@
                     @csrf
 
                     <div class="col justify-content-center">
-                        <input type="hidden" name="daily_visit_id" id="daily_visit_id" value="{{$daily_visit != null ? $daily_visit->id : ''}}">
+                        <input type="hidden" name="daily_visit_id" id="daily_visit_id">
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
                         <div class="col form-group">

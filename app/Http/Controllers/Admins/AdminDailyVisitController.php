@@ -46,7 +46,7 @@ class AdminDailyVisitController extends Controller
         ]);
         if ($request->company_name != null && $request->customer_name != null && $request->customer_address != null && $request->phone_no != null && $request->email_address != null && $request->lead_status != null && $request->feedback != null && $request->latitude != null && $request->longitude != null && $request->shipper != null) {
 
-            if($request->has("daily_visit_id")){
+            if($request->daily_visit_id != null){
                 $daily_visit = DailyVisit::where('id', $request->daily_visit_id);
                 if($daily_visit->exists()){
                     $daily_visit = $daily_visit->first();
