@@ -66,6 +66,7 @@ class LostShipmentsController extends Controller
                         ->where('shipments_journey.id', '=',
                             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
                 })
+                ->leftJoin('admins as ad', 'ad.id', '=', 'shipments_journey.admin_id')
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
                         ->where('sj.id', '=',
@@ -73,7 +74,7 @@ class LostShipmentsController extends Controller
                 })
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18);
                 // ->where(function ($sub_query) {
@@ -310,7 +311,7 @@ class LostShipmentsController extends Controller
     public function get_shipment_info(Request $request)
     {
             $shipment_status_for_bags = array(3,21,26,32,49);
-            $status_array = array(1, 5, 11, 14, 17, 21, 25, 26, 30, 31, 32, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);

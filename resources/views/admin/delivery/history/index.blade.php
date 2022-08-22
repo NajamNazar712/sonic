@@ -52,7 +52,9 @@
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
@@ -248,7 +250,9 @@
                             head.push('Delivery Note No.');
                             head.push('Status');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Rider');
+                            head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('No. Of Shipments Delivered');
@@ -270,7 +274,9 @@
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
+                                row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
@@ -320,13 +326,15 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},

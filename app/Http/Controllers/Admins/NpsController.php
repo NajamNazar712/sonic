@@ -289,7 +289,7 @@ class NpsController extends Controller
     public function consolidate_report(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),551);
         $nps_survey = NpsSurvey::orderby('id','desc')->select(['id','survey_name'])->get();
-        return view('admin.nps.report.consolidate',compact('shippers','nps_survey'));
+        return view('admin.nps.report.consolidate',compact('nps_survey'));
     }
 
     public function consolidate_report_list(Request $request){

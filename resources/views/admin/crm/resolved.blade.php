@@ -569,7 +569,7 @@
                         }
                     },
                         @endif
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(202, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'Close Requests',
                         className: 'btn btn-danger close_requests',

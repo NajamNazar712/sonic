@@ -44,6 +44,7 @@ use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Admin\SalePersonTargetDelete;
 use App\Http\Models\Admin\SalesDesignation;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesIncentiveDate;
@@ -2130,7 +2131,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
+            ->select('sale_person_targets.id as id','sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
 
         $datatable = Datatables::of($targets);
         return $datatable->make(true);
@@ -7334,6 +7335,36 @@ public function sales_incentive()
 
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+    public function delete_sale_person_targets(Request $request){
+        if(isset($request->sale_person_ids) && !empty($request->sale_person_ids)){
+
+            $sales_persons = $request->sale_person_ids;
+            if (count($sales_persons) > 0) {
+                foreach ($sales_persons as $person_id) {
+                    $sales_target = SalePersonTarget::where('id', $person_id);
+                    if ($sales_target->exists()) {
+                        $sales_target = $sales_target->first();
+
+                        $sale_person_target_del = new SalePersonTargetDelete();
+                        $sale_person_target_del->deleted_id = $sales_target->id;
+                        $sale_person_target_del->start_date = $sales_target->start_date;
+                        $sale_person_target_del->end_date = $sales_target->end_date;
+                        $sale_person_target_del->sales_person_id = $sales_target->sales_person_id;
+                        $sale_person_target_del->target_days = $sales_target->target_days;
+                        $sale_person_target_del->target_month = $sales_target->target_month;
+                        $sale_person_target_del->average_revenue = $sales_target->average_revenue;
+                        $sale_person_target_del->deleted_by = Auth::id();
+                        $sale_person_target_del->save();
+
+                    }
+                }
+                SalePersonTarget::whereIn('id', $sales_persons)->delete();
+            }
+            return response()->json(['status' => 1, 'success' => 'Delete Successfully']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No Id Found']);
         }
     }
     

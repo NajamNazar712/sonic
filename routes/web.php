@@ -2976,7 +2976,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
-
+                Route::post('delete_sale_person_targets', 'Admins\GlobalSettingsController@delete_sale_person_targets')->name('delete');
             });
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets_history')->name('index');
