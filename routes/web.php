@@ -433,6 +433,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
             Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
             Route::post('feedback', 'Shippers\ShipperCRMController@customer_feedback')->name('feedback');
+            Route::post('card_data', 'Shippers\ShipperCRMController@card_data')->name('card_data');
 
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
@@ -2981,7 +2982,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
                 Route::get('list', 'Admins\GlobalSettingsController@sales_person_targets_list')->name('list');
-
+                Route::post('delete_sale_person_targets', 'Admins\GlobalSettingsController@delete_sale_person_targets')->name('delete');
             });
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets_history')->name('index');
@@ -3436,6 +3437,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@booking_destination_keyword_update')->name('update');
             Route::get('address_verify', 'Admins\GlobalSettingsController@address_verify')->name('address_verify');
         });
+        Route::prefix('complain_portal_shippers')->name('complain_portal_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@complain_portal_shippers')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@complain_portal_shippers_update')->name('update');
+        });
+        
 
 	});
 
@@ -3563,6 +3569,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print_air_waybill', 'Admins\AdminCRMController@print_air_waybill')->name('print_air_waybill');
             Route::post('resolve', 'Admins\AdminCRMController@consignee_info_resolve')->name('resolve');
         });
+        Route::post('close_reason', 'Admins\AdminCRMController@close_reason')->name('close_reason');
+
+        
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function (){

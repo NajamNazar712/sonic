@@ -33,7 +33,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
 										<div class="form-group">
-											<select name="permissions[]" class="select2" disabled multiple="multiple" id="permissions" data-rule-required="true" data-msg-required="Permissions is Required">
+											<select name="permissions[]" class="select2" disabled multiple="multiple" id="permissions" data-rule-required="true" data-msg-required="Permission is Required">
 												@foreach($modules as $module)
 													@if($module->id != 18)
 														<option value="{{ $module->id }}">{{ $module->name }}</option>

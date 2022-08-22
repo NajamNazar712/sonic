@@ -1178,7 +1178,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394, 417, 418, 425,438,443,447,462, 477,488, 491, 494, 498, 499, 526,544, 558, 565,580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674,682, 683, 689, 697, 701, 708, 710, 714,716,747,761], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175,188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385,394, 417, 418, 425,438,443,447,462, 477,488, 491, 494, 498, 499, 526,544, 558, 565,580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674,682, 683, 689, 697, 701, 708, 710, 714,716,747,761, 788], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([149, 214, 228,302, 313, 314, 318, 367, 388,498, 580, 558,646,644,660, 667, 668, 701,716], session('permissions'))) !== 0)
@@ -1254,6 +1254,9 @@
                                         @if (session('role_id') == 1 || in_array(716, session('permissions')))
                                             <li class=" nav-item"><a href="{{route('admin.settings.invoice_against_return_delivered_shipper.index')}}"><span class="menu-title">Invoice Against Return Delivered Shipper</span></a> </li>
                                         @endif
+                                    @if (session('role_id') == 1 || in_array(788, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.complain_portal_shippers.index')}}">Complaint Portal Shippers</a></li>
+                                    @endif
                                 </ul>
 
                             </li>
@@ -1811,6 +1814,9 @@
                         @if (session('role_id') == 1 || in_array(697, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.auto_tag_territories.index')}}">Auto Tag Territories</a></li>
                         @endif
+                        
+
+                        
                     </ul>
                 </li>
             @endif
