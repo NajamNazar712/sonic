@@ -1990,13 +1990,19 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('relation', function ($deliveries) {
-                if($deliveries->amount > 0)
-                {
+                if ($deliveries->amount > 0) {
                     return '-';
-                }
-                else
-                {
-                    $relation = '<input class="form-control form-control-sm" name="relation[' . $deliveries->shId . ']" value="' . $deliveries->relation . '" placeholder="Enter Relation" value="' . $deliveries->relation . '" ></div>';
+                } else {
+                    $relation_lists = DeliveryRelation::select('id', 'name')->get();
+                    $drops = '';
+                    foreach ($relation_lists as $relation_list) {
+                        if ($relation_list->name == $deliveries->relation) {
+                            $drops .= '<option value="' . $relation_list->name . '" selected="selected">' . $relation_list->name . '</option>';
+                        } else {
+                            $drops .= '<option value="' . $relation_list->name . '">' . $relation_list->name . '</option>';
+                        }
+                    }
+                    $relation = '<select class="form-control form-control-sm select2 relationDrop" name="relation[' . $deliveries->shId . ']" id="relationDrop_' . $deliveries->shId . '">' . $drops . '</select>';
                     return $relation;
                 }
             })
