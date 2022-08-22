@@ -14,6 +14,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
@@ -8577,6 +8578,7 @@ class RiderAPIController extends Controller
         $replacement_parcel_image = null;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
+        $relation = DeliveryRelation::select('id', 'name')->get();
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
@@ -8800,10 +8802,9 @@ class RiderAPIController extends Controller
                 usort($information['deliveries'], function ($a, $b) {
                     return $a['ordering'] <=> $b['ordering'];
                 });
-
                 $nodes[] = $information;
             }
-            return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $nodes]);
+            return response()->json(['status' => 0, 'message' => 'Delivery Note Is Assigned', 'information' => $nodes, 'relation_list' => $relation]);
         }
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }

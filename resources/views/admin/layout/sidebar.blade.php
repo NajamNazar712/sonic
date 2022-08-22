@@ -1842,7 +1842,7 @@
 
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 783], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717], session('permissions'))) !== 0)
 
                         <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
 
@@ -1888,13 +1888,13 @@
                             @if (session('role_id') == 1 || in_array(717, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('admin.human_resource.adjustment.index')}}">Employee Attendance Adjustment</a></li>
                             @endif
-                            @if (session('role_id') == 1 || in_array(783, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.human_resource.employee_confirmation.index')}}">Employee Confirmation</a></li>
-                            @endif
+                            
                 @endif
+                    <li><a class="menu-item" href="{{ route('admin.human_resource.employee_confirmation.index')}}">Employee Confirmation</a></li>
                     @if (Auth::user()->trax_id != NULL)
                         <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
+
                 </ul>
             </li>
             @if (session('role_id') == 1 || count(array_intersect([535,648, 692, 702, 777], session('permissions'))) !== 0)
