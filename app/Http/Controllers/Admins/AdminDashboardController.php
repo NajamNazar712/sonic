@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -163,6 +164,7 @@ use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Rates\PendingWeightCharge;
 use App\Http\Models\Rates\PendingBookingTypeCharges;
@@ -1504,7 +1506,12 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->admin_id = $tag_id;
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
-                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
+
+                $shipper_zone_id = $user->city->zone_id; 
+                $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
+
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ,'zone' => $zone];
+
                 NotificationsController::send(81, $sale_persons, Auth::id());
                 NotificationsController::send(119, $sale_persons, Auth::id());
 
@@ -1548,7 +1555,11 @@ class AdminDashboardController extends Controller
                         $sale_person_tag->user_id = $shipper_id;
                         $sale_person_tag->status = 0;
                         $sale_person_tag->save();
-                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person_data, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
+
+                        $shipper_zone_id = $user->city->zone_id; 
+                        $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
+                        
+                        $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person_data, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date,'zone' => $zone];
                     }
                 }
             }
@@ -1814,32 +1825,34 @@ class AdminDashboardController extends Controller
     {
 
         $user = User::find($id);
-        $dws_weight = DwsWeightCharges::where('user_id', $id);
-
         $on_dws_charges = null;
         $ol_dws_charges = null;
         $detain_dws_charges = null;
         $sameday_dws_charges = null;
 
-        if ($dws_weight->exists()) {
-            $dws_weight = $dws_weight->get();
-            foreach ($dws_weight as $value) {
-                if ($value->shipping_mode_id == 1) {
-                    $on_dws_charges = $value->dws_weight_status;
+        
+        if ($date == null) {
+            
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
 
-                } elseif ($value->shipping_mode_id == 2) {
-                    $ol_dws_charges = $value->dws_weight_status;
+            if ($dws_weight->exists()) {
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if ($value->shipping_mode_id == 1) {
+                        $on_dws_charges = $value->dws_weight_status;
 
-                } elseif ($value->shipping_mode_id == 3) {
-                    $detain_dws_charges = $value->dws_weight_status;
+                    } elseif ($value->shipping_mode_id == 2) {
+                        $ol_dws_charges = $value->dws_weight_status;
 
-                } elseif ($value->shipping_mode_id == 4) {
-                    $sameday_dws_charges = $value->dws_weight_status;
+                    } elseif ($value->shipping_mode_id == 3) {
+                        $detain_dws_charges = $value->dws_weight_status;
 
+                    } elseif ($value->shipping_mode_id == 4) {
+                        $sameday_dws_charges = $value->dws_weight_status;
+
+                    }
                 }
             }
-        }
-        if ($date == null) {
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1854,6 +1867,27 @@ class AdminDashboardController extends Controller
 
         } else {
             $tomorrow = Carbon::parse($date)->addDay(1);
+
+            $dws_weight = DwsWeightChargesHistory::where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow);
+
+            if ($dws_weight->exists()) {
+                $dws_weight = $dws_weight->get();
+                foreach ($dws_weight as $value) {
+                    if ($value->shipping_mode_id == 1) {
+                        $on_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 2) {
+                        $ol_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 3) {
+                        $detain_dws_charges = $value->dws_weight_status;
+
+                    } elseif ($value->shipping_mode_id == 4) {
+                        $sameday_dws_charges = $value->dws_weight_status;
+
+                    }
+                }
+            }
             $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
@@ -1964,7 +1998,15 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id)
     {
-        $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+        $user = User::find($id);
+
+        $pending_dws = PendingDwsWeightCharges::where('user_id', $id);
+        if($pending_dws->exists()){
+            $dws_weight = $pending_dws;
+
+        }else{
+            $dws_weight = DwsWeightCharges::where('user_id', $id);
+        }
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -1989,7 +2031,6 @@ class AdminDashboardController extends Controller
                 }
             }
         }
-        $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
         $on = null;
@@ -4261,8 +4302,8 @@ class AdminDashboardController extends Controller
                     }
                 }
             }
-            if ($request->authorize == 1) {
-                DwsWeightChargesController::approve($id);
+            if ($request->authorize == 1) { 
+                DwsWeightChargesController::approve($id,1);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -9817,9 +9858,10 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $sub_segments = SubCategorySegment::where('segment_id', $user->segment->id)->get();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
     }
 
     public function updateProfile(Request $request)
@@ -9836,7 +9878,9 @@ class AdminDashboardController extends Controller
             'phone' => 'required|string|max:255',
             'cnic' => 'required|string|max:255',
             'segment_id' => 'required',
-            'sub_segment_id' => 'required'
+            'sub_segment_id' => 'required',
+            'avg_shipments' => 'required',
+            'average_shipment_duration_id' => 'required',
 
         ]);
 
@@ -9854,7 +9898,7 @@ class AdminDashboardController extends Controller
         if ($flag == true) {
             if ($request->password == "" || $request->password == null) {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
-                    'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null]);
+                    'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
                 AdminLogs::create([
                     'admin_id' => Auth::id(),
                     'user_id' => $user_id
@@ -9862,7 +9906,7 @@ class AdminDashboardController extends Controller
                 ]);
             } else {
                 User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
-                    'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null]);
+                    'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null , 'average_shipments' => $request->avg_shipments, 'average_shipment_duration_id' => $request->average_shipment_duration_id]);
             }
 
             return redirect()->back()->with(['success' => "Profile Information Successfully Updated"]);
@@ -12050,7 +12094,8 @@ class AdminDashboardController extends Controller
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+                    $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_corporate_account_dates as $date) {

@@ -261,6 +261,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
+                    blockPagePermanently();
                     $('#add_shipment_form button.add').prop('disabled', true);
 
                     var tracking_number = $(form).find('input.tracking_number').val();
@@ -268,7 +269,6 @@
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-                        blockPagePermanently();
                         $.ajax({
                             url: '{!! route('admin.cargo_manifest.bags.create.shipment_details') !!}',
                             method: 'POST',
@@ -282,7 +282,6 @@
                             timeout: 30000,
                             error: function (data) {
                                 $('#add_shipment_form button.add').prop('disabled', false);
-                                UnblockPagePermanently();
                                 scan_sound(2);
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
@@ -325,7 +324,6 @@
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
                                         $('#cargo_consignment_confirm').prop('disabled', false);
-                                        UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
@@ -371,11 +369,9 @@
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
-                                    UnblockPagePermanently();
                                 }
                                 else {
                                     $('#add_shipment_form button.add').prop('disabled', false);
-                                    UnblockPagePermanently();
                                     scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
@@ -387,6 +383,7 @@
                         scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
+                    UnblockPagePermanently();
 
                     return false;
                 }
@@ -578,6 +575,7 @@
             });
 
             $('#scan_piece').on('change', function () {
+                //blockPagePermanently();
                 var item = parseInt($(this).val());
                 $('#scan_piece').val('').focus();
                 if(item){
@@ -624,6 +622,7 @@
                         toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
+                //UnblockPagePermanently
             });
             $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
@@ -650,6 +649,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
+                    blockPagePermanently();
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     $.ajax({
@@ -700,18 +700,17 @@
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
                                     $('#cargo_consignment_confirm').prop('disabled', false);
-                                    UnblockPagePermanently();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     $('#ShipmentPiecesModal').modal('hide');
                                 }
                             }
                             else {
                                 $('#add_shipment_form button.add').prop('disabled', false);
-                                UnblockPagePermanently();
                                 scan_sound(2);
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         });
+                    UnblockPagePermanently();
                     return false;
                 }
             });

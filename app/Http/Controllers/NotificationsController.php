@@ -5634,8 +5634,9 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     $to = array();
-                    $cc = array();
+                    $cc = array('waqas@trax.pk','khan.usama@trax.pk');
                     foreach ($sales_person as $index => $person) {
+                        // dd($person);
                         $shipper = User::find($index);
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
@@ -5649,10 +5650,26 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
                         $html .= '</tr>';
 
-                        $concern = SalesCommission::join('sales_commission_users as sc', 'sc.sales_commission_id', '=', 'sales_commissions.id')->join('admins as a', 'a.id', '=', 'sc.user_id')->where('sales_commissions.shipper_id', $shipper->id)->whereIn('sc.tier_id', [1, 2, 3, 4])->where('a.status', 1);
-                        if ($concern->exists()) {
-                            $cc = array_merge($cc, $concern->pluck('email')->toArray());
+                        if($person['zone']->id == 1)
+                        {
+                            $cc[] = 'waqas.shaikh@trax.pk';
+                            $cc[] = 'nabeel.ahmed@trax.pk';
                         }
+                        else if($person['zone']->id == 3)
+                        {
+                            $cc[] = 'abbas.niazi@trax.pk';
+                            $cc[] = '';
+                        }
+                        else if($person['zone']->id == 2)
+                        {
+                            $cc[] = 'ali.qureshi@trax.pk';
+                            $cc[] = 'adeel.ali@trax.pk';
+                        }
+
+                        if ($person['old_sale_person']->email) {
+                            $cc[] = $person['old_sale_person']->email ;
+                        }
+
                         if ($person['new_sale_person']->email) {
                             $to[] = $person['new_sale_person']->email;
                         }
@@ -5673,9 +5690,8 @@ class NotificationsController extends Controller
                         $cc = null;
                     }
 
-                    /*  if($to != null){*/
                     self::email($subject, $body, $to, $cc);
-                    //}
+                    
                 } else if ($id == 82) {
                     $done_payment_report = DonePaymentsReport::get();
                     if ($done_payment_report) {
@@ -7067,7 +7083,7 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $to[] = 'waqas@trax.pk';
-                    $to[] = 'nazneen.arshad@trax.pk';
+                    // $to[] = 'nazneen.arshad@trax.pk';
 
                     self::email($subject, $body, $to);
                 } else if ($id == 204) {
@@ -9506,10 +9522,9 @@ else if ($id == 178) {
                 }
 				else if ($id == 182) {
 
-                    $employee = Employee::find($reference_1_id);
+                    $employee = $reference_1_id;
                     if($employee){
-                        
-                        $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank">View</a>';
+                        $link = '<a href="' . route('admin.human_resource.employee_confirmation.index') . '" target="_blank"><u>Click To View</u></a>';
 
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
@@ -9534,14 +9549,19 @@ else if ($id == 178) {
                         if (strpos($subject, '[name]') !== FALSE) {
                             $subject = str_replace('[name]', $employee->name, $subject);
                         }
+
+                        $body .=  PHP_EOL. PHP_EOL.'<img class="brand-logo trax" alt="Trax" src="' . asset('img/trax_logo_new.png') . '" width="100" height="50">
+                        <p>Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>';
+
                         if($employee->line_manager){
                             if($employee->line_manager->official_email){
                                 $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk',$employee->line_manager->official_email];
+                            }else{
+                                $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
                             }
                         }else{
                             $to = ['muhammad.sohail@trax.pk','shahzad.ali@trax.pk'];
                         }
-
 
                         self::email($subject, $body, $to);
                     }

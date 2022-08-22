@@ -302,7 +302,7 @@
                                                                                 <option value="2">Low</option>
                                                                                 @elseif ($on_dws_charges == 2)
                                                                                 <option value="1" >High</option>
-                                                                                <option value="" selected>Low</option>
+                                                                                <option value="2" selected>Low</option>
                                                                                 @else
                                                                                 <option value="1">High</option>
                                                                                 <option value="2">Low</option>
