@@ -13,6 +13,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
