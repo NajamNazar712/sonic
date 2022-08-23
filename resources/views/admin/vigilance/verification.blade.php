@@ -41,11 +41,11 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
-                                    <th class="border-primary border-darken-1">DNCC NO.</th>
+                                    <th class="border-primary border-darken-1">Delivery Note NO.</th>
                                     <th class="border-primary border-darken-1">Status Date and Time</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">COD Amount</th>
                                 </tr>
                                 </thead>
