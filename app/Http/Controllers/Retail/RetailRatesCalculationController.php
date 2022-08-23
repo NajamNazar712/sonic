@@ -17,7 +17,7 @@ class RetailRatesCalculationController extends Controller
             $discount = 0;
         }
         else{
-            $discount = number_format($discount / 100,2);
+            $discount = round($discount / 100,2);
         }
         
         $charges = 0;
@@ -175,11 +175,11 @@ class RetailRatesCalculationController extends Controller
             }
 
             $gst = $pickup_city->zone->gst;
-            $gst_charges = number_format($charges * $gst,2);
-            $charges = number_format($charges - $gst_charges,2);
+            $gst_charges = round($charges * $gst,2);
+            $charges = round($charges - $gst_charges,2);
 
-            $discount_amount = number_format($charges * $discount,2);
-            $charges_with_discount = number_format($charges - $discount_amount,2);
+            $discount_amount = round($charges * $discount,2);
+            $charges_with_discount = round($charges - $discount_amount,2);
 
             $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
            /* if($cod != null){
@@ -212,11 +212,11 @@ class RetailRatesCalculationController extends Controller
 
                     $city = City::find($pickup_city_id);
                     $gst = $city->zone->gst;
-                    $gst_charges = number_format($charges * $gst,2);
-                    $charges = number_format($charges - $gst_charges,2);
+                    $gst_charges = round($charges * $gst,2);
+                    $charges = round($charges - $gst_charges,2);
 
-                    $discount_amount = number_format($charges * $discount,2);
-                    $charges_with_discount = number_format($charges - $discount_amount,2);
+                    $discount_amount = round($charges * $discount,2);
+                    $charges_with_discount = round($charges - $discount_amount,2);
 
                     $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
                    /* if($cod != null){
