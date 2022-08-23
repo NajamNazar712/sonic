@@ -56,8 +56,8 @@ class MMSReportController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('zone_class_cities as zcc', function($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
