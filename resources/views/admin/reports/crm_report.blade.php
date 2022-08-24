@@ -184,6 +184,8 @@
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Weight Adjusted Amount</th>
+                        <th class="border-primary border-darken-1">Adjusted Percentage</th>
+                        <th class="border-primary border-darken-1">Remaining Percentage</th>
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Re-Open Status Date</th>
                         <th class="border-primary border-darken-1">Launched By</th>
@@ -207,7 +209,10 @@
                         <th class="border-primary border-darken-1">Tagged At</th>
                         <th class="border-primary border-darken-1">Tagged TAT</th>
                         <th class="border-primary border-darken-1">Rating</th>
-
+                        <th class="border-primary border-darken-1">Responsilbe Person</th>
+                        <th class="border-primary border-darken-1">Responsilbe Person's Hub</th>
+                        <th class="border-primary border-darken-1">Claim Adjustment Status</th>
+                        
                     </tr>
                     </thead>
                 </table>
@@ -465,6 +470,8 @@
                             head.push('COD Amount');
                             head.push('Adjusted Amount');
                             head.push('Weight Adjusted Amount');
+                            head.push('Adjusted Percentage');
+                            head.push('Remaining Percentage');
                             head.push('Request Status');
                             head.push('Re Open Status Date');
                             head.push('Launched By');
@@ -488,7 +495,10 @@
                             head.push('Tagged At');
                             head.push('Tagged TAT');
                             head.push('Rating');
-
+                            head.push('Responsilbe Person');
+                            head.push('Responsilbe Person\'s Hub');
+                            head.push('Claim Adjustment Status');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -510,6 +520,8 @@
                                 row.push(values.cod_amount);
                                 row.push(values.adjusted_amount);
                                 row.push(values.weight_charges);
+                                row.push(values.adjusted_percentage);
+                                row.push(values.remaining_percentage);
                                 row.push(values.request_status);
                                 row.push(values.reopen_date);
                                 row.push(values.launched_by_name);
@@ -533,7 +545,10 @@
                                 row.push(values.tagged_at);
                                 row.push(values.tagged_aging);
                                 row.push(values.rating);
-
+                                row.push(values.responsibe_person_name);
+                                row.push(values.responsibe_person_hub);
+                                row.push(values.claim_adjustment_status);
+                                
 
 
                                 body.push(row);
@@ -611,6 +626,8 @@
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges'},
+                    {data: 'adjusted_percentage', name: 'adjusted_percentage', class: 'align-middle adjusted_percentage'},
+                    {data: 'remaining_percentage', name: 'remaining_percentage', class: 'align-middle remaining_percentage'},
                     {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
@@ -634,7 +651,10 @@
                     {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},
                     {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
                     {data: 'rating_code', name: 'crr.name', class: 'align-middle rating_code'},
-
+                    {data: 'responsibe_person_name', name: 'responsibe_person_name', class: 'align-middle responsibe_person_name'},
+                    {data: 'responsibe_person_hub', name: 'responsibe_person_hub', class: 'align-middle responsibe_person_hub'},
+                    {data: 'claim_adjustment_status', name: 'claim_adjustment_status', class: 'align-middle claim_adjustment_status'},
+                    
                     
                 ],
                 rowCallback: function(row, data, index) {
