@@ -43,8 +43,8 @@ class AdminDailyVisitController extends Controller
         [
             'upload_bc_image.mimes' => 'Business Card Image must be a file of type: png,jpeg,jpg',
             'upload_l_image.mimes' => 'Location Image must be a file of type: png,jpeg,jpg',
-            'upload_bc_image.max' => 'File Size must not exceed 2 MB (2048 KB)',
-            'upload_l_image.max' => 'File Size must not exceed 2 MB (2048 KB)',
+            'upload_bc_image.max' => 'Business Card Image Size must not exceed 2 MB (2048 KB)',
+            'upload_l_image.max' => 'Location Image Size must not exceed 2 MB (2048 KB)',
         ]);
         if ($request->company_name != null && $request->customer_name != null && $request->customer_address != null && $request->phone_no != null && $request->email_address != null && $request->lead_status != null && $request->feedback != null && $request->latitude != null && $request->longitude != null && $request->shipper != null) {
 
