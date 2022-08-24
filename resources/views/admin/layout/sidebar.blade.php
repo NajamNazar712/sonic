@@ -1175,7 +1175,7 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(793, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.ssr.index') }}">Summaries
-                                    Sales (SSR)</a></li>
+                                    Sale (SSR)</a></li>
                         @endif
                     </ul>
                 </li>

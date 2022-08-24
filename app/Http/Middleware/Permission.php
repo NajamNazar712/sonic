@@ -605,6 +605,9 @@ class Permission
             'reports.mms.index' => 780,
             'reports.mms.list' => 780,
 
+            'reports.ssr.index' => 793,
+            'reports.ssr.list' => 793,
+
             'reports.crm_agent_wise_report.index' => 784,
 
             'packaging.index' => 76,

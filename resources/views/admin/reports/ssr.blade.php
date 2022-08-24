@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Summaries Sales Report')
+@section('title', 'Summaries Sale Report')
 
 @section('content')
     <h1 class="mb-1">
-        Summaries Sales Report
+        Summaries Sale Report
     </h1>
 
     <div class="card">
@@ -160,51 +160,16 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Vendor</th>
-                        <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remark</th>
-                        <th class="border-primary border-darken-1">Total Attempt</th>
-                        <th class="border-primary border-darken-1">Payment Status</th>
-                        <th class="border-primary border-darken-1">Invoice No.</th>
-                        <th class="border-primary border-darken-1">Payment ID</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Return City</th>
-                        <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Class</th>
-                        <th class="border-primary border-darken-1">Attempts</th>
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Category</th>
-                        <th class="border-primary border-darken-1">Description</th>
-                        <th class="border-primary border-darken-1">International Tracking No.</th>
-                        <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Sales Person</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
-                        <th class="border-primary border-darken-1">Chargeable Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
-                        <th class="border-primary border-darken-1">Return Charges</th>
-                        <th class="border-primary border-darken-1">Replacement Charges</th>
-                        <th class="border-primary border-darken-1">Try & Buy Charges</th>
-                        <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
-                        <th class="border-primary border-darken-1">Intercept Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
-                        <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">Packing Charges</th>
-                        <th class="border-primary border-darken-1">Net Payable</th>
-                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
-                        <th class="border-primary border-darken-1">Received/Refused By</th>
-                        <th class="border-primary border-darken-1">Sales Person</th>
-                        <th class="border-primary border-darken-1">Special Instructions</th>
                     </tr>
                     </thead>
                 </table>
@@ -446,53 +411,17 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
-
-                            head.push('Vendor');
-                            head.push('Order ID');
-                            head.push('Status');
-                            head.push('Reason');
-                            head.push('Remark');
-                            head.push('Total Attempt');
-                            head.push('Payment Status');
-                            head.push('Invoice No.');
-                            head.push('Payment ID');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
-                            head.push('Rider');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Return City');
-                            head.push('Zone');
-                            head.push('Class');
-                            head.push('Attempts');
-                            head.push('Shipping Mode');
-                            head.push('Category');
-                            head.push('Description');
-                            head.push('International Tracking No.');
-                            head.push('Collection Amount');
+                            head.push('Sales Person');
                             head.push('Actual Weight');
-                            head.push('Chargeable Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
                             head.push('Packaging Charges');
                             head.push('Fuel Surcharge');
-                            head.push('Return Charges');
-                            head.push('Replacement Charges');
-                            head.push('Try & Buy Charges');
-                            head.push('NSA/OSA Charges');
                             head.push('GST');
-                            head.push('Intercept Charges');
                             head.push('Total Charges');
-                            head.push('Estimated Charges');
                             head.push('Packing Charges');
-                            head.push('Net Payable');
-                            head.push('Delivered/Returned Date');
-                            head.push('Received/Refused By');
-                            head.push('Sales Person');
-                            head.push('Reason');
-                            head.push('Special Instructions');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -500,53 +429,16 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
-
-                                row.push(values.vendor);
-                                row.push(values.order_id);
-                                row.push(values.current_status);
-                                row.push(values.reason);
-                                row.push(values.remark);
-                                row.push(values.total_attempt);
-                                row.push(values.payment_status);
-                                row.push(values.invoice_number);
-                                row.push(values.payment_id);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
-                                row.push(values.ridername);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.return_city);
-                                row.push(values.zone);
-                                row.push(values.class);
-                                row.push(values.attempts);
-                                row.push(values.shipping_mode);
-                                row.push(values.category);
-                                row.push(values.description);
-                                row.push(values.international_tracking_number);
-                                row.push(values.p_collection_amount);
+                                row.push(values.sales_person);
                                 row.push(values.actual_weight);
-                                row.push(values.chargeable_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
                                 row.push(values.packaging_material_charges);
                                 row.push(values.fuel_surcharge);
-                                row.push(values.return_charges);
-                                row.push(values.replacement_charges);
-                                row.push(values.try_and_buy_charges);
-                                row.push(values.nsa_osa_charges);
                                 row.push(values.p_gst);
-                                row.push(values.intercept_charges);
                                 row.push(values.p_total_charges);
-                                row.push(values.estimated_charges);
                                 row.push(values.packaging_charges);
-                                row.push(values.p_net_payable);
-                                row.push(values.delivered_or_returned);
-                                row.push(values.received_or_refused_by);
-                                row.push(values.sales_person);
-                                row.push(values.reason);
-                                row.push(values.special_instructions);
 
                                 body.push(row);
                             });
@@ -564,7 +456,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Summaries Sales Report',
+                        title: 'Summaries Sale Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -600,58 +492,22 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
-                order: [[14, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-
-                    { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
-                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                    { data: 'reason' ,name:'reason', class: 'align-middle reason'},
-                    { data: 'remark' ,name:'remark', class: 'align-middle remark'},
-                    { data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
-                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
-                    { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
-                    { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
-                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
-                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'return_city', name: 'return_city', class: 'align-middle return_city'},
-                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
-                    { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
-                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
-                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
-                    { data:'description' ,name: 'si.description', class: 'align-middle description'},
-                    { data:'international_tracking_number' ,name: 'ibs.international_tracking_number', class: 'align-middle international_tracking_number'},
-                    { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
+                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
-                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
                     { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
-                    { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
-                    { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
-                    { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
-                    { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
-                    { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
-                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
-                    { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
