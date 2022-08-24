@@ -89,7 +89,7 @@
                                                         <fieldset style="padding-top: 5px;">
 
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color spkg"  disabled data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                             </div>
                                                         </fieldset>
@@ -1483,6 +1483,18 @@
                     $('input[name="trax_box_30_kg_range[1]"]').prop('disabled', true);
                 }
             });
+            $('input[name="trax_box_30_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="trax_box_20_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="trax_box_15_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="trax_box_10_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="trax_box_5_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="trax_box_2_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="hdocs_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="flyer_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="swift_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="cod_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="rush_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
+            $('input[name="saver_plus_kg_range[1]"]').trigger("touchspin.updatesettings", {max: 1});
 
 
             $('.decimal').inputmask({
@@ -1547,7 +1559,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled value="0.5">\n' +
+                    '                                                                <input type="text" class="touchspin-color spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_a[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_b[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_c[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_d[' + on_door_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1557,7 +1569,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1616,7 +1628,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1672,7 +1684,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1730,7 +1742,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1788,7 +1800,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1846,7 +1858,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1905,7 +1917,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -1962,7 +1974,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2017,7 +2029,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2072,7 +2084,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2127,7 +2139,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2181,7 +2193,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",

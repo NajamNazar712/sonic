@@ -89,7 +89,7 @@
                                                             <div class="col text-center">
                                                                 <fieldset style="padding-top: 5px;">
                                                                     <div class="input-group input-group-sm form-group">
-                                                                        <input type="text" class="touchspin-color input-sm spkg" data-bts-button-down-class="btn btn-success"
+                                                                        <input type="text" class="touchspin-color spkg" data-bts-button-down-class="btn btn-success"
                                                                                data-bts-button-up-class="btn btn-success" @if($sp->weight_addition == 0) disabled @endif  name="saver_plus_kg_range[{{$index}}]" value="{{$sp->kg_range}}">
                                                                     </div>
                                                                 </fieldset>
@@ -133,6 +133,8 @@
                                     </div>
                                 </div>
                                 {{--saver plus end --}}
+
+
 
                                 {{--rush start --}}
                                 <div id="" class="card-header border-success mt-2">
@@ -1844,6 +1846,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            $("input[name='touchspin']").trigger("touchspin.updatesettings", {max: 1});
+
+
+
             var on_door_count = $('.saver_plus_row').length;
             for (let i = 0; i < on_door_count; i++) {
                 $('#SaverPlusSwitch'+i+'').bind('change', function () {
@@ -1853,6 +1859,8 @@
                         $('input[name="saver_plus_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+
+                $('input[name="saver_plus_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
 
@@ -1865,6 +1873,7 @@
                         $('input[name="rush_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="rush_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
 
@@ -1877,6 +1886,7 @@
                         $('input[name="cod_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="cod_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var swift_count = $('.swift_row').length;
@@ -1888,6 +1898,7 @@
                         $('input[name="swift_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="swift_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var flyer_count = $('.flyer_row').length;
@@ -1899,6 +1910,7 @@
                         $('input[name="flyer_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="flyer_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var hd_count = $('.hdocs_row').length;
@@ -1910,6 +1922,7 @@
                         $('input[name="hdocs_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="hdocs_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_two_count = $('.trax_box_2_row').length;
@@ -1921,6 +1934,7 @@
                         $('input[name="trax_box_2_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_2_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_five_count = $('.trax_box_5_row').length;
@@ -1932,6 +1946,7 @@
                         $('input[name="trax_box_5_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_5_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_ten_count = $('.trax_box_10_row').length;
@@ -1943,6 +1958,7 @@
                         $('input[name="trax_box_10_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_10_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_fifteen_count = $('.trax_box_15_row').length;
@@ -1954,6 +1970,7 @@
                         $('input[name="trax_box_15_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_15_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_twenty_count = $('.trax_box_20_row').length;
@@ -1965,6 +1982,7 @@
                         $('input[name="trax_box_20_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_20_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
             var trax_box_thirty_count = $('.trax_box_30_row').length;
@@ -1976,6 +1994,7 @@
                         $('input[name="trax_box_30_kg_range['+i+']"]').prop('disabled', true);
                     }
                 });
+                $('input[name="trax_box_30_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
 
@@ -2041,7 +2060,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled value="0.5">\n' +
+                    '                                                                <input type="text" class="touchspin-color spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_a[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_b[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_c[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_d[' + on_door_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -2051,7 +2070,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2110,7 +2129,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2166,7 +2185,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2224,7 +2243,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2282,7 +2301,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2340,7 +2359,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2396,7 +2415,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2452,7 +2471,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2509,7 +2528,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2565,7 +2584,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2620,7 +2639,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
@@ -2676,7 +2695,7 @@
                 var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
                 $(".touchspin-color").TouchSpin({
                     min: 0.5,
-                    max: 100,
+                    max: 1,
                     step: 0.5,
                     decimals: 2,
                     buttondown_class: "btn btn-success",
