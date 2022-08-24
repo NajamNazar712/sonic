@@ -20,9 +20,9 @@ class SSRController extends Controller
         $this->middleware('Permission');
     }
 
-    public function overall_sales_index()
+    public function ssr_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 149);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 581);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
         } else {
@@ -35,14 +35,14 @@ class SSRController extends Controller
         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
-        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.ssr')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes]);
     }
-    public function overall_sales_list(Request $request)
+    public function ssr_list(Request $request)
     {
         $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 582);
         }
         $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
         $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');

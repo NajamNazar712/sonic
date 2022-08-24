@@ -2684,7 +2684,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@employee_confirmation_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@employee_confirmation_list')->name('list');
         });
-        
+
+        Route::prefix('ssr')->name('ssr.')->group(function (){
+            Route::get('', 'Admins\Reports\SSRController@ssr_index')->name('index');
+            Route::post('list', 'Admins\Reports\SSRController@ssr_list')->name('list');
+
+        });
+
     });
 
     //Reports end
