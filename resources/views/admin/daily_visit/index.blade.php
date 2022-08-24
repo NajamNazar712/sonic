@@ -10,7 +10,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
+                <form id="daily_visit_form" class="form-horizontal" method="POST" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
                     @csrf
 
                     <div class="col justify-content-center">
