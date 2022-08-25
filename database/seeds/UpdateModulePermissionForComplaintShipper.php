@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UpdateModulePermissionForComplaintShipper extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+
+        DB::table('module_permissions')->insert(array(
+            array('id' => 788, 'name' => 'Complaint Portal Shipper - View', 'module_id' => 14)
+        ));
+
+        DB::table('activity_trail_actions')->insert(array(
+            array('id' => 578, 'screen_name' => 'Complaint Portal Shipper', 'action'=> 'View'),
+        ));
+
+        DB::table('admins_screen_list')->insert(array(
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > Complaint Portal Shipper', 'url'=>'admin.settings.complain_portal_shippers.index', 'permission_id' => 788),
+        ));
+
+        DB::table('crm_closed_reason_statuses')->insert(array(
+            array('id' => 1, 'name' => 'Shipper at fault'),
+            array('id' => 2, 'name' => 'Consignee at fault'),
+            array('id' => 3, 'name' => 'Trax at fault'),
+        ));
+    }
+}
