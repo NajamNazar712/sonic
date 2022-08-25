@@ -5075,4 +5075,8 @@ class AdminCRMController extends Controller
         }
 
     }
+
+    public function bulk_claim_submit(Request $request){
+        dd($request->all());
+    }
 }

@@ -33,6 +33,7 @@
                                      </div>
                                  </div>
                             </form>
+                            <form id="bulk_claim_submit" class="form-horizontal text-center" method="POST" action="{{ route('admin.crm.bulk_claim.submit') }}" novalidate="novalidate">
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -50,12 +51,11 @@
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.individual.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
+                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Submit" disabled="disabled">Confirm</button>
                                 </div>
                             </form>
                         </div>
@@ -128,6 +128,33 @@
                 'allowPlus': false
             });
 
+            // var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
+            //     obj.id = obj.id;
+            //     obj.text = obj.name;
+
+            //     return obj;
+            // });
+            // $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
+            //     data:case_nature_type_data,
+            //     placeholder: "Select Claim Type",
+            //     width: '100%',
+            //     containerCssClass: 'select-xs',
+            //     dropdownCssClass: 'form-control-sm p-0'
+            // });
+            // var channel_data = $.map({!! $channels !!}, function (obj) {
+            //     obj.id = obj.id;
+            //     obj.text = obj.name;
+
+            //     return obj;
+            // });
+            // $(".channel_id").prepend('<option value="" selected></option>').select2({
+            //     data:channel_data,
+            //     placeholder: "Select Channel",
+            //     width: '100%',
+            //     containerCssClass: 'select-xs',
+            //     dropdownCssClass: 'form-control-sm p-0'
+            // });
+
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -175,14 +202,14 @@
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
                                         
-                                        var case_nature_type = '<select name="case_nature_type_id['+id+']" class="case_nature_type_id_'+id+'" class="case_nature_type_id select2 form-control"></select>';
+                                        var case_nature_type = '<select name="case_nature_type_id['+id+']" id="case_nature_type_id_'+id+'" class="case_nature_type_id select2 form-control"></select>';
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
                                             obj.id = obj.id;
                                             obj.text = obj.name;
 
                                             return obj;
                                         });
-                                        $("#case_nature_type_id_"+id+"").prepend('<option value="" selected></option>').select2({
+                                        $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
                                             data:case_nature_type_data,
                                             placeholder: "Select Claim Type",
                                             width: '100%',
@@ -190,14 +217,14 @@
                                             dropdownCssClass: 'form-control-sm p-0'
                                         });
 
-                                        var channel = '<select name="channel_id['+id+']" class="channel_id_'+id+'" class="case_nature_type_id select2 form-control"></select>';
+                                        var channel = '<select name="channel_id['+id+']" id="channel_id_'+id+'" class="channel_id select2 form-control"></select>';
                                         var channel_data = $.map({!! $channels !!}, function (obj) {
                                             obj.id = obj.id;
                                             obj.text = obj.name;
 
                                             return obj;
                                         });
-                                        $("#channel_id_"+id+"").prepend('<option value="" selected></option>').select2({
+                                        $(".channel_id").prepend('<option value="" selected></option>').select2({
                                             data:channel_data,
                                             placeholder: "Select Channel",
                                             width: '100%',
@@ -208,12 +235,39 @@
                                         table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<input class="form-control" name="claim_product_cost["'+id+'"]" id="claim_product_cost" value="" placeholder="Enter Product Cost">', '<input class="form-control form-control-sm" type="file" name="product_picture["'+id+'"]" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">','<input class="form-control form-control-sm" type="file" name="invoice_picture["'+id+'"]" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">','<textarea class="form-control" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
+                                        var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.type;
+
+                return obj;
+            });
+            $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
+                data:case_nature_type_data,
+                placeholder: "Select Claim Type",
+                width: '100%',
+                containerCssClass: 'select-xs',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
+            var channel_data = $.map({!! $channels !!}, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.channel;
+
+                return obj;
+            });
+            $(".channel_id").prepend('<option value="" selected></option>').select2({
+                data:channel_data,
+                placeholder: "Select Channel",
+                width: '100%',
+                containerCssClass: 'select-xs',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
+                                        table().columns.adjust();
                                         scan_sound(1);
                                         shipment_ids.push(data.details.id);
 
                                         $('#add_shipment_form button.add').prop('disabled', false);
 
-                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                        $('#bulk_claim_submit button.confirm').prop('disabled', false);
 
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
@@ -236,10 +290,10 @@
             });
 
 
-            $('#arrival_of_shipments_form').bind('submit', function(e) {
+            $('#bulk_claim_submit').bind('submit', function(e) {
                 e.preventDefault();
 
-                $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
+                $('#bulk_claim_submit input.shipment_ids').val(shipment_ids);
 
                 var form = this;
                 
@@ -291,7 +345,7 @@
                     shipment_ids.splice(index, 1);
 
                     if (shipment_ids.length == 0) {
-                        $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+                        $('#bulk_claim_submit button.confirm').prop('disabled', true);
                     }
                 }
 
