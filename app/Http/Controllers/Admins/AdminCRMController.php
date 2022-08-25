@@ -74,8 +74,11 @@ use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\CRM\CrmClosedReason;
+use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
 
 class AdminCRMController extends Controller
@@ -568,8 +571,8 @@ class AdminCRMController extends Controller
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
 //            dd($crm_sms_history);
-
-            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $special_request,'special_request_agent' => $special_request_agent, 'sepcial_request_admins' => $sepcial_request_admins, 'ratings' => $ratings, 'crm_sms_history' => $crm_sms_history]);
+            $closed_reason_statuses  = CrmClosedReasonStatus::all();
+            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $special_request,'special_request_agent' => $special_request_agent, 'sepcial_request_admins' => $sepcial_request_admins, 'ratings' => $ratings, 'crm_sms_history' => $crm_sms_history, 'closed_reason_statuses' => $closed_reason_statuses]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -650,7 +653,8 @@ class AdminCRMController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $zones = Zone::where('status', 1)->get();
-        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'shipment_status' => $shipment_status, 'zones' => $zones]);
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
+        return view('admin.crm.launched_re_open')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'agents' => $agents,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'shipment_status' => $shipment_status, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
 
     public function launched_re_open_list(Request $request){
@@ -1024,7 +1028,8 @@ class AdminCRMController extends Controller
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
-                return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
+                return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
 
     public function in_process_list(Request $request){
@@ -1556,8 +1561,9 @@ class AdminCRMController extends Controller
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $hubs = City::where('hub', 1)->get();
         //return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
 
-        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status,'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs]);
+        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status,'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
 
     public function resolved_list(Request $request){
@@ -2561,6 +2567,22 @@ class AdminCRMController extends Controller
                 }
             }
             if ($crm_request['status_id'] != 4) {
+                if($request->close_reason_status != 0){
+                    $check_exists = CrmClosedReason::where('crm_request_id',$request->req_id);
+                    if(!$check_exists->exists()){
+
+                        $crm_closed_reason = new CrmClosedReason;
+                        $crm_closed_reason->crm_request_id = $request->req_id; 
+                        $crm_closed_reason->status_id = $request->close_reason_status;
+                        $crm_closed_reason->added_by = Auth::id();
+                        $crm_closed_reason->save();
+                    }else{
+                        $check_exists = $check_exists->first();
+                        $check_exists->status_id = $request->close_reason_status;
+                        $check_exists->added_by = Auth::id();
+                        $check_exists->save();
+                    }
+                }
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
                 ]);
@@ -2598,6 +2620,27 @@ class AdminCRMController extends Controller
     }
 
     public function close(Request $request){
+        if($request->closed_reason_status != null){
+           $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
+            foreach ($close_reason_crm_ids as $value) {
+                $check_exists = CrmClosedReason::where('crm_request_id',$value);
+                    if(!$check_exists->exists()){
+
+                        $crm_closed_reason = new CrmClosedReason;
+                        $crm_closed_reason->crm_request_id = $value; 
+                        $crm_closed_reason->status_id = $request->closed_reason_status;
+                        $crm_closed_reason->added_by = Auth::id();
+                        $crm_closed_reason->save();
+                    }else{
+                        $check_exists = $check_exists->first();
+                        $check_exists->status_id = $request->closed_reason_status;
+                        $check_exists->added_by = Auth::id();
+                        $check_exists->save();
+                    }
+               
+            }
+        }
+
         $crm_requests = $request->crm_request_ids;
         if($crm_requests){
             foreach ($crm_requests as $crm_request_id){
@@ -3118,6 +3161,25 @@ class AdminCRMController extends Controller
                             }
                         }
                         elseif ($request->valid == 0){
+                            if($request->closed_reason_status != null){
+                                $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
+                                 foreach ($close_reason_crm_ids as $value) {
+                                    $check_exists = CrmClosedReason::where('crm_request_id',$value);
+                                    if(!$check_exists->exists()){
+                                        $crm_closed_reason = new CrmClosedReason;
+                                        $crm_closed_reason->crm_request_id = $value; 
+                                        $crm_closed_reason->status_id = $request->closed_reason_status;
+                                        $crm_closed_reason->added_by = Auth::id();
+                                        $crm_closed_reason->save();
+                                    }else{
+                                        $check_exists = $check_exists->first();
+                                        $check_exists->status_id = $request->closed_reason_status;
+                                        $check_exists->added_by = Auth::id();
+                                        $check_exists->save();
+                                    }
+                                     
+                                 }
+                             }
                             CrmRequest::where('id', $crm_request->id)->update([
                                 'status_id' => 4,
                             ]);
@@ -4937,4 +4999,53 @@ class AdminCRMController extends Controller
 
 
     }*/
+
+    public function close_reason(Request $request){
+
+        if($request->has('crm_request_id')) {
+            $shippers = array();
+            $crm_request_ids = $request->crm_request_ids;
+            $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if($settings->text != NULL){
+                    
+                    $shippers = array_map('intval', explode(',', $settings->text));
+                }
+            }
+    
+            $crm_requests = CrmRequest::where('id',$request->crm_request_id)->whereIn('shipper_id',$shippers);
+            if ($crm_requests->exists()) {
+                return response()->json(['status'=>1]);
+            }else{
+                return response()->json(['status'=>0]);
+            }
+        }else{
+
+            $crm_ids = array();
+            $shippers = array();
+            $crm_request_ids = $request->crm_request_ids;
+            $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if($settings->text != NULL){
+                    
+                    $shippers = array_map('intval', explode(',', $settings->text));
+                }
+            }
+    
+            foreach ($crm_request_ids as $crm_request_id){
+                $crm_requests = CrmRequest::where('id',$crm_request_id)->whereIn('shipper_id',$shippers);
+                if ($crm_requests->exists()) {
+                    array_push($crm_ids,$crm_request_id);
+                }
+            }
+            if(count($crm_ids) > 0){
+                return response()->json(['status'=>1,'crm_ids'=>$crm_ids]);
+    
+            }else{
+                return response()->json(['status'=>0]);
+            }
+        }
+    }
 }

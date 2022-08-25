@@ -586,8 +586,59 @@ class UserManagementController extends Controller
         $departments = AdminDepartment::get(['id', 'name']);
         $modules = Module::with('permissions')->get();
 
-        return view('admin.user_management.role.add.index')->with(['departments' => $departments, 'modules' => $modules]);
+        return view('admin.user_management.role.add.index')->with(['departments' => $departments,'modules' => $modules]);
     }
+
+    public function role_permission_index() {
+        $modules = Module::all();
+
+        return view('admin.user_management.role.permissions.index')->with(['modules' => $modules]);
+    }
+
+    public function module_permission(Request $request) {
+
+        $modules = Module::with('permissions')->find($request->module_id)->permissions;
+        return $modules;
+    }
+
+    public function role_permission_list(Request $request) {
+
+        // dd($request->all());
+        $module_id = $request->module_id;
+        $permissions = $request->permissions;
+        $admin_perm = array();
+
+        $admin_roles =  AdminRole::join('admin_role_module_permissions','admin_role_module_permissions.role_id','admin_roles.id')
+        ->join('admin_departments','admin_departments.id','admin_roles.department_id')
+        ->whereIn('admin_role_module_permissions.permission_id',$permissions)
+        ->select(['admin_roles.id','admin_roles.name','admin_departments.name as department'])
+        ->groupBy('admin_roles.name')
+        ->get();
+
+        foreach($admin_roles as $admin_role_key => $admin_role_value)
+        {
+            $admin_perm[$admin_role_key] = $admin_role_value;
+
+            $admin_roles_perm = AdminRoleModulePermission::leftjoin('module_permissions','module_permissions.id','admin_role_module_permissions.permission_id')
+            ->whereIn('module_permissions.id',$permissions)
+            ->where('admin_role_module_permissions.role_id',$admin_role_value->id)
+            ->select(['module_permissions.id as id','module_permissions.name as name','module_permissions.module_id as module_id','admin_role_module_permissions.role_id'])
+            ->get();
+            // dd($admin_roles_perm);
+            $admin_perm[$admin_role_key]['permissions'] = $admin_roles_perm;
+
+        }
+
+        $data['module_id'] = $module_id;
+        $data['permissions'] = $permissions;
+        $data['admin_perm'] = $admin_perm;
+
+        return $data;
+        
+        
+    }
+
+    
 
     public function role_add_store(Request $request) {
         $admin_role = new AdminRole();

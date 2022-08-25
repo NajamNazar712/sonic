@@ -503,13 +503,47 @@
                         </div>
 
                         <div class="col-md-6">
-                                    <div class="form-group row">
-                                        <div class="col-md-9">
-                                            <label>Brand Name</label>
-                                            <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
-                                        </div>
-                                    </div>
+                            <div class="form-group row">
+                                <div class="col-md-9">
+                                    <label>Brand Name</label>
+                                    <input type="text" id="brand_name" class="form-control border-primary" value="{{$user->brand_name}}" name="brand_name">
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <div class="col-md-9">
+                                    <label>Expected Average Shipments:
+                                        <span class="danger">*</span>
+                                    </label>
+                                    <input type="text" id="avg_shipments" class="form-control border-primary" value="{{$user->average_shipments}}" name="avg_shipments">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <div class="form-group col-md-9">
+                                    <label for="average_shipment_duration_id">Expected Average Shipment Duration:
+                                        <span class="danger">*</span>
+                                    </label>
+
+                                    <select name="average_shipment_duration_id" id="average_shipment_duration_id" class="select2 form-control required" style="width: 100%" >
+                                        @if ($average_shipment_durations_cycle->count() > 0)
+                                            @foreach($average_shipment_durations_cycle as $asdc)
+                                                @if ($asdc->id == $user->average_shipment_duration_id)
+                                                <option value="{{$asdc->id}}" selected>{{$asdc->name}}</option>
+                                                    
+                                                @else
+                                                    
+                                                <option value="{{$asdc->id}}">{{$asdc->name}}</option>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
                         </div>
                         <div class="form-actions right">
@@ -794,6 +828,9 @@
                 width: '100%',
             });
             $('#sub_segments').select2({
+                width: '100%',
+            });
+            $('#average_shipment_duration_id').select2({
                 width: '100%',
             });
             

@@ -36,4 +36,7 @@ class CrmRequest extends Model
     public function feedback() {
         return $this->hasOne('App\Http\Models\CRM\CrmRequestFeedback');
     }
+    public function closed_reason() {
+        return $this->hasOne('App\Http\Models\CRM\CrmClosedReason');
+    }
 }

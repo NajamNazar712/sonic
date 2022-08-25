@@ -27,7 +27,9 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\CRM\CrmClosedReasonStatus;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
 class ShipperCRMController extends Controller
@@ -44,7 +46,12 @@ class ShipperCRMController extends Controller
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
-        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status]);
+        $launched = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->count();
+        $in_process = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->count();
+        $closed = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->count();
+        $closed_reason_statuses  = CrmClosedReasonStatus::all();
+
+        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status, 'launched' => $launched, 'in_process' => $in_process, 'closed' => $closed, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
     public function requests_list(Request $request){
         $launched_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
@@ -55,20 +62,69 @@ class ShipperCRMController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.launched_by_id')
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr')
+            ->leftjoin('crm_closed_reasons as crmcr', 'crmcr.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('crm_closed_reason_statuses as crmcrs', 'crmcrs.id', '=', 'crmcr.status_id')
+            ->leftjoin('crm_request_status_histories as crmst', function ($join) {
+                $join->on('crmst.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crm_requests.status_id', 4)
+                    ->where('crmst.id', '=',
+                        DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id)'));
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr','crmst.created_at as closed_at','crm_requests.launched_by_id','crmcrs.name as at_fault')
             ->where('crm_requests.shipper_id', session('user_id'));
+
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $launched_request = $launched_request->whereBetween('crm_requests.created_at', [$from, $to]);
+            }
         $datatables = Datatables::of($launched_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
+            
             ->editColumn('descr',function($request){
                 return strip_tags($request->description);
             })
+            ->editColumn('at_fault',function($request){
+                if($request->status_id == 4){
+                    return $request->at_fault;
+                }else{
+                    return '-';
+                }
+            })
+            
             ->addColumn('id_padded_link', function ($requests) {
                 return '<u><a href=' . route('cod.crm.request.details', ['id' => $requests->id]) . ' target="_blank">' . str_pad($requests->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             })
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('cod.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+            })
+            ->addColumn('launched_by_name', function ($requests) {
+                if($requests->launched_added_by == 0){
+                    $launched_by = Admin::find($requests->launched_by_id);
+                    if($launched_by){
+                        return $launched_by->name;
+                    }
+                }else if($requests->launched_added_by == 1){
+                    $launched_by = User::find($requests->launched_by_id);
+                    if($launched_by){
+                        return $launched_by->name;
+                    }
+                }else if($requests->launched_added_by == 2){
+                    $launched_by = SubstituteUser::find($requests->launched_by_id);
+                    if($launched_by){
+                        return $launched_by->name;
+                    }
+                }else if($requests->launched_added_by == 3){
+                    $launched_by = RetailUser::find($requests->launched_by_id);
+                    if($launched_by){
+                        return $launched_by->name;
+                    }
+                }
+                    return '-';
+                
+                
             })
             ->editColumn('agent', function ($requests){
                 if($requests->agent == null){
@@ -614,6 +670,19 @@ class ShipperCRMController extends Controller
         }
         else{
             return response()->json(['status' => 1, 'message' => 'Something went wrong!']);
+        }
+    }
+
+    public function card_data(Request $request){
+        if ($request->get('from_date') && $request->get('to_date')) {
+            $from = $request->get('from_date');
+            $to = $request->get('to_date');
+            $card_data['launched'] = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            $card_data['in_process'] = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            $card_data['closed'] = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            return response()->json(['status' => 1, 'card_data' => $card_data]);
+        }else{
+            return response()->json(['status' => 0]);
         }
     }
 }
