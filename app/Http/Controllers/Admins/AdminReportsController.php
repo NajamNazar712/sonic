@@ -6562,16 +6562,29 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             })->addColumn('adjusted_percentage', function ($requests) {
-                if($requests->adjusted_amount > 0){
+                if($requests->adjusted_amount != null){
 
-                    return ($requests->cod_amount/ $requests->adjusted_amount)*100;
+                    if($requests->cod_amount > 0){
+    
+                        return number_format(($requests->adjusted_amount/ $requests->cod_amount)*100,2);
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }
             })->addColumn('remaining_percentage', function ($requests) {
-                if($requests->adjusted_amount > 0){
+                if($requests->adjusted_amount != null){
 
-                    return ($requests->cod_amount/ $requests->adjusted_amount)*100;
+                    if($requests->cod_amount > 0){
+                        if(($requests->adjusted_amount/ $requests->cod_amount)*100 == 0){
+                            return '100';
+                        }else{
+                            return number_format(100 - (($requests->adjusted_amount/ $requests->cod_amount)*100) ,2);
+                        }
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }
