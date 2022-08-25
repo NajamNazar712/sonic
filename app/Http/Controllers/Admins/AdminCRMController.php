@@ -5048,4 +5048,31 @@ class AdminCRMController extends Controller
             }
         }
     }
+
+    public function bulk_claim_index(){
+        $case_nature_type = CrmRequestCaseNatureType::where('nature_id',4)->select('id', 'type')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
+        return view('admin.crm.bulk_claim')->with(['case_nature_type' => $case_nature_type, 'channels' => $channels]);
+
+    }
+
+    public function bulk_claim_shipment_details(Request $request){
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+            $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', 4);
+            if($is_shipment->exists()){
+                return ['status' => 1, 'error' => 'Request/Complaint already lodged'];
+            }
+
+            $details = array();
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+        }else{
+            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+
+    }
 }

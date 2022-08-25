@@ -3577,6 +3577,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::post('close_reason', 'Admins\AdminCRMController@close_reason')->name('close_reason');
 
+        Route::prefix('bulk_claim')->name('bulk_claim.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@bulk_claim_index')->name('index');
+            Route::post('store', 'Admins\AdminCRMController@bulk_claim_submit')->name('submit');
+            Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
+            
+        });
+        
         
     });
 
