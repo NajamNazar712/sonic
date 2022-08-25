@@ -63,6 +63,7 @@
                     </div>
                     <div class="form-group" id="territory_select">
                         <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            <option value="0" > All Territories </option>
                         </select>
                     </div>
                     
