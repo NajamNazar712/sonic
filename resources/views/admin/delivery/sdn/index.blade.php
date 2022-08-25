@@ -1064,7 +1064,7 @@
                         }
                     },
                     {data: 'sdn', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
-                    {data: 'sdn_type', name: 'station_deposit_notes.sdn_type', class: 'align-middle sdn_type', orderable: false, searchable: false},
+                    {data: 'sdn_type', name: 'station_deposit_notes.sdn_type', class: 'align-middle sdn_type', orderable: false},
                     
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {
