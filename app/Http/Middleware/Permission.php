@@ -608,6 +608,9 @@ class Permission
             'reports.ssr.index' => 793,
             'reports.ssr.list' => 793,
 
+            'reports.shipper_summary.index' => 794,
+            'reports.shipper_summary.list' => 794,
+
             'reports.crm_agent_wise_report.index' => 784,
 
             'packaging.index' => 76,
