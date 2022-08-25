@@ -142,7 +142,7 @@
                         <th class="border-primary border-darken-1">Deposited Date</th>
                         <th class="border-primary border-darken-1">Resolved By</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Zone</th>
+                        {{-- <th class="border-primary border-darken-1">Zone</th> --}}
                         <th class="border-primary border-darken-1">Adjustment Date</th>
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
@@ -766,6 +766,8 @@
             });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
+                    blockPagePermanently();
+
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -789,7 +791,7 @@
                             head.push('Deposited Date');
                             head.push('Resolved By');
                             head.push('Status');
-                            head.push('Zone');
+                            // head.push('Zone');
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
@@ -813,7 +815,7 @@
                                 row.push(values.created_at);
                                 row.push(values.resolved_by);
                                 row.push(values.status);
-                                row.push(values.zone);
+                                // row.push(values.zone);
                                 row.push(values.adjustment_date);
                                 row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
@@ -824,6 +826,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -1089,7 +1092,7 @@
                     {data: 'created_at', name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     {data: 'resolved_by', name: 'admins.name', class: 'align-middle resolved_by'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'zone', name: 'zones.id', class: 'align-middle zone'},
+                    // {data: 'zone', name: 'zones.id', class: 'align-middle zone'},
                     {data: 'adjustment_date', name: 'sdna.date', class: 'align-middle adjustment_date'},
                     {
                         data: 'sdn_adjustment_amount',
@@ -1182,7 +1185,7 @@
                         '<option value="1">COD</option>' +
                         '<option value="2">Retail</option>' +
                         '</select>';
-                    var zones = '<select name="zones" id="zones" class="select2 form-control"></select>';
+                    // var zones = '<select name="zones" id="zones" class="select2 form-control"></select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
@@ -1206,12 +1209,14 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else if ($(header).is('.zone')) {
-                            $(zones).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else {
+                        }
+                        //  else if ($(header).is('.zone')) {
+                        //     $(zones).appendTo($(search))
+                        //         .on('change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         }).wrap(td);
+                        // }
+                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1236,19 +1241,19 @@
                     });
                     
                     
-                    var zone_data = $.map({!! $zones !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
+                    // var zone_data = $.map({!! $zones !!}, function (obj) {
+                    //     obj.id = obj.id;
+                    //     obj.text = obj.name;
 
-                        return obj;
-                    });
-                    $("#zones").prepend('<option value="" selected></option>').select2({
-                        data:zone_data,
-                        placeholder: "Select zone",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    //     return obj;
+                    // });
+                    // $("#zones").prepend('<option value="" selected></option>').select2({
+                    //     data:zone_data,
+                    //     placeholder: "Select zone",
+                    //     width: '100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
 
                     
                     var data = $.map({!! $banks !!}, function (obj) {
