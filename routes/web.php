@@ -2693,7 +2693,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('shipper_summary')->name('shipper_summary.')->group(function (){
             Route::get('', 'Admins\Reports\ShipperSummaryReportController@index')->name('index');
-            Route::get('list', 'Admins\Reports\SSRController@list')->name('list');
+            Route::get('list', 'Admins\Reports\ShipperSummaryReportController@list')->name('list');
 
         });
 

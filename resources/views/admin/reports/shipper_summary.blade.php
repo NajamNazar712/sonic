@@ -191,10 +191,17 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.shipper);
+                                row.push(values.zone);
+                                row.push(values.city);
+                                row.push(values.territory);
+                                row.push(values.product_name);
+                                row.push(values.status);
                                 row.push(values.sale_person);
                                 row.push(values.activated_at);
+                                row.push(values.disable_at);
+                                row.push(values.segment);
                                 body.push(row);
                             });
                         },
@@ -226,19 +233,26 @@
                 serverSide: true,
                 deferLoading: [50, 0],
                 ajax:{
-                    url: '{{ route('admin.reports.account_activation.list') }}',
+                    url: '{{ route('admin.reports.shipper_summary.list') }}',
                     data: function (d) {
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[4, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'id' ,name: 'users.id', class: 'align-middle text-center user_id'},
+                    { data:'id_padded' ,name: 'users.id', class: 'align-middle text-center user_id'},
                     { data:'shipper' ,name: 'users.name', class: 'align-middle text-center shipper'},
-                    { data:'sale_person' ,name: 'sp.name', class: 'align-middle text-center sale_person'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle text-center zone'},
+                    { data:'city' ,name: 'cities.name', class: 'align-middle text-center city'},
+                    { data:'territory' ,name: 't.name', class: 'align-middle text-center territory'},
+                    { data:'product_name' ,name: 'p.product_name', class: 'align-middle text-center product_name'},
+                    { data:'status' ,name: 'status', class: 'align-middle text-center status'},
+                    { data:'sale_person' ,name: 'ad.name', class: 'align-middle text-center sale_person', orderable: false, searchable: false},
                     { data:'activated_at' ,name: 'users.activated_at', class: 'align-middle text-center activated_at'},
+                    { data:'disable_at' ,name: 'users.disable_at', class: 'align-middle text-center disable_at'},
+                    { data:'segment' ,name: 'users.segment_id', class: 'align-middle text-center segment'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
