@@ -4010,13 +4010,9 @@ class AdminHumanResourseController extends Controller
             // return $availed_leaves;    
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
-            $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
-            $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
-            $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-            ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
-            ->count();
-            // $late = $employee_leaves->no_of_late;
-            return  '<button data-user_id='.$employee_leaves->employee_id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $late . '</button>';  
+            $late = $employee_leaves->no_of_late;
+            // $employee_penalty = EmployeePenalty::find($employee_leaves->id);
+            return  '<button data-user_id='.$employee_leaves->id.' data-penlaty_id='.$employee_leaves->id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $employee_leaves->no_of_late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
             $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
@@ -4153,12 +4149,15 @@ class AdminHumanResourseController extends Controller
     public function employee_penalty_duplicate(Request $request)
     {
         
-        $employee_id = $request->employee_id;
-        $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
-        $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
+        $penalty_id = $request->employee_id;
 
+        $employee_penalty = EmployeePenalty::find($penalty_id);
+
+        $penalty_date = $employee_penalty->created_at;
+        $startMonth = Carbon::parse($penalty_date)->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $endMonth = Carbon::parse($penalty_date)->startOfMonth()->addDays(19)->format('Y-m-d');
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-        ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+        ->where('ea.employee_id',$employee_penalty->employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
         ->select('ea.attendance_date','ea.clock_in_datetime')->get(); 
         $data = $duplicate;
         return response()->json(['status' => 1, 'info' => $data]);
