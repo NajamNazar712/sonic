@@ -5384,7 +5384,8 @@ class APIController extends Controller
                                         $return_data['Identification_parameter'] = $shipment_data->consignee_name;
                                         $return_data['reserved'] = "successful bill payment";
                                         Shipment::where('tracking_number', $tracking_no)->update(['received_amount' => $transfer_amount]);
-
+                                        NotificationsController::app_notification(19, $delivery_note_data->rider_id, 2,$delivery_note_data->rider_id, $upload_transaction->id);
+                                        NotificationsController::send(185, $delivery_note_data->rider_id, $upload_transaction->id);
                                         return json_encode(['status' => 200, 'message' => 'Successful Bill Payment', 'result' =>  $return_data]);
                                     }
                                     else{

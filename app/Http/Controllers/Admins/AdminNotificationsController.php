@@ -760,6 +760,9 @@ class AdminNotificationsController extends Controller
         elseif($id == 184){
             $details['fields'] = ['consignee','tracking_number'];
         }
+        elseif($id == 185){
+            $details['fields'] = ['rider', 'amount', 'tracking_number'];
+        }
         return $details;
     }
 
@@ -926,6 +929,8 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["date", "status"];
             }else if($id == 18){
                 $details['fields'] = ["employee_name","trax_id","date"];
+            }else if($id == 19){
+                $details['fields'] = ['rider', 'amount', 'tracking_number'];
             }
             return $details;
         }else{
