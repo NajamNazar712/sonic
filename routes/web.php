@@ -1,5 +1,7 @@
 <?php
 use App\Http\Models\HR\Employee;
+use Illuminate\Support\Facades\Storage;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -3982,7 +3984,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
-            Route::get('{id}/payslip_download', 'Admins\AdminHumanResourseController@payslip_download')->name('download');
+            Route::get('{id}/payslip_download', function() {
+                Storage::download('public/payslip_pdf/payslip_131661774719261478-August 2022.pdf');
+            });
         });
 
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {
