@@ -161,12 +161,17 @@
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
-{{--                                                    <option value="1">Yes</option>--}}
+                                                    <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-6 d-none" id="insurance_amount_div">
                                                 <input type="text" name="insurance_amount" id="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="packaging_amount" id="packaging_amount" class="form-control rounded-right amount" placeholder="Packaging Amount">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -793,7 +798,7 @@
                 'autoGroup': true,
             });
 
-            $('#insurance_offered').select2({
+            $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Insurance Offered*",
                 allowClear:true
@@ -966,7 +971,6 @@
                         $('#insurance_amount').val('');
                         $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
-                        $('#insurance_offered').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
                         $('#special_instructions').val('');
                         
