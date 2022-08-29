@@ -3831,7 +3831,7 @@ class AdminHumanResourseController extends Controller
                     'Content-Type: application/pdf',
                 );
 
-                return Response::download($file, $name, $headers);
+                return response()->file($payslip_pdf->file_path);
             }
             else{
                 return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
