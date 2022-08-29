@@ -9605,8 +9605,8 @@ else if ($id == 178) {
                 }
 
                 else if ($id == 185) {
-                    $one_link_transaction = OneLinkPaymentTransaction::find($reference2_id);
-                    $rider = Rider::find($reference1_id);
+                    $one_link_transaction = OneLinkPaymentTransaction::find($reference_2_id);
+                    $rider = Rider::find($reference_1_id);
                     if($one_link_transaction && $rider){
                         if (strpos($body, '[amount]') !== FALSE) {
                             $body = str_replace('[amount]', $one_link_transaction->amount, $body);
