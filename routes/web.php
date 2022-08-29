@@ -1,5 +1,7 @@
 <?php
 use App\Http\Models\HR\Employee;
+use Illuminate\Support\Facades\Storage;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
