@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Reference</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Marked By</th>
                     </tr>
                     </thead>
                 </table>
@@ -159,6 +160,7 @@
                         head.push('Reference');
                         head.push('Arrival Date');
                         head.push('Status Date');
+                        head.push('Marked By');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -179,6 +181,7 @@
                             row.push(values.reference);
                             row.push(values.arrival);
                             row.push(values.current_status_date);
+                            row.push(values.marked_by);
 
                             body.push(row);
                         });
@@ -446,7 +449,8 @@
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'reference', name: 'shipments_journey.reference_1_id', class: 'align-middle reference'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'}
+                {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'}
             ],
             rowCallback: function(row, data, index) {
                 if (data.aging < 7) {

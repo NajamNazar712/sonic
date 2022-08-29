@@ -42,23 +42,23 @@ class EmployeeConfirmationDays extends Command
      */
     public function handle()
     {
-        $employees = Employee::where('confirmation_status',2)->where('status_id',1)->get();
+        $employees = Employee::where('confirmation_status',2)->where('employee_type_id',1)->whereIn('status_id',[1,3])->get();
 
         if($employees){
             foreach ($employees as $employee) {
                 $now = Carbon::now();
                 $difference = $now->diffInDays($employee->joining_date);
-                if($difference >= 85) {
+                if($difference >= 90) {
                     $check_employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id);
                     if(!$check_employee_confirmation->exists()){
 
-                        $probation_end_date = Carbon::today()->addDays(5)->toDateString();
+                        $probation_end_date = Carbon::today()->toDateString();
                         $employee_confirmation = new EmployeeConfirmation();
                         $employee_confirmation->employee_id = $employee->id;
                         $employee_confirmation->probation_end_date = $probation_end_date;
                         $employee_confirmation->save();
 
-                        NotificationsController::send(182,$employee->id);
+                        NotificationsController::send(182, $employee);
                     }
                 }
             }

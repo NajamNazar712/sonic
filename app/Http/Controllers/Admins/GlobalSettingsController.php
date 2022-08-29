@@ -5765,41 +5765,39 @@ public function sales_incentive()
     }
 
     public function lead_tagging_submit(Request $request){
-        if($request->zone_id == 0){
-            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-            // $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
-            //     $query->where('zone_id', '=', '0')
-            //     ->where('service_id', $request->service_id)
-            //     ->where('sale_person_id',$request->agent_id)
-            //     ->where('status', 1);
-            // })->orWhere(function ($query) use ($request){
-            //     $query->where('zone_id', '=', $request->zone_id)
-            //     ->where('city_id', '=', '0')
-            //     ->where('sale_person_id',$request->agent_id)
-            //     ->where('service_id', $request->service_id)
-            //     ->where('status', 1);
-            // });
-            if(!$check_leads->exists()){
-                $lead_tagging = new LeadTagging;
-                $lead_tagging->sale_person_id = $request->agent_id;
-                $lead_tagging->zone_id = $request->zone_id;
-                if($request->city_id){
-                    $lead_tagging->city_id = $request->city_id;
-                }
-                if($request->territory_id){
-                    $lead_tagging->territory_id = $request->territory_id;
-                }
-                $lead_tagging->service_id = $request->service_id;
-                $lead_tagging->save();
-    
-                return redirect()->back()->with('success', 'Lead Agent Added!');
-    
-            }else{
-                return redirect()->back()->with('error', 'Lead Agent already exist');
-            }
-        }else{
+        // if($request->zone_id == 0){
+        //     $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+        //     // $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
+        //     //     $query->where('zone_id', '=', '0')
+        //     //     ->where('service_id', $request->service_id)
+        //     //     ->where('sale_person_id',$request->agent_id)
+        //     //     ->where('status', 1);
+        //     // })->orWhere(function ($query) use ($request){
+        //     //     $query->where('zone_id', '=', $request->zone_id)
+        //     //     ->where('city_id', '=', '0')
+        //     //     ->where('sale_person_id',$request->agent_id)
+        //     //     ->where('service_id', $request->service_id)
+        //     //     ->where('status', 1);
+        //     // });
+        //     if(!$check_leads->exists()){
+        //         $lead_tagging = new LeadTagging;
+        //         $lead_tagging->sale_person_id = $request->agent_id;
+        //         $lead_tagging->zone_id = $request->zone_id;
+        //         if($request->city_id){
+        //             $lead_tagging->city_id = $request->city_id;
+        //         }
+        //         if($request->territory_id){
+        //             $lead_tagging->territory_id = $request->territory_id;
+        //         }
+        //         $lead_tagging->service_id = $request->service_id;
+        //         $lead_tagging->save();
+        //         return redirect()->back()->with('success', 'Lead Agent Added!');
+        //     }else{
+        //         return redirect()->back()->with('error', 'Lead Agent already exist');
+        //     }
+        // }else{
 
-            $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
     
             if(!$check_leads->exists()){
                 $lead_tagging = new LeadTagging;
@@ -5815,7 +5813,7 @@ public function sales_incentive()
             }else{
                 return redirect()->back()->with('error', 'Lead Agent already exist');
             }
-        }
+        // }
     }
 
     public function lead_tagging_data(Request $request){
@@ -7294,6 +7292,48 @@ public function sales_incentive()
         }
         return response()->json(['status'=>'true']);
 
+    }
+
+    public function complain_portal_shippers(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),578);
+        
+        $shippers = array();
+        
+        $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $shippers = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
+
+        return view('admin.settings.compalint_portal_shippers')->with(['shippers' => $shippers,'users' => $users]);
+    }
+
+    public function complain_portal_shippers_update(Request $request){
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'complaint_portal_shippers';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
     public function delete_sale_person_targets(Request $request){
         if(isset($request->sale_person_ids) && !empty($request->sale_person_ids)){

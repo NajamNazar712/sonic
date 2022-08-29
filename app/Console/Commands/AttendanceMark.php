@@ -47,7 +47,7 @@ class AttendanceMark extends Command
         $today_month = $day_carbon->copy();
         $today_year = $day_carbon->copy()->format('Y');
 
-        $admins = Admin::where('status', '!=', 0);
+        $admins = Admin::where('status', '!=', 0)->whereNotNull('employee_id');
         if($admins->exists())
         {
             $admins = $admins->pluck('employee_id')->toArray();
@@ -97,7 +97,7 @@ class AttendanceMark extends Command
             }
         }
 
-        $riders = Rider::where('status', 1);
+        $riders = Rider::where('status', 1)->whereNotNull('employee_id');
         if($riders->exists())
         {
             $riders = $riders->pluck('employee_id')->toArray();
@@ -154,10 +154,10 @@ class AttendanceMark extends Command
         $rider_attendance = EmployeeAttendance::whereDate('attendance_date', $today)->where('employee_type', 2);
         if ($admin_attendance->exists()) {
             $admin_ids = $admin_attendance->pluck('employee_id')->toArray();
-            $admins = Admin::whereNotIn('employee_id', $admin_ids)->where('status', '!=', 0);
+            $admins = Admin::whereNotIn('employee_id', $admin_ids)->where('status', '!=', 0)->whereNotNull('employee_id');
         }
         else {
-            $admins = Admin::where('status', '!=', 0);
+            $admins = Admin::where('status', '!=', 0)->whereNotNull('employee_id');
         }
 
         if($admins->exists())
@@ -175,10 +175,10 @@ class AttendanceMark extends Command
 
         if ($rider_attendance->exists()) {
             $rider_ids = $rider_attendance->pluck('employee_id')->toArray();
-            $riders = Rider::whereNotIn('employee_id', $rider_ids)->where('status', 1);
+            $riders = Rider::whereNotIn('employee_id', $rider_ids)->where('status', 1)->whereNotNull('employee_id');
         }
         else {
-            $riders = Rider::where('status', 1);
+            $riders = Rider::where('status', 1)->whereNotNull('employee_id');
         }
         
         if($riders->exists())

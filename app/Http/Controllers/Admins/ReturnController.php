@@ -1311,7 +1311,7 @@ class ReturnController extends Controller
                 $join->on('cb.id', '=', 'shipments_journey.admin_id')
                     ->where('shipments_journey.shipper_status_id', 20);
             })
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -1369,6 +1369,24 @@ class ReturnController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('shipper_phone', function($shipment){
+                if($shipment->shipper_phone_omni != null)
+                {
+                    return $shipment->shipper_phone_omni;
+                }
+                else{
+                    return $shipment->shipper_phone;
+                }
+            })
+            ->editColumn('shipper_return_address', function($shipment){
+                if($shipment->shipper_return_address_omni != null)
+                {
+                    return $shipment->shipper_return_address_omni;
+                }
+                else{
+                    return $shipment->shipper_return_address;
+                }
             })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
@@ -4857,18 +4875,18 @@ class ReturnController extends Controller
     }
 
     public function confirmation_pending_manual_sms_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),568);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),570);
         return view('admin.return.confirmation_pending_manual_sms');
      }
  
      public function confirmation_pending_manual_sms_list(Request $request){
          if($request->get('excel') && $request->get('excel') == true)
          {
-             ActivityTrailController::createActivityTrailLog(Auth::id(),569);
+             ActivityTrailController::createActivityTrailLog(Auth::id(),571);
          }
         $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
             ->join('sms', 'sms.id', '=', 'rcp_manual_sms.sms_id')
-            ->select('rcp_manual_sms.id','rcp_manual_sms.tracking_number','rcp_manual_sms.recepient','rcp_manual_sms.recepient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
+            ->select('rcp_manual_sms.id','rcp_manual_sms.shipment_id','rcp_manual_sms.recipient','rcp_manual_sms.recipient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
 
         $datatable = DataTables::of($rcpmannualsms)
             ->editColumn('message', function ($rcpmannualsms) {
@@ -4931,21 +4949,21 @@ class ReturnController extends Controller
 
                     if($request->send_to == 'shipper'){
                         $sms_to = $shipment->user->phone;
-                        $recepient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
+                        $recipient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
                     }
                     else{
                         $sms_to = $shipment->consignee_phone_number_1;
-                        $recepient_name = $shipment->consignee_name;
+                        $recipient_name = $shipment->consignee_name;
                     }
 
                     $message = $request->message;
                     $sms_id = RCPSmsToConsignee::send_manual_sms($message,$sms_to);
 
                     $rcp_sms_log = new RcpManualSms();
-                    $rcp_sms_log->tracking_number = $shipment->tracking_number;
+                    $rcp_sms_log->shipment_id = $request->id;
                     $rcp_sms_log->sms_id = $sms_id;
-                    $rcp_sms_log->recepient = $request->send_to;
-                    $rcp_sms_log->recepient_name = $recepient_name;
+                    $rcp_sms_log->recipient = $request->send_to;
+                    $rcp_sms_log->recipient_name = $recipient_name;
                     $rcp_sms_log->phone = $sms_to;
                     $rcp_sms_log->message = $message;
                     $rcp_sms_log->agent = Auth::id();

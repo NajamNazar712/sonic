@@ -23,7 +23,7 @@ class MMSReportController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
 
-        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104])->whereIn('status', [3, 4])->select('id', 'name')->get();
 
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
@@ -56,8 +56,8 @@ class MMSReportController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('zone_class_cities as zcc', function($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
@@ -88,7 +88,7 @@ class MMSReportController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
             ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
-            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091])
+            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104])
             ->whereBetween('sj.created_at', [$from,$to]);
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);

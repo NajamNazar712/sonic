@@ -15,10 +15,10 @@ class CreateRcpManualSmsTable extends Migration
     {
         Schema::create('rcp_manual_sms', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('tracking_number')->index();
+            $table->string('shipment_id')->index();
             $table->integer('sms_id')->index();
-            $table->string('recepient');
-            $table->string('recepient_name');
+            $table->string('recipient');
+            $table->string('recipient_name');
             $table->string('phone');
             $table->text('message')->nullable()->default(NULL);
             $table->integer('agent')->index();

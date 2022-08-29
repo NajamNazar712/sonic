@@ -58,6 +58,8 @@ class Permission
             'daily_visit.store' => 265,
             'daily_visit.business_card' => 264,
             'daily_visit.location_photo' => 264,
+            'daily_visit.screen.index' => 791,
+            'daily_visit.screen.edit' => 792,
 
 
             'pickups.un_assigned.index' => 17,
@@ -1266,13 +1268,14 @@ class Permission
             'qa.cx_training.list' =>777,
 
             'return.confirmation_pending_manual_sms' =>781,
-            'human_resource.employee_confirmation.index' => 783,
-            'human_resource.employee_confirmation.list' => 783,
             
             'reports.employee_confirmation.index' => 786,
             'reports.employee_confirmation.list' => 786,
 
-            
+            'settings.complain_portal_shippers.index' => 788,
+
+            'user_management.roles.permissions.index' => 789,
+
         ],
 
         'shipper' => [
