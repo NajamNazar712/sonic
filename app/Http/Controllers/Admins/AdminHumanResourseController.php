@@ -3825,13 +3825,9 @@ class AdminHumanResourseController extends Controller
                 $month = $month->format('M');
                 $name = $payslip->name . '-' . $month . '.pdf';
                 $payslip_pdf = $payslip_pdf->first();
-                $file= Storage::disk('public')->url('/'.$payslip_pdf->file_path);
-
-                $headers = array(
-                    'Content-Type: application/pdf',
-                );
-
-                return response()->file($payslip_pdf->file_path);
+                $path = storage_path($payslip_pdf->file_path);
+//                return $path;
+                return response()->file($path);
             }
             else{
                 return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
