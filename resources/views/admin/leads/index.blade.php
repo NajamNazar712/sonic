@@ -1940,6 +1940,7 @@
                             $('#total_leads').text(data.leads.total);
                             $('#received_leads').text(data.leads.received);
                             $('#in_process').text(data.leads.in_process);
+                            // $('#in_process_activation').text(data.leads.in_process_for_activation);
                             $('#dead_leads').text(data.leads.dead_leads);
                             $('#active_leads').text(data.leads.accounts_activated);
                             $('#dead_ratio').text(data.leads.dead_leads_ratio);
