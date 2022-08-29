@@ -1368,6 +1368,10 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
+
+            'crm.bulk_claim.index' => 19,
+
+            
         ]
     ];
 

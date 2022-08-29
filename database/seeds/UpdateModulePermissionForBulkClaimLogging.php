@@ -22,5 +22,9 @@ class UpdateModulePermissionForBulkClaimLogging extends Seeder
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'CRM > Bulk Claim Logging', 'url'=>'admin.crm.bulk_claim.index', 'permission_id' => 795),
         ));
+
+        DB::table('module_permissions')->insert(array(
+            array('id' => 19, 'name' => 'CRM - Bulk Claim Logging')
+        ));
     }
 }

@@ -444,6 +444,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('get', 'Shippers\ShipperCRMController@get_latest_comment')->name('get');
         });
 
+        Route::prefix('bulk_claim')->name('bulk_claim.')->group(function(){
+            Route::get('', 'Shippers\ShipperCRMController@bulk_claim_index')->name('index');
+            Route::post('store', 'Shippers\ShipperCRMController@bulk_claim_submit')->name('submit');
+            Route::post('shipment_details', 'Shippers\ShipperCRMController@bulk_claim_shipment_details')->name('shipment_details');
+            
+        });
+
     });
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){

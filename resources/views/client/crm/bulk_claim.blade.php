@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
 @section('title', 'Bluk Claim Logging')
 
@@ -15,7 +15,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            @include('admin.inc.messages')
+                            @include('client.inc.messages')
                             
                             <form id="add_shipment_form" class="mb-1 justify-content-center" novalidate="novalidate">
 
@@ -32,7 +32,7 @@
                                      </div>
                                  </div>
                             </form>
-                            <form id="bulk_claim_submit" class="form-horizontal text-center" method="POST" action="{{ route('admin.crm.bulk_claim.submit') }}" novalidate="novalidate" enctype="multipart/form-data">
+                            <form id="bulk_claim_submit" class="form-horizontal text-center" method="POST" action="{{ route('cod.crm.bulk_claim.submit') }}" novalidate="novalidate" enctype="multipart/form-data">
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -71,16 +71,22 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="https://sonic.test/app-assets/vendors/css/forms/selects/select2.min.css">
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+
+<script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -172,7 +178,7 @@
                    
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
-                            url: '{!! route('admin.crm.bulk_claim.shipment_details') !!}',
+                            url: '{!! route('cod.crm.bulk_claim.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
