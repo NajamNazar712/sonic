@@ -228,23 +228,27 @@
                                     <div class="col mt-1">
                                         <div class="form-group">
                                             <label>Charges</label>
-                                            <input type="text" name="charges" id="charges" class="form-control" placeholder="Charges" disabled>
+                                            <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label>Discount</label>
-                                            <input type="text" name="discount" id="discount" class="form-control" placeholder="Discount" disabled>
+                                            <input type="text" name="discount" id="discount" class="form-control form-control-sm" placeholder="Discount" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label>Charges with Discount</label>
-                                            <input type="text" name="discount" id="charges_with_discount" class="form-control" placeholder="Charges With Discount" disabled>
+                                            <input type="text" name="discount" id="charges_with_discount" class="form-control form-control-sm" placeholder="Charges With Discount" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label>GST</label>
-                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
+                                            <input type="text" name="gst" id="gst" class="form-control form-control-sm" placeholder="GST" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Packaging & Insurance Charges</label>
+                                            <input type="text" name="packaging_and_insurance_charges" id="packaging_and_insurance_charges" class="form-control form-control-sm" placeholder="Packaging & Insurance Charges" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label>Total Charges</label>
-                                            <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
+                                            <input type="text" name="total_charges" id="total_charges" class="form-control form-control-sm" placeholder="Total Charges" disabled>
                                         </div>
                                         <div class="form-group text-center">
                                             <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
@@ -969,6 +973,7 @@
                         $('#gst').val('');
                         $('#charges_with_discount').val('');
                         $('#insurance_amount').val('');
+                        $('#packaging_amount').val('');
                         $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
@@ -1071,7 +1076,8 @@
             var length = null;
             var breadth = null;
             var height = null;
-            var cod = null;
+            var insurance = null;
+            var packaging = null;
 
             $('#calculate_rates').on('click', function () {
                 var destination = '';
@@ -1097,7 +1103,8 @@
                  length = $('#length').val();
                  breadth = $('#breadth').val();
                  height = $('#height').val();
-                 //cod = $('#cod').val();
+                 insurance = $('#insurance_amount').val();
+                 packaging = $('#packaging_amount').val();
 
                 if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
                     if(shipping_mode_id == 5 && trax_box == ''){
@@ -1118,7 +1125,8 @@
                             'trax_box': trax_box,
                             'length': length,
                             'breadth': breadth,
-                          /*  'cod': cod,*/
+                            'insurance_amount': insurance,
+                            'packaging_amount': packaging,
                             'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -1131,6 +1139,7 @@
                                 $('#discount').val(data.details.discount_amount);
                                 $('#charges_with_discount').val(data.details.charges_with_discount);
                                 $('#gst').val(data.details.gst_charges);
+                                $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
 
                                 $('#total_charges').val(data.details.total_charges);
                             }

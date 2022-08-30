@@ -218,7 +218,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-        //dd($request->all());
+
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -233,6 +233,7 @@ class RetailShipmentBookController extends Controller
         $information_display = TRUE;
 
         $discount =  Auth::user()->store->discount;
+        $insurance = Auth::user()->store->insurance;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
@@ -242,6 +243,13 @@ class RetailShipmentBookController extends Controller
         $package_type = FALSE;
         $special_instructions = $request->special_instructions;
         $business_category_id = $request->input('business_category');
+
+        $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+        $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+
+        if($insurance_amount > 0 ){
+            $insurance_amount = round($insurance_amount * $insurance / 100,2);
+        }
 
 
         $shipping_mode_check = $request->input('shipping_mode');
@@ -287,20 +295,15 @@ class RetailShipmentBookController extends Controller
             $height = null;
         }
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$request->cod);
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
        
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
         }
 
-        /*  $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
-          $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));*/
 
         $city = City::find($pickup_city_id);
-        //$gst = $city->zone->gst;
-       // $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
-        //$gst = $gst * $total_charges_without_gst;
-        //$total_charges = $total_charges_without_gst + $gst;
+
         $charges_mode_id = $request->input('charges_mode');
         if($shipping_mode_check == 3){
             $amount = str_replace(',', '', $request->input('cod'));
@@ -441,8 +444,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->weight_charges = $rates['charges'];
         $retail_shipment->discount = $rates['discount_amount'];
         $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
-//        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
-        //$retail_shipment->fuel_surcharge = $request->fuel_surcharge;
+        $retail_shipment->insurance_charges = $insurance_amount;
+        $retail_shipment->packaging_charges = $packaging;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;
@@ -500,7 +503,8 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
-        $cod = intval(str_replace(',', '', $request->cod));
+        $insurance =  Auth::user()->store->insurance;
+
         if($request->weight != null){
 
             $weight = $request->weight;
@@ -508,7 +512,15 @@ class RetailShipmentBookController extends Controller
         else{
             $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
         }
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$cod);
+        
+        $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+        $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+
+        if($insurance_amount > 0 ){
+            $insurance_amount = round($insurance_amount * $insurance / 100,2);
+        }
+
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 

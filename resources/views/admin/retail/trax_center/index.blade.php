@@ -29,6 +29,7 @@
                         <th class="border-primary border-darken-1">Store Code</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Discount</th>
+                        <th class="border-primary border-darken-1">Insurance</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -74,6 +75,13 @@
                         </div>
                         <div class="form-group">
                             <input type="text" name="long" id="long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required">
+                        </div>
+                        <div class="input-group mb-2">
+                            <input type="text" name="insurance" id="insurance" class="form-control insurance" placeholder="Insurance*"  value="" max="100" min="1"
+                                   data-rule-required="true" data-msg-required="Insurance is required">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">%</span>
+                            </div>
                         </div>
                         <div class="input-group mb-3">
                             <input type="text" name="discount" id="discount" class="form-control discount" placeholder="Discount"  value="" max="100">
@@ -122,6 +130,13 @@
                         </div>
                         <div class="form-group">
                             <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
+                        </div>
+                        <div class="input-group mb-2">
+                            <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
+                                   data-rule-required="true" data-msg-required="Insurance is required" min="1">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">%</span>
+                            </div>
                         </div>
                         <div class="input-group mb-3">
                             <input type="text" name="discount" id="edit_discount" class="form-control edit_discount" placeholder="Discount"  value="" max="100">
@@ -234,6 +249,7 @@
                             head.push('Status');
                             head.push('Store Code');
                             head.push('Discount');
+                            head.push('Insurance');
 
 
                             $.each(result.data, function(index, values) {
@@ -251,6 +267,7 @@
                                 row.push(values.status);
                                 row.push(values.code);
                                 row.push(values.discount);
+                                row.push(values.insurance);
                                 body.push(row);
                             });
                         },
@@ -308,6 +325,7 @@
                     { data:'code' ,name: 'retail_trax_centers.code', class: 'align-middle text-center code'},
                     { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
                     { data:'discount' ,name: 'discount', class: 'align-middle text-center discount', orderable: false, searchable: false},
+                    { data:'insurance' ,name: 'retail_trax_centers.insurance', class: 'align-middle text-center insurance', orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -415,6 +433,7 @@
                 var lat = table.row($(this).parents('tr')).data().location_latitude;
                 var long = table.row($(this).parents('tr')).data().location_longitude;
                 var discount = table.row($(this).parents('tr')).data().discount;
+                var insurance = table.row($(this).parents('tr')).data().insurance;
                 console.log(default_hub_id);
                 $('#trax_center_id').val(id);
                 $('#edit_name').val(name);
@@ -424,6 +443,7 @@
                 $('#edit_lat').val(lat);
                 $('#edit_long').val(long);
                 $('#edit_discount').val(discount);
+                $('#edit_insurance').val(insurance);
 
                 $('#edit_remarks_title').text('Edit Trax Center ' + name);
                 $('#edit_trax_center').modal('show');
@@ -435,6 +455,7 @@
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('.input-group'));
                 },
                 submitHandler: function(form) {
                     swal({
@@ -455,6 +476,7 @@
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('.input-group'));
                 },
                 submitHandler: function(form) {
                     swal({

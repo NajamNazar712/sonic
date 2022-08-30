@@ -12,14 +12,14 @@ use Illuminate\Http\Request;
 
 class RetailRatesCalculationController extends Controller
 {
-    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight,$cod = NULL){
+    static public function rates($shipping_mode_id, $business_category_id, $pickup_city_id, $destination_id, $trax_box_id, $discount, $weight,$insurance_amount,$packaging){
         if($discount == null || $discount == ''){
             $discount = 0;
         }
         else{
             $discount = round($discount / 100,2);
         }
-        
+       
         $charges = 0;
         $discount_amount = 0;
         $charges_with_discount = 0;
@@ -28,6 +28,7 @@ class RetailRatesCalculationController extends Controller
         $round_additional_weight = 0;
         $total_charges = 0;
         $gst_charges = 0;
+        $packaging_and_insurance_charges = 0;
 
        
         if($business_category_id == 1){
@@ -180,11 +181,9 @@ class RetailRatesCalculationController extends Controller
 
             $discount_amount = round($charges * $discount,2);
             $charges_with_discount = round($charges - $discount_amount,2);
+            $packaging_and_insurance_charges = $insurance_amount + $packaging;
+            $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
 
-            $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
-           /* if($cod != null){
-                $total_charges = $total_charges + intval($cod);
-            }*/
         }
         elseif ($business_category_id == 2){
 
@@ -217,11 +216,8 @@ class RetailRatesCalculationController extends Controller
 
                     $discount_amount = round($charges * $discount,2);
                     $charges_with_discount = round($charges - $discount_amount,2);
-
-                    $total_charges = round($charges_with_discount + $gst_charges,0,PHP_ROUND_HALF_UP);
-                   /* if($cod != null){
-                        $total_charges = $total_charges + intval($cod);
-                    }*/
+                    $packaging_and_insurance_charges = $insurance_amount + $packaging;
+                    $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
                     
                 }
             }
@@ -230,6 +226,7 @@ class RetailRatesCalculationController extends Controller
         $rates['discount_amount'] = $discount_amount;
         $rates['charges_with_discount'] = $charges_with_discount;
         $rates['gst_charges'] = $gst_charges;
+        $rates['packaging_and_insurance_charges'] = $packaging_and_insurance_charges;
         $rates['total_charges'] = $total_charges;
 
         return $rates;

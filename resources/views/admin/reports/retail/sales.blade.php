@@ -130,6 +130,12 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
+                        <th class="border-primary border-darken-1">Product Insurance Value</th>
+                        <th class="border-primary border-darken-1">Insurance %</th>
+                        <th class="border-primary border-darken-1">Insurance Charges</th>
+                        <th class="border-primary border-darken-1">Discount %</th>
+                        <th class="border-primary border-darken-1">Discount Amount</th>
+                        <th class="border-primary border-darken-1">Packaging Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
@@ -323,6 +329,12 @@
                             head.push('Actual Weight');
                             head.push('Weight Charges');
                             head.push('Fuel Surcharge');
+                            head.push('Product Insurance Value');
+                            head.push('Insurance %');
+                            head.push('Insurance Charges');
+                            head.push('Discount %');
+                            head.push('Discount Amount');
+                            head.push('Packaging Charges');
                             head.push('GST');
                             head.push('Total Charges');
                             head.push('Net Payable');
@@ -356,6 +368,12 @@
                                 row.push(values.actual_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.fuel_surcharge);
+                                row.push(values.product_value);
+                                row.push(values.insurance);
+                                row.push(values.insurance_charges);
+                                row.push(values.discount);
+                                row.push(values.discount_amount);
+                                row.push(values.packaging_charges);
                                 row.push(values.gst);
                                 row.push(values.total_charges);
                                 row.push(values.p_net_payable);
@@ -437,6 +455,12 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
+                    { data:'product_value' ,name: 'si.price', class: 'align-middle product_value'},
+                    { data:'insurance' ,name: 'insurance', class: 'align-middle insurance'},
+                    { data:'insurance_charges' ,name: 'rs.insurance_charges', class: 'align-middle insurance_charges'},
+                    { data:'discount' ,name: 'discount', class: 'align-middle discount'},
+                    { data:'discount_amount' ,name: 'rs.charges_with_discount', class: 'align-middle discount_amount'},
+                    { data:'packaging_charges' ,name: 'rs.packaging_charges', class: 'align-middle packaging_charges'},
                     { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
                     { data:'total_charges' ,name: 'rs.total_charges', class: 'align-middle total_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},

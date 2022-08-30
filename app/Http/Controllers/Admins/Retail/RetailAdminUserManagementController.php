@@ -83,7 +83,7 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
-            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at', 'retail_franchises.discount');
+            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at', 'retail_franchises.discount','retail_franchises.insurance');
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -170,6 +170,7 @@ class RetailAdminUserManagementController extends Controller
         $franchise->location_longitude = $request->long;
         $franchise->discount = $request->discount;
         $franchise->updated_by = Auth::id();
+        $franchise->insurance = $request->insurance;
         $franchise->status = 1;
         $franchise->save();
 
@@ -206,6 +207,7 @@ class RetailAdminUserManagementController extends Controller
             $franchise->location_latitude = $request->lat;
             $franchise->location_longitude = $request->long;
             $franchise->discount = $request->discount;
+            $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
@@ -244,7 +246,7 @@ class RetailAdminUserManagementController extends Controller
         }
         $trax_center = RetailTraxCenter::join('admins as a', 'a.id', '=', 'retail_trax_centers.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_trax_centers.default_hub')
-            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at', 'retail_trax_centers.updated_at','retail_trax_centers.discount');
+            ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at', 'retail_trax_centers.updated_at','retail_trax_centers.discount','retail_trax_centers.insurance');
 
         $datatables = Datatables::of($trax_center)
             ->editColumn('status', function ($data) {
@@ -325,6 +327,7 @@ class RetailAdminUserManagementController extends Controller
         $trax_center->location_latitude = $request->lat;
         $trax_center->location_longitude = $request->long;
         $trax_center->discount = $request->discount;
+        $trax_center->insurance = $request->insurance;
         $trax_center->updated_by = Auth::id();
         $trax_center->status = 1;
         $trax_center->save();
@@ -359,6 +362,7 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->location_latitude = $request->lat;
             $trax_center->location_longitude = $request->long;
             $trax_center->discount = $request->discount;
+            $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
