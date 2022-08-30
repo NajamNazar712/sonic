@@ -160,6 +160,10 @@
                             @endif
                         @endif
 
+                        @if (in_array(session('user_id'), [10358, 15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]))
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
+                        @endif
+
                     </ul>
                 </li>
             @endif
