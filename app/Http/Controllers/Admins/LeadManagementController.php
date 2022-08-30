@@ -482,12 +482,16 @@ class LeadManagementController extends Controller
         $leads['in_process_percentage'] = 0;
         $leads['dead_leads_percentage'] = 0;
         $leads['accounts_activated_percentage'] = 0;
+        $leads['in_process_for_activation_percentage'] = 0;
         if ($leads['total'] > 0) {
             if (is_numeric($leads['received'])) {
                 $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
             }
             if (is_numeric($leads['in_process'])) {
                 $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
+            }
+            if (is_numeric($leads['in_process_for_activation_percentage'])) {
+                $leads['in_process_for_activation_percentage'] = round(($leads['in_process_for_activation'] / $leads['total']) * 100, 2);
             }
             if (is_numeric($leads['dead_leads'])) {
                 $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
