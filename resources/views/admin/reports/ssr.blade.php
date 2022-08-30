@@ -392,13 +392,14 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
+
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.overall_sales.list') }}',
+                        url: '{{ route('admin.reports.ssr.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -470,7 +471,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url: '{{ route('admin.reports.overall_sales.list') }}',
+                    url: '{{ route('admin.reports.ssr.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
