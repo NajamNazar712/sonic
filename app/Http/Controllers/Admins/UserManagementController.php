@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\EmployeeShift;
@@ -488,11 +489,25 @@ class UserManagementController extends Controller
             {
                 ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
             }
-            $admin->role_id = $request->input('role_id');
+            $super_admins = [3, 6, 7, 665];
+            $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
+            if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
+                $admin->role_id = $request->input('role_id');
+                $admin->designation_id = $request->input('designation_id');
+            }
+            else{
+                if(!in_array($request->input('role_id'), $hr_roles)){
+                    $admin->role_id = $request->input('role_id');
+                    $admin->designation_id = $request->input('designation_id');
+                }
+                else{
+                    $role = AdminRole::find($request->input('role_id'));
+                    NotificationsController::send(186, Auth::id(), $role->name);
+                }
+            }
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
             $admin->shift_id = $request->input('shift_id');
-            $admin->designation_id = $request->input('designation_id');
 
             if ($request->filled('pin')) {
                 $admin->password = bcrypt($request->input('pin'));

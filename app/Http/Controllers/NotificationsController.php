@@ -9622,6 +9622,21 @@ else if ($id == 178) {
                     }
                 }
 
+                else if ($id == 186) {
+                    $role = $reference_2_id;
+                    $admin = Admin::find($reference_1_id);
+                    if($admin && $role){
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[role]') !== FALSE) {
+                            $body = str_replace('[role]', $role, $body);
+                        }
+                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
+                        self::email($subject, $body, $to);
+                    }
+                }
+
             }
         }
     }
