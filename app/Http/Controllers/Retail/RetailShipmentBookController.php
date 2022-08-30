@@ -795,6 +795,7 @@ class RetailShipmentBookController extends Controller
                       </tr>
                 ';
                     $gst = $shipment->retail->gst;
+                    $packaging_and_insurance = $shipment->retail->packaging_charges + $shipment->retail->insurance_charges;
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
@@ -804,7 +805,8 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="color primary"><strong>Discount</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
-                                <td colspan="3" class="color primary border twice-right"><strong>Total Charges</strong></td>
+                                <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
+                                <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
@@ -814,7 +816,8 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
-                                <td colspan="3" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
+                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){

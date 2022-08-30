@@ -1097,6 +1097,7 @@
                 else{
                     destination = $('#international_destination').val();
                 }
+
                 
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
@@ -1105,6 +1106,22 @@
                  height = $('#height').val();
                  insurance = $('#insurance_amount').val();
                  packaging = $('#packaging_amount').val();
+
+
+                 if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
+                     var error = 'Insurance Amount is required';
+                     toastr.error(error, 'Error!', {
+                         positionClass: 'toast-top-center',
+                         containerId: 'toast-top-center'
+                     });
+                 }
+                 else if($('#insurance_offered').val() == '' || $('#insurance_offered').val() == null){
+                     var error = 'Select option for insurance';
+                     toastr.error(error, 'Error!', {
+                         positionClass: 'toast-top-center',
+                         containerId: 'toast-top-center'
+                     });
+                 }
 
                 if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
                     if(shipping_mode_id == 5 && trax_box == ''){
