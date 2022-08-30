@@ -177,8 +177,8 @@
                             head.push('Product Type');
                             head.push('Status');
                             head.push('Sales Person Tagged');
-                            head.push('Activation Date');
-                            head.push('Disabled Date');
+                            head.push('Account Activation Date');
+                            head.push('Account Disabled Date');
                             head.push('Segment');
 
 
