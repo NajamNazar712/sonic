@@ -22,7 +22,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Activation Date From" data-rule-required="true" data-msg-required="Date(From) is required">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -32,7 +32,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Activation Date To" data-rule-required="true" data-msg-required="Date(To) is required">
                                 </div>
                             </div>
 
@@ -59,8 +59,8 @@
                             <th class="border-primary border-darken-1">Product Type</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Sales Person Tagged</th>
-                            <th class="border-primary border-darken-1">Activation Date</th>
-                            <th class="border-primary border-darken-1">Disabled Date</th>
+                            <th class="border-primary border-darken-1">Account Activation Date</th>
+                            <th class="border-primary border-darken-1">Account Disabled Date</th>
                             <th class="border-primary border-darken-1">Segment</th>
 
 
@@ -121,9 +121,6 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_root').css('top','40px');
-                },
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
@@ -138,9 +135,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
-                },
+                max: '{{ Carbon\Carbon::now() }}',
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));

@@ -379,6 +379,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                max: '{{ Carbon\Carbon::now() }}',
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
