@@ -3026,7 +3026,7 @@ class NotificationsController extends Controller
                 } else if ($id == 35) {
                     $shipment = Shipment::find($reference_1_id);
                     //yep sms
-                    if($shipment->user_id == 12613){
+                    if($shipment->user_id == 10411){
                         $body = 'Your YAP Debit card has been successfully delivered.'. PHP_EOL .' Thankyou';
                         $to = $shipment->consignee_phone_number_1;
                         self::sms($body, $to);
@@ -7637,7 +7637,7 @@ class NotificationsController extends Controller
                     $shipment = Shipment::find($reference_2_id);
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
                     //yap sms
-                    if($shipment->user_id == 12613){
+                    if($shipment->user_id == 10411){
                         $refusal_otp= '';
                         $rider= '';
                         if ($shipment_otp->exists()) {
@@ -9149,7 +9149,7 @@ class NotificationsController extends Controller
                     $shipment_id = $reference_1_id;
                     $shipment = Shipment::find($shipment_id);
                     //yep sms
-                    if($shipment->user_id == 12613){
+                    if($shipment->user_id == 10411){
                         $body = 'Your YAP Debit Card is marked for return. Reply with TRAX YES '.$shipment->tracking_number.' to receive it or TRAX NO '.$shipment->tracking_number.' to return';
                         $to = $shipment->consignee_phone_number_1;
                         $data = array($body, $to);
