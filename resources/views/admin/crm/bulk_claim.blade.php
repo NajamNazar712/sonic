@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Bluk Claim Logging')
+@section('title', 'Bulk Claim Logging')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Bluk Claim Logging
+                    Bulk Claim Logging
                 </h1>
 
                 <div class="card">
@@ -97,7 +97,7 @@
                 paging:false,
                 autoWidth:false,
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                    {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
                     {name: 'claim_type', class: 'align-middle claim_type', orderable: false, searchable: false},
                     {name: 'channel', class: 'align-middle channel', orderable: false, searchable: false},
@@ -128,33 +128,6 @@
             });
 
             
-
-            // var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
-            //     obj.id = obj.id;
-            //     obj.text = obj.name;
-
-            //     return obj;
-            // });
-            // $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
-            //     data:case_nature_type_data,
-            //     placeholder: "Select Claim Type",
-            //     width: '100%',
-            //     containerCssClass: 'select-xs',
-            //     dropdownCssClass: 'form-control-sm p-0'
-            // });
-            // var channel_data = $.map({!! $channels !!}, function (obj) {
-            //     obj.id = obj.id;
-            //     obj.text = obj.name;
-
-            //     return obj;
-            // });
-            // $(".channel_id").prepend('<option value="" selected></option>').select2({
-            //     data:channel_data,
-            //     placeholder: "Select Channel",
-            //     width: '100%',
-            //     containerCssClass: 'select-xs',
-            //     dropdownCssClass: 'form-control-sm p-0'
-            // });
 
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
@@ -204,36 +177,12 @@
                                         var rowNo = table.rows().count();
                                         
                                         var case_nature_type = '<div class="form-group"><select name="case_nature_type_id['+id+']" id="case_nature_type_id_'+id+'" class="case_nature_type_id select2 form-control" data-rule-required="true" data-msg-required="This field is required"></select></div>';
-                                        // var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
-                                        //     obj.id = obj.id;
-                                        //     obj.text = obj.name;
-
-                                        //     return obj;
-                                        // });
-                                        // $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
-                                        //     data:case_nature_type_data,
-                                        //     placeholder: "Select Claim Type",
-                                        //     width: '100%',
-                                        //     containerCssClass: 'select-xs',
-                                        //     dropdownCssClass: 'form-control-sm p-0'
-                                        // });
+                                        
 
                                         var channel = '<div class="form-group"> <select name="channel_id['+id+']" id="channel_id_'+id+'" class="channel_id select2 form-control" data-rule-required="true" data-msg-required="This field is required"></select></div>';
-                                        // var channel_data = $.map({!! $channels !!}, function (obj) {
-                                        //     obj.id = obj.id;
-                                        //     obj.text = obj.name;
+                                       
 
-                                        //     return obj;
-                                        // });
-                                        // $(".channel_id").prepend('<option value="" selected></option>').select2({
-                                        //     data:channel_data,
-                                        //     placeholder: "Select Channel",
-                                        //     width: '100%',
-                                        //     containerCssClass: 'select-xs',
-                                        //     dropdownCssClass: 'form-control-sm p-0'
-                                        // });
-
-                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" id="claim_product_cost" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>', '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']"  data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>', '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']"  data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
@@ -343,49 +292,7 @@
 
                 }
             });
-            // $('#bulk_claim_submit').bind('submit', function(e) {
-            //     e.preventDefault();
-
-            //     $('#bulk_claim_submit input.shipment_ids').val(shipment_ids);
-
-            //     var form = this;
-                
-            //         swal({
-            //             text: 'Are you sure, you want to Receive these Shipments?',
-            //             icon: 'warning',
-            //             buttons: {
-            //                 cancel: {
-            //                     text: 'No',
-            //                     value: null,
-            //                     visible: true,
-            //                     closeModal: true,
-            //                 },
-            //                 confirm: {
-            //                     text: 'Yes',
-            //                     value: true,
-            //                     visible: true,
-            //                     closeModal: true
-            //                 }
-            //             },
-            //             closeOnClickOutside: false,
-            //             closeOnEsc: false,
-            //             dangerMode: true
-            //         }).then(function(confirm) {
-            //             if (confirm) {
-            //                 swal({
-            //                     title: 'Please Wait!',
-            //                     text: 'Shipments are being marked arrived!',
-            //                     icon: 'info',
-            //                     buttons: false,
-            //                     closeOnClickOutside: false,
-            //                     closeOnEsc: false
-            //                 });
-            //                 blockPagePermanently();
-            //                 form.submit();
-            //             }
-            //         });
-
-            // });
+            
 
 
             $('#datatable tbody').on('click', 'tr td.remove button', function() {

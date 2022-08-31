@@ -5079,9 +5079,10 @@ class AdminCRMController extends Controller
     public function bulk_claim_submit(Request $request){
         
         $shipment_ids = explode(',', $request->shipment_ids);
+        $present_shipments = [];
+
         foreach ($shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
-            $present_shipments = [];
             if($shipment){
                 $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
                 $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',4)->first();
@@ -5096,14 +5097,15 @@ class AdminCRMController extends Controller
                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                     // return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                 }
-                if(count($present_shipments) > 0){
-                    return redirect()->back()->with('success', 'Request(s) successfully added. Request againts these shipment already exits '.implode(',', $present_shipments));
-                }else{
-                    return redirect()->back()->with('success', 'Request(s) successfully added');
-                }
+                
 
             }
         
+        }
+        if(count($present_shipments) > 0){
+            return redirect()->back()->with('success', 'Request(s) successfully added. Request againts these shipment already exits '.implode(',', $present_shipments));
+        }else{
+            return redirect()->back()->with('success', 'Request(s) successfully added');
         }
     }
 }
