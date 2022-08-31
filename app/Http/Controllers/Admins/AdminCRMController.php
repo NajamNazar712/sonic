@@ -5050,6 +5050,8 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_claim_index(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),585);
         $case_nature_type = CrmRequestCaseNatureType::where('nature_id',4)->select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         return view('admin.crm.bulk_claim')->with(['case_nature_type' => $case_nature_type, 'channels' => $channels]);

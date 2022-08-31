@@ -182,7 +182,7 @@
                                         var channel = '<div class="form-group"> <select name="channel_id['+id+']" id="channel_id_'+id+'" class="channel_id select2 form-control" data-rule-required="true" data-msg-required="This field is required"></select></div>';
                                        
 
-                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>', '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']"  data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>', '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']" id="product_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" id="invoice_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
@@ -197,6 +197,17 @@
                                             width: '100%',
                                             containerCssClass: 'select-xs',
                                             dropdownCssClass: 'form-control-sm p-0'
+                                        }).bind('change', function () {
+                                            var id = parseInt($(this).val());
+                                            var shipment_id = this.id.slice(20);
+                                            if(id == 26){
+                                                $('#invoice_picture_'+shipment_id).data('rule-required',false);
+                                                $('#product_picture_'+shipment_id).data('rule-required',false);
+                                                
+                                            }else{
+                                                $('#invoice_picture_'+shipment_id).data('rule-required',true);
+                                                $('#product_picture_'+shipment_id).data('rule-required',true);
+                                            }
                                         });
                                         var channel_data = $.map({!! $channels !!}, function (obj) {
                                             obj.id = obj.id;
