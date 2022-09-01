@@ -73,6 +73,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="https://sonic.test/app-assets/vendors/css/forms/selects/select2.min.css">
+    <style>
+        .table{
+            margin-bottom: 0;
+        }
+    </style>
 @endsection
 
 @section('js')
