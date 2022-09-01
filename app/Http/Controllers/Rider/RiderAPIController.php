@@ -1500,6 +1500,7 @@ class RiderAPIController extends Controller
 
     public function pickup_pick_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
@@ -1621,6 +1622,7 @@ class RiderAPIController extends Controller
 
     public function pickup_not_pick_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
@@ -1756,6 +1758,7 @@ class RiderAPIController extends Controller
 
     public function pickup_check_tracking_number(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'tracking_number' => ['required']
         ];
@@ -2003,6 +2006,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'name' => ['required'],
@@ -2180,7 +2184,7 @@ class RiderAPIController extends Controller
 
     public function cities(Request $request)
     {
-
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $cities = City::where('status', 1)->where('business_category_id', 1);
 
         if ($cities->exists()) {
@@ -4283,6 +4287,7 @@ class RiderAPIController extends Controller
 
     public function mark_attendance(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required'],
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
@@ -4376,6 +4381,7 @@ class RiderAPIController extends Controller
 
     public function attendance_details(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required']
         ];
@@ -4402,6 +4408,7 @@ class RiderAPIController extends Controller
 
     public function attendance_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'from_date' => ['required'],
             'to_date' => ['nullable']
@@ -4487,6 +4494,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
@@ -4700,6 +4708,7 @@ class RiderAPIController extends Controller
 
     public function rider_attachments_store(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
@@ -7429,6 +7438,7 @@ class RiderAPIController extends Controller
 
     public function rider_incentive(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $date = $request->get('date');
         $rider_incentives = DB::table('riders_incentives')
@@ -8370,6 +8380,7 @@ class RiderAPIController extends Controller
 
     public function rider_incentive_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
@@ -9147,6 +9158,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup_v3(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
@@ -9437,6 +9449,7 @@ class RiderAPIController extends Controller
 
     public function month_attendance_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'first_day' => ['required'],
             'last_day' => ['required'],
@@ -9509,6 +9522,7 @@ class RiderAPIController extends Controller
 
     public function mark_attendance_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required'],
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
@@ -10094,6 +10108,7 @@ class RiderAPIController extends Controller
 
     public function get_rider_location_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
@@ -10480,6 +10495,7 @@ class RiderAPIController extends Controller
     }
 
     public function leave_index(Request $request){
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $employee_id = $request->rider_employee;
         $employee = Employee::find($employee_id);
         if($employee){
@@ -10501,6 +10517,7 @@ class RiderAPIController extends Controller
 
     public function leave_apply(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'from' => ['required'],
             'to' => ['nullable'],
@@ -10559,6 +10576,7 @@ class RiderAPIController extends Controller
 
     public function employee_leave_list(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
@@ -10726,6 +10744,7 @@ class RiderAPIController extends Controller
 
     public function check_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
             ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
@@ -10744,6 +10763,7 @@ class RiderAPIController extends Controller
 
     public function get_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $blood_group_list = EmployeeBloodGroup::all();
         $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
@@ -10760,6 +10780,7 @@ class RiderAPIController extends Controller
 
     public function update_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
@@ -10788,6 +10809,7 @@ class RiderAPIController extends Controller
     }
 
     public function check_pin(Request $request){
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider){
@@ -10815,6 +10837,7 @@ class RiderAPIController extends Controller
 
     public function check_profile_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider){
