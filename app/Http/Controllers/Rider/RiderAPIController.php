@@ -852,6 +852,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_note = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0);
@@ -1050,6 +1051,7 @@ class RiderAPIController extends Controller
 
     public function delivery_action_log(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
@@ -1084,6 +1086,7 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
 
         $rules = [
@@ -1285,7 +1288,7 @@ class RiderAPIController extends Controller
 
     public function shipment_undelivered(Request $request)
     {
-
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
@@ -1818,6 +1821,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -3919,6 +3923,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -4910,7 +4915,7 @@ class RiderAPIController extends Controller
 
     public function login_v2(Request $request)
     {
-        return response()->json(['status' => 1, 'message' => 'Invalid Please Update Your Bolt App']);
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
     }
 
     public function notification_history(Request $request)
@@ -6810,6 +6815,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple_v3(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -7202,6 +7208,7 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
         $rules = [
             'added_at' => ['required'],
@@ -7711,6 +7718,7 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v3(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
         $rules = [
             'added_at' => ['required'],
