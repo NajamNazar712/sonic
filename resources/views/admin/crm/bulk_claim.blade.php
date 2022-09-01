@@ -209,8 +209,6 @@
                                         }).bind('change', function () {
                                             var id = parseInt($(this).val());
                                             var shipment_id = this.id.slice(20);
-                                            // console.log('changed');
-                                            // console.log($('#receiving_sheet_id_'+shipment_id));
                                             $('#receiving_sheet_id_'+shipment_id).empty().trigger('change');
                                             if(id == 26){
                                                 $('#invoice_picture_'+shipment_id).data('rule-required',false);
@@ -218,6 +216,7 @@
                                                 
                                             }else{
                                                 if(id == 23){
+                                                    
 
                                                     $.ajax({
                                                         url: '{!! route('admin.crm.request.lost.claim') !!}',
@@ -227,9 +226,11 @@
                                                             'shipment_id': shipment_id,
                                                         }
                                                     }).done(function (data) {
-                                                        if(data.status==1){
+                                                        if(data.status == 1){
                                                             var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                                                            $('#receiving_sheet_id_'+shipment_id).empty().trigger('change');
                                                             $('#receiving_sheet_id_'+shipment_id).append(newOption).trigger('change');
+                                                            $('#receiving_sheet_id_'+shipment_id).prepend('<option value="" selected></option>').trigger('change');
                                                         }
                                                     });
                                                     
@@ -261,7 +262,6 @@
                                         shipment_ids.push(data.details.id);
 
                                         $('#add_shipment_form button.add').prop('disabled', false);
-                                        console.log('enabled');
                                         $('#bulk_claim_submit button.confirm').prop('disabled', false);
 
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
