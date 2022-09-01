@@ -205,13 +205,13 @@
 
                                             return obj;
                                         });
-                                        $(".receiving_sheet_id").prepend('<option value="" selected></option>').select2({
+                                        $("#receiving_sheet_id_"+id).prepend('<option value="" selected></option>').select2({
                                             placeholder: "Select Receiving Sheet ID",
                                             width: '100%',
                                             containerCssClass: 'select-xs',
                                             dropdownCssClass: 'form-control-sm p-0'
                                         });
-                                        $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
+                                        $("#case_nature_type_id_"+id).prepend('<option value="" selected></option>').select2({
                                             data:case_nature_type_data,
                                             placeholder: "Select Claim Type",
                                             width: '100%',
@@ -253,7 +253,7 @@
 
                                             return obj;
                                         });
-                                        $(".channel_id").prepend('<option value="" selected></option>').select2({
+                                        $("#channel_id_"+id).prepend('<option value="" selected></option>').select2({
                                             data:channel_data,
                                             placeholder: "Select Channel",
                                             width: '100%',
@@ -267,7 +267,7 @@
                                             'rightAlign': false,
                                             'digits': 2,
                                             'min': 0.00,
-                                            'max': 100000.00
+                                            'max': 1000000.00
                                         });
                                         table.columns.adjust();
                                         scan_sound(1);
