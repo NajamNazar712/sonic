@@ -118,6 +118,7 @@
                     });
 
                     this.api().table().columns.adjust();
+
                 }
             });
 
@@ -186,7 +187,7 @@
                                        
 
                                         table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>',receiving_sheet, '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']" id="product_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" id="invoice_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
-                                        table.draw(false);
+                                        // table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
                                             obj.id = obj.id;
@@ -253,9 +254,13 @@
                                             dropdownCssClass: 'form-control-sm p-0'
                                         });
                                         $('.claim_product_cost').inputmask({
-                                            'alias': 'integer',
+                                            'alias': 'decimal',
                                             'allowMinus': false,
-                                            'allowPlus': false
+                                            'allowPlus': false,
+                                            'rightAlign': false,
+                                            'digits': 2,
+                                            'min': 0.00,
+                                            'max': 100000.00
                                         });
                                         table.columns.adjust();
                                         scan_sound(1);
@@ -338,7 +343,14 @@
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
-                table.row(parent).remove();
+                // table.row( $(this).parents('tr') ).remove().draw();
+                table.row(parent).remove().draw();
+                var counter = table.rows().count();
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    
+                    $(row.node()).find('td.serial_number').text(counter--);
+                });
                 table.draw(false);
                 var index = $.inArray(id, shipment_ids);
                 if (index !== -1) {
@@ -349,7 +361,7 @@
                     }
                 }
 
-                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                toastr.success('Success', 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
             });
 
 

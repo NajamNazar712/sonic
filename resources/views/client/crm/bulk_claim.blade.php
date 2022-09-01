@@ -261,9 +261,13 @@
                                             dropdownCssClass: 'form-control-sm p-0'
                                         });
                                         $('.claim_product_cost').inputmask({
-                                            'alias': 'integer',
+                                            'alias': 'decimal',
                                             'allowMinus': false,
-                                            'allowPlus': false
+                                            'allowPlus': false,
+                                            'rightAlign': false,
+                                            'digits': 2,
+                                            'min': 0.00,
+                                            'max': 100000.00
                                         });
                                         table.columns.adjust();
                                         scan_sound(1);
@@ -346,7 +350,14 @@
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
-                table.row(parent).remove();
+                // table.row( $(this).parents('tr') ).remove().draw();
+                table.row(parent).remove().draw();
+                var counter = table.rows().count();
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    
+                    $(row.node()).find('td.serial_number').text(counter--);
+                });
                 table.draw(false);
                 var index = $.inArray(id, shipment_ids);
                 if (index !== -1) {
@@ -357,7 +368,7 @@
                     }
                 }
 
-                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                toastr.success('Success', 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
             });
 
 
