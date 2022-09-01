@@ -209,8 +209,8 @@
                                         }).bind('change', function () {
                                             var id = parseInt($(this).val());
                                             var shipment_id = this.id.slice(20);
-                                            console.log('changed');
-                                            console.log($('#receiving_sheet_id_'+shipment_id));
+                                            // console.log('changed');
+                                            // console.log($('#receiving_sheet_id_'+shipment_id));
                                             $('#receiving_sheet_id_'+shipment_id).empty().trigger('change');
                                             if(id == 26){
                                                 $('#invoice_picture_'+shipment_id).data('rule-required',false);
