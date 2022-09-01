@@ -100,11 +100,14 @@ Route::name('api.')->group(function () {
 
 
 	Route::prefix('rider')->name('rider.')->group(function() {
-		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
+		//Obsoleted
+	    Route::post('login', 'Rider\RiderAPIController@login')->name('login');
         Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
         Route::post('login_v3', 'Rider\RiderAPIController@login_v2')->name('login_v3');
+
         Route::post('login_v4', 'Rider\RiderAPIController@login_v4')->name('login_v4');
         Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
+
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
@@ -113,6 +116,7 @@ Route::name('api.')->group(function () {
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
         Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
+
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'Rider\RiderAPIController@validate_cnic_phone_number')->name('validate_data');

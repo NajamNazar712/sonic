@@ -2372,6 +2372,7 @@ class RiderAPIController extends Controller
 
     public function return_summary_multiple(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
@@ -2543,6 +2544,7 @@ class RiderAPIController extends Controller
 
     public function return_shipment_delivered(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -2688,7 +2690,7 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered(Request $request)
     {
-
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -3757,7 +3759,7 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v2(Request $request)
     {
-
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -4939,7 +4941,7 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v3(Request $request)
     {
-
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
