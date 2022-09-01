@@ -489,7 +489,7 @@ class UserManagementController extends Controller
             {
                 ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
             }
-            $super_admins = [3, 6, 7, 665];
+            $super_admins = [3, 5, 7, 665];
             $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
             if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
                 $admin->role_id = $request->input('role_id');

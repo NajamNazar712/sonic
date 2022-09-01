@@ -1278,7 +1278,7 @@ class AdminHumanResourseController extends Controller
             'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
         ]);
 
-        $super_admins = [3, 6, 665];
+        $super_admins = [3, 5, 7, 665];
         $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
         $role_flag = false;
         if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
