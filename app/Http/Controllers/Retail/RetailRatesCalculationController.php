@@ -19,7 +19,7 @@ class RetailRatesCalculationController extends Controller
         else{
             $discount = round($discount / 100,2);
         }
-       
+
         $charges = 0;
         $discount_amount = 0;
         $charges_with_discount = 0;

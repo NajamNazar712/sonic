@@ -1743,7 +1743,9 @@ class RetailShipmentBookController extends Controller
             'consignee_cnic' => 'Consignee CNIC',
             'consignee_address' => 'Consignee Address',
             'order_id' => 'Order ID',
-//            'insurance_offered' => 'Insurance Offered',
+            'insurance_offered' => 'Insurance Offered',
+            'insurance_value' => 'Insurance Value',
+            'packaging_charges' => 'Packaging Charges',
             'trax_box_id' => 'Trax Box ID',
         /*    'weight_charges' => 'Weight Charges',
             'fuel_surcharge' => 'Fuel Surcharge',*/
@@ -1794,7 +1796,9 @@ class RetailShipmentBookController extends Controller
             'consignee_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'consignee_address' => ['required', 'between:1,255'],
             'order_id' => ['nullable'],
-//            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'insurance_offered' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'insurance_value' => ['required_if:insurance_offered,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'packaging_charges' => ['nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
             'trax_box_id' => ['required_if:shipping_mode_id,5', 'nullable', 'integer', Rule::exists('retail_trax_boxes', 'id')],
           /*  'weight_charges' => ['required', 'numeric'],
             'fuel_surcharge' => ['required', 'numeric'],*/
@@ -1812,8 +1816,8 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'iban_number', 23 => 'account_number', 24 => 'bank_id', 25 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 26){
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+            if (count($spreadsheet[0]) != 29){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -1860,12 +1864,22 @@ class RetailShipmentBookController extends Controller
                 }
 
                 $rows[$key]['pieces'] = $row['pieces'];
+                $rows[$key]['packaging_charges'] = $row['packaging_charges'];
 
                 if(!isset($row['insurance_offered']) || $row['insurance_offered'] == null){
-                    $row['insurance_offered'] = 'no';
+                    //$row['insurance_offered'] = 'no';
+                    $errors[$row_id]['insurance_offered'] = 'Select option for insurance as yes/no';
                 }
 
                 $rows[$key]['insurance_offered'] = $row['insurance_offered'];
+
+                if(in_array($row['insurance_offered'],['YES','YEs','YeS','Yes','yES','yEs','yeS','yes']) && !isset($row['insurance_value'])){
+                    $errors[$row_id]['insurance_value'] = 'Insurance value is required';
+                }
+                else{
+                    $rows[$key]['insurance_value'] = $row['insurance_value'];
+                }
+
 
                 $validate = Validator::make($row, $rules, $messages);
 

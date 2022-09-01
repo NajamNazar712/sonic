@@ -55,6 +55,8 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
         $business_category_id = $this->booking['business_category_id'];
+        $packaging_charges = 0;
+
 
         $consignee_name = $this->booking['consignee_name'];
         $trax_box_id = $this->booking['trax_box_id'];
@@ -67,14 +69,14 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $special_instructions = $this->booking['special_instruction'];
         $city_id = City::where('name', $this->booking['destination'])->first()->id;
 
-        $discount = 0;
-        //dd($category);
         if($category == 1){
-            $discount = RetailFranchise::find($category_id)->discount;
+            $retail = RetailFranchise::find($category_id);
         }
         else{
-            $discount = RetailTraxCenter::find($category_id)->discount;
+            $retail = RetailTraxCenter::find($category_id);
         }
+
+        $discount = $retail->discount;
 
         $shipping_mode_check = $this->booking['shipping_mode_id'];
         if ($shipping_mode_check == 1) {
@@ -129,8 +131,32 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             $height = null;
         }
 
+        if (strtolower($this->booking['insurance_offered']) == 'yes') {
+            $price = str_replace(',', '', $this->booking['insurance_value']);
 
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $trax_box_id, $discount, $estimated_weight);
+            $insurance = TRUE;
+        }
+        else {
+            $price = NULL;
+            $insurance = FALSE;
+        }
+
+        $type = 0;
+
+        if(isset($this->booking['packaging_charges'])){
+            $packaging_charges = str_replace(',', '', $this->booking['packaging_charges']);
+        }
+
+        $insurance_amount = 0;
+        if(isset($this->booking['insurance_value'])){
+            $insurance_amount = str_replace(',', '', $this->booking['insurance_value']);
+        }
+
+        if($insurance_amount > 0 ){
+            $insurance_amount = round($insurance_amount * $retail->insurance / 100,2);
+        }
+
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $trax_box_id, $discount, $estimated_weight,$insurance_amount,$packaging_charges);
 
         $charges_mode_id = $this->booking['charges_mode_id'];
 //        if($shipping_mode_check == 3){
@@ -164,16 +190,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
 
         $item_quantity = 1;
 
-//        if (strtolower($this->booking['insurance_offered']) == 'yes') {
-//            $price = str_replace(',', '', $this->booking['insurance_amount']);
-//            $insurance = TRUE;
-//        }
-//        else {
-            $price = NULL;
-            $insurance = FALSE;
-//        }
 
-        $type = 0;
 
         RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
 
@@ -247,6 +264,8 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
         $retail_shipment->weight_charges = $rates['charges'];
         $retail_shipment->discount = $rates['discount_amount'];
+        $retail_shipment->insurance_charges = $insurance_amount;
+        $retail_shipment->packaging_charges = $packaging_charges;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;

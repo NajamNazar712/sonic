@@ -1114,6 +1114,7 @@
                          positionClass: 'toast-top-center',
                          containerId: 'toast-top-center'
                      });
+                     return false;
                  }
                  else if($('#insurance_offered').val() == '' || $('#insurance_offered').val() == null){
                      var error = 'Select option for insurance';
@@ -1121,6 +1122,7 @@
                          positionClass: 'toast-top-center',
                          containerId: 'toast-top-center'
                      });
+                     return false;
                  }
 
                 if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
@@ -1130,6 +1132,7 @@
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                        return false;
                     }
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',

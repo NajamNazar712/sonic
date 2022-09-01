@@ -41,6 +41,9 @@
                                         <th>Consignee CNIC</th>
                                         <th>Consignee Address</th>
                                         <th>Order ID</th>
+                                        <th>Insurance Offered</th>
+                                        <th>Insurance Value</th>
+                                        <th>Packaging Charges</th>
                                         <th>Trax Box ID</th>
                                       {{--  <th>Weight Charges</th>
                                         <th>Fuel Surcharge</th>--}}
@@ -171,6 +174,21 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
+                                            @if(isset($errors[$no]['insurance_offered']))
+                                                <td>{!! Form::select('form[' . $no . '][insurance_offered]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control insurance_offered is-invalid select2','id'=>'insurance_offered','placeholder' => '']) !!}<font color="red">{{$errors[$no]['insurance_offered']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][insurance_offered]', $ro['insurance_offered'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['insurance_value']))
+                                                <td>{!! Form::text('form[' . $no . '][insurance_value]', $ro['insurance_value'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['insurance_value']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][insurance_value]', $ro['insurance_value'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                                @if(isset($errors[$no]['packaging_charges']))
+                                                    <td>{!! Form::text('form[' . $no . '][packaging_charges]', $ro['packaging_charges'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['packaging_charges']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][packaging_charges]', $ro['packaging_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @if(isset($errors[$no]['trax_box_id']))
                                                 <td>{!! Form::select('form[' . $no . '][trax_box_id]',$trax_boxes ,null,['class' => 'form-control is-invalid trax_box_id select2','id'=>'trax_box_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['trax_box_id']}}</font></td>
                                             @else
@@ -262,6 +280,10 @@
             $('.volumetric_weight').select2({
                 width: '100%',
                 placeholder: 'Volumetric Weight'
+            });
+            $('.insurance_offered').select2({
+                width: '100%',
+                placeholder: 'Insurance Offered'
             });
             $('.payment_mode_id').select2({
                 width: '100%',
