@@ -9567,6 +9567,40 @@ else if ($id == 178) {
                     }
 
                 }
+                else if ($id == 183) {
+                    $detail = $reference_1_id;
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $detail['tracking_number'], $body);
+                    }
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]', $detail['name'], $body);
+                    }
+                    if (strpos($body, '[shipper]') !== FALSE) {
+                        $body = str_replace('[shipper]', $detail['shipper_name'], $body);
+                    }
+                    $to = $detail['shipper_number_1'];
+                    self::sms($body, $to);
+                    if ($detail['shipper_number_2'] != NULL) {
+                        $to = $detail['shipper_number_2'];
+                        self::sms($body, $to);
+                    }
+                }
+                else if ($id == 184) {
+                    $detail = $reference_1_id;
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]', $detail['name'], $body);
+                    }
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $detail['tracking_number'], $body);
+                    }
+                    $to = $detail['consignee_number_1'];
+                    self::sms($body, $to);
+                    if ($detail['consignee_number_2'] != NULL) {
+                        $to = $detail['consignee_number_2'];
+                        self::sms($body, $to);
+                    }
+                }
+
             }
         }
     }

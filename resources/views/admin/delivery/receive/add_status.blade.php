@@ -57,7 +57,7 @@
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1" width="250">CNIC</th>
-                            <th class="border-primary border-darken-1" width="250">Relation</th>
+                            <th class="border-primary border-darken-1">Relation</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Open Box</th>
@@ -855,6 +855,10 @@
                                 width:'100%'
                             });
                         }
+                        $("#relationDrop_"+value.shId).prepend('<option value="" selected="selected"></option>').select2({
+                            placeholder: "Select a Relation",
+                            width:'100%'
+                        });
                         if(shipment_status.length !== 0){
                             $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
                         }
@@ -1159,8 +1163,10 @@
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
+                var relation = $(this).parents().closest('tr').find('.relationDrop');
                 status.val('').trigger("change");
                 reason.val('').trigger("change");
+                relation.val('').trigger("change");
                 $('.remarks input').val('');
             });
             $('#status_update_form').on('keypress',function (e) {
@@ -1854,7 +1860,7 @@
                                             if (amount == 0) {
                                                 var receiver_name = $(row.node()).find('td.received_or_refused_by input').val();
                                                 var cnic_input = $(row.node()).find('td.cnic input').val();
-                                                var relation_input = $(row.node()).find('td.relation input').val();
+                                                var relation_input = $(row.node()).find('td.relation select').val();
                                                 if ($.trim(receiver_name) == '' || $.trim(cnic_input) == '' || $.trim(relation_input) == '') {
                                                     not_updated_shipments.push($(row.node()).find('td.tracking_number').text());
                                                     submit_all_status_flag = false;

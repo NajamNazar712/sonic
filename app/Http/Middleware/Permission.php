@@ -58,6 +58,8 @@ class Permission
             'daily_visit.store' => 265,
             'daily_visit.business_card' => 264,
             'daily_visit.location_photo' => 264,
+            'daily_visit.screen.index' => 791,
+            'daily_visit.screen.edit' => 792,
 
 
             'pickups.un_assigned.index' => 17,
