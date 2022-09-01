@@ -42,6 +42,7 @@
                                     <th class="border-primary border-darken-1">Claim Type</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Product Cost</th>
+                                    <th class="border-primary border-darken-1">Receiving Sheet</th>
                                     <th class="border-primary border-darken-1">Product Picture</th>
                                     <th class="border-primary border-darken-1">Invoice Picture</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -79,7 +80,7 @@
 <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-<script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+{{-- <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script> --}}
 <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -108,6 +109,7 @@
                     {name: 'claim_type', class: 'align-middle claim_type', orderable: false, searchable: false},
                     {name: 'channel', class: 'align-middle channel', orderable: false, searchable: false},
                     {name: 'product_cost', class: 'align-middle product_cost', orderable: false, searchable: false},
+                    {name: 'receiving_sheet', class: 'align-middle receiving_sheet', orderable: false, searchable: false},
                     {name: 'product_picture', class: 'align-middle product_picture', orderable: false, searchable: false},
                     {name: 'invoice_picture', class: 'align-middle invoice_picture', orderable: false, searchable: false},
                     {name: 'description', class: 'align-middle description', orderable: false, searchable: false},
@@ -183,11 +185,13 @@
                                         var rowNo = table.rows().count();
                                         
                                         var case_nature_type = '<div class="form-group"><select name="case_nature_type_id['+id+']" id="case_nature_type_id_'+id+'" class="case_nature_type_id select2 form-control" data-rule-required="true" data-msg-required="This field is required"></select></div>';
-                                       
+                                        
+                                        var receiving_sheet = '<div class="form-group"><select name="receiving_sheet_id['+id+']" id="receiving_sheet_id_'+id+'" class="receiving_sheet_id select2 form-control" ></select></div>';
+                                        
                                         var channel = '<div class="form-group"> <select name="channel_id['+id+']" id="channel_id_'+id+'" class="channel_id select2 form-control" data-rule-required="true" data-msg-required="This field is required"></select></div>';
                                        
 
-                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>', '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']" id="product_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" id="invoice_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>',receiving_sheet, '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']" id="product_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" id="invoice_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
@@ -195,6 +199,12 @@
                                             obj.text = obj.type;
 
                                             return obj;
+                                        });
+                                        $(".receiving_sheet_id").prepend('<option value="" selected></option>').select2({
+                                            placeholder: "Select Receiving Sheet ID",
+                                            width: '100%',
+                                            containerCssClass: 'select-xs',
+                                            dropdownCssClass: 'form-control-sm p-0'
                                         });
                                         $(".case_nature_type_id").prepend('<option value="" selected></option>').select2({
                                             data:case_nature_type_data,
@@ -210,6 +220,21 @@
                                                 $('#product_picture_'+shipment_id).data('rule-required',false);
                                                 
                                             }else{
+                                                if(id == 23){
+                                                    $.ajax({
+                                                        url: '{!! route('cod.crm.request.lost.claim') !!}',
+                                                        method: 'POST',
+                                                        data: {
+                                                            '_token': '{{ csrf_token() }}',
+                                                            'shipment_id': shipment_id,
+                                                        }
+                                                    }).done(function (data) {
+                                                        if(data.status==1){
+                                                            var newOption = new Option(data.receiving_sheet_id, data.receiving_sheet_id, false, false);
+                                                            $('#receiving_sheet_id_'+shipment_id).append(newOption).trigger('change');
+                                                        }
+                                                    });
+                                                }
                                                 $('#invoice_picture_'+shipment_id).data('rule-required',true);
                                                 $('#product_picture_'+shipment_id).data('rule-required',true);
                                             }
