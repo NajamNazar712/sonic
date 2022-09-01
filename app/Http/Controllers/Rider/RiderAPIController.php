@@ -2090,7 +2090,7 @@ class RiderAPIController extends Controller
 
     public function pickups_history(Request $request)
     {
-
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $pickup_request_id = $request->get('pickup_request_id');
@@ -2128,6 +2128,7 @@ class RiderAPIController extends Controller
 
     public function delivery_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $delivery_note_id = $request->get('delivery_note_id');
@@ -2858,6 +2859,7 @@ class RiderAPIController extends Controller
 
     public function return_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $return_note_id = $request->get('return_note_id');
