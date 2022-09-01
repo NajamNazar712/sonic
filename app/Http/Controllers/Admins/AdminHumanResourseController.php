@@ -1278,6 +1278,22 @@ class AdminHumanResourseController extends Controller
             'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
         ]);
 
+        $super_admins = [3, 6, 7, 665];
+        $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
+        $role_flag = false;
+        if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
+            $role_flag = true;
+        }
+        else{
+            if(!in_array($request->input('role_id'), $hr_roles)){
+                $role_flag = true;
+            }
+            else{
+                $role_flag = false;
+                $role = AdminRole::find($request->input('role_id'));
+                NotificationsController::send(186, Auth::id(), $role->name);
+            }
+        }
 //        $employee->request_status_id = 2;
         $employee->name = $request->employee_name;
         $employee->phone_number = $request->personal_number;
@@ -1295,18 +1311,19 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+        if($role_flag == true){
+            if ($employee->designation_id != $request->designation) {
+                $designation_logs = new EmployeeDesignationLog();
+                $designation_logs->updated_by = Auth::id();
+                $designation_logs->designation_id = $employee->designation_id;
+                $designation_logs->employee_id = $employee->id;
+                $designation_logs->save();
+            }
 
-        if ($employee->designation_id != $request->designation) {
-            $designation_logs = new EmployeeDesignationLog();
-            $designation_logs->updated_by = Auth::id();
-            $designation_logs->designation_id = $employee->designation_id;
-            $designation_logs->employee_id = $employee->id;
-            $designation_logs->save();
+            $employee->designation_id = $request->designation;
+            $employee->department_id = ($request->has('department')) ? $request->department : 6;
         }
-
-        $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
-        $employee->department_id = ($request->has('department')) ? $request->department : 6;
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
@@ -1362,9 +1379,10 @@ class AdminHumanResourseController extends Controller
                         }
                     }
                 }
-
-                $admin->designation_id = $employee->designation_id;
-                $admin->role_id = $employee->designation->role_id ?? 79;
+                if($role_flag == true) {
+                    $admin->designation_id = $employee->designation_id;
+                    $admin->role_id = $employee->designation->role_id ?? 79;
+                }
                 $admin->phone_number = $employee->phone_number;
                 $admin->official_phone_number = $employee->official_phone_number;
                 $admin->email = $employee->official_email;
