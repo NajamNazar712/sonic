@@ -6593,13 +6593,28 @@ class AdminReportsController extends Controller
                 if($month_closing_responsible->exists()){
                     $month_closing_responsible = $month_closing_responsible->get();
                     $responsible = '';
+                    $counter = 0;
                     foreach ($month_closing_responsible as $value) {
                         if($value->admin == 1){
                             $admin = Admin::find($value->responsible_person_id);
+                            if($counter > 0){
+                                $responsible .= ','.$admin->name.'( '.($admin->designation_id != null ? $admin->Edesignation->name : '').' ) ';
 
-                            $responsible .= $admin->name.'( '.($admin->designation_id != null ? $admin->Edesignation->name : '').' ), ';
+                            }else{
+                                $responsible .= $admin->name.'( '.($admin->designation_id != null ? $admin->Edesignation->name : '').' ) ';
+                            }
+                            $counter++;
+
                         }else{
-                            $responsible .= Rider::find($value->responsible_person_id)->name.'( Rider ), ';
+                            if($counter > 0){
+                                $responsible .= ','.Rider::find($value->responsible_person_id)->name.'( Rider )';
+
+                            }else{
+                                $responsible .= Rider::find($value->responsible_person_id)->name.'( Rider )';
+
+                            }
+                            $counter++;
+
                         }  
                     }
                     return $responsible;
@@ -6611,12 +6626,26 @@ class AdminReportsController extends Controller
                 if($month_closing_responsible->exists()){
                     $month_closing_responsible = $month_closing_responsible->get();
                     $hub = '';
+                    $counter = 0;
                     foreach ($month_closing_responsible as $value) {
                         if($value->admin == 1){
                             $admin = Admin::find($value->responsible_person_id);
-                            $hub .= ($admin->default_hub_id != null ? $admin->city->hub_city->name : '').', ';
+                            if($counter > 0){
+                                $hub .= ', '.($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
+
+                            }else{
+                                $hub .= ($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
+                            }
+                            $counter++;
                         }else{
-                            $hub .= Rider::find($value->responsible_person_id)->city->hub_city->name.', ';
+                            if($counter > 0){
+                                $hub .= ','.Rider::find($value->responsible_person_id)->city->hub_city->name;
+
+                            }else{
+                                $hub .= Rider::find($value->responsible_person_id)->city->hub_city->name;
+
+                            }
+                            $counter++;
                         }  
                     }
                     return $hub;
