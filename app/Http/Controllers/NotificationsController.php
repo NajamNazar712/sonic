@@ -3885,7 +3885,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
@@ -3977,10 +3977,10 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         array_push($to, $ceo->email);
                     }
-                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
+                    $extra_admins = ['muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
 
                     $to = array_merge($to, $extra_admins);
-                    $to[] = 'fawwad.haider@trax.pk';
+
                     $to[] = 'muhammad.waqas@trax.pk';
                     foreach ($to as $email) {
                         self::email($subject, $body, $email);
@@ -4080,7 +4080,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'mursaleen.rafiq@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
