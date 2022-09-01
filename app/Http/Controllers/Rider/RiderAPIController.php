@@ -533,59 +533,7 @@ class RiderAPIController extends Controller
 
     public function login(Request $request)
     {
-        $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4']
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-            if ($rider->exists()) {
-                $rider = $rider->first();
-
-                if ($rider->status) {
-                    if (Hash::check($request->input('pin'), $rider->pin)) {
-                        $information = array();
-
-                        $information['name'] = $rider->name;
-                        $information['role'] = 'rider';
-
-                        if ($rider->api_token) {
-                            $information['api_token'] = $rider->api_token;
-                        } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
-
-                            $rider->api_token = $api_token;
-
-                            $rider->save();
-
-                            $information['api_token'] = $api_token;
-                        }
-
-                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
-                }
-            } else {
-                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-                if ($rider_request->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                }
-            }
-        }
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
     }
 
     public function get_rider_location(Request $request)
@@ -624,6 +572,7 @@ class RiderAPIController extends Controller
 
     public function pickup_summary(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [2, 3]);
@@ -692,6 +641,7 @@ class RiderAPIController extends Controller
 
     public function pickup_pick(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_notes,id'],
@@ -709,7 +659,8 @@ class RiderAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
@@ -780,6 +731,7 @@ class RiderAPIController extends Controller
 
     public function pickup_not_pick(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_notes,id'],
@@ -865,6 +817,7 @@ class RiderAPIController extends Controller
 
     public function pickup_action_log(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
@@ -4957,86 +4910,7 @@ class RiderAPIController extends Controller
 
     public function login_v2(Request $request)
     {
-        $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
-            'device_token' => ['nullable']
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-            if ($rider->exists()) {
-                $rider = $rider->first();
-
-                if ($rider->status) {
-                    if (Hash::check($request->input('pin'), $rider->pin)) {
-                        $information = array();
-
-                        $information['name'] = $rider->name;
-                        $information['phone'] = $rider->phone;
-                        $information['cnic'] = $rider->cnic;
-                        $information['address'] = $rider->address;
-                        $information['role'] = 'rider';
-                        $information['cargo_user'] = 0;
-
-                        if($request->has('device_token')){
-                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                            EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
-                            $employee_device_token = new EmployeeDeviceToken();
-                            $employee_device_token->employee_id = $rider->id;
-                            $employee_device_token->employee_type_id = 2;
-                            $employee_device_token->device_token = $request->get('device_token');
-                            $employee_device_token->save();
-                        }
-
-                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                            ->join('riders as r', 'e.id', 'r.employee_id')
-                            ->where('r.id', $rider->id);
-                        if ($reporting_location->exists()) {
-                            $reporting_location = $reporting_location->first();
-                            $information['distance'] = $reporting_location->radius;
-                            $information['lat'] = $reporting_location->lat;
-                            $information['long'] = $reporting_location->long;
-                        }else{
-                            $information['distance'] = 0;
-                            $information['lat'] = 0;
-                            $information['long'] = 0;
-                        }
-
-                        if ($rider->api_token) {
-                            $information['api_token'] = $rider->api_token;
-                        } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
-
-                            $rider->api_token = $api_token;
-
-                            $information['api_token'] = $api_token;
-                        }
-                        $rider->save();
-                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
-                }
-            } else {
-                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-                if ($rider_request->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                }
-            }
-        }
+        return response()->json(['status' => 1, 'message' => 'Invalid Please Update Your Bolt App']);
     }
 
     public function notification_history(Request $request)
