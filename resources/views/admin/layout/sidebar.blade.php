@@ -643,7 +643,7 @@
                             @if (session('role_id') == 1 || Auth::user()->role->department_id == 3 || in_array(363, session('permissions')))
                                 <li><a class="menu-item" href="{{route('admin.crm.consignee_info.index')}}">Consignee Info</a></li>
                             @endif
-                            @if (session('role_id') == 1 || Auth::user()->role->department_id == 3 || in_array(795, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(795, session('permissions')))
                                 <li><a class="menu-item" href="{{route('admin.crm.bulk_claim.index')}}">Bulk Claim Logging</a></li>
                             @endif
                         @endif
