@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Models\Admin\ActivityTrailLog;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
@@ -3876,7 +3877,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
@@ -3968,10 +3969,10 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         array_push($to, $ceo->email);
                     }
-                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
+                    $extra_admins = ['muhammad.yousuf@trax.pk', 'syed.sharique@trax.pk'];
 
                     $to = array_merge($to, $extra_admins);
-                    $to[] = 'fawwad.haider@trax.pk';
+
                     $to[] = 'muhammad.waqas@trax.pk';
                     foreach ($to as $email) {
                         self::email($subject, $body, $email);
@@ -4071,7 +4072,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'mursaleen.rafiq@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -5634,7 +5635,7 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     $to = array();
-                    $cc = array('waqas@trax.pk','khan.usama@trax.pk');
+                    $cc = array('waqas@trax.pk','khan.usama@trax.pk','shahrukh.raheem@trax.pk');
                     foreach ($sales_person as $index => $person) {
                         // dd($person);
                         $shipper = User::find($index);
@@ -8433,15 +8434,14 @@ class NotificationsController extends Controller
                     $to = $sale_person->email;
                     self::email($subject, $sale_person_body, $to);
 
-                    $finance_admin = Admin::where('role_id', 2)
-                        ->where('status', 1)
-                        ->first();
-
+                    $finance_admin = AdminDepartment::where('id', 4)->first();
+                    $finance_admin = $finance_admin->department_head;
+                    
                     if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
-                        $finance_body = str_replace('[person_of_contact]', $finance_admin->name, $finance_body);
+                        $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
                     }
 
-                    $to = $finance_admin->email;
+                    $to = $finance_admin['email'];
                     self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
@@ -8477,12 +8477,14 @@ class NotificationsController extends Controller
                     if ($kam->exists()) {
                         $kam = $kam->first();
                         if ($kam) {
-                            $em = Admin::find($kam->kam);
-                            $to[] = isset($em->email) ?? $em->email;
+                            $admin = Admin::where('id',$kam->kam)->first();
+                            if($admin){
+                                $to[] = $admin->email;
+                            }
                         }
                     }
-                    $to = array_filter($to);
-                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk','nayyer.zia@trax.pk'];
+
+                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk'];
                     $to = array_merge($to,$other);
                     if (count($to) > 0) {
                         self::email($subject, $body, $to);
@@ -9567,6 +9569,40 @@ else if ($id == 178) {
                     }
 
                 }
+                else if ($id == 183) {
+                    $detail = $reference_1_id;
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $detail['tracking_number'], $body);
+                    }
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]', $detail['name'], $body);
+                    }
+                    if (strpos($body, '[shipper]') !== FALSE) {
+                        $body = str_replace('[shipper]', $detail['shipper_name'], $body);
+                    }
+                    $to = $detail['shipper_number_1'];
+                    self::sms($body, $to);
+                    if ($detail['shipper_number_2'] != NULL) {
+                        $to = $detail['shipper_number_2'];
+                        self::sms($body, $to);
+                    }
+                }
+                else if ($id == 184) {
+                    $detail = $reference_1_id;
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]', $detail['name'], $body);
+                    }
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $detail['tracking_number'], $body);
+                    }
+                    $to = $detail['consignee_number_1'];
+                    self::sms($body, $to);
+                    if ($detail['consignee_number_2'] != NULL) {
+                        $to = $detail['consignee_number_2'];
+                        self::sms($body, $to);
+                    }
+                }
+
             }
         }
     }

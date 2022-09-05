@@ -702,6 +702,10 @@ class AdminCargoManifestController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+          /*  if($shipment->shipper_status_id == 49){
+                return ['status' => 1, 'error' => 'Misroute-Forwarded Shipments not allowed'];
+            }*/
             
            /* if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists()){
                 return ['status' => 1, 'error' => 'Bag Already Created'];

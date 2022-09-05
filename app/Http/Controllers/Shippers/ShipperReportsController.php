@@ -59,8 +59,9 @@ class ShipperReportsController extends Controller
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipments_journey as cj', function ($join) use ($connection) {
                 $join->on('cj.shipment_id', '=', 'shipments.id')
@@ -127,6 +128,7 @@ class ShipperReportsController extends Controller
             if ($ids) {
                 $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to, $from_id, $to_id) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                         ->where('dr.id', '=',
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '" and shipments_journey.id >= ' . $from_id . ' and shipments_journey.id <= ' . $to_id . ')'));
                 });
@@ -139,6 +141,7 @@ class ShipperReportsController extends Controller
             else {
                 $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
                     $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                         ->where('dr.id', '=',
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
                 });
@@ -148,6 +151,7 @@ class ShipperReportsController extends Controller
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 25, 30, 36, 37) and shipments_journey.verification = 1)'));
             });

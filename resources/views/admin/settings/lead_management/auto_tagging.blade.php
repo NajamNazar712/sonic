@@ -63,6 +63,7 @@
                     </div>
                     <div class="form-group" id="territory_select">
                         <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            <option value="0" > All Territories </option>
                         </select>
                     </div>
                     
@@ -217,8 +218,10 @@
             });
             $('#service_select').css('display','none');
             $('#city_select').css('display','none');
+            $('#city_id').val(0).trigger('change.select2');
             $('#territory_select').css('display','none');
-
+            $('#territory_id').val(0).trigger('change.select2');
+            
             $('#agent_select').css('display','none');
 
             $('#zone_id').prepend('<option selected></option>').select2({
@@ -236,8 +239,9 @@
                         $('#service_select').css('display','block');
                         $('#agent_select').css('display','block');
                     $('#city_select').css('display','none');
+                    $('#city_id').val(0).trigger('change.select2');
                     $('#territory_select').css('display','none');
-
+                    $('#territory_id').val(0).trigger('change.select2');
                 }else{
                     $('#city_select').css('display','block');
                     $('#city_id').children().remove()
@@ -272,7 +276,7 @@
                             $('#service_select').css('display','block');
                             $('#agent_select').css('display','block');
                             $('#territory_select').css('display','none');
-
+                            $('#territory_id').val(0).trigger('change.select2');
                         }else{
 
 

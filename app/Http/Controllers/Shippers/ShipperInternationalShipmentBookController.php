@@ -66,7 +66,7 @@ class ShipperInternationalShipmentBookController extends Controller
             $air_waybill = null;
         }
 //        $countries = City::where('hub', 1)->where('status', 1)->where('business_category_id', 2)->select(['id', 'name'])->get();
-//        $cities = City::where('business_category_id', 2)->where('status', 1)->whereNotNull('c.zone_id')->orderBy('c.name')->select('name','id')->get();
+//        $cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->whereNotNull('c.zone_id')->orderBy('c.name')->select('name','id')->get();
 
 //        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
         $credit_msg = '';
