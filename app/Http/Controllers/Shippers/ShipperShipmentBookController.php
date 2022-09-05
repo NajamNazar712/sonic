@@ -6047,7 +6047,7 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('shipper_id', $request->shipper)->where('phone_number_1', 'LIKE', "%" . $request->q . "%");
+        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
         if ($consignee_info->exists()) {
             $consignee_info = $consignee_info->limit(10)->get();
             foreach ($consignee_info as $item) {
@@ -6300,7 +6300,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        $cities = City::where('status', 1)->where('business_category_id', 2)->where('permanent_disabled',0)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();

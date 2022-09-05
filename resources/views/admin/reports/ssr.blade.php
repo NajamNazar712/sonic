@@ -379,6 +379,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                max: '{{ Carbon\Carbon::now() }}',
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
@@ -392,13 +393,14 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
+
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.overall_sales.list') }}',
+                        url: '{{ route('admin.reports.ssr.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -470,7 +472,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url: '{{ route('admin.reports.overall_sales.list') }}',
+                    url: '{{ route('admin.reports.ssr.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

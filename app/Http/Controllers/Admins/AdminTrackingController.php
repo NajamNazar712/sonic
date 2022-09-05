@@ -634,6 +634,7 @@ class AdminTrackingController extends Controller
 
                     $details = array();
 
+                    $details['complaint'] = NULL;
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
                     $details['shipper'] = $shipment->user->name;
@@ -665,7 +666,11 @@ class AdminTrackingController extends Controller
                         $dn = '-';
                     }
                     $details['delivery_note_id'] = $dn;
-                    //                    yahan p join lgana h shipment and delivery note shipment ka our delivery note id uthaleni h end
+
+                    $crm = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+                    if(isset($crm) && $crm->status_id != 4){
+                        $details['complaint'] = $crm->id;
+                    }
 
                     ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null);
                     return response()->json(['status' => 1, 'details' => $details]);

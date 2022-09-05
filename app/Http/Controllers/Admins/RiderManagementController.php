@@ -1034,6 +1034,9 @@ class RiderManagementController extends Controller
         if(count($riders) > 0){
             foreach ($riders as $rider){
                 $rider_category_id = $rider->rider_category_id;
+                if(in_array($rider_category_id, [3, 4, 5])){
+                    continue;
+                }
                 $pickup_shipment_ids = array();
                 $delivery_shipment_ids = array();
                 $pickup_incentive = 0;

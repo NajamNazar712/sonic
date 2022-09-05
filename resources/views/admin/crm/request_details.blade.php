@@ -444,7 +444,7 @@
 
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message" @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -550,7 +550,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message" @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
