@@ -40,6 +40,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipper\User;
@@ -3427,6 +3428,7 @@ class AdminReportsController extends Controller
         ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
         ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where('sj.shipper_status_id', 2)
                 ->where('sj.id','=',
                     DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
         })
@@ -3449,6 +3451,7 @@ class AdminReportsController extends Controller
         })
         ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
             $join->on('dr.shipment_id', '=', 'shipments.id')
+                ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                 ->where('dr.id','=',
                     DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
         })
@@ -5304,6 +5307,7 @@ class AdminReportsController extends Controller
 
             $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             })
@@ -5342,6 +5346,7 @@ class AdminReportsController extends Controller
 
             $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
@@ -5396,6 +5401,7 @@ class AdminReportsController extends Controller
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
@@ -5432,6 +5438,7 @@ class AdminReportsController extends Controller
 
             $sales->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
@@ -5439,6 +5446,7 @@ class AdminReportsController extends Controller
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             });
@@ -6349,7 +6357,11 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('crm_request_feedbacks as crf', 'crf.crm_request_id', '=', 'crm_requests.id')
             ->leftjoin('crm_request_ratings as crr', 'crr.id', '=', 'crf.rating_id')
-            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin','ad.name as admin_department','sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code')
+            
+            ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 's.id')
+            
+            
+            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.id as case_nature_id','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin','ad.name as admin_department','sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code','mc.id as month_closing_id')
             ->groupBy('crm_requests.id');
 
         if (session('department_id') == 8) {
@@ -6556,6 +6568,108 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
+            })->addColumn('adjusted_percentage', function ($requests) {
+                if($requests->adjusted_amount != null){
+
+                    if($requests->cod_amount > 0){
+    
+                        return number_format(($requests->adjusted_amount/ $requests->cod_amount)*100,2);
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
+            })->addColumn('remaining_percentage', function ($requests) {
+                if($requests->adjusted_amount != null){
+
+                    if($requests->cod_amount > 0){
+                        if(($requests->adjusted_amount/ $requests->cod_amount)*100 == 0){
+                            return '100';
+                        }else{
+                            return number_format(100 - (($requests->adjusted_amount/ $requests->cod_amount)*100) ,2);
+                        }
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
+            })->addColumn('responsibe_person_name', function ($requests) {
+                $month_closing_responsible = MonthClosingResponsible::where('month_closing_id',$requests->month_closing_id);
+                if($month_closing_responsible->exists()){
+                    $month_closing_responsible = $month_closing_responsible->get();
+                    $responsible = '';
+                    $counter = 0;
+                    foreach ($month_closing_responsible as $value) {
+                        if($value->admin == 1){
+                            $admin = Admin::find($value->responsible_person_id);
+                            if($counter > 0){
+                                $responsible .= ','.$admin->name.'( '.($admin->designation_id != null ? $admin->Edesignation->name : '').' ) ';
+
+                            }else{
+                                $responsible .= $admin->name.'( '.($admin->designation_id != null ? $admin->Edesignation->name : '').' ) ';
+                            }
+                            $counter++;
+
+                        }else{
+                            if($counter > 0){
+                                $responsible .= ','.Rider::find($value->responsible_person_id)->name.'( Rider )';
+
+                            }else{
+                                $responsible .= Rider::find($value->responsible_person_id)->name.'( Rider )';
+
+                            }
+                            $counter++;
+
+                        }  
+                    }
+                    return $responsible;
+                }else{
+                    return '-';
+                }
+            })->addColumn('responsibe_person_hub', function ($requests) {
+                $month_closing_responsible = MonthClosingResponsible::where('month_closing_id',$requests->month_closing_id);
+                if($month_closing_responsible->exists()){
+                    $month_closing_responsible = $month_closing_responsible->get();
+                    $hub = '';
+                    $counter = 0;
+                    foreach ($month_closing_responsible as $value) {
+                        if($value->admin == 1){
+                            $admin = Admin::find($value->responsible_person_id);
+                            if($counter > 0){
+                                $hub .= ', '.($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
+
+                            }else{
+                                $hub .= ($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
+                            }
+                            $counter++;
+                        }else{
+                            if($counter > 0){
+                                $hub .= ','.Rider::find($value->responsible_person_id)->city->hub_city->name;
+
+                            }else{
+                                $hub .= Rider::find($value->responsible_person_id)->city->hub_city->name;
+
+                            }
+                            $counter++;
+                        }  
+                    }
+                    return $hub;
+                }else{
+                    return '-';
+                }
+            })->addColumn('claim_adjustment_status', function ($requests) {
+                if($requests->case_nature_id == 4){
+                    if($requests->adjusted_amount != null){
+                        return 'Valid';
+                    }else{
+                        return 'Invalid';
+                    }
+                }else{
+                    return '-';
+                }
+
             });
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);

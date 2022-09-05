@@ -1281,6 +1281,8 @@ class Permission
             'settings.complain_portal_shippers.index' => 788,
 
             'user_management.roles.permissions.index' => 789,
+            'crm.bulk_claim.index' => 795,
+
 
         ],
 
@@ -1373,6 +1375,10 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
+
+            'crm.bulk_claim.index' => 19,
+
+            
         ]
     ];
 

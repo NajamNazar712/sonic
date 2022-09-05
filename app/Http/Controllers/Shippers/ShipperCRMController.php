@@ -685,4 +685,64 @@ class ShipperCRMController extends Controller
             return response()->json(['status' => 0]);
         }
     }
+
+    public function bulk_claim_index(){
+        $case_nature_type = CrmRequestCaseNatureType::where('nature_id',4)->select('id', 'type')->get();
+        $channels = CrmRequestChannel::select('id', 'channel')->get();
+        return view('client.crm.bulk_claim')->with(['case_nature_type' => $case_nature_type, 'channels' => $channels]);
+
+    }
+
+    public function bulk_claim_shipment_details(Request $request){
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('user_id',session('user_id'));
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+            $is_shipment = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id', 4);
+            if($is_shipment->exists()){
+                return ['status' => 1, 'error' => 'Request/Complaint already lodged'];
+            }
+
+            $details = array();
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+        }else{
+            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+
+    }
+
+    public function bulk_claim_submit(Request $request){
+        
+        $shipment_ids = explode(',', $request->shipment_ids);
+        $present_shipments = [];
+
+        foreach ($shipment_ids as $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+            if($shipment){
+                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',4)->first();
+                if($is_shipment){
+                    $present_shipments[] = $shipment->tracking_number;
+                }else{
+                    $crm_request_padded_id = CRMController::add(4, $request->case_nature_type_id[$shipment_id], $request->channel_id[$shipment_id], 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $request->description[$shipment_id], $request->claim_product_cost[$shipment_id],  $request->file('product_picture')[$shipment_id], $request->file('invoice_picture')[$shipment_id]);
+                                      
+                    if($request->has('key_account')){
+                        $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $request->channel_id[$shipment_id], $request->case_nature_type_id[$shipment_id]);
+                    }
+                    $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
+                    // return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                }
+                
+
+            }
+        
+        }
+        if(count($present_shipments) > 0){
+            return redirect()->back()->with('success', 'Request(s) successfully added. Request againts these shipment already exits '.implode(',', $present_shipments));
+        }else{
+            return redirect()->back()->with('success', 'Request(s) successfully added');
+        }
+    }
 }
