@@ -10034,7 +10034,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude']);
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude'])
+            ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {

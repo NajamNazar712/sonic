@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Models\Admin\ActivityTrailLog;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
@@ -5634,7 +5635,7 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     $to = array();
-                    $cc = array('waqas@trax.pk','khan.usama@trax.pk');
+                    $cc = array('waqas@trax.pk','khan.usama@trax.pk','shahrukh.raheem@trax.pk');
                     foreach ($sales_person as $index => $person) {
                         // dd($person);
                         $shipper = User::find($index);
@@ -8433,15 +8434,14 @@ class NotificationsController extends Controller
                     $to = $sale_person->email;
                     self::email($subject, $sale_person_body, $to);
 
-                    $finance_admin = Admin::where('role_id', 2)
-                        ->where('status', 1)
-                        ->first();
-
+                    $finance_admin = AdminDepartment::where('id', 4)->first();
+                    $finance_admin = $finance_admin->department_head;
+                    
                     if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
-                        $finance_body = str_replace('[person_of_contact]', $finance_admin->name, $finance_body);
+                        $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
                     }
 
-                    $to = $finance_admin->email;
+                    $to = $finance_admin['email'];
                     self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
@@ -8477,12 +8477,14 @@ class NotificationsController extends Controller
                     if ($kam->exists()) {
                         $kam = $kam->first();
                         if ($kam) {
-                            $em = Admin::find($kam->kam);
-                            $to[] = isset($em->email) ?? $em->email;
+                            $admin = Admin::where('id',$kam->kam)->first();
+                            if($admin){
+                                $to[] = $admin->email;
+                            }
                         }
                     }
-                    $to = array_filter($to);
-                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk','nayyer.zia@trax.pk'];
+
+                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk'];
                     $to = array_merge($to,$other);
                     if (count($to) > 0) {
                         self::email($subject, $body, $to);
