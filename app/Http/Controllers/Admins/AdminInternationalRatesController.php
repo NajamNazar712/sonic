@@ -258,7 +258,7 @@ class AdminInternationalRatesController extends Controller
         if($id){
             $user = User::find($id);
             if($user){
-                $cities = City::where('business_category_id', 2)->where('hub', 1)->select('id', 'name')->get();
+                $cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('hub', 1)->select('id', 'name')->get();
                 $user_information = InternationalUsersInformation::where('user_id', $user->id)->first();
                 if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
                     $rate_statuses = InternationalRatesStatus::where('user_id', $user->id)->get();

@@ -3428,6 +3428,7 @@ class AdminReportsController extends Controller
         ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
         ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where('sj.shipper_status_id', 2)
                 ->where('sj.id','=',
                     DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
         })
@@ -3450,6 +3451,7 @@ class AdminReportsController extends Controller
         })
         ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
             $join->on('dr.shipment_id', '=', 'shipments.id')
+                ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                 ->where('dr.id','=',
                     DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
         })
@@ -5305,6 +5307,7 @@ class AdminReportsController extends Controller
 
             $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             })
@@ -5343,6 +5346,7 @@ class AdminReportsController extends Controller
 
             $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
@@ -5397,6 +5401,7 @@ class AdminReportsController extends Controller
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
@@ -5433,6 +5438,7 @@ class AdminReportsController extends Controller
 
             $sales->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
@@ -5440,6 +5446,7 @@ class AdminReportsController extends Controller
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14,25,30,36,37])
                     ->where('dr.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             });
@@ -7432,9 +7439,12 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 193);
         $admins = Admin::where('admins.status', 1)
-            ->leftjoin('employee_designations as ed','admins.designation_id','ed.id')
-            ->where('ed.department_id',7)
-            ->get(['admins.id', 'admins.name']);
+            ->leftjoin('employee_designations as ed', 'admins.designation_id', 'ed.id')
+            ->where('ed.department_id', 7);
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            $admins = $admins->where('admins.id', Auth::id());
+        }
+        $admins = $admins->get(['admins.id', 'admins.name']);
         $ratings = CrmRequestRating::all();
         return view('admin.reports.daily_visit_report')->with(['admins' => $admins,'ratings'=>$ratings]);
     }
@@ -7451,6 +7461,10 @@ class AdminReportsController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
             ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
+
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+        }
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr) {
