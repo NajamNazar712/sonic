@@ -6344,8 +6344,8 @@ class DeliveryController extends Controller
             foreach ($payment_transactions as $index => $payment_transaction){
                 $payment_transaction_data[$index]['transaction_authentication_id'] = $payment_transaction->transaction_authentication_id;
                 $payment_transaction_data[$index]['tracking_number'] = $payment_transaction->tracking_number;
-                $payment_transaction_data[$index]['transaction_amount'] = $payment_transaction->transaction_amount;
-                $payment_transaction_data[$index]['created_at'] = $payment_transaction->created_at;
+                $payment_transaction_data[$index]['transaction_amount'] = number_format($payment_transaction->transaction_amount);
+                $payment_transaction_data[$index]['created_at'] = Carbon::parse($payment_transaction->created_at)->toDateTimeString();
                 $payment_transaction_data[$index]['transaction_date'] = Carbon::parse($payment_transaction->transaction_date)->format('M d, Y');
                 $payment_transaction_data[$index]['transaction_time'] = Carbon::parse($payment_transaction->transaction_time)->format('H:i:s');
             }

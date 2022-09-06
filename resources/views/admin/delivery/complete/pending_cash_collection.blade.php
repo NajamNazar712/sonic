@@ -854,13 +854,12 @@
                             //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                             // });
                             $.each(data.transaction_data, function(index, values) {
-                                console.log(data.transaction_data);
                                     html+= `
 
                                         <tr>
                                             <td>${index+1}</td>
                                             <td>${values.transaction_authentication_id}</td>
-                                            <td>${values.transaction_authentication_id}</td>
+                                            <td>${values.tracking_number}</td>
                                             <td>${values.transaction_amount}</td>
                                             <td>${values.transaction_date}</td>
                                             <td>${values.transaction_time}</td>
