@@ -5131,17 +5131,17 @@ class APIController extends Controller
             $one_link_payment_transaction->status = $status;
             $one_link_payment_transaction->save();
 
+            if($status == 2){
+                $delivery_note = DeliveryNote::find($delivery_note_id);
 
-
-            $delivery_note = DeliveryNote::find($delivery_note_id);
-
-            $update_count = $delivery_note->one_link_payment_count + 1;
-            $delivery_note->one_link_payment_count = $update_count;
-            $delivery_note->save();
-
-            $shipment = Shipment::find($shipment_id);
-            $shipment->received_amount = $transaction_amount;
-            $shipment->save();
+                $update_count = $delivery_note->one_link_payment_count + 1;
+                $delivery_note->one_link_payment_count = $update_count;
+                $delivery_note->save();
+                $amount = OneLinkPaymentTransaction::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
+                $shipment = Shipment::find($shipment_id);
+                $shipment->received_amount = $amount;
+                $shipment->save();
+            }
 
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
