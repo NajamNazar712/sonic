@@ -6,9 +6,12 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Rider\RiderDeliveryIncentiveRate;
 use App\Http\Models\Rider\RiderIncentiveDelivery;
 use App\Http\Models\Rider\RiderIncentiveDeliveryShipment;
+use App\Http\Models\Rider\RiderIncentivePickup;
 use App\Http\Models\ShipmentsJourney;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class RiderIncentiveCalculation extends Command
 {
@@ -60,9 +63,8 @@ class RiderIncentiveCalculation extends Command
 
     public function handle()
     {
-        //SELECT DISTINCT(`s`.`id`), `s`.`actual_weight` FROM `shipments_journey` AS `sj` INNER JOIN `shipments` AS `s` ON `sj`.`shipment_id` = `s`.`id` WHERE `s`.`packaging_material_request` = 0 AND `sj`.`created_at` >= '2022-09-05 00:00:00' AND `sj`.`created_at` < '2022-09-06 00:00:00' AND `sj`.`shipper_status_id` IN (14, 30, 36, 37) AND `s`.`shipper_status_id` IN (14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46) AND NOT FIND_IN_SET(`s`.`user_id`, (SELECT `text` FROM `global_settings` WHERE `type` = 'foc_account_tag')) AND `sj`.`rider_id` IS NOT NULL;
         $foc_accounts = GlobalSettings::where('type', 'foc_account_tag')->first();
-        $foc_accounts = explode(',', $foc_accounts);
+        $foc_accounts = explode(',', $foc_accounts->text);
         $yesterday = Carbon::yesterday()->toDateString();
         $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
@@ -73,7 +75,8 @@ class RiderIncentiveCalculation extends Command
             ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
             ->whereNotIn('s.user_id', $foc_accounts)
             ->whereNotNull('shipments_journey.rider_id')
-            ->whereDate('shipments_journey.date', $yesterday);
+            ->whereDate('shipments_journey.date', $yesterday)
+            ->get();
 
         $already_processed_shipments = array();
         if(count($shipments) > 0){
@@ -174,6 +177,52 @@ class RiderIncentiveCalculation extends Command
                         }
                     }
                 }
+            }
+        }
+
+        //SELECT `r`.`id`, `r`.`name`, `r`.`cnic`, `c`.`name`, COUNT(DISTINCT `sj`.`shipment_id`), SUM(`s`.`actual_weight`) FROM `shipments_journey` AS `sj` INNER JOIN `riders` AS `r` ON `sj`.`rider_id` = `r`.`id` INNER JOIN `cities` AS `c` ON `r`.`city_id` = `c`.`id` INNER JOIN `shipments` AS `s` ON `sj`.`shipment_id` = `s`.`id` INNER JOIN `user_shipping_infos` AS `usi` ON `s`.`pickup_address_id` = `usi`.`id` INNER JOIN `users` AS `u` ON `s`.`user_id` = `u`.`id` WHERE `s`.`packaging_material_request` = 0 AND `sj`.`shipper_status_id` = 2 AND NOT FIND_IN_SET(`s`.`user_id`, (SELECT `text` FROM `global_settings` WHERE `type` = 'foc_account_tag')) AND `usi`.`warehouse` != 1 AND `s`.`user_id` != (SELECT `setting_value` FROM `global_settings` WHERE `type` = 'Walk-In') AND `s`.`user_id` != (SELECT `setting_value` FROM `global_settings` WHERE `type` = 'packaging_material') AND NOT FIND_IN_SET(`s`.`user_id`, (SELECT `text` FROM `global_settings` WHERE `type` = 'carrefour_accounts')) AND !(`u`.`segment_id` = 1 AND `u`.`sub_segment_id` = 2) AND `s`.`user_id` NOT IN (167, 1159, 6693, 12412) AND `sj`.`created_at` >= '" & Number.ToText(if Month = 1 then Year - 1 else Year) & "-" & Number.ToText(if Month = 1 then 12 else Month - 1) & "-26 00:00:00' AND `sj`.`created_at` < '" & Number.ToText(Year) & "-" & Number.ToText(Month) & "-26 00:00:00' GROUP BY `r`.`id`;
+        $void_accounts = GlobalSettings::whereIn('type', ['Walk-In', 'packaging_material'])->pluck('setting_value')->toArray();
+        $carrefour__accounts = GlobalSettings::where('type', 'carrefour_accounts')->first();
+        $carrefour__accounts = explode(',', $carrefour__accounts->text);
+        $segment_users = User::where('u.segment_id', 1)->where('u.sub_segemnt_id', 2)->pluck('id')->toArray();
+        $void_accounts = array_merge($foc_accounts, $void_accounts, $carrefour__accounts, $segment_users, [167, 1159, 6693, 12412]);
+        $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
+            ->join('user_shipping_infos as ufi', 'ufi.id', '=', 's.pickup_address_id')
+            ->select('shipments_journey.rider_id as rider_id', DB::raw('count(DISTINCT s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'r.city_id', 'r.rider_main_category_id')
+            ->where('s.packaging_material_request', 0)
+            ->where('usi.warehouse', '!=', 0)
+            ->where('shipments_journey.shipper_status_id', 2)
+            ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
+            ->whereNotIn('s.user_id', $void_accounts)
+            ->whereNotNull('shipments_journey.rider_id')
+            ->whereDate('shipments_journey.date', $yesterday)
+            ->groupBy('shipments_journey.rider_id')
+            ->get();
+
+        if(count($shipments) > 0){
+            foreach ($shipments as $shipment){
+                if($shipment->main_rider_category == 1){
+                    if(in_array($shipment->city_id, [202, 223])){
+                        $rate = 1;
+                    }
+                    else{
+                        $rate = 3;
+                    }
+                }
+                else{
+                    $rate = 5;
+                }
+                $incentive = $rate * $shipment->shipment_count;
+
+                $rider_incentive_pickups = new RiderIncentivePickup();
+                $rider_incentive_pickups->rider_id = $shipment->rider_id;
+                $rider_incentive_pickups->date = $yesterday;
+                $rider_incentive_pickups->shipments = $shipment->shipment_count;
+                $rider_incentive_pickups->rate = $rate;
+                $rider_incentive_pickups->incentive = $incentive;
+                $rider_incentive_pickups->save();
             }
         }
     }
