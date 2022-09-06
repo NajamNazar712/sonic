@@ -60,7 +60,7 @@ class ProcessOneLinkDeliveryNoteShipment implements ShouldQueue
                     ]
                 ]);
 
-                var_dump($response->getBody());
+                var_dump($response->getBody()->getContents());exit;
             }
             catch(RequestException $e){
 
