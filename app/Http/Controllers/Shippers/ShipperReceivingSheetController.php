@@ -1527,7 +1527,7 @@ class ShipperReceivingSheetController extends Controller
                         <div class="receiving_sheet">
             ';
 
-            $html .= $this->view($receiving_sheet->id, $user_type, TRUE);
+            $html .= self::view($receiving_sheet->id, $user_type, TRUE);
 
             $html .= '
                         </div>
