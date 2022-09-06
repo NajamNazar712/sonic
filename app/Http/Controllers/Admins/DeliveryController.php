@@ -315,6 +315,7 @@ class DeliveryController extends Controller
         $process_one_link['shipment_ids'] = $valid_shipments;
         $process_one_link['delivery_note_id'] = 13987;
         dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+        dd(1);
         $operation_rider_category = OperationRidersCategory::all();
 
         return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
