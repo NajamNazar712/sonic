@@ -5131,7 +5131,7 @@ class APIController extends Controller
             $one_link_payment_transaction->status = $status;
             $one_link_payment_transaction->save();
 
-            return json_encode(['status' => 0, 'message' => 'Successful Bill Payment']);
+            return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
     }
 
