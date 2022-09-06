@@ -963,6 +963,7 @@ class DeliveryController extends Controller
                 $process_one_link['shipment_ids'] = $valid_shipments;
                 $process_one_link['delivery_note_id'] = $note->id;
                 dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+                dd($process_one_link);
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
