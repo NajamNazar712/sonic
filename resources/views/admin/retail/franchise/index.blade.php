@@ -331,8 +331,8 @@
                     { data:'status' ,name: 'retail_franchises.status', class: 'align-middle text-center status'},
                     { data:'code' ,name: 'retail_franchises.code', class: 'align-middle text-center code'},
                     { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
-                    { data:'discount' ,name: 'retail_franchises.discount', class: 'align-middle text-center discount', orderable: false, searchable: false},
-                    { data:'insurance' ,name: 'retail_franchises.insurance', class: 'align-middle text-center insurance', orderable: false, searchable: false},
+                    { data:'discount' ,name: 'retail_franchises.discount', class: 'align-middle text-center discount'},
+                    { data:'insurance' ,name: 'retail_franchises.insurance', class: 'align-middle text-center insurance'},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {

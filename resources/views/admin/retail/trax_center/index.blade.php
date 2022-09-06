@@ -324,8 +324,8 @@
                     { data:'status' ,name: 'retail_trax_centers.status', class: 'align-middle text-center status'},
                     { data:'code' ,name: 'retail_trax_centers.code', class: 'align-middle text-center code'},
                     { data:'location' ,name: 'location', class: 'align-middle text-center location', orderable: false, searchable: false},
-                    { data:'discount' ,name: 'discount', class: 'align-middle text-center discount', orderable: false, searchable: false},
-                    { data:'insurance' ,name: 'retail_trax_centers.insurance', class: 'align-middle text-center insurance', orderable: false, searchable: false},
+                    { data:'discount' ,name: 'discount', class: 'align-middle text-center discount'},
+                    { data:'insurance' ,name: 'retail_trax_centers.insurance', class: 'align-middle text-center insurance'},
                     { data:'action' ,name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
