@@ -27,6 +27,7 @@ class UpdateOneLinkPaymentTransactionsColumnName extends Migration
             $table->integer('delivery_note_id')->index('delivery_note_id_index');
             $table->tinyInteger('status')->default(1)->index('status_index');
             $table->string('error')->nullable()->default(NULL);
+            $table->timestamps();
         });
     }
 
