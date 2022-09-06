@@ -16,7 +16,7 @@ class UpdateOneLinkPaymentTransactionsColumnName extends Migration
         Schema::create('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
             $table->bigInteger('consumer_number')->index('consumer_number_index');
             $table->integer('transaction_authentication_id')->index('transaction_authentication_id_index');
-            $table->integer('transaction_amount');
+            $table->decimal('transaction_amount');
             $table->string('transaction_date');
             $table->string('transaction_time');
             $table->string('bank_mnemonic');
