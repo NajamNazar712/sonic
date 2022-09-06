@@ -13,6 +13,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -24,7 +25,6 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -6331,19 +6331,19 @@ class DeliveryController extends Controller
         
 
         $delivery_note_id = $request->delivery_note_id;
-        $payment_transactions = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','transaction_amount','created_at', 'tran_date', 'tran_time']);
+        $payment_transactions = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id',$delivery_note_id);
 
         if($payment_transactions->exists())
         {
             $payment_transactions = $payment_transactions->get();
             $payment_transaction_data = array();
             foreach ($payment_transactions as $index => $payment_transaction){
-                $payment_transaction_data['tran_auth_id'] = $payment_transaction->tran_auth_id;
-                $payment_transaction_data['tracking_no'] = $payment_transaction->tracking_no;
+                $payment_transaction_data['transaction_authentication_id'] = $payment_transaction->transaction_authentication_id;
+                $payment_transaction_data['tracking_number'] = $payment_transaction->tracking_number;
                 $payment_transaction_data['transaction_amount'] = $payment_transaction->transaction_amount;
                 $payment_transaction_data['created_at'] = $payment_transaction->created_at;
-                $payment_transaction_data['tran_date'] = Carbon::createFromFormat('d/m/y', $payment_transaction->tran_date);
-                $payment_transaction_data['tran_time'] = Carbon::createFromFormat('H:i:s', $payment_transaction->tran_time);
+                $payment_transaction_data['transaction_date'] = Carbon::parse($payment_transaction->transaction_date)->format('M d, Y');
+                $payment_transaction_data['transaction_time'] = Carbon::parse($payment_transaction->transaction_time)->format('H:i:s');
             }
             return response()->json(['status' => 1, 'transaction_data' => $payment_transaction_data]);
             

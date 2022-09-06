@@ -37,10 +37,10 @@ class ProcessOneLinkDeliveryNoteShipment implements ShouldQueue
         $one_link_details = $this->details;
         $shipment_ids = $one_link_details['shipment_ids'];
         $delivery_note_id = $one_link_details['delivery_note_id'];
+        $shipment_details = array();
 
         if($delivery_note_id != null && is_array($shipment_ids)){
             foreach ($shipment_ids as $index => $shipment_id){
-                $shipment_details = array();
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
                     $shipment_details[$index]['tracking_number'] = $shipment->tracking_number;

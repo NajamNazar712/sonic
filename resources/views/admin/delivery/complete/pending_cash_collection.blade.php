@@ -858,11 +858,11 @@
 
                                         <tr>
                                             <td>${index+1}</td>
-                                            <td>${values.tracking_no}</td>
-                                            <td>${values.tran_auth_id}</td>
+                                            <td>${values.transaction_authentication_id}</td>
+                                            <td>${values.transaction_authentication_id}</td>
                                             <td>${values.transaction_amount}</td>
-                                            <td>${values.tran_date}</td>
-                                            <td>${values.tran_time}</td>
+                                            <td>${values.transaction_date}</td>
+                                            <td>${values.transaction_time}</td>
                                             <td>${values.created_at}</td>
                                         </tr>
 

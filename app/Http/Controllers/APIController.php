@@ -24,7 +24,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OneLink\OneLink;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -5116,16 +5116,16 @@ class APIController extends Controller
             $delivery_note_id = $request->delivery_note_id;
             $status = $request->status;
 
-            $one_link_payment_transaction = new OneLinkPaymentTransaction();
+            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
             $one_link_payment_transaction->consumer_number = $consumer_number;
-            $one_link_payment_transaction->tran_auth_id = $transaction_authentication_id;
+            $one_link_payment_transaction->transaction_authentication_id = $transaction_authentication_id;
             $one_link_payment_transaction->transaction_amount = $transaction_amount;
-            $one_link_payment_transaction->tran_date = $transaction_date;
-            $one_link_payment_transaction->tran_time = $transaction_time;
+            $one_link_payment_transaction->transaction_date = $transaction_date;
+            $one_link_payment_transaction->transaction_time = $transaction_time;
             $one_link_payment_transaction->bank_mnemonic = $bank_mnemonic;
             $one_link_payment_transaction->reserved = $reserved;
             $one_link_payment_transaction->consumer_prefix = $consumer_prefix;
-            $one_link_payment_transaction->tracking_no = $tracking_number;
+            $one_link_payment_transaction->tracking_number = $tracking_number;
             $one_link_payment_transaction->shipment_id = $shipment_id;
             $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
             $one_link_payment_transaction->status = $status;
@@ -5137,7 +5137,7 @@ class APIController extends Controller
                 $update_count = $delivery_note->one_link_payment_count + 1;
                 $delivery_note->one_link_payment_count = $update_count;
                 $delivery_note->save();
-                $amount = OneLinkPaymentTransaction::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
+                $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
                 $shipment = Shipment::find($shipment_id);
                 $shipment->received_amount = $amount;
                 $shipment->save();
@@ -5228,7 +5228,7 @@ class APIController extends Controller
                                     if($shipment_data->amount == $shipment_data->received_amount)
                                     {
                                         // Bill paid status
-                                        $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no',$tracking_no)->first();
                                         
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5397,8 +5397,7 @@ class APIController extends Controller
 
                         if($shipment_data)
                         {
-                            // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
-                            $transaction_data = OneLinkPaymentTransaction::where('tracking_no',$tracking_no)->first();
+                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_no',$tracking_no)->first();
                             
                             if($transaction_data)
                             {
@@ -5444,7 +5443,7 @@ class APIController extends Controller
                                     $request_data['tran_time_formated'] = $tran_time_formated;
                                     $request_data['delivery_note_id'] = $delivery_note;
                                     
-                                    $upload_transaction = OneLinkPaymentTransaction::create($request_data);
+                                    $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
 
                                     if($upload_transaction)
                                     {
