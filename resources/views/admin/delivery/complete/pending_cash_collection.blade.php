@@ -58,7 +58,7 @@
                         <th class="border-primary border-darken-1">CCD Receipts</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
-                        <th class="border-primary border-darken-1">One Link Payment Count</th>
+                        <th class="border-primary border-darken-1">One Link Payment Shipment</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
