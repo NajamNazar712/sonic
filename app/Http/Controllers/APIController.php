@@ -1974,6 +1974,53 @@ class APIController extends Controller
         }
     }
 
+    public function receiving_sheet_print(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'type' => ['nullable', 'boolean'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+            if ($receiving_sheet) {
+                return response()->json(['status' => 1, 'message' => 'Receiving Sheet Not Found.']);
+            }
+            if(count($receiving_sheet->receiving_sheet_shipments) > 200){
+                return response()->json(['status' => 1, 'message' => 'Too many shipments.']);
+
+            }
+            $receiving_sheet = ShipperReceivingSheetController::print_receiving_sheet_and_air_waybill_api($receiving_sheet_id, 4);
+
+            if (!isset($request->type) || $request->type == 0) {
+                $image = SnappyImage::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+
+                return $image->setOption('disable-smart-width', true)->download($filename);
+            } else {
+                $pdf = SnappyPDF::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
+
+                return $pdf->download($filename);
+            }
+
+        }
+    }
+
     public function cities(Request $request)
     {
         $user_id = $request->user_id;
