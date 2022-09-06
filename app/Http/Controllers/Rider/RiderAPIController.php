@@ -16,6 +16,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -8619,6 +8620,8 @@ class RiderAPIController extends Controller
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
+                    $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();
