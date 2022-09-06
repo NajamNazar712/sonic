@@ -15,6 +15,7 @@ class ProcessOneLinkDeliveryNoteShipment implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected $details;
     /**
      * Create a new job instance.
      *
