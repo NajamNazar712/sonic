@@ -544,6 +544,11 @@ Route::name('api.')->group(function () {
             });
         });
     });
+
+
+    Route::prefix('1link')->name('1link.')->group(function () {
+        Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
+    });
     //Hbl Konnect
-    
+
 });
