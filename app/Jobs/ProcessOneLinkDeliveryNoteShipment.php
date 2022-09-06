@@ -59,8 +59,10 @@ class ProcessOneLinkDeliveryNoteShipment implements ShouldQueue
                         'shipments' => $shipment_details,
                     ]
                 ]);
+                var_dump(json_decode($response->getBody(), false));
 
-                var_dump($response->getBody()->getContents());
+                var_dump(json_decode($response->getBody()->getContents(), false));
+
             }
             catch(RequestException $e){
 
