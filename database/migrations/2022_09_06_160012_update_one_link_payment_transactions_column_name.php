@@ -26,6 +26,8 @@ class UpdateOneLinkPaymentTransactionsColumnName extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('one_link_payment_transactions', function (Blueprint $table) {
+            $table->renameColumn('consumer_prefix', 'consumer_prefx');
+        });
     }
 }
