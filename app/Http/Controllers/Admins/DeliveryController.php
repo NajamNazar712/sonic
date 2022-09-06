@@ -6331,7 +6331,7 @@ class DeliveryController extends Controller
         
 
         $delivery_note_id = $request->delivery_note_id;
-        $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','amount','tran_date_formated','tran_time_formated','created_at']);
+        $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','transaction_amount','created_at']);
 
         if($payment_transaction_data->exists())
         {
