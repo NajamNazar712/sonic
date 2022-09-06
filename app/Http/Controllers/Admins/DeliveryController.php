@@ -88,6 +88,7 @@ use App\Http\Models\Admin\PettyCashStatement;
 use App\Jobs\ProcessAgentCallMonitoring;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
+use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
@@ -1286,6 +1287,8 @@ class DeliveryController extends Controller
                         dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
 
                     } else {
+                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
 
@@ -1309,6 +1312,8 @@ class DeliveryController extends Controller
 
                         dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
                     } else {
+                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
 
