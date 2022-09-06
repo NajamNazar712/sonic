@@ -37,7 +37,7 @@ class ProcessOneLinkExpireDeliveryNote implements ShouldQueue
         if($delivery_note_id != null){
 
             try{
-                $client = new Client(['base_uri' => 'https://link1link.trax.pk/sonic/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+                $client = new Client(['base_uri' => 'https://link1link.trax.pk/api/sonic/', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
                 $response = $client->post('out_for_delivery_shipments_expired', [
                     'form_params' => [
                         'delivery_note_id' => $delivery_note_id
