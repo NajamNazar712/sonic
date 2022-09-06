@@ -854,6 +854,7 @@
                             //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                             // });
                             $.each(data.transaction_data, function(index, values) {
+                                console.log(transaction_data);
                                     html+= `
 
                                         <tr>
