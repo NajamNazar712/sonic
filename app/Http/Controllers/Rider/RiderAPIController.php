@@ -97,6 +97,7 @@ use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
@@ -9048,6 +9049,9 @@ class RiderAPIController extends Controller
 
                         if ($updated_shipments_count == 0) {
                             DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+
+                            dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -11384,6 +11388,8 @@ class RiderAPIController extends Controller
                                     $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
                                     if ($updated_shipments_count == 0) {
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+
+                                    dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
                                     }
 
                                     $arr['shipment_id'] = $request->shipment_id;

@@ -2341,6 +2341,8 @@ class DeliveryController extends Controller
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
+
+            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
             $response = array();
             if(count($invalid_reason_shipments) > 0){
                 $response['invalid_shipments'] = $invalid_reason_shipments;
