@@ -47,7 +47,7 @@ class ProcessOneLinkDeliveryNoteShipment implements ShouldQueue
                     $shipment_details[$index]['id'] = $shipment->id;
                     $shipment_details[$index]['amount'] = $shipment->amount;
                     $shipment_details[$index]['consignee_name'] = $shipment->consignee_name;
-                    $shipment_details[$index]['consignee_phone_number'] = $shipment->consignee_phone_number;
+                    $shipment_details[$index]['consignee_phone_number'] = $shipment->consignee_phone_number_1;
                 }
             }
 
