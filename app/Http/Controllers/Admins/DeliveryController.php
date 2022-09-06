@@ -311,11 +311,6 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
-        $valid_shipments = [365421];
-        $process_one_link['shipment_ids'] = $valid_shipments;
-        $process_one_link['delivery_note_id'] = 13987;
-        dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
-        dd(1);
         $operation_rider_category = OperationRidersCategory::all();
 
         return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
@@ -968,7 +963,6 @@ class DeliveryController extends Controller
                 $process_one_link['shipment_ids'] = $valid_shipments;
                 $process_one_link['delivery_note_id'] = $note->id;
                 dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
-                dd($process_one_link);
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
