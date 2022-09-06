@@ -15,7 +15,8 @@ class CreateRiderIncentiveDeliveriesTable extends Migration
     {
         Schema::create('rider_incentive_deliveries', function (Blueprint $table) {
             $table->increments('id');
-            $table->date('date');
+            $table->integer('rider_id')->index();
+            $table->date('date')->index();
             $table->integer('courier_type_id')->index();
             $table->integer('shipment_type_id')->index();
             $table->integer('shipment_weight_type_id')->index();
