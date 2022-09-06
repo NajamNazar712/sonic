@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRiderIncentiveDeliveryShipmentsTable extends Migration
+class CreateRiderDeliveryIncentiveRatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,12 @@ class CreateRiderIncentiveDeliveryShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('rider_incentive_delivery_shipments', function (Blueprint $table) {
+        Schema::create('rider_delivery_incentive_rates', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('rider_id')->index();
-            $table->date('date');
+            $table->integer('city_id')->nullable()->index();
             $table->integer('courier_type_id')->index();
             $table->integer('shipment_type_id')->index();
             $table->integer('shipment_weight_type_id')->index();
-            $table->integer('shipment_id');
             $table->integer('rate');
             $table->timestamps();
         });
@@ -33,6 +31,6 @@ class CreateRiderIncentiveDeliveryShipmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rider_incentive_delivery_shipments');
+        Schema::dropIfExists('rider_delivery_incentive_rates');
     }
 }
