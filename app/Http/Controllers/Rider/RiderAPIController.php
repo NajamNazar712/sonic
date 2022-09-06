@@ -69,6 +69,8 @@ use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RiderIncentiveDelivery;
+use App\Http\Models\Rider\RiderIncentivePickup;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
@@ -12068,6 +12070,76 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'response' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
+    public function rider_incentive_v4(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        if ($to_date) {
+            $rider_delivery_incentives = RiderIncentiveDelivery::join('rider_incentive_delivery_courier_types as ct', 'ct.id', '=', 'rider_incentive_deliveries.courier_type_id')
+                ->join('rider_incentive_delivery_shipment_types as st', 'st.id', '=', 'rider_incentive_deliveries.shipment_type_id')
+                ->join('rider_incentive_delivery_shipment_weight_types as wt', 'wt.id', '=', 'rider_incentive_deliveries.shipment_weight_type_id')
+                ->where('rider_incentive_deliveries.rider_id', $rider_id)->whereBetween('rider_incentive_deliveries.date', [$from_date, $to_date])
+                ->select('rider_incentive_deliveries.*', 'st.name as shipment_type', 'ct.name as courier_type', 'wt.name as weight_type');
+
+            $rider_pickup_incentives = RiderIncentivePickup::where('rider_id', $rider_id)->whereBetween('date', [$from_date, $to_date]);
+        } else {
+            $rider_delivery_incentives = RiderIncentiveDelivery::join('rider_incentive_delivery_courier_types as ct', 'ct.id', '=', 'rider_incentive_deliveries.courier_type_id')
+                ->join('rider_incentive_delivery_shipment_types as st', 'st.id', '=', 'rider_incentive_deliveries.shipment_type_id')
+                ->join('rider_incentive_delivery_shipment_weight_types as wt', 'wt.id', '=', 'rider_incentive_deliveries.shipment_weight_type_id')
+                ->where('rider_incentive_deliveries.rider_id', $rider_id)->whereDate('date', $from_date)
+                ->select('rider_incentive_deliveries.*', 'st.name as shipment_type', 'ct.name as courier_type', 'wt.name as weight_type');
+
+            $rider_pickup_incentives = RiderIncentivePickup::where('rider_id', $rider_id)->whereDate('date', $from_date);
+        }
+        if($rider_delivery_incentives->exists() || $rider_pickup_incentives->exists()){
+            $data = array();
+            $pickup_shipment = NULL;
+            $pickup_incentive = NULL;
+            $delivered_shipment = NULL;
+            $delivered_incentive = NULL;
+            if ($rider_delivery_incentives->exists()) {
+                $rider_delivery_incentives = $rider_delivery_incentives->get();
+                foreach ($rider_delivery_incentives as $rider_delivery_incentive) {
+                    $datum = array();
+                    $datum['date'] = date('Y/m/d',strtotime($rider_delivery_incentive->date));
+                    $datum['shipments'] = $rider_delivery_incentive->shipments;
+                    $datum['rate'] = $rider_delivery_incentive->rate;
+                    $datum['incentive'] = $rider_delivery_incentive->incentive;
+                    $datum['courier_type'] = $rider_delivery_incentive->courier_type;
+                    $datum['shipment_type'] = $rider_delivery_incentive->shipment_type;
+                    $datum['weight_type'] = $rider_delivery_incentive->weight_type;
+                    $datum['type'] = 1;
+                    $data[] = $datum;
+                    $delivered_shipment += $rider_delivery_incentive->shipments;
+                    $delivered_incentive += $rider_delivery_incentive->incentive;
+                }
+            }
+            if ($rider_pickup_incentives->exists()) {
+                $rider_pickup_incentives = $rider_pickup_incentives->get();
+                foreach ($rider_pickup_incentives as $rider_pickup_incentive) {
+                    $datum = array();
+                    $datum['date'] = date('Y/m/d',strtotime($rider_pickup_incentive->date));
+                    $datum['shipments'] = $rider_pickup_incentive->shipments;
+                    $datum['rate'] = $rider_pickup_incentive->rate;
+                    $datum['incentive'] = $rider_pickup_incentive->incentive;
+                    $datum['courier_type'] = NULL;
+                    $datum['shipment_type'] = NULL;
+                    $datum['weight_type'] = NULL;
+                    $datum['type'] = 2;
+                    $data[] = $datum;
+                    $pickup_shipment += $rider_pickup_incentive->shipments;
+                    $pickup_incentive += $rider_pickup_incentive->incentive;
+                }
+                return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_shipment" => $pickup_shipment]);
+            }
+        }
+        else{
+            return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
+        }
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
