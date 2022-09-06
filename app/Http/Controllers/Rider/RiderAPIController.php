@@ -641,7 +641,6 @@ class RiderAPIController extends Controller
 
     public function pickup_pick(Request $request)
     {
-        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_notes,id'],
@@ -731,7 +730,6 @@ class RiderAPIController extends Controller
 
     public function pickup_not_pick(Request $request)
     {
-        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:pickup_notes,id'],
@@ -817,7 +815,6 @@ class RiderAPIController extends Controller
 
     public function pickup_action_log(Request $request)
     {
-        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
@@ -1051,7 +1048,6 @@ class RiderAPIController extends Controller
 
     public function delivery_action_log(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'actions' => ['required', 'array', 'min:1'],
             'actions.*.logged_at' => ['required'],
@@ -1086,7 +1082,6 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
 
         $rules = [
@@ -1288,7 +1283,6 @@ class RiderAPIController extends Controller
 
     public function shipment_undelivered(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
@@ -1500,7 +1494,6 @@ class RiderAPIController extends Controller
 
     public function pickup_pick_v2(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
@@ -1622,7 +1615,6 @@ class RiderAPIController extends Controller
 
     public function pickup_not_pick_v2(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
@@ -2548,7 +2540,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_delivered(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -2694,7 +2685,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -3763,7 +3753,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v2(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -4950,7 +4939,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v3(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -7221,7 +7209,6 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v2(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
         $rules = [
             'added_at' => ['required'],
@@ -7732,7 +7719,6 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v3(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $message = '';
         $rules = [
             'added_at' => ['required'],
