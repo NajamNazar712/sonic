@@ -43,7 +43,7 @@
                                             </div>
                                         </div>
                                     </div></div>
-                                <div class="col-6"><div class="card text-center" id="status_card">
+                                <div class="col-3"><div class="card text-center" id="status_card">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <h4 class="card-title">Status</h4>
@@ -51,6 +51,14 @@
                                             </div>
                                         </div>
                                     </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <h4 class="card-title success">Case Nature ID</h4>
+                                                    <p class="card-text case_nature">No Data</p>
+                                                </div>
+                                            </div>
+                                        </div></div>
                                 <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -136,6 +144,7 @@
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking Number</th>
                                         <th class="border-primary border-darken-1">Delivery Note ID</th>
+                                        <th class="border-primary border-darken-1">Case Nature ID</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Remarks</th>
@@ -245,6 +254,9 @@
         .cyanClass{
             background-color: cyan;
         }
+        .grey{
+            background-color: darkgrey;
+        }
 
     </style>
 @endsection
@@ -299,6 +311,7 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                         {name: 'tracking_number', class: 'align-middle tracking_numbers', orderable: false},
                         {name: 'delivery_note_id', class: 'align-middle delivery_note_id', orderable: false},
+                        {name: 'complaint', class: 'align-middle complaint', orderable: false},
                         {name: 'current_status', class: 'align-middle current_status', orderable: false},
                         {name: 'reason', class: 'align-middle reason', orderable: false},
                         {name: 'remarks', class: 'align-middle remarks', orderable: false},
@@ -311,6 +324,7 @@
                         {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
+                        var complaint = $(row).find("td:eq(3)").html();
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
@@ -322,6 +336,9 @@
                             $(row).addClass('yellowClass');
                         }else if(status === 55){
                             $(row).addClass('cyanClass');
+                        }
+                        else if(complaint != null || complaint != ''){
+                            $(row).addClass('grey');
                         }
                     },
                     initComplete: function() {
@@ -360,7 +377,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -385,7 +402,7 @@
                                     }else{
                                         var rowNo = table.rows().count();
 
-                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -421,17 +438,24 @@
                                 scan_sound(2);
                             }else{
                                 $('#single_div').removeClass('d-none');
-                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass') || $('#status_card').hasClass('yellowClass') || $('#status_card').hasClass('cyanClass') ){
+                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass') || $('#status_card').hasClass('yellowClass') || $('#status_card').hasClass('cyanClass') || $('#status_card').hasClass('grey') ){
                                     $('#status_card').removeClass('greenClass');
                                     $('#status_card').removeClass('redClass');
                                     $('#status_card').removeClass('goldClass');
                                     $('#status_card').removeClass('yellowClass');
                                     $('#status_card').removeClass('cyanClass');
+                                    $('#status_card').removeClass('grey');
                                 }
 
                                 scan_sound(1);
                                 $('#single_div p.track').text(data.details.tracking_number);
                                 $('#single_div p.status').text(data.details.status);
+                                if(data.details.complaint == null){
+                                    $('#single_div p.case_nature').text('No Complaint');
+                                }else{
+                                    $('#single_div p.case_nature').text(data.details.complaint);
+                                }
+
                                 $('#single_div p.origin').text(data.details.origin);
                                 $('#single_div p.destination').text(data.details.destination);
                                 $('#single_div p.amount').text(data.details.amount);
@@ -460,6 +484,9 @@
                                 }
                                 else if(data.details.status_id == 55){
                                     $('#status_card').addClass('cyanClass');
+                                }
+                                else if(data.details.complaint != null){
+                                    $('#status_card').addClass('grey');
                                 }
 
                                 // var rowNo = table.rows().count();

@@ -104,6 +104,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
         Route::post('login_v3', 'Rider\RiderAPIController@login_v2')->name('login_v3');
         Route::post('login_v4', 'Rider\RiderAPIController@login_v4')->name('login_v4');
+        Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
@@ -276,6 +277,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
         Route::post('login_v4', 'AdminAPIController@login_v4')->name('login_v4');
+        Route::post('login_v5', 'AdminAPIController@login_v5')->name('login_v5');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
         Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
@@ -307,6 +309,7 @@ Route::name('api.')->group(function () {
             Route::get('check_permissions', 'AdminAPIController@check_permissions')->name('check_permissions');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
+            Route::post('validate_otp', 'AdminAPIController@validate_otp')->name('validate_otp');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
@@ -438,6 +441,7 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
         Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
         Route::post('login_v4', 'Retail\RetailAPIController@login')->name('login_v4');
+        Route::post('login_v5', 'Retail\RetailAPIController@login')->name('login_v5');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
@@ -479,8 +483,8 @@ Route::name('api.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
         Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('pod_tracking', 'ShipperAPIController@shipment_pod_tracking')->name('pod_tracking');
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
-
             Route::prefix('subscription')->name('subscription.')->group(function () {
                 Route::post('add', 'ShipperAPIController@shipper_subscription_add')->name('add');
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
