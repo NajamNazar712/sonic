@@ -183,7 +183,12 @@ class RiderIncentiveCalculation extends Command
 
         $void_accounts = GlobalSettings::whereIn('type', ['Walk-In', 'packaging_material'])->pluck('setting_value')->toArray();
         $carrefour__accounts = GlobalSettings::where('type', 'carrefour_accounts')->first();
-        $carrefour__accounts = explode(',', $carrefour__accounts->text);
+        if($carrefour__accounts){
+            $carrefour__accounts = explode(',', $carrefour__accounts->text);
+        }
+        else{
+            $carrefour__accounts = array();
+        }
         $segment_users = User::where('u.segment_id', 1)->where('u.sub_segemnt_id', 2)->pluck('id')->toArray();
         $void_accounts = array_merge($foc_accounts, $void_accounts, $carrefour__accounts, $segment_users, [167, 1159, 6693, 12412]);
         $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
