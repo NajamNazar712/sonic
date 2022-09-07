@@ -75,7 +75,7 @@ class RiderIncentiveCalculation extends Command
             ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
             ->whereNotIn('s.user_id', $foc_accounts)
             ->whereNotNull('shipments_journey.rider_id')
-            ->whereDate('shipments_journey.date', $yesterday)
+            ->whereDate('shipments_journey.created_at', $yesterday)
             ->get();
 
         $already_processed_shipments = array();
@@ -196,7 +196,7 @@ class RiderIncentiveCalculation extends Command
             ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
             ->whereNotIn('s.user_id', $void_accounts)
             ->whereNotNull('shipments_journey.rider_id')
-            ->whereDate('shipments_journey.date', $yesterday)
+            ->whereDate('shipments_journey.created_at', $yesterday)
             ->groupBy('shipments_journey.rider_id')
             ->get();
 
