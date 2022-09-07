@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\ReceivingSheetPrintStatus;
 use App\Http\Models\BookingType;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CorporateRateStatus;
@@ -1405,14 +1406,17 @@ class ShipperReceivingSheetController extends Controller
         }
     }
 
-    static public function print_receiving_sheet_and_air_waybill_api($id, $user_type, $body_only = FALSE) {
+    static public function print_receiving_sheet_and_air_waybill_api($id, $user_type, $print_status, $body_only = FALSE) {
         // $user_type = NULL;
 
-        
 
         $html = '';
 
         $receiving_sheet = ReceivingSheet::find($id);
+        $receiving_sheet_print = new ReceivingSheetPrintStatus;
+        $receiving_sheet_print->status = 1;
+        $receiving_sheet_print->receiving_sheet_id = $receiving_sheet->id;
+        $receiving_sheet_print->save();
 
         if ($user_type && $receiving_sheet) {
             
@@ -1540,11 +1544,12 @@ class ShipperReceivingSheetController extends Controller
                 $shipment_ids[] = $receiving_sheet_shipment->shipment->id;
             }
 
-            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, NULL);
+            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, NULL,NULL,NULL,$print_status);
 
             $html .= '
                         </div>
                     </div>
+                    
                     <script>
                       window.onload = function() {
                         window.print();
