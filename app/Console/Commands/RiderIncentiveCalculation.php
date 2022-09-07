@@ -200,7 +200,6 @@ class RiderIncentiveCalculation extends Command
             ->where('s.packaging_material_request', 0)
             ->where('usi.warehouse', '!=', 0)
             ->where('shipments_journey.shipper_status_id', 2)
-            ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
             ->whereNotIn('s.user_id', $void_accounts)
             ->whereNotNull('shipments_journey.rider_id')
             ->whereDate('shipments_journey.created_at', $yesterday)
