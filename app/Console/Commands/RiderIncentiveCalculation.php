@@ -189,7 +189,7 @@ class RiderIncentiveCalculation extends Command
         else{
             $carrefour__accounts = array();
         }
-        $segment_users = User::where('u.segment_id', 1)->where('u.sub_segemnt_id', 2)->pluck('id')->toArray();
+        $segment_users = User::where('u.segment_id', 1)->where('u.sub_segment_id', 2)->pluck('id')->toArray();
         $void_accounts = array_merge($foc_accounts, $void_accounts, $carrefour__accounts, $segment_users, [167, 1159, 6693, 12412]);
         $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
