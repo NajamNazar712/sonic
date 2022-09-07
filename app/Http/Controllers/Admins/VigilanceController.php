@@ -11,6 +11,7 @@ use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
@@ -104,6 +105,9 @@ class VigilanceController extends Controller
                     $last_status = ShipmentsJourney::where('shipment_id',$shipment->id)->orderBy('id','desc')->first();
                     $last_status_date = Carbon::parse($last_status->created_at)->toDateTimeString();
                     $data['status_date'] = $last_status_date;
+
+                    ShipmentScanningJourneyController::add($shipment->id,30,1,Auth::id(),NULL,NULL);
+
 
                     return response()->json(['status' => 1, 'details' => $data]);
 
