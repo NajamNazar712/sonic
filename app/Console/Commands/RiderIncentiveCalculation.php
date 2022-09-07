@@ -66,6 +66,8 @@ class RiderIncentiveCalculation extends Command
         $foc_accounts = GlobalSettings::where('type', 'foc_account_tag')->first();
         $foc_accounts = explode(',', $foc_accounts->text);
         $yesterday = Carbon::yesterday()->toDateString();
+        RiderIncentiveDeliveryShipment::whereDate('date', $yesterday)->delete();
+        RiderIncentivePickup::whereDate('date', $yesterday)->delete();
         $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
