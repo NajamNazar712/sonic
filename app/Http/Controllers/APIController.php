@@ -2003,7 +2003,7 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Too many shipments.']);
             }
             if(!isset($request->type) || $request->type == 0){
-                if(count($receiving_sheet->receiving_sheet_shipments) > 49){
+                if(count($receiving_sheet->receiving_sheet_shipments) > 50){
                     return response()->json(['status' => 1, 'message' => 'Too many shipments, please use type=1 to extract pdf.']);
                 } 
             }
