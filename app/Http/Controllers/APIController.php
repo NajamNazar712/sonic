@@ -2002,7 +2002,11 @@ class APIController extends Controller
             if(count($receiving_sheet->receiving_sheet_shipments) > 200){
                 return response()->json(['status' => 1, 'message' => 'Too many shipments.']);
             }
-            
+            if(!isset($request->type) || $request->type == 0){
+                if(count($receiving_sheet->receiving_sheet_shipments) > 49){
+                    return response()->json(['status' => 1, 'message' => 'Too many shipments, please use type=1 to extract pdf.']);
+                } 
+            }
             $print_status = 0;
             $receiving_sheet_print = ReceivingSheetPrintStatus::where('receiving_sheet_id',$receiving_sheet->id);
             if($receiving_sheet_print->exists()){
