@@ -12131,8 +12131,8 @@ class RiderAPIController extends Controller
                     $pickup_shipment += $rider_pickup_incentive->shipments;
                     $pickup_incentive += $rider_pickup_incentive->incentive;
                 }
-                return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
             }
+            return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
         }
         else{
             return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
