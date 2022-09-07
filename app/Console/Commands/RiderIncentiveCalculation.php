@@ -66,6 +66,7 @@ class RiderIncentiveCalculation extends Command
         $foc_accounts = GlobalSettings::where('type', 'foc_account_tag')->first();
         $foc_accounts = explode(',', $foc_accounts->text);
         $yesterday = Carbon::yesterday()->toDateString();
+        RiderIncentiveDelivery::whereDate('date', $yesterday)->delete();
         RiderIncentiveDeliveryShipment::whereDate('date', $yesterday)->delete();
         RiderIncentivePickup::whereDate('date', $yesterday)->delete();
         $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
@@ -141,7 +142,9 @@ class RiderIncentiveCalculation extends Command
                     if(array_key_exists($rider_id, $rider_incentive_details)){
                         if(array_key_exists($courier_type_id, $rider_incentive_details[$rider_id])){
                             if(array_key_exists($shipment_type_id, $rider_incentive_details[$rider_id][$courier_type_id])){
-                                $flag = true;
+                                if(array_key_exists($shipment_weight_type_id, $rider_incentive_details[$rider_id][$courier_type_id][$shipment_type_id])){
+                                    $flag = true;
+                                }
                             }
                         }
                     }
