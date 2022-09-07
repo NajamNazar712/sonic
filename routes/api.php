@@ -231,6 +231,7 @@ Route::name('api.')->group(function () {
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
             Route::post('rider_incentives_v2', 'Rider\RiderAPIController@rider_incentive_v2')->name('rider_incentives_v2');
             Route::post('rider_incentives_v3', 'Rider\RiderAPIController@rider_incentive_v3')->name('rider_incentives_v3');
+            Route::post('rider_incentives_v4', 'Rider\RiderAPIController@rider_incentive_v4')->name('rider_incentives_v4');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
