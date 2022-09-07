@@ -202,7 +202,7 @@ class RiderIncentiveCalculation extends Command
             ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
             ->select('shipments_journey.rider_id as rider_id', DB::raw('count(DISTINCT s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'r.city_id', 'r.rider_main_category_id')
             ->where('s.packaging_material_request', 0)
-            ->where('usi.warehouse', '!=', 0)
+            ->where('usi.warehouse', '!=', 1)
             ->where('shipments_journey.shipper_status_id', 2)
             ->whereNotIn('s.user_id', $void_accounts)
             ->whereNotNull('shipments_journey.rider_id')
