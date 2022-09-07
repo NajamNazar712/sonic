@@ -45,12 +45,14 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipment(s)</th>
                         <th class="border-primary border-darken-1">Excess Shipment(s)</th>
                         <th class="border-primary border-darken-1">Verify Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Unverify Shipment(s)</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated Date</th>
+                        <th class="border-primary border-darken-1">Assigned Date</th>
+                        <th class="border-primary border-darken-1">Assigned By</th>
                     </tr>
                     </thead>
                 </table>
@@ -106,6 +108,25 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="verify_shipments_modal_title">Verify Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="unverify_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="unverify_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="unverify_shipments_modal_title">Unverify Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -234,12 +255,14 @@
                             head.push('Status');
                             head.push('Hub');
                             head.push('Rider');
-                            head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('Excess Shipments');
                             head.push('Verify Shipments');
+                            head.push('Unverify Shipments');
                             head.push('Created By');
                             head.push('Created Date');
+                            head.push('Assigned Date');
+                            head.push('Assigned By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -250,12 +273,15 @@
                                 row.push(values.main_status);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.excess_shipments_count);
                                 row.push(values.verify_shipments_count);
+                                row.push(values.unverify_shipments);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
+                                row.push(values.asigned_date);
+                                row.push(values.asignee);
+                               
                                 body.push(row);
                             });
                         },
@@ -292,19 +318,21 @@
                     }
                 },
                 rowId: 'vigilance_id',
-                order: [[10, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'excess_shipments_link' ,name: 'vigilance_verifications.excess_shipments_count', class: 'align-middle excess_shipments_link text-center'},
                     { data:'verify_shipments_link' ,name: 'vigilance_verifications.verify_shipments_count', class: 'align-middle verify_shipments_link text-center'},
+                    { data:'unverify_shipments_link' ,name: 'unverify_shipments_link', class: 'align-middle unverify_shipments_link text-center',orderable: false, searchable: false},
                     { data:'created_by' ,name: 'cb.name', class: 'align-middle created_by'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
+                    { data:'asigned_date' ,name: 'delivery_notes.created_at', class: 'align-middle asigned_date'},
+                    { data:'asignee' ,name: 'ad.name', class: 'align-middle asignee'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -331,7 +359,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.unverify_shipments_link')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -513,6 +541,34 @@
                                 });
                             }
                             $('#verify_shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.unverify_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#unverify_shipments_modal .modal-body').html('');
+                $('#unverify_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.vigilance.verification.unverify_cns') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'verify_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#unverify_shipments_modal .modal-body').html(html);
                         }
                     });
 

@@ -109,6 +109,8 @@ use App\Http\Models\Admin\PODImage;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Vigilance\VigilanceVerification;
+use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
@@ -1018,7 +1020,8 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt'])
+            ->leftjoin('vigilance_verifications as vv', 'vv.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','vv.verify_shipments_count','vv.excess_shipments_count'])
             ->where('delivery_notes.status', 0);
 
 
@@ -1099,6 +1102,33 @@ class DeliveryController extends Controller
                     $query->where('oc.business_category_id', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
+                }
+            })
+            ->addColumn('vigilance_verification', function ($result) {
+                
+                if ($result->shipments_count == $result->verify_shipments_count) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Verified Count</button>';
+
+                    return 'Yes';
+                } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle partial_count">Partial</button>';
+                }else{
+                    return '<strong class="text-danger">No</strong>';
+                }
+            })
+            ->filterColumn('vigilance_verification', function ($query, $keyword) {
+                // $keyword = strtolower($keyword);
+                if ($keyword == 1) {
+                    //verified
+                    $query->where('vv.verify_shipments_count', '=', 'delivery_notes.shipment_count');
+
+                } elseif($keyword == 2) {
+                    //partial
+                    $query->where('vv.verify_shipments_count', '<>', 0)->where('vv.excess_shipments_count','<>',0);
+
+                }else{
+                    //no
+                    $query->where('vv.verify_shipments_count', '=', null);
                 }
             })
             ->addColumn("action", function ($result) {
@@ -8527,6 +8557,43 @@ class DeliveryController extends Controller
         } else {
             return response()->json(['status'=> 0,'error'=>"Station Deposit Notes Not Found"]);
 
+        }
+    }
+
+    public function receive_delivery_shipments_verified(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
+        $shipments = array();
+        if ($delivery_note_shipments->count() != 0) {
+            foreach ($delivery_note_shipments as $delivery_note_shipment) {
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        } else {
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+    public function receive_delivery_shipment_partial(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $vigilance_verification = VigilanceVerification::where('delivery_note_id',$delivery_note_id)->get()->first();
+
+        $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance_verification->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
+        
+        $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$delivery_note_id)->pluck('shipment_id')->toArray();
+        $diff_shipments = array_diff($delivery_note_shipments,$vigilance_shipments);
+
+        $shipments = array();
+        if (count($diff_shipments) != 0) {
+            foreach ($diff_shipments as $diff_shipment) {
+                $shipment = Shipment::find($diff_shipment);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        } else {
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
     }
 }

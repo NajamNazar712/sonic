@@ -42,8 +42,6 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Delivery Note</th>
-                                    <th class="border-primary border-darken-1">Status Date and Time</th>
-                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">COD Amount</th>
@@ -79,6 +77,8 @@
                                             <th class="border-primary border-darken-1">Tracking No.</th>
                                             <th class="border-primary border-darken-1">Origin</th>
                                             <th class="border-primary border-darken-1">Destination</th>
+                                            <th class="border-primary border-darken-1">Status Date and Time</th>
+                                            <th class="border-primary border-darken-1">Status</th>
                                             <th class="border-primary border-darken-1">Amount</th>
                                         </tr>
                                         </thead>
@@ -230,8 +230,8 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_numbers'},
                         {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                        {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                        {data: 'shipment_status', name: 'ss.name', class: 'align-middle shipment_status'},
+                        // {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                        // {data: 'shipment_status', name: 'ss.name', class: 'align-middle shipment_status'},
                         {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                         {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                         {data: 'amount', name: 's.amount', class: 'align-middle amount'}
@@ -277,6 +277,8 @@
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
                     {name: 'origin', class: 'align-middle origin form-group', orderable: false},
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
+                    {name: 'status_date', class: 'align-middle status_date', orderable: false},
+                    {name: 'shipment_status', class: 'align-middle shipment_status', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -330,9 +332,13 @@
                                         var rowNo = vtable.rows().count();
                                         var shipment_id = data.details.id;
 
-                                        vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.origin, data.details.destination, data.details.amount]).node().id = shipment_id;
+                                        vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.origin, data.details.destination,data.details.status_date,data.details.shipment_status, data.details.amount]).node().id = shipment_id;
                                         vtable.draw(false);
-                                        scan_sound(1);
+                                        if(data.details.verify_id == 1){
+                                            scan_sound(1);
+                                        }else{
+                                            scan_sound(2);
+                                        }
                                         vtable.order([0, 'desc']).draw();
                                         var verify_id = data.details.verify_id;
                                         shipment_ids.push(shipment_id);
