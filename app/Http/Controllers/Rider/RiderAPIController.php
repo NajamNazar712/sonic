@@ -12105,13 +12105,13 @@ class RiderAPIController extends Controller
                 foreach ($rider_delivery_incentives as $rider_delivery_incentive) {
                     $datum = array();
                     $datum['date'] = date('Y/m/d',strtotime($rider_delivery_incentive->date));
-                    $datum['shipments'] = $rider_delivery_incentive->shipments;
-                    $datum['rate'] = $rider_delivery_incentive->rate;
-                    $datum['incentive'] = $rider_delivery_incentive->incentive;
+                    $datum['shipments'] = (string)$rider_delivery_incentive->shipments;
+                    $datum['rate'] = (string)$rider_delivery_incentive->rate;
+                    $datum['incentive'] = (string)$rider_delivery_incentive->incentive;
                     $datum['shipment_type'] = $rider_delivery_incentive->shipment_type;
                     $datum['weight_type'] = $rider_delivery_incentive->weight_type;
-                    $datum['type'] = 1;
-                    $data[] = $datum;
+                    $datum['type'] = "1";
+                    $data[$rider_delivery_incentive->date]["delivered"][] = $datum;
                     $delivered_shipment += $rider_delivery_incentive->shipments;
                     $delivered_incentive += $rider_delivery_incentive->incentive;
                 }
@@ -12121,18 +12121,18 @@ class RiderAPIController extends Controller
                 foreach ($rider_pickup_incentives as $rider_pickup_incentive) {
                     $datum = array();
                     $datum['date'] = date('Y/m/d',strtotime($rider_pickup_incentive->date));
-                    $datum['shipments'] = $rider_pickup_incentive->shipments;
-                    $datum['rate'] = $rider_pickup_incentive->rate;
-                    $datum['incentive'] = $rider_pickup_incentive->incentive;
+                    $datum['shipments'] = (string)$rider_pickup_incentive->shipments;
+                    $datum['rate'] = (string)$rider_pickup_incentive->rate;
+                    $datum['incentive'] = (string)$rider_pickup_incentive->incentive;
                     $datum['shipment_type'] = NULL;
                     $datum['weight_type'] = NULL;
-                    $datum['type'] = 2;
-                    $data[] = $datum;
+                    $datum['type'] = "2";
+                    $data[$rider_pickup_incentive->date]["picked"][] = $datum;
                     $pickup_shipment += $rider_pickup_incentive->shipments;
                     $pickup_incentive += $rider_pickup_incentive->incentive;
                 }
-                return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
             }
+            return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
         }
         else{
             return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
