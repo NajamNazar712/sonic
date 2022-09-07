@@ -133,6 +133,7 @@ class RiderIncentiveCalculation extends Command
                     $delivery_incentive_shipment->shipment_weight_type_id = $shipment_weight_type_id;
                     $delivery_incentive_shipment->shipment_id = $shipment_id;
                     $delivery_incentive_shipment->rate = $rate;
+                    $delivery_incentive_shipment->save();
 
                     $flag = false;
                     if(array_key_exists($rider_id, $rider_incentive_details)){
