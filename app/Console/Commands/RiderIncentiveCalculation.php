@@ -84,7 +84,7 @@ class RiderIncentiveCalculation extends Command
             foreach ($shipments as $shipment){
                 if(!in_array($shipment->id, $already_processed_shipments)){
                     $rider_id = $shipment->rider_id;
-                    $shipment_id = $shipment->shipment_id;
+                    $shipment_id = $shipment->id;
 
                     if($shipment->rider_category_id == 2){
                         $courier_type_id = 2;
