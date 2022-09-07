@@ -158,22 +158,24 @@ class RiderIncentiveCalculation extends Command
             if(count($rider_incentive_details) > 0){
                 foreach ($rider_incentive_details as $rider_id => $courier_type_ids){
                     foreach ($courier_type_ids as $courier_type_id => $shipment_type_ids){
-                        foreach ($shipment_type_ids as $shipment_type_id => $detail){
-dd($detail['rate']);
-                            $shipment_count = $detail['shipments'];
-                            $rate = $detail['rate'];
-                            $incentive = $rate * $shipment_count;
+                        foreach ($shipment_type_ids as $shipment_type_id => $details){
+                            foreach ($details as $detail){
+                                dd($detail['shipments']);
+                                $shipment_count = $detail['shipments'];
+                                $rate = $detail['rate'];
+                                $incentive = $rate * $shipment_count;
 
-                            $delivery_incentive = new RiderIncentiveDelivery();
-                            $delivery_incentive->rider_id = $rider_id;
-                            $delivery_incentive->date = $yesterday;
-                            $delivery_incentive->courier_type_id = $courier_type_id;
-                            $delivery_incentive->shipment_type_id = $shipment_type_id;
-                            $delivery_incentive->shipment_weight_type_id = $shipment_weight_type_id;
-                            $delivery_incentive->shipments = $shipment_count;
-                            $delivery_incentive->rate = $rate;
-                            $delivery_incentive->incentive = $incentive;
-                            $delivery_incentive->save();
+                                $delivery_incentive = new RiderIncentiveDelivery();
+                                $delivery_incentive->rider_id = $rider_id;
+                                $delivery_incentive->date = $yesterday;
+                                $delivery_incentive->courier_type_id = $courier_type_id;
+                                $delivery_incentive->shipment_type_id = $shipment_type_id;
+                                $delivery_incentive->shipment_weight_type_id = $shipment_weight_type_id;
+                                $delivery_incentive->shipments = $shipment_count;
+                                $delivery_incentive->rate = $rate;
+                                $delivery_incentive->incentive = $incentive;
+                                $delivery_incentive->save();
+                            }
                         }
                     }
                 }
