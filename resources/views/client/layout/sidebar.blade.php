@@ -167,6 +167,10 @@
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
             @endif
 
+            @if (session('user_type') == 1 || in_array(19, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('cod.crm.bulk_claim.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Bulk Claim Logging</span></a></li>
+            @endif
+
             @if (session('user_type') == 1)
                 <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-users"></i>Substitute Accounts</span></a></li>
             @endif

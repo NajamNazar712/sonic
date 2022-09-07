@@ -206,7 +206,7 @@ class RetailShipmentBookController extends Controller
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_international_shipping_modes =  RetailShippingMode::where('business_category_id',2)->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
-        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
@@ -1691,7 +1691,7 @@ class RetailShipmentBookController extends Controller
         $business_categories = BusinessCategory::where('id', 1)->get();
         $shipping_modes = RetailShippingMode::where('id','!=',3)->where('business_category_id',1)->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
-        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', 1)->get();
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
@@ -1922,7 +1922,7 @@ class RetailShipmentBookController extends Controller
                 $business_categories = BusinessCategory::where('id', '!=', 2)->pluck('name', 'id');
                 $shipping_modes = RetailShippingMode::where('id', '!=', 3)->pluck('name', 'id');
                 $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
-//                $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+//                $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
                 $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.name')->get();
                 $payment_modes = RetailPaymentMode::where('id', 1)->pluck('name', 'id');
                 $charges_modes = ChargesMode::whereIn('id', [1, 2])->pluck('charges_mode', 'id');
