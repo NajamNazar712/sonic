@@ -12111,7 +12111,7 @@ class RiderAPIController extends Controller
                     $datum['shipment_type'] = $rider_delivery_incentive->shipment_type;
                     $datum['weight_type'] = $rider_delivery_incentive->weight_type;
                     $datum['type'] = 1;
-                    $data[$rider_delivery_incentive->date][] = $datum;
+                    $data[$rider_delivery_incentive->date]["delivery"] = $datum;
                     $delivered_shipment += $rider_delivery_incentive->shipments;
                     $delivered_incentive += $rider_delivery_incentive->incentive;
                 }
