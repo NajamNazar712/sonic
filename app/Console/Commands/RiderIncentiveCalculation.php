@@ -149,7 +149,6 @@ class RiderIncentiveCalculation extends Command
                         }
                     }
                     if($flag == true){
-                        $rider_incentive_details[$rider_id][$courier_type_id][$shipment_type_id][$shipment_weight_type_id]['rate'] = $rate + $rider_incentive_details[$rider_id][$courier_type_id][$shipment_type_id][$shipment_weight_type_id]['rate'];
                         $rider_incentive_details[$rider_id][$courier_type_id][$shipment_type_id][$shipment_weight_type_id]['shipments']++;
                     }
                     else{
