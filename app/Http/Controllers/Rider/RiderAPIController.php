@@ -12108,7 +12108,6 @@ class RiderAPIController extends Controller
                     $datum['shipments'] = $rider_delivery_incentive->shipments;
                     $datum['rate'] = $rider_delivery_incentive->rate;
                     $datum['incentive'] = $rider_delivery_incentive->incentive;
-                    $datum['courier_type'] = $rider_delivery_incentive->courier_type;
                     $datum['shipment_type'] = $rider_delivery_incentive->shipment_type;
                     $datum['weight_type'] = $rider_delivery_incentive->weight_type;
                     $datum['type'] = 1;
@@ -12125,7 +12124,6 @@ class RiderAPIController extends Controller
                     $datum['shipments'] = $rider_pickup_incentive->shipments;
                     $datum['rate'] = $rider_pickup_incentive->rate;
                     $datum['incentive'] = $rider_pickup_incentive->incentive;
-                    $datum['courier_type'] = NULL;
                     $datum['shipment_type'] = NULL;
                     $datum['weight_type'] = NULL;
                     $datum['type'] = 2;
@@ -12133,7 +12131,7 @@ class RiderAPIController extends Controller
                     $pickup_shipment += $rider_pickup_incentive->shipments;
                     $pickup_incentive += $rider_pickup_incentive->incentive;
                 }
-                return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_shipment" => $pickup_shipment]);
+                return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
             }
         }
         else{
