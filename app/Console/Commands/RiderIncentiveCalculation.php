@@ -159,7 +159,7 @@ class RiderIncentiveCalculation extends Command
                 foreach ($rider_incentive_details as $rider_id => $courier_type_ids){
                     foreach ($courier_type_ids as $courier_type_id => $shipment_type_ids){
                         foreach ($shipment_type_ids as $shipment_type_id => $detail){
-dd($detail);
+dd($detail['rate']);
                             $shipment_count = $detail['shipments'];
                             $rate = $detail['rate'];
                             $incentive = $rate * $shipment_count;
