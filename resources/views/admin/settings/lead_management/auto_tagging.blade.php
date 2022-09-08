@@ -68,8 +68,7 @@
                     </div>
                     
                     <div class="form-group" id="service_select">
-                        <select name="service_id" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
-                            <option value="0" > All Services </option>
+                        <select name="service_id[]" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required"  multiple="multiple">
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" > {{ $service->name }} </option>
                             @endforeach
@@ -135,8 +134,7 @@
                     </div>
 
                     <div class="form-group">
-                        <select name="service_id" id="edit_service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
-                            <option value="0" > All Services </option>
+                        <select name="service_id[]" id="edit_service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required" multiple="multiple">
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" > {{ $service->name }} </option>
                             @endforeach
@@ -162,6 +160,25 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <div class="modal fade" id="all_services" role="dialog" aria-labelledby="services_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="services_title">Service(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -210,7 +227,7 @@
                 allowClear:true,
                 dropdownParent:$('#agent_assign')
             });
-            $('#service_id').prepend('<option selected></option>').select2({
+            $('#service_id').select2({
                 width:'100%',
                 placeholder:"Select Service",
                 allowClear:true,
@@ -455,13 +472,13 @@
                 },
                 ajax: '{{ route('admin.settings.lead_tagging.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                // order: [[4, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
-                    {data: 'service2', name: 's.name', class: 'align-middle service'},
+                    {data: 'service2_link', name: 'service2', class: 'align-middle service', orderable: false, searchable: false},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'status', name: 'lead_taggings.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -488,7 +505,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.service')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){
@@ -661,9 +678,9 @@
                     form.submit();    
                 }
                 
-                });
+            });
 
-                $( "#agent_edit" ).validate({
+            $( "#agent_edit" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -672,7 +689,39 @@
                     form.submit();    
                 }
                 
-                });
+            });
+            $('#datatable tbody').on('click','tr td.service button',function () {
+                var id = $(this).attr('id');
+                console.log(id);
+                $('#all_services .modal-body').html('');
+
+                if(id){
+                    $.ajax({
+                        url:"{{route('admin.settings.lead_tagging.services')}}",
+                        method:'POST',
+                        data:{
+                            'lead_tagging_id':id,
+                            '_token':'{{ csrf_token() }}',
+                        }
+                    }).done(function (data) {
+                        if (data) {
+                            var services_names = '';
+
+                            $.each(data.services, function(index, service) {
+                                services_names += service+'<br>';
+                            });
+
+                            $('#all_services .modal-body').html(services_names);
+
+                            $('#all_services').modal('show');
+                        }
+                        // UnblockPagePermanently();
+
+                    });
+                }
+
+
+            });
         });
     </script>
 @endsection
