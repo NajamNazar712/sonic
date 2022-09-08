@@ -212,7 +212,7 @@ class RiderIncentiveCalculation extends Command
 
         if(count($shipments) > 0){
             foreach ($shipments as $shipment){
-                if($shipment->main_rider_category == 1){
+                if($shipment->rider_main_category_id == 1){
                     if(in_array($shipment->city_id, [202, 223])){
                         $rate = 1;
                     }
