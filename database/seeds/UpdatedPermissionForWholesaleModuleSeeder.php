@@ -11,6 +11,6 @@ class UpdatedPermissionForWholesaleModuleSeeder extends Seeder
      */
     public function run()
     {
-        //
+
     }
 }

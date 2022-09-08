@@ -921,6 +921,20 @@
                             </ul>
                         </li>
                     @endif
+
+                    @if (session('role_id') == 1 || count(array_intersect([770, 771], session('permissions'))) !== 0)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">International</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 || in_array(770, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.international.wholesale.accounts.index') }}">Accounts</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(771, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.international.wholesale.excel.index') }}">Excel Booking</a></li>
+                                @endif
+
+                            </ul>
+                        </li>
+                    @endif
                   {{--  <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>--}}
                 </ul>
             </li>

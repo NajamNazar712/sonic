@@ -3742,6 +3742,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit','Admins\AdminInternationalRatesController@extra_service_charges_submit')->name('submit');
         });
 
+        Route::prefix('wholesale')->name('wholesale.')->group(function () {
+            Route::prefix('accounts')->name('accounts.')->group(function () {
+                Route::get('', 'Admins\InternationalWholesaleController@accounts_index')->name('index');
+                Route::get('list', 'Admins\InternationalWholesaleController@accounts_list')->name('list');
+                Route::post('store', 'Admins\InternationalWholesaleController@accounts_store')->name('store');
+                Route::get('edit', 'Admins\InternationalWholesaleController@accounts_edit_info')->name('edit');
+                Route::post('edit', 'Admins\InternationalWholesaleController@accounts_edit')->name('edit');
+            });
+            Route::prefix('excel')->name('excel.')->group(function () {
+                Route::get('', 'Admins\InternationalWholesaleController@index')->name('index');
+                Route::post('store', 'Admins\InternationalWholesaleController@store')->name('store');
+            });
+        });
     });
 
 	Route::prefix('telenor')->name('telenor.')->group(function(){
