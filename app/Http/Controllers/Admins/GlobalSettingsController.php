@@ -5663,11 +5663,6 @@ public function sales_incentive()
     }
 
     public function lead_tagging_index(){
-        $lead_taggings = DB::table('module_permissions')->get();
-        foreach ($lead_taggings as $lead_tagging) {
-            dump($lead_tagging->name);
-        }
-        dd(DB::table('module_permissions')->get());
         
         ActivityTrailController::createActivityTrailLog(Auth::id(),493);
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
