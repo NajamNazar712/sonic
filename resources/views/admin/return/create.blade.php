@@ -37,9 +37,11 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="hub_name" id="hub_name" class="form-control select2" required >
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
+                                @if(count($hubs) > 0)
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                @endif
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -55,9 +57,11 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                @foreach($routes as $route)
-                                    <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
-                                @endforeach
+                                @if(count($routes) > 0)
+                                    @foreach($routes as $route)
+                                        <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                    @endforeach
+                                @endif
                             </select>
                             <div class="danger" id="route_error" style="display:none;">This field is required</div>
                         </fieldset>
