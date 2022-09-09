@@ -63,7 +63,7 @@ class RiderIncentiveCalculation extends Command
 
     public function handle()
     {
-        $dates = ['2022-07-25', '2022-07-26', '2022-07-27', '2022-07-28', '2022-07-29', '2022-07-30', '2022-07-31', '2022-08-01', '2022-08-02', '2022-08-03', '2022-08-04', '2022-08-05', '2022-08-06', '2022-08-07', '2022-08-08', '2022-08-09', '2022-08-10', '2022-08-11', '2022-08-12', '2022-08-13', '2022-08-14', '2022-08-15', '2022-08-16', '2022-08-17', '2022-08-18', '2022-08-19', '2022-08-20', '2022-08-21', '2022-08-22', '2022-08-23', '2022-08-24'];
+        $dates = ['2022-07-26', '2022-07-27', '2022-07-28', '2022-07-29', '2022-07-30', '2022-07-31', '2022-08-01', '2022-08-02', '2022-08-03', '2022-08-04', '2022-08-05', '2022-08-06', '2022-08-07', '2022-08-08', '2022-08-09', '2022-08-10', '2022-08-11', '2022-08-12', '2022-08-13', '2022-08-14', '2022-08-15', '2022-08-16', '2022-08-17', '2022-08-18', '2022-08-19', '2022-08-20', '2022-08-21', '2022-08-22', '2022-08-23', '2022-08-24', '2022-08-25'];
         $foc_accounts = GlobalSettings::where('type', 'foc_account_tag')->first();
         $foc_accounts = explode(',', $foc_accounts->text);
 
@@ -83,6 +83,9 @@ class RiderIncentiveCalculation extends Command
             RiderIncentiveDeliveryShipment::whereDate('date', $yesterday)->delete();
             RiderIncentivePickup::whereDate('date', $yesterday)->delete();
 
+            $start_date = Carbon::parse($date)->toDateTimeString();
+            $end_date = Carbon::parse($date)->addDays(1)->toDateTimeString();
+
             $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
@@ -92,7 +95,8 @@ class RiderIncentiveCalculation extends Command
                 ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
                 ->whereNotIn('s.user_id', $foc_accounts)
                 ->whereNotNull('shipments_journey.rider_id')
-                ->whereDate('shipments_journey.created_at', $yesterday)
+                ->where('shipments_journey.created_at', '>=', $start_date)
+                ->where('shipments_journey.created_at', '<', $end_date)
                 ->get();
 
             $already_processed_shipments = array();
@@ -210,7 +214,8 @@ class RiderIncentiveCalculation extends Command
                 ->where('shipments_journey.shipper_status_id', 2)
                 ->whereNotIn('s.user_id', $void_accounts)
                 ->whereNotNull('shipments_journey.rider_id')
-                ->whereDate('shipments_journey.created_at', $yesterday)
+                ->where('shipments_journey.created_at', '>=', $start_date)
+                ->where('shipments_journey.created_at', '<', $end_date)
                 ->groupBy('shipments_journey.rider_id')
                 ->get();
 
