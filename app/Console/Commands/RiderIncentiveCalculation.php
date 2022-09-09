@@ -89,7 +89,7 @@ class RiderIncentiveCalculation extends Command
             $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
-                ->select('shipments_journey.rider_id as rider_id', 's.id as id', 's.actual_weight as actual_weight', 's.amount as amount', 'u.segment_id as segment_id', 'u.sub_segment_id as sub_segment_id', 'r.rider_category_id as rider_category_id', 'r.city_id as city_id')
+                ->select('shipments_journey.reference_1_id as delivery_note_id', 'shipments_journey.rider_id as rider_id', 's.id as id', 's.actual_weight as actual_weight', 's.amount as amount', 'u.segment_id as segment_id', 'u.sub_segment_id as sub_segment_id', 'r.rider_category_id as rider_category_id', 'r.city_id as city_id')
                 ->where('s.packaging_material_request', 0)
                 ->whereIn('shipments_journey.shipper_status_id', [14, 30, 36, 37])
                 ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
@@ -106,6 +106,7 @@ class RiderIncentiveCalculation extends Command
                     if(!in_array($shipment->id, $already_processed_shipments)){
                         $rider_id = $shipment->rider_id;
                         $shipment_id = $shipment->id;
+                        $delivery_note_id = $shipment->delivery_note_id;
 
                         if($shipment->rider_category_id == 2){
                             $courier_type_id = 2;
@@ -154,6 +155,7 @@ class RiderIncentiveCalculation extends Command
                         $delivery_incentive_shipment->shipment_weight_type_id = $shipment_weight_type_id;
                         $delivery_incentive_shipment->shipment_id = $shipment_id;
                         $delivery_incentive_shipment->rate = $rate;
+                        $delivery_incentive_shipment->delivery_note_id = $delivery_note_id;
                         $delivery_incentive_shipment->save();
 
                         $flag = false;
