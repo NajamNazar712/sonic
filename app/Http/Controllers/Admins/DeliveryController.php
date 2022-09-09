@@ -8010,6 +8010,7 @@ class DeliveryController extends Controller
             ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
 //            ->select(['riders.*','h.name as hub_name'])
         ->where('riders.operation_rider_id', $operation_id)
+        ->whereNotNull('riders.employee_id')
         ->where('riders.status', 1);
 
         if (session('role_id') != 1) {

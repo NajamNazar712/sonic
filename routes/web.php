@@ -1,5 +1,7 @@
 <?php
 use App\Http\Models\HR\Employee;
+use Illuminate\Support\Facades\Storage;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -382,6 +384,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReportsController@daraz_mis_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@daraz_mis_list')->name('list');
         });
+        Route::prefix('mms')->name('mms.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@mms_index')->name('index');
+            Route::post('list','Shippers\ShipperReportsController@mms_list')->name('list');
+        });
     });
 
     Route::prefix('rates')->name('rates.')->group(function (){
@@ -442,6 +448,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('comment')->name('comment.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_comment')->name('add');
             Route::post('get', 'Shippers\ShipperCRMController@get_latest_comment')->name('get');
+        });
+
+        Route::prefix('bulk_claim')->name('bulk_claim.')->group(function(){
+            Route::get('', 'Shippers\ShipperCRMController@bulk_claim_index')->name('index');
+            Route::post('store', 'Shippers\ShipperCRMController@bulk_claim_submit')->name('submit');
+            Route::post('shipment_details', 'Shippers\ShipperCRMController@bulk_claim_shipment_details')->name('shipment_details');
+            
         });
 
     });
@@ -2689,7 +2702,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@employee_confirmation_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@employee_confirmation_list')->name('list');
         });
-        
+
+        Route::prefix('ssr')->name('ssr.')->group(function (){
+            Route::get('', 'Admins\Reports\SSRController@ssr_index')->name('index');
+            Route::post('list', 'Admins\Reports\SSRController@ssr_list')->name('list');
+
+        });
+
+        Route::prefix('shipper_summary')->name('shipper_summary.')->group(function (){
+            Route::get('', 'Admins\Reports\ShipperSummaryReportController@index')->name('index');
+            Route::get('list', 'Admins\Reports\ShipperSummaryReportController@list')->name('list');
+
+        });
+
     });
 
     //Reports end
@@ -3576,6 +3601,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::post('close_reason', 'Admins\AdminCRMController@close_reason')->name('close_reason');
 
+        Route::prefix('bulk_claim')->name('bulk_claim.')->group(function(){
+            Route::get('', 'Admins\AdminCRMController@bulk_claim_index')->name('index');
+            Route::post('store', 'Admins\AdminCRMController@bulk_claim_submit')->name('submit');
+            Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
+            
+        });
+        
         
     });
 
@@ -3982,6 +4014,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
+            Route::get('{id}/payslip_download', 'Admins\AdminHumanResourseController@payslip_download')->name('download');
         });
 
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {

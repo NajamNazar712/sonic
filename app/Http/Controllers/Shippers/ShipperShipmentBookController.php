@@ -6047,7 +6047,7 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('shipper_id', $request->shipper)->where('phone_number_1', 'LIKE', "%" . $request->q . "%");
+        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
         if ($consignee_info->exists()) {
             $consignee_info = $consignee_info->limit(10)->get();
             foreach ($consignee_info as $item) {
