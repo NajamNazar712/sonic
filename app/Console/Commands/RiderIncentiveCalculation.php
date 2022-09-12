@@ -89,7 +89,7 @@ class RiderIncentiveCalculation extends Command
             $shipments = ShipmentsJourney::join('shipments as s', 's.id', '=', 'shipments_journey.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
-                ->select('shipments_journey.reference_1_id as delivery_note_id', 'shipments_journey.rider_id as rider_id', 's.id as id', 's.actual_weight as actual_weight', 's.amount as amount', 'u.segment_id as segment_id', 'u.sub_segment_id as sub_segment_id', 'r.rider_category_id as rider_category_id', 'r.city_id as city_id')
+                ->select('shipments_journey.reference_1_id as delivery_note_id', 'shipments_journey.rider_id as rider_id', 's.id as id', 's.actual_weight as actual_weight', 's.amount as amount', 'u.segment_id as segment_id', 'u.sub_segment_id as sub_segment_id', 'r.rider_category_id as rider_category_id', 'r.city_id as city_id', 's.user_id as user_id')
                 ->where('s.packaging_material_request', 0)
                 ->whereIn('shipments_journey.shipper_status_id', [14, 30, 36, 37])
                 ->whereIn('s.shipper_status_id', [14, 30, 36, 37, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 45, 46])
@@ -144,8 +144,12 @@ class RiderIncentiveCalculation extends Command
                                 $shipment_weight_type_id = 2;
                             }
                         }
-
-                        $rate = $this::rate_calculation($shipment->city_id, $courier_type_id, $shipment_type_id, $shipment_weight_type_id);
+                        if(in_array($shipment->user_id, $carrefour__accounts)){
+                            $rate = 25;
+                        }
+                        else{
+                            $rate = $this::rate_calculation($shipment->city_id, $courier_type_id, $shipment_type_id, $shipment_weight_type_id);
+                        }
 
                         $delivery_incentive_shipment = new RiderIncentiveDeliveryShipment();
                         $delivery_incentive_shipment->rider_id = $rider_id;
@@ -210,7 +214,7 @@ class RiderIncentiveCalculation extends Command
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->join('riders as r', 'r.id', '=', 'shipments_journey.rider_id')
                 ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
-                ->select('shipments_journey.rider_id as rider_id', DB::raw('count(DISTINCT s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'r.city_id', 'r.rider_main_category_id')
+                ->select('shipments_journey.rider_id as rider_id', DB::raw('count(DISTINCT s.id) as shipment_count'), DB::raw('sum(s.actual_weight) as actual_weight'), 'r.city_id', 'r.rider_main_category_id', 'r.rider_category_id')
                 ->where('s.packaging_material_request', 0)
                 ->where('usi.warehouse', '!=', 1)
                 ->where('shipments_journey.shipper_status_id', 2)
@@ -228,7 +232,12 @@ class RiderIncentiveCalculation extends Command
                             $rate = 1;
                         }
                         else{
-                            $rate = 3;
+                            if($shipment->rider_category_id == 2){
+                                $rate = 1;
+                            }
+                            else{
+                                $rate = 3;
+                            }
                         }
                     }
                     else{
