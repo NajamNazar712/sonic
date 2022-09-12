@@ -93,7 +93,7 @@
 			});
 
 			$('#role_form #permissions').select2({
-                placeholder:'Search Shipment Status',
+                placeholder:'Search Permission',
                 width:'100%',
                 allowClear:true
             });
