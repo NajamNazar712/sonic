@@ -30,6 +30,13 @@ class LeadTaggingController extends Controller
             $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
             ->where('lead_taggings.city_id', '=', $lead->city_id)
             ->where('lead_taggings.territory_id', $lead->territory_id)
+            ->where('lts.service_id', $lead->service_id)
+            ->where('lead_taggings.status', 1);
+        })
+        ->orWhere(function ($query) use ($lead,$zone){
+            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
+            ->where('lead_taggings.city_id', '=', $lead->city_id)
+            ->where('lead_taggings.territory_id', $lead->territory_id)
             ->where('lead_taggings.status', 1);
         })
         ->orWhere(function ($query) use ($lead,$zone){
@@ -40,13 +47,33 @@ class LeadTaggingController extends Controller
         })
         ->orWhere(function ($query) use ($lead,$zone){
             $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', '0')
-            ->where('lead_taggings.territory_id', null)
+            ->where('lead_taggings.city_id', '=', $lead->city_id)
+            ->where('lead_taggings.territory_id', '0')
+            ->where('lts.service_id', $lead->service_id)
             ->where('lead_taggings.status', 1);
         })
         ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', '0')
-            ->where('status', 1);
+            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
+            ->where('lead_taggings.city_id', '=', '0')
+            ->where('lead_taggings.territory_id', null)
+            ->where('lts.service_id', $lead->service_id)
+            ->where('lead_taggings.status', 1);
+        })
+        ->orWhere(function ($query) use ($lead,$zone){
+            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
+            ->where('lead_taggings.city_id', '=', '0')
+            ->where('lead_taggings.territory_id', null)
+            ->where('lts.status', 1);
+        })
+
+        ->orWhere(function ($query) use ($lead,$zone){
+            $query->where('lead_taggings.zone_id', '=', '0')
+            ->where('lts.service_id', $lead->service_id)
+            ->where('lead_taggings.status', 1);
+        })
+        ->orWhere(function ($query) use ($lead,$zone){
+            $query->where('lead_taggings.zone_id', '=', '0')
+            ->where('lead_taggingsstatus', 1);
         });
 
 
