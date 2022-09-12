@@ -24,7 +24,7 @@ class LeadTaggingController extends Controller
         $lead = Lead::find($lead_id);
         $zone = City::find($lead->city_id);
 
-        $sales_person = LeadTagging::leftjoin('lead_tagging_service as lts','lts.lead_taggings','=','lead_taggings.id')
+        $sales_person = LeadTagging::leftjoin('lead_tagging_services as lts','lts.lead_tagging_id','=','lead_taggings.id')
         ->where('lead_taggings.city_id', $lead->city_id)->where('lead_taggings.territory_id', $lead->territory_id)->where('lts.service_id', $lead->service_id)->where('lead_taggings.status', 1)
         ->orWhere(function ($query) use ($lead,$zone){
             $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
@@ -63,7 +63,7 @@ class LeadTaggingController extends Controller
             $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
             ->where('lead_taggings.city_id', '=', '0')
             ->where('lead_taggings.territory_id', null)
-            ->where('lts.status', 1);
+            ->where('lead_taggings.status', 1);
         })
 
         ->orWhere(function ($query) use ($lead,$zone){
@@ -73,21 +73,25 @@ class LeadTaggingController extends Controller
         })
         ->orWhere(function ($query) use ($lead,$zone){
             $query->where('lead_taggings.zone_id', '=', '0')
-            ->where('lead_taggingsstatus', 1);
+            ->where('lead_taggings.status', 1);
         });
 
 
 
         if($sales_person->exists()){
-            $sales_person = $sales_person->select('lead_taggings.sale_person_id as sales_person_id','lead_taggings.sale_person_id as id')->orderBy('count', 'asc')->get()->first();
-            $lead->sale_person_id = $sales_person->sale_person_id;
+            dd($sales_person->get());
+            $sales_person = $sales_person->select('lead_taggings.sale_person_id as sales_person_id','lead_taggings.id as id')->orderBy('count', 'asc')->get()->first();
+            // dump($sales_person);
+            // dump($sales_person->sales_person_id);
+            // dd($sales_person->sales_person_id);
+            $lead->sale_person_id = $sales_person->sales_person_id;
             $lead->updated_by = $admin_id;
             $lead->sale_person_updated_at = Carbon::now();
             $lead->save();
             $update_count = LeadTagging::find($sales_person->id);
             $update_count->count += 1;
             $update_count->save();
-
+            // dd($lead->sale_person_id);
             LeadTaggingHistory::create([
                 'sale_person_id' => $sales_person->id,
                 'lead_id' => $lead->id,
