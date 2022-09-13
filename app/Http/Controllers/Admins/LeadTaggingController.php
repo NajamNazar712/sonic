@@ -23,77 +23,55 @@ class LeadTaggingController extends Controller
     {
         $lead = Lead::find($lead_id);
         $zone = City::find($lead->city_id);
-
+        //updated
         $sales_person = LeadTagging::leftjoin('lead_tagging_services as lts','lts.lead_tagging_id','=','lead_taggings.id')
-        ->where('lead_taggings.city_id', $lead->city_id)->where('lead_taggings.territory_id', $lead->territory_id)->where('lts.service_id', $lead->service_id)->where('lead_taggings.status', 1)
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', $lead->city_id)
-            ->where('lead_taggings.territory_id', $lead->territory_id)
-            ->where('lts.service_id', $lead->service_id)
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', $lead->city_id)
-            ->where('lead_taggings.territory_id', $lead->territory_id)
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', $lead->city_id)
-            ->where('lead_taggings.territory_id', '0')
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', $lead->city_id)
-            ->where('lead_taggings.territory_id', '0')
-            ->where('lts.service_id', $lead->service_id)
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', '0')
-            ->where('lead_taggings.territory_id', null)
-            ->where('lts.service_id', $lead->service_id)
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', $zone->zone_id)
-            ->where('lead_taggings.city_id', '=', '0')
-            ->where('lead_taggings.territory_id', null)
-            ->where('lead_taggings.status', 1);
-        })
+                        ->where('lead_taggings.status',1)
+                        ->select('lead_taggings.id','lead_taggings.sale_person_id','lead_taggings.zone_id','lead_taggings.city_id','lead_taggings.count','lead_taggings.territory_id','lead_taggings.zone_id','lts.service_id')
+                        ->orderBy('lead_taggings.count', 'asc')
+                        ->get();
+        $sales_person_tagging_id = 0;
+        $sales_person_tagging_lead_id = 0;
+    
+        foreach ($sales_person as $value) {
+            
+            if($lead->city_id == $value->city_id && $lead->territory_id == $value->territory_id && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                dump(1);
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($lead->city_id == $value->city_id && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                dump(2);
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                dump(3);
+                
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $value->zone_id == 0){
+                dump(4);
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }
 
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', '0')
-            ->where('lts.service_id', $lead->service_id)
-            ->where('lead_taggings.status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('lead_taggings.zone_id', '=', '0')
-            ->where('lead_taggings.status', 1);
-        });
-
-
-
-        if($sales_person->exists()){
-            dd($sales_person->get());
-            $sales_person = $sales_person->select('lead_taggings.sale_person_id as sales_person_id','lead_taggings.id as id')->orderBy('count', 'asc')->get()->first();
-            // dump($sales_person);
-            // dump($sales_person->sales_person_id);
-            // dd($sales_person->sales_person_id);
-            $lead->sale_person_id = $sales_person->sales_person_id;
+        }
+        
+        //updated end
+        
+        if($sales_person_tagging_id != 0){
+            
+            $lead->sale_person_id = $sales_person_tagging_id;
             $lead->updated_by = $admin_id;
             $lead->sale_person_updated_at = Carbon::now();
             $lead->save();
-            $update_count = LeadTagging::find($sales_person->id);
+            $update_count = LeadTagging::find($sales_person_tagging_lead_id);
             $update_count->count += 1;
             $update_count->save();
-            // dd($lead->sale_person_id);
             LeadTaggingHistory::create([
-                'sale_person_id' => $sales_person->id,
+                'sale_person_id' => $sales_person_tagging_id,
                 'lead_id' => $lead->id,
                 'status' => 1,
             ]);
