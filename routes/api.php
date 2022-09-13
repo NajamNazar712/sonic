@@ -456,6 +456,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
                 Route::get('list', 'AdminAPIController@sales_person_targets')->name('list');
+                Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
             });
 
         });

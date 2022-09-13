@@ -47,6 +47,7 @@ use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
@@ -9364,6 +9365,36 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $targets]);
         }
         return response()->json(['status' => 1, 'message' => 'No Data Found']);
+    }
+
+    public function sales_person_target_history(Request $request)
+    {
+        $rules = [
+            'date' => ['required', 'date'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+
+            $targets = SalePersonTargetLog::join('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
+                ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
+                ->where('a.id', $admin_id)
+                ->whereMonth('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("m"))
+                ->whereYear('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("Y"))
+                ->orderBy('sale_person_target_logs.created_at');
+
+            if ($targets->exists()) {
+                $targets = $targets->get();
+                return response()->json(['status' => 0, 'data' => $targets]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No Data Found']);
+        }
     }
 
 }
