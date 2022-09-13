@@ -454,6 +454,10 @@ Route::name('api.')->group(function () {
                 Route::post('image_upload', 'AdminAPIController@return_image_upload')->name('image_upload');
             });
 
+            Route::prefix('sales_target')->name('sales_target.')->group(function () {
+                Route::post('list', 'AdminAPIController@sales_person_targets')->name('list');
+            });
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
