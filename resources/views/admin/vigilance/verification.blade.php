@@ -327,7 +327,7 @@
                                     UnblockPagePermanently();
                                     id = data.details.id;
                                     var index = $.inArray(id, shipment_ids);
-
+                                    console.log(index);
                                     if (index === -1) {
                                         var rowNo = vtable.rows().count();
                                         var shipment_id = data.details.id;
@@ -356,6 +356,11 @@
                                         $('#verify_shipment_form_submit').prop('disabled', false);
 
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        UnblockPagePermanently();
+                                        $('#scan_shipment_form button.add').prop('disabled', false);
+                                        scan_sound(2);
+                                        toastr.error('Tracking Number Already Scanned', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
                                 }
                                 else {
