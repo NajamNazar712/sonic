@@ -227,7 +227,7 @@ class VigilanceController extends Controller
                 }
             })
             ->addColumn('unverify_shipments_link', function ($deliveries) {
-                if ($deliveries->shipments_count != 0) {
+                if ($deliveries->shipments_count-$deliveries->verify_shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle" noteId="'. $deliveries->delivery_note_id .'">' . ($deliveries->shipments_count-$deliveries->verify_shipments_count) . '</button>';
                 } else {
                     return 0;
