@@ -1175,6 +1175,7 @@ class ReturnController extends Controller
                             continue;
                         }
                         $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                        $shipment_details->consignee_status_id = 20; //Confirmation Pending
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
