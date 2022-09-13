@@ -525,7 +525,7 @@ class AdminHumanResourseController extends Controller
             })
             ->editColumn('confirmation_status', function ($user) {
                 if($user->confirmation_status == 1){
-                    return 'Permanenet';
+                    return 'Permanent';
                 }elseif ($user->confirmation_status == 2) {
                     return 'Probation';
                 }else{

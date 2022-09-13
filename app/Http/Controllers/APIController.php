@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\FTLController;
@@ -1971,6 +1972,63 @@ class APIController extends Controller
 
                 return $pdf->download($filename);
             }
+        }
+    }
+
+    public function receiving_sheet_print(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'type' => ['nullable', 'boolean'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+            // if ($receiving_sheet) {
+            //     return response()->json(['status' => 1, 'message' => 'Receiving Sheet Not Found.']);
+            // }
+            if(count($receiving_sheet->receiving_sheet_shipments) > 200){
+                return response()->json(['status' => 1, 'message' => 'Too many shipments.']);
+            }
+            if(!isset($request->type) || $request->type == 0){
+                if(count($receiving_sheet->receiving_sheet_shipments) > 50){
+                    return response()->json(['status' => 1, 'message' => 'Too many shipments, please use type=1 to extract pdf.']);
+                } 
+            }
+            $print_status = 0;
+            $receiving_sheet_print = ReceivingSheetPrintStatus::where('receiving_sheet_id',$receiving_sheet->id);
+            if($receiving_sheet_print->exists()){
+                $receiving_sheet_print = $receiving_sheet_print->get()->first();
+                $print_status = $receiving_sheet_print->status;
+            }
+            $receiving_sheet = ShipperReceivingSheetController::print_receiving_sheet_and_air_waybill_api($receiving_sheet_id, 4, $print_status);
+
+            if (!isset($request->type) || $request->type == 0) {
+                $image = SnappyImage::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+
+                return $image->setOption('disable-smart-width', true)->download($filename);
+            } else {
+                $pdf = SnappyPDF::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
+
+                return $pdf->download($filename);
+            }
+
         }
     }
 
