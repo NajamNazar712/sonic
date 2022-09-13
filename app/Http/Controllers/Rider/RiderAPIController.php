@@ -12124,7 +12124,7 @@ class RiderAPIController extends Controller
                         $consignee_phone .= ' / ' . $shipment_data->consignee_phone_number_2;
                     }
 
-                    if (in_array($shipment_data->user->id, [1363, 10104, 15587, 17363, 15636, 16292])) {
+                    if (in_array($shipment_data->user->id, [10358, 10104, 15587, 17363, 15636, 16292])) {
                         $relation_lists = DeliveryRelation::select('id', 'name')->get();
                     } else {
                         $relation_lists = DeliveryRelation::where('id', '<>', 7)->select('id', 'name')->get();
