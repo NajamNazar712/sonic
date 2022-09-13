@@ -1377,7 +1377,7 @@ class RiderAPIController extends Controller
                     if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
                         $shipment->shipper_status_id = $request->shipper_status_id;
-                        $shipment->consignee_status_id = $request->status_reason_id;
+                        $shipment->consignee_status_id = $request->shipper_status_id;
                         $shipment->save();
 
                         $remarks = NULL;
@@ -2774,7 +2774,7 @@ class RiderAPIController extends Controller
                     if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
                         $shipment->shipper_status_id = $request->shipper_status_id;
-                        $shipment->consignee_status_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
+                        $shipment->consignee_status_id = $request->shipper_status_id;
                         $shipment->save();
 
                         $remarks = NULL;
@@ -3578,7 +3578,7 @@ class RiderAPIController extends Controller
                             if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
                                 $shipment->shipper_status_id = $request->shipper_status_id;
-                                $shipment->consignee_status_id = $request->status_reason_id;
+                                $shipment->consignee_status_id = $request->shipper_status_id;
                                 $shipment->open_box = $request->open_box;
                                 $shipment->delivery_in_route = 0;
                                 $shipment->save();
@@ -3868,7 +3868,7 @@ class RiderAPIController extends Controller
                             if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
                                 $shipment->shipper_status_id = $request->shipper_status_id;
-                                $shipment->consignee_status_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;
+                                $shipment->consignee_status_id = $request->shipper_status_id;
                                 $shipment->save();
 
                                 $remarks = NULL;
@@ -5053,7 +5053,7 @@ class RiderAPIController extends Controller
                             if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
                                 $shipment->shipper_status_id = 24;
-                                $shipment->consignee_status_id = 62;
+                                $shipment->consignee_status_id = 24;
                                 $shipment->save();
 
                                 $remarks = NULL;
@@ -11239,7 +11239,7 @@ class RiderAPIController extends Controller
                                     if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
                                         $shipment->shipper_status_id = $request->shipper_status_id;
-                                        $shipment->consignee_status_id = $request->status_reason_id;
+                                        $shipment->consignee_status_id = $request->shipper_status_id;
                                         $shipment->delivery_in_route = 0;
 
                                         if(in_array($request->open_box,[1,2])){
