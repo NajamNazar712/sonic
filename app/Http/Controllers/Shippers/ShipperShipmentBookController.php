@@ -2775,7 +2775,7 @@ class ShipperShipmentBookController extends Controller
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray(null, false, false, false);
         }
         if (isset($spreadsheet)) {
             $excel_type = $request->excel_type;
