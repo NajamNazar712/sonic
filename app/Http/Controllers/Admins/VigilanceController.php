@@ -27,7 +27,7 @@ class VigilanceController extends Controller
 
     public function verification_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 562);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->get();
         return view('admin.vigilance.verification')->with(['riders' => $riders]);
     }
 
