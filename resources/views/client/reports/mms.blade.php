@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
 @section('title', 'MMS Report')
 
@@ -10,21 +10,12 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
                         </fieldset>
                     </div>
 
@@ -80,26 +71,6 @@
                         </div>
 
                     </div>
-                 {{--   <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                  <span class="">Arrival Time From</span>
-                              </span>
-                            </div>
-                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="From">
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                  <span class="">Arrival Time To</span>
-                              </span>
-                            </div>
-                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
-                        </div>
-                    </div>--}}
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -140,7 +111,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
-    <style>
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}"><style>
         table.dataTable {
             font-size: 12px;
         }
@@ -199,9 +170,12 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.time.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -209,12 +183,6 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            });
-
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
             });
 
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
@@ -232,44 +200,6 @@
                 width:'100%',
                 allowClear:true
             });
-
-          /*  $('.arrival_time_from').pickatime({
-                clear: '',
-                format: 'h:i A',
-                interval: 30,
-                onSet: function(context) {
-                    if($('input[name="search_date_from_formatted"]').val()==$('input[name="search_date_to_formatted"]').val())
-                    {
-                        if (context.select) {
-                            $('#arrival_time_to').pickatime('picker').set('min', $('#arrival_time_from').pickatime('picker').get('select'));
-                        }
-                    }
-                    else{
-                        if (context.select) {
-                            $('#arrival_time_to').pickatime('picker').set('min', '');
-                        }
-                    }
-                }
-
-            });
-            $('.arrival_time_to').pickatime({
-                clear: '',
-                format: 'h:i A',
-                interval: 30,
-                onSet: function(context) {
-                    if($('input[name="search_date_from_formatted"]').val()==$('input[name="search_date_to_formatted"]').val())
-                    {
-                        if (context.select) {
-                            $('#arrival_time_from').pickatime('picker').set('max', $('#arrival_time_to').pickatime('picker').get('select'));
-                        }
-                    }
-                    else{
-                        if (context.select) {
-                            $('#arrival_time_from').pickatime('picker').set('max', '');
-                        }
-                    }
-                }
-            });*/
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -295,8 +225,6 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                        // $('#arrival_time_from').pickatime('picker').clear();
-                        // $('#arrival_time_to').pickatime('picker').clear();
                         $('input[name="arrival_time_from"]').val('12:00 AM');
                         $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
@@ -313,8 +241,6 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                        // $('#arrival_time_from').pickatime('picker').clear();
-                        // $('#arrival_time_to').pickatime('picker').clear();
                         $('input[name="arrival_time_from"]').val('12:00 AM');
                         $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
@@ -329,7 +255,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.mms.list') }}',
+                        url: '{{ route('cod.reports.mms.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -404,14 +330,13 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url: '{{ route('admin.reports.mms.list') }}',
+                    url: '{{ route('cod.reports.mms.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
-                        d.search_shipper = $('#search_shipper').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();

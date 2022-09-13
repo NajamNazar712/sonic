@@ -623,7 +623,7 @@
 
                 </li>
             @endif
-            @if (session('role_id') == 1 || session('department_id') == 3 || count(array_intersect([233, 234, 235, 236, 363], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || session('department_id') == 3 || count(array_intersect([233, 234, 235, 236, 363, 795], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>CRM</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || session('department_id') == 3 || count(array_intersect([233, 234, 235, 236], session('permissions'))) !== 0)
@@ -647,6 +647,9 @@
 
                             @if (session('role_id') == 1 || Auth::user()->role->department_id == 3 || in_array(363, session('permissions')))
                                 <li><a class="menu-item" href="{{route('admin.crm.consignee_info.index')}}">Consignee Info</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(795, session('permissions')))
+                                <li><a class="menu-item" href="{{route('admin.crm.bulk_claim.index')}}">Bulk Claim Logging</a></li>
                             @endif
                         @endif
                     </ul>
@@ -922,7 +925,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 319, 327, 328, 337, 356, 401, 437, 444, 472, 476, 493, 502, 524, 532, 555, 613, 614, 624, 642, 647, 653, 679, 673, 676, 688, 705, 717, 780, 784, 786], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301, 319, 327, 328, 337, 356, 401, 437, 444, 472, 476, 493, 502, 524, 532, 555, 613, 614, 624, 642, 647, 653, 679, 673, 676, 688, 705, 717, 780, 784, 786, 793, 794], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -1178,7 +1181,13 @@
                         @if (session('role_id') == 1 || in_array(784, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.reports.crm_agent_wise_report.index')}}">CRM Agent Wise Report</a></li>
                         @endif
-                        
+                        @if (session('role_id') == 1 || in_array(793, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.ssr.index') }}">Summaries
+                                    Sale (SSR)</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(794, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.shipper_summary.index') }}">Shipper Summary</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
