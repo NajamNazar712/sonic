@@ -5093,8 +5093,7 @@ class APIController extends Controller
             'consumer_prefix' => ['required'],
             'tracking_number' => ['required'],
             'shipment_id' => ['required', Rule::exists('shipments', 'id')],
-            'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')],
-            'status' => ['required', 'integer'],
+            'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')]
         ];
 
         $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
@@ -5114,7 +5113,6 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $shipment_id = $request->shipment_id;
             $delivery_note_id = $request->delivery_note_id;
-            $status = $request->status;
 
             $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
             $one_link_payment_transaction->consumer_number = $consumer_number;
@@ -5128,20 +5126,18 @@ class APIController extends Controller
             $one_link_payment_transaction->tracking_number = $tracking_number;
             $one_link_payment_transaction->shipment_id = $shipment_id;
             $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
-            $one_link_payment_transaction->status = $status;
             $one_link_payment_transaction->save();
 
-            if($status == 2){
-                $delivery_note = DeliveryNote::find($delivery_note_id);
 
-                $update_count = $delivery_note->one_link_payment_count + 1;
-                $delivery_note->one_link_payment_count = $update_count;
-                $delivery_note->save();
-                $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
-                $shipment = Shipment::find($shipment_id);
-                $shipment->received_amount = $amount;
-                $shipment->save();
-            }
+            $delivery_note = DeliveryNote::find($delivery_note_id);
+
+            $update_count = $delivery_note->one_link_payment_count + 1;
+            $delivery_note->one_link_payment_count = $update_count;
+            $delivery_note->save();
+            $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
+            $shipment = Shipment::find($shipment_id);
+            $shipment->received_amount = $amount;
+            $shipment->save();
 
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
