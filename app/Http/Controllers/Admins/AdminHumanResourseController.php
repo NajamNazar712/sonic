@@ -525,7 +525,7 @@ class AdminHumanResourseController extends Controller
             })
             ->editColumn('confirmation_status', function ($user) {
                 if($user->confirmation_status == 1){
-                    return 'Permanenet';
+                    return 'Permanent';
                 }elseif ($user->confirmation_status == 2) {
                     return 'Probation';
                 }else{
@@ -3340,6 +3340,17 @@ class AdminHumanResourseController extends Controller
                     $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(24)->toDateString();
 
                     foreach ($rows as $key => $row) {
+                        $existing_payslip = EmployeePayslip::where('trax_id', trim($row['trax_id']))->whereDate('payroll_month', $payroll_month);
+                        if($existing_payslip->exists()){
+                            $existing_payslip = $existing_payslip->first();
+                            $existing_payslip_pdf = PayslipPdf::where('payslip_id', $existing_payslip->id);
+                            if($existing_payslip_pdf->exists()){
+                                $existing_payslip_pdf = $existing_payslip_pdf->first();
+                                Storage::disk('public')->delete($existing_payslip_pdf->file_path);
+                                PayslipPdf::where('payslip_id', $existing_payslip->id)->delete();
+                            }
+                            EmployeePayslip::where('id', $existing_payslip->id)->delete();
+                        }
                         $payslip_details = array();
                         $payslip = new EmployeePayslip();
                         $payslip->payroll_month = $payroll_month;
