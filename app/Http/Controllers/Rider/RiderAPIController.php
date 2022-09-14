@@ -8461,8 +8461,6 @@ class RiderAPIController extends Controller
     public function delivery_summary_multiple_v5(Request $request)
     {
         $rider_id = $request->rider_id;
-        $replacement_parcel_image = null;
-
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
         $relation = DeliveryRelation::select('id', 'name')->get();
 
@@ -8529,6 +8527,7 @@ class RiderAPIController extends Controller
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
                     $refusal_otp = null;
+                    $replacement_parcel_image = null;
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
                     if($shipment_otp->exists()){
                         $shipment_otp = $shipment_otp->first();
