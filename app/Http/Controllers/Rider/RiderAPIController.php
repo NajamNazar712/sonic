@@ -12041,7 +12041,7 @@ class RiderAPIController extends Controller
     public function delivery_summary_multiple_v6(Request $request)
     {
         $rider_id = $request->rider_id;
-        $replacement_parcel_image = null;
+
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
@@ -12104,7 +12104,7 @@ class RiderAPIController extends Controller
                 $information['deliveries'] = array();
                 $delivery_note_shipments = $delivery_note->delivery_note_shipments->sortBy('ordering');
                 foreach ($delivery_note_shipments as $delivery_note_shipment) {
-
+                    $replacement_parcel_image = null;
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
                     $refusal_otp = null;
@@ -12179,7 +12179,6 @@ class RiderAPIController extends Controller
                         $deliveries['try_n_buy_items'] = $product;
                         $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
                     }
-
                     elseif($booking_type == 2){
                         $replacement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
                         if($replacement_parcel->exists()){
