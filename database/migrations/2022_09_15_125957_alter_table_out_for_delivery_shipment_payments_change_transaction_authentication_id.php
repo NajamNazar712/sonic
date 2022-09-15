@@ -13,7 +13,9 @@ class AlterTableOutForDeliveryShipmentPaymentsChangeTransactionAuthenticationId 
      */
     public function up()
     {
-        //
+        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            $table->string('transaction_authentication_id')->change();
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AlterTableOutForDeliveryShipmentPaymentsChangeTransactionAuthenticationId 
      */
     public function down()
     {
-        //
+        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            $table->integer('transaction_authentication_id')->change();
+        });
     }
 }
