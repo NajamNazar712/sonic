@@ -17,10 +17,11 @@ class VigilanceScreenSeeder extends Seeder
             array('id' => 30, 'name' => 'Vigilance Verification', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
         ));
         
-        DB::table('admins_screen_list')->insert(
+      
+        DB::table('admins_screen_list')->insert(array(
              array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > Delivery Note', 'url'=>'admin.vigilance.verification.index', 'permission_id' => 770),
              array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > History', 'url'=>'admin.vigilance.verification.history.index', 'permission_id' => 771)
-        );
+        ));
 
 
     }
