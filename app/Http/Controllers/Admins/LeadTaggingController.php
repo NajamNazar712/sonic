@@ -35,23 +35,19 @@ class LeadTaggingController extends Controller
         foreach ($sales_person as $value) {
             
             if($lead->city_id == $value->city_id && $lead->territory_id == $value->territory_id && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
-                dump(1);
                 $sales_person_tagging_id = $value->sale_person_id;
                 $sales_person_tagging_lead_id = $value->id;
                 break;
             }elseif($lead->city_id == $value->city_id && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
-                dump(2);
                 $sales_person_tagging_id = $value->sale_person_id;
                 $sales_person_tagging_lead_id = $value->id;
                 break;
             }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
-                dump(3);
                 
                 $sales_person_tagging_id = $value->sale_person_id;
                 $sales_person_tagging_lead_id = $value->id;
                 break;
             }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $value->zone_id == 0){
-                dump(4);
                 $sales_person_tagging_id = $value->sale_person_id;
                 $sales_person_tagging_lead_id = $value->id;
                 break;
