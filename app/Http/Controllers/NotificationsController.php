@@ -13,6 +13,7 @@ use App\Http\Models\Admin\CrmSmsLog;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -9650,6 +9651,39 @@ else if ($id == 178) {
                     }
                 }
 
+                else if ($id == 185) {
+                    $one_link_transaction = OneLinkPaymentTransaction::find($reference_2_id);
+                    $rider = Rider::find($reference_1_id);
+                    if($one_link_transaction && $rider){
+                        if (strpos($body, '[amount]') !== FALSE) {
+                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                        }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                        }
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            $body = str_replace('[rider]', $rider->name, $body);
+                        }
+                        $to = $rider->phone;
+                        self::sms($body, $to);
+                    }
+                }
+
+                else if ($id == 186) {
+                    $role = $reference_2_id;
+                    $admin = Admin::find($reference_1_id);
+                    if($admin && $role){
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[role]') !== FALSE) {
+                            $body = str_replace('[role]', $role, $body);
+                        }
+                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
+                        self::email($subject, $body, $to);
+                    }
+                }
+
             }
         }
     }
@@ -9984,6 +10018,22 @@ else if ($id == 178) {
                         }
                         if (strpos($body, '[date]') !== FALSE) {
                             $body = str_replace('[date]', $leave->date, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 19) {
+                    $one_link_transaction = OneLinkPaymentTransaction::find($reference2_id);
+                    $rider = Rider::find($reference1_id);
+                    if($one_link_transaction && $rider){
+                        if (strpos($body, '[amount]') !== FALSE) {
+                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                        }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                        }
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            $body = str_replace('[rider]', $rider->name, $body);
                         }
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }

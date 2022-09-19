@@ -364,6 +364,12 @@
                                         scan_sound(2);
                                         toastr.error('Tracking Number Already Scanned', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
+                                    else{
+
+                                        $('#scan_shipment_form button.add').prop('disabled', false);
+                                        scan_sound(2);
+                                        toastr.error('Shipment is already scanned!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
                                 }
                                 else {
                                     UnblockPagePermanently();

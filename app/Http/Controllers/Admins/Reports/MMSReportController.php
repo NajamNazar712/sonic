@@ -146,13 +146,31 @@ class MMSReportController extends Controller
                     if($sale->received_or_refused_by){
                         $received_or_refused_by = $sale->received_or_refused_by;
                     }
-                    if($sale->cnic){
-                        $received_or_refused_by .= "|".$sale->cnic;
-                    }
-                    if($sale->relation){
-                        $received_or_refused_by .= "|".$sale->relation;
-                    }
                     return $received_or_refused_by;
+                } else {
+                    return '';
+                }
+            })
+
+            ->editColumn('relation', function ($sale) {
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    $relation = '';
+                    if($sale->relation){
+                        $relation = $sale->relation;
+                    }
+                    return $relation;
+                } else {
+                    return '';
+                }
+            })
+
+            ->editColumn('cnic', function ($sale) {
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    $cnic = '';
+                    if($sale->cnic){
+                        $cnic = $sale->cnic;
+                    }
+                    return $cnic;
                 } else {
                     return '';
                 }

@@ -16,6 +16,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -69,6 +70,8 @@ use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RiderIncentiveDelivery;
+use App\Http\Models\Rider\RiderIncentivePickup;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
@@ -533,59 +536,7 @@ class RiderAPIController extends Controller
 
     public function login(Request $request)
     {
-        $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4']
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-            if ($rider->exists()) {
-                $rider = $rider->first();
-
-                if ($rider->status) {
-                    if (Hash::check($request->input('pin'), $rider->pin)) {
-                        $information = array();
-
-                        $information['name'] = $rider->name;
-                        $information['role'] = 'rider';
-
-                        if ($rider->api_token) {
-                            $information['api_token'] = $rider->api_token;
-                        } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
-
-                            $rider->api_token = $api_token;
-
-                            $rider->save();
-
-                            $information['api_token'] = $api_token;
-                        }
-
-                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
-                }
-            } else {
-                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-                if ($rider_request->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                }
-            }
-        }
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
     }
 
     public function get_rider_location(Request $request)
@@ -624,6 +575,7 @@ class RiderAPIController extends Controller
 
     public function pickup_summary(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [2, 3]);
@@ -709,7 +661,8 @@ class RiderAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
@@ -899,6 +852,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_note = DeliveryNote::where('rider_id', $rider_id)->where('pending_status', 0);
@@ -1332,7 +1286,6 @@ class RiderAPIController extends Controller
 
     public function shipment_undelivered(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
@@ -1800,6 +1753,7 @@ class RiderAPIController extends Controller
 
     public function pickup_check_tracking_number(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'tracking_number' => ['required']
         ];
@@ -1865,6 +1819,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -2046,6 +2001,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'name' => ['required'],
@@ -2133,7 +2089,7 @@ class RiderAPIController extends Controller
 
     public function pickups_history(Request $request)
     {
-
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $pickup_request_id = $request->get('pickup_request_id');
@@ -2171,6 +2127,7 @@ class RiderAPIController extends Controller
 
     public function delivery_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $delivery_note_id = $request->get('delivery_note_id');
@@ -2222,7 +2179,7 @@ class RiderAPIController extends Controller
 
     public function cities(Request $request)
     {
-
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $cities = City::where('status', 1)->where('business_category_id', 1);
 
         if ($cities->exists()) {
@@ -2414,6 +2371,7 @@ class RiderAPIController extends Controller
 
     public function return_summary_multiple(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $return_notes = ReturnNote::where('rider_id', $rider_id)->where('status', 0)->where('shipments_count', '!=', 0);
@@ -2730,7 +2688,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -2901,6 +2858,7 @@ class RiderAPIController extends Controller
 
     public function return_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('date');
         $return_note_id = $request->get('return_note_id');
@@ -3798,7 +3756,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v2(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -3966,6 +3923,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -4321,6 +4279,7 @@ class RiderAPIController extends Controller
 
     public function mark_attendance(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required'],
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
@@ -4414,6 +4373,7 @@ class RiderAPIController extends Controller
 
     public function attendance_details(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required']
         ];
@@ -4440,6 +4400,7 @@ class RiderAPIController extends Controller
 
     public function attendance_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'from_date' => ['required'],
             'to_date' => ['nullable']
@@ -4525,6 +4486,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
@@ -4738,6 +4700,7 @@ class RiderAPIController extends Controller
 
     public function rider_attachments_store(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
@@ -4957,86 +4920,7 @@ class RiderAPIController extends Controller
 
     public function login_v2(Request $request)
     {
-        $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
-            'device_token' => ['nullable']
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-            if ($rider->exists()) {
-                $rider = $rider->first();
-
-                if ($rider->status) {
-                    if (Hash::check($request->input('pin'), $rider->pin)) {
-                        $information = array();
-
-                        $information['name'] = $rider->name;
-                        $information['phone'] = $rider->phone;
-                        $information['cnic'] = $rider->cnic;
-                        $information['address'] = $rider->address;
-                        $information['role'] = 'rider';
-                        $information['cargo_user'] = 0;
-
-                        if($request->has('device_token')){
-                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                            EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
-                            $employee_device_token = new EmployeeDeviceToken();
-                            $employee_device_token->employee_id = $rider->id;
-                            $employee_device_token->employee_type_id = 2;
-                            $employee_device_token->device_token = $request->get('device_token');
-                            $employee_device_token->save();
-                        }
-
-                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                            ->join('riders as r', 'e.id', 'r.employee_id')
-                            ->where('r.id', $rider->id);
-                        if ($reporting_location->exists()) {
-                            $reporting_location = $reporting_location->first();
-                            $information['distance'] = $reporting_location->radius;
-                            $information['lat'] = $reporting_location->lat;
-                            $information['long'] = $reporting_location->long;
-                        }else{
-                            $information['distance'] = 0;
-                            $information['lat'] = 0;
-                            $information['long'] = 0;
-                        }
-
-                        if ($rider->api_token) {
-                            $information['api_token'] = $rider->api_token;
-                        } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
-
-                            $rider->api_token = $api_token;
-
-                            $information['api_token'] = $api_token;
-                        }
-                        $rider->save();
-                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
-                }
-            } else {
-                $rider_request = RiderRequest::where('phone_no', substr_replace($request->input('phone_number'), '-', 4, 0));
-
-                if ($rider_request->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                }
-            }
-        }
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
     }
 
     public function notification_history(Request $request)
@@ -5058,7 +4942,6 @@ class RiderAPIController extends Controller
 
     public function return_shipment_undelivered_v3(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
@@ -6936,6 +6819,7 @@ class RiderAPIController extends Controller
 
     public function delivery_summary_multiple_v3(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
@@ -7544,6 +7428,7 @@ class RiderAPIController extends Controller
 
     public function rider_incentive(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $date = $request->get('date');
         $rider_incentives = DB::table('riders_incentives')
@@ -8484,6 +8369,7 @@ class RiderAPIController extends Controller
 
     public function rider_incentive_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
@@ -8736,6 +8622,8 @@ class RiderAPIController extends Controller
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
+                    $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();
@@ -9261,6 +9149,7 @@ class RiderAPIController extends Controller
 
     public function rider_signup_v3(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
@@ -9551,6 +9440,7 @@ class RiderAPIController extends Controller
 
     public function month_attendance_history(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'first_day' => ['required'],
             'last_day' => ['required'],
@@ -9623,6 +9513,7 @@ class RiderAPIController extends Controller
 
     public function mark_attendance_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'attendance_date' => ['required'],
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
@@ -10208,6 +10099,7 @@ class RiderAPIController extends Controller
 
     public function get_rider_location_v2(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
@@ -10594,6 +10486,7 @@ class RiderAPIController extends Controller
     }
 
     public function leave_index(Request $request){
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $employee_id = $request->rider_employee;
         $employee = Employee::find($employee_id);
         if($employee){
@@ -10615,6 +10508,7 @@ class RiderAPIController extends Controller
 
     public function leave_apply(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'from' => ['required'],
             'to' => ['nullable'],
@@ -10673,6 +10567,7 @@ class RiderAPIController extends Controller
 
     public function employee_leave_list(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
@@ -10840,6 +10735,7 @@ class RiderAPIController extends Controller
 
     public function check_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
             ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
@@ -10858,6 +10754,7 @@ class RiderAPIController extends Controller
 
     public function get_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $blood_group_list = EmployeeBloodGroup::all();
         $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
@@ -10874,6 +10771,7 @@ class RiderAPIController extends Controller
 
     public function update_profile(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
@@ -10902,6 +10800,7 @@ class RiderAPIController extends Controller
     }
 
     public function check_pin(Request $request){
+        return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider){
@@ -10929,6 +10828,7 @@ class RiderAPIController extends Controller
 
     public function check_profile_v2(Request $request)
     {
+        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider){
@@ -12068,6 +11968,74 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'response' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
+    public function rider_incentive_v4(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        if ($to_date) {
+            $rider_delivery_incentives = RiderIncentiveDelivery::join('rider_incentive_delivery_courier_types as ct', 'ct.id', '=', 'rider_incentive_deliveries.courier_type_id')
+                ->join('rider_incentive_delivery_shipment_types as st', 'st.id', '=', 'rider_incentive_deliveries.shipment_type_id')
+                ->join('rider_incentive_delivery_shipment_weight_types as wt', 'wt.id', '=', 'rider_incentive_deliveries.shipment_weight_type_id')
+                ->where('rider_incentive_deliveries.rider_id', $rider_id)->whereBetween('rider_incentive_deliveries.date', [$from_date, $to_date])
+                ->select('rider_incentive_deliveries.*', 'st.name as shipment_type', 'ct.name as courier_type', 'wt.name as weight_type');
+
+            $rider_pickup_incentives = RiderIncentivePickup::where('rider_id', $rider_id)->whereBetween('date', [$from_date, $to_date]);
+        } else {
+            $rider_delivery_incentives = RiderIncentiveDelivery::join('rider_incentive_delivery_courier_types as ct', 'ct.id', '=', 'rider_incentive_deliveries.courier_type_id')
+                ->join('rider_incentive_delivery_shipment_types as st', 'st.id', '=', 'rider_incentive_deliveries.shipment_type_id')
+                ->join('rider_incentive_delivery_shipment_weight_types as wt', 'wt.id', '=', 'rider_incentive_deliveries.shipment_weight_type_id')
+                ->where('rider_incentive_deliveries.rider_id', $rider_id)->whereDate('date', $from_date)
+                ->select('rider_incentive_deliveries.*', 'st.name as shipment_type', 'ct.name as courier_type', 'wt.name as weight_type');
+
+            $rider_pickup_incentives = RiderIncentivePickup::where('rider_id', $rider_id)->whereDate('date', $from_date);
+        }
+        if($rider_delivery_incentives->exists() || $rider_pickup_incentives->exists()){
+            $data = array();
+            $pickup_shipment = NULL;
+            $pickup_incentive = NULL;
+            $delivered_shipment = NULL;
+            $delivered_incentive = NULL;
+            if ($rider_delivery_incentives->exists()) {
+                $rider_delivery_incentives = $rider_delivery_incentives->get();
+                foreach ($rider_delivery_incentives as $rider_delivery_incentive) {
+                    $datum = array();
+                    $datum['date'] = date('Y/m/d',strtotime($rider_delivery_incentive->date));
+                    $datum['shipments'] = (string)$rider_delivery_incentive->shipments;
+                    $datum['rate'] = (string)$rider_delivery_incentive->rate;
+                    $datum['incentive'] = (string)$rider_delivery_incentive->incentive;
+                    $datum['shipment_type'] = $rider_delivery_incentive->shipment_type;
+                    $datum['weight_type'] = $rider_delivery_incentive->weight_type;
+                    $datum['type'] = "1";
+                    $data[$rider_delivery_incentive->date]["delivered"][] = $datum;
+                    $delivered_shipment += $rider_delivery_incentive->shipments;
+                    $delivered_incentive += $rider_delivery_incentive->incentive;
+                }
+            }
+            if ($rider_pickup_incentives->exists()) {
+                $rider_pickup_incentives = $rider_pickup_incentives->get();
+                foreach ($rider_pickup_incentives as $rider_pickup_incentive) {
+                    $datum = array();
+                    $datum['date'] = date('Y/m/d',strtotime($rider_pickup_incentive->date));
+                    $datum['shipments'] = (string)$rider_pickup_incentive->shipments;
+                    $datum['rate'] = (string)$rider_pickup_incentive->rate;
+                    $datum['incentive'] = (string)$rider_pickup_incentive->incentive;
+                    $datum['shipment_type'] = NULL;
+                    $datum['weight_type'] = NULL;
+                    $datum['type'] = "2";
+                    $data[$rider_pickup_incentive->date]["picked"][] = $datum;
+                    $pickup_shipment += $rider_pickup_incentive->shipments;
+                    $pickup_incentive += $rider_pickup_incentive->incentive;
+                }
+            }
+            return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
+        }
+        else{
+            return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
+        }
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
