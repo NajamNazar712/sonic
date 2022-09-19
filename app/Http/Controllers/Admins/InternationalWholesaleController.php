@@ -27,7 +27,7 @@ class InternationalWholesaleController extends Controller
 
     public function accounts_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),594);
-        $cities = City::where('business_category_id', 2)->get();
+        $cities = City::where('status', 1)->get();
         $banks = BanksList::where('status', 1)->select('id', 'name')->get();
         return view('admin.international.wholesale.accounts_index')->with(['cities' => $cities, 'banks' => $banks]);
     }
