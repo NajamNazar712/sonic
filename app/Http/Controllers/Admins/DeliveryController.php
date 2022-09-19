@@ -1107,7 +1107,7 @@ class DeliveryController extends Controller
             ->addColumn('vigilance_verification', function ($result) {
                 
                 if ($result->shipments_count == $result->verify_shipments_count) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Verified Count</button>';
+                    return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Yes</button>';
 
                     return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
@@ -1136,9 +1136,9 @@ class DeliveryController extends Controller
                 } elseif($keyword == 2) {
                     //partial
                     $query->where('vv.verify_shipments_count', '<>', DB::raw('shipments_count'))
-                    ->orWhere(function ($query){
+                    ->where(function ($query){
                         $query->where('vv.excess_shipments_count','<>',0)
-                        ->where('vv.verify_shipments_count','<>',0);
+                        ->orWhere('vv.verify_shipments_count','<>',0);
                     });
 
                 }else{
