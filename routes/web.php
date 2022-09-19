@@ -1247,6 +1247,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
             Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
             Route::post('shipments','Admins\DeliveryController@receive_delivery_shipments')->name('shipments');
+            Route::post('shipments_verified','Admins\DeliveryController@receive_delivery_shipments_verified')->name('shipments_verified');
+            Route::post('shipment_partial','Admins\DeliveryController@receive_delivery_shipment_partial')->name('shipment_partial');
+            
             Route::post('receive_shipments_delivered','Admins\DeliveryController@receive_shipments_delivered')->name('receive_shipments_delivered');
             Route::post('receive_shipments_undelivered','Admins\DeliveryController@receive_shipments_undelivered')->name('receive_shipments_undelivered');
             Route::post('receive_shipments_pending','Admins\DeliveryController@receive_shipments_pending')->name('receive_shipments_pending');
@@ -4147,6 +4150,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/add','Admins\VigilanceController@verification_add')->name('add');
                 Route::post('/excess_cns','Admins\VigilanceController@verification_excess_cns')->name('excess_cns');
                 Route::post('/verify_cns','Admins\VigilanceController@verification_verify_cns')->name('verify_cns');
+                Route::post('/unverify_cns','Admins\VigilanceController@verification_unverify_cns')->name('unverify_cns');
+                
             Route::prefix('history')->name('history.')->group(function (){
                 Route::get('/','Admins\VigilanceController@history_index')->name('index');
                 Route::get('/list','Admins\VigilanceController@history_list')->name('list');
