@@ -7890,7 +7890,7 @@ class AdminAPIController extends Controller
         $admin_employee = $request->admin_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
-            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            ->select('employee_leaves.employee_id as employee_id', 'employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
             ->where('employee_id', $admin_employee)
             ->where('employee_type_id', 1);
         if ($employee_leaves->exists()) {
@@ -7907,7 +7907,6 @@ class AdminAPIController extends Controller
                 $datum['status'] = $employee_leave->status;
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
-                dd($employee_leave);
                 if ($employee_leave->to) {
                     $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
