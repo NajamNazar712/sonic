@@ -4161,7 +4161,7 @@ class AdminHumanResourseController extends Controller
                     if ($working_days == 1) {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                     } else {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SATURDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
 
                     $diffDays++;
@@ -4178,15 +4178,24 @@ class AdminHumanResourseController extends Controller
                             if ($admin_profile->employee_gender_id == 1) {
                                 return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
                             }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                            }
                         }
                         if ($request->leave_type == 3) {
-                            if ($admin_profile->employee_gender_id == 2 || $diffDays > $leave_type->count) {
+                            if ($admin_profile->employee_gender_id == 2) {
                                 return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
+                            }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
                             }
                         }
                         if ($request->leave_type == 4) {
-                            if ($admin_profile->religion_id != 1 || $diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                            if ($admin_profile->religion_id != 1) {
+                                return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
+                            }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
                             }
                         }
                         if ($request->leave_type == 5) {

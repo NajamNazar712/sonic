@@ -7910,9 +7910,15 @@ class AdminAPIController extends Controller
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
                 if ($employee_leave->to) {
+                    $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
-                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                    if ($working_days == 1) {
+                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                    } else {
+                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                    }
+                    $datum['days_count'] = $diffDays + 1;
                 } else {
                     $datum['days_count'] = 1;
                 }
@@ -7992,9 +7998,15 @@ class AdminAPIController extends Controller
                         $datum['role'] = 0;
                     }
                     if ($employee_leave->to) {
+                        $working_days = $employee_leave->employee->department->working_days;
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
-                        $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                        if ($working_days == 1) {
+                            $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                        } else {
+                            $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                        }
+                        $datum['days_count'] = $diffDays + 1;
                     } else {
                         $datum['days_count'] = 1;
                     }
