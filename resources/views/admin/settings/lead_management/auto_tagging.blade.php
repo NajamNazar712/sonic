@@ -708,7 +708,7 @@
                             var services_names = '';
 
                             $.each(data.services, function(index, service) {
-                                services_names += service+'<br>';
+                                services_names += '<span class="font-weight-bold">'+service+'</span><br>';
                             });
 
                             $('#all_services .modal-body').html(services_names);
