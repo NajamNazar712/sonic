@@ -11853,8 +11853,9 @@ class RiderAPIController extends Controller
                 if ($working_days == 1) {
                     $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                 } else {
-                    $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SATURDAY]));
+                    $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                 }
+                $diffDays++;
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
                         if ($employee->leave_count < $diffDays) {
