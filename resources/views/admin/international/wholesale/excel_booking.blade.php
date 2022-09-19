@@ -5,7 +5,7 @@
 @section('content')
 
     <h1 class="mb-1">
-        International Wholesale Excel BookingBooking
+        International Wholesale Excel Booking
     </h1>
 
     <div class="card">
@@ -248,7 +248,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'International Shipments Tracking',
+                    title: 'International Wholesale Booking',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],

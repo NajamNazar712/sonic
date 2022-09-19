@@ -199,6 +199,20 @@ class InternationalWholesaleInvoiceController extends Controller
             $total_courier_charges = 0;
             $total_service_charges = 0;
             $total_gst = 0;
+
+
+            $invoice_history = new WholesaleInvoiceHistory();
+            $invoice_history->invoice_id = $invoice->id;
+            $invoice_history->wholesale_user_id = $invoice->wholesale_user_id;
+            $invoice_history->invoice_number = $invoice->invoice_number;
+            $invoice_history->total_courier_charges = $invoice->total_courier_charges;
+            $invoice_history->service_charges = $invoice->service_charges;
+            $invoice_history->gst = $invoice->gst;
+            $invoice_history->status = $invoice->status;
+            $invoice_history->updated_by = $invoice->updated_by;
+            $invoice_history->save();
+
+
             foreach ($invoice_shipments as $shipment){
                 $total_courier_charges += $shipment->bill_amount;
             }
@@ -219,6 +233,11 @@ class InternationalWholesaleInvoiceController extends Controller
             } else {
                 $gst = 0.13;
             }
+            $invoice_numbers = explode('-',$invoice->invoice_number);
+            $invoice_serial = (int)$invoice_numbers[1] + 1;
+
+            $new_invoice_number = $invoice_numbers[0] . '-' . $invoice_serial;
+            $invoice->invoice_number = $new_invoice_number;
             $total_gst = $total_service_charges * $gst;
             $invoice->total_courier_charges = $total_courier_charges;
             $invoice->service_charges = $total_service_charges;
