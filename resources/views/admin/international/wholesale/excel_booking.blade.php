@@ -257,7 +257,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                scrollY:'500px',
+                scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
