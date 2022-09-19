@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\Http\Models\International\Wholesale\WholesaleInvoice;
 use App\Http\Models\International\Wholesale\WholesaleInvoiceHistory;
@@ -171,13 +172,12 @@ class InternationalWholesaleInvoiceController extends Controller
             $total_service_charges = ROUND($total_service_charges, 2, PHP_ROUND_HALF_DOWN);
         }
 
-        $zone_id = City::find($user->city_id)->zone_id;
-
-        $zone = Zone::find($zone_id);
-        if ($zone) {
-            $gst = $zone->gst;
-        } else {
-            $gst = 0.13;
+        $gst = 0.13;
+        $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+        if($gst_rate->exists()){
+            $gst_rate = $gst_rate->first();
+            $gst = (float)$gst_rate->text;
+            $gst = $gst / 100;
         }
 
         $total_gst = $total_service_charges * $gst;
