@@ -517,6 +517,9 @@
         .goldClass{
             background-color: gold;
         }
+        .GreenColor{
+            background-color: #0aff00;
+        }
     </style>
 @endsection
 
