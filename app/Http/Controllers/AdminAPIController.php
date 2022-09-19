@@ -7907,6 +7907,7 @@ class AdminAPIController extends Controller
                 $datum['status'] = $employee_leave->status;
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
+                dd($employee_leave->employee);
                 if ($employee_leave->to) {
                     $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
@@ -7996,7 +7997,6 @@ class AdminAPIController extends Controller
                         $datum['role'] = 0;
                     }
                     if ($employee_leave->to) {
-                        dd($employee_leave->employee);
                         $working_days = $employee_leave->employee->department->working_days;
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
