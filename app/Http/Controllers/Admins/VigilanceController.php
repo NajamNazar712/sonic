@@ -81,6 +81,7 @@ class VigilanceController extends Controller
         if($delivery_note_id){
             $delivery_note = DeliveryNote::where('status', 0)->where('id', $delivery_note_id);
             if($delivery_note->exists()){
+                $delivery_note = $delivery_note->get()->first();
                 $tracking_number = $request->tracking_number;
                 $shipment = Shipment::where('tracking_number', $tracking_number);
                 if($shipment->exists()){
@@ -91,6 +92,9 @@ class VigilanceController extends Controller
                     $data['origin'] = $shipment->pickup_address->city->name;
                     $data['destination'] = $shipment->consignee_city->name;
                     $data['amount'] = $shipment->amount;
+                    $data['assignee'] = $delivery_note->admin->name;
+                    $data['created_at'] = Carbon::parse($delivery_note->created_at)->toDateTimeString();
+                    
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment->id);
                     if($delivery_note_shipment->exists()){
                         $data['verify'] = 'Verified';

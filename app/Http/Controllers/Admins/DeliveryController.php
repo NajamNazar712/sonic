@@ -1116,15 +1116,30 @@ class DeliveryController extends Controller
                     return '<strong class="text-danger">No</strong>';
                 }
             })
+            ->addColumn('vigilance_verification_excel', function ($result) {
+                
+                if ($result->shipments_count == $result->verify_shipments_count) {
+                    return 'Yes';
+                } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
+                    return 'Partial';
+
+                }else{
+                    return 'No';
+                }
+            })
             ->filterColumn('vigilance_verification', function ($query, $keyword) {
                 // $keyword = strtolower($keyword);
                 if ($keyword == 1) {
                     //verified
-                    $query->where('vv.verify_shipments_count', '=', 'delivery_notes.shipment_count');
+                    $query->where('vv.verify_shipments_count', '=', DB::raw('shipments_count'));
 
                 } elseif($keyword == 2) {
                     //partial
-                    $query->where('vv.verify_shipments_count', '<>', 0)->where('vv.excess_shipments_count','<>',0);
+                    $query->where('vv.verify_shipments_count', '<>', DB::raw('shipments_count'))
+                    ->orWhere(function ($query){
+                        $query->where('vv.excess_shipments_count','<>',0)
+                        ->where('vv.verify_shipments_count','<>',0);
+                    });
 
                 }else{
                     //no

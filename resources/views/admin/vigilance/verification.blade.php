@@ -1,12 +1,12 @@
 @extends('admin.layout.master')
-@section('title','Vigilance Verification')
+@section('title','Vigilance Delivery Note')
 
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-body">
                 <h1 class="mb-1">
-                    Vigilance Verification
+                    Vigilance Delivery Note
                 </h1>
 
                 <div class="card">
@@ -80,6 +80,8 @@
                                             <th class="border-primary border-darken-1">Status Date and Time</th>
                                             <th class="border-primary border-darken-1">Status</th>
                                             <th class="border-primary border-darken-1">Amount</th>
+                                            <th class="border-primary border-darken-1">Assigned By</th>
+                                            <th class="border-primary border-darken-1">Assigned Date</th>
                                         </tr>
                                         </thead>
                                     </table>
@@ -280,6 +282,8 @@
                     {name: 'status_date', class: 'align-middle status_date', orderable: false},
                     {name: 'shipment_status', class: 'align-middle shipment_status', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
+                    {name: 'assignee', class: 'align-middle assignee', orderable: false},
+                    {name: 'created_at', class: 'align-middle created_at', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
                 },
@@ -327,12 +331,10 @@
                                     UnblockPagePermanently();
                                     id = data.details.id;
                                     var index = $.inArray(id, shipment_ids);
-                                    console.log(index);
                                     if (index === -1) {
                                         var rowNo = vtable.rows().count();
                                         var shipment_id = data.details.id;
-
-                                        vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.origin, data.details.destination,data.details.status_date,data.details.shipment_status, data.details.amount]).node().id = shipment_id;
+                                        vtable.row.add([rowNo + 1, data.details.verify, data.details.tracking_number, data.details.origin, data.details.destination,data.details.status_date,data.details.shipment_status, data.details.amount, data.details.assignee, data.details.created_at]).node().id = shipment_id;
                                         vtable.draw(false);
                                         if(data.details.verify_id == 1){
                                             scan_sound(1);

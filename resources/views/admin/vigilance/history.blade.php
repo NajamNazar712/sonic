@@ -259,8 +259,8 @@
                             head.push('Excess Shipments');
                             head.push('Verify Shipments');
                             head.push('Unverify Shipments');
-                            head.push('Created By');
-                            head.push('Created Date');
+                            head.push('Updated By');
+                            head.push('Updated Date');
                             head.push('Assigned Date');
                             head.push('Assigned By');
 
