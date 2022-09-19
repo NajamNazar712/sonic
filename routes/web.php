@@ -3353,7 +3353,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\GlobalSettingsController@lead_tagging_data')->name('data');
             Route::post('update', 'Admins\GlobalSettingsController@lead_tagging_update')->name('update');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
-
+            Route::post('services', 'Admins\GlobalSettingsController@lead_tagging_services')->name('services');
+            
         });
 
         Route::prefix('lead_zones')->name('lead_zones.')->group(function () {

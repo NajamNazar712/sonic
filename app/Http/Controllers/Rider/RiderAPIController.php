@@ -11953,7 +11953,7 @@ class RiderAPIController extends Controller
         $rider_employee = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
-            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            ->select('employee_leaves.employee_id as employee_id', 'employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
             ->where('employee_id', $rider_employee)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
@@ -11971,9 +11971,15 @@ class RiderAPIController extends Controller
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
                 if($employee_leave->to){
+                    $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
-                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                    if ($working_days == 1) {
+                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                    } else {
+                        $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
+                    }
+                    $datum['days_count'] = $diffDays + 1;
                 }else{
                     $datum['days_count'] = 1;
                 }

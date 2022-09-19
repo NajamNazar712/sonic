@@ -23,75 +23,51 @@ class LeadTaggingController extends Controller
     {
         $lead = Lead::find($lead_id);
         $zone = City::find($lead->city_id);
+        //updated
+        $sales_person = LeadTagging::leftjoin('lead_tagging_services as lts','lts.lead_tagging_id','=','lead_taggings.id')
+                        ->where('lead_taggings.status',1)
+                        ->select('lead_taggings.id','lead_taggings.sale_person_id','lead_taggings.zone_id','lead_taggings.city_id','lead_taggings.count','lead_taggings.territory_id','lead_taggings.zone_id','lts.service_id')
+                        ->orderBy('lead_taggings.count', 'asc')
+                        ->get();
+        $sales_person_tagging_id = 0;
+        $sales_person_tagging_lead_id = 0;
+    
+        foreach ($sales_person as $value) {
+            
+            if($lead->city_id == $value->city_id && $lead->territory_id == $value->territory_id && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($lead->city_id == $value->city_id && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $zone->zone_id == $value->zone_id){
+                
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }elseif($value->city_id == 0 && $value->territory_id == 0 && $lead->service_id == $value->service_id && $value->zone_id == 0){
+                $sales_person_tagging_id = $value->sale_person_id;
+                $sales_person_tagging_lead_id = $value->id;
+                break;
+            }
 
-        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('territory_id', $lead->territory_id)->where('service_id', $lead->service_id)->where('status', 1)
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', $lead->city_id)
-            ->where('territory_id', $lead->territory_id)
-            ->where('service_id', $lead->service_id)
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', $lead->city_id)
-            ->where('territory_id', $lead->territory_id)
-            ->where('service_id', '0')
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', $lead->city_id)
-            ->where('territory_id', '0')
-            ->where('service_id', '0')
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', $lead->city_id)
-            ->where('territory_id', '0')
-            ->where('service_id', $lead->service_id)
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', '0')
-            ->where('territory_id', null)
-            ->where('service_id', $lead->service_id)
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', $zone->zone_id)
-            ->where('city_id', '=', '0')
-            ->where('territory_id', null)
-            ->where('service_id', '0')
-            ->where('status', 1);
-        })
-
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', '0')
-            ->where('service_id', $lead->service_id)
-            ->where('status', 1);
-        })
-        ->orWhere(function ($query) use ($lead,$zone){
-            $query->where('zone_id', '=', '0')
-            ->where('service_id', '0')
-            ->where('status', 1);
-        });
-
-
-
-        if($sales_person->exists()){
-            $sales_person = $sales_person->orderBy('count', 'asc')->get()->first();
-            $lead->sale_person_id = $sales_person->sale_person_id;
+        }
+        
+        //updated end
+        
+        if($sales_person_tagging_id != 0){
+            
+            $lead->sale_person_id = $sales_person_tagging_id;
             $lead->updated_by = $admin_id;
             $lead->sale_person_updated_at = Carbon::now();
             $lead->save();
-            $sales_person->count += 1;
-            $sales_person->save();
-
+            $update_count = LeadTagging::find($sales_person_tagging_lead_id);
+            $update_count->count += 1;
+            $update_count->save();
             LeadTaggingHistory::create([
-                'sale_person_id' => $sales_person->id,
+                'sale_person_id' => $sales_person_tagging_id,
                 'lead_id' => $lead->id,
                 'status' => 1,
             ]);

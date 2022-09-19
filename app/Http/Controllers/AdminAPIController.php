@@ -7819,6 +7819,7 @@ class AdminAPIController extends Controller
                         if ($employee->employee_gender_id == 2) {
                             return response()->json(['status' => 1, 'message' => 'Your gender doesn\'t allow to apply this leave category.']);
                         }
+
                         if ($diffDays > $leave_type->count) {
                             return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from ' . $leave_type->count . ' days']);
                         }
@@ -7916,7 +7917,7 @@ class AdminAPIController extends Controller
                     } else {
                         $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                     }
-                    $datum['days_count'] = $diffDays;
+                    $datum['days_count'] = $diffDays + 1;
                 } else {
                     $datum['days_count'] = 1;
                 }
@@ -8004,7 +8005,7 @@ class AdminAPIController extends Controller
                         } else {
                             $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                         }
-                        $datum['days_count'] = $diffDays;
+                        $datum['days_count'] = $diffDays + 1;
                     } else {
                         $datum['days_count'] = 1;
                     }
