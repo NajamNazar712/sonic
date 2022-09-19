@@ -6961,7 +6961,7 @@ public function sales_incentive()
             $delivery_location_keyword->save();
 
         }
-        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Added');
+        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Delivery Area Keyword Added');
 
     }
 
