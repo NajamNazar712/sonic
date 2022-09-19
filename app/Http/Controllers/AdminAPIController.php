@@ -7826,7 +7826,7 @@ class AdminAPIController extends Controller
                         }
                     }
                     if ($request->leave_type == 4) {
-                        if ($employee->religion_id != 1 || $diffDays > $leave_type->count) {
+                        if ($employee->religion_id != 1) {
                             return response()->json(['status' => 1, 'message' => 'Your are not allow to apply this leave category.']);
                         }
                         if ($diffDays > $leave_type->count) {
