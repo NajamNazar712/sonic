@@ -81,13 +81,14 @@ class InternationalWholesaleInvoiceController extends Controller
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([808, 809, 810, 811, 813], session('permissions'))) !== 0) {
+
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(808, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(808, session('permissions'))) && ($result->status != 2)) {
                         $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit </div></button>';
                     }
 
@@ -105,7 +106,7 @@ class InternationalWholesaleInvoiceController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item consolidated_print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Consolidated Service Commission Print </div></button>';
                     }
 
-                    if (session('role_id') == 1 || in_array(813, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(813, session('permissions'))) && ($result->status != 2)) {
                         $dropdown .= '<button type="button" class="dropdown-item resolved" data-target-id=' . $result->invoice_id . ' data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Mark as Received </div></button>';
                     }
 
@@ -170,9 +171,6 @@ class InternationalWholesaleInvoiceController extends Controller
             $total_service_charges = ROUND($total_service_charges, 2, PHP_ROUND_HALF_DOWN);
         }
 
-        $wholesale_invoice->total_courier_charges = $total_courier_charges;
-        $wholesale_invoice->service_charges = $total_service_charges;
-
         $zone_id = City::find($user->city_id)->zone_id;
 
         $zone = Zone::find($zone_id);
@@ -190,6 +188,45 @@ class InternationalWholesaleInvoiceController extends Controller
 
     }
 
+    static public function recalculate_invoice($shipment_id){
+        $invoice_shipment = WholesaleInvoiceShipment::where('wholesale_shipment_id', $shipment_id);
+        if($invoice_shipment->exists()){
+            $invoice_shipment = $invoice_shipment->first();
+            $invoice_id = $invoice_shipment->wholesale_invoice_id;
+            $invoice = WholesaleInvoice::find($invoice_id);
+
+            $invoice_shipments = $invoice->invoice_shipments;
+            $total_courier_charges = 0;
+            $total_service_charges = 0;
+            $total_gst = 0;
+            foreach ($invoice_shipments as $shipment){
+                $total_courier_charges += $shipment->bill_amount;
+            }
+            $invoice_user = $invoice->wholesale_user_id;
+            $user = WholesaleUser::find($invoice_user);
+            $margin = $user->margin;
+            if($margin){
+                $total_service_charges = ($total_courier_charges * $margin) / 100;
+                $total_service_charges = ROUND($total_service_charges, 2, PHP_ROUND_HALF_DOWN);
+            }
+
+
+            $zone_id = City::find($user->city_id)->zone_id;
+
+            $zone = Zone::find($zone_id);
+            if ($zone) {
+                $gst = $zone->gst;
+            } else {
+                $gst = 0.13;
+            }
+            $total_gst = $total_service_charges * $gst;
+            $invoice->total_courier_charges = $total_courier_charges;
+            $invoice->service_charges = $total_service_charges;
+            $invoice->gst = $total_gst;
+            $invoice->save();
+        }
+    }
+
     public function resolved(Request $request){
         $invoice_id = $request->invoice_id;
 
@@ -198,6 +235,13 @@ class InternationalWholesaleInvoiceController extends Controller
             $invoice->status = 2;
             $invoice->updated_by = Auth::id();
             $invoice->save();
+
+            $invoice_shipments = $invoice->invoice_shipments;
+            foreach ($invoice_shipments as $invoice_shipment){
+                $invoice_shipment->shipment->status_id = 4;
+                $invoice_shipment->shipment->save();
+
+            }
 
             return response()->json(['status' => 1, 'success' => 'Invoice resolved successfully!']);
         }
@@ -306,6 +350,12 @@ class InternationalWholesaleInvoiceController extends Controller
                 $invoice->updated_by = Auth::id();
                 $invoice->save();
 
+                $invoice_shipments = $invoice->invoice_shipments;
+                foreach ($invoice_shipments as $invoice_shipment){
+                    $invoice_shipment->shipment->status_id = 4;
+                    $invoice_shipment->shipment->save();
+
+                }
             }
         }
         return response()->json(['status' => 1, 'success' => 'Invoice(s) resolved successfully!']);

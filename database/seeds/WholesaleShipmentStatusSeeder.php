@@ -17,6 +17,7 @@ class WholesaleShipmentStatusSeeder extends Seeder
             array('id' => 1, 'name' => 'Booked'),
             array('id' => 2, 'name' => 'Arrived'),
             array('id' => 3, 'name' => 'Cancel'),
+            array('id' => 4, 'name' => 'Completed'),
         ));
     }
 }

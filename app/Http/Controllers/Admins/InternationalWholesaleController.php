@@ -527,7 +527,7 @@ class InternationalWholesaleController extends Controller
             ->join('wholesale_shipment_statuses as wss', 'wss.id', '=', 'wholesale_shipments.status_id')
             ->join('admins as cb', 'cb.id', '=', 'wholesale_shipments.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_shipments.updated_by')
-            ->select('wholesale_shipments.id as shipment_id', 'wholesale_shipments.dhl_waybill','wu.name as shipper_name', 'o.name as origin', 'd.name as destination', 'wholesale_shipments.type', 'wholesale_shipments.weight', 'wholesale_shipments.pieces', 'wholesale_shipments.courier_charges', 'wholesale_shipments.other_charges', 'wholesale_shipments.bill_amount', 'wholesale_shipments.created_at as booking_date', 'wholesale_shipments.updated_at as updated_date', 'wss.name as shipment_status', 'ub.name as updated_by', 'cb.name as booked_by');
+            ->select('wholesale_shipments.id as shipment_id', 'wholesale_shipments.dhl_waybill','wu.name as shipper_name', 'o.name as origin', 'd.name as destination', 'wholesale_shipments.type', 'wholesale_shipments.weight', 'wholesale_shipments.pieces', 'wholesale_shipments.courier_charges', 'wholesale_shipments.other_charges', 'wholesale_shipments.bill_amount', 'wholesale_shipments.created_at as booking_date', 'wholesale_shipments.updated_at as updated_date', 'wss.name as shipment_status', 'ub.name as updated_by', 'cb.name as booked_by', 'wholesale_shipments.status_id');
 
 
         if (session('role_id') != 1) {
@@ -537,29 +537,32 @@ class InternationalWholesaleController extends Controller
         $datatable = Datatables::of($bookings)
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([801, 802, 803], session('permissions'))) !== 0) {
-                    $dropdown = '
+                    if($result->status_id != 4){
+
+                        $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(805, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $result->shipper_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit </div></button>';
-                    }
+                        if (session('role_id') == 1 || in_array(805, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $result->shipper_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit </div></button>';
+                        }
 
 
 
-                    if (session('role_id') == 1 || in_array(806, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item cancel" data-target-id=' . $result->shipper_id . ' data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-trash"></i></div><div class="col-9 offset-1">Cancel </div></button>';
-                    }
+                        /*if (session('role_id') == 1 || in_array(806, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item cancel" data-target-id=' . $result->shipper_id . ' data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-trash"></i></div><div class="col-9 offset-1">Cancel </div></button>';
+                        }*/
 
 
-                    $dropdown .= '
+                        $dropdown .= '
                         </div>
                       </div>
                     ';
 
-                    return $dropdown;
+                        return $dropdown;
+                    }
                 } else {
                     return '';
                 }
@@ -606,6 +609,7 @@ class InternationalWholesaleController extends Controller
 
                 $old_destination = $shipment->destination_city_id;
                 $old_weight = $shipment->weight;
+                $old_other_charges = $shipment->other_charges;
 
                 $dhl_waybill = $request->dhl_waybill;
                 $destination_city_id = $request->destination_city_id;
@@ -623,11 +627,25 @@ class InternationalWholesaleController extends Controller
                 $shipment->updated_by = Auth::id();
                 $shipment->save();
 
+                $invoice_recalculation = false;
+
+                $courier_charges = $shipment->courier_charges;
                 if(($old_destination != $destination_city_id) || ($old_weight != $weight)){
                     $courier_charges = InternationalWholesaleChargesController::weight($destination_city_id, $weight);
 
+                    $invoice_recalculation = true;
+                }
+                if($old_other_charges != $other_charges){
+                    $invoice_recalculation  = true;
+                }
+
+                if($invoice_recalculation){
+
                     $shipment->courier_charges = $courier_charges;
+
+                    $shipment->bill_amount = $courier_charges + $other_charges;
                     $shipment->save();
+                    InternationalWholesaleInvoiceController::recalculate_invoice($shipment->id);
                 }
 
                 return redirect()->back()->with('success', 'Shipment updated successfully!');
