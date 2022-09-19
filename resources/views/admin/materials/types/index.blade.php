@@ -208,8 +208,8 @@
                                         <div class="card-body">
                                             <fieldset>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
-                                                    <input type="radio" class="custom-control-input bg-primary edit_internal" value="internal" name="packaging_type_edit" id="colorRadio4">
-                                                    <label class="custom-control-label" for="colorRadio4">Internal</label>
+                                                    <input type="radio" class="custom-control-input bg-primary edit_internal" value="internal" name="packaging_type_edit" id="colorRadio14">
+                                                    <label class="custom-control-label" for="colorRadio14">Internal</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
                                                     <input type="radio" class="custom-control-input bg-success edit_external" value="external" name="packaging_type_edit" id="colorRadio5">

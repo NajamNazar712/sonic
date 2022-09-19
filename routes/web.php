@@ -1,5 +1,7 @@
 <?php
 use App\Http\Models\HR\Employee;
+use Illuminate\Support\Facades\Storage;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -381,6 +383,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('daraz_mis')->name('daraz_mis.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@daraz_mis_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@daraz_mis_list')->name('list');
+        });
+        Route::prefix('mms')->name('mms.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@mms_index')->name('index');
+            Route::post('list','Shippers\ShipperReportsController@mms_list')->name('list');
         });
     });
 
@@ -4009,6 +4015,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
+            Route::get('{id}/payslip_download', 'Admins\AdminHumanResourseController@payslip_download')->name('download');
         });
 
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {

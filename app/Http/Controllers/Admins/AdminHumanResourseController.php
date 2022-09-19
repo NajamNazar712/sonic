@@ -49,6 +49,7 @@ use App\Http\Models\HR\EmployeeType;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\PayslipPdf;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
@@ -58,12 +59,14 @@ use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessPaySlipPdfEmail;
 use App\RiderMainCategory;
 use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -522,7 +525,7 @@ class AdminHumanResourseController extends Controller
             })
             ->editColumn('confirmation_status', function ($user) {
                 if($user->confirmation_status == 1){
-                    return 'Permanenet';
+                    return 'Permanent';
                 }elseif ($user->confirmation_status == 2) {
                     return 'Probation';
                 }else{
@@ -1275,6 +1278,22 @@ class AdminHumanResourseController extends Controller
             'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
         ]);
 
+        $super_admins = [3, 5, 7, 665];
+        $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
+        $role_flag = false;
+        if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
+            $role_flag = true;
+        }
+        else{
+            if(!in_array($request->input('role_id'), $hr_roles)){
+                $role_flag = true;
+            }
+            else{
+                $role_flag = false;
+                $role = AdminRole::find($request->input('role_id'));
+                NotificationsController::send(186, Auth::id(), $role->name);
+            }
+        }
 //        $employee->request_status_id = 2;
         $employee->name = $request->employee_name;
         $employee->phone_number = $request->personal_number;
@@ -1292,18 +1311,19 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+        if($role_flag == true){
+            if ($employee->designation_id != $request->designation) {
+                $designation_logs = new EmployeeDesignationLog();
+                $designation_logs->updated_by = Auth::id();
+                $designation_logs->designation_id = $employee->designation_id;
+                $designation_logs->employee_id = $employee->id;
+                $designation_logs->save();
+            }
 
-        if ($employee->designation_id != $request->designation) {
-            $designation_logs = new EmployeeDesignationLog();
-            $designation_logs->updated_by = Auth::id();
-            $designation_logs->designation_id = $employee->designation_id;
-            $designation_logs->employee_id = $employee->id;
-            $designation_logs->save();
+            $employee->designation_id = $request->designation;
+            $employee->department_id = ($request->has('department')) ? $request->department : 6;
         }
-
-        $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
-        $employee->department_id = ($request->has('department')) ? $request->department : 6;
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
@@ -1359,9 +1379,10 @@ class AdminHumanResourseController extends Controller
                         }
                     }
                 }
-
-                $admin->designation_id = $employee->designation_id;
-                $admin->role_id = $employee->designation->role_id ?? 79;
+                if($role_flag == true) {
+                    $admin->designation_id = $employee->designation_id;
+                    $admin->role_id = $employee->designation->role_id ?? 79;
+                }
                 $admin->phone_number = $employee->phone_number;
                 $admin->official_phone_number = $employee->official_phone_number;
                 $admin->email = $employee->official_email;
@@ -3056,7 +3077,7 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary', 'hub_id');
+        $payslips = EmployeePayslip::leftjoin('payslip_pdfs as pp', 'pp.payslip_id', '=', 'employee_payslips.id')->select('employee_payslips.id as id', 'employee_payslips.payroll_month as payroll_month', 'employee_payslips.trax_id as trax_id', 'employee_payslips.name as name', 'employee_payslips.designation as designation', 'employee_payslips.department as department', 'employee_payslips.hub as hub', 'employee_payslips.zone as zone', 'employee_payslips.joining_date as joining_date', 'employee_payslips.cnic as cnic', 'employee_payslips.total_deduction as total_deduction', 'employee_payslips.net_salary as net_salary', 'employee_payslips.iban as iban', 'employee_payslips.total_salary as total_salary', 'employee_payslips.hub_id as hub_id', 'pp.id as pdf_id', 'pp.file_path as file_path');
         if (!in_array(596, session('permissions'))) {
             $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
         } else {
@@ -3064,13 +3085,34 @@ class AdminHumanResourseController extends Controller
         }
 
         $datatable = Datatables::of($payslips)
-            ->addColumn('action', function () {
+            ->editColumn('total_salary', function ($payslip) {
+                if($payslip->total_salary == null){
+                    return '-';
+                }
+                else{
+                    return $payslip->total_salary;
+                }
+            })
+            ->editColumn('total_deduction', function ($payslip) {
+                if($payslip->total_deduction == null){
+                    return '-';
+                }
+                else{
+                    return $payslip->total_deduction;
+                }
+            })
+            ->addColumn('action', function ($payslip) {
                 $dropdown = '
                 <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+                if($payslip->pdf_id){
+                    $dropdown .= '<button type="button" class="dropdown-item download" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Download</div></button>';
+                }
+                else{
+                    $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+                }
 
                 return $dropdown;
             });
@@ -3298,6 +3340,18 @@ class AdminHumanResourseController extends Controller
                     $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(24)->toDateString();
 
                     foreach ($rows as $key => $row) {
+                        $existing_payslip = EmployeePayslip::where('trax_id', trim($row['trax_id']))->whereDate('payroll_month', $payroll_month);
+                        if($existing_payslip->exists()){
+                            $existing_payslip = $existing_payslip->first();
+                            $existing_payslip_pdf = PayslipPdf::where('payslip_id', $existing_payslip->id);
+                            if($existing_payslip_pdf->exists()){
+                                $existing_payslip_pdf = $existing_payslip_pdf->first();
+                                Storage::disk('public')->delete($existing_payslip_pdf->file_path);
+                                PayslipPdf::where('payslip_id', $existing_payslip->id)->delete();
+                            }
+                            EmployeePayslip::where('id', $existing_payslip->id)->delete();
+                        }
+                        $payslip_details = array();
                         $payslip = new EmployeePayslip();
                         $payslip->payroll_month = $payroll_month;
                         $payslip->payroll_cut_off_date = $payroll_cut_off_date;
@@ -3319,48 +3373,90 @@ class AdminHumanResourseController extends Controller
                         $payslip->absent_days = trim($row['absent_days']);
                         $payslip->extra_paid_days = trim($row['extra_paid_days']);
                         $payslip->fuel_days = trim($row['fuel_days']);
-                        $payslip->basic_salary = trim($row['basic_salary']);
-                        $payslip->house_rent = trim($row['house_rent']);
-                        $payslip->medical = trim($row['medical']);
-                        $payslip->gross_salary = trim($row['gross_salary']);
-                        $payslip->mobile_allowance = trim($row['mobile_allowance']);
-                        $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
-                        $payslip->fuel_allowance = trim($row['fuel_allowance']);
-                        $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
-                        $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
-                        $payslip->fixed_incentive = trim($row['fixed_incentive']);
-                        $payslip->holiday_allowance = trim($row['holiday_allowance']);
-                        $payslip->overtime = trim($row['overtime']);
-                        $payslip->bonus = trim($row['bonus']);
-                        $payslip->arrears = trim($row['arrears']);
-                        $payslip->pickup_incentive = trim($row['pickup_incentive']);
-                        $payslip->delivery_incentive = trim($row['delivery_incentive']);
-                        $payslip->operation_incentive = trim($row['operation_incentive']);
-                        $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
-                        $payslip->others_addition = trim($row['others_addition']);
-                        $payslip->total_salary = trim($row['total_salary']);
-                        $payslip->paycut = trim($row['paycut']);
-                        $payslip->absent = trim($row['absent']);
-                        $payslip->late_deduction = trim($row['late_deduction']);
-                        $payslip->income_tax = trim($row['income_tax']);
-                        $payslip->eobi = trim($row['eobi']);
-                        $payslip->advance_salary = trim($row['advance_salary']);
-                        $payslip->month_closing = trim($row['month_closing']);
-                        $payslip->loan = trim($row['loan']);
-                        $payslip->fuel_card = trim($row['fuel_card']);
-                        $payslip->open_parcel = trim($row['open_parcel']);
-                        $payslip->phone_call = trim($row['phone_call']);
-                        $payslip->recovery = trim($row['recovery']);
-                        $payslip->auction_sale = trim($row['auction_sale']);
-                        $payslip->penalty = trim($row['penalty']);
-                        $payslip->others_deduction = trim($row['others_deduction']);
-                        $payslip->van_deduction = trim($row['van_deduction']);
-                        $payslip->medical_insurance = trim($row['medical_insurance']);
-                        $payslip->total_deduction = trim($row['total_deduction']);
-                        $payslip->net_salary = trim($row['net_salary']);
+                        if(trim($row['employee_type']) == 2){
+                            $payslip->basic_salary = trim($row['basic_salary']);
+                            $payslip->house_rent = trim($row['house_rent']);
+                            $payslip->medical = trim($row['medical']);
+                            $payslip->gross_salary = trim($row['gross_salary']);
+                            $payslip->mobile_allowance = trim($row['mobile_allowance']);
+                            $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
+                            $payslip->fuel_allowance = trim($row['fuel_allowance']);
+                            $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
+                            $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
+                            $payslip->fixed_incentive = trim($row['fixed_incentive']);
+                            $payslip->holiday_allowance = trim($row['holiday_allowance']);
+                            $payslip->overtime = trim($row['overtime']);
+                            $payslip->bonus = trim($row['bonus']);
+                            $payslip->arrears = trim($row['arrears']);
+                            $payslip->pickup_incentive = trim($row['pickup_incentive']);
+                            $payslip->delivery_incentive = trim($row['delivery_incentive']);
+                            $payslip->operation_incentive = trim($row['operation_incentive']);
+                            $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
+                            $payslip->others_addition = trim($row['others_addition']);
+                            $payslip->total_salary = trim($row['total_salary']);
+                            $payslip->paycut = trim($row['paycut']);
+                            $payslip->absent = trim($row['absent']);
+                            $payslip->late_deduction = trim($row['late_deduction']);
+                            $payslip->income_tax = trim($row['income_tax']);
+                            $payslip->eobi = trim($row['eobi']);
+                            $payslip->advance_salary = trim($row['advance_salary']);
+                            $payslip->month_closing = trim($row['month_closing']);
+                            $payslip->loan = trim($row['loan']);
+                            $payslip->fuel_card = trim($row['fuel_card']);
+                            $payslip->open_parcel = trim($row['open_parcel']);
+                            $payslip->phone_call = trim($row['phone_call']);
+                            $payslip->recovery = trim($row['recovery']);
+                            $payslip->auction_sale = trim($row['auction_sale']);
+                            $payslip->penalty = trim($row['penalty']);
+                            $payslip->others_deduction = trim($row['others_deduction']);
+                            $payslip->van_deduction = trim($row['van_deduction']);
+                            $payslip->medical_insurance = trim($row['medical_insurance']);
+                            $payslip->total_deduction = trim($row['total_deduction']);
+                            $payslip->net_salary = trim($row['net_salary']);
+                        }
+                        $payslip_details['basic_salary'] = trim($row['basic_salary']);
+                        $payslip_details['house_rent'] = trim($row['house_rent']);
+                        $payslip_details['medical'] = trim($row['medical']);
+                        $payslip_details['gross_salary'] = trim($row['gross_salary']);
+                        $payslip_details['mobile_allowance'] = trim($row['mobile_allowance']);
+                        $payslip_details['vehicle_allowance'] = trim($row['vehicle_allowance']);
+                        $payslip_details['fuel_allowance'] = trim($row['fuel_allowance']);
+                        $payslip_details['conveyance_allowance'] = trim($row['conveyance_allowance']);
+                        $payslip_details['vehicle_maintenance'] = trim($row['vehicle_maintenance']);
+                        $payslip_details['fixed_incentive'] = trim($row['fixed_incentive']);
+                        $payslip_details['holiday_allowance'] = trim($row['holiday_allowance']);
+                        $payslip_details['overtime'] = trim($row['overtime']);
+                        $payslip_details['bonus'] = trim($row['bonus']);
+                        $payslip_details['arrears'] = trim($row['arrears']);
+                        $payslip_details['pickup_incentive'] = trim($row['pickup_incentive']);
+                        $payslip_details['delivery_incentive'] = trim($row['delivery_incentive']);
+                        $payslip_details['operation_incentive'] = trim($row['operation_incentive']);
+                        $payslip_details['extra_duty_allowance'] = trim($row['extra_duty_allowance']);
+                        $payslip_details['others_addition'] = trim($row['others_addition']);
+                        $payslip_details['total_salary'] = trim($row['total_salary']);
+                        $payslip_details['paycut'] = trim($row['paycut']);
+                        $payslip_details['absent'] = trim($row['absent']);
+                        $payslip_details['late_deduction'] = trim($row['late_deduction']);
+                        $payslip_details['income_tax'] = trim($row['income_tax']);
+                        $payslip_details['eobi'] = trim($row['eobi']);
+                        $payslip_details['advance_salary'] = trim($row['advance_salary']);
+                        $payslip_details['month_closing'] = trim($row['month_closing']);
+                        $payslip_details['loan'] = trim($row['loan']);
+                        $payslip_details['fuel_card'] = trim($row['fuel_card']);
+                        $payslip_details['open_parcel'] = trim($row['open_parcel']);
+                        $payslip_details['phone_call'] = trim($row['phone_call']);
+                        $payslip_details['recovery'] = trim($row['recovery']);
+                        $payslip_details['auction_sale'] = trim($row['auction_sale']);
+                        $payslip_details['penalty'] = trim($row['penalty']);
+                        $payslip_details['others_deduction'] = trim($row['others_deduction']);
+                        $payslip_details['van_deduction'] = trim($row['van_deduction']);
+                        $payslip_details['medical_insurance'] = trim($row['medical_insurance']);
+                        $payslip_details['total_deduction'] = trim($row['total_deduction']);
+                        $payslip_details['net_salary'] = trim($row['net_salary']);
                         $payslip->iban = trim($row['iban']);
                         $payslip->added_by = Auth::id();
                         $payslip->save();
+                        dispatch(new ProcessPaySlipPdfEmail($payslip_details, $payslip->id));
                         $updated++;
                     }
                     $error_msg = '';
@@ -3407,348 +3503,371 @@ class AdminHumanResourseController extends Controller
                 $personal_contact = $rider->phone;
             }
         }
+            $basic_salary = ($payslip->basic_salary != null) ? number_format($payslip->basic_salary) : '-';
+            $house_rent = ($payslip->house_rent != null) ? number_format($payslip->house_rent) : '-';
+            $medical = ($payslip->medical != null) ? number_format($payslip->medical) : '-';
+            $gross_salary = ($payslip->gross_salary != null) ? number_format($payslip->gross_salary) : '-';
+            $payroll_days = ($payslip->payroll_days != null) ? $payslip->payroll_days : '-';
+            $present_days = ($payslip->present_days != null) ? $payslip->present_days : '-';
+            $absent_days = ($payslip->absent_days != null) ? $payslip->absent_days : '-';
+            $pay_cut_days = ($payslip->pay_cut_days != null) ? $payslip->pay_cut_days : '-';
+            $extra_paid_days = ($payslip->extra_paid_days != null) ? $payslip->extra_paid_days : '-';
+            $fuel_days = ($payslip->fuel_days != null) ? $payslip->fuel_days : '-';
 
-        $basic_salary = ($payslip->basic_salary != null) ? number_format($payslip->basic_salary) : '-';
-        $house_rent = ($payslip->house_rent != null) ? number_format($payslip->house_rent) : '-';
-        $medical = ($payslip->medical != null) ? number_format($payslip->medical) : '-';
-        $gross_salary = ($payslip->gross_salary != null) ? number_format($payslip->gross_salary) : '-';
-        $payroll_days = ($payslip->payroll_days != null) ? $payslip->payroll_days : '-';
-        $present_days = ($payslip->present_days != null) ? $payslip->present_days : '-';
-        $absent_days = ($payslip->absent_days != null) ? $payslip->absent_days : '-';
-        $pay_cut_days = ($payslip->pay_cut_days != null) ? $payslip->pay_cut_days : '-';
-        $extra_paid_days = ($payslip->extra_paid_days != null) ? $payslip->extra_paid_days : '-';
-        $fuel_days = ($payslip->fuel_days != null) ? $payslip->fuel_days : '-';
+            $mobile_allowance = ($payslip->mobile_allowance != null) ? number_format($payslip->mobile_allowance) : '-';
+            $vehicle_allowance = ($payslip->vehicle_allowance != null) ? number_format($payslip->vehicle_allowance) : '-';
+            $fuel_allowance = ($payslip->fuel_allowance != null) ? number_format($payslip->fuel_allowance) : '-';
+            $conveyance_allowance = ($payslip->conveyance_allowance != null) ? number_format($payslip->conveyance_allowance) : '-';
+            $vehicle_maintenance = ($payslip->vehicle_maintenance != null) ? number_format($payslip->vehicle_maintenance) : '-';
+            $fixed_incentive = ($payslip->fixed_incentive != null) ? number_format($payslip->fixed_incentive) : '-';
+            $holiday_allowance = ($payslip->holiday_allowance != null) ? number_format($payslip->holiday_allowance) : '-';
+            $overtime = ($payslip->overtime != null) ? number_format($payslip->overtime) : '-';
+            $bonus = ($payslip->bonus != null) ? number_format($payslip->bonus) : '-';
+            $arrears = ($payslip->arrears != null) ? number_format($payslip->arrears) : '-';
+            $pickup_incentive = ($payslip->pickup_incentive != null) ? number_format($payslip->pickup_incentive) : '-';
+            $delivery_incentive = ($payslip->delivery_incentive != null) ? number_format($payslip->delivery_incentive) : '-';
+            $operations_incentive = ($payslip->operation_incentive != null) ? number_format($payslip->operation_incentive) : '-';
+            $extra_duty_allowance = ($payslip->extra_duty_allowance != null) ? number_format($payslip->extra_duty_allowance) : '-';
+            $others_addition = ($payslip->others_addition != null) ? number_format($payslip->others_addition) : '-';
 
-        $mobile_allowance = ($payslip->mobile_allowance != null) ? number_format($payslip->mobile_allowance) : '-';
-        $vehicle_allowance = ($payslip->vehicle_allowance != null) ? number_format($payslip->vehicle_allowance) : '-';
-        $fuel_allowance = ($payslip->fuel_allowance != null) ? number_format($payslip->fuel_allowance) : '-';
-        $conveyance_allowance = ($payslip->conveyance_allowance != null) ? number_format($payslip->conveyance_allowance) : '-';
-        $vehicle_maintenance = ($payslip->vehicle_maintenance != null) ? number_format($payslip->vehicle_maintenance) : '-';
-        $fixed_incentive = ($payslip->fixed_incentive != null) ? number_format($payslip->fixed_incentive) : '-';
-        $holiday_allowance = ($payslip->holiday_allowance != null) ? number_format($payslip->holiday_allowance) : '-';
-        $overtime = ($payslip->overtime != null) ? number_format($payslip->overtime) : '-';
-        $bonus = ($payslip->bonus != null) ? number_format($payslip->bonus) : '-';
-        $arrears = ($payslip->arrears != null) ? number_format($payslip->arrears) : '-';
-        $pickup_incentive = ($payslip->pickup_incentive != null) ? number_format($payslip->pickup_incentive) : '-';
-        $delivery_incentive = ($payslip->delivery_incentive != null) ? number_format($payslip->delivery_incentive) : '-';
-        $operations_incentive = ($payslip->operation_incentive != null) ? number_format($payslip->operation_incentive) : '-';
-        $extra_duty_allowance = ($payslip->extra_duty_allowance != null) ? number_format($payslip->extra_duty_allowance) : '-';
-        $others_addition = ($payslip->others_addition != null) ? number_format($payslip->others_addition) : '-';
+            $total_addition = ($payslip->total_salary != null) ? number_format($payslip->total_salary) : '-';
 
-        $total_addition = ($payslip->total_salary != null) ? number_format($payslip->total_salary) : '-';
+            $paycut = ($payslip->paycut != null) ? number_format($payslip->paycut) : '-';
+            $absent = ($payslip->absent != null) ? number_format($payslip->absent) : '-';
+            $late_deduction = ($payslip->late_deduction != null) ? number_format($payslip->late_deduction) : '-';
+            $income_tax = ($payslip->income_tax != null) ? number_format($payslip->income_tax) : '-';
+            $eobi = ($payslip->eobi != null) ? number_format($payslip->eobi) : '-';
+            $advance_salary = ($payslip->advance_salary != null) ? number_format($payslip->advance_salary) : '-';
+            $month_closing = ($payslip->month_closing != null) ? number_format($payslip->month_closing) : '-';
+            $loan = ($payslip->loan != null) ? number_format($payslip->loan) : '-';
+            $fuel_card = ($payslip->fuel_card != null) ? number_format($payslip->fuel_card) : '-';
+            $open_parcel = ($payslip->open_parcel != null) ? number_format($payslip->open_parcel) : '-';
+            $phone_call = ($payslip->phone_call != null) ? number_format($payslip->phone_call) : '-';
+            $recovery = ($payslip->recovery != null) ? number_format($payslip->recovery) : '-';
+            $auction_sale = ($payslip->auction_sale != null) ? number_format($payslip->auction_sale) : '-';
+            $penalty = ($payslip->penalty != null) ? number_format($payslip->penalty) : '-';
+            $medical_insurance = ($payslip->medical_insurance != null) ? number_format($payslip->medical_insurance) : '-';
+            $van_deduction = ($payslip->van_deduction != null) ? number_format($payslip->van_deduction) : '-';
+            $others_deduction = ($payslip->others_deduction != null) ? number_format($payslip->others_deduction) : '-';
 
-        $paycut = ($payslip->paycut != null) ? number_format($payslip->paycut) : '-';
-        $absent = ($payslip->absent != null) ? number_format($payslip->absent) : '-';
-        $late_deduction = ($payslip->late_deduction != null) ? number_format($payslip->late_deduction) : '-';
-        $income_tax = ($payslip->income_tax != null) ? number_format($payslip->income_tax) : '-';
-        $eobi = ($payslip->eobi != null) ? number_format($payslip->eobi) : '-';
-        $advance_salary = ($payslip->advance_salary != null) ? number_format($payslip->advance_salary) : '-';
-        $month_closing = ($payslip->month_closing != null) ? number_format($payslip->month_closing) : '-';
-        $loan = ($payslip->loan != null) ? number_format($payslip->loan) : '-';
-        $fuel_card = ($payslip->fuel_card != null) ? number_format($payslip->fuel_card) : '-';
-        $open_parcel = ($payslip->open_parcel != null) ? number_format($payslip->open_parcel) : '-';
-        $phone_call = ($payslip->phone_call != null) ? number_format($payslip->phone_call) : '-';
-        $recovery = ($payslip->recovery != null) ? number_format($payslip->recovery) : '-';
-        $auction_sale = ($payslip->auction_sale != null) ? number_format($payslip->auction_sale) : '-';
-        $penalty = ($payslip->penalty != null) ? number_format($payslip->penalty) : '-';
-        $medical_insurance = ($payslip->medical_insurance != null) ? number_format($payslip->medical_insurance) : '-';
-        $van_deduction = ($payslip->van_deduction != null) ? number_format($payslip->van_deduction) : '-';
-        $others_deduction = ($payslip->others_deduction != null) ? number_format($payslip->others_deduction) : '-';
+            $total_deduction = ($payslip->total_deduction != null) ? number_format($payslip->total_deduction) : '-';
+            $net_salary = ($payslip->net_salary != null) ? number_format($payslip->net_salary) : '-';
 
-        $total_deduction = ($payslip->total_deduction != null) ? number_format($payslip->total_deduction) : '-';
-        $net_salary = ($payslip->net_salary != null) ? number_format($payslip->net_salary) : '-';
+            $html = '<!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+                        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+    
+                        <title>Payslip</title>
+    
+                         <style>
+                         @page {
+                            size: A4 portrait;
+                          }
+                          body {
+                            font-size: 0.95rem !important;
+    
+                          }
+                          .color.primary {
+                            background: #c8c8c8 !important;
+                          }
+    
+                          .color.secondary {
+                            background: #ebebeb !important;
+                          }
+                          .border.twice {
+                            border-width: 1px !important;
+                          }
+    
+                          .border.twice-top {
+                            border-top-width: 1px !important;
+                          }
+    
+                          .border.twice-bottom {
+                            border-bottom-width: 1px !important;
+                          }
+    
+                          .border.twice-left {
+                            border-left-width: 1px !important;
+                          }
+    
+                          .border.twice-right {
+                            border-right-width: 1px !important;
+                          }
+    
+                          .font-small {
+                            font-size: 0.65rem !important;
+                          }
+    
+                          .table-borderless td, .table th {
+                            border: none;
+                         }
+                         td{
+                            color: #000;
+                         }
+                        </style>';
 
-        $html = '<!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            $html .= '</head>
+                      <body>
+    
+                          <div class="table-responsive">
+                              <table class="table table-borderless mb-0">
+    
+                              <tbody>
+                                <tr>
+                                  <td class="text-left align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
+    
+                                     <td class="text-right align-middle"><h1 class="d-block">SALARY SLIP</h1></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="text-left align-middle">Head Office (Karachi): </td>
+                                    <td class="text-right align-middle"><b>Payroll Month: </b><u>' . $payroll_month . '</u></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="text-left align-middle">Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi.</td>
+                                    <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>' . $payroll_cut_off_date . '</u></td>
+    
+                                 </tr>
+                                 </tbody>
+                             </table>';
 
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+            $html .= '<table class="table border table-sm">
+    
+                        <tbody>
+                            <tr class="text-center">
+                                <td class="color primary border twice" colspan="8"><b>Employee Information</b></td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Employee ID</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->trax_id . '</td>
+                                <td colspan="2"  class="border twice-right">Date of Joining</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->joining_date . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Employee Name</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->name . '</td>
+                                <td colspan="2"  class="border twice-right">Date of Confirmation</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->confirmation_date . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Designation</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->designation . '</td>
+                                <td colspan="2"  class="border twice-right">Employee Type</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->employee_type . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Department</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->department . '</td>
+                                <td colspan="2"  class="border twice-right">Employee Status</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->employee_status . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Location</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->hub . '</td>
+                                <td colspan="2"  class="border twice-right">Personal Contact #</td>
+                                <td colspan="2"  class="border twice-right">' . $personal_contact . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">CNIC No.</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->cnic . '</td>
+                                <td colspan="2"  class="border twice-right">Bank Account No.</td>
+                                <td colspan="2"  class="border twice-right">' . $payslip->iban . '</td>
+                            </tr>
+                            <tr class="text-center">
+                                <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Basic Salary</td>
+                                <td colspan="2"  class="border twice-right">' . $basic_salary . '</td>
+                                <td colspan="1"  class="border twice-right">Payroll Days</td>
+                                <td colspan="1"  class="border twice-right">' . $payroll_days . '</td>
+                                <td colspan="1"  class="border twice-right">Absent Days</td>
+                                <td colspan="1"  class="border twice-right">' . $absent_days . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">House Rent</td>
+                                <td colspan="2"  class="border twice-right">' . $house_rent . '</td>
+                                <td colspan="1"  class="border twice-right">Present Days</td>
+                                <td colspan="1"  class="border twice-right">' . $present_days . '</td>
+                                <td colspan="1"  class="border twice-right">Extra Paid Days</td>
+                                <td colspan="1"  class="border twice-right">' . $extra_paid_days . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Medical</td>
+                                <td colspan="2"  class="border twice-right">' . $medical . '</td>
+                                <td colspan="1"  class="border twice-right">Pay Cut Days</td>
+                                <td colspan="1"  class="border twice-right">' . $pay_cut_days . '</td>
+                                <td colspan="1"  class="border twice-right">Fuel Days</td>
+                                <td colspan="1"  class="border twice-right">' . $fuel_days . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right"><b>Gross Salary</b></td>
+                                <td colspan="2"  class="border twice-right">' . $gross_salary . '</td>
+                                <td colspan="4"  class="border twice-right"></td>
+                            </tr>
+                            <tr class="text-center">
+                                <td class="color primary border twice" colspan="4"><b>Addition</b></td>
+                                <td class="color primary border twice" colspan="4"><b>Deduction</b></td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Mobile Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $mobile_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Pay Cut</td>
+                                <td colspan="2"  class="border twice-right">' . $paycut . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Vehicle Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $vehicle_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Absent</td>
+                                <td colspan="2"  class="border twice-right">' . $absent . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Fuel Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $fuel_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Late Deduction</td>
+                                <td colspan="2"  class="border twice-right">' . $late_deduction . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Conveyance Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $conveyance_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Income Tax</td>
+                                <td colspan="2"  class="border twice-right">' . $income_tax . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Vehicle Maintenance</td>
+                                <td colspan="2"  class="border twice-right">' . $vehicle_maintenance . '</td>
+                                <td colspan="2"  class="border twice-right">EOBI</td>
+                                <td colspan="2"  class="border twice-right">' . $eobi . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Fixed Incentive</td>
+                                <td colspan="2"  class="border twice-right">' . $fixed_incentive . '</td>
+                                <td colspan="2"  class="border twice-right">Advance Salary</td>
+                                <td colspan="2"  class="border twice-right">' . $advance_salary . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Sunday / Holiday Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $holiday_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Month Closing</td>
+                                <td colspan="2"  class="border twice-right">' . $month_closing . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Overtime</td>
+                                <td colspan="2"  class="border twice-right">' . $overtime . '</td>
+                                <td colspan="2"  class="border twice-right">Loan</td>
+                                <td colspan="2"  class="border twice-right">' . $loan . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Bonus</td>
+                                <td colspan="2"  class="border twice-right">' . $bonus . '</td>
+                                <td colspan="2"  class="border twice-right">Fuel Card</td>
+                                <td colspan="2"  class="border twice-right">' . $fuel_card . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Arrears</td>
+                                <td colspan="2"  class="border twice-right">' . $arrears . '</td>
+                                <td colspan="2"  class="border twice-right">Open Parcel</td>
+                                <td colspan="2"  class="border twice-right">' . $open_parcel . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Pickup Incentive</td>
+                                <td colspan="2"  class="border twice-right">' . $pickup_incentive . '</td>
+                                <td colspan="2"  class="border twice-right">Phone Call</td>
+                                <td colspan="2"  class="border twice-right">' . $phone_call . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Delivery Incentive</td>
+                                <td colspan="2"  class="border twice-right">' . $delivery_incentive . '</td>
+                                <td colspan="2"  class="border twice-right">Recovery</td>
+                                <td colspan="2"  class="border twice-right">' . $recovery . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Operations Incentive</td>
+                                <td colspan="2"  class="border twice-right">' . $operations_incentive . '</td>
+                                <td colspan="2"  class="border twice-right">Auction Sale</td>
+                                <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
+                                <td colspan="2"  class="border twice-right">Penalty</td>
+                                <td colspan="2"  class="border twice-right">' . $penalty . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right">Others Addition</td>
+                                <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                                <td colspan="2"  class="border twice-right">Medical Insurance</td>
+                                <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right"></td>
+                                <td colspan="2"  class="border twice-right"></td>
+                                <td colspan="2"  class="border twice-right">Van Deduction</td>
+                                <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td colspan="2" class="border twice-right"></td>
+                                <td colspan="2"  class="border twice-right"></td>
+                                <td colspan="2"  class="border twice-right">Others Deduction</td>
+                                <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
+                            </tr>
+    
+                            <tr class="text-center">
+                                <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
+                                <td class="color primary border twice" colspan="2">' . $total_addition . '</td>
+                                <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
+                                <td class="color primary border twice" colspan="2">' . $total_deduction . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
+                                <td class="color primary border twice text-center" colspan="2">' . $net_salary . '</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>
+                            </tr>
+                       </tbody>
+                             </table>';
 
-                    <title>Payslip</title>
+            $html .= '
+                          </div>
+                          </body>
+                          </html>';
 
-                     <style>
-                     @page {
-                        size: A4 portrait;
-                      }
-                      body {
-                        font-size: 0.95rem !important;
+            $pdf = SnappyPDF::loadHTML($html);
 
-                      }
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
+            $filename = 'payslip_' . $payslip->id . '.pdf';
 
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-                      .border.twice {
-                        border-width: 1px !important;
-                      }
+            $result = $pdf->download($filename);
+            $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
+            return array('status' => 1, 'image' => $pdf_file);
+    }
+    public function payslip_download(Request $request, $id)
+    {
+        $payslip = EmployeePayslip::find($id);
+        if($payslip){
+            $payslip_pdf = PayslipPdf::where('payslip_id', $id);
+            if ($payslip_pdf->exists()) {
+                $month = Carbon::parse($payslip->payroll_month);
+                $month = $month->format('M');
+                $name = $payslip->name . '-' . $month . '.pdf';
+                $payslip_pdf = $payslip_pdf->first();
+                $file = public_path() . "/storage/" . $payslip_pdf->file_path;
 
-                      .border.twice-top {
-                        border-top-width: 1px !important;
-                      }
-
-                      .border.twice-bottom {
-                        border-bottom-width: 1px !important;
-                      }
-
-                      .border.twice-left {
-                        border-left-width: 1px !important;
-                      }
-
-                      .border.twice-right {
-                        border-right-width: 1px !important;
-                      }
-
-                      .font-small {
-                        font-size: 0.65rem !important;
-                      }
-
-                      .table-borderless td, .table th {
-                        border: none;
-                     }
-                     td{
-                        color: #000;
-                     }
-                    </style>';
-
-        $html .= '</head>
-                  <body>
-
-                      <div class="table-responsive">
-                          <table class="table table-borderless mb-0">
-
-                          <tbody>
-                            <tr>
-                              <td class="text-left align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
-
-                                 <td class="text-right align-middle"><h1 class="d-block">SALARY SLIP</h1></td>
-                             </tr>
-                             <tr>
-                                <td class="text-left align-middle">Head Office (Karachi): </td>
-                                <td class="text-right align-middle"><b>Payroll Month: </b><u>' . $payroll_month . '</u></td>
-                             </tr>
-                             <tr>
-                                <td class="text-left align-middle">Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi.</td>
-                                <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>' . $payroll_cut_off_date . '</u></td>
-
-                             </tr>
-                             </tbody>
-                         </table>';
-
-        $html .= '<table class="table border table-sm">
-
-                    <tbody>
-                        <tr class="text-center">
-                            <td class="color primary border twice" colspan="8"><b>Employee Information</b></td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Employee ID</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->trax_id . '</td>
-                            <td colspan="2"  class="border twice-right">Date of Joining</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->joining_date . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Employee Name</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->name . '</td>
-                            <td colspan="2"  class="border twice-right">Date of Confirmation</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->confirmation_date . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Designation</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->designation . '</td>
-                            <td colspan="2"  class="border twice-right">Employee Type</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->employee_type . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Department</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->department . '</td>
-                            <td colspan="2"  class="border twice-right">Employee Status</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->employee_status . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Location</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->hub . '</td>
-                            <td colspan="2"  class="border twice-right">Personal Contact #</td>
-                            <td colspan="2"  class="border twice-right">' . $personal_contact . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">CNIC No.</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->cnic . '</td>
-                            <td colspan="2"  class="border twice-right">Bank Account No.</td>
-                            <td colspan="2"  class="border twice-right">' . $payslip->iban . '</td>
-                        </tr>
-                        <tr class="text-center">
-                            <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Basic Salary</td>
-                            <td colspan="2"  class="border twice-right">' . $basic_salary . '</td>
-                            <td colspan="1"  class="border twice-right">Payroll Days</td>
-                            <td colspan="1"  class="border twice-right">' . $payroll_days . '</td>
-                            <td colspan="1"  class="border twice-right">Absent Days</td>
-                            <td colspan="1"  class="border twice-right">' . $absent_days . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">House Rent</td>
-                            <td colspan="2"  class="border twice-right">' . $house_rent . '</td>
-                            <td colspan="1"  class="border twice-right">Present Days</td>
-                            <td colspan="1"  class="border twice-right">' . $present_days . '</td>
-                            <td colspan="1"  class="border twice-right">Extra Paid Days</td>
-                            <td colspan="1"  class="border twice-right">' . $extra_paid_days . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Medical</td>
-                            <td colspan="2"  class="border twice-right">' . $medical . '</td>
-                            <td colspan="1"  class="border twice-right">Pay Cut Days</td>
-                            <td colspan="1"  class="border twice-right">' . $pay_cut_days . '</td>
-                            <td colspan="1"  class="border twice-right">Fuel Days</td>
-                            <td colspan="1"  class="border twice-right">' . $fuel_days . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right"><b>Gross Salary</b></td>
-                            <td colspan="2"  class="border twice-right">' . $gross_salary . '</td>
-                            <td colspan="4"  class="border twice-right"></td>
-                        </tr>
-                        <tr class="text-center">
-                            <td class="color primary border twice" colspan="4"><b>Addition</b></td>
-                            <td class="color primary border twice" colspan="4"><b>Deduction</b></td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Mobile Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $mobile_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Pay Cut</td>
-                            <td colspan="2"  class="border twice-right">' . $paycut . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Vehicle Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $vehicle_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Absent</td>
-                            <td colspan="2"  class="border twice-right">' . $absent . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Fuel Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $fuel_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Late Deduction</td>
-                            <td colspan="2"  class="border twice-right">' . $late_deduction . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Conveyance Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $conveyance_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Income Tax</td>
-                            <td colspan="2"  class="border twice-right">' . $income_tax . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Vehicle Maintenance</td>
-                            <td colspan="2"  class="border twice-right">' . $vehicle_maintenance . '</td>
-                            <td colspan="2"  class="border twice-right">EOBI</td>
-                            <td colspan="2"  class="border twice-right">' . $eobi . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Fixed Incentive</td>
-                            <td colspan="2"  class="border twice-right">' . $fixed_incentive . '</td>
-                            <td colspan="2"  class="border twice-right">Advance Salary</td>
-                            <td colspan="2"  class="border twice-right">' . $advance_salary . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Sunday / Holiday Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $holiday_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Month Closing</td>
-                            <td colspan="2"  class="border twice-right">' . $month_closing . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Overtime</td>
-                            <td colspan="2"  class="border twice-right">' . $overtime . '</td>
-                            <td colspan="2"  class="border twice-right">Loan</td>
-                            <td colspan="2"  class="border twice-right">' . $loan . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Bonus</td>
-                            <td colspan="2"  class="border twice-right">' . $bonus . '</td>
-                            <td colspan="2"  class="border twice-right">Fuel Card</td>
-                            <td colspan="2"  class="border twice-right">' . $fuel_card . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Arrears</td>
-                            <td colspan="2"  class="border twice-right">' . $arrears . '</td>
-                            <td colspan="2"  class="border twice-right">Open Parcel</td>
-                            <td colspan="2"  class="border twice-right">' . $open_parcel . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Pickup Incentive</td>
-                            <td colspan="2"  class="border twice-right">' . $pickup_incentive . '</td>
-                            <td colspan="2"  class="border twice-right">Phone Call</td>
-                            <td colspan="2"  class="border twice-right">' . $phone_call . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Delivery Incentive</td>
-                            <td colspan="2"  class="border twice-right">' . $delivery_incentive . '</td>
-                            <td colspan="2"  class="border twice-right">Recovery</td>
-                            <td colspan="2"  class="border twice-right">' . $recovery . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Operations Incentive</td>
-                            <td colspan="2"  class="border twice-right">' . $operations_incentive . '</td>
-                            <td colspan="2"  class="border twice-right">Auction Sale</td>
-                            <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
-                            <td colspan="2"  class="border twice-right">Penalty</td>
-                            <td colspan="2"  class="border twice-right">' . $penalty . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Others Addition</td>
-                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
-                            <td colspan="2"  class="border twice-right">Medical Insurance</td>
-                            <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right">Van Deduction</td>
-                            <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td colspan="2" class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right">Others Deduction</td>
-                            <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
-                        </tr>
-
-                        <tr class="text-center">
-                            <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
-                            <td class="color primary border twice" colspan="2">' . $total_addition . '</td>
-                            <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
-                            <td class="color primary border twice" colspan="2">' . $total_deduction . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
-                            <td class="color primary border twice text-center" colspan="2">' . $net_salary . '</td>
-                        </tr>
-                        <tr class="text-left">
-                            <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>
-                        </tr>
-                   </tbody>
-                         </table>';
-
-        $html .= '
-                      </div>
-                      </body>
-                      </html>';
-
-        $pdf = SnappyPDF::loadHTML($html);
-
-        $filename = 'payslip_' . $payslip->id . '.pdf';
-
-        $result = $pdf->download($filename);
-        $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
-        return array('status' => 1, 'image' => $pdf_file);
-
+                $headers = array(
+                    'Content-Type: application/pdf',
+                );
+                return response()->download($file, $name ,$headers);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
+        }
     }
 
     public function leave_index()
