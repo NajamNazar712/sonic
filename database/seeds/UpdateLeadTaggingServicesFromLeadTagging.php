@@ -14,7 +14,7 @@ class UpdateLeadTaggingServicesFromLeadTagging extends Seeder
         $lead_taggings = DB::table('lead_taggings')->get();
         foreach ($lead_taggings as $lead_tagging) {
             
-            DB::table('lead_taggings_services')->insert(['lead_tagging_id' => $lead_tagging->id, 'service_id' => $lead_tagging->service_id]);
+            DB::table('lead_tagging_services')->insert(['lead_tagging_id' => $lead_tagging->id, 'service_id' => $lead_tagging->service_id]);
 
         }
     }
