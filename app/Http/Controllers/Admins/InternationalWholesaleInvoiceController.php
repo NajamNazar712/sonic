@@ -347,7 +347,7 @@ class InternationalWholesaleInvoiceController extends Controller
                     $row['service_charges'] = $history->service_charges;
                     $row['gst'] = $history->gst;
                     $row['status'] = ($history->status == 1)? 'Pending':'Received';
-                    $row['updated_by'] = $history->admin->name;
+                    $row['updated_by'] = ($history->updated_by != NULL)? $history->admin->name: '';
                     $row['updated_at'] = Carbon::parse($history->created_at)->toDateTimeString();
                     $history_data[] = $row;
                 }
