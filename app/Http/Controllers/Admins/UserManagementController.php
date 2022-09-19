@@ -619,8 +619,16 @@ class UserManagementController extends Controller
     public function role_permission_list(Request $request) {
 
         // dd($request->all());
+        $permissions = array();
         $module_id = $request->module_id;
-        $permissions = $request->permissions;
+        if(isset($request->permissions))
+        {
+            $permissions = $request->permissions;
+        }
+        else{
+            $permissions = $modules = Module::with('permissions')->find($request->module_id)->permissions->pluck('id')->toArray();
+        }
+        
         $admin_perm = array();
 
         $admin_roles =  AdminRole::join('admin_role_module_permissions','admin_role_module_permissions.role_id','admin_roles.id')
@@ -639,7 +647,6 @@ class UserManagementController extends Controller
             ->where('admin_role_module_permissions.role_id',$admin_role_value->id)
             ->select(['module_permissions.id as id','module_permissions.name as name','module_permissions.module_id as module_id','admin_role_module_permissions.role_id'])
             ->get();
-            // dd($admin_roles_perm);
             $admin_perm[$admin_role_key]['permissions'] = $admin_roles_perm;
 
         }
