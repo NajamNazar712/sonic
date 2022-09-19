@@ -7996,6 +7996,7 @@ class AdminAPIController extends Controller
                         $datum['role'] = 0;
                     }
                     if ($employee_leave->to) {
+                        dd($employee_leave->employee);
                         $working_days = $employee_leave->employee->department->working_days;
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
