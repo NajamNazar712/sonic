@@ -7799,6 +7799,7 @@ class AdminAPIController extends Controller
                     $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SATURDAY]));
                 }
                 $diffDays++;
+                dd($diffDays);
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
                         if ($employee->leave_count < $diffDays) {
