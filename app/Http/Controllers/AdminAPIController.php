@@ -27,11 +27,13 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -57,6 +59,7 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DailyVisitLeadStatus;
+use App\Http\Models\DeliveryNoteRequests;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
@@ -9416,6 +9419,68 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'data' => $targets]);
             }
             return response()->json(['status' => 1, 'message' => 'No Data Found']);
+        }
+    }
+
+    public function delivery_note_index(Request $request)
+    {
+        $role_id = $request->admin_role_id;
+        $admin_hubs = $request->admin_hubs;
+        if ($request->has("operation_category_id")) {
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('riders.operation_rider_id', $request->operation_category_id)
+                ->whereNotNull('riders.employee_id')
+                ->where('riders.status', 1);
+
+            if ($role_id != 1) {
+                $riders = $riders->whereHas('city', function ($query) use ($admin_hubs) {
+                    $query->whereIn('hub_id', $admin_hubs);
+                });
+            }
+            if ($riders) {
+                $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
+                return response()->json(['status' => 0, 'riders' => $riders]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Riders Found']);
+            }
+        } else if ($request->has("rider_id")) {
+            $routes = Route::where('status', 1);
+            if ($role_id != 1) {
+                $routes = $routes->whereHas('city', function ($query) use ($admin_hubs) {
+                    $query->whereIn('hub_id', $admin_hubs);
+                });
+            }
+            $routes = $routes->get();
+            $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+            $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                ->where('r.id', $request->rider_id)
+                ->where('delivery_notes.dncc_status', 0)
+                ->where('delivery_notes.status', '!=', 4)
+                ->whereDate('delivery_notes.created_at', '>', $datetime)
+                ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
+                ->where('r.operation_rider_id', 1);
+
+            if ($delivery_note->exists()) {
+                $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
+                if ($delivery_note_request) {
+                    $delivery_note_request->completed = 1;
+                    $delivery_note_request->save();
+                    $rider = Rider::find($request->rider_id);
+                    $ccd_rider = $rider->ccd;
+
+                    return response()->json(['status' => 0, 'routes' => $routes, 'ccd_rider' => $ccd_rider]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Rider can not be selected because previous delivery note is not been completed"]);
+                }
+            } else {
+                $rider = Rider::find($request->rider_id);
+                $ccd_rider = $rider->ccd;
+                return response()->json(['status' => 0, 'ccd_rider' => $ccd_rider, 'routes' => $routes]);
+            }
+        } else {
+            $operation_rider_category = OperationRidersCategory::all();
+            return response()->json(['status' => 0, 'rider_category' => $operation_rider_category]);
         }
     }
 

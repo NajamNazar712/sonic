@@ -461,6 +461,10 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
             });
 
+            Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
+                Route::post('index', 'AdminAPIController@delivery_note_index')->name('index');
+            });
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
