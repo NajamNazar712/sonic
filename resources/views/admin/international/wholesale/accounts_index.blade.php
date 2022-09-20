@@ -160,7 +160,7 @@
 
                         <div class="modal-footer">
                             <div class="form-group ml-1">
-                                <button type="submit" class="btn btn-primary width-200" value="Add" id="AddShipperSubmitButton">Add</button>
+                                <button type="submit" class="btn btn-primary width-200" value="Add" id="AddShipperSubmitButton" disabled>Add</button>
                                 <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                             </div>
@@ -492,7 +492,6 @@
                                 row.push(values.address);
                                 row.push(values.city);
                                 row.push(values.email);
-                                row.push(values.phone);
                                 row.push(values.bank_name);
                                 row.push(values.bank_account);
                                 row.push(values.ntn);
@@ -649,9 +648,9 @@
             documents_image_table = $('#documents_upload_table').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
-                    title: 'Add Row',
+                    title: 'Add Document',
                     className: 'btn btn-primary mb-1',
-                    text: '<i class="la la-plus"></i> Add Row',
+                    text: '<i class="la la-plus"></i> Add Document',
                     action:function (e) {
                         add_row();
                     }
@@ -901,7 +900,7 @@
                             margin = 0;
                         }
 
-                        $('#add_margin_form #add_margin').val(margin);
+                        $('#add_margin_form #margin').val(margin);
                         $('#add_margin_form #shipper_id').val(id);
                         $('#add_margin_modal').modal('show');
 
