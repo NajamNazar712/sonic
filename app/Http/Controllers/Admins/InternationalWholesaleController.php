@@ -467,6 +467,7 @@ class InternationalWholesaleController extends Controller
                     $tracking_numbers = array();
                     $invoice_shipment_ids = array();
                     $invoice_shipper_id = NULL;
+                    $invoice_data = array();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $shipper_id = trim($row['shipper_id']);
@@ -477,8 +478,6 @@ class InternationalWholesaleController extends Controller
                         $pieces = $row['pieces'];
                         $other_charges = $row['other_charges'];
                         $shipper = WholesaleUser::find($shipper_id);
-
-                        $invoice_shipper_id = $shipper_id;
 
                         $wholesale_shipment = new WholesaleShipment();
                         $wholesale_shipment->dhl_waybill = $tracking;
@@ -503,10 +502,13 @@ class InternationalWholesaleController extends Controller
                         $wholesale_shipment->save();
                         $shipment_id = $wholesale_shipment->id;
                         $tracking_numbers['Row #' . $row_id] = $tracking;
-                        $invoice_shipment_ids[] = $shipment_id;
+
+                        $invoice_data[$shipper_id][] = $shipment_id;
                     }
-                    if(count($invoice_shipment_ids) > 0){
-                        InternationalWholesaleInvoiceController::generate_invoice($invoice_shipper_id, $invoice_shipment_ids);
+                    if(count($invoice_data) > 0){
+                        foreach ($invoice_data as $shipper_id => $shipment_ids){
+                            InternationalWholesaleInvoiceController::generate_invoice($shipper_id, $shipment_ids);
+                        }
                     }
                     $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                         return $row . ': ' . $tracking_number;
