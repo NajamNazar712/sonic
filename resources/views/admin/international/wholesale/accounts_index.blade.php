@@ -197,7 +197,7 @@
                         </div>
                         <input type="hidden" id="shipper_id">
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Add</button>
+                            <button type="submit" name="add" class="btn btn-primary" id="add_margin_btn" value="Add">Add</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -984,7 +984,7 @@
                 },
                 submitHandler: function(form) {
 
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $('#add_margin_btn').attr('disabled', 'disabled');
 
                     swal({
                         text: 'Are you sure, you want to update Margin for this shipper?',
@@ -1038,12 +1038,14 @@
 
                         }
                     });
+                    $('#add_margin_btn').prop('disabled', false);
                 }
             });
 
             $('#add_margin_modal').on('hidden.bs.modal', function () {
 
                 $('#add_margin_form').validate().resetForm();
+                $('#add_margin_btn').prop('disabled', false);
             });
 
             $('#edit_shipper_form').validate({
