@@ -81,7 +81,7 @@
                     <div class="modal-body p-3">
                         <div class="form-group">
                             <label class="label" for="tracking_number">DHL Waybill No.</label>
-                            <input type="text" name="dhl_waybill" id="edit_dhl_waybill" class="form-control" data-rule-required="true" data-msg-required="DHL Waybill No. is required">
+                            <input type="text" name="dhl_waybill" id="edit_dhl_waybill" class="form-control" readonly>
                         </div>
                         <div class="form-group">
                             <label class="label" for="tracking_number">Destination</label>

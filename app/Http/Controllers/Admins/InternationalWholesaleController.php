@@ -626,14 +626,14 @@ class InternationalWholesaleController extends Controller
                 $old_weight = $shipment->weight;
                 $old_other_charges = $shipment->other_charges;
                 $courier_charges = $shipment->courier_charges;
-                $dhl_waybill = $request->dhl_waybill;
+//                $dhl_waybill = $request->dhl_waybill;
                 $destination_city_id = $request->destination_city_id;
                 $type = $request->type;
                 $weight = $request->weight;
                 $pieces = $request->pieces;
                 $other_charges = $request->other_charges;
 
-                $shipment->dhl_waybill = $dhl_waybill;
+//                $shipment->dhl_waybill = $dhl_waybill;
                 $shipment->destination_city_id = $destination_city_id;
                 $shipment->type = $type;
                 $shipment->weight = $weight;
