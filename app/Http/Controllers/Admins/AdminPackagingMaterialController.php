@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\PackagingStockHistory;
 use App\Http\Models\CargoConsignment;
@@ -353,7 +354,12 @@ class AdminPackagingMaterialController extends Controller
             })
             ->leftjoin('packaging_material_request_statuses as pmrs', 'pmrs.id', '=', 'packaging_material_requests.status_id')
             ->leftjoin('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone'])
+            ->leftjoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'packaging_material_requests.user_id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = packaging_material_requests.user_id and sale_person_tags.status = 0)'));
+            })
+            ->leftJoin('admins as a','a.id','=','spt.admin_id')
+            ->select(['packaging_material_requests.id as request_id', 'u.name as shipper', 'packaging_material_requests.created_at', 'ct.name as city', 'packaging_material_requests.address', 'ppm.mode', 'packaging_material_requests.amount', 'packaging_material_requests.tracking_number', 'packaging_material_requests.tracking_number as tracking_number_link', 'pmrs.name as status', 'packaging_material_requests.status_id as status_id', DB::raw('sum(pmrd.quantity) as total_quantity'), 's.id as shipment_id', 's.shipper_status_id as shipper_status_id', 's.booking_type_id as booking_type_id', 's.created_at as confirmed_date', 'sj.remarks as remarks', 'rb.name as requested_by', 'u.phone as shipper_phone','a.name as tagged_sale_person'])
             ->groupBy('packaging_material_requests.id')
             ->having('total_quantity', '>', 0);
 
