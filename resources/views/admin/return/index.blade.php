@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                      {{--   <th class="border-primary border-darken-1">RCP SMS Count</th>--}}
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -736,6 +737,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Address');
+                            head.push('Sub Station');
                             head.push('Collection Amount');
                            /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -773,6 +775,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                 row.push(values.consignee_address);
+                                row.push(values.sub_station);
                                 row.push(values.amount);
                             /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1233,6 +1236,7 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                    /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
@@ -1283,7 +1287,7 @@
                         var header = column.header();
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts') || $(header).is('.consolidation') || $(header).is('.reattemp_status_remarks') ) {
-                            $(td).appendTo($(search));
+                            $(td).appendTo($(search) || $(header).is('sub_station'));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
                                 .on( 'change', function () {

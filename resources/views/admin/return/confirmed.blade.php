@@ -40,6 +40,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -201,6 +202,7 @@
                             head.push('Shipper Name');
                             head.push('Phone');
                             head.push('Address');
+                            head.push('Sub Station');
                             head.push('Attempt Count');
                             head.push('Origin');
                             head.push('Destination');
@@ -228,6 +230,7 @@
                                 row.push(values.shipper); 
                                 row.push(values.shipper_phone); // to be changed
                                 row.push(values.shipper_return_address); // to be changed
+                                row.push(values.sub_station);
                                 row.push(values.total_attempt);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -457,7 +460,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[22, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -466,6 +469,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'shipper_phone', name: 'usi.phone', class: 'align-middle shipper_phone'},
                     {data: 'shipper_return_address', name: 'usi.pickup_address', class: 'align-middle shipper_return_address'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable:false},
                     {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -505,7 +509,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')|| $(header).is('.select-checkbox') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city')) {
+                        if ($(header).is('.serial_number')|| $(header).is('.select-checkbox') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city') || $(header).is('.sub_station')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))

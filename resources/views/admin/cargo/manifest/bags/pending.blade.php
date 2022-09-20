@@ -48,6 +48,7 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Origin Hub</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Sub Station</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -97,6 +98,7 @@
                             head.push('Origin');
                             head.push('Origin Hub');
                             head.push('Destination');
+                            head.push('Sub Station');
                             head.push('Shipper');
                             head.push('Amount');
                             head.push('Shipping Mode');
@@ -116,6 +118,7 @@
                                 row.push(values.origin);
                                 row.push(values.origin_hub);
                                 row.push(values.destination);
+                                row.push(values.sub_station);
                                 row.push(values.shipper);
                                 row.push(values.amount);
                                 row.push(values.shipping_mode);
@@ -161,7 +164,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -171,6 +174,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'origin_hub', name: 'ohc.name', class: 'align-middle origin_hub'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
@@ -199,7 +203,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.sub_station')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))

@@ -11,6 +11,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
@@ -152,7 +153,7 @@ class ReturnController extends Controller
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
            /* ->leftjoin('return_confirmation_pending_sms_attempts as rcps','rcps.shipment_id','=','shipments.id')*/
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/)
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'dc.id as destination_city_id')
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
@@ -359,6 +360,34 @@ class ReturnController extends Controller
                 else{
                     return 0;
                 }
+            })
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                $msg_string = null;
+                $str_arr = null;
+                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                foreach ($check as $nsa) {
+                    foreach ($str_arr as $arr_value) {
+                        if (strtolower($nsa) == strtolower($arr_value)) {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+                $delivery_area = null;
+                if ($msg_string != null) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id',$shipments->destination_city_id)
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                        ->select('dlm.area_name as area_name', 'dlm.id','delivery_location_mapping_keywords.mapping_id');
+
+                    if ($found->exists()) {
+                        $found = $found->first();
+                        $delivery_area = $found->area_name;
+                    }
+                }
+                return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn("action", function ($result) {
                 
@@ -1311,7 +1340,7 @@ class ReturnController extends Controller
                 $join->on('cb.id', '=', 'shipments_journey.admin_id')
                     ->where('shipments_journey.shipper_status_id', 20);
             })
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -1464,6 +1493,34 @@ class ReturnController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                $msg_string = null;
+                $str_arr = null;
+                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                foreach ($check as $nsa) {
+                    foreach ($str_arr as $arr_value) {
+                        if (strtolower($nsa) == strtolower($arr_value)) {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+                $delivery_area = null;
+                if ($msg_string != null) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id',$shipments->destination_city_id)
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                        ->select('dlm.area_name as area_name', 'dlm.id','delivery_location_mapping_keywords.mapping_id');
+
+                    if ($found->exists()) {
+                        $found = $found->first();
+                        $delivery_area = $found->area_name;
+                    }
+                }
+                return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function($shipment) {
                 if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID

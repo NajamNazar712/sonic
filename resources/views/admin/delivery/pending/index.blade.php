@@ -177,6 +177,7 @@
                         head.push('Consignee Name');
                         head.push('Reattempted By');
                         head.push('Address');
+                        head.push('Sub Station');
                         head.push('Weight');
                         head.push('Collection Amount');
                         head.push('Product Type');
@@ -201,6 +202,7 @@
                             row.push(values.consignee_name);
                             row.push(values.agent);
                             row.push(values.consignee_address);
+                            row.push(values.sub_station);
                             row.push(values.weight);
                             row.push(values.amount);
                             row.push(values.product_type);
@@ -263,7 +265,7 @@
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                {data: 'sub_station', name: 'delivery_location_mappings.area_name', class: 'align-middle sub_station'},
+                {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', searchable:false},
                 {data: 'weight', name: 'shipments.actual_weight', class: 'align-middle weight'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'product_type', name: 'prod.product_name', class: 'align-middle product_type'},
@@ -298,7 +300,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.shipment_description')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.shipment_description') || $(header).is('.sub_station')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

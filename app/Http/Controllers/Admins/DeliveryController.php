@@ -304,7 +304,7 @@ class DeliveryController extends Controller
                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
                         ->where('dlm.city_id',$shipments->destination_city_id)
-                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
                         ->select('dlm.area_name as area_name', 'dlm.id','delivery_location_mapping_keywords.mapping_id');
 
                     if ($found->exists()) {
