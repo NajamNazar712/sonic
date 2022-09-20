@@ -480,6 +480,7 @@
                             head.push('Margin');
                             head.push('Updated By');
                             head.push('Updated At');
+                            head.push('Status');
 
 
 
@@ -501,6 +502,7 @@
                                 row.push(values.margin);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
+                                row.push(values.user_status);
                                 body.push(row);
                             });
                         },

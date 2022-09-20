@@ -210,7 +210,7 @@
                             head.push('Bill Amount');
                             head.push('Status');
                             head.push('Booked By');
-                            head.push('Bookind Date/Time');
+                            head.push('Booking Date/Time');
                             head.push('Edit By');
                             head.push('Edit Date/Time');
 

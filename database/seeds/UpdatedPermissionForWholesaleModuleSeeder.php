@@ -28,7 +28,7 @@ class UpdatedPermissionForWholesaleModuleSeeder extends Seeder
             array('id' => 803, 'name' => 'International Wholesale Accounts - Add Margin', 'module_id' => 33),
             array('id' => 804, 'name' => 'International Wholesale Excel Booking - View', 'module_id' => 33),
             array('id' => 805, 'name' => 'International Wholesale Excel Booking - Edit Shipment', 'module_id' => 33),
-            array('id' => 806, 'name' => 'International Wholesale Excel Booking - Cancel Shipment', 'module_id' => 33),
+            //array('id' => 806, 'name' => 'International Wholesale Excel Booking - Cancel Shipment', 'module_id' => 33),
             array('id' => 807, 'name' => 'International Wholesale Invoices - View', 'module_id' => 8),
             array('id' => 808, 'name' => 'International Wholesale Invoices - Edit', 'module_id' => 8),
             array('id' => 809, 'name' => 'International Wholesale Invoices - View History', 'module_id' => 8),
