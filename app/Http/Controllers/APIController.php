@@ -399,8 +399,30 @@ class APIController extends Controller
     {
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
-
         $user_id = $request->user_id;
+        $return_address_rules = array();
+        $return_address_verify = false;
+        $settings = GlobalSettings::where('type', 'shipper_return_address');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL && isset($request->return_address) && isset($request->return_contact_person) && isset($request->return_vendor) && isset($request->return_phone_number) && isset($request->return_email_address) && isset($request->return_city)) {
+                $return_accounts = array_map('intval', explode(',', $settings->text));
+                if(in_array($user_id,$return_accounts)){
+                    $return_address_rules = [
+                        'return_address' => ['required', 'between:1,255'],
+                        'return_contact_person' => ['required', 'between:1,100'],
+                        'return_vendor' => ['required', 'between:1,100'],
+                        'return_phone_number' => ['required', 'phone_number'],
+                        'return_email_address' => ['required', 'email', 'between:0,100'],
+                        'return_city' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1)],
+
+                    ];
+                    $return_address_verify = true;
+                }
+
+            }
+        }
+
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
@@ -666,14 +688,31 @@ class APIController extends Controller
                 $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
             }
         }
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validations = array_merge($rules, $return_address_rules);
+        $validate = Validator::make($request->all(), $validations, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            //Return Address
+            if($return_address_verify) {
+                $return_city = City::where('name', $request->return_city)->first();
+                $return_address_id = NULL;
+                $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city->id);
+                if ($return_address->exists()) {
+                    $return_address = $return_address->first();
+                    $return_address_id = $return_address->id;
+                } else {
+                    $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city->id, 0);
+                }
+                $request->merge([
+                    'return_address_id' => "$return_address_id",
+                ]);
+            }
+            //Return Address
+
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
 
             if ($request->filled('consignee_phone_number_2')) {
