@@ -60,6 +60,21 @@ class InternationalWholesaleController extends Controller
                     return '';
                 }
             })
+            ->addColumn('user_status', function ($invoice) {
+                if ($invoice->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->filterColumn('user_status', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('wholesale_users.status', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('document', function ($shippers) {
                 if ($shippers->is_document != 0) {
                     return '<a class="btn btn-sm btn-outline-info align-middle document_view" href="javascript:void(0);"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';

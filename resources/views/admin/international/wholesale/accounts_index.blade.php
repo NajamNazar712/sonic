@@ -60,6 +60,7 @@
                                 <th class="border-primary border-darken-1">Margin %</th>
                                 <th class="border-primary border-darken-1">Updated By</th>
                                 <th class="border-primary border-darken-1">Updated At</th>
+                                <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Action</th>
                             </tr>
                             </thead>
@@ -565,6 +566,7 @@
                     { data:'margin_percentage' ,name: 'wholesale_users.margin', class: 'align-middle text-center margin_percentage'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle text-center updated_by'},
                     { data:'updated_at' ,name: 'wholesale_users.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'user_status' ,name: 'user_status', class: 'align-middle text-center user_status', orderable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -577,13 +579,19 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.document')) {
                             $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.user_status')) {
+                            $(status_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -594,6 +602,13 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $('#status_select').prepend('<option value="" selected></option>').select2({
+                        data: [{id: 1, name: "Enable", text: "Enable"},{id: 0, name: "Disable", text: "Disable"}],
+                        placeholder: 'Select Status',
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
