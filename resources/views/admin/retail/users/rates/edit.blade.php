@@ -169,10 +169,10 @@
                                                         <label class="card-title">Within City</label>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Same Zone</label>
+                                                        <label class="card-title">Same Region</label>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Different Zone</label>
+                                                        <label class="card-title">Different Region</label>
                                                     </div>
                                                     <div class="col-1"></div>
                                                 </div>
@@ -317,10 +317,10 @@
                                                         <label class="card-title">Within City</label>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Same Zone</label>
+                                                        <label class="card-title">Same Region</label>
                                                     </div>
                                                     <div class="col text-center">
-                                                        <label class="card-title">Different Zone</label>
+                                                        <label class="card-title">Different Region</label>
                                                     </div>
                                                     <div class="col-1"></div>
                                                 </div>
@@ -463,10 +463,10 @@
                                                             <label class="card-title">Within City</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Same Zone</label>
+                                                            <label class="card-title">Same Region</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Different Zone</label>
+                                                            <label class="card-title">Different Region</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -612,10 +612,10 @@
                                                             <label class="card-title">Within City</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Same Zone</label>
+                                                            <label class="card-title">Same Region</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Different Zone</label>
+                                                            <label class="card-title">Different Region</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -763,10 +763,10 @@
                                                             <label class="card-title">Within City</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Same Zone</label>
+                                                            <label class="card-title">Same Region</label>
                                                         </div>
                                                         <div class="col text-center">
-                                                            <label class="card-title">Different Zone</label>
+                                                            <label class="card-title">Different Region</label>
                                                         </div>
                                                         <div class="col-1"></div>
                                                     </div>
@@ -923,10 +923,10 @@
                                                                             <label class="card-title">Within City</label>
                                                                         </div>
                                                                         <div class="col text-center">
-                                                                            <label class="card-title">Same Zone</label>
+                                                                            <label class="card-title">Same Region</label>
                                                                         </div>
                                                                         <div class="col text-center">
-                                                                            <label class="card-title">Different Zone</label>
+                                                                            <label class="card-title">Different Region</label>
                                                                         </div>
                                                                         <div class="col-1"></div>
                                                                     </div>
@@ -1076,10 +1076,10 @@
                                                                         <label class="card-title">Within City</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Same Zone</label>
+                                                                        <label class="card-title">Same Region</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Different Zone</label>
+                                                                        <label class="card-title">Different Region</label>
                                                                     </div>
                                                                     <div class="col-1"></div>
                                                                 </div>
@@ -1229,10 +1229,10 @@
                                                                         <label class="card-title">Within City</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Same Zone</label>
+                                                                        <label class="card-title">Same Region</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Different Zone</label>
+                                                                        <label class="card-title">Different Region</label>
                                                                     </div>
                                                                     <div class="col-1"></div>
                                                                 </div>
@@ -1382,10 +1382,10 @@
                                                                         <label class="card-title">Within City</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Same Zone</label>
+                                                                        <label class="card-title">Same Region</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Different Zone</label>
+                                                                        <label class="card-title">Different Region</label>
                                                                     </div>
                                                                     <div class="col-1"></div>
                                                                 </div>
@@ -1535,10 +1535,10 @@
                                                                         <label class="card-title">Within City</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Same Zone</label>
+                                                                        <label class="card-title">Same Region</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Different Zone</label>
+                                                                        <label class="card-title">Different Region</label>
                                                                     </div>
                                                                     <div class="col-1"></div>
                                                                 </div>
@@ -1688,10 +1688,10 @@
                                                                         <label class="card-title">Within City</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Same Zone</label>
+                                                                        <label class="card-title">Same Region</label>
                                                                     </div>
                                                                     <div class="col text-center">
-                                                                        <label class="card-title">Different Zone</label>
+                                                                        <label class="card-title">Different Region</label>
                                                                     </div>
                                                                     <div class="col-1"></div>
                                                                 </div>

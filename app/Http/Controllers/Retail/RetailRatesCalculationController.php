@@ -7,6 +7,7 @@ use App\Http\Models\City;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalStandardRetailRates;
 use App\Http\Models\RetailStandardRates;
+use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
 
@@ -92,6 +93,9 @@ class RetailRatesCalculationController extends Controller
                     }
                     else{
                         $consignee_city = City::find($destination_id);
+                        $consignee_zone = Zone::find($consignee_city->zone_id);
+                        $pickup_zone = Zone::find($pickup_city->zone_id);
+                        
                         if($pickup_city->id == $consignee_city->id){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($round_additional_weight * $weight_charges->within_city);
@@ -101,7 +105,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($weight_charges->within_city);
                             }
                         }
-                        elseif ($pickup_city->zone_id == $consignee_city->zone_id){
+                        elseif ($pickup_zone->zone_region->region_id == $consignee_zone->zone_region->region_id){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($round_additional_weight * $weight_charges->same_zone);
                                 $charges = intval($charges->same_zone) + $additional_charges;
@@ -143,6 +147,8 @@ class RetailRatesCalculationController extends Controller
                         }
                     }
                     $consignee_city = City::find($destination_id);
+                    $consignee_zone = Zone::find($consignee_city->zone_id);
+                    $pickup_zone = Zone::find($pickup_city->zone_id);
                     if($pickup_city->id == $consignee_city->id){
 
                         if($remaining_weight > 0){
@@ -153,7 +159,7 @@ class RetailRatesCalculationController extends Controller
                             $charges = intval($weight_charges->within_city);
                         }
                     }
-                    elseif ($pickup_city->zone_id == $consignee_city->zone_id){
+                    elseif ($pickup_zone->zone_region->region_id == $consignee_zone->zone_region->region_id){
                         if($remaining_weight > 0){
                             $additional_charges = intval($round_additional_weight * $weight_charges->same_zone);
                             $charges = intval($charges->same_zone) + $additional_charges;
