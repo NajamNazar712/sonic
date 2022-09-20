@@ -83,18 +83,18 @@ class InternationalWholesaleController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([760], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([801, 802, 803], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(760, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(801, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $result->shipper_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit </div></button>';
                     }
 
-                    if (session('role_id') == 1 || in_array(760, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(802, session('permissions'))) {
                         if($result->status == 1){
                             $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $result->shipper_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Disable </div></button>';
                         }
@@ -103,7 +103,7 @@ class InternationalWholesaleController extends Controller
                         }
                     }
 
-                    if (session('role_id') == 1 || in_array(760, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(803, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item add_margin" data-margin="'. $result->margin .'" data-target-id=' . $result->shipper_id . ' data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Add Margin </div></button>';
                     }
 
@@ -553,7 +553,7 @@ class InternationalWholesaleController extends Controller
 
         $datatable = Datatables::of($bookings)
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([801, 802, 803], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([805, 806], session('permissions'))) !== 0) {
                     if($result->status_id != 4){
 
                         $dropdown = '
