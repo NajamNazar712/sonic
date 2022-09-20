@@ -241,6 +241,7 @@ class InternationalWholesaleInvoiceController extends Controller
             $invoice->total_courier_charges = $total_courier_charges;
             $invoice->service_charges = $total_service_charges;
             $invoice->gst = $total_gst;
+            $invoice->updated_by = Auth::id();
             $invoice->save();
         }
     }
@@ -383,7 +384,7 @@ class InternationalWholesaleInvoiceController extends Controller
         $invoice_id = $request->invoice_id;
         if($invoice_id){
             $invoice = WholesaleInvoice::find($invoice_id);
-
+            $total_courier_charges = $invoice->total_courier_charges;
             $invoice_shipments = $invoice->invoice_shipments;
 
             $html = '';
@@ -412,7 +413,6 @@ class InternationalWholesaleInvoiceController extends Controller
               <body>
             ';
 
-            $total_courier_charges = 0;
 
             $shipment_details = array();
             foreach($invoice_shipments as $invoice_shipment){
@@ -427,7 +427,7 @@ class InternationalWholesaleInvoiceController extends Controller
                 $row['other_charges'] = $shipment->other_charges;
                 $row['bill_amount'] = $shipment->bill_amount;
 
-                $total_courier_charges += $shipment->bill_amount;
+
                 $shipment_details[] = $row;
             }
 
@@ -585,14 +585,10 @@ class InternationalWholesaleInvoiceController extends Controller
         if($invoice_id){
             $invoice = WholesaleInvoice::find($invoice_id);
             $total_courier_charges = 0;
-            $invoice_shipments = $invoice->invoice_shipments;
-            $grand_total = $invoice->service_charges + $invoice->gst;
-            $shipment_details = array();
-            foreach($invoice_shipments as $invoice_shipment){
 
-                $shipment = $invoice_shipment->shipment;
-                $total_courier_charges += $shipment->bill_amount;
-            }
+            $grand_total = $invoice->service_charges + $invoice->gst;
+            $total_courier_charges = $invoice->total_courier_charges;
+
 
             $html = '';
 
