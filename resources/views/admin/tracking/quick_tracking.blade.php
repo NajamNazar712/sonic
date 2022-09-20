@@ -305,6 +305,7 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
+                    scrollX: true,
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -324,7 +325,8 @@
                         {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
-                        var complaint = $(row).find("td:eq(3)").html();
+                        var complaint_id = $(row).find("td:eq(3)").html();
+                        console.log(complaint_id);
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
@@ -337,7 +339,7 @@
                         }else if(status === 55){
                             $(row).addClass('cyanClass');
                         }
-                        else if(complaint != null || complaint != ''){
+                        else if(complaint_id !== '-'){
                             $(row).addClass('grey');
                         }
                     },

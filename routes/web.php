@@ -1,5 +1,7 @@
 <?php
 use App\Http\Models\HR\Employee;
+use Illuminate\Support\Facades\Storage;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -381,6 +383,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('daraz_mis')->name('daraz_mis.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@daraz_mis_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@daraz_mis_list')->name('list');
+        });
+        Route::prefix('mms')->name('mms.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@mms_index')->name('index');
+            Route::post('list','Shippers\ShipperReportsController@mms_list')->name('list');
         });
     });
 
@@ -1241,6 +1247,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
             Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
             Route::post('shipments','Admins\DeliveryController@receive_delivery_shipments')->name('shipments');
+            Route::post('shipments_verified','Admins\DeliveryController@receive_delivery_shipments_verified')->name('shipments_verified');
+            Route::post('shipment_partial','Admins\DeliveryController@receive_delivery_shipment_partial')->name('shipment_partial');
+            
             Route::post('receive_shipments_delivered','Admins\DeliveryController@receive_shipments_delivered')->name('receive_shipments_delivered');
             Route::post('receive_shipments_undelivered','Admins\DeliveryController@receive_shipments_undelivered')->name('receive_shipments_undelivered');
             Route::post('receive_shipments_pending','Admins\DeliveryController@receive_shipments_pending')->name('receive_shipments_pending');
@@ -3347,7 +3356,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\GlobalSettingsController@lead_tagging_data')->name('data');
             Route::post('update', 'Admins\GlobalSettingsController@lead_tagging_update')->name('update');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
-
+            Route::post('services', 'Admins\GlobalSettingsController@lead_tagging_services')->name('services');
+            
         });
 
         Route::prefix('lead_zones')->name('lead_zones.')->group(function () {
@@ -4041,6 +4051,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
+            Route::get('{id}/payslip_download', 'Admins\AdminHumanResourseController@payslip_download')->name('download');
         });
 
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {
@@ -4172,6 +4183,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/add','Admins\VigilanceController@verification_add')->name('add');
                 Route::post('/excess_cns','Admins\VigilanceController@verification_excess_cns')->name('excess_cns');
                 Route::post('/verify_cns','Admins\VigilanceController@verification_verify_cns')->name('verify_cns');
+                Route::post('/unverify_cns','Admins\VigilanceController@verification_unverify_cns')->name('unverify_cns');
+                
             Route::prefix('history')->name('history.')->group(function (){
                 Route::get('/','Admins\VigilanceController@history_index')->name('index');
                 Route::get('/list','Admins\VigilanceController@history_list')->name('list');

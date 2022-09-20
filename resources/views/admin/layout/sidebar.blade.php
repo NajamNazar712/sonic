@@ -916,7 +916,7 @@
                         <li class=" nav-item"><a href="#"><span class="menu-title">Vigilance Verification</span></a>
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(770, session('permissions')))
-                                    <li><a class="menu-item" href="{{ route('admin.vigilance.verification.index') }}">Delivery Note</a></li>
+                                    <li><a class="menu-item" href="{{ route('admin.vigilance.verification.index') }}">Vigilance Delivery Note</a></li>
                                 @endif
                                 @if (session('role_id') == 1 || in_array(771, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.vigilance.verification.history.index') }}">History</a></li>
