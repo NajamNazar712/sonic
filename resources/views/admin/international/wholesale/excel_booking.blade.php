@@ -13,7 +13,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.wholesale.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                <form id="shipment_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.international.wholesale.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                     {{ csrf_field() }}
 
                     <div class="row align-items-center justify-content-center">
@@ -31,7 +31,7 @@
 
                         <div class="col ml-auto">
                             <div class="form-group text-right">
-                                <a href="{{ asset('file/International Excel Booking Template.xlsx') }}?v=14_09_2022" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                <a href="{{ asset('file/International Wholesale Booking Template.xlsx') }}?v=14_09_2022" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                             </div>
                         </div>
                     </div>
@@ -268,7 +268,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'shipment_id', name: 'wholesale_shipments.id', class: 'align-middle shipment_id'},
                     {data: 'dhl_waybill', name: 'wholesale_shipments.dhl_waybill', class: 'align-middle dhl_waybill'},
-                    {data: 'shipper_name', name: 'wu.shipper_name', class: 'align-middle shipper_name'},
+                    {data: 'shipper_name', name: 'wu.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'o.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'd.name', class: 'align-middle destination'},
                     {data: 'type', name: 'wholesale_shipments.type', class: 'align-middle type'},
@@ -424,7 +424,7 @@
 
             });
 
-            $('#edit_tracking_form').validate({
+            $('#shipment_excel_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -435,28 +435,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Tracking Number is being edited!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-            $('#upload_pod_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Uploading POD File!',
+                        text: 'Shipment are being booked!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -467,27 +446,6 @@
                 }
             });
 
-
-            $('body').on('click', 'button.upload_pod',  function(){
-                var id = $(this).parents('tr').attr('id');
-                $('#pod_shipment').val(id);
-
-                $('#upload_pod_modal').modal('show');
-                // if(id){
-                //     $('#corporate_rate_type_modal').modal('show');
-                //     $('#corporate_rate_type_shipper_id').val(id);
-                // }
-            });
-            $('body').on('click', 'button.replace_pod',  function(){
-                var id = $(this).parents('tr').attr('id');
-                $('#pod_shipment').val(id);
-
-                $('#upload_pod_modal').modal('show');
-                // if(id){
-                //     $('#corporate_rate_type_modal').modal('show');
-                //     $('#corporate_rate_type_shipper_id').val(id);
-                // }
-            });
         });
     </script>
 @endsection

@@ -625,7 +625,7 @@ class InternationalWholesaleController extends Controller
                 $old_destination = $shipment->destination_city_id;
                 $old_weight = $shipment->weight;
                 $old_other_charges = $shipment->other_charges;
-
+                $courier_charges = $shipment->courier_charges;
                 $dhl_waybill = $request->dhl_waybill;
                 $destination_city_id = $request->destination_city_id;
                 $type = $request->type;
@@ -644,7 +644,7 @@ class InternationalWholesaleController extends Controller
 
                 $invoice_recalculation = false;
 
-                $courier_charges = $shipment->courier_charges;
+
                 if(($old_destination != $destination_city_id) || ($old_weight != $weight)){
                     $courier_charges = InternationalWholesaleChargesController::weight($destination_city_id, $weight);
 

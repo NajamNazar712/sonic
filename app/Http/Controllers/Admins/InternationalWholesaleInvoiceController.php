@@ -213,8 +213,8 @@ class InternationalWholesaleInvoiceController extends Controller
             $invoice_history->save();
 
 
-            foreach ($invoice_shipments as $shipment){
-                $total_courier_charges += $shipment->bill_amount;
+            foreach ($invoice_shipments as $invoice_shipment){
+                $total_courier_charges += $invoice_shipment->shipment->bill_amount;
             }
             $invoice_user = $invoice->wholesale_user_id;
             $user = WholesaleUser::find($invoice_user);
@@ -225,13 +225,12 @@ class InternationalWholesaleInvoiceController extends Controller
             }
 
 
-            $zone_id = City::find($user->city_id)->zone_id;
-
-            $zone = Zone::find($zone_id);
-            if ($zone) {
-                $gst = $zone->gst;
-            } else {
-                $gst = 0.13;
+            $gst = 0.13;
+            $gst_rate = GlobalSettings::where('type', 'international_gst_rate');
+            if($gst_rate->exists()){
+                $gst_rate = $gst_rate->first();
+                $gst = (float)$gst_rate->text;
+                $gst = $gst / 100;
             }
             $invoice_numbers = explode('-',$invoice->invoice_number);
             $invoice_serial = (int)$invoice_numbers[1] + 1;
