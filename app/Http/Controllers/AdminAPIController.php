@@ -9703,25 +9703,25 @@ class AdminAPIController extends Controller
                                         $amount_log = $amount_log->first();
                                         $amount_check = true;
                                     }
-                                    $crm_request = array();
+                                    $success_message = null;
+                                    if($intercept == true || $amount_check == true){
+                                        $success_message.='This Shipment with Tracking Number: '.$shipment.tracking_number.' has following changes:'.PHP_EOL;
+                                    }
                                     if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                         if ($amount_check) {
-                                            $crm_request['cod_change'] = $amount_log->new_amount;
+                                            $cod_change = $amount_log->new_amount;
                                         } else {
-                                            $crm_request['cod_change'] = $shipment->intercept_history->new_amount;
+                                            $cod_change = $shipment->intercept_history->new_amount;
                                         }
-                                    } else {
-                                        $crm_request['cod_change'] = null;
+                                        $success_message .= '   COD : '.$cod_change.PHP_EOL  ;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))) {
-                                        $crm_request['address_change'] = $shipment->intercept_history->new_consignee_address;
-                                    } else {
-                                        $crm_request['address_change'] = null;
+                                        $address_change = $shipment->intercept_history->new_consignee_address;
+                                        $success_message .='    Address : '.$address_change.PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))) {
-                                        $crm_request['phone_one_change'] = $shipment->intercept_history->new_consignee_phone_number_1;
-                                    } else {
-                                        $crm_request['phone_one_change'] = null;
+                                        $phone_one_change = $shipment->intercept_history->new_consignee_phone_number_1;
+                                        $success_message .='    Phone : '.$phone_one_change.PHP_EOL;
                                     }
                                     if ($shipment->payment_mode_id == 2) {
                                         $ccd_shipment = 1;
