@@ -102,7 +102,7 @@ class ProcessPaySlipPdfEmail implements ShouldQueue
         $recovery = ($payslip_salary_details['recovery'] != NULL) ? number_format($payslip_salary_details['recovery']) : '-';
         $auction_sale = ($payslip_salary_details['auction_sale'] != NULL) ? number_format($payslip_salary_details['auction_sale']) : '-';
         $penalty = ($payslip_salary_details['penalty'] != NULL) ? number_format($payslip_salary_details['penalty']) : '-';
-        $medical_insurance = ($payslip_salary_details['medical_insurance'] != NULL) ? number_format($payslip_salary_details['medical_insurance'] != NULL) : '-';
+        $medical_insurance = ($payslip_salary_details['medical_insurance'] != NULL) ? number_format($payslip_salary_details['medical_insurance']) : '-';
         $van_deduction = ($payslip_salary_details['van_deduction'] != NULL) ? number_format($payslip_salary_details['van_deduction']) : '-';
         $others_deduction = ($payslip_salary_details['others_deduction'] != NULL) ? number_format($payslip_salary_details['others_deduction']) : '-';
 

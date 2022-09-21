@@ -3340,6 +3340,17 @@ class AdminHumanResourseController extends Controller
                     $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(24)->toDateString();
 
                     foreach ($rows as $key => $row) {
+                        $existing_payslip = EmployeePayslip::where('trax_id', trim($row['trax_id']))->whereDate('payroll_month', $payroll_month);
+                        if($existing_payslip->exists()){
+                            $existing_payslip = $existing_payslip->first();
+                            $existing_payslip_pdf = PayslipPdf::where('payslip_id', $existing_payslip->id);
+                            if($existing_payslip_pdf->exists()){
+                                $existing_payslip_pdf = $existing_payslip_pdf->first();
+                                Storage::disk('public')->delete($existing_payslip_pdf->file_path);
+                                PayslipPdf::where('payslip_id', $existing_payslip->id)->delete();
+                            }
+                            EmployeePayslip::where('id', $existing_payslip->id)->delete();
+                        }
                         $payslip_details = array();
                         $payslip = new EmployeePayslip();
                         $payslip->payroll_month = $payroll_month;
@@ -4150,7 +4161,7 @@ class AdminHumanResourseController extends Controller
                     if ($working_days == 1) {
                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                     } else {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SATURDAY]));
+                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                     }
 
                     $diffDays++;
@@ -4167,15 +4178,24 @@ class AdminHumanResourseController extends Controller
                             if ($admin_profile->employee_gender_id == 1) {
                                 return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
                             }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                            }
                         }
                         if ($request->leave_type == 3) {
-                            if ($admin_profile->employee_gender_id == 2 || $diffDays > $leave_type->count) {
+                            if ($admin_profile->employee_gender_id == 2) {
                                 return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
+                            }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
                             }
                         }
                         if ($request->leave_type == 4) {
-                            if ($admin_profile->religion_id != 1 || $diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                            if ($admin_profile->religion_id != 1) {
+                                return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
+                            }
+                            if ($diffDays > $leave_type->count) {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
                             }
                         }
                         if ($request->leave_type == 5) {

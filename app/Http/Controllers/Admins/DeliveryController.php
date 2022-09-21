@@ -2041,7 +2041,11 @@ class DeliveryController extends Controller
                 if ($deliveries->amount > 0) {
                     return '-';
                 } else {
-                    $relation_lists = DeliveryRelation::select('id', 'name')->get();
+                    if (in_array($deliveries->shipper_id, [10358, 10104, 15587, 17363, 15636, 16292])) {
+                        $relation_lists = DeliveryRelation::select('id', 'name')->get();
+                    } else {
+                        $relation_lists = DeliveryRelation::where('id', '<>', 7)->select('id', 'name')->get();
+                    }
                     $drops = '';
                     foreach ($relation_lists as $relation_list) {
                         if ($relation_list->name == $deliveries->relation) {
