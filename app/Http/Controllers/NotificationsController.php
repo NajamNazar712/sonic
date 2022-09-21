@@ -191,7 +191,9 @@ class NotificationsController extends Controller
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
         if($to){
+
             if(is_array($to)){
+//                dd($to);
                 $to = array_values(array_filter($to));
                 if(empty($to)){
                     return false;

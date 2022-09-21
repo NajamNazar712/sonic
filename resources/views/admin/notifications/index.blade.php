@@ -54,6 +54,14 @@
 														</select>
 													</div>
 
+													<div class="form-group d-none" id="segment_div">
+														<select name="segment" class="select2 segment" data-rule-required="true" data-msg-required="Segment is required">
+															<option value="" selected="selected"></option>
+															<option value="1">General Logistics</option>
+															<option value="2">E-Commerce</option>
+														</select>
+													</div>
+
 													<div class="form-group d-none" id="shipper_div">
 														<select name="shipper_status" class="select2 shipper_status" data-rule-required="true" data-msg-required="Select one">
 															<option value="" selected="selected"></option>
@@ -242,6 +250,11 @@
 					placeholder: 'City*'
 				});
 
+				$('#send_custom_email .segment').select2({
+					width: '100%',
+					placeholder: 'Select Segment*'
+				});
+
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
 					placeholder: 'Receiver*'
@@ -255,11 +268,14 @@
 						$('#shipper_div').removeClass('d-none');
 						$('#city_div').removeClass('d-none');
 						$('#hub_div').addClass('d-none');
+						$('#segment_div').removeClass('d-none');
+
 					}
 					else{
 						$('#shipper_div').addClass('d-none');
 						$('#city_div').addClass('d-none');
 						$('#hub_div').removeClass('d-none');
+						$('#segment_div').addClass('d-none');
 					}
 				});
 
@@ -603,6 +619,7 @@
 
 				$('.shipper_status').val('').trigger('change');
 				$('#shipper_div').addClass('d-none');
+				$('#segment_div').addClass('d-none');
 				$('.receiver').val('').trigger('change');
 				$('.search_hub').val('').trigger('change');
 				$('.search_city').val('').trigger('change');
@@ -614,6 +631,7 @@
 
 			$('#send_custom_notification').on('hide.bs.modal', function (e) {
 				$('.notification_receiver').val('').trigger('change');
+				$('.segment').val('').trigger('change');
 				$('.riders').val('').trigger('change');
 				$('.employees').val('').trigger('change');
 				$('.search_hub').val('').trigger('change');
