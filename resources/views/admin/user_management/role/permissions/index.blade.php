@@ -33,13 +33,14 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
 										<div class="form-group">
-											<select name="permissions[]" class="select2" disabled multiple="multiple" id="permissions" data-rule-required="true" data-msg-required="Permission is Required">
+											<select name="permissions[]" class="select2" disabled multiple="multiple" id="permissions">
 												@foreach($modules as $module)
 													@if($module->id != 18)
 														<option value="{{ $module->id }}">{{ $module->name }}</option>
 													@endif
 												@endforeach
 											</select>
+											<span> <b> Default selection All Prmissions </b></span>
 										</div>
 									</div>
 
@@ -48,7 +49,13 @@
 											<button type="submit" class="btn btn-primary btn-block">Search</button>
 										</div>
 									</div>
-
+								</div>
+							</form>
+							<form id="role_form_update" class="form-horizontal" method="POST" action="{{ route('admin.user_management.roles.permissions.store') }}"  novalidate="novalidate">
+								{{ csrf_field() }}
+								<input type="hidden" name="update_module_id" id="update_module_id" value="">
+								<input type="hidden" name="update_module_permission" id="update_module_permission" value="">
+								<div class="row d-none" id="permission_area">
 									<div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 									</div>
@@ -63,9 +70,13 @@
 											
 										</div>
 									</div>
+									<div class="col-12">
+										<div class="form-group text-center">
+											<button type="submit" class="btn btn-primary">Update</button>
+										</div>
+									</div>
 								</div>
 							</form>
-
 						</div>
 					</div>
 				</div>
@@ -87,16 +98,22 @@
 
 	<script>
 		$(document).ready(function() {
-			$('#role_form #module_id').prepend('<option value="" selected="selected"></option>').select2({
+			$('#module_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Select Module*'
 			});
 
-			$('#role_form #permissions').select2({
+			$('#permissions').select2({
                 placeholder:'Search Permission',
                 width:'100%',
                 allowClear:true
-            });
+            }).on('select2:selecting', function(e) {
+				var cur = e.params.args.data.id;
+				var old = (e.target.value == '') ? [cur] : $(e.target).val().concat([cur]);
+				$(e.target).val(old).trigger('change');
+				$(e.params.args.originalEvent.currentTarget).attr('aria-selected', 'true');
+				return false;
+			});
 
 			
 
@@ -110,7 +127,6 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-
 					module_id = $("#module_id").val();
 					permissions = $("#permissions").val();
 
@@ -125,10 +141,14 @@
 					})
 					.done(function(data) {
 
+						
 						module_id = data.module_id;
 						permissions = data.permissions;
 						admin_perm = data.admin_perm;
-
+						permissions_data = data.permissions_data;
+						
+						$('#update_module_id').val(module_id);
+						
 						$('#admin_roles').html('');
 						$('#module_permissions').html('');
 
@@ -146,10 +166,30 @@
 
 							if(id == 0)
 							{
-								$('#module_permissions').append('<div class="tab-pane fade show active" id="module_'+details.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+details.id+'_tab">');
+								$('#module_permissions').append('<div class="tab-pane fade show active" id="module_'+details.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+details.id+'_tab"> <div class="row"> <div class="col-12"> <div class=" text-center mt-2"> <button type="button" data-module_id="'+details.id+'"  class="selectAll btn btn-primary" >Select All</button> <button type="button" data-module_id="'+details.id+'"  class="unselectAll btn btn-primary">Unselect All</button> </div> </div> </div>');
 									
-									$.each(details.permissions, function(key,value) {
-										$('#module_'+details.id+'_tabpanel').append('<fieldset class="d-inline-block m-1"> <input type="checkbox" checked id="permission_'+value.id+'" class="permission perm_check_'+details.id+'" name="permission_ids[]" value="'+value.id+'"> <label for="permission_'+value.id+'">'+value.name+'</label> </fieldset>');
+									$.each(permissions_data, function(key,value) {
+										checked = '';
+
+										perm = $('#update_module_permission').val();
+										if(perm == '')
+										{
+											$('#update_module_permission').val(value.id);
+										}
+										else{
+											$('#update_module_permission').val(perm +','+ value.id);
+										}
+										
+
+										if(details.permissions.includes(value.id))
+										{
+											checked = 'checked';
+										}
+										else{
+											checked = '';
+										}
+
+										$('#module_'+details.id+'_tabpanel').append('<fieldset class="d-inline-block m-1"> <input type="checkbox" '+checked+' id="permission_'+value.id+'" class="permission perm_check_'+details.id+'" name="permission_ids['+details.id+'][]" value="'+value.id+'"> <label for="permission_'+value.id+'">'+value.name+'</label> </fieldset>');
 									});
 
 								$('#module_permissions').append('</div>');
@@ -157,20 +197,27 @@
 							}
 							else{
 								
-								$('#module_permissions').append('<div class="tab-pane fade" id="module_'+details.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+details.id+'_tab">');
-									$.each(details.permissions, function(key,value) {
+								$('#module_permissions').append('<div class="tab-pane fade" id="module_'+details.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+details.id+'_tab"> <div class="row"> <div class="col-12"> <div class=" text-center mt-2"> <button type="button" data-module_id="'+details.id+'"  class="selectAll btn btn-primary" >Select All</button> <button type="button" data-module_id="'+details.id+'"  class="unselectAll btn btn-primary">Unselect All</button> </div> </div> </div>');
+									$.each(permissions_data, function(key,value) {
+										checked = '';
 
-										$('#module_'+details.id+'_tabpanel').append('<fieldset class="d-inline-block m-1"> <input type="checkbox" checked id="permission_'+value.id+'" class="checkbox permission perm_check_'+details.id+'" name="permission_ids[]" value="'+value.id+'"> <label for="permission_'+value.id+'">'+value.name+'</label> </fieldset>');
+										if(details.permissions.includes(value.id))
+										{
+											checked = 'checked';
+										}
+										else{
+											checked = '';
+										}
+
+										$('#module_'+details.id+'_tabpanel').append('<fieldset class="d-inline-block m-1"> <input type="checkbox" '+checked+' id="permission_'+value.id+'" class="checkbox permission perm_check_'+details.id+'" name="permission_ids['+details.id+'][]" value="'+value.id+'"> <label for="permission_'+value.id+'">'+value.name+'</label> </fieldset>');
 
 									});
 
 								$('#module_permissions').append('</div>');
-
 							}
-
 						});
 
-						$('#role_form .permission').each(function() {
+						$('.permission').each(function() {
 							var checkbox = $(this);
 							var label = checkbox.next();
 							var text = label.text();
@@ -185,18 +232,28 @@
 							});
 						});
 
-						$('input').iCheck('disable');
+						$(".selectAll").on('click',function (){
+							let module_id = $(this).attr('data-module_id');
+							$(".perm_check_"+module_id).prop('checked',true);
+							$(".perm_check_"+module_id).iCheck('update');
+						});
+
+						$(".unselectAll").on('click',function (){
+							let module_id = $(this).attr('data-module_id');
+							$(".perm_check_"+module_id).prop('checked',false);
+							$(".perm_check_"+module_id).iCheck('update');
+						});
+
+						// $('input').iCheck('disable');
+						$('#permission_area').removeClass('d-none');
 					});
 					
 				}
 			});
 
-			$("#role_form #module_id").on('change',function (){
+			$("#module_id").on('change',function (){
 
 				_this = $("#module_id").val();
-
-				
-
 				$.ajax({
                     url: '{!! route('admin.user_management.roles.permissions.modulepermission') !!}',
                     method: 'POST',
@@ -208,12 +265,12 @@
 				.done(function(data) {
 					if(data)
 					{
-						$("#role_form #permissions").removeAttr('disabled');
-						$("#role_form #permissions").html('');
+						$("#permissions").removeAttr('disabled');
+						$("#permissions").html('');
 
 						$.each(data, function(id,details) {
 
-							$("#role_form #permissions").append('<option value="'+details.id+'"> '+details.name+' </option>');
+							$("#permissions").append('<option value="'+details.id+'"> '+details.name+' </option>');
 
 						});
 
@@ -221,12 +278,40 @@
 					}
 					else{
 
-						$("#role_form #permissions").attr('disabled','disabled');
+						$("#permissions").attr('disabled','disabled');
 						var message = "Invalid Response Data Not load ! please contact administrator";
 
 						toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 					}
+					
 				});
+			});
+
+			$('#role_form_update').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+					swal({
+						title: 'Please Wait!',
+						text: 'Role is being updated!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit()
+					
+				}
 			});
 		});
 	</script>

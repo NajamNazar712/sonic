@@ -624,9 +624,12 @@ class UserManagementController extends Controller
         if(isset($request->permissions))
         {
             $permissions = $request->permissions;
+            $permissions_data = ModulePermission::where('module_id',$request->module_id)->whereIn('id',$permissions)->get();
+            
         }
         else{
-            $permissions = $modules = Module::with('permissions')->find($request->module_id)->permissions->pluck('id')->toArray();
+            $permissions =  Module::with('permissions')->find($request->module_id)->permissions->pluck('id')->toArray();
+            $permissions_data =  Module::with('permissions')->find($request->module_id)->permissions;
         }
         
         $admin_perm = array();
@@ -636,6 +639,7 @@ class UserManagementController extends Controller
         ->whereIn('admin_role_module_permissions.permission_id',$permissions)
         ->select(['admin_roles.id','admin_roles.name','admin_departments.name as department'])
         ->groupBy('admin_roles.name')
+        ->orderBy('admin_roles.id')
         ->get();
 
         foreach($admin_roles as $admin_role_key => $admin_role_value)
@@ -645,8 +649,8 @@ class UserManagementController extends Controller
             $admin_roles_perm = AdminRoleModulePermission::leftjoin('module_permissions','module_permissions.id','admin_role_module_permissions.permission_id')
             ->whereIn('module_permissions.id',$permissions)
             ->where('admin_role_module_permissions.role_id',$admin_role_value->id)
-            ->select(['module_permissions.id as id','module_permissions.name as name','module_permissions.module_id as module_id','admin_role_module_permissions.role_id'])
-            ->get();
+            ->pluck('module_permissions.id')
+            ->toArray();
             $admin_perm[$admin_role_key]['permissions'] = $admin_roles_perm;
 
         }
@@ -654,13 +658,56 @@ class UserManagementController extends Controller
         $data['module_id'] = $module_id;
         $data['permissions'] = $permissions;
         $data['admin_perm'] = $admin_perm;
+        $data['permissions_data'] = $permissions_data;
 
+        // dd($data);
+   
         return $data;
-        
-        
     }
 
-    
+    public function module_permission_update_store(Request $request) {
+        // dd($request->all());
+
+        $module_id = $request->update_module_id;
+        $curr_module_perm_id = explode(",",$request->update_module_permission);
+        $permissions = $request->permission_ids;
+
+        // selected permissions
+        $module_all_permissions = ModulePermission::where('module_id', $request->update_module_id)->pluck('id')->toArray();
+        
+        // admins id who has selected module and permission access
+        $all_admin_role_ids = AdminRoleModulePermission::whereIn('permission_id',$curr_module_perm_id)->distinct('role_id')->pluck('role_id')->toArray();
+        
+        // dd($module_all_permissions , $curr_module_perm_id, $all_admin_role_ids);
+
+        $role_ids = array();
+
+        // dd($admin_ids);
+
+        foreach ($permissions as $key => $value) {
+            
+            // collecting role ids and permission id from form data
+            $role_ids[] = $key;
+            $role_id = $key;
+            $permission_id = $value;
+
+            $result = AdminRoleModulePermission::where('role_id',$role_id)->whereIn('permission_id',$module_all_permissions)->delete();
+            
+            foreach ($permission_id as $key => $value) {
+                
+                $AdminRoleModulePermission = new AdminRoleModulePermission();
+                $AdminRoleModulePermission->role_id = $role_id;
+                $AdminRoleModulePermission->permission_id = $value;
+                $AdminRoleModulePermission->save();
+            }
+
+        }
+
+        $delete_permission_ids = array_diff($all_admin_role_ids, $role_ids);
+        $result = AdminRoleModulePermission::whereIn('role_id',$delete_permission_ids)->whereIn('permission_id',$curr_module_perm_id)->delete();
+
+        return redirect()->route('admin.user_management.roles.permissions.index')->with(['success' => 'Role as per permission has been updated!']);
+    }
 
     public function role_add_store(Request $request) {
         $admin_role = new AdminRole();
