@@ -9512,7 +9512,8 @@ class AdminAPIController extends Controller
 
                 $rider_default_type = Rider::where('id',$rider_id)->select('rider_category_id')->first();
 
-                $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight')->first();
+                $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight', 'consignee_city_id')->first();
+
 
                 $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
 
@@ -9733,7 +9734,8 @@ class AdminAPIController extends Controller
                                     return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
                                 }
 
-                            } else {
+                            }
+                            else {
                                 if (!$request->has('pieces_confirm')) {
                                     if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                         $details = array();
