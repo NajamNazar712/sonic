@@ -38,10 +38,10 @@ class UpdatedPermissionForWholesaleModuleSeeder extends Seeder
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(
+        DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > International > Wholesale Accounts', 'url'=>'admin.international.wholesale.accounts.index', 'permission_id' => 799),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > International > Wholesale Excel Booking', 'url'=>'admin.international.wholesale.excel.index', 'permission_id' => 804),
-        array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Financials > Invoices > Wholesale Invoices', 'url'=>'admin.international.wholesale.invoices.index', 'permission_id' => 807)
-        );
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Financials > Invoices > Wholesale Invoices', 'url'=>'admin.international.wholesale.invoices.index', 'permission_id' => 807)
+        ));
     }
 }

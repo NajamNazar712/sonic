@@ -174,7 +174,7 @@
                             head.push('Shipper ID');
                             head.push('Shipper Name');
                             head.push('Total Courier Charges');
-                            head.push('Service Charges');
+                            head.push('Service Charges On Inv.');
                             head.push('GST');
                             head.push('Created At');
                             head.push('Status');
