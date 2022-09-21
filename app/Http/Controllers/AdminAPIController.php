@@ -9669,7 +9669,7 @@ class AdminAPIController extends Controller
                                         }
                                     }
                                     $destination = $shipment->consignee_city->name;
-                                    $hub = City::find($shipment->consignee_city->hub_id)->name;
+                                    $hub = City::find($shipment->consignee_city->hub_id)->id;
                                     $service = $shipment->booking_type->booking_type;
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                                     if ($shipment_journey->exists()) {
