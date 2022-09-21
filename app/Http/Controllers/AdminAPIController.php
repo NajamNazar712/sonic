@@ -9565,9 +9565,9 @@ class AdminAPIController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             if ($request->tracking != '') {
                 $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
-                $remarks = '';
-                $status = '';
-                $rider_name = '';
+                $remarks = ' - ';
+                $status = ' - ';
+                $rider_name = ' - ';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
                     $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
