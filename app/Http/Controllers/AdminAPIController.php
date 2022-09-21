@@ -9619,7 +9619,7 @@ class AdminAPIController extends Controller
                         if ($old_delivery_note_id->exists()) {
                             $old_delivery_note_id = $old_delivery_note_id->first();
                             $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
-                            $rider_name = $delivery_note_rider->rider->name;
+                            $rider_name = ($delivery_note_rider->rider_id != null) ? $delivery_note_rider->rider->name : " - ";
                             $is_updateable = DeliveryNoteShipment::where('delivery_note_id', $old_delivery_note_id->delivery_note_id)->where('status', 0)->count();
                         } else {
                             $is_updateable = 0;
