@@ -9832,21 +9832,29 @@ class AdminAPIController extends Controller
 
     public function get_delivery_piece_details(Request $request)
     {
-        $shipment_id = $request->shipment_id;
-        $shipment_piece_id = $request->piece_id;
+        $rules = [
+            'shipment_id' => ['required', 'exists:shipments,id'],
+            'piece_id' => ['required', 'exists:shipment_pieces,tracking_number'],
+        ];
 
-        $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
-        if ($shipment_piece->exists()) {
-            $shipment_piece = $shipment_piece->first();
-            if ($shipment_piece->shipment_id == $shipment_id) {
-                $scanned_shipment_piece = $shipment_piece->tracking_number;
-                return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
-            } else {
-                return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
-            }
-
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
+            $shipment_id = $request->shipment_id;
+            $shipment_piece_id = $request->piece_id;
+            $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+            if ($shipment_piece->exists()) {
+                $shipment_piece = $shipment_piece->first();
+                if ($shipment_piece->shipment_id == $shipment_id) {
+                    $scanned_shipment_piece = $shipment_piece->tracking_number;
+                    return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
+            }
         }
     }
 

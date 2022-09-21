@@ -464,6 +464,7 @@ Route::name('api.')->group(function () {
             Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
                 Route::post('index', 'AdminAPIController@delivery_note_index')->name('index');
                 Route::post('shipment_details', 'AdminAPIController@get_delivery_shipment_details')->name('shipment_details');
+                Route::post('piece_details', 'AdminAPIController@get_delivery_piece_details')->name('piece_details');
             });
 
         });
