@@ -623,6 +623,8 @@
                     html += '</div>'; 
                     html += '</div>'; 
                     $('#deductionEmployeeLateModal .deduction_table').html(html);
+                    $("#deduction_count").val(data.info.deduction_count);
+
                 });
                 
             }
@@ -665,7 +667,6 @@
                     var deduction_select = $('#select_deduction').val();
                     if(deduction_select == 'deduction_quota')
                     {
-                        $("#deduction_count").val(deduction_count);
                         $("#employee_id").val(employee_id);
                         $("#line_manager_id").val(line_manager_id);
                         if(deduction_count > available_leave_quota)

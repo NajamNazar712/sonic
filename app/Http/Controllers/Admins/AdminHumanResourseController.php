@@ -3994,7 +3994,7 @@ class AdminHumanResourseController extends Controller
                 // $q->where('a.line_manager_id', Auth::user()->employee_id);
             }
         })
-        ->groupBy(['employee_penalties.employee_id']);
+        ->groupBy(['employee_penalties.date']);
         // dd($employee_leaves);
         // dd($employee_leaves);
         // dd(DB::getQueryLog());
