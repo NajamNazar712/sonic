@@ -418,6 +418,7 @@ class InternationalWholesaleInvoiceController extends Controller
             foreach($invoice_shipments as $invoice_shipment){
                 $row = array();
                 $shipment = $invoice_shipment->shipment;
+                $row['id'] = str_pad($shipment->id, 6, '0', STR_PAD_LEFT);
                 $row['booking_date'] = Carbon::parse($shipment->created_at)->format('Y-m-d');
                 $row['dhl_waybill'] = $shipment->dhl_waybill;
                 $row['weight'] = $shipment->weight;
@@ -508,6 +509,7 @@ class InternationalWholesaleInvoiceController extends Controller
                         <tr>
                             <th class="color secondary">S.#</th>
                             <th class="color secondary">Date</th>
+                            <th class="color secondary">Trax Shipment ID</th>
                             <th class="color secondary">DHL AWB#</th>
                             <th class="color secondary">Weight</th>
                             <th class="color secondary">Type</th>
@@ -526,6 +528,7 @@ class InternationalWholesaleInvoiceController extends Controller
                         <tr>
                             <td>' . $invoice_serial_number . '</td>
                             <td>' . $shipment_detail['booking_date'] . '</td>
+                            <td>' . $shipment_detail['id'] . '</td>
                             <td>' . $shipment_detail['dhl_waybill'] . '</td>
                             <td>' . $shipment_detail['weight'] . '</td>
                             <td>' . $shipment_detail['type'] . '</td>
@@ -541,16 +544,16 @@ class InternationalWholesaleInvoiceController extends Controller
 
             $html .= '
                 <tr>
-                    <td colspan="9" class="color primary text-center">Summary</td>
+                    <td colspan="10" class="color primary text-center">Summary</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="color primary text-center">Total Courier Charges</td>
+                    <td colspan="8" class="color primary text-center">Total Courier Charges</td>
                     <td colspan="1" class="color primary text-center"></td>
                     <td colspan="1" class="color primary text-center">' . $total_courier_charges . '</td>
                 </tr>
                 <tr>
                   
-                  <td colspan="9" class="color secondary text-center"><strong>Amount in Words : </strong> ' . self::amount_to_words($total_courier_charges) . ' Only</td>
+                  <td colspan="10" class="color secondary text-center"><strong>Amount in Words : </strong> ' . self::amount_to_words($total_courier_charges) . ' Only</td>
                 </tr>
             </tbody>
             </table>';
