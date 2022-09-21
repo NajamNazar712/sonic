@@ -8524,7 +8524,7 @@ class NotificationsController extends Controller
                         }
                     }
 
-                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk'];
+                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk', 'nadir.qureshi@trax.pk'];
                     $to = array_merge($to,$other);
                     if (count($to) > 0) {
                         self::email($subject, $body, $to);
