@@ -9835,27 +9835,34 @@ class AdminAPIController extends Controller
     public function get_delivery_piece_details(Request $request)
     {
         $rules = [
-            'shipment_id' => ['required', 'exists:shipments,id'],
-            'piece_id' => ['required', 'exists:shipment_pieces,tracking_number'],
+            'tracking' => ['required'],
+            'piece_id' => ['required'],
         ];
-
-        $validate = Validator::make($request->all(), $rules);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment_id = $request->shipment_id;
-            $shipment_piece_id = $request->piece_id;
-            $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
-            if ($shipment_piece->exists()) {
-                $shipment_piece = $shipment_piece->first();
-                if ($shipment_piece->shipment_id == $shipment_id) {
-                    $scanned_shipment_piece = $shipment_piece->tracking_number;
-                    return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece]);
+            $tracking = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                $shipment_id = $shipment->id;
+                $shipment_piece_id = $request->piece_id;
+                $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+                if ($shipment_piece->exists()) {
+                    $shipment_piece = $shipment_piece->first();
+                    if ($shipment_piece->shipment_id == $shipment_id) {
+                        $scanned_shipment_piece = $shipment_piece->tracking_number;
+                        return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
+                    }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
+                    return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
+                return response()->json(['status' => 1, 'message' => 'No Shipment Found!']);
             }
         }
     }
