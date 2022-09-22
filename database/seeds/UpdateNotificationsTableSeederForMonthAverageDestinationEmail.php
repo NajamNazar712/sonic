@@ -23,8 +23,8 @@ class UpdateNotificationsTableSeederForMonthAverageDestinationEmail extends Seed
             'updated_at' => $timestamp, 
             'name' => 'Daily Month Average Destination Report', 
             'type_id' => 1, 
-            'subject' => 'Daily Month Average Destination Report', 
-            'body' => 'Daily Month Average Destination [date]',
+            'subject' => 'Daily Month Average Destination Report [date]', 
+            'body' => '[preview] Please download the report from the following link: [link].',
             'updated_by' => 7, 
             'status' => 0)
         ));
