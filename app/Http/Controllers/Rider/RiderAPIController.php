@@ -12325,10 +12325,10 @@ class RiderAPIController extends Controller
 
             $routes = Route::leftjoin('cities as c', 'routes.city_id', '=', 'c.id')
                 ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
-                ->where('status', 1)
+                ->where('routes.status', 1)
                 ->where('h.id', $hub_id);
 
-            $routes = $routes->get();
+            $routes = $routes->select('routes.*')->get();
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
             $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
                 ->where('r.id', $rider_id)
