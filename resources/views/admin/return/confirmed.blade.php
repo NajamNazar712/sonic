@@ -46,7 +46,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Sub Station</th>
+                        <th class="border-primary border-darken-1">Consignee Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
