@@ -9483,8 +9483,12 @@ class AdminAPIController extends Controller
                     $delivery_note_request->save();
                     $rider = Rider::find($request->rider_id);
                     $ccd_rider = $rider->ccd;
-
-                    return response()->json(['status' => 0, 'routes' => $routes, 'ccd_rider' => $ccd_rider]);
+                    $rider_details = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                        ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                        ->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name', 'h.id as hub_id')
+                        ->where('riders.id', $request->rider_id)->first();
+                    $rider_name = $rider_details->name .' - '.$rider_details->trax_id.' - '.$rider_details->hub_name;
+                    return response()->json(['status' => 0, 'routes' => $routes, 'ccd_rider' => $ccd_rider, 'rider_details' => ['id' => $rider_details->id, 'name' => $rider_name]]);
                 } else {
                     return response()->json(['status' => 1, 'message' => "Rider can not be selected because previous delivery note is not been completed"]);
                 }
