@@ -8199,7 +8199,7 @@ class AdminAPIController extends Controller
             $routes = $routes->whereHas('city', function ($query) use ($admin_hubs) {
                 $query->whereIn('hub_id', $admin_hubs);
             });
-            $hubs = $hubs->WhereIn('id', session('hubs'));
+            $hubs = $hubs->WhereIn('id', $admin_hubs);
         }
         $routes = $routes->get();
         $hubs = $hubs->get(['id', 'name']);
