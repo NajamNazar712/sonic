@@ -1236,7 +1236,7 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: falsepe,searchable:false},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                    /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
