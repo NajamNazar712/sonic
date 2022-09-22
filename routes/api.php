@@ -50,7 +50,7 @@ Route::name('api.')->group(function () {
             Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
-
+            Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
