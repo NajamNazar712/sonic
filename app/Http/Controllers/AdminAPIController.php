@@ -9919,9 +9919,9 @@ class AdminAPIController extends Controller
             'selected_route_id' => ['required'],
             'selected_rider_id' => ['required'],
             'shipment_ids' => ['required'],
-            'open_box_ids' => ['required'],
-            'notification_ids' => ['required'],
-            'rider_info_ids' => ['required'],
+            'open_box_ids' => ['nullable'],
+            'notification_ids' => ['nullable'],
+            'rider_info_ids' => ['nullable'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
