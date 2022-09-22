@@ -208,7 +208,7 @@
                             head.push('Hub');
                             head.push('Return City');
                             head.push('Consignee Name');
-                            head.push('Sub Station');
+                            head.push('Consignee Sub Station');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
@@ -475,7 +475,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city', orderable: false, searchable: false},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable:false},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},

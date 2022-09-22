@@ -265,7 +265,7 @@
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', searchable:false},
+                {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false, searchable:false},
                 {data: 'weight', name: 'shipments.actual_weight', class: 'align-middle weight'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'product_type', name: 'prod.product_name', class: 'align-middle product_type'},
