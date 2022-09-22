@@ -194,7 +194,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 swal({
-                    text: 'Are you sure, you want Enable/Disable ?',
+                    text: 'Are you sure, you want Enable/Disable ? ',
                     icon: 'warning',
                     buttons: {
                         cancel: {
