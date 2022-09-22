@@ -701,6 +701,10 @@ class UserManagementController extends Controller
                 $AdminRoleModulePermission->save();
             }
 
+            $admin_role = AdminRole::find($role_id);
+                $admin_role->updated_by = Auth::id();
+                $admin_role->save();
+
         }
 
         $delete_permission_ids = array_diff($all_admin_role_ids, $role_ids);
@@ -929,11 +933,17 @@ class UserManagementController extends Controller
     }
 
     public function role_bulk_add_store(Request $request){
+        
         $roles =explode(',' , $request->ids);
         $permission_ids = $request->permission_ids; 
-
+        // dd($request->all());
         foreach($roles as $role){
             if ($request->has('permission_ids')) {
+
+                $admin_role = AdminRole::find($role);
+                $admin_role->updated_by = Auth::id();
+                $admin_role->save();
+
                 foreach($permission_ids as $permission_id) {
 
                     $check_exists = AdminRoleModulePermission::where('role_id', $role)->where('permission_id', $permission_id);
