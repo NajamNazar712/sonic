@@ -9885,23 +9885,22 @@ class AdminAPIController extends Controller
                 $rider->save();
                 NotificationsController::app_notification(9, $rider->id, 2, $otp);
                 NotificationsController::send(144, $rider, $otp);
-                return response()->json(['status' => 0, 'message' => "Otp Generated"]);
+                return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Rider not found!']);
             }
         }
-        return response()->json(['status' => 0, 'message' => "Otp Generated"]);
+        return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
     }
 
     public function delivery_note_otp_verification(Request $request)
     {
         $environment = config('app.env');
-
         if ($environment == 'production' || $environment == 'staging') {
             $rider = Rider::find($request->rider_id);
             if ($rider) {
                 if ($rider->delivery_note_otp == $request->otp) {
-                    return response()->json(['status' => 0, 'message' => 'Otp Verified']);
+                    return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
                 }
@@ -9909,7 +9908,7 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Rider not selected!']);
             }
         } else {
-            return response()->json(['status' => 0, 'message' => 'Otp Verified']);
+            return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
         }
     }
 
