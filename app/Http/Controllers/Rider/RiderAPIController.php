@@ -12360,10 +12360,9 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'tracking' => ['required'],
-            'rider_id' => ['required', 'exists:riders,id'],
         ];
 
-        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+        $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
