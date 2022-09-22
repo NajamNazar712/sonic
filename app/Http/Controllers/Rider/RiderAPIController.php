@@ -12321,7 +12321,7 @@ class RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider->operation_rider_id == 1){
-            $hub_id = $request->hub_id;
+            $hub_id = $request->rider_hub;
 
             $routes = Route::leftjoin('cities as c', 'routes.city_id', '=', 'c.id')
                 ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
@@ -12369,8 +12369,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             if (Shipment::where('tracking_number', $request->tracking)->exists()) {
-                $role_id = $request->admin_role_id;
-                $admin_hubs = $request->admin_hubs;
+                $rider_hub = $request->rider_hub;
                 if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
                     $rider_id = $request->rider_id;
@@ -12462,7 +12461,7 @@ class RiderAPIController extends Controller
                         }
 
                         $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
-                        if ($role_id == 1 || in_array($admin_hub, $admin_hubs)) {
+                        if ($admin_hub == $rider_hub) {
                             $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
                             if ($old_delivery_note_id->exists()) {
                                 $old_delivery_note_id = $old_delivery_note_id->first();

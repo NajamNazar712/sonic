@@ -37,7 +37,7 @@ class RiderAPIToken
                         $employee = $employee->first();
                         $employee_id = $employee->id;
                     }
-                    $request->request->add(['rider_id' => $rider->id, 'rider_employee' => $employee_id, 'trax_id' => $rider->trax_id, 'hub_id' => $rider->hub_id]);
+                    $request->request->add(['rider_id' => $rider->id, 'rider_employee' => $employee_id, 'trax_id' => $rider->trax_id, 'rider_hub' => $rider->hub_id]);
                     return $next($request);
                 }
                 else {
