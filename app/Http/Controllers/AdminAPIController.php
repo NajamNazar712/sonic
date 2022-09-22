@@ -9510,58 +9510,44 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            if(Shipment::where('tracking_number', $request->tracking)->exists()){
+            if (Shipment::where('tracking_number', $request->tracking)->exists()) {
                 $role_id = $request->admin_role_id;
                 $admin_hubs = $request->admin_hubs;
-                if ($request->tracking != '' && $request->rider_id != '' )
-                {
+                if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
                     $rider_id = $request->rider_id;
 
-                    $rider_default_type = Rider::where('id',$rider_id)->select('rider_category_id')->first();
+                    $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
 
-                    $shipment = Shipment::where('tracking_number',$tracking_number)->select('actual_weight', 'consignee_city_id')->first();
+                    $shipment = Shipment::where('tracking_number', $tracking_number)->select('actual_weight', 'consignee_city_id')->first();
 
 
                     $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
 
-                    if($shipment->actual_weight > $weight->text)
-                    {
-                        $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',2)->select('rider_category_id','id')->latest()->first();
+                    if ($shipment->actual_weight > $weight->text) {
+                        $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 2)->select('rider_category_id', 'id')->latest()->first();
 
-                        if($rider_bypass_type)
-                        {
+                        if ($rider_bypass_type) {
                             $rider_bypass_id = $rider_bypass_type->id;
-                            if($rider_bypass_type->rider_category_id != 2)
-                            {
-                                if($rider_default_type->rider_category_id == 1)
-                                {
+                            if ($rider_bypass_type->rider_category_id != 2) {
+                                if ($rider_default_type->rider_category_id == 1) {
                                     return response()->json(['status' => 1, 'message' => 'Shipment is heavy weighted and the selected rider type is light weighted !']);
                                 }
                             }
-                        }
-                        elseif($rider_default_type->rider_category_id == 1)
-                        {
+                        } elseif ($rider_default_type->rider_category_id == 1) {
                             return response()->json(['status' => 1, 'message' => 'Shipment is heavy weighted and the selected rider type is light weighted !']);
                         }
-                    }
-                    elseif($shipment->actual_weight <= $weight->text)
-                    {
-                        $rider_bypass_type = RiderCategoryByPass::where('rider_id',$rider_id)->where('status',1)->where('rider_category_id',1)->select('rider_category_id','id')->latest()->first();
+                    } elseif ($shipment->actual_weight <= $weight->text) {
+                        $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 1)->select('rider_category_id', 'id')->latest()->first();
 
-                        if($rider_bypass_type)
-                        {
+                        if ($rider_bypass_type) {
                             $rider_bypass_id = $rider_bypass_type->id;
-                            if($rider_bypass_type->rider_category_id != 1)
-                            {
-                                if($rider_default_type->rider_category_id == 2)
-                                {
+                            if ($rider_bypass_type->rider_category_id != 1) {
+                                if ($rider_default_type->rider_category_id == 2) {
                                     return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
                                 }
                             }
-                        }
-                        elseif($rider_default_type->rider_category_id == 2)
-                        {
+                        } elseif ($rider_default_type->rider_category_id == 2) {
                             return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
                         }
                     }
@@ -9575,7 +9561,7 @@ class AdminAPIController extends Controller
                     if ($shipment->exists()) {
                         $shipment = $shipment->first();
                         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
-                        if(!$dispute_check){
+                        if (!$dispute_check) {
                             return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                         }
 
@@ -9710,8 +9696,8 @@ class AdminAPIController extends Controller
                                             $amount_check = true;
                                         }
                                         $success_message = null;
-                                        if($intercept == true || $amount_check == true){
-                                            $success_message.='This Shipment with Tracking Number: '.$shipment.tracking_number.' has following changes:'.PHP_EOL;
+                                        if ($intercept == true || $amount_check == true) {
+                                            $success_message .= 'This Shipment with Tracking Number: ' . $shipment . tracking_number . ' has following changes:' . PHP_EOL;
                                         }
                                         if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                             if ($amount_check) {
@@ -9719,19 +9705,19 @@ class AdminAPIController extends Controller
                                             } else {
                                                 $cod_change = $shipment->intercept_history->new_amount;
                                             }
-                                            $success_message .= '   COD : '.$cod_change.PHP_EOL  ;
+                                            $success_message .= '   COD : ' . $cod_change . PHP_EOL;
                                         }
                                         if (($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))) {
                                             $address_change = $shipment->intercept_history->new_consignee_address;
-                                            $success_message .='    Address : '.$address_change.PHP_EOL;
+                                            $success_message .= '    Address : ' . $address_change . PHP_EOL;
                                         }
                                         if (($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))) {
                                             $phone_one_change = $shipment->intercept_history->new_consignee_phone_number_1;
-                                            $success_message .='    Phone : '.$phone_one_change.PHP_EOL;
+                                            $success_message .= '    Phone : ' . $phone_one_change . PHP_EOL;
                                         }
                                         $ccd_shipment = 0;
                                         if ($shipment->payment_mode_id == 2) {
-                                            $success_message.='This shipment ' . $shipment->tracking_number .' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
+                                            $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                             $ccd_shipment = 1;
                                         }
                                         return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
@@ -9740,8 +9726,7 @@ class AdminAPIController extends Controller
                                         return response()->json(['status' => 1, 'message' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id]);
                                     }
 
-                                }
-                                else {
+                                } else {
                                     if (!$request->has('pieces_confirm')) {
                                         if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                             $details = array();
@@ -9794,8 +9779,8 @@ class AdminAPIController extends Controller
                                         $amount_check = true;
                                     }
                                     $success_message = null;
-                                    if($intercept == true || $amount_check == true){
-                                        $success_message.='This Shipment with Tracking Number: '.$shipment.tracking_number.' has following changes:'.PHP_EOL;
+                                    if ($intercept == true || $amount_check == true) {
+                                        $success_message .= 'This Shipment with Tracking Number: ' . $shipment . tracking_number . ' has following changes:' . PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                         if ($amount_check) {
@@ -9803,20 +9788,20 @@ class AdminAPIController extends Controller
                                         } else {
                                             $cod_change = $shipment->intercept_history->new_amount;
                                         }
-                                        $success_message .= '   COD : '.$cod_change.PHP_EOL  ;
+                                        $success_message .= '   COD : ' . $cod_change . PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))) {
                                         $address_change = $shipment->intercept_history->new_consignee_address;
-                                        $success_message .='    Address : '.$address_change.PHP_EOL;
+                                        $success_message .= '    Address : ' . $address_change . PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))) {
                                         $phone_one_change = $shipment->intercept_history->new_consignee_phone_number_1;
-                                        $success_message .='    Phone : '.$phone_one_change.PHP_EOL;
+                                        $success_message .= '    Phone : ' . $phone_one_change . PHP_EOL;
                                     }
                                     $ccd_shipment = 0;
                                     if ($shipment->payment_mode_id == 2) {
                                         $ccd_shipment = 1;
-                                        $success_message.='This shipment ' . $shipment->tracking_number .' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
+                                        $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                     }
                                     return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
                                 }
@@ -9831,7 +9816,7 @@ class AdminAPIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!']);
                     }
                 }
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
             }
         }
@@ -9927,15 +9912,14 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $tracking_numbers = explode(',', $request->shipment_ids);
             $open_box_ids = explode(',', $request->open_box_ids);
             $notifications = explode(',', $request->notification_ids);
             $rider_informations = explode(',', $request->rider_info_ids);
             $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
             if (count($shipments) == 0) {
-                return response()->json(['status' => 0,'message' => 'Shipments not entered!']);
+                return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
             }
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
@@ -9971,18 +9955,18 @@ class AdminAPIController extends Controller
                         sort($valid_shipments); //sort_valid_shipments;
                     }
                     $serial = 1;
-                    foreach ($valid_shipments as $index => $shipment) {
+                    foreach ($valid_shipments as $shipment) {
                         DeliveryNoteShipment::create([
                             'delivery_note_id' => $note->id,
                             'shipment_id' => $shipment,
-                            'notification' => $notifications[$index],
-                            'rider_information' => $rider_informations[$index],
+                            'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
+                            'rider_information' => (in_array($shipment, $rider_informations)) ? 1 : 0,
                             'ordering' => $serial
                         ]);
                         $serial++;
                     }
 
-                    foreach ($valid_shipments as $index => $shipment) {
+                    foreach ($valid_shipments as $shipment) {
                         if (in_array($shipment, $open_box_ids)) {
                             $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
                             if ($shipment_detail) {
@@ -10031,22 +10015,22 @@ class AdminAPIController extends Controller
 
                     }
 
-                    foreach ($valid_shipments as $index => $shipment) {
+                    foreach ($valid_shipments as $shipment) {
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
 
-                        if ($notifications[$index]) {
+                        if (in_array($shipment, $notifications)) {
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                            $otp = mt_rand(100000, 999999);
                             if ($shipment_otp->exists()) {
                                 $shipment_otp = $shipment_otp->first();
                             } else {
-                                $otp = mt_rand(100000, 999999);
                                 $shipment_otp = new ShipmentOtp();
                                 $shipment_otp->shipment_id = $shipment;
-                                $shipment_otp->otp = $otp;
-                                $shipment_otp->save();
                             }
+                            $shipment_otp->otp = $otp;
+                            $shipment_otp->save();
                             if ($shipment_obj->amount == 0) {
                                 //English
                                 NotificationsController::send(132, $note->id, $shipment);
@@ -10076,9 +10060,9 @@ class AdminAPIController extends Controller
                     $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
                 }
                 //todo end
-                return response()->json(['status' => 0,'message' => 'Delivery note has been created successfully']);
+                return response()->json(['status' => 0, 'message' => 'Delivery note has been created successfully']);
             } else {
-                return response()->json(['status' => 1,'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
+                return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
 
             }
         }
