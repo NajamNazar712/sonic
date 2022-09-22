@@ -40,13 +40,13 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -202,13 +202,13 @@
                             head.push('Shipper Name');
                             head.push('Phone');
                             head.push('Address');
-                            head.push('Sub Station');
                             head.push('Attempt Count');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Return City');
                             head.push('Consignee Name');
+                            head.push('Sub Station');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
@@ -230,13 +230,13 @@
                                 row.push(values.shipper); 
                                 row.push(values.shipper_phone); // to be changed
                                 row.push(values.shipper_return_address); // to be changed
-                                row.push(values.sub_station);
                                 row.push(values.total_attempt);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.consignee_name);
+                                row.push(values.sub_station);
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.service_type);
@@ -469,13 +469,13 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'shipper_phone', name: 'usi.phone', class: 'align-middle shipper_phone'},
                     {data: 'shipper_return_address', name: 'usi.pickup_address', class: 'align-middle shipper_return_address'},
-                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable:false},
                     {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city', orderable: false, searchable: false},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
