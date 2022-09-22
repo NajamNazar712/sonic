@@ -10060,7 +10060,7 @@ class AdminAPIController extends Controller
                     $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
                 }
                 //todo end
-                return response()->json(['status' => 0, 'message' => 'Delivery note has been created successfully']);
+                return response()->json(['status' => 0, 'create_message' => 'Delivery note has been created successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
 
