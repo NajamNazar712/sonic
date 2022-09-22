@@ -38,6 +38,7 @@ use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\Excel_reports\MonthAverage;
+use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
@@ -9684,6 +9685,89 @@ else if ($id == 178) {
                         $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
                         self::email($subject, $body, $to);
                     }
+                }
+
+                else if ($id == 190) {
+
+                    $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $reference_1_id, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $reference_1_id, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $date = Carbon::today()->startOfDay()->toDateTimeString();
+                    $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                    $month_average_data = MonthAverageDestination::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Shipments/Day</strong></th></tr></thead><tbody>';
+                    $serial = 1;
+                    $shipments_count = 0;
+                    $revenue_count = 0;
+                    $avg_revenue_count = 0;
+                    $avg_shipments_count = 0;
+                    $avg_revenue_per_day_count = 0;
+                    $month_speed_count = 0;
+                    foreach ($month_average_data as $month_average) {
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $month_average->city->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($month_average->shipments) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->revenue)) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_shipments)) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->avg_revenue_per_day)) . '</td>';
+                        // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_average->month_speed)) . '</td>';
+                        $html .= '</tr>';
+                        $shipments_count = $shipments_count + $month_average->shipments;
+                        $revenue_count = $revenue_count + $month_average->revenue;
+                        $avg_shipments_count = $avg_shipments_count + $month_average->avg_shipments;
+                        $avg_revenue_per_day_count = $avg_revenue_per_day_count + $month_average->avg_revenue_per_day;
+                        $month_speed_count = $month_speed_count + $month_average->month_speed;
+                        $serial++;
+                    }
+                    if ($shipments_count != 0) {
+                        $avg_revenue_count = $revenue_count / $shipments_count;
+                    } else {
+                        $avg_revenue_count = 0;
+                    }
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
+                    // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
+                    // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_shipments_count)) . '</td>';
+                    // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_per_day_count)) . '</td>';
+                    // $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($month_speed_count)) . '</td>';
+                    $html .= '</tr>';
+
+                    // $html .= '</tr>';
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+                    // $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['info@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk'];
+                    $cc = array();
+                    $bcc = array();
+                    $bcc = ['muhammad.waqas@trax.pk'];
+
+                    self::email($subject, $body, $to, $cc, $bcc);
+
                 }
 
             }

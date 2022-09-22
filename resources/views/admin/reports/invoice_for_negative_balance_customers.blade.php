@@ -40,6 +40,15 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                    @foreach($shippers as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
                         <div class="col-2">
                             <div class="form-group">
                                 <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
@@ -151,6 +160,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_admins').select2({
                 width:'100%',
                 placeholder:"Select Sale Persons",
@@ -228,6 +242,7 @@
                     url: '{{ route('admin.reports.negative_balance_customers.list') }}',
                     data: function (d) {
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.sale_persons = $('#search_admins').val();
                         d.status_select = $('#status_select').val();
                     }
