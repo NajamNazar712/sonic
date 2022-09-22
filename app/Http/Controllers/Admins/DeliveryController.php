@@ -1108,8 +1108,6 @@ class DeliveryController extends Controller
                 
                 if ($result->shipments_count == $result->verify_shipments_count) {
                     return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Yes</button>';
-
-                    return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle partial_count">Partial</button>';
                 }else{
@@ -1122,7 +1120,6 @@ class DeliveryController extends Controller
                     return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
                     return 'Partial';
-
                 }else{
                     return 'No';
                 }

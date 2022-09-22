@@ -362,7 +362,7 @@
                         }
                     },
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                    {data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification'},
+                    {data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification', orderable: false},
 
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
