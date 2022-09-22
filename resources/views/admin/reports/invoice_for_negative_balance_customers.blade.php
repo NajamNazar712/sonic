@@ -56,51 +56,6 @@
                         </div>
                     </div>
                 </form>
-                <div class="row">
-                    <div class="col align-self-end" style="margin-top: -30px">
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="heading-elements">
-                                    <ul class="list-inline mb-0">
-                                        <li class="primary border-primary round"><a
-                                                    data-action="collapse">Explain Colors
-                                                <i class="ft-minus"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="card-content collapse align-self-end">
-                                <div class="card-body p-1">
-                                    <table class="table mb-0">
-                                        <tbody>
-                                        <tr style="background-color: yellow;"
-                                            id="" class="legends">
-                                            <td class="align-middle">
-                                                <button type="button"
-                                                        class="btn btn-sm round btn-min-width"
-                                                        style="background-color: rebeccapurple;color: white"
-                                                        disabled>Highlighted
-                                                </button>
-                                            </td>
-                                            <td class="align-middle" style="color: black">For Enabled</td>
-                                        </tr>
-                                        <tr style="background-color: yellow;"
-                                            id="" class="legends">
-                                            <td class="align-middle">
-                                                <button type="button"
-                                                        class="btn btn-sm round btn-min-width"
-                                                        style="background-color: rebeccapurple;color: white"
-                                                        disabled>Non Highlighted
-                                                </button>
-                                            </td>
-                                            <td class="align-middle" style="color: black">For Disable</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
