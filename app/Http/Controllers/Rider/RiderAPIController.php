@@ -12322,10 +12322,12 @@ class RiderAPIController extends Controller
         $rider = Rider::find($rider_id);
         if($rider->operation_rider_id == 1){
             $hub_id = $request->hub_id;
-            $routes = Route::where('status', 1)
-                ->whereHas('city', function ($query) use ($hub_id) {
-                    $query->whereIn('hub_id', $hub_id);
-                });
+
+            $routes = Route::leftjoin('cities as c', 'routes.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('status', 1)
+                ->where('h.id', $hub_id);
+
             $routes = $routes->get();
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
             $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
