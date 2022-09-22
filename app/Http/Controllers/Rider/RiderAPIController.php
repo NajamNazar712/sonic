@@ -12320,7 +12320,7 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider->operation_rider_id != 1){
+        if($rider->operation_rider_id == 1){
             $hub_id = $request->hub_id;
             $routes = Route::where('status', 1)
                 ->whereHas('city', function ($query) use ($hub_id) {
