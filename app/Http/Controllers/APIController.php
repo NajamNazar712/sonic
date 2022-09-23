@@ -6109,7 +6109,7 @@ class APIController extends Controller
         });
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-            if(isset($data['shipping_mode_id']) && isset($data['service_type_id'])){
+            if(isset($data['shipping_mode_id'])){
                 $shipping_mode_id = $data['shipping_mode_id'];
                 $service_type_id = 1;
             }
@@ -6132,7 +6132,7 @@ class APIController extends Controller
 
         Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-            if(isset($data['shipping_mode_id']) && isset($data['service_type_id'])){
+            if(isset($data['shipping_mode_id'])){
                 $shipping_mode_id = $data['shipping_mode_id'];
                 $service_type_id = 1;
             }
