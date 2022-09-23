@@ -6164,7 +6164,7 @@ class APIController extends Controller
                 'return_vendor' => ['required', 'between:1,100'],
                 'return_phone_number' => ['required', 'phone_number'],
                 'return_email_address' => ['required', 'email', 'between:0,100'],
-                'return_city_id' => ['required', 'integer', 'between:1,100', Rule::exists('cities', 'id')->where('business_category_id', 1)->where('status', 1)],
+                'return_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)->where('status', 1)],
 
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                 'consignee_name' => ['required', 'between:1,100'],
