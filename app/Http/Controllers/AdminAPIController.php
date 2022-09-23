@@ -46,6 +46,8 @@ use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RiderType;
+use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
@@ -2741,7 +2743,7 @@ class AdminAPIController extends Controller
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
-        $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('permanent_disabled', 0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
@@ -4892,14 +4894,11 @@ class AdminAPIController extends Controller
                 $shipment_id = $shipment->id;
 
                 //todo: now checking canceled shipment arrival
-                $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
-                if($user)
-                {
-                    if($user->shipper_status_id == 17)
-                    {
-                        $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
-                        if($canceled_shipment)
-                        {
+                $user = ShipmentsJourney::where('shipment_id', $shipment->id)->select('user_id', 'shipper_status_id')->orderby('id', 'desc')->first();
+                if ($user) {
+                    if ($user->shipper_status_id == 17) {
+                        $canceled_shipment = CancelledShipmentArrival::where('shipper_id', $user->user_id)->first();
+                        if ($canceled_shipment) {
                             return response()->json(false);
                         }
                     }
@@ -6800,16 +6799,16 @@ class AdminAPIController extends Controller
         } else {
             try {
                 $edit = 0;
-                if($request->has("daily_visit_id")){
+                if ($request->has("daily_visit_id")) {
                     $daily_visit = DailyVisit::where('id', $request->daily_visit_id);
-                    if($daily_visit->exists()){
+                    if ($daily_visit->exists()) {
                         $daily_visit = $daily_visit->first();
                         $daily_visit->updated_by = $request->admin_id;
                         $edit = 1;
-                    }else{
+                    } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Daily Visit ID']);
                     }
-                } else{
+                } else {
                     $daily_visit = new DailyVisit();
                     $daily_visit->admin_id = $request->admin_id;
                 }
@@ -6826,7 +6825,7 @@ class AdminAPIController extends Controller
                 $daily_visit->save();
 
                 if ($request->hasFile('business_card_image')) {
-                    if($daily_visit->business_card_image != null){
+                    if ($daily_visit->business_card_image != null) {
                         Storage::disk('public')->delete($daily_visit->business_card_image);
                     }
                     $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
@@ -6837,7 +6836,7 @@ class AdminAPIController extends Controller
                 }
 
                 if ($request->hasFile('location_image')) {
-                    if($daily_visit->location_image != null){
+                    if ($daily_visit->location_image != null) {
                         Storage::disk('public')->delete($daily_visit->location_image);
                     }
                     $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
@@ -9300,7 +9299,8 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function validate_otp(Request $request){
+    public function validate_otp(Request $request)
+    {
         $rules = [
             'otp' => ['required', 'integer', 'digits:6'],
             'device_token' => ['nullable']
@@ -9372,6 +9372,50 @@ class AdminAPIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
             }
+        }
+    }
+
+    public function sales_person_targets(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $targets = SalePersonTarget::join('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
+            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))
+            ->where('a.status', 1)
+            ->where('a.id', $admin_id);
+        if ($targets->exists()) {
+            $targets = $targets->get();
+            return response()->json(['status' => 0, 'data' => $targets]);
+        }
+        return response()->json(['status' => 1, 'message' => 'No Data Found']);
+    }
+
+    public function sales_person_target_history(Request $request)
+    {
+        $rules = [
+            'date' => ['required', 'date'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+
+            $targets = SalePersonTargetLog::join('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
+                ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
+                ->where('a.id', $admin_id)
+                ->whereMonth('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("m"))
+                ->whereYear('sale_person_target_logs.start_date', Carbon::parse($request->date)->format("Y"))
+                ->orderBy('sale_person_target_logs.created_at');
+
+            if ($targets->exists()) {
+                $targets = $targets->get();
+                return response()->json(['status' => 0, 'data' => $targets]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No Data Found']);
         }
     }
 
