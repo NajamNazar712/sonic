@@ -344,7 +344,7 @@ class DeliveryController extends Controller
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
         ->where('r.id' ,$request->rider_id)
-        ->where('delivery_notes.dncc_status',0)
+        ->where('delivery_notes.dncc_status',10)
         ->where('delivery_notes.status', '!=', 4)
         ->whereDate('delivery_notes.created_at', '>', $datetime)
         ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
@@ -743,8 +743,6 @@ class DeliveryController extends Controller
         }
     }
 
-
-
     public function get_piece_details(Request $request)
     {
         $shipment_id = $request->shipment_id;
@@ -784,7 +782,7 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
-        
+
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -877,14 +875,17 @@ class DeliveryController extends Controller
                 }
                 $serial = 1;
                 foreach ($valid_shipments as $index => $shipment) {
-                    DeliveryNoteShipment::create([
-                        'delivery_note_id' => $note->id,
-                        'shipment_id' => $shipment,
-                        'notification' => $notifications[$index],
-                        'rider_information' => $rider_informations[$index],
-                        'ordering' => $serial
-                    ]);
-                    $serial++;
+                        $pos = array_keys($shipments, $shipment);
+                        DeliveryNoteShipment::create([
+                            'delivery_note_id' => $note->id,
+                            'shipment_id' => $shipment,
+                            'notification' => $notifications[$pos[0]],
+                            'rider_information' => $rider_informations[$pos[0]],
+                            'ordering' => $serial
+                        ]);
+                        $serial++;
+
+
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -939,8 +940,8 @@ class DeliveryController extends Controller
                 foreach ($valid_shipments as $index => $shipment) {
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
-
-                    if ($notifications[$index]) {
+                    $pos = array_keys($shipments, $shipment);
+                    if ($notifications[$pos[0]]) {
                         $shipment_obj = Shipment::find($shipment);
                         $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                         if ($shipment_otp->exists()) {
