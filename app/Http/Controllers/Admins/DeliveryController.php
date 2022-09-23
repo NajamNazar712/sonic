@@ -344,7 +344,7 @@ class DeliveryController extends Controller
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
         ->where('r.id' ,$request->rider_id)
-        ->where('delivery_notes.dncc_status',10)
+        ->where('delivery_notes.dncc_status',0)
         ->where('delivery_notes.status', '!=', 4)
         ->whereDate('delivery_notes.created_at', '>', $datetime)
         ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
