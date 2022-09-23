@@ -6154,7 +6154,7 @@ class APIController extends Controller
 
         $user_type = User::where('id', $user_id)->first();
             $rules = [
-                'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+                'tracking_number' => ['required', 'integer', Rule::unique('shipments', 'tracking_number')],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'origin_check'],
@@ -6164,7 +6164,7 @@ class APIController extends Controller
                 'return_vendor' => ['required', 'between:1,100'],
                 'return_phone_number' => ['required', 'phone_number'],
                 'return_email_address' => ['required', 'email', 'between:0,100'],
-                'return_city' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1)],
+                'return_city_id' => ['required', 'integer', 'between:1,100', Rule::exists('cities', 'id')->where('business_category_id', 1)->where('status', 1)],
 
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                 'consignee_name' => ['required', 'between:1,100'],
@@ -6210,13 +6210,13 @@ class APIController extends Controller
         } else {
 
             //Return Address
-            $return_city = City::where('name', $request->return_city)->first();
-            $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city->id);
+            $return_city_id = $request->return_city_id;
+            $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city_id);
             if ($return_address->exists()) {
                 $return_address = $return_address->first();
                 $return_address_id = $return_address->id;
             } else {
-                $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city->id, 0);
+                $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city_id, 0);
             }
 
             $shipping_mode_id = $request->input('shipping_mode_id');
