@@ -195,6 +195,16 @@ class AdminDashboardController extends Controller
 
     public function index()
     {
+        $prefix = 2231;
+        $prefix_length = strlen((string)$prefix);
+        $tracking_number_prefix = str_split(221300961, $prefix_length);
+
+        if((int)$prefix != (int)$tracking_number_prefix){
+            dd(false);
+        }
+        else{
+            dd(true);
+        }
         /*$stats = array();
         $graph = array();
         $sales=array();

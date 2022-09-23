@@ -6208,12 +6208,10 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $shipment_prebook = ShipmentPrebook::where('user_id', $user_id);
-            $prefix = $shipment_prebook->prefix;
-            $prefix_length = strlen((string)$prefix);
-            $tracking_number_prefix = str_split($request->tracking_number, $prefix_length);
-
-            if((int)$prefix != (int)$tracking_number_prefix){
+            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->first();
+            $length = strlen($shipment_pre_book->prefix);
+            $tracking_number_prefix = str_split($request->tracking_number, $length);
+            if ($shipment_pre_book->prefix != $tracking_number_prefix[0]) {
                 return response()->json(['status' => 1, 'message' => 'Prefix not matched with given tracking number']);
             }
 
