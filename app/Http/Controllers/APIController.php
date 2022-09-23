@@ -6173,7 +6173,6 @@ class APIController extends Controller
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                 'order_date' => ['nullable', 'date_format:Y-m-d'],
-                'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
@@ -6355,11 +6354,7 @@ class APIController extends Controller
                 $order_id = null;
             }
 
-            if ($request->input('package_type') == 1) {
-                $package_type = true;
-            } else {
-                $package_type = false;
-            }
+            $package_type = false;
 
             if ($request->filled('special_instructions')) {
                 $special_instructions = $request->input('special_instructions');
