@@ -27,13 +27,18 @@ class VigilanceController extends Controller
 
     public function verification_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 562);
-        $riders = Rider::where('status', 1)->get();
+        if (session('role_id') != 1) {
+            $riders = Rider::join('cities as c', 'c.id', '=', 'riders.city_id')->select('riders.id', 'riders.name', 'riders.trax_id', 'c.name as rider_city')->where('riders.status', 1)->whereIn('c.hub_id', session('hubs'))->get();
+        } else {
+            $riders = Rider::where('status', 1)->get();
+        }
         return view('admin.vigilance.verification')->with(['riders' => $riders]);
     }
 
     public function verification_list(Request $request){
         $delivery_note = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->join('cities as c', 'c.id', '=', 'r.city_id')
             ->join('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->join('shipments_journey', function ($join) {
@@ -42,10 +47,13 @@ class VigilanceController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 5)'));
             })
             ->join('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->select('s.tracking_number', 'delivery_notes.id as delivery_note_id', 'ss.name as shipment_status', 'shipments_journey.created_at as status_date', 'r.name as rider', 'u.name as shipper', 's.amount')
+            ->select('s.tracking_number', 's.id as shipment_id', 'delivery_notes.id as delivery_note_id', 'ss.name as shipment_status', 'shipments_journey.created_at as status_date', 'r.name as rider', 'u.name as shipper', 's.amount')
         ->where('delivery_notes.status', 0)
         ->whereDate('delivery_notes.created_at', Carbon::today());
 
+        if (session('role_id') != 1) {
+            $delivery_note = $delivery_note->whereIn('c.hub_id', session('hubs'));
+        }
 
         if ($delivery_note_id = $request->get('search_delivery_note_id')) {
 

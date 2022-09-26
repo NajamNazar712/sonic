@@ -24,7 +24,7 @@
                                     <fieldset class="form-group">
                                         <select name="search_rider" id="search_rider" class="form-control select2">
                                             @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->city->name}}</option>
+                                                <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->rider_city}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
@@ -228,6 +228,7 @@
                         }
                     },
                     order: [3, 'desc'],
+                    rowId: 'shipment_id',
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_numbers'},
@@ -352,6 +353,7 @@
                                             $('#verify_datatable tr#'+ id + ' td.verify').addClass('ex');
                                         }
 
+                                        $('#datatable tr#'+ shipment_id).remove();
 
                                         $('#scan_shipment_form button.add').prop('disabled', false);
 
@@ -363,12 +365,6 @@
                                         $('#scan_shipment_form button.add').prop('disabled', false);
                                         scan_sound(2);
                                         toastr.error('Tracking Number Already Scanned', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                    else{
-
-                                        $('#scan_shipment_form button.add').prop('disabled', false);
-                                        scan_sound(2);
-                                        toastr.error('Shipment is already scanned!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
                                 }
                                 else {
