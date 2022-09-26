@@ -303,7 +303,7 @@ Route::name('api.')->group(function () {
                 Route::post('piece_details', 'Rider\RiderAPIController@get_delivery_piece_details')->name('piece_details');
                 Route::post('generate_otp', 'AdminAPIController@delivery_note_otp_generation')->name('generate_otp');
                 Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
-//                Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
+                Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
             });
         });
 
