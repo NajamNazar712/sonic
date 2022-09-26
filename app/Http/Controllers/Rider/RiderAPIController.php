@@ -12766,7 +12766,6 @@ class RiderAPIController extends Controller
         $rules = [
             'hub_id' => ['required'],
             'selected_route_id' => ['required'],
-            'selected_rider_id' => ['required'],
             'shipment_ids' => ['required'],
             'open_box_ids' => ['nullable'],
             'notification_ids' => ['nullable'],
@@ -12804,7 +12803,7 @@ class RiderAPIController extends Controller
                 }
                 $note = RiderDeliveryNoteRequest::create([
                     'hub_id' => $request->hub_id,
-                    'rider_id' => $request->selected_rider_id,
+                    'rider_id' => $request->rider_id,
                     'route_id' => $request->selected_route_id,
                     'shipments_count' => $shipments_count,
                     'total_cod_amount' => $total_cod_amount,
