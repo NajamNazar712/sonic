@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                      {{--   <th class="border-primary border-darken-1">RCP SMS Count</th>--}}
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -517,6 +518,9 @@
         .goldClass{
             background-color: gold;
         }
+        .GreenColor{
+            background-color: #0aff00;
+        }
     </style>
 @endsection
 
@@ -736,6 +740,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Address');
+                            head.push('Sub Station');
                             head.push('Collection Amount');
                            /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -773,6 +778,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                 row.push(values.consignee_address);
+                                row.push(values.sub_station);
                                 row.push(values.amount);
                             /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1218,7 +1224,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[22, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1233,6 +1239,7 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                    /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
@@ -1283,7 +1290,7 @@
                         var header = column.header();
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts') || $(header).is('.consolidation') || $(header).is('.reattemp_status_remarks') ) {
-                            $(td).appendTo($(search));
+                            $(td).appendTo($(search) || $(header).is('sub_station'));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
                                 .on( 'change', function () {

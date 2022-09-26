@@ -194,43 +194,46 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 swal({
-                        text: 'Are you sure, you want to Delete?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+                    text: 'Are you sure, you want Enable/Disable ? ',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                        }).then(function(confirm) {
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
 
-                            
-                            $.ajax({
-                            url:'{!! route("admin.settings.delivery_area_keyword.enable_disable") !!}',
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route("admin.settings.delivery_area_keyword.enable_disable") !!}',
                             method: 'POST',
                             data: {
                                 'id': id,
                                 '_token': '{{ csrf_token() }}'
                             }
-                            }).done(function (data) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                table.draw();
+                        }).done(function (data) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
                             });
+                            table.draw();
                         });
+                    }
+
+
+                });
                 
             });
 
