@@ -12805,7 +12805,7 @@ class RiderAPIController extends Controller
                     'hub_id' => $request->hub_id,
                     'rider_id' => $request->rider_id,
                     'route_id' => $request->selected_route_id,
-                    'shipments_count' => $shipments_count,
+                    'shipment_count' => $shipments_count,
                     'total_cod_amount' => $total_cod_amount,
                     'ordering' => $order
                 ]);
