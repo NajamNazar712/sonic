@@ -301,9 +301,9 @@ Route::name('api.')->group(function () {
                 Route::post('index', 'Rider\RiderAPIController@delivery_note_index')->name('index');
                 Route::post('shipment_details', 'Rider\RiderAPIController@get_delivery_shipment_details')->name('shipment_details');
                 Route::post('piece_details', 'Rider\RiderAPIController@get_delivery_piece_details')->name('piece_details');
-                Route::post('generate_otp', 'AdminAPIController@delivery_note_otp_generation')->name('generate_otp');
-                Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
-                Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
+                Route::post('generate_otp', 'Rider\RiderAPIController@delivery_note_otp_generation')->name('generate_otp');
+                Route::post('verify_otp', 'Rider\RiderAPIController@delivery_note_otp_verification')->name('verify_otp');
+                Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
             });
         });
 
