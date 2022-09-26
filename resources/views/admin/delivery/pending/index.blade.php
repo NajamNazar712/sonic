@@ -42,6 +42,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Sub Stations</th>
                         <th class="border-primary border-darken-1">Weight</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Product Type</th>
@@ -176,6 +177,7 @@
                         head.push('Consignee Name');
                         head.push('Reattempted By');
                         head.push('Address');
+                        head.push('Sub Station');
                         head.push('Weight');
                         head.push('Collection Amount');
                         head.push('Product Type');
@@ -200,6 +202,7 @@
                             row.push(values.consignee_name);
                             row.push(values.agent);
                             row.push(values.consignee_address);
+                            row.push(values.sub_station);
                             row.push(values.weight);
                             row.push(values.amount);
                             row.push(values.product_type);
@@ -251,7 +254,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[18, 'desc']],
+            order: [[19, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -262,6 +265,7 @@
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false, searchable:false},
                 {data: 'weight', name: 'shipments.actual_weight', class: 'align-middle weight'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'product_type', name: 'prod.product_name', class: 'align-middle product_type'},
@@ -296,7 +300,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.shipment_description')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.shipment_description') || $(header).is('.sub_station')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

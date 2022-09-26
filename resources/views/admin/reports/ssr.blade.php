@@ -165,11 +165,13 @@
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
-                        <th class="border-primary border-darken-1">Packaging Charges</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        {{-- <th class="border-primary border-darken-1">Packaging Charges</th> --}}
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
-                        <th class="border-primary border-darken-1">Packing Charges</th>
+                        {{-- <th class="border-primary border-darken-1">Packing Charges</th> --}}
                     </tr>
                     </thead>
                 </table>
@@ -418,11 +420,13 @@
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
-                            head.push('Packaging Charges');
+                            head.push('Origin');
+                            head.push('Destination');
+                            // head.push('Packaging Charges');
                             head.push('Fuel Surcharge');
                             head.push('GST');
                             head.push('Total Charges');
-                            head.push('Packing Charges');
+                            // head.push('Packing Charges');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -436,11 +440,13 @@
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
-                                row.push(values.packaging_material_charges);
+                                row.push(values.origin_city_name);
+                                row.push(values.destination_city_name);
+                                // row.push(values.packaging_material_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.p_gst);
                                 row.push(values.p_total_charges);
-                                row.push(values.packaging_charges);
+                                // row.push(values.packaging_charges);
 
                                 body.push(row);
                             });
@@ -505,11 +511,13 @@
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
-                    { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
+                    { data:'origin_city_name' ,name: 'oc.name', class: 'align-middle origin_city_name'},
+                    { data:'destination_city_name' ,name: 'dc.name', class: 'align-middle destination_city_name'},
+                    // { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
+                    // { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
