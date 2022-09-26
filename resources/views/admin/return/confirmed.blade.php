@@ -57,6 +57,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -219,6 +220,7 @@
                             head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Received By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -247,7 +249,7 @@
                                 row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
-
+                                row.push(values.received_by);
                                 body.push(row);
                             });
                         },
@@ -486,6 +488,7 @@
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

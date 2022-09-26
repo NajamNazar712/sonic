@@ -2160,7 +2160,10 @@ class AdminCargoManifestController extends Controller
                 if ($manifest) {
                     if ($manifest->vehicle_id != null) {
                         $fleet = Fleet::find($manifest->vehicle_id);
-                        $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $fleet->reg_number . "</button>";
+                        if($fleet)
+                        {
+                            $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $fleet->reg_number . "</button>";
+                        }
                     } else {
                         $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $manifest->vehicle_number . "</button>";
                     }
@@ -2702,7 +2705,10 @@ class AdminCargoManifestController extends Controller
                 if ($manifest) {
                     if ($manifest->vehicle_id != null) {
                         $fleet = Fleet::find($manifest->vehicle_id);
-                        $vehicle_data = $fleet->reg_number;
+                        if ($fleet)
+                        {
+                            $vehicle_data = $fleet->reg_number;
+                        }
                     } else {
                         $vehicle_data = $manifest->vehicle_number;
                     }

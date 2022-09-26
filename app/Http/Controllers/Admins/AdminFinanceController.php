@@ -11150,7 +11150,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
 
         $serial_number = 1;
 
@@ -11182,6 +11182,7 @@ class AdminFinanceController extends Controller
             $row[] = $invoice_shipment->charges;
             $row[] = $invoice_shipment->gst;
             $row[] = $invoice_shipment->invoice_amount;
+            $row[] = $shipment->intercept_charges;
 
             $details[] = $row;
 
@@ -11198,6 +11199,7 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
@@ -11218,7 +11220,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)','Intercept Charges (PKR)'];
 
         $serial_number = 1;
 
@@ -11250,6 +11252,7 @@ class AdminFinanceController extends Controller
             $row[] = $invoice_shipment->charges;
             $row[] = $invoice_shipment->gst;
             $row[] = $invoice_shipment->invoice_amount;
+            $row[] = $shipment->intercept_charges;
 
             $details[] = $row;
 
@@ -11266,6 +11269,7 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
         $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
