@@ -9684,6 +9684,25 @@ else if ($id == 178) {
                     }
                 }
 
+                else if ($id == 191) {
+                    
+                    $crm_id = $reference_1_id->id;
+                    $tracking_number = $reference_1_id->tracking_number;
+                    $dnt = Carbon::parse($reference_1_id->updated_at)->toDateTimeString();
+                    $reason = $reference_1_id->reason;
+                    
+                    if (strpos($body, '[Shipper name]') !== FALSE) {
+                        $body = str_replace('[Shipper name]', $reference_1_id->shipper_name, $body);
+                    }
+
+                    $body .= PHP_EOL. PHP_EOL.'<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr style="padding:5px;border: 1px solid black"> <th style="padding:5px;border: 1px solid black">CRM Request ID</th> <th style="padding:5px;border: 1px solid black"> Tracking Number </th> <th style="padding:5px;border: 1px solid black"> Close Date & Time </th> <th style="padding:5px;border: 1px solid black"> Reasons </th> </tr>';
+                    $body .= '<tr style="padding:5px;border: 1px solid black"> <td style="padding:5px;border: 1px solid black"> '.$crm_id.' </td> <td style="padding:5px;border: 1px solid black"> '.$tracking_number.' </td> <td style="padding:5px;border: 1px solid black"> '.$dnt.' </td> <td style="padding:5px;border: 1px solid black"> '.$reason.' </td> </tr>';
+                    $body .= '</table>';
+                    
+                    $to = $reference_1_id->email;
+                    self::email($subject, $body, $to);
+                }
+
             }
         }
     }
