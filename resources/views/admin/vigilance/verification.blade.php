@@ -23,9 +23,18 @@
                                 <div class="col-3">
                                     <fieldset class="form-group">
                                         <select name="search_rider" id="search_rider" class="form-control select2">
-                                            @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->rider_city}}</option>
-                                            @endforeach
+                                            @if(session('role_id') == 1)
+                                                @foreach($riders as $rider)
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->city->name}}</option>
+                                                @endforeach
+
+                                            @else
+                                                @foreach($riders as $rider)
+                                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->rider_city}}</option>
+                                                @endforeach
+
+                                            @endif
+
                                         </select>
                                     </fieldset>
                                 </div>
