@@ -116,6 +116,8 @@ use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
 use App\Http\Models\Admin\BookingDestinationMapping;
 use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\LeadTaggingService;
+use App\Http\Models\ServiceList;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -5679,10 +5681,11 @@ public function sales_incentive()
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
         ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
-        ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
+        // ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
         ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
         ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
-        ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', DB::raw('(SELECT COUNT(id) FROM lead_tagging_services WHERE lead_tagging_id = lead_taggings.id) AS service2'),'lead_taggings.status');
+        // ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5759,54 +5762,32 @@ public function sales_incentive()
                 return $roles->territory_name;
             }
 
+        })
+        ->addColumn('service2_link', function($roles) {
+            return '<button class="btn btn-sm btn-outline-info align-middle services_link" id="'.$roles->id.'"><span class="align-middle">' . $roles->service2 . '</span></button>';
         });
 
     return $datatables->make(true);
     }
 
     public function lead_tagging_submit(Request $request){
-        // if($request->zone_id == 0){
-        //     $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-        //     // $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
-        //     //     $query->where('zone_id', '=', '0')
-        //     //     ->where('service_id', $request->service_id)
-        //     //     ->where('sale_person_id',$request->agent_id)
-        //     //     ->where('status', 1);
-        //     // })->orWhere(function ($query) use ($request){
-        //     //     $query->where('zone_id', '=', $request->zone_id)
-        //     //     ->where('city_id', '=', '0')
-        //     //     ->where('sale_person_id',$request->agent_id)
-        //     //     ->where('service_id', $request->service_id)
-        //     //     ->where('status', 1);
-        //     // });
-        //     if(!$check_leads->exists()){
-        //         $lead_tagging = new LeadTagging;
-        //         $lead_tagging->sale_person_id = $request->agent_id;
-        //         $lead_tagging->zone_id = $request->zone_id;
-        //         if($request->city_id){
-        //             $lead_tagging->city_id = $request->city_id;
-        //         }
-        //         if($request->territory_id){
-        //             $lead_tagging->territory_id = $request->territory_id;
-        //         }
-        //         $lead_tagging->service_id = $request->service_id;
-        //         $lead_tagging->save();
-        //         return redirect()->back()->with('success', 'Lead Agent Added!');
-        //     }else{
-        //         return redirect()->back()->with('error', 'Lead Agent already exist');
-        //     }
-        // }else{
+      
 
-            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('territory_id',$request->territory_id);
     
             if(!$check_leads->exists()){
                 $lead_tagging = new LeadTagging;
                 $lead_tagging->sale_person_id = $request->agent_id;
                 $lead_tagging->zone_id = $request->zone_id;
                 $lead_tagging->city_id = $request->city_id;
-                $lead_tagging->service_id = $request->service_id;
                 $lead_tagging->territory_id = $request->territory_id;
                 $lead_tagging->save();
+                foreach($request->service_id as $service_id){
+                    LeadTaggingService::create([
+                        'service_id' => $service_id,
+                        'lead_tagging_id' => $lead_tagging->id,
+                    ]);
+                }
     
                 return redirect()->back()->with('success', 'Lead Agent Added!');
     
@@ -5819,10 +5800,10 @@ public function sales_incentive()
     public function lead_tagging_data(Request $request){
         $lead_tagging = LeadTagging::find($request->id);
 
+        $service_id = LeadTaggingService::where('lead_tagging_id',$request->id)->pluck('service_id')->toArray();
         $agent_id = $lead_tagging->sale_person_id;
         $city_id = $lead_tagging->city_id;
         $zone_id = $lead_tagging->zone_id;
-        $service_id = $lead_tagging->service_id;
         $lead_tagging_id = $lead_tagging->id;
         $territory_id = $lead_tagging->territory_id;
 
@@ -5832,17 +5813,29 @@ public function sales_incentive()
 
 
     public function lead_tagging_update(Request $request){
-        // dd($request->all());
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+        $service_id = $request->service_id;
+        $check_leads = LeadTagging::where('city_id',$request->city_id)
+        ->where('sale_person_id',$request->agent_id)
+        ->where('territory_id',$request->territory_id)
+        ->where('id','<>',$request->lead_tagging_id);
 
         if(!$check_leads->exists()){
+            
             $lead_tagging = LeadTagging::find($request->lead_tagging_id);
             $lead_tagging->sale_person_id = $request->agent_id;
             $lead_tagging->zone_id = $request->zone_id;
             $lead_tagging->city_id = $request->city_id;
-            $lead_tagging->service_id = $request->service_id;
             $lead_tagging->territory_id = $request->territory_id;
             $lead_tagging->save();
+
+            LeadTaggingService::where('lead_tagging_id',$request->lead_tagging_id)->delete();
+
+            foreach($request->service_id as $service_id){
+                LeadTaggingService::create([
+                    'service_id' => $service_id,
+                    'lead_tagging_id' => $lead_tagging->id,
+                ]);
+            }
             return redirect()->back()->with('success', 'Lead Agent Updated!');
         }else{
             return redirect()->back()->with('error', 'Lead Agent already exist');
@@ -7364,6 +7357,21 @@ public function sales_incentive()
         } else {
             return response()->json(['status' => 0, 'error' => 'No Id Found']);
         }
+    }
+
+
+    public function lead_tagging_services(Request $request){
+        $all_services = array();
+        $services = LeadTaggingService::where('lead_tagging_id', $request->lead_tagging_id)->get();
+
+        foreach ($services as $service) {
+            $service_name = ServiceList::find($service->service_id);
+            if($service_name){
+                $all_services[] = $service_name->name;
+            }
+        }
+
+        return response()->json(['status' => 1, 'services' => $all_services]);
     }
     
 }

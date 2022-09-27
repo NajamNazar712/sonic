@@ -328,7 +328,7 @@
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'excess_shipments_link' ,name: 'vigilance_verifications.excess_shipments_count', class: 'align-middle excess_shipments_link text-center'},
                     { data:'verify_shipments_link' ,name: 'vigilance_verifications.verify_shipments_count', class: 'align-middle verify_shipments_link text-center'},
-                    { data:'unverify_shipments_link' ,name: 'unverify_shipments_link', class: 'align-middle unverify_shipments_link text-center',orderable: false, searchable: false},
+                    { data:'unverify_shipments_link' ,name: 'unverify_shipments_order', class: 'align-middle unverify_shipments_link text-center', searchable: false},
                     { data:'created_by' ,name: 'cb.name', class: 'align-middle created_by'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                     { data:'asigned_date' ,name: 'delivery_notes.created_at', class: 'align-middle asigned_date'},

@@ -3357,7 +3357,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\GlobalSettingsController@lead_tagging_data')->name('data');
             Route::post('update', 'Admins\GlobalSettingsController@lead_tagging_update')->name('update');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
-
+            Route::post('services', 'Admins\GlobalSettingsController@lead_tagging_services')->name('services');
+            
         });
 
         Route::prefix('lead_zones')->name('lead_zones.')->group(function () {
@@ -3752,6 +3753,39 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit','Admins\AdminInternationalRatesController@extra_service_charges_submit')->name('submit');
         });
 
+        Route::prefix('wholesale')->name('wholesale.')->group(function () {
+            Route::prefix('accounts')->name('accounts.')->group(function () {
+                Route::get('', 'Admins\InternationalWholesaleController@accounts_index')->name('index');
+                Route::get('list', 'Admins\InternationalWholesaleController@accounts_list')->name('list');
+                Route::post('store', 'Admins\InternationalWholesaleController@accounts_store')->name('store');
+                Route::get('edit', 'Admins\InternationalWholesaleController@accounts_edit_info')->name('edit');
+                Route::post('edit', 'Admins\InternationalWholesaleController@accounts_edit')->name('edit');
+                Route::post('remove_image', 'Admins\InternationalWholesaleController@accounts_remove_image')->name('remove_image');
+                Route::post('change_status', 'Admins\InternationalWholesaleController@accounts_change_status')->name('change_status');
+                Route::post('margin', 'Admins\InternationalWholesaleController@accounts_margin')->name('margin');
+                Route::post('view_document', 'Admins\InternationalWholesaleController@accounts_view_document')->name('view_document');
+            });
+            Route::prefix('excel')->name('excel.')->group(function () {
+                Route::get('', 'Admins\InternationalWholesaleController@excel_booking_index')->name('index');
+                Route::get('list', 'Admins\InternationalWholesaleController@excel_booking_list')->name('list');
+                Route::post('store', 'Admins\InternationalWholesaleController@excel_booking_store')->name('store');
+                Route::get('edit_info', 'Admins\InternationalWholesaleController@excel_booking_edit_info')->name('edit_info');
+                Route::post('edit', 'Admins\InternationalWholesaleController@excel_booking_edit')->name('edit');
+                Route::post('cancel', 'Admins\InternationalWholesaleController@excel_booking_cancel')->name('cancel');
+            });
+            Route::prefix('invoices')->name('invoices.')->group(function () {
+                Route::get('', 'Admins\InternationalWholesaleInvoiceController@index')->name('index');
+                Route::get('list', 'Admins\InternationalWholesaleInvoiceController@list')->name('list');
+                Route::post('resolved', 'Admins\InternationalWholesaleInvoiceController@resolved')->name('resolved');
+                Route::get('edit', 'Admins\InternationalWholesaleInvoiceController@edit_info')->name('edit');
+                Route::post('edit', 'Admins\InternationalWholesaleInvoiceController@edit')->name('edit');
+                Route::get('view_history', 'Admins\InternationalWholesaleInvoiceController@view_history')->name('view_history');
+                Route::post('bulk_resolved', 'Admins\InternationalWholesaleInvoiceController@bulk_resolved')->name('bulk_resolved');
+                Route::post('general_print', 'Admins\InternationalWholesaleInvoiceController@general_print')->name('general_print');
+                Route::post('consolidated_print', 'Admins\InternationalWholesaleInvoiceController@consolidated_print')->name('consolidated_print');
+            });
+
+        });
     });
 
 	Route::prefix('telenor')->name('telenor.')->group(function(){

@@ -844,6 +844,9 @@ class AdminCargoManifestController extends Controller
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                                 }
                             }
+                            else if(($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->pickup_address->city->hub_id)) {
+                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                            }
 
                             if ($request->bag_type != 0) {
                                 if (in_array($shipment->shipper_status_id, [2, 49, 55])) {

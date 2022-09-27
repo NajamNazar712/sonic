@@ -1283,6 +1283,10 @@ class Permission
             'user_management.roles.permissions.index' => 789,
             'crm.bulk_claim.index' => 795,
 
+            'international.wholesale.accounts.index' => 799,
+
+            'international.wholesale.excel.index' => 804,
+            'international.wholesale.invoices.index' => 807,
 
         ],
 
