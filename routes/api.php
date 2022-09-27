@@ -476,6 +476,7 @@ Route::name('api.')->group(function () {
                 Route::post('generate_otp', 'AdminAPIController@delivery_note_otp_generation')->name('generate_otp');
                 Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
+                Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
             });
 
         });

@@ -121,6 +121,7 @@ use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
 use App\Models\Rider\RiderDeliveryNoteRequest;
+use App\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
@@ -12814,7 +12815,7 @@ class RiderAPIController extends Controller
                     }
                     $serial = 1;
                     foreach ($valid_shipments as $shipment) {
-                        DeliveryNoteShipment::create([
+                        RiderDeliveryNoteRequestShipment::create([
                             'request_note_id' => $note->id,
                             'shipment_id' => $shipment,
                             'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
