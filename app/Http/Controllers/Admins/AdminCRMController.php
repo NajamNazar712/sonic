@@ -2626,10 +2626,13 @@ class AdminCRMController extends Controller
                         ->join('users','users.id','crm_requests.shipper_id')
                         ->where('crm_requests.id',$request->req_id)
                         ->where('crm_requests.shipper_id',$complaint_shipper_ids)
-                        ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name'])
-                        ->first();
-
-                        NotificationsController::send(191,$crm_data);
+                        ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
+                        if($crm_data->exists())
+                        {
+                            $crm_data = $crm_data->first();
+                            NotificationsController::send(191,$crm_data);
+                        }
+                        
                     }
                 
                 }
@@ -2645,6 +2648,7 @@ class AdminCRMController extends Controller
     }
 
     public function close(Request $request){
+        
         if($request->closed_reason_status != null){
            $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
             foreach ($close_reason_crm_ids as $value) {
@@ -2689,6 +2693,32 @@ class AdminCRMController extends Controller
 
                 NotificationsController::send(31,$crm_request_id);
                 NotificationsController::send(142,$crm_request_id);
+
+                // Notification 191 send email noticifaction on CRM Request Close to complaint shippers start
+                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');  
+                if($settings->exists())
+                {
+                    $settings= $settings->first();
+                    if($settings->text != "")
+                    {
+                        $complaint_shipper_ids = explode(',',$settings->text);
+                        
+                        $crm_data = CrmRequest::join('shipments','shipments.id','crm_requests.shipment_id')
+                        ->join('crm_closed_reasons','crm_closed_reasons.crm_request_id','crm_requests.id')
+                        ->join('crm_closed_reason_statuses','crm_closed_reason_statuses.id','crm_closed_reasons.status_id')
+                        ->join('users','users.id','crm_requests.shipper_id')
+                        ->where('crm_requests.id',$crm_request_id)
+                        ->where('crm_requests.shipper_id',$complaint_shipper_ids)
+                        ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
+                        if($crm_data->exists())
+                        {
+                            $crm_data = $crm_data->first();
+                            NotificationsController::send(191,$crm_data);
+                        }
+                    }
+                
+                }
+                // Notification 191 end
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }

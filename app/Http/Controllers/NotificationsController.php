@@ -9700,6 +9700,7 @@ else if ($id == 178) {
                     $body .= '</table>';
                     
                     $to = $reference_1_id->email;
+                    
                     self::email($subject, $body, $to);
                 }
 
