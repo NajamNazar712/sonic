@@ -10141,11 +10141,11 @@ class AdminAPIController extends Controller
                 $open_box_ids =  $request_shipments;
                 $notifications =  $request_shipments;
                 $rider_informations =  $request_shipments;
+                $shipments =  $request_shipments;
                 $open_box_ids =  $open_box_ids->where('open_box', 1)->pluck('shipment_id')->toArray();
-                dd($open_box_ids);
                 $notifications = $notifications->where('notification', 1)->pluck('shipment_id')->toArray();
                 $rider_informations = $rider_informations->where('rider_information', 1)->pluck('shipment_id')->toArray();
-                $shipments = $request_shipments->pluck('shipment_id')->toArray();
+                $shipments = $shipments->pluck('shipment_id')->toArray();
 
                 dd($shipments);
                 if (count($shipments) == 0) {
