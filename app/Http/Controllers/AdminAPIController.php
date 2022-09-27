@@ -10084,7 +10084,7 @@ class AdminAPIController extends Controller
             ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
             ->where('rider_delivery_note_requests.status', 0)
-            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as city_name', 'ro.junction as junction', 'ro.start as start', 'ro.end as end');
+            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as city_name', 'ro.junction as junction', 'ro.start as start', 'ro.end as end')->orderBy('rider_delivery_note_requests.id', 'DESC');
         if($role_id != 1){
             $delivery_note_requests = $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', $admin_hubs);
         }
