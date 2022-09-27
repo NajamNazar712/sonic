@@ -478,7 +478,7 @@ Route::name('api.')->group(function () {
                 Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
                 Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
                 Route::post('reject', 'Rider\RiderAPIController@delivery_note_requests_reject')->name('reject');
-                Route::post('approve', 'Rider\RiderAPIController@delivery_note_requests_reject')->name('reject');
+                Route::post('approve', 'Rider\RiderAPIController@delivery_note_requests_reject')->name('approve');
             });
 
         });
