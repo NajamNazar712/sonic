@@ -10143,7 +10143,6 @@ class AdminAPIController extends Controller
                 $open_box_ids =  $request_shipments->where('open_box', 1)->pluck('shipment_id')->toArray();
                 $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
                 $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
-                dd($shipments,$open_box_ids,$notifications,$rider_informations);
 
                 if (count($shipments) == 0) {
                     return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
