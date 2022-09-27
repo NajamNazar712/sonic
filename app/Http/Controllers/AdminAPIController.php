@@ -10148,7 +10148,7 @@ class AdminAPIController extends Controller
                 $notifications = $notifications->where('notification', 1)->pluck('shipment_id')->toArray();
                 $rider_informations = $rider_informations->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
-                $shipments = $shipments->pluck('shipment_id')->toArray();
+//                $shipments = $shipments->pluck('shipment_id')->toArray();
 
                 dd($shipments->pluck('shipment_id')->toArray(),$request_shipments->pluck('shipment_id')->toArray());
                 if (count($shipments) == 0) {
