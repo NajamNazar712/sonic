@@ -95,7 +95,6 @@ use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\MisroutedHistory;
-use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\PendingPayment;
@@ -9443,7 +9442,96 @@ class AdminAPIController extends Controller
     {
         $role_id = $request->admin_role_id;
         $admin_hubs = $request->admin_hubs;
-        if ($request->has("operation_category_id")) {
+        if ($request->has("request_id")) {
+            $request_id = $request->request_id;
+            $request_delivery_note = RiderDeliveryNoteRequest::find($request_id);
+            $shipments = Shipment::join('rider_delivery_note_request_shipments as rs', 'rs.shipment_id', 'shipments.id')
+                ->where('request_note_id', $request_delivery_note->id)
+                ->select('shipments.*');
+            $rider = Rider::find($request_delivery_note->rider_id);
+            if ($shipments->exists()) {
+                $shipments = $shipments->get();
+                $data = array();
+                foreach ($shipments as $shipment) {
+                    $datum = array();
+                    $status = ' - ';
+                    $remarks = ' - ';
+                    $rider_name = ' - ';
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                    if ($shipment_journey->exists()) {
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
+                        $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
+                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                        if ($status_id != '') {
+                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                            $status = $status_name->name;
+                        } else {
+                            $status = ' - ';
+                        }
+                    }
+                    $complaint_row = 0;
+                    if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                        $complaint_row = 1;
+                    }
+
+                    $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
+                    if ($old_delivery_note_id->exists()) {
+                        $old_delivery_note_id = $old_delivery_note_id->first();
+                        $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
+                        $rider_name = ($delivery_note_rider->rider_id != null) ? $delivery_note_rider->rider->name : " - ";
+                    }
+
+                    if ($shipment->shipment_detail()->exists()) {
+                        if ($shipment->shipment_detail->is_open == 1) {
+                            $is_open_box = 1;
+                        } else {
+                            $is_open_box = 0;
+
+                        }
+                    } else {
+                        $is_open_box = 0;
+
+                    }
+
+                    $ccd_shipment = 0;
+                    if ($shipment->payment_mode_id == 2) {
+                        $ccd_shipment = 1;
+                    }
+
+                    $consolidation_details = DeliveryController::check_consolidation($shipment->id);
+                    $consolidation_flag = FALSE;
+
+                    if ($consolidation_details) {
+                        $consolidation_flag = TRUE;
+                    }
+
+                    $datum["shId"] = $shipment->id;
+                    $datum["tracking_number"] = $shipment->tracking_number;
+                    $datum["destination"] = $shipment->consignee_city->name;
+                    $datum["hub"] = City::find($shipment->consignee_city->hub_id)->id;
+                    $datum["consignee_name"] = $shipment->consignee_name;
+                    $datum["phone"] = $shipment->consignee_phone_number_1;
+                    $datum["address"] = $shipment->consignee_address;
+                    $datum["amount"] = number_format($shipment->amount);
+                    $datum["service_type"] = $service = $shipment->booking_type->booking_type;
+                    $datum["shipment_status"] = $status;
+                    $datum["remarks"] = $remarks;
+                    $datum["crm_row"] = $complaint_row;
+                    $datum["rider_name"] = $rider_name;
+                    $datum["is_open_box"] = $is_open_box;
+                    $datum["ccd_shipment"] = $ccd_shipment;
+                    $datum["consolidation_flag"] = $consolidation_flag;
+                    $datum["consolidation_details"] = $consolidation_details;
+
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'shipments' => $data, 'hub_id' => $request_delivery_note->hub_id, 'rider_id' => $rider->id, 'route_id' => $request_delivery_note->route_id, 'category_id' => $rider->operation_rider_id]);
+
+            }
+            return response()->json(['status' => 1, 'message' => "No shipment found!"]);
+
+        }
+        else if ($request->has("operation_category_id")) {
             $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
                 ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
                 ->where('riders.operation_rider_id', $request->operation_category_id)
@@ -9483,7 +9571,7 @@ class AdminAPIController extends Controller
                 ->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name', 'h.id as hub_id')
                 ->where('riders.id', $request->rider_id)->first();
 
-            $rider_name = $rider_details->name .' - '.$rider_details->trax_id.' - '.$rider_details->hub_name;
+            $rider_name = $rider_details->name . ' - ' . $rider_details->trax_id . ' - ' . $rider_details->hub_name;
 
             if ($delivery_note->exists()) {
                 $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -10268,10 +10356,6 @@ class AdminAPIController extends Controller
                                     NotificationsController::send(12, $note->id, $shipment);
                                 }
                             }
-                        }
-                        NotificationsController::send(40, $note->id);
-                        if ($normal_rider) {
-                            NotificationsController::app_notification(5, $rider_id, 2, $note->id);
                         }
                     }
 
