@@ -187,8 +187,9 @@
                                        
 
                                         table.row.add([rowNo + 1, data.details.tracking_number, case_nature_type, channel, '<div class="form-group"> <input type="text" class="form-control form-control-sm claim_product_cost" name="claim_product_cost['+id+']" placeholder="Enter Product Cost" data-rule-required="true" data-msg-required="This field is required"></div>',receiving_sheet, '<div class="form-group"><input type="file" class="form-control form-control-sm" name="product_picture['+id+']" id="product_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<div class="form-group"><input type="file" class="form-control form-control-sm" name="invoice_picture['+id+']" id="invoice_picture_'+id+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="File is required"></div>','<textarea class="form-control form-control-sm" name="description["'+id+'"]" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>', remove_button]).node().id = data.details.id;
-                                        // table.draw(false);
-                                        table.order([0, 'desc']).draw();
+                                        table.draw(false);
+                                        // table.draw();
+                                        // table.order([0, 'desc']).draw();
                                         var case_nature_type_data = $.map({!! $case_nature_type !!}, function (obj) {
                                             obj.id = obj.id;
                                             obj.text = obj.type;
@@ -344,14 +345,19 @@
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
                 // table.row( $(this).parents('tr') ).remove().draw();
-                table.row(parent).remove().draw();
-                var counter = table.rows().count();
+                table.row(parent).remove();
+                // var counter = table.rows().count();
+                var counter = 1;
+
                 table.rows().nodes().each(function(index) {
                     var row = table.row(index);
                     
-                    $(row.node()).find('td.serial_number').text(counter--);
+                    $(row.node()).find('td.serial_number').text(counter++);
                 });
+                 // table.draw(false);
+                // table.draw();
                 table.draw(false);
+                // table.order([0, 'desc']).draw();
                 var index = $.inArray(id, shipment_ids);
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);

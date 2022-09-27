@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\FTLController;
@@ -398,8 +399,30 @@ class APIController extends Controller
     {
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
-
         $user_id = $request->user_id;
+        $return_address_rules = array();
+        $return_address_verify = false;
+        $settings = GlobalSettings::where('type', 'shipper_return_address');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL && isset($request->return_address) && isset($request->return_contact_person) && isset($request->return_vendor) && isset($request->return_phone_number) && isset($request->return_email_address) && isset($request->return_city)) {
+                $return_accounts = array_map('intval', explode(',', $settings->text));
+                if(in_array($user_id,$return_accounts)){
+                    $return_address_rules = [
+                        'return_address' => ['required', 'between:1,255'],
+                        'return_contact_person' => ['required', 'between:1,100'],
+                        'return_vendor' => ['required', 'between:1,100'],
+                        'return_phone_number' => ['required', 'phone_number'],
+                        'return_email_address' => ['required', 'email', 'between:0,100'],
+                        'return_city' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1)],
+
+                    ];
+                    $return_address_verify = true;
+                }
+
+            }
+        }
+
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
@@ -665,14 +688,31 @@ class APIController extends Controller
                 $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
             }
         }
-
-        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validations = array_merge($rules, $return_address_rules);
+        $validate = Validator::make($request->all(), $validations, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            //Return Address
+            if($return_address_verify) {
+                $return_city = City::where('name', $request->return_city)->first();
+                $return_address_id = NULL;
+                $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city->id);
+                if ($return_address->exists()) {
+                    $return_address = $return_address->first();
+                    $return_address_id = $return_address->id;
+                } else {
+                    $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city->id, 0);
+                }
+                $request->merge([
+                    'return_address_id' => "$return_address_id",
+                ]);
+            }
+            //Return Address
+
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
 
             if ($request->filled('consignee_phone_number_2')) {
@@ -1971,6 +2011,63 @@ class APIController extends Controller
 
                 return $pdf->download($filename);
             }
+        }
+    }
+
+    public function receiving_sheet_print(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'type' => ['nullable', 'boolean'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+            // if ($receiving_sheet) {
+            //     return response()->json(['status' => 1, 'message' => 'Receiving Sheet Not Found.']);
+            // }
+            if(count($receiving_sheet->receiving_sheet_shipments) > 200){
+                return response()->json(['status' => 1, 'message' => 'Too many shipments.']);
+            }
+            if(!isset($request->type) || $request->type == 0){
+                if(count($receiving_sheet->receiving_sheet_shipments) > 50){
+                    return response()->json(['status' => 1, 'message' => 'Too many shipments, please use type=1 to extract pdf.']);
+                } 
+            }
+            $print_status = 0;
+            $receiving_sheet_print = ReceivingSheetPrintStatus::where('receiving_sheet_id',$receiving_sheet->id);
+            if($receiving_sheet_print->exists()){
+                $receiving_sheet_print = $receiving_sheet_print->get()->first();
+                $print_status = $receiving_sheet_print->status;
+            }
+            $receiving_sheet = ShipperReceivingSheetController::print_receiving_sheet_and_air_waybill_api($receiving_sheet_id, 4, $print_status);
+
+            if (!isset($request->type) || $request->type == 0) {
+                $image = SnappyImage::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.jpg';
+
+                return $image->setOption('disable-smart-width', true)->download($filename);
+            } else {
+                $pdf = SnappyPDF::loadHTML($receiving_sheet);
+
+                $filename = 'receiving_sheet_' . $receiving_sheet_id . '.pdf';
+
+                return $pdf->download($filename);
+            }
+
         }
     }
 
@@ -5384,7 +5481,8 @@ class APIController extends Controller
                                         $return_data['Identification_parameter'] = $shipment_data->consignee_name;
                                         $return_data['reserved'] = "successful bill payment";
                                         Shipment::where('tracking_number', $tracking_no)->update(['received_amount' => $transfer_amount]);
-
+                                        NotificationsController::app_notification(19, $delivery_note_data->rider_id, 2,$delivery_note_data->rider_id, $upload_transaction->id);
+                                        NotificationsController::send(185, $delivery_note_data->rider_id, $upload_transaction->id);
                                         return json_encode(['status' => 200, 'message' => 'Successful Bill Payment', 'result' =>  $return_data]);
                                     }
                                     else{

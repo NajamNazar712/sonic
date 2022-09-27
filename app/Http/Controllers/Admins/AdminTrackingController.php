@@ -634,7 +634,7 @@ class AdminTrackingController extends Controller
 
                     $details = array();
 
-                    $details['complaint'] = NULL;
+                    $details['complaint'] = '-';
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
                     $details['shipper'] = $shipment->user->name;

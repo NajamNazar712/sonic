@@ -726,7 +726,7 @@ class ShipperCRMController extends Controller
                 if($is_shipment){
                     $present_shipments[] = $shipment->tracking_number;
                 }else{
-                    $crm_request_padded_id = CRMController::add(4, $request->case_nature_type_id[$shipment_id], $request->channel_id[$shipment_id], 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $request->description[$shipment_id], $request->claim_product_cost[$shipment_id],  $request->file('product_picture')[$shipment_id], $request->file('invoice_picture')[$shipment_id]);
+                    $crm_request_padded_id = CRMController::add(4, $request->case_nature_type_id[$shipment_id], $request->channel_id[$shipment_id], 1, Auth::id(), 1, $shipment_id, $shipment->user_id, NULL , $request->description[$shipment_id], $request->claim_product_cost[$shipment_id],  $request->file('product_picture')[$shipment_id], $request->file('invoice_picture')[$shipment_id]);
                                       
                     if($request->has('key_account')){
                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $request->channel_id[$shipment_id], $request->case_nature_type_id[$shipment_id]);

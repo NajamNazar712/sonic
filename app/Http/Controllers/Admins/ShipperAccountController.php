@@ -54,7 +54,7 @@ class ShipperAccountController extends Controller
                     NotificationsController::send(58, $status);
 
                     // sending survey form notification
-                    $disabled_shipper = User::where('id', $status)->select(['id','email','name','phone'])->get();
+                    $disabled_shippers = User::where('id', $status)->select(['id','email','name','phone'])->get();
 
                     // via email
                     NotificationsController::send(179, $disabled_shippers);
