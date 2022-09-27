@@ -9695,12 +9695,12 @@ else if ($id == 178) {
                         $body = str_replace('[Shipper name]', $reference_1_id->shipper_name, $body);
                     }
 
-                    $body .= PHP_EOL. PHP_EOL.'<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr style="padding:5px;border: 1px solid black"> <th style="padding:5px;border: 1px solid black">CRM Request ID</th> <th style="padding:5px;border: 1px solid black"> Tracking Number </th> <th style="padding:5px;border: 1px solid black"> Close Date & Time </th> <th style="padding:5px;border: 1px solid black"> Reasons </th> </tr>';
+                    $body .= PHP_EOL. PHP_EOL.'<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr style="padding:5px;border: 1px solid black"> <th style="padding:5px;border: 1px solid black">CRM Request ID</th> <th style="padding:5px;border: 1px solid black"> Tracking Number </th> <th style="padding:5px;border: 1px solid black"> Close Date & Time </th> <th style="padding:5px;border: 1px solid black"> Reason </th> </tr>';
                     $body .= '<tr style="padding:5px;border: 1px solid black"> <td style="padding:5px;border: 1px solid black"> '.$crm_id.' </td> <td style="padding:5px;border: 1px solid black"> '.$tracking_number.' </td> <td style="padding:5px;border: 1px solid black"> '.$dnt.' </td> <td style="padding:5px;border: 1px solid black"> '.$reason.' </td> </tr>';
                     $body .= '</table>';
                     
                     $to = $reference_1_id->email;
-                    
+
                     self::email($subject, $body, $to);
                 }
 
