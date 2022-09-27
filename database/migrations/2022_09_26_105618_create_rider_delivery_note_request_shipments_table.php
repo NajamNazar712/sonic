@@ -21,6 +21,7 @@ class CreateRiderDeliveryNoteRequestShipmentsTable extends Migration
             $table->tinyInteger('rider_information')->index();
             $table->tinyInteger('open_box')->index();
             $table->integer('ordering')->nullable();
+            $table->integer('status')->default(0)->index();
             $table->timestamps();
         });
     }
