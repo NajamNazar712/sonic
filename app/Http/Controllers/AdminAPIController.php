@@ -10138,6 +10138,7 @@ class AdminAPIController extends Controller
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
             if($delivery_request){
                 $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
+                dd($request_shipments->pluck('shipment_id')->toArray());
                 $open_box_ids =  $request_shipments;
                 $notifications =  $request_shipments;
                 $rider_informations =  $request_shipments;
@@ -10150,7 +10151,7 @@ class AdminAPIController extends Controller
 
 //                $shipments = $shipments->pluck('shipment_id')->toArray();
 
-                dd($shipments->pluck('shipment_id')->toArray(),$request_shipments->pluck('shipment_id')->toArray());
+//                dd($shipments->pluck('shipment_id')->toArray(),);
                 if (count($shipments) == 0) {
                     return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
                 }
