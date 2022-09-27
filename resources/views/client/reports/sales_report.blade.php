@@ -129,7 +129,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 1</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 2</th>
-                        <th class="border-primary border-darken-1">Consignee Address</th>
+{{--                        <th class="border-primary border-darken-1">Consignee Address</th>--}}
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -420,7 +420,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone No. 1');
                             head.push('Consignee Phone No. 2');
-                            head.push('Consignee Address');
+                            // head.push('Consignee Address');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Payment Status');
@@ -473,7 +473,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.consignee_phone_number_2);
-                                row.push(values.consignee_address);
+                                // row.push(values.consignee_address);
                                 row.push(values.current_status);
                                 row.push(values.reason_name);
                                 row.push(values.payment_status);
@@ -572,7 +572,7 @@
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone_number_1' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     { data:'consignee_phone_number_2' ,name: 'shipments.consignee_phone_number_2', class: 'align-middle consignee_phone_number_2'},
-                    { data:'consignee_address' ,name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    // { data:'consignee_address' ,name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
