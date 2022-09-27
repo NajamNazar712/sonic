@@ -10095,6 +10095,7 @@ class AdminAPIController extends Controller
                 $datum = array();
                 $shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
                     ->where('request_note_id', $delivery_note_request->id)->pluck('s.tracking_number')->toArray();
+                $datum['date'] = Carbon::parse($delivery_note_request->date)->format("Y-m-d");
                 $datum['request_id'] = $delivery_note_request->id;
                 $datum['rider_name'] = $delivery_note_request->rider_name;
                 $datum['city_name'] = $delivery_note_request->city_name;
