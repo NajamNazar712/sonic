@@ -10138,20 +10138,13 @@ class AdminAPIController extends Controller
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
             if($delivery_request){
                 $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
-                dd($request_shipments->pluck('shipment_id')->toArray());
-                $open_box_ids =  $request_shipments;
-                $notifications =  $request_shipments;
-                $rider_informations =  $request_shipments;
-                $shipments =  $request_shipments;
 
-                $open_box_ids =  $open_box_ids->where('open_box', 1)->pluck('shipment_id')->toArray();
-//                dd($shipments->get(),$request_shipments->get(),$open_box_ids,$delivery_request->id);
-                $notifications = $notifications->where('notification', 1)->pluck('shipment_id')->toArray();
-                $rider_informations = $rider_informations->where('rider_information', 1)->pluck('shipment_id')->toArray();
+                $shipments = $request_shipments->pluck('shipment_id')->toArray();
+                dd($shipments);
+                $open_box_ids =  $request_shipments->where('open_box', 1)->pluck('shipment_id')->toArray();
+                $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
+                $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
-//                $shipments = $shipments->pluck('shipment_id')->toArray();
-
-//                dd($shipments->pluck('shipment_id')->toArray(),);
                 if (count($shipments) == 0) {
                     return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
                 }
