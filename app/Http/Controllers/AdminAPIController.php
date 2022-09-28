@@ -10263,6 +10263,7 @@ class AdminAPIController extends Controller
                 $shipments_count = count($valid_shipments);
                 if ($shipments_count != 0) {
                     $valid_shipments = $valid_shipments->toArray();
+                    $invalid_shipments = array_diff($shipments, $valid_shipments);
                     Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                     $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                         $query->where('booking_type_id', '!=', 4)
@@ -10277,6 +10278,7 @@ class AdminAPIController extends Controller
                     }
                     $normal_rider = TRUE;
                     $rider_id = $delivery_request->rider_id;
+                    $rider = Rider::find($rider_id);
                     $hub_id = $delivery_request->hub_id;
                     $route_id = $delivery_request->route_id;
                     $note = DeliveryNote::create([
@@ -10381,9 +10383,13 @@ class AdminAPIController extends Controller
                             }
                         }
                     }
+                    NotificationsController::send(40, $note->id);
+                    if ($normal_rider) {
+                        NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
+                    }
 
                     //rider attendance
-                    if ($request->operation_rider_type_for_attendance == 1) {
+                    if ($rider->operation_rider_id == 1) {
                         EmployeeAttendanceController::riders_attendance_mark($rider_id);
                     }
                     //rider attendance end
@@ -10392,22 +10398,21 @@ class AdminAPIController extends Controller
                     $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->select('rider_category_id', 'id')->latest()->first();
                     if ($rider_bypass_type) {
                         $rider_bypass_id = $rider_bypass_type->id;
-                        $rider_bypass_update = RiderCategoryByPass::where('rider_id', $rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
+                        RiderCategoryByPass::where('rider_id', $rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
                     }
                     //todo end
                     $delivery_request->status = 1;
                     $delivery_request->approved_by = $admin;
                     $delivery_request->approved_at = Carbon::today();
                     $delivery_request->save();
-                    $requests_shipment = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)
-                        ->update(['status' => 1]);
-                    return response()->json(['status' => 0, 'message' => 'Delivery note has been Approved successfully'. $note->id]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
+                    return response()->json(['status' => 0, 'message' => 'Delivery note has been Approved successfully'.PHP_EOL. 'Delivery Note ID: '. $note->id]);
                 } else {
                     $delivery_request->status = 3;
                     $delivery_request->updated_by = $admin;
                     $delivery_request->save();
-                    $requests_shipment = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)
-                        ->update(['status' => 3]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->update(['status' => 3]);
                     return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
                 }
             }
