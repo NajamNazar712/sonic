@@ -10014,11 +10014,14 @@ class AdminAPIController extends Controller
             $notifications = explode(',', $request->notification_ids);
             $rider_informations = explode(',', $request->rider_info_ids);
             $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+            $admin = $request->admin_id;
             if (count($shipments) == 0) {
                 return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
             }
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
+            $removed_shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
+                ->whereIn('s.tracking_number', $request->removed_shipments)->pluck('s.id')->toArray();
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
@@ -10034,7 +10037,6 @@ class AdminAPIController extends Controller
                 if ($request->has('order_checkbox')) {
                     $order = true;
                 }
-                $admin = $request->admin_id;
                 $normal_rider = TRUE;
                 $note = DeliveryNote::create([
                     'hub_id' => $request->hub_id,
@@ -10155,9 +10157,28 @@ class AdminAPIController extends Controller
                     $rider_bypass_id = $rider_bypass_type->id;
                     $rider_bypass_update = RiderCategoryByPass::where('rider_id', $request->selected_rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
                 }
+
+                if($request->has("request_id")){
+                    $rider_request = RiderDeliveryNoteRequest::find($request->request_id);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $valid_shipments)->update(['status' => 1]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
+                    $rider_request->status = 1;
+                    $rider_request->approved_by = $admin;
+                    $rider_request->updated_by = $admin;
+                    $rider_request->approved_at = Carbon::today();
+                    $rider_request->save();
+                }
                 //todo end
                 return response()->json(['status' => 0, 'create_message' => 'Delivery note has been created successfully']);
             } else {
+                if ($request->has("request_id")) {
+                    $rider_request = RiderDeliveryNoteRequest::find($request->request_id);
+                    $rider_request->status = 3;
+                    $rider_request->updated_by = $admin;
+                    $rider_request->save();
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)
+                        ->update(['status' => 3]);
+                }
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
 
             }
