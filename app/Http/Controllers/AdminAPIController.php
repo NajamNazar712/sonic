@@ -10021,17 +10021,17 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
             }
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
-            $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
+            $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id')->toArray();
             $removed_shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
                 ->whereIn('s.tracking_number', $removed_shipments)->pluck('s.id')->toArray();
             if($request->has("request_id")){
                 $requests_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->pluck('shipment_id')->toArray();
                 $added_shipments = array_diff($shipments, $requests_shipments);
+                $invalid_shipments = array_diff($requests_shipments, $valid_shipments);
             }
 
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
-                $valid_shipments = $valid_shipments->toArray();
                 Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                 $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                     $query->where('booking_type_id', '!=', 4)
@@ -10070,13 +10070,17 @@ class AdminAPIController extends Controller
                         ]);
                         $serial++;
                     }
+
                     if(count($added_shipments) > 0){
+                        $serial = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->orderBy('ordering')->first();
+                        $serial = $serial->ordering;
                         foreach ($added_shipments as $shipment) {
-                            DeliveryNoteShipment::create([
-                                'delivery_note_id' => $note->id,
+                            RiderDeliveryNoteRequestShipment::create([
+                                'request_note_id' => $request->request_id,
                                 'shipment_id' => $shipment,
                                 'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
                                 'rider_information' => (in_array($shipment, $rider_informations)) ? 1 : 0,
+                                'open_box' => (in_array($shipment, $open_box_ids)) ? 1 : 0,
                                 'ordering' => $serial
                             ]);
                             $serial++;
@@ -10179,7 +10183,8 @@ class AdminAPIController extends Controller
                 if($request->has("request_id")){
                     $rider_request = RiderDeliveryNoteRequest::find($request->request_id);
                     RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $valid_shipments)->update(['status' => 1]);
-                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $invalid_shipments)->update(['status' => 3]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $added_shipments)->update(['status' => 4]);
                     RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
                     $rider_request->status = 1;
                     $rider_request->approved_by = $admin;
