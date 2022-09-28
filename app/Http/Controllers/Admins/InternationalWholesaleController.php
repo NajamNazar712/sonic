@@ -404,7 +404,7 @@ class InternationalWholesaleController extends Controller
             })],
             'dhl_waybill' => ['required'],
             'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where(function($query){
-                $query->where('status', 1)->where('business_category_id', 2);
+                $query->where('status', 1)->where('hub', 1)->where('business_category_id', 2);
             })],
             'type' => ['required', 'between:0,190'],
             'weight' => ['required', 'numeric', 'between:0.1,100000'],
