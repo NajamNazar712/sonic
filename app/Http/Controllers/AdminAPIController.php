@@ -6766,6 +6766,7 @@ class AdminAPIController extends Controller
             $permissions['return_note_create'] = (in_array(48, $user_permissions)) ? 1 : 0;
             $permissions['return_note_view'] = (in_array(49, $user_permissions)) ? 1 : 0;
             $permissions['return_note_receive'] = (in_array(50, $user_permissions)) ? 1 : 0;
+            $permissions['delivery_note_create'] = (in_array(35, $user_permissions)) ? 1 : 0;
             $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
             if ($global_settings->exists()) {
                 $global_settings = $global_settings->first();
