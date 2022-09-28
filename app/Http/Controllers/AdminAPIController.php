@@ -10402,7 +10402,7 @@ class AdminAPIController extends Controller
                     }
                     NotificationsController::send(40, $note->id);
                     if ($normal_rider) {
-                        NotificationsController::app_notification(5, $rider->employee_id, 2, $note->id);
+                        NotificationsController::app_notification(5, $rider_id, 2, $note->id);
                     }
 
                     //rider attendance
