@@ -10013,6 +10013,7 @@ class AdminAPIController extends Controller
             $open_box_ids = explode(',', $request->open_box_ids);
             $notifications = explode(',', $request->notification_ids);
             $rider_informations = explode(',', $request->rider_info_ids);
+            $removed_shipments = explode(',', $request->removed_shipments);
             $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
             $admin = $request->admin_id;
             if (count($shipments) == 0) {
@@ -10021,7 +10022,7 @@ class AdminAPIController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $removed_shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
-                ->whereIn('s.tracking_number', $request->removed_shipments)->pluck('s.id')->toArray();
+                ->whereIn('s.tracking_number', $removed_shipments)->pluck('s.id')->toArray();
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
