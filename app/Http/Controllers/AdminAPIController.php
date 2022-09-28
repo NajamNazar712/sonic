@@ -10072,7 +10072,7 @@ class AdminAPIController extends Controller
                     }
 
                     if(count($added_shipments) > 0){
-                        $serial = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->orderBy('ordering')->first();
+                        $serial = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->orderBy('ordering', 'DESC')->first();
                         $serial = $serial->ordering;
                         foreach ($added_shipments as $shipment) {
                             RiderDeliveryNoteRequestShipment::create([
