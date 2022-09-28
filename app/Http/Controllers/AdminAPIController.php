@@ -10024,6 +10024,11 @@ class AdminAPIController extends Controller
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $removed_shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
                 ->whereIn('s.tracking_number', $removed_shipments)->pluck('s.id')->toArray();
+            if($request->has("request_id")){
+                $requests_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->pluck('shipment_id')->toArray();
+                $added_shipments = array_diff($shipments, $requests_shipments);
+            }
+
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
@@ -10065,7 +10070,18 @@ class AdminAPIController extends Controller
                         ]);
                         $serial++;
                     }
-
+                    if(count($added_shipments) > 0){
+                        foreach ($added_shipments as $shipment) {
+                            DeliveryNoteShipment::create([
+                                'delivery_note_id' => $note->id,
+                                'shipment_id' => $shipment,
+                                'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
+                                'rider_information' => (in_array($shipment, $rider_informations)) ? 1 : 0,
+                                'ordering' => $serial
+                            ]);
+                            $serial++;
+                        }
+                    }
                     foreach ($valid_shipments as $shipment) {
                         if (in_array($shipment, $open_box_ids)) {
                             $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
@@ -10163,6 +10179,7 @@ class AdminAPIController extends Controller
                 if($request->has("request_id")){
                     $rider_request = RiderDeliveryNoteRequest::find($request->request_id);
                     RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $valid_shipments)->update(['status' => 1]);
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
                     RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
                     $rider_request->status = 1;
                     $rider_request->approved_by = $admin;
@@ -10389,7 +10406,7 @@ class AdminAPIController extends Controller
                     }
 
                     //rider attendance
-                    if ($rider->operation_rider_id == 1) {
+                    if ($rider->operation_rider_id == 1 && $rider->employee_id != null) {
                         EmployeeAttendanceController::riders_attendance_mark($rider_id);
                     }
                     //rider attendance end
