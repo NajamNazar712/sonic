@@ -9704,6 +9704,37 @@ else if ($id == 178) {
                     self::email($subject, $body, $to);
                 }
 
+                else if ($id == 192) {
+                    $rider_id = $reference_1_id;
+                    $shipment_id = $reference_2_id;
+
+                    $rider = Rider::find($rider_id);
+                    $shipment = DeliveryNote::find($shipment_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
+
+                    if (strpos($body, '[consignee_name]') !== FALSE) {
+                        $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
+                    }
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
+                    }
+
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                    }
+                    
+                    $to = $shipment->consignee_phone_number_1;
+                    self::sms($body, $to);
+                    if ($shipment->consignee_phone_number_2 != NULL) {
+                        $to = $shipment->consignee_phone_number_2;
+                        self::sms($body, $to);
+                    }
+                }
+
             }
         }
     }
