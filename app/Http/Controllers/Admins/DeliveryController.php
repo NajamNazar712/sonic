@@ -8618,33 +8618,52 @@ class DeliveryController extends Controller
         }
     }
 
-    public function rider_otp_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),414);
-        $settings = GlobalSettings::where('type','rider_otp');
-        if($settings->doesntExist())
-        {
-            $settings = new GlobalSettings();
-            $settings->setting_value = 1;
-            $settings->type = "rider_otp";
-            $settings->save();
-        }
-        else{
-            $settings = $settings->first();
-        }
-
-        return view('admin.otp.rider')->with(['setting'=>$settings]);
+    public function shipment_otp_index(){
+        return view('admin.otp.shipment');
     }
 
-    public function rider_otp_list(Request $request){
+    public function shipment_otp_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),415);
         }
-        $riders = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
-            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp','riders.delivery_note_otp as delivery_note_otp','riders.otp_date as delivery_note_otp_date', 'riders.last_login_attempt')
-            ->where('riders.status', 1);
 
-        $datatable = Datatables::of($riders);
+        $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
+            ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number');
+
+        $datatable = Datatables::of($otp)
+            ->addColumn('tracking_number', function ($shipments) {
+                return $shipments->tracking_number;
+            })
+
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+
+            ->addColumn('rider_name', function ($shipments) {
+                if($shipments->rider_name){
+                    return $shipments->rider_name;
+                } else{
+                    return " - ";
+                }
+            })
+            ->addColumn('generated_at', function ($shipments) {
+                if($shipments->updated_at){
+                    return Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s");
+                } else{
+                    return " - ";
+                }
+            })
+            ->addColumn('location', function ($shipments) {
+                if ($shipments->latitude && $shipments->longitude) {
+                    $location = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $shipments->latitude . ',' . $shipments->longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                } else {
+                    $location = '-';
+                }
+                return $location;
+            });
         return $datatable->make(true);
     }
 }
