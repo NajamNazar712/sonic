@@ -8630,6 +8630,7 @@ class DeliveryController extends Controller
 
         $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
             ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
+            ->where('s.amount', 0)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number');
 
         $datatable = Datatables::of($otp)
