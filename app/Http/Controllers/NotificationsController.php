@@ -9709,7 +9709,7 @@ else if ($id == 178) {
                     $shipment_id = $reference_2_id;
 
                     $rider = Rider::find($rider_id);
-                    $shipment = DeliveryNote::find($shipment_id);
+                    $shipment = Shipment::find($shipment_id);
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
 
                     if (strpos($body, '[consignee_name]') !== FALSE) {

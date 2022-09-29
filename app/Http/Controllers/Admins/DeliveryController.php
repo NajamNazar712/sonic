@@ -8617,4 +8617,34 @@ class DeliveryController extends Controller
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
     }
+
+    public function rider_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),414);
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "rider_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        return view('admin.otp.rider')->with(['setting'=>$settings]);
+    }
+
+    public function rider_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),415);
+        }
+        $riders = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
+            ->select('cities.name as city','riders.id as id', 'riders.name as name', 'riders.otp as otp', 'riders.reset_pin_otp as reset_pin_otp','riders.delivery_note_otp as delivery_note_otp','riders.otp_date as delivery_note_otp_date', 'riders.last_login_attempt')
+            ->where('riders.status', 1);
+
+        $datatable = Datatables::of($riders);
+        return $datatable->make(true);
+    }
 }
