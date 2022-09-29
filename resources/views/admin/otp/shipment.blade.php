@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Shipment OTP
+        Non-COD Shipments OTP
     </h1>
 
     <div class="card">
@@ -146,7 +146,7 @@
             buttons: [
                 {
                     extend: 'excel',
-                    title: 'Rider OTP',
+                    title: 'Non-COD Shipments OTP',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
