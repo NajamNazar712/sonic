@@ -12303,6 +12303,45 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
     }
 
+    public function generate_otp_for_consignee(Request $request){
+        $rules = [
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $shipment_id = $request->shipment_id;
+            $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today());
+            if(!$shipment_otp->exists()){
+                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
+                $otp = mt_rand(100000, 999999);
+                if($shipment_otp->exists()){
+                    $shipment_otp = $shipment_otp->first();
+                }
+                else{
+                    $shipment_otp = new ShipmentOtp();
+                    $shipment_otp->shipment_id = $shipment_id;
+                }
+                $shipment_otp->otp = $otp;
+                $shipment_otp->rider_id = $rider_id;
+                $shipment_otp->latitude = $request->latitude;
+                $shipment_otp->longitude = $request->longitude;
+                $shipment_otp->save();
+                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
+            }
+        }
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

@@ -944,15 +944,18 @@ class DeliveryController extends Controller
                     if ($notifications[$pos[0]]) {
                         $shipment_obj = Shipment::find($shipment);
                         $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        $otp = mt_rand(100000, 999999);
                         if ($shipment_otp->exists()) {
                             $shipment_otp = $shipment_otp->first();
                         } else {
-                            $otp = mt_rand(100000, 999999);
                             $shipment_otp = new ShipmentOtp();
                             $shipment_otp->shipment_id = $shipment;
-                            $shipment_otp->otp = $otp;
-                            $shipment_otp->save();
                         }
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->rider_id = null;
+                        $shipment_otp->latitude = null;
+                        $shipment_otp->longitude = null;
+                        $shipment_otp->save();
                         if ($shipment_obj->amount == 0) {
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
