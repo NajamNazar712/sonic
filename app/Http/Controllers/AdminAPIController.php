@@ -10073,7 +10073,7 @@ class AdminAPIController extends Controller
 
                     if(count($added_shipments) > 0){
                         $serial = RiderDeliveryNoteRequestShipment::where('request_note_id', $request->request_id)->orderBy('ordering', 'DESC')->first();
-                        $serial = $serial->ordering;
+                        $serial = $serial->ordering + 1;
                         foreach ($added_shipments as $shipment) {
                             RiderDeliveryNoteRequestShipment::create([
                                 'request_note_id' => $request->request_id,
@@ -10190,6 +10190,8 @@ class AdminAPIController extends Controller
                     $rider_request->approved_by = $admin;
                     $rider_request->updated_by = $admin;
                     $rider_request->approved_at = Carbon::today();
+                    $rider_request->total_cod_amount = $total_cod_amount;
+                    $rider_request->shipment_count = $shipments_count;
                     $rider_request->save();
                 }
                 //todo end
