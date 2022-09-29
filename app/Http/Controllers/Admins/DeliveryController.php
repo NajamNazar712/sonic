@@ -8619,13 +8619,14 @@ class DeliveryController extends Controller
     }
 
     public function shipment_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),608);
         return view('admin.otp.shipment');
     }
 
     public function shipment_otp_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),415);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),609);
         }
 
         $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
