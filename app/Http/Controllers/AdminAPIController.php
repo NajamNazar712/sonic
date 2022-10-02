@@ -10267,7 +10267,8 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
             $admin = $request->admin_id;
             $request_id = $request->request_note_id;
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
