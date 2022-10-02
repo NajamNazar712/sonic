@@ -2,23 +2,22 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryRelation;
-use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
@@ -27,50 +26,53 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
+use App\Http\Models\Admin\PODImage;
 use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\RiderCategoryByPass;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteLog;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\Http\Models\Admin\ShipmentOnHold;
-use App\Http\Models\DeliveryNoteRequests;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\Admin\Vigilance\VigilanceVerification;
+use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
 use App\Http\Models\BanksList;
-use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
-use App\Http\Models\ConsigneeRefusedReason;
-use App\Http\Models\Admin\AgentCallMonitoring;
-
 use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\ConsigneeRefusedReason;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\DeliveryNoteRequests;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
@@ -79,20 +81,17 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
-use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
-use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
-use App\Jobs\RCPSmsToConsignee;
+use App\Models\Rider\RiderDeliveryNoteRequest;
+use App\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -100,20 +99,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\Admin\PODImage;
-use App\Http\Models\Admin\Retail\RetailCashDeposit;
-use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\Vigilance\VigilanceVerification;
-use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
-use App\Http\Models\SelfCollectionShipment;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
 {
@@ -1105,7 +1091,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('vigilance_verification', function ($result) {
-                
+
                 if ($result->shipments_count == $result->verify_shipments_count) {
                     return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Yes</button>';
 
@@ -1117,7 +1103,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('vigilance_verification_excel', function ($result) {
-                
+
                 if ($result->shipments_count == $result->verify_shipments_count) {
                     return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
@@ -8615,5 +8601,146 @@ class DeliveryController extends Controller
         } else {
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
+    }
+
+    public function rider_request_note_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 20);
+        return view('admin.delivery.rider_request.index');
+    }
+
+    public function rider_request_note_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
+        }
+
+        $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
+            ->join('cities as c', 'c.id', '=', 'rider_delivery_note_requests.hub_id')
+            ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
+            ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
+            ->join('zones as z','c.zone_id','=','z.id')
+            ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
+            ->where('rider_delivery_note_requests.status', 0)
+            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount','rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link','z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id','rider_types.name as rt')
+            ->orderBy('rider_delivery_note_requests.id', 'DESC');
+
+
+        if (session('role_id') != 1) {
+            $delivery_note_requests = $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', session('hubs'));
+        }
+
+        $datatables = Datatables::of($delivery_note_requests)
+            ->editColumn('amount', function ($delivery_note_requests) {
+                return number_format($delivery_note_requests->amount);
+            })
+            ->addColumn('request_note_id_padded', function ($delivery_note_requests) {
+                return str_pad($delivery_note_requests->request_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
+            })
+            ->editColumn('shipments_count_link', function ($delivery_note_requests) {
+                if ($delivery_note_requests->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $delivery_note_requests->shipments_count . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('rider', function ($delivery_note_requests) {
+                    return $delivery_note_requests->rider_name;
+            })
+            ->editColumn('route', function ($delivery_note_requests) {
+                return $delivery_note_requests->code . ' (' . $delivery_note_requests->start . ' to ' . $delivery_note_requests->end . ')';
+            })
+            ->filterColumn('route', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($result) {});
+//            ->addColumn("action", function ($result) {
+//                $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
+//                $route = route('admin.delivery.receive.update', ['note' => $result->delivery_note]);
+//                $verifyStatus = route('admin.delivery.receive.status.verify', ['note' => $result->delivery_note]);
+//
+//                $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+//                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
+//                $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
+//                $print_temporary_dncc_button = '<a class="dropdown-item printTempDNCC"><i class="ft-printer primary"></i> Print Temporary DNCC</a>';
+//                $print_undelivered_performa_button = '<a class="dropdown-item printUndeliveredDNCC"><i class="ft-printer primary"></i> Print Undelivered Performa</a>';
+//                $reassign_rider_button = '<a class="dropdown-item reassign_rider"><i class="la la-edit primary"></i> Reassign Rider</a>';
+//
+//                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+//                    $dropdown = '
+//                      <div class="btn-group">
+//                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+//                        <div class="dropdown-menu dropdown-menu-sm">
+//                    ';
+//                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id' => $result->delivery_note, 'status' => 0])->get();
+//                    $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id', $result->delivery_note)->where('status', '>', 0)->exists();
+//
+//
+//                    if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+//                        if(session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)){
+//                            $dropdown .= $receive_button;
+//                        }
+//                    }
+//
+//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+//                        if (!$updatedstatusCheck) {
+//
+//                            $dropdown .= $shift_shipment_button;
+//                        }
+//                    }
+//
+//
+//                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
+//                        $dropdown .= $verify_statuses_button;
+//                    }
+//
+//                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+//                        $dropdown .= $print_temporary_dncc_button;
+//
+//                        $dropdown .= $print_undelivered_performa_button;
+//                    }
+//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+//                        if (!$updatedstatusCheck) {
+//                            $dropdown .= $reassign_rider_button;
+//                        }
+//                    }
+//
+//                    $dropdown .= '
+//                        </div>
+//                      </div>
+//                    ';
+//
+//                    return $dropdown;
+//                } else {
+//                    return '';
+//                }
+//            });
+        return $datatables->make(true);
+
+    }
+
+    public function request_note_shipments(Request $request)
+    {
+        $request_note_id = $request->input('request_note_id');
+        $request_note = RiderDeliveryNoteRequest::find($request_note_id);
+        $shipments = array();
+        if ($request_note) {
+            $shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
+                ->where('request_note_id', $request_note->id)->pluck('s.tracking_number')->toArray();
+        }
+        if (count($shipments) > 0) {
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        } else {
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+
     }
 }

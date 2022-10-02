@@ -25,6 +25,7 @@
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
+                        <th class="border-primary border-darken-1">Requested At</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -55,104 +56,6 @@
         </div>
     </div>
     <!--Shipments popup -->
-    <!--reassign popup -->
-    <div class="modal fade" id="reassign_modal" data-backdrop="static" role="dialog" aria-labelledby="reassign_modal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <form id="reassign_rider_form" class="form" nonvalidate="nonvalidate">
-                <input type="hidden" id="delivery_note_id" value="">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="reassign_modal_title">Reassign Rider</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <div class="row justify-content-center">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="operation_rider_id" id="operation_rider_id"
-                                            class="form-control select2" required>
-                                        @foreach($operation_rider_category as $category)
-                                            <option value="{{$category->id}}">{{$category->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    <div class="danger" id="operation_error" style="display:none;">This field is
-                                        required
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="rider" id="riders" class="form-control select2" required>
-
-                                    </select>
-                                    <div class="danger" id="rider_error" style="display:none;">This field is required
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="route" id="route" class="form-control select2" required>
-                                        @foreach($routes as $route)
-                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}}
-                                                to {{$route->end}})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div class="danger" id="route_error" style="display:none;">This field is required
-                                    </div>
-                                </fieldset>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="reassign_button" class="btn btn-primary" disabled>Reassign</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!--reassign popup -->
-
-    <!--otp popup -->
-    <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="OtpModal"
-         aria-hidden="true" style="top:30%;">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content col">
-                <div class="modal-header text-center">
-                    <div class="row align-items-center">
-                        <div class="col sonic_logo align-middle text-left">
-                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic"
-                                 class="d-inline-block mx-auto w-50">
-                        </div>
-
-                        <div class="col trax_logo align-middle text-right">
-                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax"
-                                 class="d-inline-block mx-auto w-50">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-body  text-center">
-                    <div class="row justify-content-center">
-                        <div class="form-group form-inline">
-                            <input type="text" class="form-control otp" autofocus id="otp_input"
-                                   placeholder="Enter Verification Code">
-                        </div>
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--otp popup -->
 
 @endsection
 
@@ -220,11 +123,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Rider',
-                width: '100%',
-                allowClear: true
-            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -233,7 +131,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.receive.list') }}',
+                        url: '{{ route('admin.delivery.rider_request.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -308,14 +206,14 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.delivery.receive.list') }}',
+                    url: '{{ route('admin.delivery.rider_request.list') }}',
                     data: function (d) {
                         d.delivery_note_number = $('#scan_delivery_note').val();
                         d.search_tracking = $('#search_tracking').val();
                     }
                 },
-                rowId: 'delivery_note_id',
-                order: [[1, 'desc']],
+                rowId: 'request_note_id',
+                order: [[9, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -327,48 +225,15 @@
                             return '';
                         }
                     },
-                    {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                    {data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification'},
-
-                    {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
+                    {data: 'request_note_id_padded', name: 'rider_delivery_note_requests.id', class: 'align-middle request_note'},
+                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {
-                        data: 'business_category',
-                        name: 'oc.business_category_id',
-                        class: 'align-middle business_category'
-                    },
-                    {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
+                    {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
-                    {
-                        data: 'shipments_count_link',
-                        name: 'delivery_notes.shipments_count',
-                        class: 'align-middle shipments_count_link text-center'
-                    },
-                    {
-                        data: 'shipments_unverified_link',
-                        name: 'shipments_unverified_count',
-                        class: 'align-middle shipments_unverified_link text-center',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'delivered_shipments',
-                        name: 'delivery_notes.delivered_shipments',
-                        class: 'align-middle delivered_shipments text-center',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
-                    {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle created_at'},
-                    {data: 'amount', name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
-                    {data: 'pending_status', name: 'pending_status', class: 'align-middle pending_status'},
-                    {
-                        data: 'last_updated_at',
-                        name: 'delivery_notes.last_updated_at',
-                        class: 'align-middle last_updated_at'
-                    },
-                    {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
+                    {data: 'shipments_count_link',name: 'delivery_notes.shipments_count',class: 'align-middle shipments_count_link text-center'},
+                    {data: 'date', name: 'rider_delivery_note_requests.created_at', class: 'align-middle date'},
+                    {data: 'amount', name: 'rider_delivery_note_requests.total_cod_amount', class: 'align-middle amount'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -378,56 +243,19 @@
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api(settings);
                     var data = api.rows({page: 'current'}).data();
-
-                    if ($('#scan_delivery_note').val() != '') {
-                        if (data.length > 0) {
-                            scan_sound(1);
-                        } else {
-                            scan_sound(2);
-                        }
-                    }
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Pending for Update</option>' +
-                        '<option value="1">Pending for Verification</option>' +
-                        '</select>';
-                    var business_drop = '<select name="business_select" id="business_select" class="select2 form-control">' +
-                        '<option value="1">Domestic</option>' +
-                        '<option value="2">International</option>' +
-                        '</select>';
-                    var vigilance_drop = '<select name="vigilance_select" id="vigilance_select" class="select2 form-control">' +
-                        '<option value="1">Yes</option>' +
-                        '<option value="2">Partial</option>' +
-                        '<option value="3">No</option>' +
-                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link')) {
                             $(td).appendTo($(search));
-                        } else if ($(header).is('.pending_status')) {
-                            $(drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.business_category')) {
-                            $(business_drop).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.vigilance_verification')) {
-                            $(vigilance_drop).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else {
+                        }  else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -437,25 +265,6 @@
                             }
                         }
                     });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#business_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Category",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $("#vigilance_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Vigilance Verification",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    
                     this.api().table().columns.adjust();
                 }
             });
@@ -468,54 +277,7 @@
                 'mask': '999999'
             });
 
-            $('#search_tracking').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function () {
-                if (this.value.length == 0 || this.value.length >= 6) {
-                    table.draw();
-                }
-            });
-
-            $('#scan_delivery_note').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function () {
-                table.draw();
-            });
-
-
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        var tab = window.open('', '_blank');
-
-                        if (!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        } else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-
-            $('body').on('click', '.printdeliverynote', function () {
+            /*$('body').on('click', '.printdeliverynote', function () {
                 var deliverynote = $(this).parents('tr').attr('id');
                 print(deliverynote);
             });
@@ -534,136 +296,8 @@
                 } else {
                     $('#otp_submit').attr('disabled', true);
                 }
-            });
+            });*/
 
-            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Category*',
-                width: '100%',
-            }).bind('select2:select', function () {
-                if (this.value) {
-                    $.ajax({
-                        url: '{!! route('admin.delivery.note.operation_riders') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'operation_rider_type': this.value,
-                        }
-                    }).done(function (data) {
-
-                        if (data.status == 1) {
-                            var html = "";
-                            $.each(data.riders, function (key, value) {
-                                if (value.trax_id)
-                                    html += `<option value="${value.id}">${value.name} - ${value.trax_id}</option>`;
-                                else
-                                    html += `<option value="${value.id}">${value.name}</option>`;
-
-                            });
-                            $('#riders').html(html);
-                            $('#riders').val('').trigger('change');
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-                }
-            });
-            $('#route').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Route*',
-                width: '100%',
-            });
-            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select Rider*',
-                width: '100%',
-            });
-            $('#riders').on('change', function () {
-                var route = $(this).find(":selected").data("id");
-                var rider_id = $(this).val();
-                if (rider_id != null) {
-                    $.ajax({
-                        url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'rider_id': rider_id,
-                        }
-                    }).done(function (data) {
-                        if (data.status == 1) {
-                            ccd_rider = parseInt(data.ccd_rider);
-                            $('#route').val(route).trigger('change');
-                            $("#reassign_button").attr('disabled', false);
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                            $("#reassign_button").attr('disabled', true);
-                        }
-                    });
-                } else {
-                    $('#route').val(route).trigger('change');
-                }
-
-            });
-
-            function printTemp(id, temp = null) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        'temporary': temp,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        var tab = window.open('', '_blank');
-
-                        if (!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        } else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-
-            function printUndelivered(id) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        var tab = window.open('', '_blank');
-
-                        if (!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        } else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
 
             var route = '{!! route('admin.tracking.index') !!}';
 
@@ -673,11 +307,11 @@
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipments') !!}',
+                    url: '{!! route('admin.delivery.rider_request.shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'request_note_id': id
                     }
                 })
                     .done(function (data) {
@@ -693,121 +327,6 @@
                         }
                     });
 
-            });
-
-            $('#datatable tbody').on('click', 'tr td.vigilance_verification button.verified_count', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
-
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipments_verified') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
-                    }
-                })
-                    .done(function (data) {
-                        if (data) {
-                            var html = '';
-
-                            if (data.shipments) {
-                                $.each(data.shipments, function (index, tracking_number) {
-                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
-
-            });
-
-            $('#datatable tbody').on('click', 'tr td.vigilance_verification button.partial_count', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
-
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipment_partial') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
-                    }
-                })
-                    .done(function (data) {
-                        if (data) {
-                            var html = '';
-                            console.log(data);
-                            if (data.shipments) {
-                                $.each(data.shipments, function (index, tracking_number) {
-                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
-
-            });
-
-
-            $('body').on('click', '.reassign_rider', function () {
-                var note_id = $(this).parents('tr').attr('id');
-                $('#delivery_note_id').val(note_id);
-                $('#reassign_modal').modal('show');
-            });
-            // $('#scan_delivery_note').on('change', function () {
-            //     var count = table.rows().count();
-            //     if(count > 0){
-            //         scan_sound(1);
-            //     }else{
-            //         scan_sound(2);
-            //     }
-            // });
-            {{--$('#scan_tracking').on('change',function () {--}}
-            {{--var scan = $(this);--}}
-            {{--var tracking = $(this).val();--}}
-            {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-            {{--if(numberRegex.test(tracking)) {--}}
-
-            {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-            {{--url = url.replace('id',tracking);--}}
-
-            {{--window.location.href = url;--}}
-            {{--}else{--}}
-            {{--scan.val('');--}}
-            {{--}--}}
-            {{--});--}}
-
-            $('#reassign_button').on('click', function () {
-                var operation_id = $('#operation_rider_id').val();
-                var route = $('#route').val();
-                var rider = $('#riders').val();
-                var errors = 0;
-                if (rider !== '' && rider !== null) {
-                    $('#rider_error').css('display', 'none');
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#rider_error').css('display', 'block');
-                }
-                if (route !== '' && route !== null) {
-                    $('#route_error').css('display', 'none');
-                } else {
-                    var error = "Route not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#route_error').css('display', 'block');
-                }
-                if (errors == 0) {
-                    if (operation_id === '2') {
-                        reassign_rider();
-                    } else {
-                        otp_generation();
-                    }
-                }
             });
 
             $('#otp_submit').on('click', function () {
@@ -932,19 +451,6 @@
                 }
 
             }
-
-            $('#reassign_modal').on('hide.bs.modal', function (e) {
-                $('#reassign_rider_form')[0].reset();
-                $("#reassign_button").attr('disabled', true);
-                $('#riders').html("");
-                $('#operation_rider_id').val('').trigger('change');
-                $('#route').val('').trigger('change');
-                $('#rider_error').css('display', 'none');
-                $('#route_error').css('display', 'none');
-                $('#delivery_note_id').val('');
-                $('#otp_input').val('');
-                $('#OtpModal').modal('hide');
-            });
 
         });
     </script>

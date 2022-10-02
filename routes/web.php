@@ -1450,6 +1450,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
+
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
+            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
+        });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
