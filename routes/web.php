@@ -1452,8 +1452,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rider_request')->name('rider_request.')->group(function () {
-            Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
-            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::get('','Admins\DeliveryController@rider_request_note_index')->name('index');
+            Route::get('list','Admins\DeliveryController@rider_request_note_list')->name('list');
             Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
         });
 
