@@ -1457,6 +1457,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
             Route::get('{id}/approve','Admins\DeliveryController@request_note_approve')->name('approve');
             Route::get('{id}/reject','Admins\DeliveryController@request_note_reject')->name('reject');
+            Route::get('{id}/update','Admins\DeliveryController@request_note_update')->name('update');
         });
 
     });

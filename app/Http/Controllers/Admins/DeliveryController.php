@@ -8665,47 +8665,19 @@ class DeliveryController extends Controller
             ->addColumn("action", function ($result) {
                 $approveRoute = route('admin.delivery.rider_request.approve', ['id' => $result->request_note_id]);
                 $rejectRoute = route('admin.delivery.rider_request.reject', ['id' => $result->request_note_id]);
+                $editShipmentRoute = route('admin.delivery.rider_request.update', ['id' => $result->request_note_id]);
                 $approveButton = '<a href="' . $approveRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-check-circle primary"></i> Approve</a>';
                 $rejectButton = '<a href="' . $rejectRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-minus-circle primary"></i> Reject</a>';
+                $editShipmentButton = '<a href="' . $editShipmentRoute . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-edit primary"></i> Edit</a>';
                 if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
-
                     $dropdown .= $approveButton;
                     $dropdown .= $rejectButton;
-
-                    /*if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        if(session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)){
-                            $dropdown .= $receive_button;
-                        }
-                    }
-
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
-                        if (!$updatedstatusCheck) {
-
-                            $dropdown .= $shift_shipment_button;
-                        }
-                    }
-
-
-                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
-                        $dropdown .= $verify_statuses_button;
-                    }
-
-                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        $dropdown .= $print_temporary_dncc_button;
-
-                        $dropdown .= $print_undelivered_performa_button;
-                    }
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
-                        if (!$updatedstatusCheck) {
-                            $dropdown .= $reassign_rider_button;
-                        }
-                    }*/
-
+                    $dropdown .= $editShipmentButton;
                     $dropdown .= '
                         </div>
                       </div>
@@ -8716,67 +8688,6 @@ class DeliveryController extends Controller
                     return '';
                 }
             });
-//            ->addColumn("action", function ($result) {
-//                $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
-//                $route = route('admin.delivery.receive.update', ['note' => $result->delivery_note]);
-//                $verifyStatus = route('admin.delivery.receive.status.verify', ['note' => $result->delivery_note]);
-//
-//                $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
-//                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
-//                $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
-//                $print_temporary_dncc_button = '<a class="dropdown-item printTempDNCC"><i class="ft-printer primary"></i> Print Temporary DNCC</a>';
-//                $print_undelivered_performa_button = '<a class="dropdown-item printUndeliveredDNCC"><i class="ft-printer primary"></i> Print Undelivered Performa</a>';
-//                $reassign_rider_button = '<a class="dropdown-item reassign_rider"><i class="la la-edit primary"></i> Reassign Rider</a>';
-//
-//                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
-//                    $dropdown = '
-//                      <div class="btn-group">
-//                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-//                        <div class="dropdown-menu dropdown-menu-sm">
-//                    ';
-//                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id' => $result->delivery_note, 'status' => 0])->get();
-//                    $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id', $result->delivery_note)->where('status', '>', 0)->exists();
-//
-//
-//                    if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-//                        if(session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)){
-//                            $dropdown .= $receive_button;
-//                        }
-//                    }
-//
-//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
-//                        if (!$updatedstatusCheck) {
-//
-//                            $dropdown .= $shift_shipment_button;
-//                        }
-//                    }
-//
-//
-//                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
-//                        $dropdown .= $verify_statuses_button;
-//                    }
-//
-//                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-//                        $dropdown .= $print_temporary_dncc_button;
-//
-//                        $dropdown .= $print_undelivered_performa_button;
-//                    }
-//                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
-//                        if (!$updatedstatusCheck) {
-//                            $dropdown .= $reassign_rider_button;
-//                        }
-//                    }
-//
-//                    $dropdown .= '
-//                        </div>
-//                      </div>
-//                    ';
-//
-//                    return $dropdown;
-//                } else {
-//                    return '';
-//                }
-//            });
         return $datatables->make(true);
 
     }
@@ -8926,6 +8837,9 @@ class DeliveryController extends Controller
                                 $shipment_otp->shipment_id = $shipment;
                             }
                             $shipment_otp->otp = $otp;
+                            $shipment_otp->rider_id = null;
+                            $shipment_otp->latitude = null;
+                            $shipment_otp->longitude = null;
                             $shipment_otp->save();
                             if ($shipment_obj->amount == 0) {
                                 //English
@@ -8988,6 +8902,11 @@ class DeliveryController extends Controller
         return redirect()->back()->with('error', 'Invalid Request ID');
     }
 
+    public function request_note_update(Request $request, $id)
+    {
+        $service_type = BookingType::all();
+        return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+    }
 
     public function shipment_otp_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),608);
