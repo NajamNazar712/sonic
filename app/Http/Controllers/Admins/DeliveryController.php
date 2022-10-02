@@ -729,8 +729,6 @@ class DeliveryController extends Controller
         }
     }
 
-
-
     public function get_piece_details(Request $request)
     {
         $shipment_id = $request->shipment_id;
@@ -770,7 +768,7 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
-        
+
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -863,14 +861,17 @@ class DeliveryController extends Controller
                 }
                 $serial = 1;
                 foreach ($valid_shipments as $index => $shipment) {
-                    DeliveryNoteShipment::create([
-                        'delivery_note_id' => $note->id,
-                        'shipment_id' => $shipment,
-                        'notification' => $notifications[$index],
-                        'rider_information' => $rider_informations[$index],
-                        'ordering' => $serial
-                    ]);
-                    $serial++;
+                        $pos = array_keys($shipments, $shipment);
+                        DeliveryNoteShipment::create([
+                            'delivery_note_id' => $note->id,
+                            'shipment_id' => $shipment,
+                            'notification' => $notifications[$pos[0]],
+                            'rider_information' => $rider_informations[$pos[0]],
+                            'ordering' => $serial
+                        ]);
+                        $serial++;
+
+
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -925,19 +926,22 @@ class DeliveryController extends Controller
                 foreach ($valid_shipments as $index => $shipment) {
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
-
-                    if ($notifications[$index]) {
+                    $pos = array_keys($shipments, $shipment);
+                    if ($notifications[$pos[0]]) {
                         $shipment_obj = Shipment::find($shipment);
                         $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        $otp = mt_rand(100000, 999999);
                         if ($shipment_otp->exists()) {
                             $shipment_otp = $shipment_otp->first();
                         } else {
-                            $otp = mt_rand(100000, 999999);
                             $shipment_otp = new ShipmentOtp();
                             $shipment_otp->shipment_id = $shipment;
-                            $shipment_otp->otp = $otp;
-                            $shipment_otp->save();
                         }
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->rider_id = null;
+                        $shipment_otp->latitude = null;
+                        $shipment_otp->longitude = null;
+                        $shipment_otp->save();
                         if ($shipment_obj->amount == 0) {
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
@@ -1094,8 +1098,6 @@ class DeliveryController extends Controller
 
                 if ($result->shipments_count == $result->verify_shipments_count) {
                     return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Yes</button>';
-
-                    return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle partial_count">Partial</button>';
                 }else{
@@ -1108,7 +1110,6 @@ class DeliveryController extends Controller
                     return 'Yes';
                 } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
                     return 'Partial';
-
                 }else{
                     return 'No';
                 }
@@ -8985,5 +8986,57 @@ class DeliveryController extends Controller
             return redirect()->back()->with('success', 'Delivery Note Creation Request is Rejected Successfully');
         }
         return redirect()->back()->with('error', 'Invalid Request ID');
+    }
+
+
+    public function shipment_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),608);
+        return view('admin.otp.shipment');
+    }
+
+    public function shipment_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),609);
+        }
+
+        $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
+            ->where('s.amount', 0)
+            ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number');
+
+        $datatable = Datatables::of($otp)
+            ->addColumn('tracking_number', function ($shipments) {
+                return $shipments->tracking_number;
+            })
+
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+
+            ->addColumn('rider_name', function ($shipments) {
+                if($shipments->rider_name){
+                    return $shipments->rider_name;
+                } else{
+                    return " - ";
+                }
+            })
+            ->addColumn('generated_at', function ($shipments) {
+                if($shipments->updated_at){
+                    return Carbon::parse($shipments->updated_at)->format("Y-m-d H:i:s");
+                } else{
+                    return " - ";
+                }
+            })
+            ->addColumn('location', function ($shipments) {
+                if ($shipments->latitude && $shipments->longitude) {
+                    $location = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $shipments->latitude . ',' . $shipments->longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                } else {
+                    $location = '-';
+                }
+                return $location;
+            });
+        return $datatable->make(true);
     }
 }

@@ -1184,7 +1184,10 @@ class Permission
             'rider_otp.list' => 563,
 
             'rider_otp.update' => 721,
-            
+
+            'shipment_otp.index' => 815,
+            'shipment_otp.list' => 815,
+
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
             
@@ -1283,6 +1286,10 @@ class Permission
             'user_management.roles.permissions.index' => 789,
             'crm.bulk_claim.index' => 795,
 
+            'international.wholesale.accounts.index' => 799,
+
+            'international.wholesale.excel.index' => 804,
+            'international.wholesale.invoices.index' => 807,
 
         ],
 

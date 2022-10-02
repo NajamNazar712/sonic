@@ -524,7 +524,7 @@
                             $('#rider_name').val('').trigger('change');
                             $('#operation_rider_type_id').val(id);
                             $('#operation_rider_type').attr('disabled',true);
-                            console.log(id);
+
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -1182,7 +1182,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                            console.log($('#create_delivery_note_form input#selected_rider_id').val());
+
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
                                                 $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);

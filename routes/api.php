@@ -50,7 +50,7 @@ Route::name('api.')->group(function () {
             Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
-
+            Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
@@ -193,6 +193,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
+                Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
