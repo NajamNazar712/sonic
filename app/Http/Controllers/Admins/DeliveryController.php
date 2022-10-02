@@ -8797,10 +8797,20 @@ class DeliveryController extends Controller
 
     }
 
-    public function request_note_approve(Request $request){
+    public function request_note_approve(Request $request, $id){
         dd($request);
     }
-    public function request_note_reject(Request $request){
-        dd($request);
+
+    public function request_note_reject(Request $request, $id){
+        $delivery_request = RiderDeliveryNoteRequest::find($id);
+        if($delivery_request){
+            $delivery_request->status = 2;
+            $delivery_request->updated_by = Auth::id();
+            $delivery_request->save();
+            RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)
+                ->update(['status' => 2]);
+            return redirect()->back()->with('success', 'Delivery Note Creation Request is Rejected Successfully');
+        }
+        return redirect()->back()->with('error', 'Invalid Request ID');
     }
 }

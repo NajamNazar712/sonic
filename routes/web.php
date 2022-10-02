@@ -1455,8 +1455,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\DeliveryController@rider_request_note_index')->name('index');
             Route::get('list','Admins\DeliveryController@rider_request_note_list')->name('list');
             Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
-            Route::post('approve','Admins\DeliveryController@request_note_approve')->name('approve');
-            Route::post('reject','Admins\DeliveryController@request_note_reject')->name('reject');
+            Route::get('{id}/approve','Admins\DeliveryController@request_note_approve')->name('approve');
+            Route::get('{id}/reject','Admins\DeliveryController@request_note_reject')->name('reject');
         });
 
     });
