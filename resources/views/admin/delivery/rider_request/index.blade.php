@@ -230,10 +230,10 @@
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
-                    {data: 'route', name: 'route', class: 'align-middle route'},
-                    {data: 'shipments_count_link',name: 'delivery_notes.shipments_count',class: 'align-middle shipments_count_link text-center'},
-                    {data: 'date', name: 'rider_delivery_note_requests.created_at', class: 'align-middle date'},
+                    {data: 'route', name: 'route', class: 'align-middle route', orderable: false},
+                    {data: 'shipments_count_link',name: 'delivery_notes.shipments_count',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
                     {data: 'amount', name: 'rider_delivery_note_requests.total_cod_amount', class: 'align-middle amount'},
+                    {data: 'date', name: 'rider_delivery_note_requests.created_at', class: 'align-middle date'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -253,7 +253,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_count_link')) {
                             $(td).appendTo($(search));
                         }  else {
                             var current = $(input).appendTo($(search)).on('change', function () {

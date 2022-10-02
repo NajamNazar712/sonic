@@ -8661,7 +8661,60 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn("action", function ($result) {});
+            ->addColumn("action", function ($result) {
+                $approveRoute = route('admin.delivery.rider_request.approve', ['id' => $result->request_note_id]);
+                $rejectRoute = route('admin.delivery.rider_request.reject', ['id' => $result->request_note_id]);
+                $approveButton = '<a href="' . $approveRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-check-circle primary"></i> Approve</a>';
+                $rejectButton = '<a href="' . $rejectRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-minus-circle primary"></i> Reject</a>';
+                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    $dropdown .= $approveButton;
+                    $dropdown .= $rejectButton;
+
+                    /*if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                        if(session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)){
+                            $dropdown .= $receive_button;
+                        }
+                    }
+
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+                        if (!$updatedstatusCheck) {
+
+                            $dropdown .= $shift_shipment_button;
+                        }
+                    }
+
+
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
+                        $dropdown .= $verify_statuses_button;
+                    }
+
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                        $dropdown .= $print_temporary_dncc_button;
+
+                        $dropdown .= $print_undelivered_performa_button;
+                    }
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 15) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+                        if (!$updatedstatusCheck) {
+                            $dropdown .= $reassign_rider_button;
+                        }
+                    }*/
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
 //            ->addColumn("action", function ($result) {
 //                $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
 //                $route = route('admin.delivery.receive.update', ['note' => $result->delivery_note]);
@@ -8742,5 +8795,12 @@ class DeliveryController extends Controller
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
 
+    }
+
+    public function request_note_approve(Request $request){
+        dd($request);
+    }
+    public function request_note_reject(Request $request){
+        dd($request);
     }
 }
