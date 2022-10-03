@@ -889,9 +889,11 @@
 
                                                     }
                                                     else if(data.negative_shipper.length > 0) {
+                                                        alert(data.negative_shipper);
                                                         $.each(data.negative_shipper, function (index, tracking_number) {
                                                             tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                         });
+
                                                         var html = '<p>Following Shipment(s) Can not marked as "Return Unsuccessful for CX and Sales"</p><br>';
                                                         html += tracking_numbers;
                                                         content = document.createElement('div');
