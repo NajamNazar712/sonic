@@ -8699,7 +8699,7 @@ class DeliveryController extends Controller
         $shipments = array();
         if ($request_note) {
             $shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
-                ->where('request_note_id', $request_note->id)->pluck('s.tracking_number')->toArray();
+                ->where('request_note_id', $request_note->id)->whereIn('rider_delivery_note_request_shipments.status', [0, 4])->pluck('s.tracking_number')->toArray();
         }
         if (count($shipments) > 0) {
             return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
