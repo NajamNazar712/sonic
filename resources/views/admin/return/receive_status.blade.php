@@ -889,8 +889,7 @@
                                                         });
 
                                                     }
-                                                    else if(data.negative_shipper) {
-                                                        alert(data.negative_shipper);
+                                                    else if(data.negative_shipper.length > 0) {
                                                         $.each(data.negative_shipper, function (index, tracking_number) {
                                                             tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                         });

@@ -2838,9 +2838,13 @@ class ReturnController extends Controller
                 $response = ['status'=> 2, 'success' => 'Return Note Status Has Been Updated'];
                 if(count($reason_mandatory_shipments) > 0){
                     $response['reason_mandatory_shipments'] = $reason_mandatory_shipments;
+                }else{
+                    $response['reason_mandatory_shipments'] = [];
                 }
                 if(count($negative_shipper) > 0){
                     $response['negative_shipper'] = $negative_shipper;
+                }else{
+                    $response['negative_shipper'] = [];
                 }
 
                 if(count($negative_shipper) > 0 || count($reason_mandatory_shipments) > 0){
