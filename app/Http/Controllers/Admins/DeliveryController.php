@@ -9004,13 +9004,13 @@ class DeliveryController extends Controller
                     if ($delivery) {
                         if ($shipment->status == 0) {
                             $shipment->status = 5;
+                            $shipment->save();
                         } else {
                             RiderDeliveryNoteRequestShipment::where('shipment_id', $request->shipment_id)->where('request_note_id', $request->request_note_id)->delete();
                         }
                         $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
                         $delivery->shipment_count = $delivery->shipment_count - 1;
                         $delivery->updated_by = Auth::id();
-                        $shipment->save();
                         $delivery->save();
                     }
                 }
