@@ -23,8 +23,8 @@
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
                                                 <select name="admin_role[]" id="admin_role_select" class="form-control select2" multiple="multiple">
-                                                    @foreach($admin_roles as $admin_role)
-                                                        <option value="{{$admin_role->id}}">{{$admin_role->name}}</option>
+                                                    @foreach($admins as $admin_role)
+                                                        <option value="{{$admin_role->id}}">{{$admin_role->name}} | {{$admin_role->d_name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>

@@ -5765,7 +5765,7 @@ public function sales_incentive()
         })
         ->filterColumn('z.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball zones\b/',$keyword)) {
+            if (preg_match('/\ball zones\b/',$keyword) || preg_match('/\bAll Zones\b/',$keyword)) {
                 $query->where('lead_taggings.zone_id', 0);
             } else {
                 $query->where('z.name', 'like', '%' . $keyword . '%');
@@ -5773,7 +5773,7 @@ public function sales_incentive()
         })
         ->filterColumn('c.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball cities\b/',$keyword)) {
+            if (preg_match('/\ball cities\b/',$keyword) || preg_match('/\bAll Cities\b/',$keyword)) {
                 $query->where('lead_taggings.city_id', 0);
             } else {
                 $query->where('c.name', 'like', '%' . $keyword . '%');
@@ -5781,7 +5781,7 @@ public function sales_incentive()
         })
         ->filterColumn('t.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball territories\b/',$keyword)) {
+            if (preg_match('/\ball territories\b/',$keyword) || preg_match('/\bAll Territories\b/',$keyword)) {
                 $query->where('lead_taggings.territory_id', 0);
             } else {
                 $query->where('t.name', 'like', '%' . $keyword . '%');
@@ -6396,15 +6396,18 @@ public function sales_incentive()
     public function cn_print_right()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
-        $admin_roles_id = AdminRole::all();
-//        dd($admin_roles);
+
+        $admins = AdminRole::leftjoin('admin_departments as ad','ad.id','=','admin_roles.department_id')
+        ->where('ad.id','!=',1)
+        ->select('admin_roles.id as id','admin_roles.name as name','ad.id as d_id','ad.name as d_name')
+        ->get();
+
         $settings = GlobalSettings::where('type', 'cn_print_rights');
-        $foc_account_tags = array();
         if ($settings->exists()) {
             $settings = $settings->first();
             $admin_roles = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles_id,'existing_admin_roles'=> $admin_roles ]);
+        return view('admin.settings.cn_print_right')->with(['admins' => $admins,'existing_admin_roles'=> $admin_roles]);
     }
     public function cn_print_right_store(Request $request)
     {
