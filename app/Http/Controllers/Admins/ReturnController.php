@@ -2284,7 +2284,7 @@ class ReturnController extends Controller
         $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
-            ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
+            ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
             ->where('st.status', 0)
             ->groupBy('u.id')
             ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
