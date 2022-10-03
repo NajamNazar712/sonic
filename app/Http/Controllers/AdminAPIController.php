@@ -9111,7 +9111,7 @@ class AdminAPIController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if (in_array($shipment->user_id, $negative) && $shipment_status == 60) {
-                        array_push($shipment->tracking_number, $negative_shipper);
+                        array_push($negative_shipper, $shipment->tracking_number);
                     } else {
                         $shipment->shipper_status_id = $shipment_status;
                         $shipment->save();
