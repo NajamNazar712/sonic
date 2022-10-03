@@ -8987,12 +8987,10 @@ class DeliveryController extends Controller
         $shipments = $request->shipment_ids;
         $request_note_id = $request->request_note_id;
         if ($request_note_id) {
-            dd(1);
             foreach ($shipments as $shipment_id) {
                 $shipment = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')->where('rider_delivery_note_request_shipments.shipment_id', $shipment_id)->where('rider_delivery_note_request_shipments.request_note_id', $request->request_note_id)
                     ->select('rider_delivery_note_request_shipments.*', 's.amount as cod');
                 if ($shipment->exists()) {
-                    dd(2);
                     $shipment = $shipment->first();
                     $request_note = $request->request_note_id;
                     $delivery = RiderDeliveryNoteRequest::find($request_note);
@@ -9011,7 +9009,6 @@ class DeliveryController extends Controller
             }
             return ['status' => 0, 'success' => 'Shipments are successfully removed'];
         } else {
-            dd(3);
             return ['status' => 1, 'error' => 'Something went wrong'];
         }
     }
