@@ -8631,8 +8631,13 @@ class DeliveryController extends Controller
 
         $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
             ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
+            ->join('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->where('s.amount', 0)
-            ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number');
+            ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id');
+
+        if (session('role_id') != 1){
+            $otp = $otp->whereIn('dc.hub_id', session('hubs'));
+        }
 
         $datatable = Datatables::of($otp)
             ->addColumn('tracking_number', function ($shipments) {
