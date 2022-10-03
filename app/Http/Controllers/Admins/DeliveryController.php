@@ -8944,6 +8944,7 @@ class DeliveryController extends Controller
 
     public function request_note_remove(Request $request)
     {
+        dd($request);
         $shipment = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')->where('rider_delivery_note_request_shipments.shipment_id', $request->shipment_id)->where('rider_delivery_note_request_shipments.request_note_id', $request->request_note_id)
             ->select('rider_delivery_note_request_shipments.*', 's.amount as cod');
         if ($shipment->exists()) {
@@ -8996,6 +8997,77 @@ class DeliveryController extends Controller
         } else {
             return ['status' => 1, 'error' => 'Something went wrong'];
         }
+    }
+
+    public function add_shipments_in_request_note(Request $request)
+    {
+
+        $shipment_id = $request->shipment_id;
+        $delivery_note_id = $request->delivery_note_id;
+        $shipment = Shipment::find($shipment_id);
+        $serial = '';
+        if ($shipment) {
+            $delivery_note = DeliveryNote::find($delivery_note_id);
+            if ($delivery_note) {
+                if($delivery_note->status == 4){
+                    return response()->json(['status' => 1, 'error' => 'Delivery note is cancelled, all shipments removed!']);
+                }
+                $rider = $delivery_note->rider;
+                if ($shipment->payment_mode_id == 2 && $rider->ccd == 0) {
+                    return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                }
+
+                if (DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment->id)->exists()) {
+                    return response()->json(['status' => 1, 'error' => 'Shipment is already in this delivery note!']);
+                }
+                $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();
+
+                $cod_amount = $delivery_note->total_cod_amount;
+                $total_cod_amount = $cod_amount + $shipment->amount;
+                $delivery_note->shipments_count = $total_shipments + 1;
+                $delivery_note->total_cod_amount = $total_cod_amount;
+                $delivery_note->save();
+
+                if ($delivery_note->ordering == 1) {
+                    $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering', 'desc')->first();
+                    $serial = $serial->ordering;
+                }
+                $serial++;
+
+                $delivery_note_shipment = new DeliveryNoteShipment();
+                $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+                $delivery_note_shipment->shipment_id = $shipment->id;
+                $delivery_note_shipment->ordering = $serial;
+                $delivery_note_shipment->save();
+
+                $shipment->shipper_status_id = 5;
+                $shipment->consignee_status_id = 5;
+                $shipment->save();
+                ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
+
+                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+                if (!$shipment_otp->exists()) {
+                    $otp = mt_rand(100000, 999999);
+                    $shipment_otp = new ShipmentOtp();
+                    $shipment_otp->shipment_id = $shipment->id;
+                    $shipment_otp->otp = $otp;
+                    $shipment_otp->save();
+                }
+                if ($shipment->amount == 0) {
+                    //English
+                    NotificationsController::send(132, $delivery_note_id, $shipment->id);
+                    //Urdu
+                    NotificationsController::send(135, $delivery_note_id, $shipment->id);
+                } else {
+                    NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                }
+
+                return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+            }
+        } else {
+            return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
+        }
+
     }
 
     public function shipment_otp_index(){
