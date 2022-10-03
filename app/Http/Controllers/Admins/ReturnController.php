@@ -2288,7 +2288,6 @@ class ReturnController extends Controller
             ->where('st.status', 0)
             ->groupBy('u.id')
             ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
-        dd($negative);
 
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
             ->join('shipments','shipments.id','=','dns.shipment_id')
