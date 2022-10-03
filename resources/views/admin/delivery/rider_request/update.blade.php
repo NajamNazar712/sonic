@@ -1,10 +1,10 @@
 
 @extends('admin.layout.master')
-@section('title','Update Receive Deliveries')
+@section('title','Update Request Deliveries')
 
 @section('content')
     <h1 class="mb-1">
-        Update Receive Deliveries
+        Update Request Deliveries
     </h1>
 
     <div class="card">

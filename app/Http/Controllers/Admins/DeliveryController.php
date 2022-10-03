@@ -8606,14 +8606,14 @@ class DeliveryController extends Controller
 
     public function rider_request_note_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 20);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 610);
         return view('admin.delivery.rider_request.index');
     }
 
     public function rider_request_note_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 611);
         }
 
         $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
@@ -8681,15 +8681,21 @@ class DeliveryController extends Controller
                 $approveButton = '<a href="' . $approveRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-check-circle primary"></i> Approve</a>';
                 $rejectButton = '<a href="' . $rejectRoute . '" class="dropdown-item" data-target-id="' . $result->request_note_id . '" class=""><i class="ft-minus-circle primary"></i> Reject</a>';
                 $editShipmentButton = '<a href="' . $editShipmentRoute . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-edit primary"></i> Edit</a>';
-                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([816, 817, 818], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
-                    $dropdown .= $approveButton;
-                    $dropdown .= $rejectButton;
-                    $dropdown .= $editShipmentButton;
+                    if (session('role_id') == 1 || in_array(816, session('permissions'))){
+                        $dropdown .= $approveButton;
+                    }
+                    if (session('role_id') == 1 || in_array(817, session('permissions'))){
+                        $dropdown .= $rejectButton;
+                    }
+                    if (session('role_id') == 1 || in_array(818, session('permissions'))){
+                        $dropdown .= $editShipmentButton;
+                    }
                     $dropdown .= '
                         </div>
                       </div>
