@@ -5765,7 +5765,7 @@ public function sales_incentive()
         })
         ->filterColumn('z.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball zones\b/',$keyword)) {
+            if (preg_match('/\ball zones\b/',$keyword) || preg_match('/\bAll Zones\b/',$keyword)) {
                 $query->where('lead_taggings.zone_id', 0);
             } else {
                 $query->where('z.name', 'like', '%' . $keyword . '%');
@@ -5773,7 +5773,7 @@ public function sales_incentive()
         })
         ->filterColumn('c.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball cities\b/',$keyword)) {
+            if (preg_match('/\ball cities\b/',$keyword) || preg_match('/\bAll Cities\b/',$keyword)) {
                 $query->where('lead_taggings.city_id', 0);
             } else {
                 $query->where('c.name', 'like', '%' . $keyword . '%');
@@ -5781,7 +5781,7 @@ public function sales_incentive()
         })
         ->filterColumn('t.name', function ($query, $keyword) {
             
-            if (preg_match('/\ball territories\b/',$keyword)) {
+            if (preg_match('/\ball territories\b/',$keyword) || preg_match('/\bAll Territories\b/',$keyword)) {
                 $query->where('lead_taggings.territory_id', 0);
             } else {
                 $query->where('t.name', 'like', '%' . $keyword . '%');
