@@ -2383,12 +2383,12 @@ class ReturnController extends Controller
                 }else{
                     if(in_array($deliveries->booking_type_id,[1,4,5])){
                         $where = array(24,47,48);
-                        if(!in_array($negative, $deliveries->user_id)){
+                        if(!in_array($deliveries->user_id, $negative)){
                             $where[] = 60;
                         }
                     }else if($deliveries->booking_type_id == 2){
                         $where = array(47, 48);
-                        if(in_array(!$negative, $deliveries->user_id)){
+                        if(!in_array($deliveries->user_id, $negative)){
                             $where[] = 60;
                         }
 
@@ -2401,7 +2401,7 @@ class ReturnController extends Controller
 
                     }else if($deliveries->booking_type_id == 3){
                         $where = array(35,47,48);
-                        if(!in_array($negative, $deliveries->user_id)){
+                        if(!in_array($deliveries->user_id, $negative)){
                             $where[] = 60;
                         }
                     }
@@ -2797,7 +2797,7 @@ class ReturnController extends Controller
                 $negative_shipper = array();
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
-                    if (in_array($negative, $shipment->user_id) && $shipment_status == 60) {
+                    if (in_array($shipment->user_id, $negative) && $shipment_status == 60) {
                         array_push($negative_shipper, $shipment->tracking_number);
                     }
                     else{
