@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Receive Deliveries')
+@section('title','Pending Delivery Note Requests')
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries
+        Pending Delivery Note Requests
     </h1>
 
     <div class="card">
@@ -26,6 +26,8 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
                         <th class="border-primary border-darken-1">Requested At</th>
+                        <th class="border-primary border-darken-1">Last Updated By</th>
+                        <th class="border-primary border-darken-1">Last Updated At</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -131,54 +133,41 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.rider_request.list') }}',
-                        data: params,
                         success: function (result) {
                             head = [];
 
                             head.push('S.No');
-                            head.push('Delivery Note No.');
-                            head.push('Vigilance Verification');
+                            head.push('Request Note No.');
                             head.push('Hub');
                             head.push('Zone');
-                            head.push('Business Category');
                             head.push('Rider');
                             head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('No. Of Pending Shipments');
-                            head.push('No. Of Delivered Shipments');
-                            head.push('Assigned By');
-                            head.push('Assigned Date');
                             head.push('Total COD');
-                            head.push('Status');
-                            head.push('Last Updated (Date)');
+                            head.push('Requested At');
                             head.push('Last Updated By');
+                            head.push('Last Updated (Date)');
+
                             $.each(result.data, function (index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id_padded);
-                                row.push(values.vigilance_verification_excel);
+                                row.push(values.request_note_id_padded);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
-                                row.push(values.business_category);
                                 row.push(values.rider);
                                 row.push(values.rt);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
-                                row.push(values.shipments_unverified_count);
-                                row.push(values.delivered_shipments);
-                                row.push(values.assignee);
-                                row.push(values.created_at);
                                 row.push(values.amount);
-                                row.push(values.pending_status);
-                                row.push(values.last_updated_at);
-                                row.push(values.updated_by);
+                                row.push(values.date);
+                                row.push(values.admin_name);
+                                row.push(values.updated_at);
                                 body.push(row);
                             });
                         },
+                        url: '{{ route('admin.delivery.rider_request.list') }}',
+                        data: params,
                         async: false
                     });
 
@@ -192,7 +181,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Receive Deliveries',
+                        title: 'Pending Delivery Note Requests',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
@@ -234,6 +223,8 @@
                     {data: 'shipments_count_link',name: 'delivery_notes.shipments_count',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
                     {data: 'amount', name: 'rider_delivery_note_requests.total_cod_amount', class: 'align-middle amount'},
                     {data: 'date', name: 'rider_delivery_note_requests.created_at', class: 'align-middle date'},
+                    {data: 'admin_name', name: 'ad.name', class: 'align-middle admin_name'},
+                    {data: 'updated_at', name: 'rider_delivery_note_requests.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {

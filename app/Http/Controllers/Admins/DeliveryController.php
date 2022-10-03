@@ -8619,11 +8619,12 @@ class DeliveryController extends Controller
         $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
             ->join('cities as c', 'c.id', '=', 'rider_delivery_note_requests.hub_id')
             ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
+            ->join('admins as ad', 'ad.id', '=', 'rider_delivery_note_requests.updated_by')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z','c.zone_id','=','z.id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
             ->where('rider_delivery_note_requests.status', 0)
-            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount','rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link','z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id','rider_types.name as rt')
+            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount','rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link','z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id','rider_types.name as rt', 'ad.name as admin_name', 'rider_delivery_note_requests.updated_at as updated_at')
             ->orderBy('rider_delivery_note_requests.id', 'DESC');
 
 
@@ -8643,7 +8644,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('shipments_count_link', function ($delivery_note_requests) {
                 if ($delivery_note_requests->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $delivery_note_requests->shipments_count . '</button>';
+                    $shipment_count = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_note_requests->id)
+                        ->whereIn('status', [0, 4])->count();
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment_count . '</button>';
                 } else {
                     return 0;
                 }
