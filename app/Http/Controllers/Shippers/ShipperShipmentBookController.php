@@ -2464,7 +2464,7 @@ class ShipperShipmentBookController extends Controller
             $role_ids = explode(',', $ids);
 
             if (in_array(session('role_id'),$role_ids)) {
-                return response()->json(['status' => '2', 'error' => 'You have no rights to print']);
+                return response()->json(['status' => '2', 'error' => 'You are restricted from printing duplicate airway bill(s). Please contact your line manager.']);
             }
         }
 

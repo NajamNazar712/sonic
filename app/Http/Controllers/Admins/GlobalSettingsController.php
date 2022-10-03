@@ -6396,15 +6396,18 @@ public function sales_incentive()
     public function cn_print_right()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
-        $admin_roles_id = AdminRole::all();
-//        dd($admin_roles);
+
+        $admins = AdminRole::leftjoin('admin_departments as ad','ad.id','=','admin_roles.department_id')
+        ->where('ad.id','!=',1)
+        ->select('admin_roles.id as id','admin_roles.name as name','ad.id as d_id','ad.name as d_name')
+        ->get();
+
         $settings = GlobalSettings::where('type', 'cn_print_rights');
-        $foc_account_tags = array();
         if ($settings->exists()) {
             $settings = $settings->first();
             $admin_roles = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles_id,'existing_admin_roles'=> $admin_roles ]);
+        return view('admin.settings.cn_print_right')->with(['admins' => $admins,'existing_admin_roles'=> $admin_roles]);
     }
     public function cn_print_right_store(Request $request)
     {
