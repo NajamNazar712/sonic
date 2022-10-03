@@ -185,7 +185,7 @@
                             }).then(function (confirm) {
                                 if (confirm) {
                                     $.ajax({
-                                        url: '{!! route('admin.delivery.receive.update.remove.bulk') !!}',
+                                        url: '{!! route('admin.delivery.rider_request.update.remove.bulk') !!}',
                                         method: 'POST',
                                         data: {
                                             '_token': '{{ csrf_token() }}',
@@ -201,7 +201,7 @@
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             $('#add_tracking_number').prop('disabled', true);
                                             setTimeout(function() {
-                                                window.location.href = '{{ route('admin.delivery.receive.index') }}';
+                                                window.location.href = '{{ route('admin.delivery.rider_request.index') }}';
                                             }, 2500);
                                         }
                                         else{
@@ -385,9 +385,9 @@
                 }
             });
 
-            $('body').on('click','a.deliverynoterow',function () {
+            $('body').on('click','a.requestnoterow',function () {
                 var shipment_id = $(this).parents('tr').attr('id');
-                var delivery_note = $('#delivery_note').val();
+                var request_note_id = $('#request_note').val();
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to remove the shipment!',
@@ -413,11 +413,11 @@
                     if (confirm) {
                         blockPagePermanently();
                         $.ajax({
-                            url:'{{route('admin.delivery.receive.update.remove')}}',
+                            url:'{{route('admin.delivery.rider_request.update.remove')}}',
                             type:'POST',
                             data: {
                                 'shipment_id':shipment_id,
-                                'delivery_note_id':delivery_note,
+                                'request_note_id':request_note_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -428,7 +428,7 @@
                                 if(total_rows <= 0){
                                     $('#add_tracking_number').prop('disabled', true);
                                     setTimeout(function() {
-                                        window.location.href = '{{ route('admin.delivery.receive.index') }}';
+                                        window.location.href = '{{ route('admin.delivery.rider_request.index') }}';
                                     }, 2500);
                                 }
                             }else{

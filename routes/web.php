@@ -1459,7 +1459,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/reject','Admins\DeliveryController@request_note_reject')->name('reject');
             Route::get('{id}/update','Admins\DeliveryController@request_note_update')->name('update');
             Route::get('{id}/update/list','Admins\DeliveryController@request_note_update_list')->name('update.list');
-            Route::post('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('update/remove','Admins\DeliveryController@request_note_remove')->name('update.remove');
             Route::post('update/remove_bulk','Admins\DeliveryController@receive_delivery_remove_bulk')->name('update.remove.bulk');
         });
 

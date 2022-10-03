@@ -8924,7 +8924,7 @@ class DeliveryController extends Controller
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
                 if ($deliveries->payment_mode_id != 2) {
-                    return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
+                    return "<a href='javascript:void(0);' class='requestnoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
                 }
             })
             ->editColumn('amount', function ($shipment) {
@@ -8940,6 +8940,62 @@ class DeliveryController extends Controller
             })
             ->make(true);
 
+    }
+
+    public function request_note_remove(Request $request)
+    {
+        $shipment = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')->where('rider_delivery_note_request_shipments.shipment_id', $request->shipment_id)->where('rider_delivery_note_request_shipments.request_note_id', $request->request_note_id)
+            ->select('rider_delivery_note_request_shipments.*', 's.amount as cod');
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+            $request_note = $request->request_note_id;
+            $delivery = RiderDeliveryNoteRequest::find($request_note);
+            if ($delivery) {
+                if ($shipment->status == 0) {
+                    $shipment->status = 5;
+                } else {
+                    RiderDeliveryNoteRequestShipment::where('shipment_id', $request->shipment_id)->where('request_note_id', $request->request_note_id)->delete();
+                }
+                $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
+                $delivery->shipment_count = $delivery->shipment_count - 1;
+                return ['status' => 0, 'success' => 'Shipment is successfully removed'];
+            } else {
+                return ['status' => 1, 'error' => 'Something went wrong'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'Something went wrong'];
+        }
+    }
+
+    public function request_note_remove_bulk(Request $request)
+    {
+        $shipments = $request->shipment_ids;
+        $request_note_id = $request->request_note_id;
+        if ($request_note_id) {
+            foreach ($shipments as $shipment_id) {
+                $shipment = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')->where('rider_delivery_note_request_shipments.shipment_id', $shipment_id)->where('rider_delivery_note_request_shipments.request_note_id', $request->request_note_id)
+                    ->select('rider_delivery_note_request_shipments.*', 's.amount as cod');
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+                    $request_note = $request->request_note_id;
+                    $delivery = RiderDeliveryNoteRequest::find($request_note);
+                    if ($delivery) {
+                        if ($shipment->status == 0) {
+                            $shipment->status = 5;
+                        } else {
+                            RiderDeliveryNoteRequestShipment::where('shipment_id', $request->shipment_id)->where('request_note_id', $request->request_note_id)->delete();
+                        }
+                        $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
+                        $delivery->shipment_count = $delivery->shipment_count - 1;
+                        $shipment->save();
+                        $delivery->save();
+                    }
+                }
+            }
+            return ['status' => 0, 'success' => 'Shipments are successfully removed'];
+        } else {
+            return ['status' => 1, 'error' => 'Something went wrong'];
+        }
     }
 
     public function shipment_otp_index(){
