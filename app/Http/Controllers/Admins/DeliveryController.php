@@ -8908,6 +8908,40 @@ class DeliveryController extends Controller
         return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
     }
 
+    public function request_note_update_list(Request $request, $id)
+    {
+        $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
+            ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
+            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
+            ->where('delivery_notes.id', $id);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($deliveries)
+            ->addColumn("action", function ($deliveries) {
+                if ($deliveries->payment_mode_id != 2) {
+                    return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
+                }
+            })
+            ->editColumn('amount', function ($shipment) {
+                return number_format($shipment->amount);
+            })
+            ->filterColumn('service_type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('bt.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
+
+    }
+
     public function shipment_otp_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),608);
         return view('admin.otp.shipment');
