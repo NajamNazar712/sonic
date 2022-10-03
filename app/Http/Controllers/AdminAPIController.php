@@ -8821,12 +8821,10 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $date = Carbon::now();
-            $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
             $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
-                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
                 ->where('st.status', 0)
                 ->groupBy('u.id')
                 ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
@@ -8882,12 +8880,12 @@ class AdminAPIController extends Controller
                     } else {
                         if (in_array($shipment->booking_type_id, [1, 4, 5])) {
                             $where = array(24, 47, 48);
-                            if(!in_array($negative, $shipment->user_id)){
+                            if(!in_array($shipment->user_id,$negative)){
                                 $where[] = 60;
                             }
                         } else if ($shipment->booking_type_id == 2) {
                             $where = array(47, 48);
-                            if(!in_array($negative, $shipment->user_id)){
+                            if(!in_array($shipment->user_id,$negative)){
                                 $where[] = 60;
                             }
                             if (in_array($shipment->shipper_status_id, $return_array)) {
@@ -8898,7 +8896,7 @@ class AdminAPIController extends Controller
 
                         } else if ($shipment->booking_type_id == 3) {
                             $where = array(35, 47, 48);
-                            if(!in_array($negative, $shipment->user_id)){
+                            if(!in_array($shipment->user_id,$negative)){
                                 $where[] = 60;
                             }
 
@@ -9032,12 +9030,10 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $date = Carbon::now();
-            $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
             $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
-                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
                 ->where('st.status', 0)
                 ->groupBy('u.id')
                 ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
@@ -9060,7 +9056,6 @@ class AdminAPIController extends Controller
             $negative_shipper = array();
             if ($shipment_status == 25) {
                 foreach ($shipment_ids as $shipment_id) {
-                    $parcel = Shipment::where('id', $shipment_id)->first();
                     $parcel = Shipment::where('id', $shipment_id)->first();
                     if (count($open_box_ids) > 0) {
                         if (in_array($shipment_id, $open_box_ids)) {
@@ -9116,7 +9111,7 @@ class AdminAPIController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if (in_array($negative, $shipment->user_id) && $shipment_status == 60) {
-                        array_push($negative_shipper, $shipment->tracking_number);
+                        array_push($shipment->tracking_number, $negative_shipper);
                     } else {
                         $shipment->shipper_status_id = $shipment_status;
                         $shipment->save();
