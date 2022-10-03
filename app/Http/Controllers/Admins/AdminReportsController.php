@@ -7442,8 +7442,17 @@ class AdminReportsController extends Controller
         $admins = Admin::where('admins.status', 1)
             ->leftjoin('employee_designations as ed', 'admins.designation_id', 'ed.id')
             ->where('ed.department_id', 7);
+
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->where('multiple_sale_leads.admin_id', Auth::id())
+            ->pluck('mst.admin_id')->toArray();
+
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $admins = $admins->where('admins.id', Auth::id());
+            if(count($multiple_sales_tags) > 0){
+                $admins = $admins->whereIn('admins.id', $multiple_sales_tags);
+            } else{
+                $admins = $admins->where('admins.id', Auth::id());
+            }
         }
         $admins = $admins->get(['admins.id', 'admins.name']);
         $ratings = CrmRequestRating::all();
