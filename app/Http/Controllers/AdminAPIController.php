@@ -8852,7 +8852,7 @@ class AdminAPIController extends Controller
                         ->where('rrb.id', '=',
                             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
                 })
-                ->select(['return_notes.id as return_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'usi.pickup_address as address', 'users.name as shipper', 'bt.booking_type as service_type', 'shipments.booking_type_id', 'shipments.shipper_status_id', 'ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges', 'crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
+                ->select(['return_notes.id as return_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'usi.pickup_address as address', 'users.name as shipper', 'bt.booking_type as service_type', 'shipments.booking_type_id', 'shipments.shipper_status_id', 'ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges', 'crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name', 'shipments.user_id as user_id'])
                 ->where('return_notes.id', $request->return_note_id);
 
             if ($role_id != 1) {
