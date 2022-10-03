@@ -8944,7 +8944,6 @@ class DeliveryController extends Controller
 
     public function request_note_remove(Request $request)
     {
-        dd($request);
         $shipment = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')->where('rider_delivery_note_request_shipments.shipment_id', $request->shipment_id)->where('rider_delivery_note_request_shipments.request_note_id', $request->request_note_id)
             ->select('rider_delivery_note_request_shipments.*', 's.amount as cod');
         if ($shipment->exists()) {
@@ -8959,11 +8958,14 @@ class DeliveryController extends Controller
                 }
                 $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
                 $delivery->shipment_count = $delivery->shipment_count - 1;
+                dd(1);
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
             } else {
+                dd(2);
                 return ['status' => 1, 'error' => 'Something went wrong'];
             }
         } else {
+            dd(3);
             return ['status' => 1, 'error' => 'Something went wrong'];
         }
     }
