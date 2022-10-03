@@ -8977,6 +8977,7 @@ class DeliveryController extends Controller
                 }
                 $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
                 $delivery->shipment_count = $delivery->shipment_count - 1;
+                $delivery->updated_by = Auth::id();
                 $shipment->save();
                 $delivery->save();
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
@@ -9008,6 +9009,7 @@ class DeliveryController extends Controller
                         }
                         $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
                         $delivery->shipment_count = $delivery->shipment_count - 1;
+                        $delivery->updated_by = Auth::id();
                         $shipment->save();
                         $delivery->save();
                     }
@@ -9045,6 +9047,7 @@ class DeliveryController extends Controller
                         $request_shipment->status = 4;
                         $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->amount;
                         $request_note->shipment_count = $request_note->shipment_count + 1;
+                        $request_note->updated_by = Auth::id();
                         $request_shipment->save();
                         $request_note->save();
                         return response()->json(['status' => 0, 'success' => 'Shipment Added']);
@@ -9063,6 +9066,7 @@ class DeliveryController extends Controller
                     ]);
                     $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->amount;
                     $request_note->shipment_count = $request_note->shipment_count + 1;
+                    $request_note->updated_by = Auth::id();
                     $request_note->save();
                     return response()->json(['status' => 0, 'success' => 'Shipment Added']);
                 }
