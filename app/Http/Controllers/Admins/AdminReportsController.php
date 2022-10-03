@@ -26,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
+use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
