@@ -7449,6 +7449,7 @@ class AdminReportsController extends Controller
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if(count($multiple_sales_tags) > 0){
+                array_push($multiple_sales_tags, Auth::id());
                 $admins = $admins->whereIn('admins.id', $multiple_sales_tags);
             } else{
                 $admins = $admins->where('admins.id', Auth::id());
@@ -7478,6 +7479,7 @@ class AdminReportsController extends Controller
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if(count($multiple_sales_tags) > 0){
+                array_push($multiple_sales_tags, Auth::id());
                 $daily_visit = $daily_visit->whereIn('daily_visits.admin_id', $multiple_sales_tags);
             }
             else{
