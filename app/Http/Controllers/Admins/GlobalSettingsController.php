@@ -5763,6 +5763,30 @@ public function sales_incentive()
             }
 
         })
+        ->filterColumn('z.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball zones\b/',$keyword)) {
+                $query->where('lead_taggings.zone_id', 0);
+            } else {
+                $query->where('z.name', 'like', '%' . $keyword . '%');
+            }
+        })
+        ->filterColumn('c.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball cities\b/',$keyword)) {
+                $query->where('lead_taggings.city_id', 0);
+            } else {
+                $query->where('c.name', 'like', '%' . $keyword . '%');
+            }
+        })
+        ->filterColumn('t.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball territories\b/',$keyword)) {
+                $query->where('lead_taggings.territory_id', 0);
+            } else {
+                $query->where('t.name', 'like', '%' . $keyword . '%');
+            }
+        })
         ->addColumn('service2_link', function($roles) {
             return '<button class="btn btn-sm btn-outline-info align-middle services_link" id="'.$roles->id.'"><span class="align-middle">' . $roles->service2 . '</span></button>';
         });
