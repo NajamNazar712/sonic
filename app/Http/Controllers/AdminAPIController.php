@@ -8829,7 +8829,7 @@ class AdminAPIController extends Controller
                 ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
                 ->where('st.status', 0)
                 ->groupBy('u.id')
-                ->having('overall_payable', '<', 0)->pluck('u.id')->toArray();
+                ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
 
             $role_id = $request->admin_role_id;
             $admin_id = $request->admin_id;
@@ -9040,7 +9040,7 @@ class AdminAPIController extends Controller
                 ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
                 ->where('st.status', 0)
                 ->groupBy('u.id')
-                ->having('overall_payable', '<', 0)->pluck('u.id')->toArray();
+                ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
             $shipment_ids = explode(',', $request->shipments);
             $shipment_status = $request->shipment_status;
             $shipment_reason = ($request->shipment_reason == -1) ? NULL : $request->shipment_reason;
