@@ -1,6 +1,6 @@
 
 @extends('admin.layout.master')
-@section('title','Rider OTP (Login & Delivery Note)')
+@section('title','Non-COD Shipments OTP')
 
 @section('content')
     <h1 class="mb-1">
