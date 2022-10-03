@@ -8651,6 +8651,15 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->editColumn('shipments_count', function ($delivery_note_requests) {
+                if ($delivery_note_requests->shipments_count != 0) {
+                    $shipment_count = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_note_requests->id)
+                        ->whereIn('status', [0, 4])->count();
+                    return $shipment_count;
+                } else {
+                    return 0;
+                }
+            })
             ->editColumn('rider', function ($delivery_note_requests) {
                     return $delivery_note_requests->rider_name;
             })
