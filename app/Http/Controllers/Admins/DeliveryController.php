@@ -9036,7 +9036,7 @@ class DeliveryController extends Controller
                     $serial = RiderDeliveryNoteRequestShipment::select('ordering')->where('request_note_id', $request_note->id)->orderBy('ordering', 'desc')->first();
                     RiderDeliveryNoteRequestShipment::create([
                         'request_note_id' => $request_note->id,
-                        'shipment_id' => $shipment,
+                        'shipment_id' => $shipment->id,
                         'notification' => 1,
                         'rider_information' => 1,
                         'open_box' => 0,
