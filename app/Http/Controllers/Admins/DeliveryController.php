@@ -8619,7 +8619,7 @@ class DeliveryController extends Controller
         $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
             ->join('cities as c', 'c.id', '=', 'rider_delivery_note_requests.hub_id')
             ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
-            ->join('admins as ad', 'ad.id', '=', 'rider_delivery_note_requests.updated_by')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'rider_delivery_note_requests.updated_by')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z','c.zone_id','=','z.id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
