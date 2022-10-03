@@ -8915,7 +8915,8 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->select(['rider_delivery_note_requests.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
-            ->where('rider_delivery_note_requests.id', $id);
+            ->where('rider_delivery_note_requests.id', $id)
+            ->whereIn('dns.status', [0, 4]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('rider_delivery_note_requests.hub_id', session('hubs'));
@@ -8958,14 +8959,13 @@ class DeliveryController extends Controller
                 }
                 $delivery->total_cod_amount = $delivery->total_cod_amount - $shipment->cod;
                 $delivery->shipment_count = $delivery->shipment_count - 1;
-                dd(1);
+                $shipment->save();
+                $delivery->save();
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
             } else {
-                dd(2);
                 return ['status' => 1, 'error' => 'Something went wrong'];
             }
         } else {
-            dd(3);
             return ['status' => 1, 'error' => 'Something went wrong'];
         }
     }
