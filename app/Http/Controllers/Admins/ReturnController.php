@@ -2279,8 +2279,7 @@ class ReturnController extends Controller
     }
 
     public function return_receive_status_list(Request $request){
-        $date = Carbon::now();
-        $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
+
         $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
@@ -2288,7 +2287,6 @@ class ReturnController extends Controller
             ->where('st.status', 0)
             ->groupBy('u.id')
             ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
-        dd($negative);
 
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
             ->join('shipments','shipments.id','=','dns.shipment_id')
@@ -2687,12 +2685,10 @@ class ReturnController extends Controller
             $shipment_status_mandatory = array(24,47,48);
             $mandatory_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
             $open_box_ids = array();
-            $date = Carbon::now();
-            $from_date = $date->subDays(7)->startOfDay()->toDateTimeString();
             $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
-                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'), DB::raw("(select max(id) from shipments where shipments.user_id = s.user_id and shipments.created_at > '" . $from_date . "') as shipment_exist"))
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
                 ->where('st.status', 0)
                 ->groupBy('u.id')
                 ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
