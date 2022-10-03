@@ -856,7 +856,7 @@
                                                     var tracking_numbers = '';
                                                     var route = '{!! route('admin.tracking.index') !!}';
                                                     UnblockPagePermanently();
-                                                    console.log(data.negative_shipper);
+
                                                     if(data.reason_mandatory_shipments.length > 0) {
                                                         $.each(data.reason_mandatory_shipments, function (index, tracking_number) {
                                                             tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
@@ -889,7 +889,7 @@
                                                         });
 
                                                     }
-                                                    else if(data.negative_shipper.length > 0) {
+                                                    else if(data.negative_shipper) {
                                                         alert(data.negative_shipper);
                                                         $.each(data.negative_shipper, function (index, tracking_number) {
                                                             tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
