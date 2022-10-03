@@ -12834,7 +12834,6 @@ class RiderAPIController extends Controller
         }
     }
 
-
     public function generate_otp_for_consignee(Request $request){
         $rules = [
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],

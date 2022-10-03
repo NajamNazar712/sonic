@@ -469,15 +469,15 @@
                                 }
                             }).done(function(data) {
                                 if(data.status == 0){
-                                   var delivery_note_id = $('#delivery_note').val();
+                                   var request_note_id = $('#request_note').val();
                                     $.ajax({
 
-                                        url: '{!! route('admin.delivery.receive.add.shipments') !!}',
+                                        url: '{!! route('admin.delivery.rider_request.add.shipments') !!}',
                                         method: 'POST',
                                         data: {
                                             'shipment_id': data.shId,
                                             'tracking_number':data.tracking_number,
-                                            'delivery_note_id': delivery_note_id,
+                                            'request_note_id': request_note_id,
                                             '_token': '{{ csrf_token() }}',
                                         }
                                     })
