@@ -7463,7 +7463,7 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
-        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
             ->where('multiple_sale_leads.admin_id', Auth::id())
             ->pluck('mst.admin_id')->toArray();
 
