@@ -33,7 +33,7 @@
                     </div>
                 </form>
 
-                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note">
+                <input type="hidden" value="{{$request_note_id}}" id="request_note">
 
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -153,7 +153,7 @@
                     className: 'btn btn-primary bulk_remove',
                     enabled:false,
                     action: function (e, dt, node, config) {
-                        var delivery_note_id = $('#delivery_note').val();
+                        var request_note_id = $('#request_note').val();
                         //$('input:hidden[name=delivery_note]').val(selected_rows);
 
                         if(selected_rows.length === 0){
@@ -190,7 +190,7 @@
                                         data: {
                                             '_token': '{{ csrf_token() }}',
                                             'shipment_ids':selected_rows,
-                                            'delivery_note_id':delivery_note_id,
+                                            'request_note_id':request_note_id,
                                         }
                                     }).done(function(data){
                                         if(data.status == 0){
@@ -220,64 +220,6 @@
                     }
                 },
                     {
-                    text: '<i class="la la-print"></i> Print',
-                    className: 'btn btn-primary print',
-                    enabled:true,
-                    action: function (e, dt, node, config) {
-                        var delivery_note_id = $('#delivery_note').val();
-
-                            swal({
-                                title: 'Are You Sure?',
-                                text: 'Select Yes to print!',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if (confirm) {
-                                    $.ajax({
-                                        url: '{!! route('admin.delivery.receive.print') !!}',
-                                        method: 'POST',
-                                        data: {
-                                            '_token': '{{ csrf_token() }}',
-                                            'id':delivery_note_id,
-                                        }
-                                    }).done(function(data){
-                                        var tab = window.open('', '_blank');
-
-                                        if(!tab) {
-                                            swal({
-                                                title: 'Popup Blocker Enabled!',
-                                                text: 'Please add this site to your exception list.',
-                                                icon: 'error',
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false
-                                            });
-                                        }
-                                        else {
-                                            tab.document.write(data);
-                                            tab.document.close();
-                                            tab.focus();
-                                        }
-                                    });
-                                }
-                            });
-                    }
-                },{
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -345,7 +287,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.receive.update.list',['note'=>$delivery_note_id]) }}',
+                ajax: '{{ route('admin.delivery.rider_request.update.list',['note'=>$request_note_id]) }}',
                 rowId: 'shId',
                 order: [[1, 'desc']],
                 columns: [

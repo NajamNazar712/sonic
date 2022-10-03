@@ -8905,20 +8905,20 @@ class DeliveryController extends Controller
     public function request_note_update(Request $request, $id)
     {
         $service_type = BookingType::all();
-        return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+        return view('admin.delivery.rider_request.update')->with(['request_note_id' => $id, 'service_type' => $service_type]);
     }
 
     public function request_note_update_list(Request $request, $id)
     {
-        $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+        $deliveries = RiderDeliveryNoteRequest::join('rider_delivery_note_request_shipments as dns', 'dns.request_note_id', '=', 'rider_delivery_note_requests.id')
             ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
-            ->where('delivery_notes.id', $id);
+            ->select(['rider_delivery_note_requests.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
+            ->where('rider_delivery_note_requests.id', $id);
 
         if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+            $deliveries = $deliveries->whereIn('rider_delivery_note_requests.hub_id', session('hubs'));
         }
 
         return Datatables::of($deliveries)
