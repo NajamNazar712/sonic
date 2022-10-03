@@ -9025,7 +9025,7 @@ class DeliveryController extends Controller
                     }
                     else if($request_shipment->status == 5){
                         $request_shipment->status = 4;
-                        $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->cod;
+                        $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->amount;
                         $request_note->shipment_count = $request_note->shipment_count + 1;
                         $request_shipment->save();
                         $request_note->save();
@@ -9043,7 +9043,7 @@ class DeliveryController extends Controller
                         'status' => 4,
                         'ordering' => $serial->ordering + 1
                     ]);
-                    $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->cod;
+                    $request_note->total_cod_amount = $request_note->total_cod_amount + $shipment->amount;
                     $request_note->shipment_count = $request_note->shipment_count + 1;
                     $request_note->save();
                     return response()->json(['status' => 0, 'success' => 'Shipment Added']);
