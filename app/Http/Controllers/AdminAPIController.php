@@ -9144,7 +9144,7 @@ class AdminAPIController extends Controller
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
                 if (count($negative_shipper) > 0) {
-                    return response()->json(['status' => 0, 'bulk_update_message' => 'Following Shipments Has Not Been Updated to' . PHP_EOL . 'Return Unsuccessful for CX and Sales' . implode(PHP_EOL, $negative_shipper)]);
+                    return response()->json(['status' => 0, 'bulk_update_message' => 'Following Shipments Has Not Been Updated to' . PHP_EOL . 'Return Unsuccessful for CX and Sales'.PHP_EOL. implode(PHP_EOL, $negative_shipper)]);
                 } else {
                     return response()->json(['status' => 0, 'bulk_update_message' => 'Return Note Status Has Been Updated']);
                 }
