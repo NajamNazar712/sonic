@@ -132,7 +132,7 @@ use App\Http\Models\WMS\WmsPicklistItem;
 use App\Http\Models\WMS\WmsProductBarcode;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
-use App\Models\Http\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;

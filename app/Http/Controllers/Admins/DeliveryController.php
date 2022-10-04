@@ -91,7 +91,7 @@ use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
-use App\Models\Http\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

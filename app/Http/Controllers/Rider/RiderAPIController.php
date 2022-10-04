@@ -121,7 +121,7 @@ use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
-use App\Models\Http\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
