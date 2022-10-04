@@ -338,10 +338,10 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 105, 44, 47, 48, 49, 126, 262, 441,464,495,496,497,531, 566,675,757,758], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 105, 44, 47, 48, 49, 126, 262, 441,464,495,496,497,531, 566,675,757,758,815], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441,464,531,757,758], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441,464,531,757,758,815], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(33, session('permissions')))
@@ -428,6 +428,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(758, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.delivery.note.rider_category_bypass_weight')}}">Rider Category ByPass Weight</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(815, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.shipment_otp.index')}}">Non-COD Shipments OTP</a></li>
                                     @endif
                                 </ul>
                             </li>

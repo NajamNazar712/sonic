@@ -83,6 +83,7 @@ class AdminAttendanceController extends Controller
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
+            $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
             $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
@@ -90,6 +91,7 @@ class AdminAttendanceController extends Controller
             $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
             $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
+            $disabled_riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', '!=', 1)->select('e.id', 'e.name')->get();
         }
         else{
             $cities = City::select('id','name')->whereIn('id', session('hubs'))->get();
@@ -108,7 +110,7 @@ class AdminAttendanceController extends Controller
             $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
         }
 
-        return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
+        return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "disabled_admins" => $disabled_users, "trax_ids" => $trax_ids, "riders" => $riders, "disabled_riders" => $disabled_riders, "cnics"=>$cnic]);
     }
 
     public function admin_attendance_horizontal_index(Request $request){
@@ -117,7 +119,9 @@ class AdminAttendanceController extends Controller
         if(in_array(session('role_id'), [1, 63, 70])){
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
+            $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
             $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
+            $disabled_riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', '!=', 1)->select('e.id', 'e.name')->get();
             $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
@@ -135,7 +139,7 @@ class AdminAttendanceController extends Controller
             $trax_ids = array_merge($trax_id, $rider_trax_id);
         }
 
-        return view('admin.attendance.admin.horizontal')->with(["departments" => $departments, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders]);
+        return view('admin.attendance.admin.horizontal')->with(["departments" => $departments, "admins" => $users, "disabled_admins" => $disabled_users, "trax_ids" => $trax_ids, "riders" => $riders, "disabled_riders" => $disabled_riders]);
     }
 
     public function admin_attendance_list(Request $request)
@@ -165,6 +169,14 @@ class AdminAttendanceController extends Controller
                 });
             }
 
+        }
+
+
+        if ($search_disabled_admin = $request->get('search_disabled_admin')) {
+            $attendances->where('a.id', $search_disabled_admin)->where('employee_type',1);
+        }
+        if ($search_disabled_rider = $request->get('search_disabled_rider')) {
+            $attendances->where('a.id', $search_disabled_rider)->where('employee_type',2);
         }
 
 //        if(session('role_id') != 1)
@@ -362,6 +374,13 @@ class AdminAttendanceController extends Controller
             $attendances->where(function($query){
                 $query->whereIn('c.hub_id', session('hubs'));
             });
+        }
+
+        if ($search_disabled_admin = $request->get('search_disabled_admin')) {
+            $attendances->where('a.id', $search_disabled_admin)->where('employee_type',1);
+        }
+        if ($search_disabled_rider = $request->get('search_disabled_rider')) {
+            $attendances->where('a.id', $search_disabled_rider)->where('employee_type',2);
         }
         
 

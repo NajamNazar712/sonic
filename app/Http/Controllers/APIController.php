@@ -400,28 +400,6 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-        $return_address_rules = array();
-        $return_address_verify = false;
-        $settings = GlobalSettings::where('type', 'shipper_return_address');
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            if ($settings->text != NULL && isset($request->return_address) && isset($request->return_contact_person) && isset($request->return_vendor) && isset($request->return_phone_number) && isset($request->return_email_address) && isset($request->return_city)) {
-                $return_accounts = array_map('intval', explode(',', $settings->text));
-                if(in_array($user_id,$return_accounts)){
-                    $return_address_rules = [
-                        'return_address' => ['required', 'between:1,255'],
-                        'return_contact_person' => ['required', 'between:1,100'],
-                        'return_vendor' => ['required', 'between:1,100'],
-                        'return_phone_number' => ['required', 'phone_number'],
-                        'return_email_address' => ['required', 'email', 'between:0,100'],
-                        'return_city' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1)],
-
-                    ];
-                    $return_address_verify = true;
-                }
-
-            }
-        }
 
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -688,31 +666,14 @@ class APIController extends Controller
                 $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
             }
         }
-        $validations = array_merge($rules, $return_address_rules);
-        $validate = Validator::make($request->all(), $validations, $this->messages);
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            //Return Address
-            if($return_address_verify) {
-                $return_city = City::where('name', $request->return_city)->first();
-                $return_address_id = NULL;
-                $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city->id);
-                if ($return_address->exists()) {
-                    $return_address = $return_address->first();
-                    $return_address_id = $return_address->id;
-                } else {
-                    $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city->id, 0);
-                }
-                $request->merge([
-                    'return_address_id' => "$return_address_id",
-                ]);
-            }
-            //Return Address
-
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
 
             if ($request->filled('consignee_phone_number_2')) {
@@ -6122,6 +6083,368 @@ class APIController extends Controller
                 }
             }
             return $result;
+        }
+    }
+
+    public function shipment_book_daraz(Request $request)
+    {
+        /********************************NOTE********************************/
+        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+        $user_id = $request->user_id;
+        $daraz_account_ids = [7306, 7308, 10381];
+        if(!in_array($user_id, $daraz_account_ids)){
+            return response()->json(['status' => 1, 'message' => 'Shipper is not allowed.']);
+        }
+
+        Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+            if ($value) {
+                $value = $this->phone_number($value);
+
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            if(isset($data['shipping_mode_id'])){
+                $shipping_mode_id = $data['shipping_mode_id'];
+                $service_type_id = 1;
+            }
+            else{
+                return false;
+            }
+
+            if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
+                $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            if(isset($data['shipping_mode_id'])){
+                $shipping_mode_id = $data['shipping_mode_id'];
+                $service_type_id = 1;
+            }
+            else{
+                return false;
+            }
+            if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
+                $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        $user_type = User::where('id', $user_id)->first();
+            $rules = [
+                'tracking_number' => ['required', 'integer', Rule::unique('shipments', 'tracking_number')],
+                'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('hidden', 0);
+                }), 'origin_check'],
+
+                'return_address' => ['required', 'between:1,255'],
+                'return_contact_person' => ['required', 'between:1,100'],
+                'return_vendor' => ['required', 'between:1,100'],
+                'return_phone_number' => ['required', 'phone_number'],
+                'return_email_address' => ['required', 'email', 'between:0,100'],
+                'return_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)->where('status', 1)],
+
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
+                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_address' => ['required', 'between:1,255'],
+                'consignee_phone_number_1' => ['required', 'phone_number'],
+                'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
+                'consignee_email_address' => ['nullable', 'filled', 'email'],
+                'order_date' => ['nullable', 'date_format:Y-m-d'],
+                'special_instructions' => ['nullable', 'filled', 'between:0,190'],
+                'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
+
+                'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
+
+                'item_description' => ['required', 'between:0,500'],
+                'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
+
+                'shipper_reference_number_1' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_2' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_3' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_4' => ['nullable', 'between:0,190'],
+                'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+
+                'order_id' => ['nullable', 'filled', 'between:0,100'],
+
+            ];
+
+            if ($user_type['corporate_rate_type_id'] == 3) {
+                $rules['shipping_mode_id'] = ['required', 'integer', 'between:1,2', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            } else {
+                $rules['shipping_mode_id'] = ['required', 'integer', 'between:1,2', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->first();
+            $length = strlen($shipment_pre_book->prefix);
+            $tracking_number_prefix = str_split($request->tracking_number, $length);
+            if ($shipment_pre_book->prefix != $tracking_number_prefix[0]) {
+                return response()->json(['status' => 1, 'message' => 'Prefix not matched with given tracking number']);
+            }
+
+            //Return Address
+            $return_city_id = $request->return_city_id;
+            $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city_id);
+            if ($return_address->exists()) {
+                $return_address = $return_address->first();
+                $return_address_id = $return_address->id;
+            } else {
+                $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city_id, 0);
+            }
+
+            $shipping_mode_id = $request->input('shipping_mode_id');
+            //Return Address
+
+            $result = ShipperShipmentBookController::check_return_destination($return_address_id, $shipping_mode_id, $user_id);
+            if(!$result){
+                return response()->json(['status' => 1, 'message' => 'Return city not allowed, please contact your sales person!']);
+            }
+
+            $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
+
+            if ($request->filled('consignee_phone_number_2')) {
+                $consignee_phone_number_2 = $this->phone_number($request->consignee_phone_number_2);
+            }
+
+            $open_shipment = 0;
+
+            $service_type_id = 1;
+            $shipment_pre_book = null;
+
+            $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
+
+            if (!$user_shipping_info->status) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
+            }
+
+            if (!$user_shipping_info->city->status) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
+            }
+            if (!$user_shipping_info->city->zone_id) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
+            }
+
+            if (!$user_shipping_info->city->pickup) {
+                return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+            }
+
+
+            $user_shipping_info_return = UserShippingInfo::find($return_address_id);
+
+            if (!$user_shipping_info_return->status) {
+                return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $return_address_id . ' is disabled']);
+            }
+
+            if (!$user_shipping_info_return->city->status) {
+                return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
+            }
+            if (!$user_shipping_info_return->city->zone_id) {
+                return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
+            }
+
+            $consignee_city = City::find($request->input('consignee_city_id'));
+
+
+            if (!$consignee_city->status) {
+                return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
+            }
+
+            if (!$consignee_city->zone_id) {
+                return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
+            }
+
+            $pickup_city_id = $user_shipping_info->city_id;
+
+            if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
+                return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
+            }
+
+            if ($user_shipping_info->city->id != $consignee_city->id) {
+                $city_zone = City::where('id', $consignee_city->id)->first();
+                $zone = ZoneClassCity::where(['city_id' => $consignee_city->id, 'zone_id' => $city_zone['zone_id']]);
+                $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
+                $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
+                $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
+                $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
+                if ($zone->exists()) {
+                    $zone = $zone->first();
+
+                    if ($zone['class'] == 0) {
+                        $check_zone = $class_a['setting_value'];
+                    } elseif ($zone['class'] == 1) {
+                        $check_zone = $class_b['setting_value'];
+                    } elseif ($zone['class'] == 2) {
+                        $check_zone = $class_c['setting_value'];
+                    } else {
+                        $check_zone = $class_d['setting_value'];
+                    }
+                    if ((int) $request->input('amount') > $check_zone) {
+                        return response()->json(['status' => 1, 'message' => 'Amount must be smaller then or equal to ' . $check_zone]);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Zone class does'nt exists"]);
+                }
+            }
+
+            if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $service_type_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+                return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $service_type_id . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+            }
+
+            $pickup_address_id = $request->input('pickup_address_id');
+            $consignee_city_id = $request->input('consignee_city_id');
+
+            $consignee_address = $request->input('consignee_address');
+
+            $consignee_name = $request->input('consignee_name');
+            $consignee_phone_number_1 = substr_replace($consignee_phone_number_1, '-', 4, 0);
+
+            if ($request->filled('consignee_phone_number_2')) {
+                $consignee_phone_number_2 = substr_replace($consignee_phone_number_2, '-', 4, 0);
+            } else {
+                $consignee_phone_number_2 = null;
+            }
+
+            if ($request->filled('consignee_email_address')) {
+                $consignee_email_address = $request->input('consignee_email_address');
+            } else {
+                $consignee_email_address = null;
+            }
+            $information_display = 1;
+
+            $charges_mode_id = 3;
+
+            $self_collection = false;
+            if ($service_type_id == 1 && $request->has('self_collection')) {
+                if ($request->input('self_collection') != null) {
+                    if ($request->input('self_collection') == 1) {
+                        $self_collection = true;
+                    }
+                }
+            }
+
+            if ($request->filled('order_id')) {
+                $order_id = $request->input('order_id');
+            } else {
+                $order_id = null;
+            }
+
+            $package_type = false;
+
+            if ($request->filled('special_instructions')) {
+                $special_instructions = $request->input('special_instructions');
+            } else {
+                $special_instructions = null;
+            }
+
+            $estimated_weight = $request->input('estimated_weight');
+            $amount = $request->input('amount');
+
+            $same_day_timing_id = null;
+            $try_and_buy_charges = null;
+            $pieces_quantity = 1;
+
+            $payment_mode_id = 1;
+
+            $business_category_id = 1;
+            $delivery_type_id = 1;
+
+            $tracking_number = $request->input('tracking_number');
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+
+            $shipment = Shipment::find($shipment_id);
+            $shipment->tracking_number = $tracking_number;
+            $shipment->save();
+
+            if ($request->has('order_date')) {
+                if ($request->order_date != null) {
+                    $order_date = new ShipmentOrderDate();
+                    $order_date->shipment_id = $shipment_id;
+                    $order_date->order_date = $request->order_date;
+                    $order_date->save();
+                }
+            }
+
+            if ($request->has('shipper_reference_number_1') || $request->has('shipper_reference_number_2') || $request->has('shipper_reference_number_3') || $request->has('shipper_reference_number_4') || $request->has('shipper_reference_number_5')) {
+                $shipper_reference = new ShipmentShipperReference();
+                $shipper_reference->shipment_id = $shipment_id;
+                if ($request->has('shipper_reference_number_1')) {
+                    $shipper_reference->reference_1 = $request->shipper_reference_number_1;
+                }
+                if ($request->has('shipper_reference_number_2')) {
+                    $shipper_reference->reference_2 = $request->shipper_reference_number_2;
+                }
+                if ($request->has('shipper_reference_number_3')) {
+                    $shipper_reference->reference_3 = $request->shipper_reference_number_3;
+                }
+                if ($request->has('shipper_reference_number_4')) {
+                    $shipper_reference->reference_4 = $request->shipper_reference_number_4;
+                }
+                if ($request->has('shipper_reference_number_5')) {
+                    $shipper_reference->reference_5 = $request->shipper_reference_number_5;
+                }
+                $shipper_reference->save();
+            }
+
+            $item_product_type_id = 24;
+
+            if ($request->filled('item_description')) {
+                $item_description = $request->input('item_description');
+            } else {
+                $item_description = null;
+            }
+
+            $item_quantity = $request->input('item_quantity');
+
+            $item_price = null;
+            $item_insurance = false;
+
+            $item_type = 0;
+
+            ShipperShipmentBookController::add_item($shipment_id, $item_product_type_id, $item_description, $item_quantity, $item_price, $item_insurance, $item_type);
+
+
+            if ($user_type['logo_status'] == 1) {
+                $shipment = Shipment::find($shipment_id);
+                $shipment->shipment_invoice_status = 1;
+                $shipment->save();
+            }
+
+
+            return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+
         }
     }
 }

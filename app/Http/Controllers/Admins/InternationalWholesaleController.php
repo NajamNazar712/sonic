@@ -403,8 +403,8 @@ class InternationalWholesaleController extends Controller
                 $query->where('status', 1);
             })],
             'dhl_waybill' => ['required'],
-            'destination' => ['required', 'integer', Rule::exists('cities', 'id')->where(function($query){
-                $query->where('status', 1)->where('business_category_id', 2);
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where(function($query){
+                $query->where('status', 1)->where('hub', 1)->where('business_category_id', 2);
             })],
             'type' => ['required', 'between:0,190'],
             'weight' => ['required', 'numeric', 'between:0.1,100000'],
@@ -465,25 +465,25 @@ class InternationalWholesaleController extends Controller
                 }
                 if(empty($errors)){
                     $tracking_numbers = array();
-                    $invoice_shipment_ids = array();
-                    $invoice_shipper_id = NULL;
                     $invoice_data = array();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $shipper_id = trim($row['shipper_id']);
                         $tracking = trim($row['dhl_waybill']);
-                        $destination_id = trim($row['destination']);
+                        $destination_name = trim($row['destination']);
                         $type = trim($row['type']);
                         $weight = $row['weight'];
                         $pieces = $row['pieces'];
                         $other_charges = $row['other_charges'];
                         $shipper = WholesaleUser::find($shipper_id);
 
+                        $destination = City::where('name', $destination_name)->first();
+
                         $wholesale_shipment = new WholesaleShipment();
                         $wholesale_shipment->dhl_waybill = $tracking;
                         $wholesale_shipment->wholesale_user_id = $shipper_id;
                         $wholesale_shipment->origin_city_id = $shipper->city_id;
-                        $wholesale_shipment->destination_city_id = $destination_id;
+                        $wholesale_shipment->destination_city_id = $destination->id;
                         $wholesale_shipment->type = $type;
                         $wholesale_shipment->weight = $weight;
                         $wholesale_shipment->pieces = $pieces;
@@ -494,7 +494,7 @@ class InternationalWholesaleController extends Controller
                         $wholesale_shipment->created_by = Auth::id();
                         $wholesale_shipment->save();
 
-                        $courier_charges = InternationalWholesaleChargesController::weight($destination_id, $weight);
+                        $courier_charges = InternationalWholesaleChargesController::weight($destination->id, $weight);
 
                         $wholesale_shipment->courier_charges = $courier_charges;
                         $wholesale_shipment->bill_amount = $courier_charges + $other_charges;

@@ -311,6 +311,7 @@ class AdminAPIController extends Controller
 
     public function return_note_details(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Use Bolt form now onwards to Upload Images']);
         $admin_id = $request->admin_id;
         $return_note_id = $request->return_note_id;
         if ($return_note_id) {
@@ -373,6 +374,7 @@ class AdminAPIController extends Controller
 
     public function history_update_image(Request $request)
     {
+        return response()->json(['status' => 1, 'message' => 'Please Use Bolt form now onwards to Upload Images']);
         $rules = [
             'added_at' => ['required'],
             'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],

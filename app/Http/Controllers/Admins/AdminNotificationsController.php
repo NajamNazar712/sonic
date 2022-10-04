@@ -799,6 +799,9 @@ class AdminNotificationsController extends Controller
         elseif($id == 186){
             $details['fields'] = ['admin', 'role'];
         }
+        elseif($id == 191){
+            $details['fields'] = ['Shipper name'];
+        }
         return $details;
     }
 
