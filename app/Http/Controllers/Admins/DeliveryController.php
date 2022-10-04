@@ -21,7 +21,6 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
-use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
@@ -1813,7 +1812,7 @@ class DeliveryController extends Controller
                 $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
-                
+
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->pending_status, 'shipment_update' => $shipment_update, 'undelivered_printed' => $undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage, 'tomorrow' => $tomorrow, 'next3days' => $next3days, 'dayAfterTomorrow' => $dayAfterTomorrow, 'days15FromNow' => $days15fromNow, 'require_password' => $require_password, 'consignee_refused_reasons' => $consignee_refused_reasons]);
             } else {
                 return redirect(route('admin.delivery.receive.index'));
@@ -2535,7 +2534,7 @@ class DeliveryController extends Controller
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if($shipment_status->packaging_material_request == 0){
-                                
+
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0,NULL , NULL , NULL , NULL , $request->remarks_id[$shipment]);
                             }else if($shipment_status->packaging_material_charges != '' && $shipment_status->packaging_material_request == 1){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0,NULL , NULL , NULL , NULL , $request->remarks_id[$shipment]);
@@ -3376,7 +3375,7 @@ class DeliveryController extends Controller
 
     // Check
     public function receive_delivery_verify_status_submit(Request $request)
-    {  
+    {
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
         $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
@@ -4578,7 +4577,7 @@ class DeliveryController extends Controller
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
 
-        
+
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
@@ -5275,7 +5274,7 @@ class DeliveryController extends Controller
                     return 'Retail';;
                 }else{
                     return 'COD';;
-                    
+
                 }
             })
             ->editColumn('sdn_amount', function ($shipment) {
@@ -5523,8 +5522,8 @@ class DeliveryController extends Controller
             //             ->where('s.tracking_number', '=', $tracking_number);
             //     })
             //     ->groupBy('station_deposit_notes.id');
-            
-               
+
+
 
         }
         if ($tracking_number = $request->get('search_tracking_retail')) {
@@ -5543,7 +5542,7 @@ class DeliveryController extends Controller
 
         }
 
-        
+
         if ($dncc = $request->get('scan_dncc')) {
             $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
                 ->where('dnsdns.delivery_note_id', '=', $dncc)
@@ -6467,7 +6466,7 @@ class DeliveryController extends Controller
 
     public function one_link_payments(Request $request)
     {
-        
+
 
         $delivery_note_id = $request->delivery_note_id;
         $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','amount','tran_date_formated','tran_time_formated','created_at']);
@@ -6476,7 +6475,7 @@ class DeliveryController extends Controller
         {
             $payment_transaction_data = $payment_transaction_data->get();
             return response()->json(['status' => 1, 'transaction_data' => $payment_transaction_data]);
-            
+
         }
         else{
             return response()->json(['status' => 0, 'transaction_data' => []]);
@@ -8620,7 +8619,7 @@ class DeliveryController extends Controller
         $vigilance_verification = VigilanceVerification::where('delivery_note_id',$delivery_note_id)->get()->first();
 
         $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance_verification->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
-        
+
         $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$delivery_note_id)->pluck('shipment_id')->toArray();
         $diff_shipments = array_diff($delivery_note_shipments,$vigilance_shipments);
 
