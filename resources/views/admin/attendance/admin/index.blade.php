@@ -52,9 +52,27 @@
                                         </div>
                                         <div class="col-4 mt-1">
                                             <fieldset class="form-group">
+                                                <select name="search_disabled_admin" id="search_disabled_admin" class="form-control select2">
+                                                    @foreach($disabled_admins as $disabled_admin)
+                                                        <option value="{{$disabled_admin->id}}">{{$disabled_admin->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group">
                                                 <select name="search_rider" id="search_rider" class="form-control select2">
                                                     @foreach($riders as $rider)
                                                         <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_disabled_rider" id="search_disabled_rider" class="form-control select2">
+                                                    @foreach($disabled_riders as $disabled_rider)
+                                                        <option value="{{$disabled_rider->id}}">{{$disabled_rider->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
@@ -256,8 +274,18 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_disabled_admin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Disabled Staff',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Rider',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_disabled_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Disabled Rider',
                 width:'100%',
                 allowClear:true
             });
@@ -466,7 +494,9 @@
                     data: function (d) {
 
                         d.search_admin = $('#search_admin').val();
+                        d.search_disabled_admin = $('#search_disabled_admin').val();
                         d.search_rider = $('#search_rider').val();
+                        d.search_disabled_rider = $('#search_disabled_rider').val();
                         d.search_city = $('#search_city').val();
                         d.search_department = $('#search_department').val();
                         d.search_trax_id = $('#search_trax_id').val();

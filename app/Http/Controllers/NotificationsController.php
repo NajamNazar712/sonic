@@ -9728,10 +9728,10 @@ else if ($id == 178) {
                     }
                     
                     $to = $shipment->consignee_phone_number_1;
-                    self::sms($body, $to);
+                    self::sms($body, $to, 1);
                     if ($shipment->consignee_phone_number_2 != NULL) {
                         $to = $shipment->consignee_phone_number_2;
-                        self::sms($body, $to);
+                        self::sms($body, $to, 1);
                     }
                 }
 

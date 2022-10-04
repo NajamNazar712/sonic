@@ -26,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
+use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -7441,8 +7442,18 @@ class AdminReportsController extends Controller
         $admins = Admin::where('admins.status', 1)
             ->leftjoin('employee_designations as ed', 'admins.designation_id', 'ed.id')
             ->where('ed.department_id', 7);
+
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->where('multiple_sale_leads.admin_id', Auth::id())
+            ->pluck('mst.admin_id')->toArray();
+
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $admins = $admins->where('admins.id', Auth::id());
+            if(count($multiple_sales_tags) > 0) {
+                array_push($multiple_sales_tags, Auth::id());
+                $admins = $admins->whereIn('admins.id', $multiple_sales_tags);
+            }else{
+                $admins = $admins->where('admins.id', Auth::id());
+            }
         }
         $admins = $admins->get(['admins.id', 'admins.name']);
         $ratings = CrmRequestRating::all();
@@ -7462,8 +7473,18 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->where('multiple_sale_leads.admin_id', Auth::id())
+            ->pluck('mst.admin_id')->toArray();
+
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+            if(count($multiple_sales_tags) > 0){
+                array_push($multiple_sales_tags, Auth::id());
+                $daily_visit = $daily_visit->whereIn('daily_visits.admin_id', $multiple_sales_tags);
+            }
+            else{
+                $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+            }
         }
 
         $datatables = Datatables::of($daily_visit)
