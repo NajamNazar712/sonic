@@ -8804,7 +8804,8 @@ class DeliveryController extends Controller
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
                     'last_updated_at' => Carbon::now(),
-                    'ordering' => $order
+                    'ordering' => $order,
+                    'request_note_id' => $delivery_request->id
                 ]);
                 if ($note) {
                     if (!$order) {  //Default

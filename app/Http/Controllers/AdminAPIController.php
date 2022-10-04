@@ -10090,7 +10090,8 @@ class AdminAPIController extends Controller
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
                     'last_updated_at' => Carbon::now(),
-                    'ordering' => $order
+                    'ordering' => $order,
+                    'created_via_app' => 1
                 ]);
                 if ($note) {
                     if (!$order) {  //Default
@@ -10187,6 +10188,9 @@ class AdminAPIController extends Controller
                                 $shipment_otp->shipment_id = $shipment;
                             }
                             $shipment_otp->otp = $otp;
+                            $shipment_otp->rider_id = null;
+                            $shipment_otp->latitude = null;
+                            $shipment_otp->longitude = null;
                             $shipment_otp->save();
                             if ($shipment_obj->amount == 0) {
                                 //English
@@ -10230,6 +10234,8 @@ class AdminAPIController extends Controller
                     $rider_request->total_cod_amount = $total_cod_amount;
                     $rider_request->shipment_count = $shipments_count;
                     $rider_request->save();
+                    $note->request_note_id = $rider_request->id;
+                    $note->save();
                 }
                 //todo end
                 return response()->json(['status' => 0, 'create_message' => 'Delivery note has been created successfully']);
@@ -10351,7 +10357,9 @@ class AdminAPIController extends Controller
                         'admin_id' => $admin,
                         'total_cod_amount' => $total_cod_amount,
                         'last_updated_at' => Carbon::now(),
-                        'ordering' => $order
+                        'ordering' => $order,
+                        'created_via_app' => 1,
+                        'request_note_id' => $delivery_request->id
                     ]);
                     if ($note) {
                         if (!$order) {  //Default
@@ -10433,6 +10441,9 @@ class AdminAPIController extends Controller
                                     $shipment_otp->shipment_id = $shipment;
                                 }
                                 $shipment_otp->otp = $otp;
+                                $shipment_otp->rider_id = null;
+                                $shipment_otp->latitude = null;
+                                $shipment_otp->longitude = null;
                                 $shipment_otp->save();
                                 if ($shipment_obj->amount == 0) {
                                     //English
