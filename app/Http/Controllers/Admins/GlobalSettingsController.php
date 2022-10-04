@@ -3861,11 +3861,11 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_1' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_2' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_3' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_4' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_5' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_1' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_2' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_3' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_4' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_5' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_1') && !$request->hasFile('upload_image_2') && !$request->hasFile('upload_image_3') && !$request->hasFile('upload_image_4') && !$request->hasFile('upload_image_5')) {
@@ -5250,11 +5250,11 @@ public function sales_incentive()
     public function admin_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_6' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_7' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_8' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_9' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_10' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_6' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_7' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_8' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_9' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_10' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_6') && !$request->hasFile('upload_image_7') && !$request->hasFile('upload_image_8') && !$request->hasFile('upload_image_9') && !$request->hasFile('upload_image_10')) {
@@ -5347,11 +5347,11 @@ public function sales_incentive()
     public function retail_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_11' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_12' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_13' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_14' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_15' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_11' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_12' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_13' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_14' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_15' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_11') && !$request->hasFile('upload_image_12') && !$request->hasFile('upload_image_13') && !$request->hasFile('upload_image_14') && !$request->hasFile('upload_image_15')) {
@@ -6981,7 +6981,7 @@ public function sales_incentive()
             $delivery_location_keyword->save();
 
         }
-        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Added');
+        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Delivery Area Keyword Added');
 
     }
 

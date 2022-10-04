@@ -125,7 +125,7 @@
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone1" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
                                     </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="consignee_name" id="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
@@ -585,7 +585,7 @@
 
 
             $(".phone1").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-            $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
+            // $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
             $('.amount').inputmask({

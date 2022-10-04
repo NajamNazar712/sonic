@@ -1957,6 +1957,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_permission_index')->name('index');
                 Route::post('module_permission', 'Admins\UserManagementController@module_permission')->name('modulepermission');
                 Route::post('list', 'Admins\UserManagementController@role_permission_list')->name('list');
+                Route::post('store', 'Admins\UserManagementController@module_permission_update_store')->name('store');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function() {
