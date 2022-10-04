@@ -8632,7 +8632,10 @@ class DeliveryController extends Controller
         $otp = ShipmentOtp::join('shipments as s', 'shipment_otps.shipment_id', '=', 's.id')
             ->leftjoin('riders as r', 'r.id', '=', 'shipment_otps.rider_id')
             ->join('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+            ->join('delivery_note_shipments as ds', 'ds.shipment_id', '=', 's.id')
+            ->join('delivery_notes as dn', 'dn.id', '=', 'ds.delivery_note_id')
             ->where('s.amount', 0)
+            ->where('dn.pending_status', 1)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id');
 
         if (session('role_id') != 1){
