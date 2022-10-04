@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -56,6 +57,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -207,6 +209,7 @@
                             head.push('Hub');
                             head.push('Return City');
                             head.push('Consignee Name');
+                            head.push('Consignee Sub Station');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
@@ -217,6 +220,7 @@
                             head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Received By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -234,6 +238,7 @@
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.consignee_name);
+                                row.push(values.sub_station);
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.service_type);
@@ -244,7 +249,7 @@
                                 row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
-
+                                row.push(values.received_by);
                                 body.push(row);
                             });
                         },
@@ -457,7 +462,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[22, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -472,6 +477,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city', orderable: false, searchable: false},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
@@ -482,6 +488,7 @@
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -505,7 +512,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')|| $(header).is('.select-checkbox') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city')) {
+                        if ($(header).is('.serial_number')|| $(header).is('.select-checkbox') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city') || $(header).is('.sub_station')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))

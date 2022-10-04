@@ -8841,6 +8841,14 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
+                ->join('users as u', 'u.id', '=', 's.user_id')
+                ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
+                ->where('st.status', 0)
+                ->groupBy('u.id')
+                ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
+
             $role_id = $request->admin_role_id;
             $admin_id = $request->admin_id;
             $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
@@ -8864,7 +8872,7 @@ class AdminAPIController extends Controller
                         ->where('rrb.id', '=',
                             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
                 })
-                ->select(['return_notes.id as return_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'usi.pickup_address as address', 'users.name as shipper', 'bt.booking_type as service_type', 'shipments.booking_type_id', 'shipments.shipper_status_id', 'ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges', 'crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
+                ->select(['return_notes.id as return_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'usi.pickup_address as address', 'users.name as shipper', 'bt.booking_type as service_type', 'shipments.booking_type_id', 'shipments.shipper_status_id', 'ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges', 'crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name', 'shipments.user_id as user_id'])
                 ->where('return_notes.id', $request->return_note_id);
 
             if ($role_id != 1) {
@@ -8891,9 +8899,15 @@ class AdminAPIController extends Controller
                         $statuses = [['id' => $shipment->shipper_status_id, 'name' => $shipment->current_status_name]];
                     } else {
                         if (in_array($shipment->booking_type_id, [1, 4, 5])) {
-                            $where = array(24, 47, 48, 60);
+                            $where = array(24, 47, 48);
+                            if(!in_array($shipment->user_id,$negative)){
+                                $where[] = 60;
+                            }
                         } else if ($shipment->booking_type_id == 2) {
-                            $where = array(47, 48, 60);
+                            $where = array(47, 48);
+                            if(!in_array($shipment->user_id,$negative)){
+                                $where[] = 60;
+                            }
                             if (in_array($shipment->shipper_status_id, $return_array)) {
                                 $where[] = 25;
                             } else {
@@ -8901,7 +8915,11 @@ class AdminAPIController extends Controller
                             }
 
                         } else if ($shipment->booking_type_id == 3) {
-                            $where = array(35, 47, 48, 60);
+                            $where = array(35, 47, 48);
+                            if(!in_array($shipment->user_id,$negative)){
+                                $where[] = 60;
+                            }
+
                         }
                         $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->get();
                     }
@@ -9032,6 +9050,13 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
+                ->join('users as u', 'u.id', '=', 's.user_id')
+                ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
+                ->where('st.status', 0)
+                ->groupBy('u.id')
+                ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
             $shipment_ids = explode(',', $request->shipments);
             $shipment_status = $request->shipment_status;
             $shipment_reason = ($request->shipment_reason == -1) ? NULL : $request->shipment_reason;
@@ -9048,6 +9073,7 @@ class AdminAPIController extends Controller
             if (in_array($shipment_status, $shipment_status_mandatory) && $shipment_reason == -1) {
                 return response()->json(['status' => 1, 'message' => 'Reason is Mandatory for Selected Status']);
             }
+            $negative_shipper = array();
             if ($shipment_status == 25) {
                 foreach ($shipment_ids as $shipment_id) {
                     $parcel = Shipment::where('id', $shipment_id)->first();
@@ -9087,6 +9113,7 @@ class AdminAPIController extends Controller
                         $return_note_details->completion_status = 1;
                         $return_note_details->save();
                     }
+
                 }
                 $shipment_status_count = ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'status' => 0])->count();
                 if ($shipment_status_count == 0) {
@@ -9103,17 +9130,20 @@ class AdminAPIController extends Controller
                 $remarks = $request->remarks;
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->user_id, $negative) && $shipment_status == 60) {
+                        array_push($negative_shipper, $shipment->tracking_number);
+                    } else {
+                        $shipment->shipper_status_id = $shipment_status;
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, $admin_id, $request->return_note_id);
 
-                    $shipment->shipper_status_id = $shipment_status;
-                    $shipment->save();
-                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, $admin_id, $request->return_note_id);
-
-                    ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
-                    if (count($open_box_ids) > 0) {
-                        if (in_array($shipment_id, $open_box_ids)) {
-                            $shipment->open_box = 1;
-                            $shipment->save();
-                            ShipmentOpenBoxJourneyController::add($shipment_id, 7, $admin_id);
+                        ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                        if (count($open_box_ids) > 0) {
+                            if (in_array($shipment_id, $open_box_ids)) {
+                                $shipment->open_box = 1;
+                                $shipment->save();
+                                ShipmentOpenBoxJourneyController::add($shipment_id, 7, $admin_id);
+                            }
                         }
                     }
                 }
@@ -9133,7 +9163,12 @@ class AdminAPIController extends Controller
                 }
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
-                return response()->json(['status' => 0, 'bulk_update_message' => 'Return Note Status Has Been Updated']);
+                if (count($negative_shipper) > 0) {
+                    return response()->json(['status' => 0, 'bulk_update_message' => 'Following Shipments Has Not Been Updated to' . PHP_EOL . 'Return Unsuccessful for CX and Sales'.PHP_EOL. implode(PHP_EOL, $negative_shipper)]);
+                } else {
+                    return response()->json(['status' => 0, 'bulk_update_message' => 'Return Note Status Has Been Updated']);
+                }
+
             }
 
         }
