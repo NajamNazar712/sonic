@@ -29,8 +29,8 @@ class UpdateShipmentOtpForRiderInfo extends Migration
     {
         Schema::table('shipment_otps', function (Blueprint $table) {
             $table->dropColumn('rider_id');
-            $table->dropColumn('latitude', 10, 6);
-            $table->dropColumn('longitude', 10, 6);
+            $table->dropColumn('latitude');
+            $table->dropColumn('longitude');
         });
     }
 }

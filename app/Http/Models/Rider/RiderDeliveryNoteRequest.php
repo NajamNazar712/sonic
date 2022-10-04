@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Rider;
+namespace App\Http\Models\Rider;
 
 use Illuminate\Database\Eloquent\Model;
 
