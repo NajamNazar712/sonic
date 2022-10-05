@@ -4106,6 +4106,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('shipment_otp')->name('shipment_otp.')->group(function () {
         Route::get('', 'Admins\DeliveryController@shipment_otp_index')->name('index');
         Route::get('list', 'Admins\DeliveryController@shipment_otp_list')->name('list');
+        Route::post('update', 'Admins\DeliveryController@shipment_otp_update')->name('update');
     });
 
     Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
