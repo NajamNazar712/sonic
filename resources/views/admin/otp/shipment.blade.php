@@ -11,6 +11,25 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                @if(session('role_id') == 1 || in_array(819,session('permissions')))
+                    <form action="{{route('admin.shipment_otp.update')}}" method="post" novalidate="novalidate" id="delivery_otp_form">
+                        @csrf
+                        <div class="row justify-content-center">
+                            <div class="input-group col-3">
+                                <label class="mr-2 font-small-3"><b>Shipment OTP: </b></label>
+                                <div class="form-group">
+                                    <input type="checkbox" name="otp_toggle" id="otp_toggle" class="switchery otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="input-group col-2">
+                                <button class="btn btn-primary">Update</button>
+                            </div>
+                        </div>
+                    </form>
+                @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -208,6 +227,44 @@
             }
 
 
+        });
+
+        $("#delivery_otp_form").validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
+            },
+            submitHandler: function (form) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to toggle Shipment OTP!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if(confirm){
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                        blockPagePermanently();
+                        form.submit();
+                    }
+                });
+            }
         });
     </script>
 @endsection

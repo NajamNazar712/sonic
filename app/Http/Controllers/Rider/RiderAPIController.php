@@ -12089,6 +12089,14 @@ class RiderAPIController extends Controller
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
 
+            $delivery_otp = 1;
+            $settings = GlobalSettings::where('type','delivery_otp');
+            if($settings->exists())
+            {
+                $settings = $settings->first();
+                $delivery_otp = ($settings->setting_value == 1) ? 0 : 1;
+            }
+
             $nodes = array();
 
             foreach ($delivery_notes as $delivery_note) {
@@ -12249,6 +12257,7 @@ class RiderAPIController extends Controller
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
+                    $deliveries['delivery_otp'] = $delivery_otp;
                     $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);

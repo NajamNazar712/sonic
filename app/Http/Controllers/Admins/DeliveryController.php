@@ -9111,7 +9111,18 @@ class DeliveryController extends Controller
 
     public function shipment_otp_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),608);
-        return view('admin.otp.shipment');
+        $settings = GlobalSettings::where('type','delivery_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->setting_value = 1;
+            $settings->type = "delivery_otp";
+            $settings->save();
+        }
+        else{
+            $settings = $settings->first();
+        }
+        return view('admin.otp.shipment')->with(['setting'=>$settings]);
     }
 
     public function shipment_otp_list(Request $request){
@@ -9166,5 +9177,24 @@ class DeliveryController extends Controller
                 return $location;
             });
         return $datatable->make(true);
+    }
+
+    public function shipment_otp_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 612);
+        $settings = GlobalSettings::where('type','delivery_otp');
+        if($settings->doesntExist())
+        {
+            $settings = new GlobalSettings();
+            $settings->type = "delivery_otp";
+        }
+        else{
+            $settings = $settings->first();
+        }
+
+        $settings->setting_value = $request->has('otp_toggle') ? 1 : 0;
+        $settings->save();
+
+        return back()->with(['success'=>"Shipment OTP Updated Successfully"]);
     }
 }
