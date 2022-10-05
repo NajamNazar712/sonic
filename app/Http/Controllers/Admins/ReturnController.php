@@ -1392,10 +1392,10 @@ class ReturnController extends Controller
                     }
                 },
             ])
-            ->addColumn('received_by', function ($shipment) {
+           /* ->addColumn('received_by', function ($shipment) {
                 return $shipment->receiver_name;
 //                return $shipment->shipment_id;
-            })
+            })*/
             ->addColumn('return_pending_for', function ($shipment) {
                 if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46,47,48])) {
                     return 'Shipper';
