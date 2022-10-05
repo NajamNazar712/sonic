@@ -4618,7 +4618,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('cash_amount', function ($shipment) {
-                if($shipment->cash_amount >= 0){
+                if($shipment->cash_amount){
                     return number_format($shipment->cash_amount);
                 }
                 else{
