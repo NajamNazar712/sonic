@@ -7400,5 +7400,45 @@ public function sales_incentive()
 
         return response()->json(['status' => 1, 'services' => $all_services]);
     }
+
+    public function non_cod_otp_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),613);
+        $user_ids = array();
+
+        $settings = GlobalSettings::where('type', 'non_cod_otp_shippers');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $user_ids = array_map('intval', explode(',', $settings->text));
+        }
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.otp.non_cod_otp_shippers')->with(['shippers' => $shippers, 'user_ids' => $user_ids]);
+    }
+
+    public function non_cod_otp_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),614);
+        if ($request->has('users')) {
+            $user_ids = implode(',', $request->users);
+            $settings = GlobalSettings::where('type', 'non_cod_otp_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'non_cod_otp_shippers';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $user_ids;
+            $settings->save();
+        } else {
+            GlobalSettings::where('type', 'non_cod_otp_shippers')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
     
 }

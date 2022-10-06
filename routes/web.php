@@ -3476,6 +3476,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@complain_portal_shippers')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@complain_portal_shippers_update')->name('update');
         });
+
+        Route::prefix('non_cod_otp_shippers')->name('non_cod_otp_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@non_cod_otp_shippers_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@non_cod_otp_shippers_store')->name('store');
+        });
         
 
 	});
