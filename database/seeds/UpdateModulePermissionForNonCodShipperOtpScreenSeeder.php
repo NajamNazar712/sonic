@@ -14,7 +14,7 @@ class UpdateModulePermissionForNonCodShipperOtpScreenSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('global_settings')->insert(array(
-            array('type' => 'non_cod_otp_shippers', 'setting_value' => 0, 'text' => Null, 'created_at' => $timestamp, 'updated_at' => $timestamp)
+            array('type' => 'non_cod_otp_shippers', 'setting_value' => 0, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
 
         DB::table('activity_trail_actions')->insert(array(
