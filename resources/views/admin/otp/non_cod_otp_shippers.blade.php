@@ -22,16 +22,27 @@
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.non_cod_otp_shippers.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="col-12 form-group">
-                                            <select name="users[]" id="users_select" class="form-control select2" multiple="multiple">
+                                            <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
+                                            <input type="checkbox" name="all_shipper_toggle" id="all_shipper_toggle" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true" @if(isset($all_shippers->setting_value) && $all_shippers->setting_value == 1) checked @endif>
+                                        </div>
+                                        <div class="col-12 form-group" id="excluded_users_container">
+                                            <label class="mr-2 font-small-3"><b>Exclude Shipper(s) </b></label>
+                                            <select name="excluded_users[]" id="excluded_users" class="form-control select2" multiple="multiple">
                                                 @foreach($shippers as $shipper)
                                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-12 form-group">
-                                            <button type="button" class="col-md-2 btn btn-primary" id="select_all">Select All</button>
-                                            <button type="button" class="col-md-2 btn btn-primary" id="select_none" disabled>Select None</button>
+
+                                        <div class="col-12 form-group" id="only_users_container">
+                                            <label class="mr-2 font-small-3"><b>Only Shipper(s) </b></label>
+                                            <select name="only_users[]" id="only_users" class="form-control select2" data-rule-required="true"  data-msg-required="This Field is required" style="width: 100%" multiple="multiple">
+                                                @foreach($shippers as $shipper)
+                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
+
                                         <div class="col-md-12 form-group">
                                             <button type="submit" class="col-md-4 btn btn-primary">Update</button>
                                         </div>
@@ -67,16 +78,32 @@
     <script>
         $(document).ready(function() {
 
-            $('#users_select').select2({
-                placeholder:'Select Shippers',
+            setTimeout(function(){
+                $("#all_shipper_toggle").trigger('change');
+                }, 100);
+
+            $('#excluded_users').select2({
+                placeholder:'Select Exclude Shippers',
                 width:'100%',
                 allowClear:true
             });
 
-            @if(count($user_ids) > 0)
-                var ids = @json($user_ids);
-                $('#users_select').val(ids).trigger('change');
+            $('#only_users').select2({
+                placeholder:'Select Only Shippers',
+                width:'100%',
+                allowClear:true
+            });
+
+            @if(count($excluded_shippers) > 0)
+                var ids = @json($excluded_shippers);
+                $('#excluded_users').val(ids).trigger('change');
             @endif
+
+            @if(count($only_shippers) > 0)
+                var ids = @json($only_shippers);
+                $('#only_users').val(ids).trigger('change');
+            @endif
+
             $('#settings_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -84,15 +111,14 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 }
             });
-
-            $("#select_all").click(function(){
-                $("#users_select > option").prop("selected","selected").trigger("change");
-                $("#select_none").removeAttr('disabled');
-            });
-
-            $("#select_none").click(function(){
-                $('#users_select').val('').trigger('change');
-                $("#select_none").attr('disabled');
+            $("#all_shipper_toggle").change(function(){
+                if($("#all_shipper_toggle").is(':checked') ){
+                    $("#excluded_users_container").removeClass('d-none');
+                    $("#only_users_container").addClass('d-none');
+                }else{
+                    $("#excluded_users_container").addClass('d-none');
+                    $("#only_users_container").removeClass('d-none');
+                }
             });
         });
     </script>
