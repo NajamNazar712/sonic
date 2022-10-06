@@ -16,7 +16,7 @@ class UpdateModulePermissionForNonCodShipperOtpScreenSeeder extends Seeder
         DB::table('global_settings')->insert(array(
             array('type' => 'non_cod_otp_excluded_shippers', 'setting_value' => 0, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('type' => 'non_cod_otp_only_shippers', 'setting_value' => 0, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('type' => 'non_cod_otp_all_shippers', 'setting_value' => 0, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp)
+            array('type' => 'non_cod_otp_all_shippers', 'setting_value' => 1, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
 
         DB::table('activity_trail_actions')->insert(array(

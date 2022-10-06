@@ -12068,20 +12068,38 @@ class RiderAPIController extends Controller
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
 
-            $delivery_otp = 1;
+            $delivery_otp = 0;
             $non_cod_otp_shipper_ids = array();
             $settings = GlobalSettings::where('type','delivery_otp');
-            $non_cod_otp_shippers = GlobalSettings::where('type', 'non_cod_otp_shippers');
+
+            $all_shippers = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
 
             if($settings->exists())
             {
                 $settings = $settings->first();
-                $delivery_otp = ($settings->setting_value == 1) ? 0 : 1;
+                $delivery_otp = $settings->setting_value;
             }
 
-            if ($non_cod_otp_shippers->exists()) {
-                $non_cod_otp_shippers = $non_cod_otp_shippers->first();
-                $non_cod_otp_shipper_ids = array_map('intval', explode(',', $non_cod_otp_shippers->text));
+            if ($all_shippers->exists()) {
+                $all_shippers = $all_shippers->first();
+                if($all_shippers->setting_value == 1){
+                    $excluded_shippers = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
+                    if ($excluded_shippers->exists()) {
+                        $excluded_shippers = $excluded_shippers->first();
+                        $excluded_shippers = array_map('intval', explode(',', $excluded_shippers->text));
+                    } else{
+                        $excluded_shippers = [];
+                    }
+                }
+                else{
+                    $only_shippers = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
+                    if ($only_shippers->exists()) {
+                        $only_shippers = $only_shippers->first();
+                        $only_shippers = array_map('intval', explode(',', $only_shippers->text));
+                    } else{
+                        $only_shippers = [];
+                    }
+                }
             }
 
             $nodes = array();
@@ -12244,6 +12262,23 @@ class RiderAPIController extends Controller
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
+                    if($delivery_otp == 1){
+                        if($all_shippers->setting_value == 1){
+                            if(count($excluded_shippers) > 0){
+                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$excluded_shippers)) ? 1 : 0;
+                            } else{
+                                $deliveries['delivery_otp'] = 0;
+                            }
+                        } else{
+                            if(count($only_shippers) > 0){
+                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$only_shippers)) ? 0 : 1;
+                            } else{
+                                $deliveries['delivery_otp'] = 1;
+                            }
+                        }
+                    } else{
+                        $deliveries['delivery_otp'] = 1;
+                    }
                     $deliveries['delivery_otp'] = (in_array($shipment_data->user_id, $non_cod_otp_shipper_ids)) ? $delivery_otp : 1;
                     $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
