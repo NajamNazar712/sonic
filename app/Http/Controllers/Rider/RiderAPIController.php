@@ -12067,13 +12067,10 @@ class RiderAPIController extends Controller
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
-
             $delivery_otp = 0;
             $non_cod_otp_shipper_ids = array();
             $settings = GlobalSettings::where('type','delivery_otp');
-
             $all_shippers = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
-
             if($settings->exists())
             {
                 $settings = $settings->first();
