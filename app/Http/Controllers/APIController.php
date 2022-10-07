@@ -6091,7 +6091,7 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-        $daraz_account_ids = [7306, 7308, 10377];
+        $daraz_account_ids = [7306, 7308, 10389];
         if(!in_array($user_id, $daraz_account_ids)){
             return response()->json(['status' => 1, 'message' => 'Shipper is not allowed.']);
         }
