@@ -12098,7 +12098,6 @@ class RiderAPIController extends Controller
                     }
                 }
             }
-//            dd($excluded_shippers, $all_shippers->setting_value, $delivery_otp);
 
             $nodes = array();
 
@@ -12264,7 +12263,6 @@ class RiderAPIController extends Controller
                         if($all_shippers->setting_value == 1){
                             if(count($excluded_shippers) > 0){
                                 $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$excluded_shippers)) ? 1 : 0;
-                                dd($deliveries['delivery_otp']);
                             } else{
                                 $deliveries['delivery_otp'] = 0;
                             }
@@ -12278,7 +12276,6 @@ class RiderAPIController extends Controller
                     } else{
                         $deliveries['delivery_otp'] = 1;
                     }
-                    $deliveries['delivery_otp'] = (in_array($shipment_data->user_id, $non_cod_otp_shipper_ids)) ? $delivery_otp : 1;
                     $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
