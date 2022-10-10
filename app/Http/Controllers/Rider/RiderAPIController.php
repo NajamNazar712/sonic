@@ -12083,7 +12083,7 @@ class RiderAPIController extends Controller
                     $excluded_shippers = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
                     if ($excluded_shippers->exists()) {
                         $excluded_shippers = $excluded_shippers->first();
-                        $excluded_shippers = array_map('intval', explode(',', $excluded_shippers->text));
+                        $excluded_shippers = explode(',', $excluded_shippers->text);
                     } else{
                         $excluded_shippers = [];
                     }
@@ -12092,7 +12092,7 @@ class RiderAPIController extends Controller
                     $only_shippers = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
                     if ($only_shippers->exists()) {
                         $only_shippers = $only_shippers->first();
-                        $only_shippers = array_map('intval', explode(',', $only_shippers->text));
+                        $only_shippers = explode(',', $only_shippers->text);
                     } else{
                         $only_shippers = [];
                     }
