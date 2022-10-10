@@ -12098,7 +12098,7 @@ class RiderAPIController extends Controller
                     }
                 }
             }
-            dd($only_shippers, $excluded_shippers, $all_shippers->setting_value, $delivery_otp);
+            dd($excluded_shippers, $all_shippers->setting_value, $delivery_otp);
 
             $nodes = array();
 
