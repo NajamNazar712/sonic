@@ -12263,8 +12263,8 @@ class RiderAPIController extends Controller
                     if($delivery_otp == 1){
                         if($all_shippers->setting_value == 1){
                             if(count($excluded_shippers) > 0){
-                                dd(1);
                                 $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$excluded_shippers)) ? 1 : 0;
+                                dd($deliveries['delivery_otp']);
                             } else{
                                 $deliveries['delivery_otp'] = 0;
                             }
