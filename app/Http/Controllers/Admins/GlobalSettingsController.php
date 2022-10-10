@@ -7400,5 +7400,102 @@ public function sales_incentive()
 
         return response()->json(['status' => 1, 'services' => $all_services]);
     }
+
+    public function non_cod_otp_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),613);
+        $excluded_shippers = array();
+        $only_shippers = array();
+
+        $excluded_shipper = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
+        $only_shipper = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
+        $all_shipper = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
+
+        if ($excluded_shipper->exists()) {
+            $excluded_shipper = $excluded_shipper->first();
+            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper->text));
+        } else{
+            $excluded_shipper = new GlobalSettings();
+            $excluded_shipper->setting_value = 0;
+            $excluded_shipper->type = "non_cod_otp_excluded_shippers";
+            $excluded_shipper->save();
+        }
+
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $only_shipper->text));
+        } else{
+            $only_shipper = new GlobalSettings();
+            $only_shipper->setting_value = 0;
+            $only_shipper->type = "non_cod_otp_only_shippers";
+            $only_shipper->save();
+        }
+
+        if ($all_shipper->exists()) {
+            $all_shipper = $all_shipper->first();
+        } else{
+            $all_shipper = new GlobalSettings();
+            $all_shipper->setting_value = 1;
+            $all_shipper->type = "non_cod_otp_all_shippers";
+            $all_shipper->save();
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.otp.non_cod_otp_shippers')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper]);
+    }
+
+    public function non_cod_otp_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),614);
+
+        $all_shipper_settings = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
+        if($all_shipper_settings->exists()){
+            $all_shipper_settings = $all_shipper_settings->first();
+        } else{
+            $all_shipper_settings = new GlobalSettings();
+            $all_shipper_settings->type = 'non_cod_otp_all_shippers';
+        }
+        $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
+        $all_shipper_settings->save();
+
+        if ($request->has('excluded_users')) {
+            $excluded_users = implode(',', $request->excluded_users);
+            $settings = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'non_cod_otp_excluded_shippers';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $excluded_users;
+            $settings->save();
+        } else{
+            GlobalSettings::where('type', 'non_cod_otp_excluded_shippers')->delete();
+        }
+
+        if ($request->has('only_users')) {
+            $only_users = implode(',', $request->only_users);
+            $settings = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'non_cod_otp_excluded_shippers';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $only_users;
+            $settings->save();
+        } else{
+            GlobalSettings::where('type', 'non_cod_otp_only_shippers')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
     
 }
