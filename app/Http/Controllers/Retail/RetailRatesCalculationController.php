@@ -53,7 +53,7 @@ class RetailRatesCalculationController extends Controller
                         }
                     }
                     if($shipping_mode_id == 1){
-                        $zone_class = ZoneClassCity::where('city_id', $destination_id)->where('zone_id', $destination_city->zone_id)->first();
+                        $zone_class = ZoneClassCity::where('city_id', $destination_id)->where('zone_id', $destination_city->zone_id)->latest()->first();
                         if($zone_class->class == 0){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($round_additional_weight * $weight_charges->zone_a);
