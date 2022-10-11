@@ -3995,7 +3995,8 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 153);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
-        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes' => $shipping_modes, 'salesperson' => $salesperson]);
+        $shippers = User::all();
+        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes' => $shipping_modes, 'salesperson' => $salesperson, 'shippers' => $shippers]);
 
     }
 
@@ -4046,6 +4047,10 @@ class AdminReportsController extends Controller
 
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $datatable->where('u.id', '=', $shipper);
         }
 
         if ($sale_persons = $request->get('sale_persons')) {

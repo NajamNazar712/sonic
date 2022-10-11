@@ -1957,6 +1957,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_permission_index')->name('index');
                 Route::post('module_permission', 'Admins\UserManagementController@module_permission')->name('modulepermission');
                 Route::post('list', 'Admins\UserManagementController@role_permission_list')->name('list');
+                Route::post('store', 'Admins\UserManagementController@module_permission_update_store')->name('store');
             });
 
             Route::prefix('update/{id}')->name('update.')->group(function() {
@@ -3475,6 +3476,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@complain_portal_shippers')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@complain_portal_shippers_update')->name('update');
         });
+
+        Route::prefix('non_cod_otp_shippers')->name('non_cod_otp_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@non_cod_otp_shippers_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@non_cod_otp_shippers_store')->name('store');
+        });
         
 
 	});
@@ -4105,6 +4111,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('shipment_otp')->name('shipment_otp.')->group(function () {
         Route::get('', 'Admins\DeliveryController@shipment_otp_index')->name('index');
         Route::get('list', 'Admins\DeliveryController@shipment_otp_list')->name('list');
+        Route::post('update', 'Admins\DeliveryController@shipment_otp_update')->name('update');
     });
 
     Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){

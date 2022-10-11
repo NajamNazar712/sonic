@@ -54,7 +54,7 @@
                                             <fieldset class="form-group">
                                                 <select name="search_disabled_admin" id="search_disabled_admin" class="form-control select2">
                                                     @foreach($disabled_admins as $disabled_admin)
-                                                        <option value="{{$disabled_admin->id}}">{{$disabled_admin->name}}</option>
+                                                        <option value="{{$disabled_admin->id}}">{{$disabled_admin->name}} - {{$disabled_admin->trax_id}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
@@ -72,7 +72,7 @@
                                             <fieldset class="form-group">
                                                 <select name="search_disabled_rider" id="search_disabled_rider" class="form-control select2">
                                                     @foreach($disabled_riders as $disabled_rider)
-                                                        <option value="{{$disabled_rider->id}}">{{$disabled_rider->name}}</option>
+                                                        <option value="{{$disabled_rider->id}}">{{$disabled_rider->name}} - {{$disabled_rider->trax_id}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
