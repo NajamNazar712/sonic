@@ -5786,6 +5786,7 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
                         $to[] = 'arbab.alam@trax.pk';
+                        $to[] = 'mohsin.khan@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'danish.zahid@trax.pk';
@@ -8138,6 +8139,7 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
                         $to[] = 'arbab.alam@trax.pk';
+                        $to[] = 'mohsin.khan@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'danish.zahid@trax.pk';
