@@ -8684,6 +8684,7 @@ class DeliveryController extends Controller
             ->join('delivery_note_shipments as ds', 'ds.shipment_id', '=', 's.id')
             ->join('delivery_notes as dn', 'dn.id', '=', 'ds.delivery_note_id')
             ->where('s.amount', 0)
+            ->whereNotNull('shipment_otps.dbf_otp')
             ->where('dn.pending_status', 0)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id');
 
