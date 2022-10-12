@@ -12271,7 +12271,7 @@ class RiderAPIController extends Controller
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
-                    $deliveries['dbf_otp'] = ($dbf_otp != 0) ? (string)$dbf_otp : null;
+                    $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
