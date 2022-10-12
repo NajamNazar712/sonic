@@ -8692,6 +8692,15 @@ class DeliveryController extends Controller
         }
 
         $datatable = Datatables::of($otp)
+
+            ->addColumn('otp', function ($shipments) {
+                if($shipments->dbf_otp){
+                    return $shipments->dbf_otp;
+                } else{
+                    return " - ";
+                }
+            })
+
             ->addColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
             })
