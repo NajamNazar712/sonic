@@ -1301,6 +1301,9 @@ class Permission
             'international.wholesale.excel.index' => 804,
             'international.wholesale.invoices.index' => 807,
 
+            'settings.non_cod_otp_shippers.index' => 820,
+            'settings.non_cod_otp_shippers.store' => 820,
+
         ],
 
         'shipper' => [
