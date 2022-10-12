@@ -15,7 +15,7 @@ class UpdateShipmentOtpForDbfOtp extends Migration
     {
         Schema::table('shipment_otps', function (Blueprint $table) {
             $table->integer('otp')->nullable()->change();
-            $table->integer('dbf_otp')->nullable();
+            $table->integer('dbf_otp')->default(null);
         });
     }
 
