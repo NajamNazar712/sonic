@@ -12068,7 +12068,6 @@ class RiderAPIController extends Controller
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
             $delivery_otp = 0;
-            $non_cod_otp_shipper_ids = array();
             $settings = GlobalSettings::where('type','delivery_otp');
             $all_shippers = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
             if($settings->exists())
@@ -12258,7 +12257,7 @@ class RiderAPIController extends Controller
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
-                    $deliveries['dbf_otp'] = (string)$dbf_otp;
+                    $deliveries['dbf_otp'] = ($dbf_otp != 0) ? (string)$dbf_otp : null;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
