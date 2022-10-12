@@ -967,23 +967,28 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
+
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                    $dbf_otp = mt_rand(100000, 999999);
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                    } else {
+                        $shipment_otp = new ShipmentOtp();
+                        $shipment_otp->shipment_id = $shipment;
+                    }
+                    $shipment_otp->dbf_otp = $dbf_otp;
+                    $shipment_otp->rider_id = null;
+                    $shipment_otp->latitude = null;
+                    $shipment_otp->longitude = null;
+
                     $pos = array_keys($shipments, $shipment);
                     if ($notifications[$pos[0]]) {
                         $shipment_obj = Shipment::find($shipment);
-                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                         $otp = mt_rand(100000, 999999);
-                        if ($shipment_otp->exists()) {
-                            $shipment_otp = $shipment_otp->first();
-                        } else {
-                            $shipment_otp = new ShipmentOtp();
-                            $shipment_otp->shipment_id = $shipment;
-                        }
                         $shipment_otp->otp = $otp;
-                        $shipment_otp->rider_id = null;
-                        $shipment_otp->latitude = null;
-                        $shipment_otp->longitude = null;
                         $shipment_otp->save();
                         if ($shipment_obj->amount == 0) {
                             //English
@@ -993,6 +998,10 @@ class DeliveryController extends Controller
                         } else {
                             NotificationsController::send(12, $note->id, $shipment);
                         }
+                    }
+                    else{
+                        $shipment_otp->otp = null;
+                        $shipment_otp->save();
                     }
                 }
                 NotificationsController::send(40, $note->id);
