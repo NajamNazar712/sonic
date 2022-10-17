@@ -541,7 +541,7 @@
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'transactions_amount_link' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
-                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {

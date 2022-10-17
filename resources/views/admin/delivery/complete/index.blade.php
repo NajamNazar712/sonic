@@ -152,6 +152,28 @@
     </div>
     <!-- one link payment details popup -->
 
+
+    <!--HBL Konnect Information -->
+    <div class="modal fade" id="transactions_information_modal" data-backdrop="static" role="dialog" aria-labelledby="transactions_information_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white" id="transactions_information_modal_title">HBL Konnect Amount</h4>
+
+                    <button type="button" class="close white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--HBL Konnect Information -->
+
 @endsection
 
 @section('css')
@@ -465,7 +487,7 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
-                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -833,6 +855,47 @@
                     });
 
             });
+
+            $('#datatable tbody').on('click','tr td.transactions_amount button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#transactions_information_modal .modal-body').html('');
+                $('#transactions_information_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.transactions.information') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status === 1) {
+                            var html = '';
+                            html += '<table class="table table-bordered text-center">';
+                            html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.details, function (index, value) {
+                                console.log(value);
+                                var ind = index + 1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value.transaction_id + '</td>';
+                                html += '<td>' + value.amount + '</td>';
+                                html += '<td>' + value.deposited_at + '</td>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            $('#transactions_information_modal .modal-body').html(html);
+                            $('#transactions_information_modal').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+
+            });
+
 
         });
     </script>

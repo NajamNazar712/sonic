@@ -4601,7 +4601,7 @@ class DeliveryController extends Controller
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
-            ->editColumn('transactions_amount_link', function ($shipment) {
+            ->addColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
@@ -4609,7 +4609,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('one_link_payment_count', function ($deliveries) {
+            ->addColumn('one_link_payment_count_button', function ($deliveries) {
                 if($deliveries->one_link_payment_count != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 }
@@ -4835,7 +4835,7 @@ class DeliveryController extends Controller
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
-            ->editColumn('one_link_payment_count', function ($deliveries) {
+            ->editColumn('one_link_payment_count_button', function ($deliveries) {
                 if($deliveries->one_link_payment_count != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 }
@@ -4843,7 +4843,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('transactions_amount_link', function ($shipment) {
+            ->addColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
@@ -6766,7 +6766,7 @@ class DeliveryController extends Controller
                     $query->where('rdns.status' , null)->orWhere('rdns.status',0);
                 }
             })
-            ->editColumn('one_link_payment_count', function ($deliveries) {
+            ->addColumn('one_link_payment_count_button', function ($deliveries) {
                 if($deliveries->one_link_payment_count != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 }
@@ -6774,7 +6774,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('transactions_amount_link', function ($shipment) {
+            ->addColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
