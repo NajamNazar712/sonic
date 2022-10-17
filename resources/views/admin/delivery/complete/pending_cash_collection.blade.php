@@ -563,7 +563,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.ccd_image')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.ccd_image') || $(header).is('.cash_amount')) {
                             $(td).appendTo($(search));
                         }
                         else {

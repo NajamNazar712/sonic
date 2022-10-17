@@ -510,7 +510,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount')) {
                             $(td).appendTo($(search));
                         }
                         else {
