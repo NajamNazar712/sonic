@@ -802,6 +802,9 @@ class AdminNotificationsController extends Controller
         elseif($id == 191){
             $details['fields'] = ['Shipper name'];
         }
+        elseif($id == 192){
+            $details['fields'] = ['consignee_name', 'rider_name', 'tracking_number', 'otp'];
+        }
         return $details;
     }
 
