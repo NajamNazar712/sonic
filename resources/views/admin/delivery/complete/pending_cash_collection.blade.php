@@ -301,6 +301,7 @@
                             head.push('DNCC Amount');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
+                            head.push('One Link Payment Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -322,6 +323,7 @@
                                 row.push(values.amount);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
+                                row.push(values.one_link_payment_count);
 
                                 body.push(row);
                             });

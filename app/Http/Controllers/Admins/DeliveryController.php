@@ -4784,7 +4784,8 @@ class DeliveryController extends Controller
             ->leftjoin('rider_types as rt','rt.id','=','riders.rider_type_id')
             ->leftjoin('cities as c','c.id','=','riders.city_id')
             ->leftjoin('zones as zn','zn.id','=','c.zone_id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status','rt.name as rider_type','zn.name as zone_name'])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count'])
             ->where('delivery_notes.cash_collection_status', 1)
             ->where('delivery_notes.dncc_status', 0);
 
@@ -4833,6 +4834,30 @@ class DeliveryController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
+            })
+            ->editColumn('one_link_payment_count', function ($deliveries) {
+                if($deliveries->one_link_payment_count != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('transactions_amount', function ($shipment) {
+                if($shipment->transactions_amount != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('cash_amount', function ($shipment) {
+                if($shipment->cash_amount != null){
+                    return number_format($shipment->cash_amount);
+                }
+                else{
+                    return number_format($shipment->amount);
+                }
             })
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -6631,7 +6656,8 @@ class DeliveryController extends Controller
             ->leftjoin('rider_types as rt','rt.id','=','riders.rider_type_id')
             ->leftjoin('cities as c','c.id','=','riders.city_id')
             ->leftjoin('zones as zn','zn.id','=','c.zone_id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path','rt.name as rider_type','zn.name as zone_name'])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count'])
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
@@ -6738,6 +6764,30 @@ class DeliveryController extends Controller
                     $query->where('rdns.status', $keyword);
                 } else {
                     $query->where('rdns.status' , null)->orWhere('rdns.status',0);
+                }
+            })
+            ->editColumn('one_link_payment_count', function ($deliveries) {
+                if($deliveries->one_link_payment_count != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('transactions_amount', function ($shipment) {
+                if($shipment->transactions_amount != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('cash_amount', function ($shipment) {
+                if($shipment->cash_amount != null){
+                    return number_format($shipment->cash_amount);
+                }
+                else{
+                    return number_format($shipment->amount);
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
