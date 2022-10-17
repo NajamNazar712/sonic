@@ -108,6 +108,8 @@ class AdminAttendanceController extends Controller
             $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
             $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', 1)->select('e.id', 'e.name')->get();
+            $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
+            $disabled_riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', '!=', 1)->select('e.id', 'e.name')->get();
         }
 
         return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "disabled_admins" => $disabled_users, "trax_ids" => $trax_ids, "riders" => $riders, "disabled_riders" => $disabled_riders, "cnics"=>$cnic]);
@@ -137,6 +139,8 @@ class AdminAttendanceController extends Controller
             $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
+            $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
+            $disabled_riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', '!=', 1)->select('e.id', 'e.name')->get();
         }
 
         return view('admin.attendance.admin.horizontal')->with(["departments" => $departments, "admins" => $users, "disabled_admins" => $disabled_users, "trax_ids" => $trax_ids, "riders" => $riders, "disabled_riders" => $disabled_riders]);
