@@ -4601,7 +4601,7 @@ class DeliveryController extends Controller
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
-            ->editColumn('transactions_amount', function ($shipment) {
+            ->editColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
@@ -4843,7 +4843,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('transactions_amount', function ($shipment) {
+            ->editColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
@@ -6774,7 +6774,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('transactions_amount', function ($shipment) {
+            ->editColumn('transactions_amount_link', function ($shipment) {
                 if($shipment->transactions_amount != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
                 }
