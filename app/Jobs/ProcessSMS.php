@@ -119,11 +119,11 @@ class ProcessSMS implements ShouldQueue
             $difference = $last->diffInMinutes($now);
 
             if ($difference >= 15) {
-                // $generate_session_id = TRUE;
+                $generate_session_id = TRUE;
             }
         }
         else {
-            // $generate_session_id = TRUE;
+            $generate_session_id = TRUE;
         }
 
         $send_sms = FALSE;
