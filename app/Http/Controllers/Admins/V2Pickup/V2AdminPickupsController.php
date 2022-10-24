@@ -759,7 +759,7 @@ class V2AdminPickupsController extends Controller
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2){
+            if($user->sub_segment_id == 2){
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -870,7 +870,7 @@ class V2AdminPickupsController extends Controller
         if ($shipment_item) {
             $shipment = Shipment::find($shipment_item->shipment_id);
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2) {
+            if($user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -899,7 +899,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_pieces->shipment_id);
 
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2) {
+            if($user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
