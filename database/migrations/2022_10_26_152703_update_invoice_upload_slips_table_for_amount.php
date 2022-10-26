@@ -27,7 +27,8 @@ class UpdateInvoiceUploadSlipsTableForAmount extends Migration
     public function down()
     {
         Schema::table('invoice_upload_slips', function (Blueprint $table) {
-            //
+            $table->dropColumn('amount')->nullable();
+            $table->dropColumn('added_by')->index()->nullable();
         });
     }
 }
