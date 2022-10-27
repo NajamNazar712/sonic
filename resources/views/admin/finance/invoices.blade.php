@@ -456,7 +456,7 @@
 					});
 
 					$('.adjustment_reason').prepend('<option value="" selected="selected"></option>').select2({
-						placeholder: 'Enter Reason',
+						placeholder: 'Enter Reason*',
 						width: '100%',
 						allowClear:true,
 						dropdownParent:$('#invoice_add_adjustment_form')
@@ -751,7 +751,7 @@
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
 							{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
 							{data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-							{data:'balance_amount', name: 'balance_amount', class: 'align-middle text-center balance_amount'},
+							{data:'balance_amount', name: 'balance_amount', class: 'align-middle text-center balance_amount',orderable: false, searchable: false},
 							{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
 							{data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
 							{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
@@ -813,7 +813,7 @@
 								var column = this;
 								var header = column.header();
 
-								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip')) {
+								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip') || $(header).is('.balance_amount')) {
 									$(td).appendTo($(search));
 								}
 								else if($(header).is('.account'))
