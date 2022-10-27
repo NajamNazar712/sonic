@@ -10775,7 +10775,7 @@ class AdminFinanceController extends Controller
                     $dropdown .= $email_reminder_button;
                 }
 
-                if ((session('role_id') == 1 || in_array(821, session('permissions'))) && in_array($invoice->status_id,[1,2,4]) && $invoice->account_type == 2) {
+                if ((session('role_id') == 1 || in_array(821, session('permissions'))) && $invoice->status_id != 3 && $invoice->account_type == 2 && ($invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount)) > 0) {
                     $dropdown .= $add_adjustment;
                 }
 
@@ -10787,7 +10787,7 @@ class AdminFinanceController extends Controller
                 $dropdown .= $gst_wise_print_button;
                 $dropdown .= $detailed_print_button;
 
-                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->account_type == 2 && $invoice->status_id != 3) {
+                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->account_type == 2 && $invoice->status_id != 3 &&  ($invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount)) > 0) {
                     $dropdown .= $upload_deposit_slip_button;
                 }
                 $dropdown .= '
