@@ -10920,11 +10920,7 @@ class AdminFinanceController extends Controller
 
         if($deposited_amount > 0){
             $invoice->deposited_amount += $deposited_amount;
-            //$invoice->balance_amount = $invoice->total_invoice_amount - $invoice->deposited_amount;
-            if ($deposited_amount == $invoice->total_invoice_amount) {
-                $invoice->status_id = 3;
-            }
-            else{
+            if ($deposited_amount != $invoice->total_invoice_amount) {
                 $invoice->status_id = 4;
             }
             $invoice->save();
