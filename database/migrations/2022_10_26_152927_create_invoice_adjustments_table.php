@@ -17,7 +17,7 @@ class CreateInvoiceAdjustmentsTable extends Migration
             $table->increments('id');
             $table->integer('invoice_id')->index();
             $table->integer('amount');
-            $table->text('reason');
+            $table->integer('reason_id')->index();
             $table->text('remarks')->nullable();
             $table->integer('added_by')->index();
             $table->timestamps();

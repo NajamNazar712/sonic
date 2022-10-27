@@ -290,7 +290,11 @@
 									</div>
 									<div class="col form-group">
 										<label>Reason</label>
-										<textarea class="form-control" id="adjustment_reason" name="adjustment_reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+										<select name="adjustment_reason" class="select2 adjustment_reason" data-rule-required="true" data-msg-required="Reason is required">
+											@foreach($adjustment_reasons as $reasons)
+												<option value="{{ $reasons->id }}">{{ $reasons->name }}</option>
+											@endforeach
+										</select>
 									</div>
 									<div class="col form-group">
 										<label>Remarks</label>
@@ -449,6 +453,13 @@
 						placeholder: 'Search',
 						width: '100%',
 						allowClear: false
+					});
+
+					$('.adjustment_reason').prepend('<option value="" selected="selected"></option>').select2({
+						placeholder: 'Enter Reason',
+						width: '100%',
+						allowClear:true,
+						dropdownParent:$('#invoice_add_adjustment_form')
 					});
 
 					$('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
@@ -1244,7 +1255,7 @@
 					$('#addAdjustmentModal').on('hidden.bs.modal', function () {
 						$('#adjustment_amount').val('');
 						$('#adjustment_remarks').val('');
-						$('#adjustment_reason').val('');
+						$('#adjustment_reason').val('').trigger('change');
 					});
 
 					var deposit_slip_table;

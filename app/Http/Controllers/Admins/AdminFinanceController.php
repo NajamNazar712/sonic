@@ -11,6 +11,7 @@ use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\CorporateUserPackagingInvoice;
 use App\Http\Models\Admin\InvoiceAdjustment;
+use App\Http\Models\Admin\InvoiceAdjustmentReasons;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\ResolvedOutstandingShipment;
@@ -10559,8 +10560,8 @@ class AdminFinanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 34);
         $company_banks = BanksList::where('affiliate', 1)->get();
         $invoice_statuses = InvoiceStatus::get();
-
-        return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
+        $adjustment_reasons = InvoiceAdjustmentReasons::all();
+        return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses,'adjustment_reasons' => $adjustment_reasons]);
     }
 
     public function reimbursement_invoices_index()
@@ -10617,7 +10618,7 @@ class AdminFinanceController extends Controller
                 }
             })
             ->addColumn('balance_amount', function ($invoice) {
-                if ($invoice->account_type == 2) {
+                if ($invoice->account_type == 2 && $invoice->is_id != 3) {
                     return $invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount);
                 }
                 else{
@@ -15489,7 +15490,7 @@ class AdminFinanceController extends Controller
             $adjustment = new InvoiceAdjustment();
             $adjustment->invoice_id = $request->invoice_id;
             $adjustment->amount = $request->adjustment_amount;
-            $adjustment->reason = $request->adjustment_reason;
+            $adjustment->reason_id = $request->adjustment_reason;
             $adjustment->remarks = $request->adjustment_remarks;
             $adjustment->added_by = Auth::id();
             $adjustment->save();
@@ -15517,7 +15518,7 @@ class AdminFinanceController extends Controller
                 foreach ($adjustments as $adjustment) {
                     $sorted_array[$adjustment->id]['adjusted_date'] = Carbon::parse($adjustment->created_at)->toDateString();
                     $sorted_array[$adjustment->id]['amount'] = $adjustment->amount;
-                    $sorted_array[$adjustment->id]['reason'] = $adjustment->reason;
+                    $sorted_array[$adjustment->id]['reason'] = $adjustment->reasons->name;
                     $sorted_array[$adjustment->id]['remarks'] = $adjustment->remarks;
                     $sorted_array[$adjustment->id]['added_by'] = Admin::find($adjustment->added_by)->name;
                 }
