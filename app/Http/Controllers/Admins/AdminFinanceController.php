@@ -10892,7 +10892,7 @@ class AdminFinanceController extends Controller
         $invoice = Invoice::find($request->invoice_id);
         $check_amount = $invoice->deposited_amount + $request->total_amount + $invoice->adjusted_amount;
         if($check_amount > $invoice->total_invoice_amount){
-            return redirect()->back()->with('error','Deposited amount should not exceed ' .$request->total_amount );
+            return redirect()->back()->with('error','Deposited amount should not exceed ' .$invoice->total_invoice_amount);
         }
 
         $deposited_amount = 0;
