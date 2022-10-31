@@ -2128,6 +2128,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
+            Route::post('add_adjustment', 'Admins\AdminFinanceController@invoice_add_adjustment')->name('add_adjustment');
+            Route::post('adjustment_view', 'Admins\AdminFinanceController@invoice_adjustment_view')->name('adjustment_view');
+
             //Route::get('download/{id}', 'Admins\AdminFinanceController@email_print_invoice')->name('download');
 
             Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
