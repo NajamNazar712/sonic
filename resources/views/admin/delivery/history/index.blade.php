@@ -65,6 +65,9 @@
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                        <th class="border-primary border-darken-1">Cash Amount</th>
+                        <th class="border-primary border-darken-1">One Link Payment Count</th>
                         <th class="border-primary border-darken-1">Updated via App</th>
                         <th class="border-primary border-darken-1">Last Updated At</th>
                     </tr>
@@ -115,6 +118,59 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <!-- one link payment details popup -->
+    <div class="modal fade" id="one_link_payment_details_modal" data-backdrop="static" role="dialog" aria-labelledby="one_link_payment_details_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="max-width: 900px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="one_link_payment_details_modal_title">One Link Payment(s)</h4>
+                </div>
+                <div class="modal-body justify-content-center">
+                    <table class="table table-hover table-responsive" id="one_link_payment_details_table">
+                        <thead>
+                        <th>S.NO</th>
+                        <th>Tracking Number</th>
+                        <th>Transaction ID</th>
+                        <th>Amount </th>
+                        <th>Transaction Date</th>
+                        <th>Transaction Time</th>
+                        <th>Created at</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- one link payment details popup -->
+
+
+    <!--HBL Konnect Information -->
+    <div class="modal fade" id="transactions_information_modal" data-backdrop="static" role="dialog" aria-labelledby="transactions_information_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white" id="transactions_information_modal_title">HBL Konnect Amount</h4>
+
+                    <button type="button" class="close white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--HBL Konnect Information -->
 
     <!--Signature popup -->
     <div class="modal fade" id="signature_modal" data-backdrop="static" role="dialog" aria-labelledby="signature_modal" aria-hidden="true">
@@ -263,6 +319,9 @@
                             head.push('Cash Collected By');
                             head.push('Cash Collection Date');
                             head.push('DNCC Amount');
+                            head.push('HBL Konnect  Amount');
+                            head.push('Cash Amount');
+                            head.push('One Link Payment Count');
                             head.push('Updated via App');
                             head.push('Last Updated At');
 
@@ -287,6 +346,9 @@
                                 row.push(values.cash_collected);
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
+                                row.push(values.transactions_amount);
+                                row.push(values.cash_amount);
+                                row.push(values.one_link_payment_count);
                                 row.push(values.updated_via_app);
                                 row.push(values.last_updated_at);
 
@@ -345,6 +407,9 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
+                    { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                 ],
@@ -378,7 +443,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.cash_amount')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -558,6 +623,96 @@
 
                 $('#signature_modal').modal('show');
             });
+
+
+            $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
+                $('#one_link_payment_details_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.onelinkpayment') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.transaction_data) {
+                                // $.each(data.shipments, function(index, tracking_number) {
+                                //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                // });
+                                $.each(data.transaction_data, function(index, values) {
+                                    html+= `
+
+                                        <tr>
+                                            <td>${index+1}</td>
+                                            <td>${values.tracking_no}</td>
+                                            <td>${values.tran_auth_id}</td>
+                                            <td>${values.amount}</td>
+                                            <td>${values.tran_date_formated}</td>
+                                            <td>${values.tran_time_formated}</td>
+                                            <td>${values.created_at}</td>
+                                        </tr>
+
+                                    `;
+                                });
+                                $('#one_link_payment_details_table tbody').html(html);
+
+
+
+                            }
+                            // $('#one_link_payment_details_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+
+            $('#datatable tbody').on('click','tr td.transactions_amount button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#transactions_information_modal .modal-body').html('');
+                $('#transactions_information_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.transactions.information') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status === 1) {
+                            var html = '';
+                            html += '<table class="table table-bordered text-center">';
+                            html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.details, function (index, value) {
+                                console.log(value);
+                                var ind = index + 1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value.transaction_id + '</td>';
+                                html += '<td>' + value.amount + '</td>';
+                                html += '<td>' + value.deposited_at + '</td>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            $('#transactions_information_modal .modal-body').html(html);
+                            $('#transactions_information_modal').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+
+            });
+
 
         });
     </script>

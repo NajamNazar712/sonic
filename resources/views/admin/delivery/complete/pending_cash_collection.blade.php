@@ -301,6 +301,7 @@
                             head.push('DNCC Amount');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
+                            head.push('One Link Payment Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -322,6 +323,7 @@
                                 row.push(values.amount);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
+                                row.push(values.one_link_payment_count);
 
                                 body.push(row);
                             });
@@ -537,9 +539,9 @@
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
-                    { data:'transactions_amount' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
-                    { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount'},
-                    { data:'one_link_payment_count' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
+                    { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount',orderable: false, searchable: false},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -561,7 +563,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.ccd_image')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.ccd_image') || $(header).is('.cash_amount')) {
                             $(td).appendTo($(search));
                         }
                         else {
