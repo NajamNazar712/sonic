@@ -5198,6 +5198,9 @@ class APIController extends Controller
             $shipment->received_amount = $amount;
             $shipment->save();
 
+            NotificationsController::app_notification(19, $delivery_note->rider_id, 2,$delivery_note->rider_id, $one_link_payment_transaction->id);
+            NotificationsController::send(185, $delivery_note->rider_id, $one_link_payment_transaction->id);
+
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
     }
