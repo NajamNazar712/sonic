@@ -7133,7 +7133,7 @@ class AdminAPIController extends Controller
                 $role_id = $request->admin_role_id;
                 if ($role_id == 81) {
                     $data['user_type'] = 2;
-                } elseif ($employee->is_line_manager == 1) {
+                } elseif ($employee->is_line_manager) {
                 // } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
                     $data['user_type'] = 1;
                 } else {
