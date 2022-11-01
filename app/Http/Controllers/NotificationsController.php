@@ -9654,10 +9654,10 @@ else if ($id == 178) {
                     $rider = Rider::find($reference_1_id);
                     if($one_link_transaction && $rider){
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
@@ -10158,10 +10158,10 @@ else if ($id == 178) {
                     $rider = Rider::find($reference1_id);
                     if($one_link_transaction && $rider){
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);

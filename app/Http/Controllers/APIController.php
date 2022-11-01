@@ -5186,9 +5186,7 @@ class APIController extends Controller
             $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
             $one_link_payment_transaction->save();
 
-
             $delivery_note = DeliveryNote::find($delivery_note_id);
-
             $update_count = $delivery_note->one_link_payment_count + 1;
             $delivery_note->one_link_payment_count = $update_count;
             $delivery_note->save();
@@ -5196,6 +5194,9 @@ class APIController extends Controller
             $shipment = Shipment::find($shipment_id);
             $shipment->received_amount = $amount;
             $shipment->save();
+
+            NotificationsController::app_notification(19, $delivery_note->rider_id, 2,$delivery_note->rider_id, $one_link_payment_transaction->id);
+            NotificationsController::send(185, $delivery_note->rider_id, $one_link_payment_transaction->id);
 
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
@@ -5498,6 +5499,7 @@ class APIController extends Controller
                                     $request_data['delivery_note_id'] = $delivery_note;
                                     
                                     $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
+                                    dd($upload_transaction->id);
 
                                     if($upload_transaction)
                                     {
