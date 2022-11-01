@@ -7186,11 +7186,12 @@ class AdminAPIController extends Controller
                     $leave_request = new EmployeeAttendanceAdjustment();
                     $leave_request->employee_id = $employee_id;
                     $leave_request->employee_type_id = 1;
-                    if (in_array($request->admin_role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
-                        $reporter_id = 139;
-                    } else {
-                        $reporter_id = $employee->line_manager_id;
-                    }
+                    // if (in_array($request->admin_role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                    //     $reporter_id = 139;
+                    // } else {
+                        // $reporter_id = $employee->line_manager_id;
+                    // }
+                    $reporter_id = $employee->line_manager_id;
                     $leave_request->reporter_id = $reporter_id;
                     $leave_request->date = $request->date;
                     $leave_request->applied_reason = $request->reason;
