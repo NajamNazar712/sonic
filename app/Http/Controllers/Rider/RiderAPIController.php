@@ -11662,7 +11662,7 @@ class RiderAPIController extends Controller
                     $leave_request = new EmployeeAttendanceAdjustment();
                     $leave_request->employee_id = $employee_id;
                     $leave_request->employee_type_id = 2;
-                    $leave_request->reporter_id = $rider->line_manager->admin->id;
+                    $leave_request->reporter_id = $rider->line_manager_id;
                     $leave_request->date = $request->date;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();

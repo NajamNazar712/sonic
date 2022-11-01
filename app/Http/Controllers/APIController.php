@@ -1199,7 +1199,8 @@ class APIController extends Controller
                 ->pluck('keyword')
                 ->toArray();
             $bdmk_error = "";
-            $bdmk_result = array();
+
+            $consignee_city = City::find($consignee_city_id);
 
             $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk,$consignee_city->name);
             if (isset($bdmk_result['invalid_cities'])) {
