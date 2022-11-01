@@ -25,7 +25,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OneLink\OneLink;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -5138,6 +5138,70 @@ class APIController extends Controller
         }
     }
 
+    public function out_for_delivery_shipment_payment(Request $request)
+    {
+        $rules = [
+            'consumer_number' => ['required', 'integer'],
+            'transaction_authentication_id' => ['required', 'integer'],
+            'transaction_amount' => ['required'],
+            'transaction_date' => ['required'],
+            'transaction_time' => ['required'],
+            'bank_mnemonic' => ['required'],
+            'reserved' => ['required'],
+            'consumer_prefix' => ['required'],
+            'tracking_number' => ['required'],
+            'shipment_id' => ['required', Rule::exists('shipments', 'id')],
+            'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')]
+        ];
+
+        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $consumer_number = $request->consumer_number;
+            $transaction_authentication_id = $request->transaction_authentication_id;
+            $transaction_amount = $request->transaction_amount;
+            $transaction_date = $request->transaction_date;
+            $transaction_time = $request->transaction_time;
+            $bank_mnemonic = $request->bank_mnemonic;
+            $reserved = $request->reserved;
+            $consumer_prefix = $request->consumer_prefix;
+            $tracking_number = $request->tracking_number;
+            $shipment_id = $request->shipment_id;
+            $delivery_note_id = $request->delivery_note_id;
+
+            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
+            $one_link_payment_transaction->consumer_number = $consumer_number;
+            $one_link_payment_transaction->transaction_authentication_id = $transaction_authentication_id;
+            $one_link_payment_transaction->transaction_amount = $transaction_amount;
+            $one_link_payment_transaction->transaction_date = $transaction_date;
+            $one_link_payment_transaction->transaction_time = $transaction_time;
+            $one_link_payment_transaction->bank_mnemonic = $bank_mnemonic;
+            $one_link_payment_transaction->reserved = $reserved;
+            $one_link_payment_transaction->consumer_prefix = $consumer_prefix;
+            $one_link_payment_transaction->tracking_number = $tracking_number;
+            $one_link_payment_transaction->shipment_id = $shipment_id;
+            $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
+            $one_link_payment_transaction->save();
+
+
+            $delivery_note = DeliveryNote::find($delivery_note_id);
+
+            $update_count = $delivery_note->one_link_payment_count + 1;
+            $delivery_note->one_link_payment_count = $update_count;
+            $delivery_note->save();
+            $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
+            $shipment = Shipment::find($shipment_id);
+            $shipment->received_amount = $amount;
+            $shipment->save();
+
+            return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
+        }
+    }
+
+
     public function onelink_payment_billinquiry(Request $request)
     {
         $valid_ip_addresses = array();
@@ -5218,7 +5282,7 @@ class APIController extends Controller
                                     if($shipment_data->amount == $shipment_data->received_amount)
                                     {
                                         // Bill paid status
-                                        $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no',$tracking_no)->first();
                                         
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5387,8 +5451,7 @@ class APIController extends Controller
 
                         if($shipment_data)
                         {
-                            // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
-                            $transaction_data = OneLinkPaymentTransaction::where('tracking_no',$tracking_no)->first();
+                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_no',$tracking_no)->first();
                             
                             if($transaction_data)
                             {
@@ -5434,7 +5497,7 @@ class APIController extends Controller
                                     $request_data['tran_time_formated'] = $tran_time_formated;
                                     $request_data['delivery_note_id'] = $delivery_note;
                                     
-                                    $upload_transaction = OneLinkPaymentTransaction::create($request_data);
+                                    $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
 
                                     if($upload_transaction)
                                     {

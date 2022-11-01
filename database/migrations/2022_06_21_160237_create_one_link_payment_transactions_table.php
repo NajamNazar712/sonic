@@ -22,7 +22,7 @@ class CreateOneLinkPaymentTransactionsTable extends Migration
             $table->string('tran_time');
             $table->string('bank_mnemonic');
             $table->string('reserved')->nullable();
-            $table->string('consumer_prefx');
+            $table->string('consumer_prefix');
             $table->string('tracking_no')->index();
             $table->integer('shipment_id')->index();
             $table->integer('amount');
