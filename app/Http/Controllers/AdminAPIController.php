@@ -7313,7 +7313,7 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $employee_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    $employee_leaves->status = 2;
+                    $employee_leaves->status = 6;
                     $employee_leaves->updated_by = $admin_id;
                     $user = Employee::find($employee_leaves->employee_id);
                     if (!$user) {
@@ -7411,7 +7411,7 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeAttendanceAdjustment::where('id', $request->adjustment_id)->where('reporter_id', $employee_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    $employee_leaves->status = 3;
+                    $employee_leaves->status = 7;
                     $employee_leaves->rejected_reason = $request->rejection_reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
