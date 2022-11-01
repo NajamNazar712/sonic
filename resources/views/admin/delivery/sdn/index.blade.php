@@ -14,7 +14,7 @@
                 <form id="track_form" class="justify-content-center m-2" novalidate="novalidate">
                     <div class="row mb-2 justify-content-center">
 
-                        <div class="col-4">
+                        <div class="col-2">
 {{--                            <fieldset class="position-relative has-icon-left">--}}
 
 {{--                                <div class="form-control-position">--}}
@@ -22,26 +22,43 @@
 {{--                                </div>--}}
 {{--                            </fieldset>--}}
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Scan SDN" name="scan_sdn"
+                                <input type="text" class="form-control" placeholder="Search By SDN" name="scan_sdn"
                                        id="scan_sdn"  data-tags-input-name="scan_sdn">
                             </div>
 
                         </div>
-                        <div class="col-4">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc"
+                        <div class="col-2">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By DNCC" name="scan_dncc"
                                        id="scan_dncc">
                                 <div class="form-control-position">
-                                    <i class="ft-search"></i>
+                                    
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-4">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                        <div class="col-2">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By RNCC" name="scan_rncc"
+                                       id="scan_rncc">
+                                <div class="form-control-position">
+                                   
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By COD Tracking Number"
                                        name="search_tracking" id="search_tracking">
                                 <div class="form-control-position">
-                                    <i class="ft-search"></i>
+                                    
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="position-relative">
+                                <input type="text" class="form-control text-left" placeholder="Search By Retail Tracking Number"
+                                       name="search_tracking_retail" id="search_tracking_retail">
+                                <div class="form-control-position">
                                 </div>
                             </fieldset>
                         </div>
@@ -113,6 +130,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
+                        <th class="border-primary border-darken-1">SDN Type</th>
+                        
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">No of DNCCs</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
@@ -123,6 +142,7 @@
                         <th class="border-primary border-darken-1">Deposited Date</th>
                         <th class="border-primary border-darken-1">Resolved By</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        {{-- <th class="border-primary border-darken-1">Zone</th> --}}
                         <th class="border-primary border-darken-1">Adjustment Date</th>
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
@@ -746,6 +766,8 @@
             });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
+                    blockPagePermanently();
+
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -758,6 +780,8 @@
                             head = [];
                             head.push('S.No');
                             head.push('SDN No.');
+                            head.push('SDN Type');
+                            
                             head.push('Hub');
                             head.push('No. of DNCCs');
                             head.push('Delivered Shipments');
@@ -767,6 +791,7 @@
                             head.push('Deposited Date');
                             head.push('Resolved By');
                             head.push('Status');
+                            // head.push('Zone');
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
@@ -779,6 +804,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.sdn_id_padded);
+                                row.push(values.sdn_type);
+                                
                                 row.push(values.hub);
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);
@@ -788,6 +815,7 @@
                                 row.push(values.created_at);
                                 row.push(values.resolved_by);
                                 row.push(values.status);
+                                // row.push(values.zone);
                                 row.push(values.adjustment_date);
                                 row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
@@ -798,6 +826,7 @@
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
                     return {body: body, header: head};
                 }
@@ -1010,7 +1039,10 @@
                     data: function (d) {
                         d.scan_sdn = $('#scan_sdn').val();
                         d.scan_dncc = $('#scan_dncc').val();
+                        d.scan_rncc = $('#scan_rncc').val();
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_tracking_retail = $('#search_tracking_retail').val();
+                        
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_date_from_deposited = $('input[name="search_date_from_deposited_formatted"]').val();
@@ -1035,6 +1067,8 @@
                         }
                     },
                     {data: 'sdn', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
+                    {data: 'sdn_type', name: 'station_deposit_notes.sdn_type', class: 'align-middle sdn_type', orderable: false},
+                    
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {
                         data: 'dncc_link',
@@ -1058,6 +1092,7 @@
                     {data: 'created_at', name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     {data: 'resolved_by', name: 'admins.name', class: 'align-middle resolved_by'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    // {data: 'zone', name: 'zones.id', class: 'align-middle zone'},
                     {data: 'adjustment_date', name: 'sdna.date', class: 'align-middle adjustment_date'},
                     {
                         data: 'sdn_adjustment_amount',
@@ -1118,7 +1153,14 @@
                             scan_sound(2);
                         }
                     }
-
+                    if ($('#scan_rncc').val() != '') {
+                        if (data.length > 0) {
+                            scan_sound(1);
+                        } else {
+                            scan_sound(2);
+                      
+                        }
+                    }
                     if ($('#scan_sdn').val() != '') {
                         if (data.length > 0) {
                             scan_sound(1);
@@ -1139,6 +1181,11 @@
                         '<option value="2">Resolved</option>' +
                         '<option value="3">Closed</option>' +
                         '</select>';
+                    var sdn_type_select = '<select name="sdn_type_select" id="sdn_type_select" class="select2 form-control">' +
+                        '<option value="1">COD</option>' +
+                        '<option value="2">Retail</option>' +
+                        '</select>';
+                    // var zones = '<select name="zones" id="zones" class="select2 form-control"></select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
@@ -1151,12 +1198,25 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else if ($(header).is('.bank')) {
+                        }  else if ($(header).is('.sdn_type')) {
+                            $(sdn_type_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        } 
+                        else if ($(header).is('.bank')) {
                             $(bank_select).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else {
+                        }
+                        //  else if ($(header).is('.zone')) {
+                        //     $(zones).appendTo($(search))
+                        //         .on('change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         }).wrap(td);
+                        // }
+                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1173,6 +1233,29 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    $("#sdn_type_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    
+                    
+                    // var zone_data = $.map({!! $zones !!}, function (obj) {
+                    //     obj.id = obj.id;
+                    //     obj.text = obj.name;
+
+                    //     return obj;
+                    // });
+                    // $("#zones").prepend('<option value="" selected></option>').select2({
+                    //     data:zone_data,
+                    //     placeholder: "Select zone",
+                    //     width: '100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
+
+                    
                     var data = $.map({!! $banks !!}, function (obj) {
                         obj.id = obj.id;
 
@@ -1195,7 +1278,7 @@
                 }
             });
             var select = $('#track_form #scan_sdn').selectize({
-                placeholder: 'Scan sdn(s)*',
+                placeholder: 'Search SDN(s)',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
@@ -1227,7 +1310,27 @@
                 }
             });
 
+            $('#search_tracking_retail').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function () {
+                if (this.value.length == 0 || this.value.length >= 6) {
+                    table.draw();
+                }
+            });
+
+            
+
             $('#scan_dncc').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function () {
+                table.draw();
+            });
+
+            $('#scan_rncc').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false

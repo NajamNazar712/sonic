@@ -20,6 +20,7 @@ use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\MasterCargo\BagShipment;
 use App\Http\Models\Admin\ShipmentOnHold;
@@ -388,7 +389,7 @@ class AdminCargoManifestController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub')->whereNotIn('shipments.id', $on_hold_shipments);
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub','shipments.consignee_address','dc.id as destination_city_id')->whereNotIn('shipments.id', $on_hold_shipments);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -582,7 +583,35 @@ class AdminCargoManifestController extends Controller
             })
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('ohc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dhc.name, IF (shipments.shipper_status_id = 49, olddhc.name, IF (shipments.shipper_status_id = 55, olddhci.name, oc.name)))') . ' $1')
-            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
+            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1')
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                $msg_string = null;
+                $str_arr = null;
+                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                foreach ($check as $nsa) {
+                    foreach ($str_arr as $arr_value) {
+                        if (strtolower($nsa) == strtolower($arr_value)) {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+                $delivery_area = null;
+                if ($msg_string != null) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id', $shipments->destination_city_id)
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                        ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
+
+                    if ($found->exists()) {
+                        $found = $found->first();
+                        $delivery_area = $found->area_name;
+                    }
+                }
+                return isset($delivery_area) ? $delivery_area : '-';
+            });
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
@@ -702,6 +731,10 @@ class AdminCargoManifestController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+          /*  if($shipment->shipper_status_id == 49){
+                return ['status' => 1, 'error' => 'Misroute-Forwarded Shipments not allowed'];
+            }*/
             
            /* if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists()){
                 return ['status' => 1, 'error' => 'Bag Already Created'];
@@ -810,6 +843,9 @@ class AdminCargoManifestController extends Controller
                                 if (($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)) {
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                                 }
+                            }
+                            else if(($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->pickup_address->city->hub_id)) {
+                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                             }
 
                             if ($request->bag_type != 0) {
@@ -1037,7 +1073,7 @@ class AdminCargoManifestController extends Controller
             $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
-            CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
+            CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL,1);
 
             $id = $bag->id;
 
@@ -1163,7 +1199,7 @@ class AdminCargoManifestController extends Controller
                 $bag->current_hub_id = Auth::user()->default_hub_id;
                 $bag->save();
 
-                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
+                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL,2);
 
                 $id = $bag->id;
                 $bag_shipment = new CargoManifestBagShipments();
@@ -1650,7 +1686,7 @@ class AdminCargoManifestController extends Controller
                     $bag->current_hub_id = Auth::user()->default_hub_id;
                     $bag->update();
 
-                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1);
+                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1,3);
                 }
 
                 $success_cargo_ids[$hub_id] = $master_cargo_id;
@@ -2127,7 +2163,10 @@ class AdminCargoManifestController extends Controller
                 if ($manifest) {
                     if ($manifest->vehicle_id != null) {
                         $fleet = Fleet::find($manifest->vehicle_id);
-                        $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $fleet->reg_number . "</button>";
+                        if($fleet)
+                        {
+                            $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $fleet->reg_number . "</button>";
+                        }
                     } else {
                         $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $manifest->vehicle_number . "</button>";
                     }
@@ -2428,7 +2467,7 @@ class AdminCargoManifestController extends Controller
                             }
                         }
                         $bag->current_hub_id = Auth::user()->default_hub_id;
-
+                        $bag->updated_by = Auth::id();
                         $bag->update();
 
                         ManifestBag::where('cargo_manifest_bag_id', $bag->id)
@@ -2439,7 +2478,7 @@ class AdminCargoManifestController extends Controller
                         } else {
                             array_push($bag_misroute, $bag->seal_number);
                         }
-                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id());
+                        CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(),NULL,NULL,4);
                     } else {
                         array_push($bag_not_exists_in_mapping, $bag_id);
                     }
@@ -2471,7 +2510,7 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag->status_id = 9;
                             $bag->current_hub_id = Auth::user()->default_hub_id;
                             $short_received_bag->update();
-                            CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
+                            CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id(),NULL,NULL,4);
                             $bag_short_received_count++;
                             array_push($bag_short_received, $manifest_bag->cargo_manifest_bag_id);
                             array_push($cargo_short_received, $short_received_bag->id);
@@ -2518,8 +2557,9 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                             $short_received_bag->status_id = 9;
                             $bag->current_hub_id = Auth::user()->default_hub_id;
+                            $bag->updated_by = Auth::id();
                             $short_received_bag->update();
-                            CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
+                            CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id(),NULL,NULL,4);
                             $bag_short_received_count++;
                             array_push($bag_short_received, $manifest_bag->cargo_manifest_bag_id);
                             array_push($cargo_short_received, $short_received_bag->id);
@@ -2668,7 +2708,10 @@ class AdminCargoManifestController extends Controller
                 if ($manifest) {
                     if ($manifest->vehicle_id != null) {
                         $fleet = Fleet::find($manifest->vehicle_id);
-                        $vehicle_data = $fleet->reg_number;
+                        if ($fleet)
+                        {
+                            $vehicle_data = $fleet->reg_number;
+                        }
                     } else {
                         $vehicle_data = $manifest->vehicle_number;
                     }

@@ -421,6 +421,14 @@
                         });
                     }
                 }
+
+                if ($(this).hasClass('download')) {
+                    if(payslip_id){
+                        var route = '{!! route('admin.human_resource.payslip.download', ':id') !!}';
+                        route = route.replace(':id', payslip_id);
+                        window.open(route,'_black');
+                    }
+                }
             });
 
             $('#search_form').bind('submit',function (e) {

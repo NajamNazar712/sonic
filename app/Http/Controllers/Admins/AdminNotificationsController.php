@@ -23,6 +23,7 @@ use App\Http\Models\City;
 use Illuminate\Support\Facades\Storage;
 
 use Auth;
+use function foo\func;
 
 class AdminNotificationsController extends Controller
 {
@@ -101,28 +102,60 @@ class AdminNotificationsController extends Controller
             }
         }
         else {
+            $segment = isset($request->segment) ? $request->segment : null ;
             if($request->get('search_city') == 0)
             {
                 if ($request->get('shipper_status') == 1) {
-                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->get()->pluck('email')->toArray();
                 }
                 else if ($request->get('shipper_status') == 2) {
-                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->get()->pluck('email')->toArray();
                 }
                 else {
-                    $emails = User::where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                    $emails = User::where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->get()->pluck('email')->toArray();
                 }
             }
             else
             {
                 if ($request->get('shipper_status') == 1) {
-                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
                 }
                 else if ($request->get('shipper_status') == 2) {
-                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                    $emails = User::where('status', '=', 4)
+                        ->where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
                 }
                 else {
-                    $emails = User::where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                    $emails = User::where('blacklist', '=', 0)
+                        ->where(function ($que) use ($segment){
+                            if(!empty($segment))
+                                $que->where('segment_id',$segment);
+                        })
+                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
                 }
             }
         }
@@ -753,7 +786,25 @@ class AdminNotificationsController extends Controller
         }else if ($id == 182)
         {
             $details['fields'] = ['link','emp_id','name','designation','joining_date'];
-        }		
+        }
+		elseif($id == 183){
+            $details['fields'] = ['shipper','tracking_number'];
+        }
+        elseif($id == 184){
+            $details['fields'] = ['consignee','tracking_number'];
+        }
+        elseif($id == 185){
+            $details['fields'] = ['rider', 'amount', 'tracking_number'];
+        }
+        elseif($id == 186){
+            $details['fields'] = ['admin', 'role'];
+        }
+        elseif($id == 191){
+            $details['fields'] = ['Shipper name'];
+        }
+        elseif($id == 192){
+            $details['fields'] = ['consignee_name', 'rider_name', 'tracking_number', 'otp'];
+        }
         return $details;
     }
 
@@ -920,6 +971,8 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["date", "status"];
             }else if($id == 18){
                 $details['fields'] = ["employee_name","trax_id","date"];
+            }else if($id == 19){
+                $details['fields'] = ['rider', 'amount', 'tracking_number'];
             }
             return $details;
         }else{

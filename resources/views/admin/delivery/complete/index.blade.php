@@ -56,7 +56,9 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
@@ -67,6 +69,9 @@
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                        <th class="border-primary border-darken-1">Cash Amount</th>
+                        <th class="border-primary border-darken-1">One Link Payment Count</th>
                     </tr>
                     </thead>
                 </table>
@@ -115,6 +120,59 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <!-- one link payment details popup -->
+    <div class="modal fade" id="one_link_payment_details_modal" data-backdrop="static" role="dialog" aria-labelledby="one_link_payment_details_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="max-width: 900px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="one_link_payment_details_modal_title">One Link Payment(s)</h4>
+                </div>
+                <div class="modal-body justify-content-center">
+                    <table class="table table-hover table-responsive" id="one_link_payment_details_table">
+                        <thead>
+                        <th>S.NO</th>
+                        <th>Tracking Number</th>
+                        <th>Transaction ID</th>
+                        <th>Amount </th>
+                        <th>Transaction Date</th>
+                        <th>Transaction Time</th>
+                        <th>Created at</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- one link payment details popup -->
+
+
+    <!--HBL Konnect Information -->
+    <div class="modal fade" id="transactions_information_modal" data-backdrop="static" role="dialog" aria-labelledby="transactions_information_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white" id="transactions_information_modal_title">HBL Konnect Amount</h4>
+
+                    <button type="button" class="close white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--HBL Konnect Information -->
 
 @endsection
 
@@ -200,7 +258,9 @@
                             head.push('S.No');
                             head.push('Delivery Note No.');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Rider');
+                            head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('No. Of Shipments Delivered');
@@ -211,6 +271,9 @@
                             head.push('Cash Collected By');
                             head.push('Cash Collection Date');
                             head.push('DNCC Amount');
+                            head.push('HBL Konnect  Amount');
+                            head.push('Cash Amount');
+                            head.push('One Link Payment Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -219,7 +282,9 @@
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
+                                row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
@@ -230,6 +295,9 @@
                                 row.push(values.cash_collected);
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
+                                row.push(values.transactions_amount);
+                                row.push(values.cash_amount);
+                                row.push(values.one_link_payment_count);
 
                                 body.push(row);
                             });
@@ -398,13 +466,15 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[11, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
@@ -415,6 +485,9 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
+                    { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -437,7 +510,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -734,6 +807,95 @@
                     table.draw();
                 }
             });
+
+
+            $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
+                $('#one_link_payment_details_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.onelinkpayment') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.transaction_data) {
+                                // $.each(data.shipments, function(index, tracking_number) {
+                                //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                // });
+                                $.each(data.transaction_data, function(index, values) {
+                                    html+= `
+
+                                        <tr>
+                                            <td>${index+1}</td>
+                                            <td>${values.tracking_no}</td>
+                                            <td>${values.tran_auth_id}</td>
+                                            <td>${values.amount}</td>
+                                            <td>${values.tran_date_formated}</td>
+                                            <td>${values.tran_time_formated}</td>
+                                            <td>${values.created_at}</td>
+                                        </tr>
+
+                                    `;
+                                });
+                                $('#one_link_payment_details_table tbody').html(html);
+
+
+
+                            }
+                            // $('#one_link_payment_details_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.transactions_amount button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#transactions_information_modal .modal-body').html('');
+                $('#transactions_information_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.transactions.information') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status === 1) {
+                            var html = '';
+                            html += '<table class="table table-bordered text-center">';
+                            html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.details, function (index, value) {
+                                console.log(value);
+                                var ind = index + 1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value.transaction_id + '</td>';
+                                html += '<td>' + value.amount + '</td>';
+                                html += '<td>' + value.deposited_at + '</td>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            $('#transactions_information_modal .modal-body').html(html);
+                            $('#transactions_information_modal').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+
+            });
+
 
         });
     </script>

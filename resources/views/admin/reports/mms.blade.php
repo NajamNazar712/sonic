@@ -120,6 +120,8 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
+                        <th class="border-primary border-darken-1">Relation</th>
+                        <th class="border-primary border-darken-1">CNIC</th>
                         <th class="border-primary border-darken-1">Aging (Days)</th>
                     </tr>
                     </thead>
@@ -349,6 +351,8 @@
                             head.push('Zone');
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
+                            head.push('Relation');
+                            head.push('CNIC');
                             head.push('Aging (Days)');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -366,6 +370,8 @@
                                 row.push(values.zone);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
+                                row.push(values.relation);
+                                row.push(values.cnic);
                                 row.push(values.aging);
 
                                 body.push(row);
@@ -430,6 +436,8 @@
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
+                    { data: 'relation' ,name: 'dr.relation', class: 'align-middle relation'},
+                    { data: 'cnic' ,name: 'dr.cnic', class: 'align-middle cnic'},
                     { data: 'aging' ,name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
