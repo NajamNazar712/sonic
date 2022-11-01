@@ -15,8 +15,16 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentsSetIdPrimaryKey extends Migrati
     {
         //
         Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
-            $table->Integer('id')->primary()->change();
+            $table->primary('id')->unsigned(true)->nullable(false)->change();
+
         });
+
+        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            $table->Integer('id',true)->change();
+        });
+
+
+
     }
 
     /**
@@ -28,7 +36,14 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentsSetIdPrimaryKey extends Migrati
     {
         //
         Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            $table->Integer('id',false)->change();
             $table->dropPrimary('id');
+
+
+        });
+
+        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            $table->Integer('id')->nullable()->change();
         });
     }
 }
