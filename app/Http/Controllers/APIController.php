@@ -5147,7 +5147,7 @@ class APIController extends Controller
             'transaction_date' => ['required'],
             'transaction_time' => ['required'],
             'bank_mnemonic' => ['required'],
-            'reserved' => ['required'],
+            'reserved' => ['nullable'],
             'consumer_prefix' => ['required'],
             'tracking_number' => ['required'],
             'shipment_id' => ['required', Rule::exists('shipments', 'id')],
