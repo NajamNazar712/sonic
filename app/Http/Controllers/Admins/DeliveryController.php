@@ -342,9 +342,15 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
+        $setting_value = 0;
         $operation_rider_category = OperationRidersCategory::all();
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->exists()) {
+            $settings = $settings->first();
+            $setting_value = $settings->setting_value;
+        }
 
-        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category, 'rider_otp' => $setting_value]);
     }
 
     public function get_adjustment_reference(Request $request)
