@@ -13,6 +13,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
@@ -26,7 +27,6 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -89,6 +89,9 @@ use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
+use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
@@ -185,6 +188,7 @@ class DeliveryController extends Controller
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
@@ -342,9 +346,15 @@ class DeliveryController extends Controller
 
     public function delivery_note_index()
     {
+        $setting_value = 0;
         $operation_rider_category = OperationRidersCategory::all();
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->exists()) {
+            $settings = $settings->first();
+            $setting_value = $settings->setting_value;
+        }
 
-        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['operation_rider_category' => $operation_rider_category, 'rider_otp' => $setting_value]);
     }
 
     public function get_adjustment_reference(Request $request)
@@ -995,6 +1005,9 @@ class DeliveryController extends Controller
                         }
                     }
                 }
+                $process_one_link['shipment_ids'] = $valid_shipments;
+                $process_one_link['delivery_note_id'] = $note->id;
+                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
@@ -1002,9 +1015,9 @@ class DeliveryController extends Controller
             }
 
             //rider attendance
-            if ($request->operation_rider_type_for_attendance == 1) {
-                EmployeeAttendanceController::riders_attendance_mark($rider->id);
-            }
+//            if ($request->operation_rider_type_for_attendance == 1) {
+//                EmployeeAttendanceController::riders_attendance_mark($rider->id);
+//            }
             //rider attendance end
 
             //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
@@ -1355,7 +1368,11 @@ class DeliveryController extends Controller
                     }
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+
                     } else {
+                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
 
@@ -1376,7 +1393,11 @@ class DeliveryController extends Controller
 
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+
+                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
                     } else {
+                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
 
@@ -2419,6 +2440,8 @@ class DeliveryController extends Controller
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
+
+            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
             $response = array();
             if(count($invalid_reason_shipments) > 0){
                 $response['invalid_shipments'] = $invalid_reason_shipments;
@@ -2622,6 +2645,8 @@ class DeliveryController extends Controller
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
+
+            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             if (count($invalid_reason_shipments) > 0) {
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);
@@ -6506,11 +6531,20 @@ class DeliveryController extends Controller
         
 
         $delivery_note_id = $request->delivery_note_id;
-        $payment_transaction_data = OneLinkPaymentTransaction::where('delivery_note_id',$delivery_note_id)->select(['tran_auth_id','tracking_no','amount','tran_date_formated','tran_time_formated','created_at']);
+        $payment_transactions = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id',$delivery_note_id);
 
-        if($payment_transaction_data->exists())
+        if($payment_transactions->exists())
         {
-            $payment_transaction_data = $payment_transaction_data->get();
+            $payment_transactions = $payment_transactions->get();
+            $payment_transaction_data = array();
+            foreach ($payment_transactions as $index => $payment_transaction){
+                $payment_transaction_data[$index]['transaction_authentication_id'] = $payment_transaction->transaction_authentication_id;
+                $payment_transaction_data[$index]['tracking_number'] = $payment_transaction->tracking_number;
+                $payment_transaction_data[$index]['transaction_amount'] = number_format($payment_transaction->transaction_amount);
+                $payment_transaction_data[$index]['created_at'] = Carbon::parse($payment_transaction->created_at)->toDateTimeString();
+                $payment_transaction_data[$index]['transaction_date'] = Carbon::parse($payment_transaction->transaction_date)->format('M d, Y');
+                $payment_transaction_data[$index]['transaction_time'] = Carbon::parse($payment_transaction->transaction_time)->format('H:i:s');
+            }
             return response()->json(['status' => 1, 'transaction_data' => $payment_transaction_data]);
             
         }

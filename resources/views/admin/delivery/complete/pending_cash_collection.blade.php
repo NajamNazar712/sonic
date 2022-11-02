@@ -60,7 +60,7 @@
                         <th class="border-primary border-darken-1">CCD Receipts</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
-                        <th class="border-primary border-darken-1">One Link Payment Count</th>
+                        <th class="border-primary border-darken-1">1Link Payment Shipment(s)</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -115,7 +115,7 @@
         <div class="modal-dialog modal-lg" style="max-width: 900px;" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="one_link_payment_details_modal_title">One Link Payment(s)</h4>
+                    <h4 class="modal-title" id="one_link_payment_details_modal_title">1Link Payment Shipment(s)</h4>
                 </div>
                 <div class="modal-body justify-content-center">
                     <table class="table table-hover table-responsive" id="one_link_payment_details_table">
@@ -868,11 +868,11 @@
 
                                         <tr>
                                             <td>${index+1}</td>
-                                            <td>${values.tracking_no}</td>
-                                            <td>${values.tran_auth_id}</td>
-                                            <td>${values.amount}</td>
-                                            <td>${values.tran_date_formated}</td>
-                                            <td>${values.tran_time_formated}</td>
+                                            <td>${values.tracking_number}</td>
+                                            <td>${values.transaction_authentication_id}</td>
+                                            <td>${values.transaction_amount}</td>
+                                            <td>${values.transaction_date}</td>
+                                            <td>${values.transaction_time}</td>
                                             <td>${values.created_at}</td>
                                         </tr>
 

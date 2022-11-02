@@ -13,7 +13,7 @@ use App\Http\Models\Admin\CrmSmsLog;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -9650,14 +9650,14 @@ else if ($id == 178) {
                 }
 
                 else if ($id == 185) {
-                    $one_link_transaction = OneLinkPaymentTransaction::find($reference_2_id);
+                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference_2_id);
                     $rider = Rider::find($reference_1_id);
                     if($one_link_transaction && $rider){
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
@@ -10154,14 +10154,14 @@ else if ($id == 178) {
                     }
                 }
                 else if ($id == 19) {
-                    $one_link_transaction = OneLinkPaymentTransaction::find($reference2_id);
+                    $one_link_transaction = OneLinkOutForDeliveryShipmentPayment::find($reference2_id);
                     $rider = Rider::find($reference1_id);
                     if($one_link_transaction && $rider){
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $one_link_transaction->amount, $body);
+                            $body = str_replace('[amount]', $one_link_transaction->transaction_amount, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_no, $body);
+                            $body = str_replace('[tracking_number]', $one_link_transaction->tracking_number, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
