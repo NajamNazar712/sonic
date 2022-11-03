@@ -69,7 +69,7 @@ class ActivityTrailController extends Controller
             $data->whereBetween('activity_trail_logs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
 
-        if(!in_array(session('role_id'), [1, 58]))
+        if(!in_array(session('role_id'), [1, 58, 24, 5]))
         {
             $head_department_id = Auth::user()->role->department_id;
             $data->where('ar.department_id',$head_department_id);

@@ -601,8 +601,14 @@ Route::name('api.')->group(function () {
             Route::prefix('payments')->name('payments.')->group(function () {
                 Route::post('billinquiry', 'APIController@onelink_payment_billinquiry')->name('billinquiry');
                 Route::post('billpayment', 'APIController@onelink_payment_billpayment')->name('billpayment');
+                Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
             });
         });
+    });
+
+
+    Route::prefix('1link')->name('1link.')->group(function () {
+        Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
     });
     //Hbl Konnect
 
