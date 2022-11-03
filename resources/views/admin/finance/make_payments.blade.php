@@ -225,7 +225,6 @@
 														<th class="border-primary border-darken-1">Shipper</th>
 														<th class="border-primary border-darken-1">Shipment</th>
 														<th class="border-primary border-darken-1">Origin</th>
-														<th class="border-primary border-darken-1">Arrival Date</th>
 														<th class="border-primary border-darken-1">Type</th>
 														<th class="border-primary border-darken-1">Status</th>
 														<th class="border-primary border-darken-1">Delivery / Return Datetime</th>
@@ -236,6 +235,7 @@
 														<th class="border-primary border-darken-1">WHT</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
+														<th class="border-primary border-darken-1">Arrival Date</th>
 													</tr>
 												</thead>
 											</table>
@@ -847,7 +847,6 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
 					{data:'origin', name: 'oc.name', class: 'align-middle origin'},
-					{data:'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
 					{data:'type', name: 'type', class: 'align-middle type'},
 					{data:'status', name: 'ss.name', class: 'align-middle status'},
 					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
@@ -857,7 +856,8 @@
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
 					{data:'wht', name: 'pending_payment_shipments.wht', class: 'align-middle wht'},
 					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
-					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
+					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
+					{data:'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);

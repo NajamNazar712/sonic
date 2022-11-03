@@ -4889,7 +4889,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin', 'Arrival Date', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
@@ -4917,7 +4917,6 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->user->name;
             $row[] = $shipment->tracking_number;
             $row[] = $shipment->pickup_address->city->name;
-            $row[] = ($arrival_date) ? $arrival_date->created_at : '';
             $row[] = $type;
             $row[] = $shipment->status_shipper->name;
             $row[] = $pending_payment_shipment->created_at;
@@ -4927,6 +4926,7 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->gst;
             $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
             $row[] = $pending_payment_shipment->payable;
+            $row[] = ($arrival_date) ? $arrival_date->created_at : '';
 
             $serial_number++;
 
