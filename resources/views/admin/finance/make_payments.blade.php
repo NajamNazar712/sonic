@@ -235,6 +235,7 @@
 														<th class="border-primary border-darken-1">WHT</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
+														<th class="border-primary border-darken-1">Arrival Date</th>
 													</tr>
 												</thead>
 											</table>
@@ -855,7 +856,8 @@
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
 					{data:'wht', name: 'pending_payment_shipments.wht', class: 'align-middle wht'},
 					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
-					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
+					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
+					{data:'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);

@@ -4800,7 +4800,12 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id', '=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id');
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -4884,7 +4889,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
@@ -4904,6 +4909,7 @@ class AdminFinanceController extends Controller
             $now = Carbon::now()->startOfDay();
             $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
             $aging = $created_at->diffInDays($now) . 'd';
+            $arrival_date = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->first();
 
             $row = array();
 
@@ -4920,6 +4926,7 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->gst;
             $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
             $row[] = $pending_payment_shipment->payable;
+            $row[] = ($arrival_date) ? $arrival_date->created_at : '';
 
             $serial_number++;
 
