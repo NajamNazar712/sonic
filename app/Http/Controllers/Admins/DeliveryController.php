@@ -6734,7 +6734,7 @@ class DeliveryController extends Controller
                     if ($deliveries->pending_status == 0) {
                         return 'Pending for Update';
                     } else if ($deliveries->pending_status == 1) {
-                        return 'Pending for Verificatin';
+                        return 'Pending for Verification';
                     }
                 } else if ($deliveries->status == 1) {
                     if ($deliveries->dncc_status == 1) {
