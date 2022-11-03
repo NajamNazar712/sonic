@@ -16,7 +16,8 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryRelation;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+//use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -102,6 +103,7 @@ use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
@@ -8622,7 +8624,7 @@ class RiderAPIController extends Controller
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
-                    $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
@@ -8943,6 +8945,9 @@ class RiderAPIController extends Controller
 
                         if ($updated_shipments_count == 0) {
                             DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+
+                            dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -11309,6 +11314,8 @@ class RiderAPIController extends Controller
                                     $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
                                     if ($updated_shipments_count == 0) {
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+
+                                    dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
                                     }
 
                                     $arr['shipment_id'] = $request->shipment_id;
@@ -11669,7 +11676,7 @@ class RiderAPIController extends Controller
                     $leave_request = new EmployeeAttendanceAdjustment();
                     $leave_request->employee_id = $employee_id;
                     $leave_request->employee_type_id = 2;
-                    $leave_request->reporter_id = $rider->line_manager->admin->id;
+                    $leave_request->reporter_id = $rider->line_manager_id;
                     $leave_request->date = $request->date;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
@@ -12292,7 +12299,7 @@ class RiderAPIController extends Controller
                     } else{
                         $deliveries['delivery_otp'] = 1;
                     }
-                    $one_link_payment = OneLinkPaymentTransaction::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {

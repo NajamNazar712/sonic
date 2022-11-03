@@ -26,7 +26,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)">
+                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(30)}}">
                                     </div>
                                 </div>
 
@@ -38,7 +38,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)">
+                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
                                 </div>
 
