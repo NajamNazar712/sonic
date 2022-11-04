@@ -328,23 +328,10 @@
 					errorClass: 'danger',
 					successClass: 'success',
 					normalizer: function(value) {
-						return $.trim(value);
+						return $.trim(value).replace(/,/g, '');
 					},
 					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parent('.form-group'));
-					},
-					submitHandler: function(form) {
-
-						swal({
-							title: 'Please Wait!',
-							text: 'Adjustments are being added!',
-							icon: 'info',
-							buttons: false,
-							closeOnClickOutside: false,
-							closeOnEsc: false
-						});
-
-						form.submit();
+						error.addClass('w-100').appendTo(element.parents('form'));
 					}
 				});
 			@endif
