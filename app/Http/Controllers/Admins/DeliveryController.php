@@ -1066,7 +1066,6 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('vigilance_verifications as vv', 'vv.delivery_note_id', '=', 'delivery_notes.id')
             ->join('vigilance_verifications as vv', function ($join) {
                 $join->on('vv.delivery_note_id', '=', 'delivery_notes.id')
                     ->where('vv.id', '=',
