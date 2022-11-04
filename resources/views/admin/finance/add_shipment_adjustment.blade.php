@@ -307,7 +307,7 @@
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 			});
 
