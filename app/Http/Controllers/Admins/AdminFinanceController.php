@@ -15556,7 +15556,7 @@ class AdminFinanceController extends Controller
             'adjustment_type_id' => ['required', 'integer', Rule::exists('adjustment_types', 'id')->where(function($query) {
                 $query->whereIn('id', [6, 7, 8, 9, 10, 11, 15, 16]);
                 })],
-            'remarks' => ['required', 'string'],
+            'remarks' => ['required'],
         ];
 
         $fields = [0 => 'tracking_number', 1 => 'payable', 2 => 'adjustment_type_id', 3 => 'remarks'];

@@ -84,7 +84,7 @@
 
 										<div class="col-md-3 justify-content-end">
 											<div class="form-group text-right">
-												<a href="{{ asset('file/Bulk Adjsutment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
+												<a href="{{ asset('file/Bulk Shipment Adjustment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
 											</div>
 										</div>
 									</div>
