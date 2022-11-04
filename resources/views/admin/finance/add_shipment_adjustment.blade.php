@@ -17,11 +17,13 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<div class="row toggle_row justify-content-center">
-								<h3 class="pr-1">Individual</h3>
-								<input type="checkbox" class="switchery" data-color="success" data-size="md" name="switch" id="switch"/>
-								<h3 class="pl-1">Bulk</h3>
-							</div>
+							@if (session('role_id') == 1 || in_array(137, session('permissions')))
+								<div class="row toggle_row justify-content-center">
+									<h3 class="pr-1">Individual</h3>
+									<input type="checkbox" class="switchery" data-color="success" data-size="sm" name="switch" id="switch"/>
+									<h3 class="pl-1">Bulk</h3>
+								</div>
+							@endif
 							<div class="row individual_adjustemnt mt-4 justify-content-center">
 								<form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
