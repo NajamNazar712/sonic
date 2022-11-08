@@ -107,6 +107,7 @@ use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
+use App\Http\Models\ShipmentOtpVerification;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
@@ -8738,6 +8739,7 @@ class RiderAPIController extends Controller
             'house_image' => ['nullable', 'mimes:png,jpeg,jpg'],
             'ccd_image' => ['nullable', 'mimes:png,jpeg,jpg'],
             'replacement_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+            'dbf_otp_entered' => ['nullable', 'integer'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8995,6 +8997,18 @@ class RiderAPIController extends Controller
                         $delivery_note_data->status_updated_at = Carbon::now();
                         $delivery_note_data->save();
                         $rider_delivery->save();
+
+                        if($request->has('dbf_otp_entered')){
+                            $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
+                            if($shipment_verification->exists()){
+                                $shipment_verification = $shipment_verification->first();
+                            }else{
+                                $shipment_verification = new ShipmentOtpVerification();
+                                $shipment_verification->shipment_id = $shipment->id;
+                            }
+                            $shipment_verification->via_dbf_otp = $request->dbf_otp_entered;
+                            $shipment_verification->save();
+                        }
                         $message = 'Shipment is marked as delivered Successfully';
                     }
                 } else {
@@ -12096,7 +12110,6 @@ class RiderAPIController extends Controller
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
             $delivery_otp = 0;
-            $non_cod_otp_shipper_ids = array();
             $settings = GlobalSettings::where('type','delivery_otp');
             $all_shippers = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
             if($settings->exists())
@@ -12187,10 +12200,12 @@ class RiderAPIController extends Controller
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
                     $refusal_otp = null;
+                    $dbf_otp = null;
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
                     if($shipment_otp->exists()){
                         $shipment_otp = $shipment_otp->first();
                         $refusal_otp = $shipment_otp->otp;
+                        $dbf_otp = $shipment_otp->dbf_otp;
                     }
                     $payment_mode = $shipment_data->payment_mode_id;
                     $tracking_number = $shipment_data->tracking_number;
@@ -12284,6 +12299,7 @@ class RiderAPIController extends Controller
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
+                    $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;

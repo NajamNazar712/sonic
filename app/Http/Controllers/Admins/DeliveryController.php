@@ -966,23 +966,28 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
+
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                    $dbf_otp = mt_rand(100000, 999999);
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                    } else {
+                        $shipment_otp = new ShipmentOtp();
+                        $shipment_otp->shipment_id = $shipment;
+                    }
+                    $shipment_otp->dbf_otp = $dbf_otp;
+                    $shipment_otp->rider_id = null;
+                    $shipment_otp->latitude = null;
+                    $shipment_otp->longitude = null;
+
                     $pos = array_keys($shipments, $shipment);
                     if ($notifications[$pos[0]]) {
                         $shipment_obj = Shipment::find($shipment);
-                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                         $otp = mt_rand(100000, 999999);
-                        if ($shipment_otp->exists()) {
-                            $shipment_otp = $shipment_otp->first();
-                        } else {
-                            $shipment_otp = new ShipmentOtp();
-                            $shipment_otp->shipment_id = $shipment;
-                        }
                         $shipment_otp->otp = $otp;
-                        $shipment_otp->rider_id = null;
-                        $shipment_otp->latitude = null;
-                        $shipment_otp->longitude = null;
                         $shipment_otp->save();
                         if ($shipment_obj->amount == 0) {
                             //English
@@ -992,6 +997,10 @@ class DeliveryController extends Controller
                         } else {
                             NotificationsController::send(12, $note->id, $shipment);
                         }
+                    }
+                    else{
+                        $shipment_otp->otp = null;
+                        $shipment_otp->save();
                     }
                 }
                 $process_one_link['shipment_ids'] = $valid_shipments;
@@ -9226,6 +9235,7 @@ class DeliveryController extends Controller
             ->join('delivery_note_shipments as ds', 'ds.shipment_id', '=', 's.id')
             ->join('delivery_notes as dn', 'dn.id', '=', 'ds.delivery_note_id')
             ->where('s.amount', 0)
+            ->whereNotNull('shipment_otps.dbf_otp')
             ->where('dn.pending_status', 0)
             ->select('shipment_otps.*', 'r.name as rider_name', 's.tracking_number as tracking_number', 'dc.hub_id');
 
@@ -9234,6 +9244,15 @@ class DeliveryController extends Controller
         }
 
         $datatable = Datatables::of($otp)
+
+            ->addColumn('otp', function ($shipments) {
+                if($shipments->dbf_otp){
+                    return $shipments->dbf_otp;
+                } else{
+                    return " - ";
+                }
+            })
+
             ->addColumn('tracking_number', function ($shipments) {
                 return $shipments->tracking_number;
             })

@@ -189,7 +189,7 @@
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle name'},
-                {data: 'otp', name: 'shipment_otps.otp', class: 'align-middle otp'},
+                {data: 'otp', name: 'shipment_otps.dbf_otp', class: 'align-middle otp'},
                 {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                 {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                 {data: 'generated_at', name: 'shipment_otps.updated_at', class: 'align-middle generated_at'},
