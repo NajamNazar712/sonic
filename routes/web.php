@@ -2064,6 +2064,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@add_shipment_adjustment_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminFinanceController@add_shipment_adjustment_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@add_shipment_adjustment_store')->name('store');
+            Route::post('bulk/store', 'Admins\AdminFinanceController@add_bulk_shipment_adjustment_store')->name('bulk_store');
         });
 
         Route::prefix('make_payments')->name('make_payments.')->group(function () {

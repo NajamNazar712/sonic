@@ -1055,7 +1055,11 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('vigilance_verifications as vv', 'vv.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('vigilance_verifications as vv', function ($join) {
+                $join->on('vv.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('vv.id', '=',
+                        DB::raw('(select max(id) from vigilance_verifications where vigilance_verifications.delivery_note_id = delivery_notes.id)'));
+            })
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','vv.verify_shipments_count','vv.excess_shipments_count'])
             ->where('delivery_notes.status', 0);
 
@@ -6723,7 +6727,7 @@ class DeliveryController extends Controller
                     if ($deliveries->pending_status == 0) {
                         return 'Pending for Update';
                     } else if ($deliveries->pending_status == 1) {
-                        return 'Pending for Verificatin';
+                        return 'Pending for Verification';
                     }
                 } else if ($deliveries->status == 1) {
                     if ($deliveries->dncc_status == 1) {
