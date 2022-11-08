@@ -99,7 +99,10 @@
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-inline mb-0">
-                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress 1.8.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
+                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress-reimbursement 1.8.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download for Reimbursement Account</a></li>
+                                            </ul>
+                                            <ul class="list-inline mb-0">
+                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress-corporate 1.8.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download for Corporate Account</a></li>
                                             </ul>
                                         </div>
                                     </div>
