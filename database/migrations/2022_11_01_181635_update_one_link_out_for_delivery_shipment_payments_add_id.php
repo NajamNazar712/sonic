@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateOneLinkOutForDeliveryShipmentPaymentsAddId extends Migration
+class UpdateOneLinkOutForDeliveryShipmentPaymentsAddIds extends Migration
 {
     /**
      * Run the migrations.
@@ -30,8 +30,8 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentsAddId extends Migration
     public function down()
     {
         //
-        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+        // Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
 //            $table->dropColumn('id');
-        });
+        // });
     }
 }
