@@ -14,12 +14,12 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentsAddId extends Migration
     public function up()
     {
         //
-        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
-            $table->dropColumn('id');
-        });
-        Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
-            $table->increments('id')->first();
-        });
+        // Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            // $table->dropColumn('id');
+        // });
+        // Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
+            // $table->increments('id')->first();
+        // });
     }
 
     /**
