@@ -296,8 +296,16 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
 
             });
-
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
+
+            Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@delivery_note_index')->name('index');
+                Route::post('shipment_details', 'Rider\RiderAPIController@get_delivery_shipment_details')->name('shipment_details');
+                Route::post('piece_details', 'Rider\RiderAPIController@get_delivery_piece_details')->name('piece_details');
+                Route::post('generate_otp', 'Rider\RiderAPIController@delivery_note_otp_generation')->name('generate_otp');
+                Route::post('verify_otp', 'Rider\RiderAPIController@delivery_note_otp_verification')->name('verify_otp');
+                Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
+            });
         });
 
     });
@@ -460,6 +468,18 @@ Route::name('api.')->group(function () {
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
                 Route::get('list', 'AdminAPIController@sales_person_targets')->name('list');
                 Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
+            });
+
+            Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
+                Route::post('index', 'AdminAPIController@delivery_note_index')->name('index');
+                Route::post('shipment_details', 'AdminAPIController@get_delivery_shipment_details')->name('shipment_details');
+                Route::post('piece_details', 'AdminAPIController@get_delivery_piece_details')->name('piece_details');
+                Route::post('generate_otp', 'AdminAPIController@delivery_note_otp_generation')->name('generate_otp');
+                Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
+                Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
+                Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
+                Route::post('reject', 'AdminAPIController@delivery_note_requests_reject')->name('reject');
+                Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
 
         });

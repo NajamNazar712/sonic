@@ -7174,10 +7174,12 @@ class AdminReportsController extends Controller
             ->editColumn('status', function ($sdn) {
                 if ($sdn->status == 0) {
                     return 'Created';
-                } else if ($sdn->status == 0) {
+                } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {

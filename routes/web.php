@@ -1450,6 +1450,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
+
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('','Admins\DeliveryController@rider_request_note_index')->name('index');
+            Route::get('list','Admins\DeliveryController@rider_request_note_list')->name('list');
+            Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
+            Route::get('{id}/approve','Admins\DeliveryController@request_note_approve')->name('approve');
+            Route::get('{id}/reject','Admins\DeliveryController@request_note_reject')->name('reject');
+            Route::get('{id}/update','Admins\DeliveryController@request_note_update')->name('update');
+            Route::get('{id}/update/list','Admins\DeliveryController@request_note_update_list')->name('update.list');
+            Route::post('update/remove','Admins\DeliveryController@request_note_remove')->name('update.remove');
+            Route::post('update/remove_bulk','Admins\DeliveryController@request_note_remove_bulk')->name('update.remove.bulk');
+            Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_request_note')->name('add.shipments');
+        });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
@@ -2050,6 +2064,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@add_shipment_adjustment_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminFinanceController@add_shipment_adjustment_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@add_shipment_adjustment_store')->name('store');
+            Route::post('bulk/store', 'Admins\AdminFinanceController@add_bulk_shipment_adjustment_store')->name('bulk_store');
         });
 
         Route::prefix('make_payments')->name('make_payments.')->group(function () {

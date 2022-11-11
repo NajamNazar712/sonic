@@ -21,7 +21,10 @@ class RiderAPIToken
         $api_token = $request->header('Authorization');
 
         if ($api_token) {
-            $rider = Rider::where('api_token', $api_token);
+            $rider = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('riders.api_token', $api_token)
+                ->select('riders.*', 'h.id as hub_id');
 
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -34,7 +37,7 @@ class RiderAPIToken
                         $employee = $employee->first();
                         $employee_id = $employee->id;
                     }
-                    $request->request->add(['rider_id' => $rider->id, 'rider_employee' => $employee_id, 'trax_id' => $rider->trax_id]);
+                    $request->request->add(['rider_id' => $rider->id, 'rider_employee' => $employee_id, 'trax_id' => $rider->trax_id, 'rider_hub' => $rider->hub_id]);
                     return $next($request);
                 }
                 else {
