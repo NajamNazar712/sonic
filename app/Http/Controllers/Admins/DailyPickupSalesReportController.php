@@ -90,7 +90,7 @@ class DailyPickupSalesReportController extends Controller
             ->where('usi.city_id', $hub->id)
             ->count();
 
-            if($booked > 0 || $received > 0){
+            if($received > 0){
                 $shipments_data = array();
 
                 $shipments_data = DB::connection('reports')->table('shipments_journey')
@@ -2288,7 +2288,7 @@ class DailyPickupSalesReportController extends Controller
                 ->where('s.shipping_mode_id', $mode->id)
                 ->count();
 
-                if($booked > 0 || $received > 0){
+                if($received > 0){
 
                     $shipments_data = array();
 
