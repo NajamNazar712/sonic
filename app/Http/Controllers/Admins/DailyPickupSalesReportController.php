@@ -31,15 +31,13 @@ class DailyPickupSalesReportController extends Controller
         $search_city_hub = '';
         $hub_ids = DB::connection('reports')->table('shipments_journey')
             ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-            ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+            ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
             ->where('s.packaging_material_request', 0)
             ->where('s.user_id', '!=', 1690)
             ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
             ->whereIn('shipments_journey.shipper_status_id', [1, 2])
-            ->select('usi.city_id')
-            ->groupBy('usi.city_id')
-            ->get()
-            ->toArray();
+            ->distinct()
+            ->pluck('usi.city_id');
         $hubs = DB::connection('reports')->table('cities')->whereIn('id', $hub_ids)->select('id', 'name')->get();
 
         $details = array();
@@ -75,7 +73,7 @@ class DailyPickupSalesReportController extends Controller
         foreach ($hubs as $hub) {
 
             $booked = DB::connection('reports')->table('shipments')
-            ->join('user_shipping_infos AS usi', 'usi.id', 'shipments.pickup_address_id')
+            ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
             ->where('shipments.packaging_material_request', 0)
             ->where('shipments.user_id', '!=', 1690)
             ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -84,7 +82,7 @@ class DailyPickupSalesReportController extends Controller
 
             $received = DB::connection('reports')->table('shipments_journey')
             ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-            ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+            ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
             ->where('s.packaging_material_request', 0)
             ->where('s.user_id', '!=', 1690)
             ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -97,7 +95,7 @@ class DailyPickupSalesReportController extends Controller
 
                 $shipments_data = DB::connection('reports')->table('shipments_journey')
                 ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-                ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+                ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                 ->where('s.packaging_material_request', 0)
                 ->where('s.user_id', '!=', 1690)
                 ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -185,7 +183,7 @@ class DailyPickupSalesReportController extends Controller
 
             $pickup_request_shippers = DB::connection('reports')->table('shipments_journey')
             ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-            ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+            ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
             ->where('s.packaging_material_request', 0)
             ->where('s.user_id', '!=', 1690)
             ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -193,7 +191,7 @@ class DailyPickupSalesReportController extends Controller
             ->where('usi.city_id', $hub->id);
 
             if($pickup_request_shippers->exists()) {
-                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('user_id')->toArray();
+                $pickup_request_shippers_ids = $pickup_request_shippers->pluck('s.user_id')->toArray();
 
                 $pickup_request_shippers_ids = array_unique($pickup_request_shippers_ids);
 
@@ -241,7 +239,7 @@ class DailyPickupSalesReportController extends Controller
                     }
 
                     $shipper_booked = DB::connection('reports')->table('shipments')
-                    ->join('user_shipping_infos AS usi', 'usi.id', 'shipments.pickup_address_id')
+                    ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                     ->where('shipments.packaging_material_request', 0)
                     ->whereBetween('shipments.created_at', [$date_from, $date_to])
                     ->where('usi.city_id', $origin)
@@ -250,7 +248,7 @@ class DailyPickupSalesReportController extends Controller
 
                     $shipper_received = DB::connection('reports')->table('shipments_journey')
                     ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-                    ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+                    ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                     ->where('s.packaging_material_request', 0)
                     ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
                     ->where('shipments_journey.shipper_status_id', 2)
@@ -261,9 +259,9 @@ class DailyPickupSalesReportController extends Controller
                     if($shipper_received > 0){
                         $shipment_data = array();
 
-                        $shipments_data = DB::connection('reports')->table('shipments_journey')
+                        $shipment_data = DB::connection('reports')->table('shipments_journey')
                         ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
-                        ->join('user_shipping_infos AS usi', 'usi.id', 's.pickup_address_id')
+                        ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                         ->where('s.packaging_material_request', 0)
                         ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
                         ->where('shipments_journey.shipper_status_id', 2)
