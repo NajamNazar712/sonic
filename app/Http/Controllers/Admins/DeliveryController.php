@@ -8995,15 +8995,12 @@ class DeliveryController extends Controller
                             if ($shipment_obj->amount == 0) {
                                 //English
                                 NotificationsController::send(132, $note->id, $shipment);
-                                print_r(1);
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
-                                print_r(2);
                             } else {
                                 NotificationsController::send(12, $note->id, $shipment);
                                 print_r(3);
                             }
-                            dd('ok');
                         }
                     }
                 }
