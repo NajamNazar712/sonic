@@ -8861,8 +8861,6 @@ class DeliveryController extends Controller
         $admin = Auth::id();
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
-        echo "<pre>";
-        print_r('1');
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             $shipments = $request_shipments->pluck('shipment_id')->toArray();
@@ -8870,15 +8868,14 @@ class DeliveryController extends Controller
             $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
             $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
+            dd($notifications);
+
             if (count($shipments) == 0) {
-                dd('count($shipments) == 0');
                 return redirect()->back()->with('error',  'Shipments not entered!');
             }
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
-            print_r('2');
-            print_r($shipments_count);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
@@ -8910,12 +8907,7 @@ class DeliveryController extends Controller
                     'ordering' => $order,
                     'request_note_id' => $delivery_request->id
                 ]);
-                print_r('3');
-                print_r( $note);
                 if ($note) {
-                    print_r('5 inside note');
-                    print_r($note);
-                   
                     if (!$order) {  //Default
                         sort($valid_shipments); //sort_valid_shipments;
                     }
@@ -8981,14 +8973,10 @@ class DeliveryController extends Controller
                     }
 
                     foreach ($valid_shipments as $shipment) {
-                        print_r('valid_shipments');
-                        
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
-                        print_r($shipment);
-                        print_r($notifications);
+
                         if (in_array($shipment, $notifications)) {
-                            print_r('132');
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                             $otp = mt_rand(100000, 999999);
@@ -9005,12 +8993,10 @@ class DeliveryController extends Controller
                             $shipment_otp->save();
                             if ($shipment_obj->amount == 0) {
                                 //English
-                                dd('zero cod', $shipment_obj->amount);
                                 NotificationsController::send(132, $note->id, $shipment);
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
-                                dd('cod', $shipment_obj->amount);
                                 NotificationsController::send(12, $note->id, $shipment);
                             }
                         }
@@ -9040,18 +9026,14 @@ class DeliveryController extends Controller
                 $delivery_request->save();
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
-                dd('$shipments_count', $shipments_count);
                 return redirect()->back()->with('success', 'Delivery note has been Approved successfully' . PHP_EOL . 'Delivery Note ID: ' . $note->id);
             } else {
                 $delivery_request->status = 3;
                 $delivery_request->updated_by = $admin;
                 $delivery_request->save();
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->update(['status' => 3]);
-                dd('shipments_count else', $delivery_request);
                 return redirect()->back()->with('error', 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!');
             }
-
-            dd('5');
         } else {
             return redirect()->back()->with('error', 'Invalid Request ID');
         }
