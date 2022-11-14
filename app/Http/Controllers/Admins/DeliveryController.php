@@ -8861,6 +8861,7 @@ class DeliveryController extends Controller
         $admin = Auth::id();
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
+        dd('delivery_request', $delivery_request , $request_id);
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             $shipments = $request_shipments->pluck('shipment_id')->toArray();
