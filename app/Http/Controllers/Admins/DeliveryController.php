@@ -8863,6 +8863,7 @@ class DeliveryController extends Controller
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
+            dd($request_shipments->get(),$delivery_request->id);
             $shipments = $request_shipments->pluck('shipment_id')->toArray();
             $open_box_ids = $request_shipments->where('open_box', 1)->pluck('shipment_id')->toArray();
             $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
