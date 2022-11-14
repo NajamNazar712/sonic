@@ -8863,10 +8863,13 @@ class DeliveryController extends Controller
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
-            $shipments = $request_shipments->pluck('shipment_id')->toArray();
-            $open_box_ids = $request_shipments->where('open_box', 1)->pluck('shipment_id')->toArray();
-            $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
-            $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
+            
+            $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->pluck('shipment_id')->toArray();
+            $open_box_ids = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('open_box', 1)->pluck('shipment_id')->toArray();
+            $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('notification', 1)->pluck('shipment_id')->toArray();
+            $rider_informations = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('rider_information', 1)->pluck('shipment_id')->toArray();
+
+            // dd($request_shipments->get(),$delivery_request->id,$notifications);
 
             if (count($shipments) == 0) {
                 return redirect()->back()->with('error',  'Shipments not entered!');
@@ -8978,6 +8981,7 @@ class DeliveryController extends Controller
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                             $otp = mt_rand(100000, 999999);
+                            $dbf_otp = mt_rand(100000, 999999);
                             if ($shipment_otp->exists()) {
                                 $shipment_otp = $shipment_otp->first();
                             } else {
@@ -8985,6 +8989,7 @@ class DeliveryController extends Controller
                                 $shipment_otp->shipment_id = $shipment;
                             }
                             $shipment_otp->otp = $otp;
+                            $shipment_otp->dbf_otp = $dbf_otp;
                             $shipment_otp->rider_id = null;
                             $shipment_otp->latitude = null;
                             $shipment_otp->longitude = null;
