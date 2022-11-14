@@ -8991,10 +8991,12 @@ class DeliveryController extends Controller
                             $shipment_otp->save();
                             if ($shipment_obj->amount == 0) {
                                 //English
+                                dd("zero cod");
                                 NotificationsController::send(132, $note->id, $shipment);
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
+                                dd("cod");
                                 NotificationsController::send(12, $note->id, $shipment);
                             }
                         }
