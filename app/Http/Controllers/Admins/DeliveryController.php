@@ -8982,10 +8982,11 @@ class DeliveryController extends Controller
 
                     foreach ($valid_shipments as $shipment) {
                         print_r('valid_shipments');
-                        print_r($shipment_obj);
+                        
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
-
+                        print_r($shipment);
+                        print_r($notifications);
                         if (in_array($shipment, $notifications)) {
                             print_r('132');
                             $shipment_obj = Shipment::find($shipment);
