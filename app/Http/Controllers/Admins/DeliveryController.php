@@ -8861,7 +8861,7 @@ class DeliveryController extends Controller
         $admin = Auth::id();
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
-        dd('delivery_request', $delivery_request , $request_id);
+        print_r('1', $delivery_request , $request_id);
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             $shipments = $request_shipments->pluck('shipment_id')->toArray();
@@ -8875,6 +8875,7 @@ class DeliveryController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
+            print_r('2', $shipments_count);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
@@ -8906,7 +8907,10 @@ class DeliveryController extends Controller
                     'ordering' => $order,
                     'request_note_id' => $delivery_request->id
                 ]);
+                print_r('3', $note);
                 if ($note) {
+                    print_r('4 inside note', $note);
+                   
                     if (!$order) {  //Default
                         sort($valid_shipments); //sort_valid_shipments;
                     }
@@ -9035,6 +9039,8 @@ class DeliveryController extends Controller
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->update(['status' => 3]);
                 return redirect()->back()->with('error', 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!');
             }
+
+            dd('5');
         } else {
             return redirect()->back()->with('error', 'Invalid Request ID');
         }
