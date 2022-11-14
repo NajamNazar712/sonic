@@ -8861,6 +8861,7 @@ class DeliveryController extends Controller
         $admin = Auth::id();
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
+        dd('delivery_request',$request_id);
         if ($delivery_request) {
             $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             $shipments = $request_shipments->pluck('shipment_id')->toArray();
@@ -8874,6 +8875,7 @@ class DeliveryController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
+            dd('shipments_count');
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
@@ -8905,6 +8907,7 @@ class DeliveryController extends Controller
                     'ordering' => $order,
                     'request_note_id' => $delivery_request->id
                 ]);
+                dd("note");
                 if ($note) {
                     if (!$order) {  //Default
                         sort($valid_shipments); //sort_valid_shipments;
