@@ -8870,6 +8870,7 @@ class DeliveryController extends Controller
             $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
             if (count($shipments) == 0) {
+                dd('count($shipments) == 0');
                 return redirect()->back()->with('error',  'Shipments not entered!');
             }
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
@@ -9034,12 +9035,14 @@ class DeliveryController extends Controller
                 $delivery_request->save();
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
+                dd('$shipments_count', $shipments_count);
                 return redirect()->back()->with('success', 'Delivery note has been Approved successfully' . PHP_EOL . 'Delivery Note ID: ' . $note->id);
             } else {
                 $delivery_request->status = 3;
                 $delivery_request->updated_by = $admin;
                 $delivery_request->save();
                 RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->update(['status' => 3]);
+                dd('shipments_count else', $delivery_request);
                 return redirect()->back()->with('error', 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!');
             }
 
