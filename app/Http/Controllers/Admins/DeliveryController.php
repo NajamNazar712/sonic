@@ -8868,7 +8868,7 @@ class DeliveryController extends Controller
             $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
             $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
-            dd($notifications);
+            dd($request_shipments);
 
             if (count($shipments) == 0) {
                 return redirect()->back()->with('error',  'Shipments not entered!');
