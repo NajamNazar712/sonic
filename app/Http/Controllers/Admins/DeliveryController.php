@@ -8869,7 +8869,7 @@ class DeliveryController extends Controller
             $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('notification', 1)->pluck('shipment_id')->toArray();
             $rider_informations = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
-            dd($request_shipments->get(),$delivery_request->id,$notifications);
+            // dd($request_shipments->get(),$delivery_request->id,$notifications);
 
             if (count($shipments) == 0) {
                 return redirect()->back()->with('error',  'Shipments not entered!');
@@ -8995,11 +8995,15 @@ class DeliveryController extends Controller
                             if ($shipment_obj->amount == 0) {
                                 //English
                                 NotificationsController::send(132, $note->id, $shipment);
+                                print_r(1);
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
+                                print_r(2);
                             } else {
                                 NotificationsController::send(12, $note->id, $shipment);
+                                print_r(3);
                             }
+                            dd('ok');
                         }
                     }
                 }
