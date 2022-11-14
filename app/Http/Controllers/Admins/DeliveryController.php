@@ -8999,7 +8999,6 @@ class DeliveryController extends Controller
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
                                 NotificationsController::send(12, $note->id, $shipment);
-                                print_r(3);
                             }
                         }
                     }
