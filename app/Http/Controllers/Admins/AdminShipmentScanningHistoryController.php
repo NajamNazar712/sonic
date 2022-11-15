@@ -66,6 +66,13 @@ class AdminShipmentScanningHistoryController extends Controller
                                 ($c)?$city=$c['name']:$city='-';
                                 $scanned_by = $retail_admin->name;
                             }
+                            else if($scanning_history->user_type == 5){
+                                $account_type = 'Rider';
+                                $rider = Rider::find($scanning_history->admin_id);
+                                $c = City::find($rider->city_id);
+                                ($c)?$city=$c['name']:$city='-';
+                                $scanned_by = $rider->name;
+                            }
                             else{
                                 $account_type = '-';
                                 $scanned_by = '-';
