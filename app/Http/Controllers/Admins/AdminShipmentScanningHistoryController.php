@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\ShipmentScanningScreenLocation;
