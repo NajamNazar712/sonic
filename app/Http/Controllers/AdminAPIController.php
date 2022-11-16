@@ -9986,7 +9986,7 @@ class AdminAPIController extends Controller
 
     public function delivery_note_otp_generation(Request $request)
     {   
-        $settings = GlobalSettings::where('type', 'rider_otp');
+        $settings = GlobalSettings::where('type', 'admin_otp');
         $environment = config('app.env');
 
         if ($settings->exists()) {
@@ -10019,25 +10019,6 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
         }
 
-
-
-        // $environment = config('app.env');
-        // if ($environment == 'production' || $environment == 'staging') {
-        //     $rider_id = $request->get('rider_id');
-        //     $rider = Rider::find($rider_id);
-        //     if ($rider) {
-        //         $otp = mt_rand(100000, 999999);
-        //         $rider->delivery_note_otp = $otp;
-        //         $rider->otp_date = Carbon::now();
-        //         $rider->save();
-        //         NotificationsController::app_notification(9, $rider->id, 2, $otp);
-        //         NotificationsController::send(144, $rider, $otp);
-        //         return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
-        //     } else {
-        //         return response()->json(['status' => 1, 'message' => 'Rider not found!']);
-        //     }
-        // }
-        // return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
     }
 
     public function delivery_note_otp_verification(Request $request)
