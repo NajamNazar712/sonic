@@ -6290,7 +6290,7 @@ class AdminAPIController extends Controller
                 ->join('cities as c', 'c.id', '=', 'e.city_id')
                 ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                 ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
-                ->where('admins.status', 1)->where('admins.role_id',"!=",1);
+                ->where('admins.status', 1);
             if ($request->search_with == 1) {
                 $admin_profile = $admin_profile->where('e.name', 'like', '%' . $request->search_param . '%');
             } elseif ($request->search_with == 2) {
