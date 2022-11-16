@@ -9986,7 +9986,7 @@ class AdminAPIController extends Controller
 
     public function delivery_note_otp_generation(Request $request)
     {   
-        $settings = GlobalSettings::where('type', 'admin_otp');
+        $settings = GlobalSettings::where('type', 'rider_otp');
         $environment = config('app.env');
 
         if ($settings->exists()) {
