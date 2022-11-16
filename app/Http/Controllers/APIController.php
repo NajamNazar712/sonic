@@ -5112,29 +5112,24 @@ class APIController extends Controller
                 $delivery_note = DeliveryNote::where('id', $delivery_note_id);
                 if($delivery_note->exists()){
                     $delivery_note = $delivery_note->first();
-                    $min_date = Carbon::parse('01-01-2022 00:00:00')->toDateTimeString();
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
                     if($delivery_note->created_at >= $min_date){
-                        if($delivery_note->status == 0){
-                            $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note->id);
-                            $transactions_amount = 0;
-                            if($hbl_konnect_transaction_delivery_note->exists()){
-                                $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
-                                $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
-                            }
-                            $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
-                            $rider_id = $delivery_note->rider_id;
-                            $rider = Rider::where('id',$rider_id);
-                            if($rider->exists())
-                            {
-                                $rider = $rider->first();
-                                $rider_name = $rider->name;
-                                $rider_trax_id = $rider->trax_id;
-                            }
-                            return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'rider_name' => $rider_name, 'rider_trax_id' =>$rider_trax_id]);
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note->id);
+                        $transactions_amount = 0;
+                        if($hbl_konnect_transaction_delivery_note->exists()){
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                            $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
                         }
-                        else{
-                            return response()->json(['status' => 0, 'message' => 'Delivery Note already updated!']);
+                        $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
+                        $rider_id = $delivery_note->rider_id;
+                        $rider = Rider::where('id',$rider_id);
+                        if($rider->exists())
+                        {
+                            $rider = $rider->first();
+                            $rider_name = $rider->name;
+                            $rider_trax_id = $rider->trax_id;
                         }
+                        return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'rider_name' => $rider_name, 'rider_trax_id' =>$rider_trax_id]);
                     }
                     else{
                         return response()->json(['status' => 0, 'message' => 'Delivery Note restricted!']);

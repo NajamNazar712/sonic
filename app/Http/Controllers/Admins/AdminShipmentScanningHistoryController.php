@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\ShipmentScanningScreenLocation;
@@ -65,6 +66,13 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $c = City::find($retail_admin->city_id);
                                 ($c)?$city=$c['name']:$city='-';
                                 $scanned_by = $retail_admin->name;
+                            }
+                            else if($scanning_history->user_type == 5){
+                                $account_type = 'Rider';
+                                $rider = Rider::find($scanning_history->admin_id);
+                                $c = City::find($rider->city_id);
+                                ($c)?$city=$c['name']:$city='-';
+                                $scanned_by = $rider->name;
                             }
                             else{
                                 $account_type = '-';
