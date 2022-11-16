@@ -10040,6 +10040,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $added_shipments = [];
             $tracking_numbers = explode(',', $request->shipment_ids);
             $open_box_ids = explode(',', $request->open_box_ids);
             $notifications = explode(',', $request->notification_ids);
