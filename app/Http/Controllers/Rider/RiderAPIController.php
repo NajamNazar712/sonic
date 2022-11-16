@@ -12798,9 +12798,9 @@ class RiderAPIController extends Controller
         $settings = GlobalSettings::where('type', 'rider_otp');
         $environment = config('app.env');
 
-        if (!$settings->exists()) {
+        if ($settings->exists()) {
             $settings = $settings->first();
-            if ($settings->setting_value) {
+            if ($settings->setting_value == 1) {
                 if ($environment == 'production' || $environment == 'staging') {
                     $rider_id = $request->get('rider_id');
                     $rider = Rider::find($rider_id);
@@ -12819,6 +12819,9 @@ class RiderAPIController extends Controller
                 else{
                     return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
                 }
+            }
+            else{
+                return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
             }
         }
         else{
