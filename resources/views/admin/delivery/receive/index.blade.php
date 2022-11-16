@@ -317,7 +317,7 @@
                                 row.push(values.pending_status);
                                 row.push(values.last_updated_at);
                                 row.push(values.updated_by);
-                                row.push(values.created_via_app);
+                                row.push(values.created_via);
                                 body.push(row);
                             });
                         },
@@ -410,7 +410,7 @@
                         class: 'align-middle last_updated_at'
                     },
                     {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
-                    {data: 'created_via_app', name: 'delivery_notes.created_via_app', class: 'align-middle created_via_app'},
+                    {data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -987,6 +987,8 @@
                 $('#otp_input').val('');
                 $('#OtpModal').modal('hide');
             });
+
+
 
         });
     </script>
