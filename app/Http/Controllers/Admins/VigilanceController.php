@@ -360,19 +360,27 @@ class VigilanceController extends Controller
                 $verify_count = $vigilance->verify_shipments_count;
                 if($verify_count != 0){
                     $shipments = array();
-                    $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
-                    $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$vigilance->delivery_note_id)->pluck('shipment_id')->toArray();
+
+                    if($request->unverify_shipments_count < 0){
+                        $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
+                        $delivery_note_shipments = ShipmentsJourney::where('reference_1_id',$vigilance->delivery_note_id)->where('shipper_status_id',5)->pluck('shipment_id')->toArray();
+                        
+                    }else{
+                        $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
+                        $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$vigilance->delivery_note_id)->pluck('shipment_id')->toArray();
+                    }
                     $diff_shipments = array_diff($delivery_note_shipments,$vigilance_shipments);
-                    if(count($diff_shipments) != 0){
-                        foreach ($diff_shipments as $diff_shipment) {
-                            $shipment = Shipment::find($diff_shipment);
-                            $shipments[] = $shipment->tracking_number;
+                        if(count($diff_shipments) != 0){
+                            foreach ($diff_shipments as $diff_shipment) {
+                                $shipment = Shipment::find($diff_shipment);
+                                $shipments[] = $shipment->tracking_number;
+                            }
+                            return ['status' => 0, 'success' => 'Unverify Shipments', 'shipments' => $shipments];
                         }
-                        return ['status' => 0, 'success' => 'Unverify Shipments', 'shipments' => $shipments];
-                    }
-                    else{
-                        return ['status' => 0, 'success' => 'No Unverify Shipments', 'shipments' => FALSE];
-                    }
+                        else{
+                            return ['status' => 0, 'success' => 'No Unverify Shipments', 'shipments' => FALSE];
+                        }
+
                 }
             }
         }
