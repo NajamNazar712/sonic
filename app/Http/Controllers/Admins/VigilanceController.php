@@ -361,15 +361,16 @@ class VigilanceController extends Controller
                 if($verify_count != 0){
                     $shipments = array();
 
+                    $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
+                    $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$vigilance->delivery_note_id)->pluck('shipment_id')->toArray();
+                    
                     if($request->unverify_shipments_count < 0){
-                        $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
-                        $delivery_note_shipments = ShipmentsJourney::where('reference_1_id',$vigilance->delivery_note_id)->where('shipper_status_id',5)->pluck('shipment_id')->toArray();
                         
+                        $diff_shipments = array_diff($vigilance_shipments,$delivery_note_shipments);
                     }else{
-                        $vigilance_shipments = VigilanceVerifiedShipment::where('vigilance_verification_id',$vigilance->id)->where('verification_type',1)->pluck('shipment_id')->toArray();
-                        $delivery_note_shipments = DeliveryNoteShipment::where('delivery_note_id',$vigilance->delivery_note_id)->pluck('shipment_id')->toArray();
+
+                        $diff_shipments = array_diff($delivery_note_shipments,$vigilance_shipments);
                     }
-                    $diff_shipments = array_diff($delivery_note_shipments,$vigilance_shipments);
                         if(count($diff_shipments) != 0){
                             foreach ($diff_shipments as $diff_shipment) {
                                 $shipment = Shipment::find($diff_shipment);
