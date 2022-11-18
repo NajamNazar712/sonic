@@ -1138,7 +1138,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_via', function ($delivery) {
-                if ($delivery->created_via_app == 0) {
+                if ($delivery->created_via == 0) {
                     return 'Sonic';
                 } else {
                     return 'App';
@@ -6870,8 +6870,8 @@ class DeliveryController extends Controller
                     return number_format($shipment->amount);
                 }
             })
-            ->editColumn('created_via_app', function ($delivery) {
-                if ($delivery->created_via_app == 0) {
+            ->editColumn('created_via', function ($delivery) {
+                if ($delivery->created_via == 0) {
                     return 'Sonic';
                 } else {
                     return 'App';
@@ -6944,26 +6944,6 @@ class DeliveryController extends Controller
                 }
                 else{
                     return $query->where('riders.operation_rider_id',2);
-                }
-            })
-            ->editColumn('created_via', function ($delivery) {
-                if ($delivery->created_via_app == 0) {
-                    return 'Sonic';
-                } else {
-                    return 'App';
-                }
-            })
-            ->filterColumn('delivery_notes.created_via_app', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-                if ($keyword != '') {
-                    if($keyword == 'sonic'){
-                        return $query->where('delivery_notes.created_via_app',0);
-                    }
-                    else{
-                        return $query->where('delivery_notes.created_via_app',1);
-                    }
-                } else {
-                    $query->whereRaw('false');
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {

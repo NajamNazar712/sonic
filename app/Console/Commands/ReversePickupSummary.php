@@ -54,7 +54,7 @@ class ReversePickupSummary extends Command
             $start_date = $start_date . ' ' . $cut_off_time;
             $end_date = Carbon::today()->format('Y-m-d');
             $end_date = $end_date . ' ' . $cut_off_time;
-            $response = AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
+            AdminReportsEmailController::reverse_pickup_summary($start_date, $end_date);
         }
     }
 }
