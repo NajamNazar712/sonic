@@ -357,7 +357,7 @@
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
-                                row.push(values.created_via_app);
+                                row.push(values.created_via);
                                 row.push(values.updated_via_app);
                                 row.push(values.last_updated_at);
 
