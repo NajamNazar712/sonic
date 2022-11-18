@@ -1046,9 +1046,15 @@ class DeliveryController extends Controller
             });
         }
 
+        $settings = GlobalSettings::where('type','rider_otp');
+        if($settings->exists()) {
+            $settings = $settings->first();
+            $setting_value = $settings->setting_value;
+        }
+
         $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
-        return view('admin.delivery.receive.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.receive.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category, 'rider_otp' => $setting_value]);
     }
 
     public function receive_deliveries_list(Request $request)
@@ -7925,11 +7931,12 @@ class DeliveryController extends Controller
     {
         $rider_id = $request->rider;
         $delivery_note_id = $request->delivery_note_id;
-        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id', 'riders.ccd as ccd')->where('riders.id', $rider_id);
+        $rider = Rider::leftjoin('cities as c', 'c.id', '=', 'riders.city_id')->select('c.hub_id as hub_id', 'riders.ccd as ccd' , 'riders.employee_id as employee_id')->where('riders.id', $rider_id);
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if ($delivery_note) {
             if ($rider->exists()) {
                 $rider = $rider->first();
+                // dd($rider);
                 if ($delivery_note->hub_id == $rider->hub_id) {
                     $ccd_flag = false;
                     foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
@@ -7948,7 +7955,7 @@ class DeliveryController extends Controller
                             $attendance_date = Carbon::now()->format('Y-m-d');
                             $attendance_time = Carbon::now()->format('H:i:s');
                             // $city_id_location = City::find($delivery_note->hub_id);
-
+                            // dd($rider->employee_id);
                             $rider_attendance = EmployeeAttendance::where('employee_id', $rider->employee_id)
                                 ->whereDate('attendance_date', $attendance_date)
                                 ->where('employee_type', 2);

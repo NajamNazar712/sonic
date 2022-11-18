@@ -106,6 +106,7 @@
                         <div class="row justify-content-center">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <input type="hidden" id="rider_otp" name="rider_otp" value="{{$rider_otp}}">
                                     <select name="operation_rider_id" id="operation_rider_id"
                                             class="form-control select2" required>
                                         @foreach($operation_rider_category as $category)
@@ -818,6 +819,7 @@
                 var operation_id = $('#operation_rider_id').val();
                 var route = $('#route').val();
                 var rider = $('#riders').val();
+                var rider_otp = $('#rider_otp').val();
                 var errors = 0;
                 if (rider !== '' && rider !== null) {
                     $('#rider_error').css('display', 'none');
@@ -836,7 +838,7 @@
                     $('#route_error').css('display', 'block');
                 }
                 if (errors == 0) {
-                    if (operation_id === '2') {
+                    if (operation_id === '2' || rider_otp === '0') {
                         reassign_rider();
                     } else {
                         otp_generation();
