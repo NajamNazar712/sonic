@@ -550,13 +550,16 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#unverify_shipments_modal .modal-body').html('');
                 $('#unverify_shipments_modal').modal('show');
+                
+                var unverify_shipments_count = parseInt($(this).html());
 
                 $.ajax({
                     url: '{!! route('admin.vigilance.verification.unverify_cns') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'verify_id': id
+                        'verify_id': id,
+                        'unverify_shipments_count' : unverify_shipments_count
                     }
                 })
                     .done(function(data) {
