@@ -87,6 +87,5 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
                 }
             }
         }
-        dd($details);
     }
 }
