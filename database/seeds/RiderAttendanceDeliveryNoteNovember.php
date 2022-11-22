@@ -13,7 +13,7 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
     public function run()
     {
         $from = Carbon::createFromFormat('Y-m-d H:i:s', '2022-10-21 00:00:01');
-        $to = Carbon::createFromFormat('Y-m-d H:i:s', '2022-10-22 23:23:59');
+        $to = Carbon::createFromFormat('Y-m-d H:i:s', '2022-11-22 23:23:59');
 
         $length = $from->diffInDays($to);
 
