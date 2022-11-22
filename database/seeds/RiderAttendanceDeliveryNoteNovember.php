@@ -12,18 +12,31 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
      */
     public function run()
     {
-        $from = Carbon::createFromFormat('Y-m-d H:i:s', '2022-10-21 00:00:01');
-        $to = Carbon::createFromFormat('Y-m-d H:i:s', '2022-11-22 23:23:59');
+        $from = Carbon::createFromFormat('Y-m-d', '2022-10-21');
+        $to = Carbon::createFromFormat('Y-m-d', '2022-11-20');
 
         $length = $from->diffInDays($to);
 
         $dates = [];
+        $all_dates = array();
+        while ($from->lte($to)){
+            $all_dates[] = $from->toDateString();
 
-        for ($i = 0; $i < $length; $i++){
-            $date = $from->addDays($i);
-            array_push($dates, $date);
-}
-
-        dd($dates);
+            $from->addDay();
+        }
+        $details = [];
+        foreach($all_dates as $date){
+            $riders = [];
+            $delivery_notes = \App\Http\Models\Admin\DeliveryNote::whereDate('created_at', $date);
+            if($delivery_notes->exists()){
+                $delivery_notes = $delivery_notes->get();
+                foreach ($delivery_notes as $delivery_note){
+                    if(!in_array($riders, $delivery_note->rider_id)){
+                        $details[$delivery_note->rider_id][] = $delivery_note->created_at;
+                    }
+                }
+            }
+        }
+        dd($details);
     }
 }
