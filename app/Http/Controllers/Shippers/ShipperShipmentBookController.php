@@ -1043,11 +1043,10 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL)
+    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
         $watermark_flag = false;
         if ($user_type == 3) {
             $user_name = Admin::find($user_id)->name . ' (Admin)';
@@ -1059,6 +1058,7 @@ class ShipperShipmentBookController extends Controller
             $sub_shipper = SubstituteUser::where('user_id', $user_id)->where('id', Auth::id())->select('name')->first();
             $user_name = $sub_shipper->name . ' (Sub-Shipper)';
         } else if ($user_type == 4) {
+            
             $user_name = User::find($user_id)->name . ' (API)';
         } else {
             $user_name = 'Unknown';
@@ -2342,6 +2342,50 @@ class ShipperShipmentBookController extends Controller
                             }
                             
             //delivery location watermark end
+
+                            
+                            //receiving_sheet_print
+                            if($print_status == 1){
+                                
+                                if($page_break){
+                                    $shipment_details .= '
+                                    <div id="watermark_" class="watermark_">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -1200px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: red; 
+                                      font-stretch: extra-expanded;"     
+                                      > Duplicate Print  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }else{
+                                    $shipment_details .= '
+                                    <div id="watermark_" class="watermark_">
+                                    <h1 style="
+                                      text-align: center;  
+                                      text-transform: uppercase;                  
+                                      overflow: hidden;
+                                      position: absolute;
+                                      margin-top: -290px;
+                                      opacity: 0.2;
+                                      transform: rotate(350deg);
+                                      font-size: 400%; 
+                                      color: red; 
+                                      font-stretch: extra-expanded;"     
+                                      > Duplicate Print  </h1>
+                                    
+                                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                                  </div>';
+                                }
+                                
+                            }
             }
             if ($user_type == 3) {
                 $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
@@ -2420,7 +2464,7 @@ class ShipperShipmentBookController extends Controller
             $role_ids = explode(',', $ids);
 
             if (in_array(session('role_id'),$role_ids)) {
-                return response()->json(['status' => '2', 'error' => 'You have no rights to print']);
+                return response()->json(['status' => '2', 'error' => 'You are restricted from printing duplicate airway bill(s). Please contact your line manager.']);
             }
         }
 
@@ -6047,7 +6091,7 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('shipper_id', $request->shipper)->where('phone_number_1', 'LIKE', "%" . $request->q . "%");
+        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
         if ($consignee_info->exists()) {
             $consignee_info = $consignee_info->limit(10)->get();
             foreach ($consignee_info as $item) {
@@ -6300,7 +6344,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        $cities = City::where('status', 1)->where('business_category_id', 2)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        $cities = City::where('status', 1)->where('business_category_id', 2)->where('permanent_disabled',0)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
         $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();

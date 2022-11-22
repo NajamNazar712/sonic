@@ -21,9 +21,9 @@ class UpdateModuleNotificationAndScreenSearchVigilanceSeeder extends Seeder
             array('id' => 771, 'name' => 'Vigilance Verification History - View', 'module_id' => 33),
         ));
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > Delivery Notes', 'url'=>'admin.vigilance.verification.index', 'permission_id' => 770),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > History', 'url'=>'admin.vigilance.verification.history.index', 'permission_id' => 771)
-        );
+        // DB::table('admins_screen_list')->insert(
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > Delivery Notes', 'url'=>'admin.vigilance.verification.index', 'permission_id' => 770),
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Vigilance Verification > History', 'url'=>'admin.vigilance.verification.history.index', 'permission_id' => 771)
+        // );
     }
 }

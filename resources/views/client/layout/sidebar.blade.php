@@ -47,6 +47,7 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+
 {{--                        @if(session('user_id') == 3324)--}}
 {{--                            <li><a class="menu-item" href="{{ route('cod.shipment.telenor.other_courier.index') }}">Other Courier Shipments</a></li>--}}
 {{--                        @endif--}}
@@ -159,11 +160,19 @@
                             @endif
                         @endif
 
+                        @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]))
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
+                        @endif
+
                     </ul>
                 </li>
             @endif
             @if (session('user_type') == 1 || in_array(10, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
+            @endif
+
+            @if (session('user_type') == 1 || in_array(19, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('cod.crm.bulk_claim.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Bulk Claim Logging</span></a></li>
             @endif
 
             @if (session('user_type') == 1)
@@ -196,8 +205,10 @@
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.receiving_sheet.index')}}">Receiving Sheet (Shipment Description)</a></li>
                         @endif
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{ route('cod.cancelled_shipments_arrival.cancelled_shipments_arrival_index') }}">Restrict Cancelled Shipment Arrival</a></li>
+                        @endif
                     </ul>
-
                 </li>
             @endif
 

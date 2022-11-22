@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\HR\Employee;
 use Closure;
 
@@ -24,13 +25,16 @@ class AdminAPIToken
 
             if ($admin->exists()) {
                 $admin = $admin->first();
-
+//dd($admin);
                 if ($admin->status) {
+
                     $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
                     if($employee->exists())
                     {
+
                         $employee = $employee->first();
-                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id]);
+                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->pluck('hub_id')->toArray();
+                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id, 'admin_hubs' => $admin_hubs]);
                         return $next($request);
                     } else{
                         return response()->json([
@@ -42,6 +46,7 @@ class AdminAPIToken
 
                 }
                 else {
+                    
                     return response()->json([
                         'status' => 2,
                         'message' => 'Your Account is not Activate.'

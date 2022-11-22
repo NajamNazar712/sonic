@@ -58,6 +58,8 @@ class Permission
             'daily_visit.store' => 265,
             'daily_visit.business_card' => 264,
             'daily_visit.location_photo' => 264,
+            'daily_visit.screen.index' => 791,
+            'daily_visit.screen.edit' => 792,
 
 
             'pickups.un_assigned.index' => 17,
@@ -604,6 +606,14 @@ class Permission
 
             'reports.mms.index' => 780,
             'reports.mms.list' => 780,
+
+            'reports.ssr.index' => 793,
+            'reports.ssr.list' => 793,
+
+            'reports.shipper_summary.index' => 794,
+            'reports.shipper_summary.list' => 794,
+
+            'reports.crm_agent_wise_report.index' => 784,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1174,7 +1184,20 @@ class Permission
             'rider_otp.list' => 563,
 
             'rider_otp.update' => 721,
-            
+
+            'shipment_otp.index' => 815,
+            'shipment_otp.list' => 815,
+
+            'delivery.rider_request.index' => 35,
+            'delivery.rider_request.list' => 35,
+            'delivery.rider_request.approve' => 816,
+            'delivery.rider_request.reject' => 817,
+            'delivery.rider_request.update' => 818,
+            'delivery.rider_request.update.list' => 818,
+            'delivery.rider_request.update.remove' => 818,
+            'delivery.rider_request.update.remove.bulk' => 818,
+            'delivery.rider_request.add.shipments' => 818,
+
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
             
@@ -1262,6 +1285,25 @@ class Permission
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
             'qa.cx_training.list' =>777,
+
+            'return.confirmation_pending_manual_sms' =>781,
+            
+            'reports.employee_confirmation.index' => 786,
+            'reports.employee_confirmation.list' => 786,
+
+            'settings.complain_portal_shippers.index' => 788,
+
+            'user_management.roles.permissions.index' => 789,
+            'crm.bulk_claim.index' => 795,
+
+            'international.wholesale.accounts.index' => 799,
+
+            'international.wholesale.excel.index' => 804,
+            'international.wholesale.invoices.index' => 807,
+
+            'settings.non_cod_otp_shippers.index' => 820,
+            'settings.non_cod_otp_shippers.store' => 820,
+
         ],
 
         'shipper' => [
@@ -1353,6 +1395,10 @@ class Permission
 
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
+
+            'crm.bulk_claim.index' => 19,
+
+            
         ]
     ];
 

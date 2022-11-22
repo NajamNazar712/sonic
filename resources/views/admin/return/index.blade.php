@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                      {{--   <th class="border-primary border-darken-1">RCP SMS Count</th>--}}
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -406,6 +407,58 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="send_sms_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="send_sms_modal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h4 class="modal-title white" id="">Send SMS</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="send_sms_form" method="POST" novalidate="novalidate">
+                        @csrf
+                        <input type="hidden" name="id" class="id" id="id">
+                        <input type="hidden" name="send_via" class="send_via" id="send_via" value="auto">
+                        <div class="row justify-content-center">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
+                                <div class="form-group">
+                                    <label for="send_sms_checkbox" class="font-medium-2 font-weight-bold mr-1">Auto</label>
+                                    <input type="checkbox" name="send_sms_checkbox" id="send_sms_checkbox" class="switchery send_sms_checkbox" data-size="sm" data-switchery="true">
+                                    <label for="send_sms_checkbox" class="font-medium-2 font-weight-bold ml-1">Manual</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mannual_sms d-none" >
+                            <div class="col-6">
+                                <div class="form-group input-group text-center">
+                                    <label class="font-medium-2 font-weight-bold block ">Send Message TO</label>
+                                    <select name="shipper_consignee" id="shipper_consignee" class="form-control select2" data-msg-required="Select Shipper/Consignee" data-rule-required="true">
+                                        <option value="shipper">Shipper</option>
+                                        <option value="consignee">Consignee</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <div class="form-group input-group text-center">
+                                    <label class="font-medium-2 font-weight-bold block">Message</label>
+                                    <textarea id="send_mannual_message" name="send_mannual_message" disabled class="form-control" placeholder="Type Your Message*" rows="5" data-rule-required="true"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+
+                            <div class="col-12 form-group text-center">
+                                <button type="submit" class="btn btn-primary btn-block">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -465,6 +518,9 @@
         .goldClass{
             background-color: gold;
         }
+        .GreenColor{
+            background-color: #0aff00;
+        }
     </style>
 @endsection
 
@@ -489,6 +545,137 @@
             });
         @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
         $(document).ready(function () {
+
+            // $('#send_sms_modal').modal('show');
+
+            $('#send_sms_form #shipper_consignee').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder: 'Select Shipper/Consignee',
+                allowClear:true,
+				dropdownParent:$('#send_sms_form')
+            });
+
+            $('#send_sms_checkbox').on('change',function(){
+
+                var send_sms_checkbox = document.querySelector('.switchery.send_sms_checkbox');
+
+                if (send_sms_checkbox.checked === true) {
+                    $('#send_sms_form #send_via').val('manual');
+                    $('.mannual_sms').removeClass('d-none');
+
+                }else if (send_sms_checkbox.checked === false) {
+                    $('#send_sms_form #send_via').val('auto');
+                    $('.mannual_sms').addClass('d-none');
+                }
+            });
+
+            $('#shipper_consignee').on('select2:unselect', function () {
+
+                $('#send_mannual_message').val('');
+                $('#send_mannual_message').attr('disabled', true);
+			});
+
+            $('#shipper_consignee').select2({
+				placeholder:'Select Shipper/Consignee',
+				width:'100%',
+				allowClear:true
+			}).bind('select2:select', function () {
+                $('#send_mannual_message').attr('disabled', false);
+			});
+
+            $('#send_sms_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    var form = $("#send_sms_form");
+                    var id = $(form).find('#id').val();
+                    var send_via = $(form).find('#send_via').val();
+                    var send_to = $(form).find('#shipper_consignee').val();
+                    var message = $(form).find('#send_mannual_message').val();
+
+                    if(id){
+
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to update Estimated Charges!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                swal({
+                                    text: 'Please Wait!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                               
+                                $.ajax({
+                                    url: '{!! route('admin.return.rcp_sms') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'id': id,
+                                        'send_via': send_via,
+                                        'send_to': send_to,
+                                        'message': message
+                                    }
+                                })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    $('#send_sms_modal').modal('hide');
+
+                                    swal.close();
+                                    
+                                });    
+                            }                            
+                        });
+                    }
+                }
+			});
+
+            $('#send_sms_modal').on('hide.bs.modal', function (e) {
+
+                if($("#send_sms_checkbox").is(":checked")){
+                    $("#send_sms_checkbox").trigger('click');
+                }
+
+                $('#shipper_consignee').val(null).trigger('change');
+                
+                $('#send_mannual_message').val('');
+                $('#send_mannual_message').attr('disabled', true);
+
+
+            });
+
             $('#label_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Labeling*'
@@ -553,6 +740,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Address');
+                            head.push('Sub Station');
                             head.push('Collection Amount');
                            /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -590,6 +778,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                 row.push(values.consignee_address);
+                                row.push(values.sub_station);
                                 row.push(values.amount);
                             /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1035,7 +1224,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[22, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1050,6 +1239,7 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                    /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
@@ -1100,7 +1290,7 @@
                         var header = column.header();
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts') || $(header).is('.consolidation') || $(header).is('.reattemp_status_remarks') ) {
-                            $(td).appendTo($(search));
+                            $(td).appendTo($(search) || $(header).is('sub_station'));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -2065,52 +2255,56 @@
             $('#datatable tbody').on('click', '.dropdown-menu a.rcp_sms', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
-                if(id){
 
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to update Estimated Charges!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            $.ajax({
-                                url: '{!! route('admin.return.rcp_sms') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'id': id
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status == 0) {
+                $('#send_sms_form #id').val(id);
+                $('#send_sms_modal').modal('show');
 
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
+                // if(id){
 
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                });
-                        }
-                    });
-                }
+                //     swal({
+                //         title: 'Are You Sure?',
+                //         text: 'Select Yes to update Estimated Charges!',
+                //         icon: 'warning',
+                //         buttons: {
+                //             cancel: {
+                //                 text: 'No',
+                //                 value: null,
+                //                 visible: true,
+                //                 closeModal: true,
+                //             },
+                //             confirm: {
+                //                 text: 'Yes',
+                //                 value: true,
+                //                 visible: true,
+                //                 closeModal: true
+                //             }
+                //         },
+                //         closeOnClickOutside: false,
+                //         closeOnEsc: false,
+                //         dangerMode: true
+                //     }).then(function (confirm) {
+                //         if(confirm){
+                //             $.ajax({
+                //                 url: '{!! route('admin.return.rcp_sms') !!}',
+                //                 method: 'POST',
+                //                 data: {
+                //                     '_token': '{{ csrf_token() }}',
+                //                     'id': id
+                //                 }
+                //             })
+                //                 .done(function(data) {
+                //                     if (data.status == 0) {
+
+                //                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                //                     }
+                //                     else {
+
+                //                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //                     }
+                //                 });
+                //         }
+                //     });
+                // }
             });
 
 

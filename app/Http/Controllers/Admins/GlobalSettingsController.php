@@ -44,6 +44,7 @@ use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Admin\SalePersonTargetDelete;
 use App\Http\Models\Admin\SalesDesignation;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesIncentiveDate;
@@ -115,6 +116,8 @@ use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
 use App\Http\Models\Admin\BookingDestinationMapping;
 use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\LeadTaggingService;
+use App\Http\Models\ServiceList;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -2130,7 +2133,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
+            ->select('sale_person_targets.id as id','sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
 
         $datatable = Datatables::of($targets);
         return $datatable->make(true);
@@ -3858,11 +3861,11 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_1' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_2' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_3' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_4' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_5' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_1' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_2' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_3' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_4' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_5' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_1') && !$request->hasFile('upload_image_2') && !$request->hasFile('upload_image_3') && !$request->hasFile('upload_image_4') && !$request->hasFile('upload_image_5')) {
@@ -5247,11 +5250,11 @@ public function sales_incentive()
     public function admin_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_6' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_7' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_8' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_9' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_10' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_6' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_7' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_8' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_9' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_10' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_6') && !$request->hasFile('upload_image_7') && !$request->hasFile('upload_image_8') && !$request->hasFile('upload_image_9') && !$request->hasFile('upload_image_10')) {
@@ -5344,11 +5347,11 @@ public function sales_incentive()
     public function retail_ticker_store(Request $request)
     {
         $request->validate([
-            'upload_image_11' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_12' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_13' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_14' => 'nullable|image|mimes:jpeg,png|max:2048',
-            'upload_image_15' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_11' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_12' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_13' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_14' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image_15' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if (!$request->hasFile('upload_image_11') && !$request->hasFile('upload_image_12') && !$request->hasFile('upload_image_13') && !$request->hasFile('upload_image_14') && !$request->hasFile('upload_image_15')) {
@@ -5678,10 +5681,11 @@ public function sales_incentive()
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
         ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
-        ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
+        // ->leftjoin('service_list as s','s.id','lead_taggings.service_id')
         ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
         ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
-        ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', DB::raw('(SELECT COUNT(id) FROM lead_tagging_services WHERE lead_tagging_id = lead_taggings.id) AS service2'),'lead_taggings.status');
+        // ->select('lead_taggings.id','lead_taggings.service_id as service', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service2','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5758,72 +5762,72 @@ public function sales_incentive()
                 return $roles->territory_name;
             }
 
+        })
+        ->filterColumn('z.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball zones\b/',$keyword) || preg_match('/\bAll Zones\b/',$keyword)) {
+                $query->where('lead_taggings.zone_id', 0);
+            } else {
+                $query->where('z.name', 'like', '%' . $keyword . '%');
+            }
+        })
+        ->filterColumn('c.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball cities\b/',$keyword) || preg_match('/\bAll Cities\b/',$keyword)) {
+                $query->where('lead_taggings.city_id', 0);
+            } else {
+                $query->where('c.name', 'like', '%' . $keyword . '%');
+            }
+        })
+        ->filterColumn('t.name', function ($query, $keyword) {
+            
+            if (preg_match('/\ball territories\b/',$keyword) || preg_match('/\bAll Territories\b/',$keyword)) {
+                $query->where('lead_taggings.territory_id', 0);
+            } else {
+                $query->where('t.name', 'like', '%' . $keyword . '%');
+            }
+        })
+        ->addColumn('service2_link', function($roles) {
+            return '<button class="btn btn-sm btn-outline-info align-middle services_link" id="'.$roles->id.'"><span class="align-middle">' . $roles->service2 . '</span></button>';
         });
 
     return $datatables->make(true);
     }
 
     public function lead_tagging_submit(Request $request){
-        if($request->zone_id == 0){
-            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-            // $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
-            //     $query->where('zone_id', '=', '0')
-            //     ->where('service_id', $request->service_id)
-            //     ->where('sale_person_id',$request->agent_id)
-            //     ->where('status', 1);
-            // })->orWhere(function ($query) use ($request){
-            //     $query->where('zone_id', '=', $request->zone_id)
-            //     ->where('city_id', '=', '0')
-            //     ->where('sale_person_id',$request->agent_id)
-            //     ->where('service_id', $request->service_id)
-            //     ->where('status', 1);
-            // });
-            if(!$check_leads->exists()){
-                $lead_tagging = new LeadTagging;
-                $lead_tagging->sale_person_id = $request->agent_id;
-                $lead_tagging->zone_id = $request->zone_id;
-                if($request->city_id){
-                    $lead_tagging->city_id = $request->city_id;
-                }
-                if($request->territory_id){
-                    $lead_tagging->territory_id = $request->territory_id;
-                }
-                $lead_tagging->service_id = $request->service_id;
-                $lead_tagging->save();
-    
-                return redirect()->back()->with('success', 'Lead Agent Added!');
-    
-            }else{
-                return redirect()->back()->with('error', 'Lead Agent already exist');
-            }
-        }else{
+      
 
-            $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('territory_id',$request->territory_id);
     
             if(!$check_leads->exists()){
                 $lead_tagging = new LeadTagging;
                 $lead_tagging->sale_person_id = $request->agent_id;
                 $lead_tagging->zone_id = $request->zone_id;
                 $lead_tagging->city_id = $request->city_id;
-                $lead_tagging->service_id = $request->service_id;
                 $lead_tagging->territory_id = $request->territory_id;
                 $lead_tagging->save();
+                foreach($request->service_id as $service_id){
+                    LeadTaggingService::create([
+                        'service_id' => $service_id,
+                        'lead_tagging_id' => $lead_tagging->id,
+                    ]);
+                }
     
                 return redirect()->back()->with('success', 'Lead Agent Added!');
     
             }else{
                 return redirect()->back()->with('error', 'Lead Agent already exist');
             }
-        }
+        // }
     }
 
     public function lead_tagging_data(Request $request){
         $lead_tagging = LeadTagging::find($request->id);
 
+        $service_id = LeadTaggingService::where('lead_tagging_id',$request->id)->pluck('service_id')->toArray();
         $agent_id = $lead_tagging->sale_person_id;
         $city_id = $lead_tagging->city_id;
         $zone_id = $lead_tagging->zone_id;
-        $service_id = $lead_tagging->service_id;
         $lead_tagging_id = $lead_tagging->id;
         $territory_id = $lead_tagging->territory_id;
 
@@ -5833,17 +5837,29 @@ public function sales_incentive()
 
 
     public function lead_tagging_update(Request $request){
-        // dd($request->all());
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+        $service_id = $request->service_id;
+        $check_leads = LeadTagging::where('city_id',$request->city_id)
+        ->where('sale_person_id',$request->agent_id)
+        ->where('territory_id',$request->territory_id)
+        ->where('id','<>',$request->lead_tagging_id);
 
         if(!$check_leads->exists()){
+            
             $lead_tagging = LeadTagging::find($request->lead_tagging_id);
             $lead_tagging->sale_person_id = $request->agent_id;
             $lead_tagging->zone_id = $request->zone_id;
             $lead_tagging->city_id = $request->city_id;
-            $lead_tagging->service_id = $request->service_id;
             $lead_tagging->territory_id = $request->territory_id;
             $lead_tagging->save();
+
+            LeadTaggingService::where('lead_tagging_id',$request->lead_tagging_id)->delete();
+
+            foreach($request->service_id as $service_id){
+                LeadTaggingService::create([
+                    'service_id' => $service_id,
+                    'lead_tagging_id' => $lead_tagging->id,
+                ]);
+            }
             return redirect()->back()->with('success', 'Lead Agent Updated!');
         }else{
             return redirect()->back()->with('error', 'Lead Agent already exist');
@@ -6380,15 +6396,18 @@ public function sales_incentive()
     public function cn_print_right()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
-        $admin_roles_id = AdminRole::all();
-//        dd($admin_roles);
+
+        $admins = AdminRole::leftjoin('admin_departments as ad','ad.id','=','admin_roles.department_id')
+        ->where('ad.id','!=',1)
+        ->select('admin_roles.id as id','admin_roles.name as name','ad.id as d_id','ad.name as d_name')
+        ->get();
+
         $settings = GlobalSettings::where('type', 'cn_print_rights');
-        $foc_account_tags = array();
         if ($settings->exists()) {
             $settings = $settings->first();
             $admin_roles = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles_id,'existing_admin_roles'=> $admin_roles ]);
+        return view('admin.settings.cn_print_right')->with(['admins' => $admins,'existing_admin_roles'=> $admin_roles]);
     }
     public function cn_print_right_store(Request $request)
     {
@@ -6962,7 +6981,7 @@ public function sales_incentive()
             $delivery_location_keyword->save();
 
         }
-        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Deivery Area Keyword Added');
+        return redirect()->route('admin.settings.delivery_area_keyword.index')->with('success', 'Delivery Area Keyword Added');
 
     }
 
@@ -7293,6 +7312,190 @@ public function sales_incentive()
         }
         return response()->json(['status'=>'true']);
 
+    }
+
+    public function complain_portal_shippers(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),578);
+        
+        $shippers = array();
+        
+        $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $shippers = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
+
+        return view('admin.settings.compalint_portal_shippers')->with(['shippers' => $shippers,'users' => $users]);
+    }
+
+    public function complain_portal_shippers_update(Request $request){
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'complaint_portal_shippers';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+    public function delete_sale_person_targets(Request $request){
+        if(isset($request->sale_person_ids) && !empty($request->sale_person_ids)){
+
+            $sales_persons = $request->sale_person_ids;
+            if (count($sales_persons) > 0) {
+                foreach ($sales_persons as $person_id) {
+                    $sales_target = SalePersonTarget::where('id', $person_id);
+                    if ($sales_target->exists()) {
+                        $sales_target = $sales_target->first();
+
+                        $sale_person_target_del = new SalePersonTargetDelete();
+                        $sale_person_target_del->deleted_id = $sales_target->id;
+                        $sale_person_target_del->start_date = $sales_target->start_date;
+                        $sale_person_target_del->end_date = $sales_target->end_date;
+                        $sale_person_target_del->sales_person_id = $sales_target->sales_person_id;
+                        $sale_person_target_del->target_days = $sales_target->target_days;
+                        $sale_person_target_del->target_month = $sales_target->target_month;
+                        $sale_person_target_del->average_revenue = $sales_target->average_revenue;
+                        $sale_person_target_del->deleted_by = Auth::id();
+                        $sale_person_target_del->save();
+
+                    }
+                }
+                SalePersonTarget::whereIn('id', $sales_persons)->delete();
+            }
+            return response()->json(['status' => 1, 'success' => 'Delete Successfully']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No Id Found']);
+        }
+    }
+
+
+    public function lead_tagging_services(Request $request){
+        $all_services = array();
+        $services = LeadTaggingService::where('lead_tagging_id', $request->lead_tagging_id)->get();
+
+        foreach ($services as $service) {
+            $service_name = ServiceList::find($service->service_id);
+            if($service_name){
+                $all_services[] = $service_name->name;
+            }
+        }
+
+        return response()->json(['status' => 1, 'services' => $all_services]);
+    }
+
+    public function non_cod_otp_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),613);
+        $excluded_shippers = array();
+        $only_shippers = array();
+
+        $excluded_shipper = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
+        $only_shipper = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
+        $all_shipper = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
+
+        if ($excluded_shipper->exists()) {
+            $excluded_shipper = $excluded_shipper->first();
+            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper->text));
+        } else{
+            $excluded_shipper = new GlobalSettings();
+            $excluded_shipper->setting_value = 0;
+            $excluded_shipper->type = "non_cod_otp_excluded_shippers";
+            $excluded_shipper->save();
+        }
+
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $only_shipper->text));
+        } else{
+            $only_shipper = new GlobalSettings();
+            $only_shipper->setting_value = 0;
+            $only_shipper->type = "non_cod_otp_only_shippers";
+            $only_shipper->save();
+        }
+
+        if ($all_shipper->exists()) {
+            $all_shipper = $all_shipper->first();
+        } else{
+            $all_shipper = new GlobalSettings();
+            $all_shipper->setting_value = 1;
+            $all_shipper->type = "non_cod_otp_all_shippers";
+            $all_shipper->save();
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.otp.non_cod_otp_shippers')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper]);
+    }
+
+    public function non_cod_otp_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),614);
+
+        $all_shipper_settings = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
+        if($all_shipper_settings->exists()){
+            $all_shipper_settings = $all_shipper_settings->first();
+        } else{
+            $all_shipper_settings = new GlobalSettings();
+            $all_shipper_settings->type = 'non_cod_otp_all_shippers';
+        }
+        $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
+        $all_shipper_settings->save();
+
+        if ($request->has('excluded_users')) {
+            $excluded_users = implode(',', $request->excluded_users);
+            $settings = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'non_cod_otp_excluded_shippers';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $excluded_users;
+            $settings->save();
+        } else{
+            GlobalSettings::where('type', 'non_cod_otp_excluded_shippers')->delete();
+        }
+
+        if ($request->has('only_users')) {
+            $only_users = implode(',', $request->only_users);
+            $settings = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'non_cod_otp_excluded_shippers';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $only_users;
+            $settings->save();
+        } else{
+            GlobalSettings::where('type', 'non_cod_otp_only_shippers')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
     
 }

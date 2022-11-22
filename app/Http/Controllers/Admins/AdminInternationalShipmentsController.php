@@ -14,6 +14,7 @@ use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalShipmentsLog;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -43,7 +44,7 @@ class AdminInternationalShipmentsController extends Controller
         }
         $shipments = InternationalShipment::join('shipments', 'shipments.id', '=', 'international_shipments.shipment_id')
         ->leftjoin('international_shipment_service_providers as issp', 'issp.id', '=', 'international_shipments.service_provider_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider','international_shipments.seal_number');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider','international_shipments.seal_number', 'shipments.shipper_status_id');
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
@@ -61,42 +62,31 @@ class AdminInternationalShipmentsController extends Controller
 
                 $pod_file = PODImage::where('shipment_id' , $shipments->shipment_id);
 
-                if ($pod_file->exists()) {
-                    $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                                <button type="button" class="dropdown-item replace_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#ReplacePOD"><i class="ft-plus-circle"></i> Replace POD</button>
-                            </div>
-                        </div>
-                    ';
-                }else{
-                    $shipment_check = Shipment::find($shipments->shipment_id);
-                    if($shipment_check->shipper_status_id == 14){
-                        $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                                <button type="button" class="dropdown-item upload_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#UploadPOD"><i class="ft-plus-circle"></i> Upload POD</button>
-                            
-                                </div>
-                        </div>
-                    ';
-                    }else{
-                        $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                            </div>
-                        </div>
-                    ';
-                    }
-                   
-                }
+                $replace_pod = '<button type="button" class="dropdown-item replace_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#ReplacePOD"><i class="ft-plus-circle"></i> Replace POD</button>';
 
+                $upload_pod = '<button type="button" class="dropdown-item upload_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#UploadPOD"><i class="ft-plus-circle"></i> Upload POD</button>';
+
+                $edit = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                $logs = '<button type="button" class="dropdown-item view_logs"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Logs</div></button>';
+
+                $dropdown = "
+                        <div class='btn-group'>
+                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
+
+
+                if ($pod_file->exists()) {
+                    $dropdown .= $replace_pod;
+                }else{
+                    if($shipments->shipper_status_id == 14){
+                        $dropdown .= $upload_pod;
+                    }
+                }
+                $dropdown .= $edit;
+                $dropdown .= $logs;
+
+                $dropdown .= '</div></div>';
                 return $dropdown;
             });
         return $datatables->make(true);
@@ -530,5 +520,25 @@ class AdminInternationalShipmentsController extends Controller
         $shipment_log->weight = $weight;
         $shipment_log->updated_by = $admin_id;
         $shipment_log->save();
+    }
+
+    public function tracking_logs(Request $request){
+        $shipment_id = $request->shipment_id;
+
+        if($shipment_id){
+            $shipment_logs = InternationalShipmentsLog::where('shipment_id', $shipment_id);
+            if($shipment_logs->exists()){
+                $shipment_logs = $shipment_logs->get();
+                $logs = array();
+
+                foreach ($shipment_logs as $log){
+                    $logs[] = ['weight' => $log->international_shipment->actual_weight, 'tracking' => $log->international_shipment->international_tracking_number, 'updated_by' => $log->admin->name, 'date' => Carbon::parse($log->created_at)->toDateTimeString()];
+                }
+
+                return response()->json(['status' => 0, 'logs' => $logs]);
+            }
+            return response()->json(['status' => 1, 'message' => 'Shipment logs not found!']);
+        }
+        return response()->json(['status' => 2, 'error' => 'Something went wrong, please try again!']);
     }
 }

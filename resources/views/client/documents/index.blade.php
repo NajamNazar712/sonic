@@ -69,13 +69,13 @@
                                         </div>
                                     </div>
 
-                                                           <div class="card text-white box-shadow-0 bg-gradient-y-warning">
+                                   <div class="card text-white box-shadow-0 bg-gradient-y-warning">
                                     <div class="card-header">
                                         <h4 class="card-title text-white">Shopfiy Plugin</h4>
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-unstyled mb-0 text-center">
-                                                <li><a id="shopfiy_link" onClick="setShopifyLink();" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Install</a></li>
+                                                <li><a target="_blank" href="https://apps.shopify.com/sonic-trax" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Click here to Install</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -87,10 +87,6 @@
                                                     <a class="white" href="https://youtu.be/naeczv-jQYM" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
                                                 </div>
                                                 <div class="col-4">
-                                                    <ul class="list-inline text-right">
-                                                        <li><input id="shopify_text" class="form-control display-inline" type="text" placeholder="Shopify Store Name"></li>
-                                                        <li>.myshopify.com</li>
-                                                    </ul>
                                                 </div>
                                             </div>
 
@@ -103,7 +99,7 @@
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-inline mb-0">
-                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress 1.8.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
+                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress 1.9.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -159,24 +155,6 @@
 
             })
         });
-
-        var shopify_text,shopfiy_link;
-
-        function setShopifyLink(){
-        shopify_text= document.getElementById('shopify_text').value;
-        if(!shopify_text)
-        {
-            var error = 'Please enter Shopify Store Name';
-            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-        }
-        else
-        {
-            shopfiy_link="https://s-app-sonic.trax.pk?shop="+shopify_text+'.myshopify.com';
-            window.open(shopfiy_link);
-            document.getElementById('shopify_text').value="";
-        }
-        
-    }
 
 
 

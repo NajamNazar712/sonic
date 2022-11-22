@@ -117,7 +117,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\BirthdayMessage',
 		'App\Console\Commands\AutoComplaintHighAging',
 		'App\Console\Commands\LeaveCountUpdate',
-        
+		'App\Console\Commands\EmployeeConfirmationDays',
+        'App\Console\Commands\MonthAverageDestinationReportEmail',
         ];
 
     /**
@@ -140,6 +141,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
+        $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -397,6 +399,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
         $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
+
+        $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
 
 
     }

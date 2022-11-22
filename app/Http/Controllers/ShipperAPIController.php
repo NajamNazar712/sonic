@@ -31,6 +31,8 @@ use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
@@ -733,6 +735,7 @@ class ShipperAPIController extends Controller
                                 'new_consignee_email' => $request->consignee_email,
                                 'old_amount' => $shipment->amount,
                                 'new_amount' => $amount,
+                                'intercept_type' => $intercept_type,
                                 'shipper_id' => $user_id,
                             ]);
                             $shipment->consignee_status_id = 55;
@@ -1067,6 +1070,168 @@ class ShipperAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
             }
 
+        }
+    }
+
+    public function shipment_pod_tracking(Request $request)
+    {
+        $rules = [
+            'tracking_no' => ['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number', $request->tracking_no);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ($request->shipper_id == $shipment->pickup_address->user->id) {
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->orderBy('id', 'DESC')->first();
+                        $message = array();
+                        if (in_array($journey->shipper_status_id, [7, 8, 9, 12, 15, 18, 14, 30, 37, 56])) {
+                            $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
+                            if ($rider_delivery->exists()) {
+                                $data = array();
+                                $rider_delivery = $rider_delivery->first();
+
+                                if ($rider_delivery->picture_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                    if ($exists) {
+                                        $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                    } else {
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                    }
+                                    $data["pod_image"] = $pod_image;
+                                } else {
+                                    $data["pod_image"] = NULL;
+                                    array_push($message, "POD");
+                                }
+
+                                if ($rider_delivery->cnic_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->cnic_image);
+                                    if ($exists) {
+                                        $cnic_image = asset(Storage::url($rider_delivery->cnic_image));
+                                    } else {
+                                        $cnic_image = Storage::disk('s3')->temporaryUrl($rider_delivery->cnic_image, now()->addMinutes(15));
+                                    }
+                                    $data["cnic_image"] = $cnic_image;
+                                } else {
+                                    $data["cnic_image"] = NULL;
+                                    array_push($message,"CNIC");
+                                }
+
+                                if ($rider_delivery->house_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->house_image);
+                                    if ($exists) {
+                                        $house_image = asset(Storage::url($rider_delivery->house_image));
+                                    } else {
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->house_image, now()->addMinutes(15));
+                                    }
+                                    $data["house_image"] = $house_image;
+                                } else {
+                                    $data["house_image"] = NULL;
+                                    array_push($message, "House Image");
+                                }
+
+                                if ($rider_delivery->audio_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                    if ($exists) {
+                                        $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                    } else {
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                    }
+                                    $data["audio"] = $audio_path;
+                                } else {
+                                    $data["audio"] = NULL;
+                                    array_push($message, "Audio");
+                                }
+
+                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                    $data["latitude"] = $rider_delivery->actual_location_latitude;
+                                    $data["longitude"] = $rider_delivery->actual_location_longitude;
+                                } else {
+                                    $data["latitude"] = NULL;
+                                    $data["longitude"] = NULL;
+                                    array_push($message, "Location");
+                                }
+                                return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
+                            }
+                        }
+                        else if (in_array($journey->shipper_status_id, [47, 24, 48, 60, 25, 31, 38])) {
+                            $rider_delivery = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id)->orderBy('id', 'DESC');
+                            if ($rider_delivery->exists()) {
+                                $data = array();
+                                $rider_delivery = $rider_delivery->first();
+                                $data["cnic_image"] = NULL;
+                                if ($rider_delivery->picture_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                    if ($exists) {
+                                        $pod_image = asset(Storage::url($rider_delivery->picture_path));
+                                    } else {
+                                        $pod_image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(15));
+                                    }
+                                    $data["pod_image"] = $pod_image;
+                                } else {
+                                    $data["pod_image"] = NULL;
+                                    array_push($message, "POD");
+                                }
+
+                                if ($rider_delivery->pod_image != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->pod_image);
+                                    if ($exists) {
+                                        $house_image = asset(Storage::url($rider_delivery->pod_image));
+                                    } else {
+                                        $house_image = Storage::disk('s3')->temporaryUrl($rider_delivery->pod_image, now()->addMinutes(15));
+                                    }
+                                    $data["house_image"] = $house_image;
+                                } else {
+                                    $data["house_image"] = NULL;
+                                    array_push($message, "House Image");
+                                }
+
+                                if ($rider_delivery->audio_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                    if ($exists) {
+                                        $audio_path = asset(Storage::url($rider_delivery->audio_path));
+                                    } else {
+                                        $audio_path = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(15));
+                                    }
+                                    $data["audio"] = $audio_path;
+                                } else {
+                                    $data["audio"] = NULL;
+                                    array_push($message, "Audio");
+                                }
+
+                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                    $data["latitude"] = $rider_delivery->actual_location_latitude;
+                                    $data["longitude"] = $rider_delivery->actual_location_longitude;
+                                } else {
+                                    $data["latitude"] = NULL;
+                                    $data["longitude"] = NULL;
+                                    array_push($message, "Location");
+                                }
+                                return response()->json(['status' => 0, 'message' => implode(', ', $message). ' for the selected tracking number is not found', 'information' => $data]);
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'error' => 'PODs for the selected tracking number are not found']);
+                            }
+                        }
+                        else{
+                            return response()->json(['status' => 1, 'error' => 'Shipment is not on valid status']);
+                        }
+                } else {
+                    return response()->json(['status' => 1, 'error' => "Following Tracking Number doesn't belong to you : " . $request->tracking_no]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'error' => 'Invalid Tracking Number']);
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
@@ -43,6 +44,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
@@ -151,7 +153,12 @@ class ReturnController extends Controller
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
            /* ->leftjoin('return_confirmation_pending_sms_attempts as rcps','rcps.shipment_id','=','shipments.id')*/
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/)
+           ->leftJoin('rider_deliveries', function ($join) {
+               $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
+                   ->where('rider_deliveries.id','=',
+                       DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
+           })
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id','rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id')
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
@@ -186,6 +193,9 @@ class ReturnController extends Controller
                         return 'goldClass';
                     }else if($shipments->booking_type_id == 3){
                         return "tnb_row";
+                    }
+                    if($shipments->current_status_id == 12 && $shipments->rider_status_id == 12 && $shipments->reason_id == 8 && $shipments->rider_otp_entered == 1){
+                        return "GreenColor";
                     }
                 },
 				'consolidation_id' => function($shipments){
@@ -358,6 +368,34 @@ class ReturnController extends Controller
                 else{
                     return 0;
                 }
+            })
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                $msg_string = null;
+                $str_arr = null;
+                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                foreach ($check as $nsa) {
+                    foreach ($str_arr as $arr_value) {
+                        if (strtolower($nsa) == strtolower($arr_value)) {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+                $delivery_area = null;
+                if ($msg_string != null) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id',$shipments->destination_city_id)
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                        ->select('dlm.area_name as area_name', 'dlm.id','delivery_location_mapping_keywords.mapping_id');
+
+                    if ($found->exists()) {
+                        $found = $found->first();
+                        $delivery_area = $found->area_name;
+                    }
+                }
+                return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn("action", function ($result) {
                 
@@ -1174,6 +1212,7 @@ class ReturnController extends Controller
                             continue;
                         }
                         $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                        $shipment_details->consignee_status_id = 20; //Confirmation Pending
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
@@ -1310,7 +1349,19 @@ class ReturnController extends Controller
                 $join->on('cb.id', '=', 'shipments_journey.admin_id')
                     ->where('shipments_journey.shipper_status_id', 20);
             })
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
+            /*->leftJoin('cargo_manifest_bag_shipments', function ($join) {
+                $join->on('cargo_manifest_bag_shipments.shipment_id', '=', 'shipments.id')
+                    ->where('cargo_manifest_bag_shipments.id','=',
+                        DB::raw('(select max(id) from cargo_manifest_bag_shipments)'));
+            })
+            ->leftJoin('cargo_manifest_bags','cargo_manifest_bags.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')*/
+            ->leftJoin('shipments_journey as sjn', function ($join) {
+                $join->on('sjn.shipment_id', '=', 'shipments.id')
+                    ->where('sjn.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 22)'));
+            })
+            ->leftJoin('admins as a','a.id','=','sjn.admin_id')
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id','a.name as receiver_name')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -1335,6 +1386,7 @@ class ReturnController extends Controller
             });
         }
 
+
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -1345,6 +1397,10 @@ class ReturnController extends Controller
                     }
                 },
             ])
+           /* ->addColumn('received_by', function ($shipment) {
+                return $shipment->receiver_name;
+//                return $shipment->shipment_id;
+            })*/
             ->addColumn('return_pending_for', function ($shipment) {
                 if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46,47,48])) {
                     return 'Shipper';
@@ -1368,6 +1424,24 @@ class ReturnController extends Controller
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
+            })
+            ->editColumn('shipper_phone', function($shipment){
+                if($shipment->shipper_phone_omni != null)
+                {
+                    return $shipment->shipper_phone_omni;
+                }
+                else{
+                    return $shipment->shipper_phone;
+                }
+            })
+            ->editColumn('shipper_return_address', function($shipment){
+                if($shipment->shipper_return_address_omni != null)
+                {
+                    return $shipment->shipper_return_address_omni;
+                }
+                else{
+                    return $shipment->shipper_return_address;
+                }
             })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
@@ -1445,6 +1519,34 @@ class ReturnController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+                $msg_string = null;
+                $str_arr = null;
+                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+                foreach ($check as $nsa) {
+                    foreach ($str_arr as $arr_value) {
+                        if (strtolower($nsa) == strtolower($arr_value)) {
+                            $msg_string = $arr_value;
+                        }
+                    }
+                }
+                $delivery_area = null;
+                if ($msg_string != null) {
+                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                        ->where('dlm.city_id',$shipments->destination_city_id)
+//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                        ->select('dlm.area_name as area_name', 'dlm.id','delivery_location_mapping_keywords.mapping_id');
+
+                    if ($found->exists()) {
+                        $found = $found->first();
+                        $delivery_area = $found->area_name;
+                    }
+                }
+                return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function($shipment) {
                 if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
@@ -2259,6 +2361,15 @@ class ReturnController extends Controller
     }
 
     public function return_receive_status_list(Request $request){
+
+        $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+            ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
+            ->where('st.status', 0)
+            ->groupBy('u.id')
+            ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
+
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -2279,7 +2390,7 @@ class ReturnController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name', 'shipments.user_id as user_id'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -2345,16 +2456,23 @@ class ReturnController extends Controller
                 }
             })
 
-            ->addColumn('status', function ($deliveries) {
+            ->addColumn('status', function ($deliveries) use ($negative) {
                 $delivered_array = array(25,31,38);
                 $return_array = array(23, 25);
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
                     return $deliveries->current_status_name;
                 }else{
                     if(in_array($deliveries->booking_type_id,[1,4,5])){
-                        $where = array(24,47,48, 60);
+                        $where = array(24,47,48);
+                        if(!in_array($deliveries->user_id, $negative)){
+                            $where[] = 60;
+                        }
                     }else if($deliveries->booking_type_id == 2){
-                        $where = array(47, 48, 60);
+                        $where = array(47, 48);
+                        if(!in_array($deliveries->user_id, $negative)){
+                            $where[] = 60;
+                        }
+
                         if(in_array($deliveries->shipper_status_id,$return_array)){
                             $where[] = 25;
                         }
@@ -2363,7 +2481,10 @@ class ReturnController extends Controller
                         }
 
                     }else if($deliveries->booking_type_id == 3){
-                        $where = array(35,47,48, 60);
+                        $where = array(35,47,48);
+                        if(!in_array($deliveries->user_id, $negative)){
+                            $where[] = 60;
+                        }
                     }
                     $statuses = ShipmentStatus::whereIn('id',$where)->get();
                     $drops = '';
@@ -2646,6 +2767,13 @@ class ReturnController extends Controller
             $shipment_status_mandatory = array(24,47,48);
             $mandatory_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
             $open_box_ids = array();
+            $negative = PendingPaymentShipment::join('shipments as s', 's.id', '=', 'pending_payment_shipments.shipment_id')
+                ->join('users as u', 'u.id', '=', 's.user_id')
+                ->leftjoin('sale_person_tags as st', 'st.user_id', '=', 'u.id')
+                ->select('u.id as account_no', DB::raw('SUM(pending_payment_shipments.payable) AS overall_payable'))
+                ->where('st.status', 0)
+                ->groupBy('u.id')
+                ->having('overall_payable', '<', 0)->pluck('account_no')->toArray();
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
             }
@@ -2745,23 +2873,29 @@ class ReturnController extends Controller
             }
             else{
                 $remarks = $request->remarks;
+                $negative_shipper = array();
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
-                    if(in_array($shipment_status,$shipment_status_mandatory) && in_array($shipment->user_id,$mandatory_shippers) && $shipment_reason == null){
-                        array_push($reason_mandatory_shipments, $shipment->tracking_number);
+                    if (in_array($shipment->user_id, $negative) && $shipment_status == 60) {
+                        array_push($negative_shipper, $shipment->tracking_number);
                     }
                     else{
-                        $shipment->shipper_status_id = $shipment_status;
-                        $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
+                        if(in_array($shipment_status,$shipment_status_mandatory) && in_array($shipment->user_id,$mandatory_shippers) && $shipment_reason == null){
+                            array_push($reason_mandatory_shipments, $shipment->tracking_number);
+                        }
+                        else{
+                            $shipment->shipper_status_id = $shipment_status;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
 
 
-                        ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
-                        if(count($open_box_ids) > 0){
-                            if(in_array($shipment_id, $open_box_ids)){
-                                $shipment->open_box = 1;
-                                $shipment->save();
-                                ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                            ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                            if(count($open_box_ids) > 0){
+                                if(in_array($shipment_id, $open_box_ids)){
+                                    $shipment->open_box = 1;
+                                    $shipment->save();
+                                    ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                                }
                             }
                         }
                     }
@@ -2783,9 +2917,22 @@ class ReturnController extends Controller
 
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
+                $response = ['status'=> 2, 'success' => 'Return Note Status Has Been Updated'];
                 if(count($reason_mandatory_shipments) > 0){
-                    return response()->json(['status'=> 2, 'success' => 'Return Note Status Has Been Updated', 'reason_mandatory_shipments' => $reason_mandatory_shipments]);
+                    $response['reason_mandatory_shipments'] = $reason_mandatory_shipments;
                 }else{
+                    $response['reason_mandatory_shipments'] = [];
+                }
+                if(count($negative_shipper) > 0){
+                    $response['negative_shipper'] = $negative_shipper;
+                }else{
+                    $response['negative_shipper'] = [];
+                }
+
+                if(count($negative_shipper) > 0 || count($reason_mandatory_shipments) > 0){
+                    return response()->json($response);
+                }
+                else{
                     return response()->json(['status'=> 0, 'success' => 'Return Note Status Has Been Updated']);
                 }
             }
@@ -4703,24 +4850,27 @@ class ReturnController extends Controller
     }
     public function return_revert_shipment_details(Request $request)
     {
-        $shipment = Shipment::where('tracking_number', $request->tracking_number)->whereIn('shipper_status_id', [25,31,38])->first();
-        if($shipment)
-        {
-            $details = array();
+        $tracking_number = explode(',',$request->tracking_number);
+        $tr_e  = array();
+        $details = array();
+        foreach ($tracking_number as $key=>$t_n) {
+            $shipment = Shipment::where('tracking_number', $t_n)->whereIn('shipper_status_id', [25, 31, 38])->first();
+            if ($shipment) {
+                $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
+                $details[$key]['id'] = $shipment->id;
+                $details[$key]['tracking_number'] = $shipment->tracking_number;
+                $details[$key]['shipper'] = isset($shipment->user->name) ? $shipment->user->name : '';
+                $details[$key]['return_note'] = $return_note_id->return_note_id;
 
-            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
+                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null, null);
 
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['shipper'] = $shipment->user->name;
-            $details['return_note'] = $return_note_id->return_note_id;
+            } else {
+                $tr_e[] = $t_n;
+            }
+        }
 
-            ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
-            
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-        } 
-        else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is on another status'];
+        if(count($details) > 0 || count($tr_e) > 0){
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details,'ids'=>$tr_e];
         }
     }
     public function return_revert_submit(Request $request)
@@ -4852,25 +5002,107 @@ class ReturnController extends Controller
         return $datatable->make(true);
     }
 
-    public function manual_rcp_sms(Request $request){
-        if($request->id){
-            $shipment = Shipment::find($request->id)->id;
-            if($shipment){
-                $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
-                if($rcp_sms->exists()){
-                    $rcp_sms = $rcp_sms->latest('id')->first();
-                    $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+    public function confirmation_pending_manual_sms_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),570);
+        return view('admin.return.confirmation_pending_manual_sms');
+     }
+ 
+     public function confirmation_pending_manual_sms_list(Request $request){
+         if($request->get('excel') && $request->get('excel') == true)
+         {
+             ActivityTrailController::createActivityTrailLog(Auth::id(),571);
+         }
+        $rcpmannualsms = RcpManualSms::join('admins as agent','agent.id','=','rcp_manual_sms.agent')
+            ->join('sms', 'sms.id', '=', 'rcp_manual_sms.sms_id')
+            ->select('rcp_manual_sms.id','rcp_manual_sms.shipment_id','rcp_manual_sms.recipient','rcp_manual_sms.recipient_name','rcp_manual_sms.phone','rcp_manual_sms.message','rcp_manual_sms.created_at as datetime','agent.name as agent_name','sms.status');
 
-                    if ($rcp_sms->count <= $limit->text){
-                        dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+        $datatable = DataTables::of($rcpmannualsms)
+            ->editColumn('message', function ($rcpmannualsms) {
+                return '<span class="show_message" title="'.$rcpmannualsms->message.'"> '.$rcpmannualsms->message.' </span>';
+            })
+            ->editColumn('message_excel', function ($rcpmannualsms) {
+                return $rcpmannualsms->message;
+            })
+            ->editColumn('status', function ($rcpmannualsms) {
+                if($rcpmannualsms->status == 3){
+                    return 'Delivered';
+                }
+                else{
+                    return 'Not Delivered';
+                }
+            })
+            ->filterColumn('sms.status', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    if($keyword == 'delivered')
+                    {
+                        $sub_query->where('sms.status', 3);
+                    }
+                    else{
+                        $sub_query->where('sms.status','!=', 3);
+                    }
+                   
+                });
+            });
+ 
+         return $datatable->make(true);
+     }
+
+    public function manual_rcp_sms(Request $request){
+
+        if($request->id){
+            if($request->send_via == 'auto'){
+                $shipment = Shipment::find($request->id)->id;
+                if($shipment){
+                    $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
+                    if($rcp_sms->exists()){
+                        $rcp_sms = $rcp_sms->latest('id')->first();
+                        $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+
+                        if ($rcp_sms->count <= $limit->text){
+                            dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
                     }
                 }
                 else{
-                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
                 }
+
             }
-            else{
-                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+            else if($request->send_via == 'manual'){
+                $shipment = Shipment::find($request->id);
+                if($shipment){
+
+                    if($request->send_to == 'shipper'){
+                        $sms_to = $shipment->user->phone;
+                        $recipient_name = $shipment->user->name . ' ('. $shipment->user->poc .')';
+                    }
+                    else{
+                        $sms_to = $shipment->consignee_phone_number_1;
+                        $recipient_name = $shipment->consignee_name;
+                    }
+
+                    $message = $request->message;
+                    $sms_id = RCPSmsToConsignee::send_manual_sms($message,$sms_to);
+
+                    $rcp_sms_log = new RcpManualSms();
+                    $rcp_sms_log->shipment_id = $request->id;
+                    $rcp_sms_log->sms_id = $sms_id;
+                    $rcp_sms_log->recipient = $request->send_to;
+                    $rcp_sms_log->recipient_name = $recipient_name;
+                    $rcp_sms_log->phone = $sms_to;
+                    $rcp_sms_log->message = $message;
+                    $rcp_sms_log->agent = Auth::id();
+
+                    $rcp_sms_log->save();
+
+                    return response()->json(['status' => 0, 'success' => 'SMS Send Sucessfully']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+                }
             }
         }
     }

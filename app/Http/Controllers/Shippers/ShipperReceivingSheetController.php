@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\ReceivingSheetPrintStatus;
 use App\Http\Models\BookingType;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CorporateRateStatus;
@@ -1403,5 +1404,162 @@ class ShipperReceivingSheetController extends Controller
         else {
             return redirect()->back()->with('error', 'No Shipments in File');
         }
+    }
+
+    static public function print_receiving_sheet_and_air_waybill_api($id, $user_type, $print_status, $body_only = FALSE) {
+        // $user_type = NULL;
+
+
+        $html = '';
+
+        $receiving_sheet = ReceivingSheet::find($id);
+        $receiving_sheet_print = new ReceivingSheetPrintStatus;
+        $receiving_sheet_print->status = 1;
+        $receiving_sheet_print->receiving_sheet_id = $receiving_sheet->id;
+        $receiving_sheet_print->save();
+
+        if ($user_type && $receiving_sheet) {
+            
+            $user_id = $receiving_sheet->user_id;
+
+            $html .= '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Receiving Sheet and Air Waybill(s)</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.7rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .air_waybill table.table-bordered tbody tr td {
+                        width: 12.5% !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .border.twice {
+                        border-width: 2px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 2px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 2px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 2px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 2px !important;
+                      }
+
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+
+                      .manual_form {
+                        page-break-inside: avoid;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+
+                      .receiving_sheet {
+                        page-break-after: always;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+                        <div class="receiving_sheet">
+            ';
+
+            $html .= self::view($receiving_sheet->id, $user_type, TRUE);
+
+            $html .= '
+                        </div>
+                        <div class="air_waybill">
+            ';
+
+            $shipment_ids = array();
+
+            foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
+                $shipment_ids[] = $receiving_sheet_shipment->shipment->id;
+            }
+
+            $html .= ShipperShipmentBookController::air_waybill($user_type, $user_id, $shipment_ids, FALSE, NULL,NULL,NULL,$print_status);
+
+            $html .= '
+                        </div>
+                    </div>
+                    
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+            ';
+        }
+
+        return $html;
     }
 }
