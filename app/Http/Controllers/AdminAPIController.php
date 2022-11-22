@@ -9555,6 +9555,7 @@ class AdminAPIController extends Controller
                     $datum["consolidation_details"] = $consolidation_details;
 
                     $data[] = $datum;
+                    
                 }
                 return response()->json(['status' => 0, 'shipments' => $data, 'hub_id' => $request_delivery_note->hub_id, 'rider_id' => $rider->id, 'route_id' => $request_delivery_note->route_id, 'category_id' => $rider->operation_rider_id]);
 
@@ -9847,7 +9848,19 @@ class AdminAPIController extends Controller
                                             $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                             $ccd_shipment = 1;
                                         }
-                                        return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
+
+                                        if ($shipment->shipment_detail()->exists()) {
+                                            if ($shipment->shipment_detail->is_open == 1) {
+                                                $is_open = 1;
+                                            } else {
+                                                $is_open = 0;
+                
+                                            }
+                                        } else {
+                                            $is_open = 0;
+                
+                                        }
+                                        return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'is_open' => $is_open, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
 
                                     } else {
                                         return response()->json(['status' => 1, 'message' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id]);
@@ -9930,8 +9943,19 @@ class AdminAPIController extends Controller
                                         $ccd_shipment = 1;
                                         $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                     }
-                                    $ShipmentDetail = ShipmentDetail::select('is_open')->where('shipment_id', $shipment->id)->first();
-                                    $is_open = $ShipmentDetail->is_open;
+
+                                    if ($shipment->shipment_detail()->exists()) {
+                                        if ($shipment->shipment_detail->is_open == 1) {
+                                            $is_open = 1;
+                                        } else {
+                                            $is_open = 0;
+            
+                                        }
+                                    } else {
+                                        $is_open = 0;
+            
+                                    }
+
                                     return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'is_open' => $is_open, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
                                 }
                             } else {
