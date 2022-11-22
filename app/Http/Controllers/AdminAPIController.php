@@ -10329,6 +10329,7 @@ class AdminAPIController extends Controller
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
             if($delivery_request){
                 // $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
+                
                 $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->pluck('shipment_id')->toArray();
                 $open_box_ids =  RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('open_box', 1)->pluck('shipment_id')->toArray();
                 $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('notification', 1)->pluck('shipment_id')->toArray();
