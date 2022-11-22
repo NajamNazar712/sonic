@@ -50,7 +50,7 @@ Route::name('api.')->group(function () {
             Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
-
+            Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
@@ -193,6 +193,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
+                Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -297,8 +298,16 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
 
             });
-
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
+
+            Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@delivery_note_index')->name('index');
+                Route::post('shipment_details', 'Rider\RiderAPIController@get_delivery_shipment_details')->name('shipment_details');
+                Route::post('piece_details', 'Rider\RiderAPIController@get_delivery_piece_details')->name('piece_details');
+                Route::post('generate_otp', 'Rider\RiderAPIController@delivery_note_otp_generation')->name('generate_otp');
+                Route::post('verify_otp', 'Rider\RiderAPIController@delivery_note_otp_verification')->name('verify_otp');
+                Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
+            });
         });
 
     });
@@ -465,6 +474,18 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'AdminAPIController@sales_person_target_history')->name('history');
             });
 
+            Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
+                Route::post('index', 'AdminAPIController@delivery_note_index')->name('index');
+                Route::post('shipment_details', 'AdminAPIController@get_delivery_shipment_details')->name('shipment_details');
+                Route::post('piece_details', 'AdminAPIController@get_delivery_piece_details')->name('piece_details');
+                Route::post('generate_otp', 'AdminAPIController@delivery_note_otp_generation')->name('generate_otp');
+                Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
+                Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
+                Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
+                Route::post('reject', 'AdminAPIController@delivery_note_requests_reject')->name('reject');
+                Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
+            });
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
@@ -586,8 +607,14 @@ Route::name('api.')->group(function () {
             Route::prefix('payments')->name('payments.')->group(function () {
                 Route::post('billinquiry', 'APIController@onelink_payment_billinquiry')->name('billinquiry');
                 Route::post('billpayment', 'APIController@onelink_payment_billpayment')->name('billpayment');
+                Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
             });
         });
+    });
+
+
+    Route::prefix('1link')->name('1link.')->group(function () {
+        Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
     });
     //Hbl Konnect
 

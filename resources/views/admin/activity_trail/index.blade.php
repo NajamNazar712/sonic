@@ -26,7 +26,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)">
+                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(30)}}">
                                     </div>
                                 </div>
 
@@ -38,7 +38,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)">
+                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
                                 </div>
 
@@ -206,7 +206,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
-                    {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
+                    {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'screen_name', name: 'ata.screen_name', class: 'align-middle screen'},
                     {data: 'action', name: 'ata.action', class: 'align-middle action'},
                     {data: 'created_at', name: 'activity_trail_logs.created_at', class: 'align-middle created_at'},

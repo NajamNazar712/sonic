@@ -65,6 +65,7 @@
                             </a>
                         </div>
                         <input type="hidden" id="rider_id" name="rider_id">
+                        <input type="hidden" id="rider_otp" name="rider_otp" value="{{$rider_otp}}">
                         <input type="hidden" id="operation_rider_type_id" name="operation_rider_type_id">
                         <input type="hidden" id="route_id" name="route_id">
                     </div>
@@ -524,7 +525,7 @@
                             $('#rider_name').val('').trigger('change');
                             $('#operation_rider_type_id').val(id);
                             $('#operation_rider_type').attr('disabled',true);
-                            console.log(id);
+
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
@@ -1182,7 +1183,7 @@
                                             $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                             $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
                                             $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                            console.log($('#create_delivery_note_form input#selected_rider_id').val());
+
                                             $('#create_delivery_note_form input#selected_route_id').val(route);
                                             if (special_rider_flag) {
                                                 $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
@@ -1282,7 +1283,6 @@
 
 
             $('#create_delivery_note_form').on('submit', function(event) {
-
                 event.preventDefault();
 
                 var count = 0;
@@ -1294,7 +1294,7 @@
                 var route = $('#route_id').val();
                 var operation_id = $('#operation_rider_type_id').val();
                 var special = parseInt($('#rider_id').find(':selected').data('special'));
-
+                var rider_otp = $('#rider_otp').val();
 
                 if (rider !== '' && rider !== null) {
 
@@ -1333,7 +1333,7 @@
                                 $('#SpecialRiderModal').modal('show');
                             }else{
                                 if(rider_dncc_check == true){
-                                    if(operation_id === '2'){
+                                    if(operation_id === '2' || rider_otp === '0'){
                                         create_delivery_note();
                                     }else{
                                         otp_generation();

@@ -26,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
+use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -3480,7 +3481,7 @@ class AdminReportsController extends Controller
         ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
         ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
         ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
-        ->select('invoices.invoice_number','r.name as ridername','ssr.name as reason','sjr.remarks as remark','p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','sm.id as shipping_mode_id','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number','usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type','rc.name as return_city',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation')
+        ->select('invoices.invoice_number','r.name as ridername','ssr.name as reason','sjr.remarks as remark','p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','sm.id as shipping_mode_id','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number','usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type','rc.name as return_city',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address')
         ->whereNotIn('shipments.shipper_status_id',[1,17])
         ->whereNotIn('u.id', [8761, 9358])
         ->whereBetween('sj.created_at', [$from,$to]);
@@ -3994,7 +3995,8 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 153);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
-        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes' => $shipping_modes, 'salesperson' => $salesperson]);
+        $shippers = User::all();
+        return view('admin.reports.invoice_for_negative_balance_customers')->with(['shipping_modes' => $shipping_modes, 'salesperson' => $salesperson, 'shippers' => $shippers]);
 
     }
 
@@ -4045,6 +4047,10 @@ class AdminReportsController extends Controller
 
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $datatable->where('u.id', '=', $shipper);
         }
 
         if ($sale_persons = $request->get('sale_persons')) {
@@ -7168,10 +7174,12 @@ class AdminReportsController extends Controller
             ->editColumn('status', function ($sdn) {
                 if ($sdn->status == 0) {
                     return 'Created';
-                } else if ($sdn->status == 0) {
+                } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
@@ -7441,8 +7449,18 @@ class AdminReportsController extends Controller
         $admins = Admin::where('admins.status', 1)
             ->leftjoin('employee_designations as ed', 'admins.designation_id', 'ed.id')
             ->where('ed.department_id', 7);
+
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->where('multiple_sale_leads.admin_id', Auth::id())
+            ->pluck('mst.admin_id')->toArray();
+
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $admins = $admins->where('admins.id', Auth::id());
+            if(count($multiple_sales_tags) > 0) {
+                array_push($multiple_sales_tags, Auth::id());
+                $admins = $admins->whereIn('admins.id', $multiple_sales_tags);
+            }else{
+                $admins = $admins->where('admins.id', Auth::id());
+            }
         }
         $admins = $admins->get(['admins.id', 'admins.name']);
         $ratings = CrmRequestRating::all();
@@ -7462,8 +7480,18 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_ratings as rate','rate.id','daily_visits.rating_id')
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone','rate.name as rating_text','daily_visits.comment as rating_comment','rate.code as rating');
 
+        $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+            ->where('multiple_sale_leads.admin_id', Auth::id())
+            ->pluck('mst.admin_id')->toArray();
+
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+            if(count($multiple_sales_tags) > 0){
+                array_push($multiple_sales_tags, Auth::id());
+                $daily_visit = $daily_visit->whereIn('daily_visits.admin_id', $multiple_sales_tags);
+            }
+            else{
+                $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
+            }
         }
 
         $datatables = Datatables::of($daily_visit)
