@@ -32,24 +32,23 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
 
                 if($shipments->exists()){
                     $shipments = $shipments->pluck('id')->toArray();
-                    dd(count($shipments));
-//                    foreach ($shipments as $shipment){
-//                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
-//                        $otp = mt_rand(100000, 999999);
-//                        $dbf_otp = mt_rand(100000, 999999);
-//                        if ($shipment_otp->exists()) {
-//                            $shipment_otp = $shipment_otp->first();
-//                        } else {
-//                            $shipment_otp = new ShipmentOtp();
-//                            $shipment_otp->shipment_id = $shipment;
-//                        }
-//                        $shipment_otp->otp = $otp;
-//                        $shipment_otp->dbf_otp = $dbf_otp;
-//                        $shipment_otp->rider_id = null;
-//                        $shipment_otp->latitude = null;
-//                        $shipment_otp->longitude = null;
-//                        $shipment_otp->save();
-//                    }
+                    foreach ($shipments as $shipment){
+                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        $otp = mt_rand(100000, 999999);
+                        $dbf_otp = mt_rand(100000, 999999);
+                        if ($shipment_otp->exists()) {
+                            $shipment_otp = $shipment_otp->first();
+                        } else {
+                            $shipment_otp = new ShipmentOtp();
+                            $shipment_otp->shipment_id = $shipment;
+                        }
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->dbf_otp = $dbf_otp;
+                        $shipment_otp->rider_id = null;
+                        $shipment_otp->latitude = null;
+                        $shipment_otp->longitude = null;
+                        $shipment_otp->save();
+                    }
                 }
             }
         }
