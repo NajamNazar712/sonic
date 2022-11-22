@@ -16,38 +16,71 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
      */
     public function run()
     {
-        $from = Carbon::createFromFormat('Y-m-d H:i:s', '2022-11-22 00:00:00');
-        $to = Carbon::createFromFormat('Y-m-d H:i:s', '2022-11-22 23:23:59');
 
-        $delivery_notes = \App\Http\Models\Admin\DeliveryNote::whereBetween('created_at', [$from,$to]);
-        if($delivery_notes->exists()){
-            $delivery_notes = $delivery_notes->pluck('id')->toArray();
+        $from = Carbon::createFromFormat('Y-m-d', '2022-10-21');
+        $to = Carbon::createFromFormat('Y-m-d', '2022-11-23');
 
-            $delivery_note_shipments = \App\Http\Models\Admin\DeliveryNoteShipment::whereIn('delivery_note_id', $delivery_notes);
+        $all_dates = array();
+        while ($from->lte($to)){
+            $all_dates[] = $from->toDateString();
 
-            if($delivery_note_shipments->exists()){
-                $delivery_note_shipments = $delivery_note_shipments->pluck('shipment_id')->toArray();
+            $from->addDay();
+        }
+        foreach($all_dates as $date){
+            $riders = array();
+            $delivery_notes = \App\Http\Models\Admin\DeliveryNote::whereDate('created_at', $date);
+            if($delivery_notes->exists()){
+                $delivery_notes = $delivery_notes->get();
+                foreach ($delivery_notes as $delivery_note){
+                    if(!in_array($delivery_note->rider_id, $riders)){
+                        $attendance_datetime = Carbon::parse($delivery_note->created_at)->format('Y-m-d H:i:s');
+                        $attendance_date = $date;
 
-                $shipments = \App\Http\Models\Shipment::whereIn('id', $delivery_note_shipments)->where('amount', 0);
+                        $employee_id = Rider::find($delivery_note->rider_id)->employee_id;
+                        if($employee_id != null){
+                            $rider_attendance = EmployeeAttendance::where('employee_id', $employee_id)
+                                ->whereDate('attendance_date', $attendance_date)
+                                ->where('employee_type', 2);
+                            if (!$rider_attendance->exists()) {
+                                $rider_attendance = new EmployeeAttendance();
+                                $rider_attendance->employee_id = $employee_id;
+                                $rider_attendance->employee_type = 2;
+                                $rider_attendance->attendance_date = $attendance_date;
+                                $rider_attendance->clock_in_datetime = $attendance_datetime;
+                                $rider_attendance->clock_in_latitude = '0';
+                                $rider_attendance->clock_in_longitude = '0';
+                                $rider_attendance->save();
 
-                if($shipments->exists()){
-                    $shipments = $shipments->pluck('id')->toArray();
-                    foreach ($shipments as $shipment){
-                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
-                        $otp = mt_rand(100000, 999999);
-                        $dbf_otp = mt_rand(100000, 999999);
-                        if ($shipment_otp->exists()) {
-                            $shipment_otp = $shipment_otp->first();
-                        } else {
-                            $shipment_otp = new ShipmentOtp();
-                            $shipment_otp->shipment_id = $shipment;
+                                $rider_attendance_action = new EmployeeAttendanceActionLog();
+                                $rider_attendance_action->employee_id = $employee_id;
+                                $rider_attendance_action->employee_type = 2;
+                                $rider_attendance_action->action_id = 1;
+                                $rider_attendance_action->attendance_date = $attendance_date;
+                                $rider_attendance_action->action_date = $attendance_datetime;
+                                $rider_attendance_action->latitude = '0';
+                                $rider_attendance_action->longitude = '0';
+                                $rider_attendance_action->save();
+                            }else{
+                                $rider_attendance = $rider_attendance->get()->first();
+                                if($rider_attendance->clock_in_datetime == NULL){
+                                    $rider_attendance->clock_in_datetime = $attendance_datetime;
+                                    $rider_attendance->save();
+
+                                    $rider_attendance_action = new EmployeeAttendanceActionLog();
+                                    $rider_attendance_action->employee_id = $employee_id;
+                                    $rider_attendance_action->employee_type = 2;
+                                    $rider_attendance_action->action_id = 1;
+                                    $rider_attendance_action->attendance_date = $attendance_date;
+                                    $rider_attendance_action->action_date = $attendance_datetime;
+                                    $rider_attendance_action->latitude = '0';
+                                    $rider_attendance_action->longitude = '0';
+                                    $rider_attendance_action->save();
+                                }
+
+                            }
                         }
-                        $shipment_otp->otp = $otp;
-                        $shipment_otp->dbf_otp = $dbf_otp;
-                        $shipment_otp->rider_id = null;
-                        $shipment_otp->latitude = null;
-                        $shipment_otp->longitude = null;
-                        $shipment_otp->save();
+
+                        $riders[] = $delivery_note->rider_id;
                     }
                 }
             }
