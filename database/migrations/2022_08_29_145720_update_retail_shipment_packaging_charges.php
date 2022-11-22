@@ -19,11 +19,11 @@ class UpdateRetailShipmentPackagingCharges extends Migration
         });
 
         Schema::table('retail_franchises', function (Blueprint $table) {
-            $table->decimal('insurance',8,2)->default(1);
+            $table->decimal('insurance',8,2)->default(2);
         });
 
         Schema::table('retail_trax_centers', function (Blueprint $table) {
-            $table->decimal('insurance',8,2)->default(1);
+            $table->decimal('insurance',8,2)->default(2);
         });
     }
 
