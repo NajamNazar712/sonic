@@ -1013,9 +1013,9 @@ class DeliveryController extends Controller
             }
 
             //rider attendance
-//            if ($request->operation_rider_type_for_attendance == 1) {
-//                EmployeeAttendanceController::riders_attendance_mark($rider->id);
-//            }
+            if ($request->operation_rider_type_for_attendance == 1) {
+                EmployeeAttendanceController::riders_attendance_mark($rider->id);
+            }
             //rider attendance end
 
             //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
