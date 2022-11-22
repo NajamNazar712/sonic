@@ -5538,7 +5538,7 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10, 25])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id);
+                    $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [8, 9, 10, 25, 33])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id);
                     if ($operation_admins->exists()) {
                         $to = array_merge($to, $operation_admins->pluck('admins.email')->toArray());
                     }

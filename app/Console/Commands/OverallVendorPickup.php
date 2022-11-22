@@ -55,7 +55,7 @@ class OverallVendorPickup extends Command
             $start_date = $start_date . ' ' . $cut_off_time;
             $end_date = Carbon::today()->format('Y-m-d');
             $end_date = $end_date . ' ' . $cut_off_time;
-            $response = AdminReportsEmailController::overall_pickup_vendor_wise($start_date, $end_date);
+            AdminReportsEmailController::overall_pickup_vendor_wise($start_date, $end_date);
         }
     }
 }

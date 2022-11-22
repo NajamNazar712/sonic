@@ -6290,7 +6290,7 @@ class AdminAPIController extends Controller
                 ->join('cities as c', 'c.id', '=', 'e.city_id')
                 ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                 ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city', 'e.official_phone_number as official_phone_number')
-                ->where('admins.status', 1);
+                ->where('admins.status', 1)->where('admins.role_id',"!=",1);
             if ($request->search_with == 1) {
                 $admin_profile = $admin_profile->where('e.name', 'like', '%' . $request->search_param . '%');
             } elseif ($request->search_with == 2) {
@@ -9985,24 +9985,40 @@ class AdminAPIController extends Controller
     }
 
     public function delivery_note_otp_generation(Request $request)
-    {
+    {   
+        $settings = GlobalSettings::where('type', 'rider_otp');
         $environment = config('app.env');
-        if ($environment == 'production' || $environment == 'staging') {
-            $rider_id = $request->get('rider_id');
-            $rider = Rider::find($rider_id);
-            if ($rider) {
-                $otp = mt_rand(100000, 999999);
-                $rider->delivery_note_otp = $otp;
-                $rider->otp_date = Carbon::now();
-                $rider->save();
-                NotificationsController::app_notification(9, $rider->id, 2, $otp);
-                NotificationsController::send(144, $rider, $otp);
-                return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Rider not found!']);
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->setting_value == 1) {
+                if ($environment == 'production' || $environment == 'staging') {
+                    $rider_id = $request->get('rider_id');
+                    $rider = Rider::find($rider_id);
+                    if ($rider) {
+                        $otp = mt_rand(100000, 999999);
+                        $rider->delivery_note_otp = $otp;
+                        $rider->otp_date = Carbon::now();
+                        $rider->save();
+                        NotificationsController::app_notification(9, $rider->id, 2, $otp);
+                        NotificationsController::send(144, $rider, $otp);
+                        return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Rider not found!']);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
+                }
+            }
+            else{
+                return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
             }
         }
-        return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
+        else{
+            return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
+        }
+
     }
 
     public function delivery_note_otp_verification(Request $request)
@@ -10040,6 +10056,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $added_shipments = [];
             $tracking_numbers = explode(',', $request->shipment_ids);
             $open_box_ids = explode(',', $request->open_box_ids);
             $notifications = explode(',', $request->notification_ids);
@@ -10174,6 +10191,7 @@ class AdminAPIController extends Controller
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                             $otp = mt_rand(100000, 999999);
+                            $dbf_otp = mt_rand(100000, 999999);
                             if ($shipment_otp->exists()) {
                                 $shipment_otp = $shipment_otp->first();
                             } else {
@@ -10181,6 +10199,7 @@ class AdminAPIController extends Controller
                                 $shipment_otp->shipment_id = $shipment;
                             }
                             $shipment_otp->otp = $otp;
+                            $shipment_otp->dbf_otp = $dbf_otp;
                             $shipment_otp->rider_id = null;
                             $shipment_otp->latitude = null;
                             $shipment_otp->longitude = null;
