@@ -26,13 +26,14 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
         }
         $details = [];
         foreach($all_dates as $date){
-            $riders = [];
+            $riders = array();
             $delivery_notes = \App\Http\Models\Admin\DeliveryNote::whereDate('created_at', $date);
             if($delivery_notes->exists()){
                 $delivery_notes = $delivery_notes->get();
                 foreach ($delivery_notes as $delivery_note){
-                    if(!in_array($riders, $delivery_note->rider_id)){
+                    if(!in_array($delivery_note->rider_id, $riders)){
                         $details[$delivery_note->rider_id][] = $delivery_note->created_at;
+                        $riders[] = $delivery_note->rider_id;
                     }
                 }
             }
