@@ -8269,13 +8269,18 @@ class DeliveryController extends Controller
                 ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
 
                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
-                if (!$shipment_otp->exists()) {
-                    $otp = mt_rand(100000, 999999);
+                $otp = mt_rand(100000, 999999);
+                $dbf_otp = mt_rand(100000, 999999);
+                if ($shipment_otp->exists()) {
+                    $shipment_otp = $shipment_otp->first();
+                } else {
                     $shipment_otp = new ShipmentOtp();
-                    $shipment_otp->shipment_id = $shipment->id;
-                    $shipment_otp->otp = $otp;
-                    $shipment_otp->save();
+                    $shipment_otp->shipment_id = $shipment;
                 }
+                $shipment_otp->otp = $otp;
+                $shipment_otp->dbf_otp = $dbf_otp;
+                $shipment_otp->save();
+
                 if ($shipment->amount == 0) {
                     //English
                     NotificationsController::send(132, $delivery_note_id, $shipment->id);

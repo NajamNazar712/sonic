@@ -10449,6 +10449,7 @@ class AdminAPIController extends Controller
                                 $shipment_obj = Shipment::find($shipment);
                                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                                 $otp = mt_rand(100000, 999999);
+                                $dbf_otp = mt_rand(100000, 999999);
                                 if ($shipment_otp->exists()) {
                                     $shipment_otp = $shipment_otp->first();
                                 } else {
@@ -10456,6 +10457,7 @@ class AdminAPIController extends Controller
                                     $shipment_otp->shipment_id = $shipment;
                                 }
                                 $shipment_otp->otp = $otp;
+                                $shipment_otp->dbf_otp = $dbf_otp;
                                 $shipment_otp->rider_id = null;
                                 $shipment_otp->latitude = null;
                                 $shipment_otp->longitude = null;
