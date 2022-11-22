@@ -9930,7 +9930,9 @@ class AdminAPIController extends Controller
                                         $ccd_shipment = 1;
                                         $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                     }
-                                    return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
+                                    $ShipmentDetail = ShipmentDetail::select('is_open')->where('shipment_id', $shipment->id)->first();
+                                    $is_open = $ShipmentDetail->is_open;
+                                    return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'is_open' => $is_open, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
                                 }
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'This Shipment is already in an unverified delivery note!']);
@@ -10329,7 +10331,7 @@ class AdminAPIController extends Controller
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
             if($delivery_request){
                 // $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
-                
+
                 $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->pluck('shipment_id')->toArray();
                 $open_box_ids =  RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('open_box', 1)->pluck('shipment_id')->toArray();
                 $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('notification', 1)->pluck('shipment_id')->toArray();
