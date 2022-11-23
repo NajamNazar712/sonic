@@ -8252,6 +8252,7 @@ class AdminReportsController extends Controller
 
                     if (session('department_id') != 7) {
                         $booked = DB::connection('reports')->table('shipments')
+                        ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                         ->where('shipments.packaging_material_request', 0)
                         ->where('shipments.user_id', '!=', 1690)
                         ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -8261,6 +8262,7 @@ class AdminReportsController extends Controller
 
                         $received = DB::connection('reports')->table('shipments_journey')
                         ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                        ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                         ->where('s.packaging_material_request', 0)
                         ->where('s.user_id', '!=', 1690)
                         ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8274,6 +8276,7 @@ class AdminReportsController extends Controller
 
                             $shipments_data = DB::connection('reports')->table('shipments_journey')
                             ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                            ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                             ->where('s.packaging_material_request', 0)
                             ->where('s.user_id', '!=', 1690)
                             ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8291,6 +8294,7 @@ class AdminReportsController extends Controller
                     else {
                         if (!in_array(session('id'), session('sale_users_bypass'))) {
                             $booked = DB::connection('reports')->table('shipments')
+                            ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                             ->where('shipments.packaging_material_request', 0)
                             ->where('shipments.user_id', '!=', 1690)
                             ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -8301,6 +8305,7 @@ class AdminReportsController extends Controller
 
                             $received = DB::connection('reports')->table('shipments_journey')
                             ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                            ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                             ->where('s.packaging_material_request', 0)
                             ->where('s.user_id', '!=', 1690)
                             ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8315,6 +8320,7 @@ class AdminReportsController extends Controller
 
                                 $shipments_data = DB::connection('reports')->table('shipments_journey')
                                 ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                                ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                                 ->where('s.packaging_material_request', 0)
                                 ->where('s.user_id', '!=', 1690)
                                 ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8344,6 +8350,7 @@ class AdminReportsController extends Controller
                                 }
 
                                 $booked = DB::connection('reports')->table('shipments')
+                                ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                                 ->where('shipments.packaging_material_request', 0)
                                 ->where('shipments.user_id', '!=', 1690)
                                 ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -8354,6 +8361,7 @@ class AdminReportsController extends Controller
 
                                 $received = DB::connection('reports')->table('shipments_journey')
                                 ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                                ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                                 ->where('s.packaging_material_request', 0)
                                 ->where('s.user_id', '!=', 1690)
                                 ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8368,6 +8376,7 @@ class AdminReportsController extends Controller
 
                                     $shipments_data = DB::connection('reports')->table('shipments_journey')
                                     ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                                    ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                                     ->where('s.packaging_material_request', 0)
                                     ->where('s.user_id', '!=', 1690)
                                     ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8385,6 +8394,7 @@ class AdminReportsController extends Controller
                             }
                             else {
                                 $booked = DB::connection('reports')->table('shipments')
+                                ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                                 ->where('shipments.packaging_material_request', 0)
                                 ->where('shipments.user_id', '!=', 1690)
                                 ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -8395,6 +8405,7 @@ class AdminReportsController extends Controller
 
                                 $received = DB::connection('reports')->table('shipments_journey')
                                 ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                                ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                                 ->where('s.packaging_material_request', 0)
                                 ->where('s.user_id', '!=', 1690)
                                 ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8409,6 +8420,7 @@ class AdminReportsController extends Controller
 
                                     $shipments_data = DB::connection('reports')->table('shipments_journey')
                                     ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                                    ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                                     ->where('s.packaging_material_request', 0)
                                     ->where('s.user_id', '!=', 1690)
                                     ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8655,6 +8667,7 @@ class AdminReportsController extends Controller
                     $revenue_wo_gst = 0;
 
                     $booked = DB::connection('reports')->table('shipments')
+                    ->join('user_shipping_infos as usi', 'usi.id', 'shipments.pickup_address_id')
                     ->where('shipments.packaging_material_request', 0)
                     ->where('shipments.user_id', '!=', 1690)
                     ->whereBetween('shipments.created_at', [$date_from, $date_to])
@@ -8664,6 +8677,7 @@ class AdminReportsController extends Controller
 
                     $received = DB::connection('reports')->table('shipments_journey')
                     ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                    ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                     ->where('s.packaging_material_request', 0)
                     ->where('s.user_id', '!=', 1690)
                     ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
@@ -8677,6 +8691,7 @@ class AdminReportsController extends Controller
 
                         $shipments_data = DB::connection('reports')->table('shipments_journey')
                         ->join('shipments as s', 's.id', 'shipments_journey.shipment_id')
+                        ->join('user_shipping_infos as usi', 'usi.id', 's.pickup_address_id')
                         ->where('s.packaging_material_request', 0)
                         ->where('s.user_id', '!=', 1690)
                         ->whereBetween('shipments_journey.created_at', [$date_from, $date_to])
