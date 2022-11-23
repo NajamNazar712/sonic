@@ -8275,7 +8275,7 @@ class DeliveryController extends Controller
                     $shipment_otp = $shipment_otp->first();
                 } else {
                     $shipment_otp = new ShipmentOtp();
-                    $shipment_otp->shipment_id = $shipment;
+                    $shipment_otp->shipment_id = $shipment->id;
                 }
                 $shipment_otp->otp = $otp;
                 $shipment_otp->dbf_otp = $dbf_otp;
