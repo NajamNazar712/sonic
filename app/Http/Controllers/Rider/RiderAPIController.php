@@ -12411,7 +12411,6 @@ class RiderAPIController extends Controller
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
             $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
                 ->where('r.id', $rider_id)
-                ->where('delivery_notes.pending_status',0)
                 ->where('delivery_notes.cash_collection_status',0)
                 ->where('delivery_notes.status', '!=', 4)
                 ->whereDate('delivery_notes.created_at', '>', $datetime)
