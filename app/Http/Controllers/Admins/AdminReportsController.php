@@ -5687,8 +5687,16 @@ class AdminReportsController extends Controller
     public static function revenue_excel_download()
     {
 
-        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+//        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
+//        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+
+        //Next
+
+        /*        $from = Carbon::today()->subMonth(1)->toDateTimeString();
+                $to = Carbon::parse($from)->addMonth(1)->addDay(1)->endOfDay()->toDateTimeString();*/
+
         $sales = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -5944,8 +5952,15 @@ class AdminReportsController extends Controller
     public static function revenue_by_delivery_date_excel_download()
     {
 
-        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        /*$from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
+        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();*/
+        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+
+        //Next
+
+/*        $from = Carbon::today()->subMonth(1)->toDateTimeString();
+        $to = Carbon::parse($from)->addMonth(1)->addDay(1)->endOfDay()->toDateTimeString();*/
         $sales = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
