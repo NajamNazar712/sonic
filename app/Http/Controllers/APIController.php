@@ -41,6 +41,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\GulAhmedCities;
 use App\Http\Models\GulAhmedPickupAddress;
@@ -2361,6 +2362,9 @@ class APIController extends Controller
                     $details['order_information']['items'][] = $item_details;
                 }
 
+                $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                $details['order_information']['amount'] = $shipment->amount;
+
                 foreach ($shipment->shipment_journey as $journey) {
                     if ($journey->verification) {
                         $journey_details = array();
@@ -3259,6 +3263,9 @@ class APIController extends Controller
                     $account_type_id = $invoice->shipper->account_type_id;
                     $data['billing_method'] = 'Corporate Invoicing Account';
                     $data['invoice_date'] = Carbon::parse($invoice->invoicing_date)->toDateTimeString();
+                    $data['total_charges'] = $invoice->total_charges;
+                    $data['total_gst'] = $invoice->total_gst;
+                    $data['total_invoice_amount'] = $invoice->total_invoice_amount;
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
@@ -3286,6 +3293,8 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+                            $details[$shipment->tracking_number]['amount'] = $shipment->amount;
+                            $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
                             $data['shipments'][] = $details;
 
                         }
@@ -3300,9 +3309,13 @@ class APIController extends Controller
                 $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
                 if ($done_payment->exists()) {
                     $done_payment = $done_payment->first();
+                    $done_payment_calculation = DonePaymentCalculation::where('done_payment_id', $done_payment->id)->first();
                     $account_type_id = $done_payment->shipper->account_type_id;
                     $data['billing_method'] = $done_payment->shipper->account_type->name;
                     $data['invoice_date'] = Carbon::parse($done_payment->created_at)->toDateTimeString();
+                    $data['total_charges'] = $done_payment_calculation->charges;
+                    $data['total_gst'] = $done_payment_calculation->gst;
+                    $data['total_invoice_amount'] = $done_payment_calculation->payable;
                     $data['shipments'] = array();
                     $done_payment_shipments = $done_payment->done_payment_shipments;
 
@@ -3330,6 +3343,8 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+                            $details[$shipment->tracking_number]['amount'] = $shipment->amount;
+                            $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
                             $data['shipments'][] = $details;
 
                         }

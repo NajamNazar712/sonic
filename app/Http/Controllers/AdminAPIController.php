@@ -9555,6 +9555,7 @@ class AdminAPIController extends Controller
                     $datum["consolidation_details"] = $consolidation_details;
 
                     $data[] = $datum;
+                    
                 }
                 return response()->json(['status' => 0, 'shipments' => $data, 'hub_id' => $request_delivery_note->hub_id, 'rider_id' => $rider->id, 'route_id' => $request_delivery_note->route_id, 'category_id' => $rider->operation_rider_id]);
 
@@ -9847,6 +9848,7 @@ class AdminAPIController extends Controller
                                             $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                             $ccd_shipment = 1;
                                         }
+
                                         return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
 
                                     } else {
@@ -9930,6 +9932,7 @@ class AdminAPIController extends Controller
                                         $ccd_shipment = 1;
                                         $success_message .= 'This shipment ' . $shipment->tracking_number . ' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.';
                                     }
+
                                     return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
                                 }
                             } else {
@@ -10191,6 +10194,7 @@ class AdminAPIController extends Controller
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                             $otp = mt_rand(100000, 999999);
+                            $dbf_otp = mt_rand(100000, 999999);
                             if ($shipment_otp->exists()) {
                                 $shipment_otp = $shipment_otp->first();
                             } else {
@@ -10198,6 +10202,7 @@ class AdminAPIController extends Controller
                                 $shipment_otp->shipment_id = $shipment;
                             }
                             $shipment_otp->otp = $otp;
+                            $shipment_otp->dbf_otp = $dbf_otp;
                             $shipment_otp->rider_id = null;
                             $shipment_otp->latitude = null;
                             $shipment_otp->longitude = null;
@@ -10326,12 +10331,12 @@ class AdminAPIController extends Controller
             $request_id = $request->request_note_id;
             $delivery_request = RiderDeliveryNoteRequest::find($request_id);
             if($delivery_request){
-                $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
+                // $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id);
 
-                $shipments = $request_shipments->pluck('shipment_id')->toArray();
-                $open_box_ids =  $request_shipments->where('open_box', 1)->pluck('shipment_id')->toArray();
-                $notifications = $request_shipments->where('notification', 1)->pluck('shipment_id')->toArray();
-                $rider_informations = $request_shipments->where('rider_information', 1)->pluck('shipment_id')->toArray();
+                $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->pluck('shipment_id')->toArray();
+                $open_box_ids =  RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('open_box', 1)->pluck('shipment_id')->toArray();
+                $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('notification', 1)->pluck('shipment_id')->toArray();
+                $rider_informations = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->where('rider_information', 1)->pluck('shipment_id')->toArray();
 
                 if (count($shipments) == 0) {
                     return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
@@ -10444,6 +10449,7 @@ class AdminAPIController extends Controller
                                 $shipment_obj = Shipment::find($shipment);
                                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                                 $otp = mt_rand(100000, 999999);
+                                $dbf_otp = mt_rand(100000, 999999);
                                 if ($shipment_otp->exists()) {
                                     $shipment_otp = $shipment_otp->first();
                                 } else {
@@ -10451,6 +10457,7 @@ class AdminAPIController extends Controller
                                     $shipment_otp->shipment_id = $shipment;
                                 }
                                 $shipment_otp->otp = $otp;
+                                $shipment_otp->dbf_otp = $dbf_otp;
                                 $shipment_otp->rider_id = null;
                                 $shipment_otp->latitude = null;
                                 $shipment_otp->longitude = null;
