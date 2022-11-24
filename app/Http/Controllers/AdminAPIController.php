@@ -9642,9 +9642,10 @@ class AdminAPIController extends Controller
             if (Shipment::where('tracking_number', $request->tracking)->exists()) {
                 $role_id = $request->admin_role_id;
                 $admin_hubs = $request->admin_hubs;
+                $rider_id = $request->rider_id;
                 /*if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
-                    $rider_id = $request->rider_id;
+
 
                     $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
 

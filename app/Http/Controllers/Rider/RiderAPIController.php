@@ -12450,9 +12450,10 @@ class RiderAPIController extends Controller
         } else {
             if (Shipment::where('tracking_number', $request->tracking)->exists()) {
                 $rider_hub = $request->rider_hub;
+                rider_id = $request->rider_id;
                 /*if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
-                    $rider_id = $request->rider_id;
+                    $
 
                     $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
 
