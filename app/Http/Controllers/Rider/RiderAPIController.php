@@ -123,6 +123,7 @@ use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\RiderDeliveryNoteStatus;
@@ -12924,6 +12925,10 @@ class RiderAPIController extends Controller
                         ]);
                         $serial++;
                     }
+
+                    $process_one_link['shipment_ids'] = $valid_shipments;
+                    $process_one_link['delivery_note_id'] = $note->id;
+                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for approval']);
             } else {
