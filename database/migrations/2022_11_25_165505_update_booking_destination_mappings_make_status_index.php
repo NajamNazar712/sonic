@@ -17,6 +17,10 @@ class UpdateBookingDestinationMappingsMakeStatusIndex extends Migration
         Schema::table('booking_destination_mappings', function (Blueprint $table) {
             $table->index('status');
         });
+
+        Schema::table('cities', function (Blueprint $table) {
+            $table->index('name');
+        });
     }
 
     /**
@@ -29,6 +33,10 @@ class UpdateBookingDestinationMappingsMakeStatusIndex extends Migration
         //
         Schema::table('booking_destination_mappings', function (Blueprint $table) {
             $table->dropIndex(['status']);
+        });
+
+        Schema::table('cities', function (Blueprint $table) {
+            $table->dropIndex(['name']);
         });
     }
 }
