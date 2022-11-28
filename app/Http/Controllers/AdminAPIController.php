@@ -9816,13 +9816,28 @@ class AdminAPIController extends Controller
             }
             $routes = $routes->get();
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-            $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-                ->where('r.id', $request->rider_id)
-                ->where('delivery_notes.dncc_status', 0)
-                ->where('delivery_notes.status', '!=', 4)
-                ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
-                ->where('r.operation_rider_id', 1);
+            $city_id = Rider::find($request->rider_id)->city_id;
+
+            if($city_id == 202){
+                $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                    ->where('r.id', $request->rider_id)
+                    ->where('delivery_notes.cash_collection_status',0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<=', Carbon::today())
+                    ->where('r.operation_rider_id',1);
+            }
+            else{
+                $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+                    ->where('r.id' ,$request->rider_id)
+                    ->where('delivery_notes.dncc_status',0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<=', Carbon::today())
+                    ->where('r.operation_rider_id',1);
+            }
+
+
 
             $rider_details = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
                 ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
@@ -9867,9 +9882,10 @@ class AdminAPIController extends Controller
             if (Shipment::where('tracking_number', $request->tracking)->exists()) {
                 $role_id = $request->admin_role_id;
                 $admin_hubs = $request->admin_hubs;
-                if ($request->tracking != '' && $request->rider_id != '') {
+                $rider_id = $request->rider_id;
+                /*if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
-                    $rider_id = $request->rider_id;
+
 
                     $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
 
@@ -9905,7 +9921,7 @@ class AdminAPIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
                         }
                     }
-                }
+                }*/
                 $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                 if ($request->tracking != '') {
                     $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -10675,6 +10691,7 @@ class AdminAPIController extends Controller
                                 $shipment_obj = Shipment::find($shipment);
                                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                                 $otp = mt_rand(100000, 999999);
+                                $dbf_otp = mt_rand(100000, 999999);
                                 if ($shipment_otp->exists()) {
                                     $shipment_otp = $shipment_otp->first();
                                 } else {
@@ -10682,6 +10699,7 @@ class AdminAPIController extends Controller
                                     $shipment_otp->shipment_id = $shipment;
                                 }
                                 $shipment_otp->otp = $otp;
+                                $shipment_otp->dbf_otp = $dbf_otp;
                                 $shipment_otp->rider_id = null;
                                 $shipment_otp->latitude = null;
                                 $shipment_otp->longitude = null;

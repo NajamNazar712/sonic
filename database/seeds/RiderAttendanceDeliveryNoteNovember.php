@@ -3,6 +3,7 @@
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Rider;
+use App\Http\Models\ShipmentOtp;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -15,6 +16,7 @@ class RiderAttendanceDeliveryNoteNovember extends Seeder
      */
     public function run()
     {
+
         $from = Carbon::createFromFormat('Y-m-d', '2022-10-21');
         $to = Carbon::createFromFormat('Y-m-d', '2022-11-23');
 
