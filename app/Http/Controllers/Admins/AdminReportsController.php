@@ -9132,7 +9132,14 @@ class AdminReportsController extends Controller
             ->whereNotNull('shipments.actual_weight');
 
         if (session('role_id') != 1) {
-            $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
         }
 
         $datatable = Datatables::of($shipments)
