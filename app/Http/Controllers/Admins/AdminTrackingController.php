@@ -2024,9 +2024,11 @@ class AdminTrackingController extends Controller
                                         $last_action = 'Handover Created';
                                         $last_date = $handover_created_at;
                                     }
-                                    if($handover_received_at > $last_date){
-                                        $last_action = 'Handover Received';
-                                        $last_date = $handover_received_at;
+                                    if($handover->received_by != null) {
+                                        if ($handover_received_at > $last_date) {
+                                            $last_action = 'Handover Received';
+                                            $last_date = $handover_received_at;
+                                        }
                                     }
                                 }
 
