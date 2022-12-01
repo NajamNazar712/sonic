@@ -11,13 +11,13 @@ class UpdatePermissionSeederForTrackShipmentPosition extends Seeder
      */
     public function run()
     {
-        DB::table('activity_trail_actions')->insert(array(
-            array('id' => 615, 'screen_name' => 'Track Actual Shipment Position', 'action'=> 'View'),
-            array('id' => 616, 'screen_name' => 'Track Actual Shipment Position', 'action'=> 'Excel'),
-        ));
+//        DB::table('activity_trail_actions')->insert(array(
+//            array('id' => 615, 'screen_name' => 'Track Actual Shipment Position', 'action'=> 'View'),
+//            array('id' => 616, 'screen_name' => 'Track Actual Shipment Position', 'action'=> 'Excel'),
+//        ));
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 821, 'name' => 'Track Actual Shipment Position - View', 'module_id' => 33)
+            array('id' => 822, 'name' => 'Track Actual Shipment Position - View', 'module_id' => 33)
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
