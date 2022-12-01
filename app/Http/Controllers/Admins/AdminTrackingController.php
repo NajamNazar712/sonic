@@ -1894,6 +1894,7 @@ class AdminTrackingController extends Controller
 
                         $shipments = Shipment::whereIn('id', $shipment_ids);
                         if ($shipments->exists()) {
+                            ShipmentPosition::where('tracked_by', Auth::id())->delete();
                             $shipments = $shipments->get();
                             foreach ($shipments as $shipment){
                                 $shipment_detail = array();
@@ -1980,8 +1981,8 @@ class AdminTrackingController extends Controller
                                         $handover_note = str_pad($handover->id, 6, '0', STR_PAD_LEFT);
                                         $handover_created_by = Admin::find($handover->created_by)->name;
                                         $handover_created_at = $handover->created_at;
-                                        $handover_from = Admin::find($handover->created_by)->name . ' (' . $handover->from_dept_area_desg . ')';
-                                        $handover_to = Admin::find($handover->created_by)->name . ' (' . $handover->to_dept_area_desg . ')';
+                                        $handover_from = Admin::find($handover->from)->name . ' (' . $handover->from_dept_area_desg . ')';
+                                        $handover_to = Admin::find($handover->to)->name . ' (' . $handover->to_dept_area_desg . ')';
                                         $handover_received_by = Admin::find($handover->received_by)->name;
                                         $handover_received_at = $handover->received_at;
                                     }
