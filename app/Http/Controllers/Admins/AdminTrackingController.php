@@ -1984,8 +1984,14 @@ class AdminTrackingController extends Controller
                                         $handover_created_at = $handover->created_at;
                                         $handover_from = HandoverResponsibilities::find($handover->from)->name . ' (' . $handover->from_dept_area_desg . ')';
                                         $handover_to = HandoverResponsibilities::find($handover->to)->name . ' (' . $handover->to_dept_area_desg . ')';
-                                        $handover_received_by = Admin::find($handover->received_by)->name;
-                                        $handover_received_at = $handover->received_at;
+                                        if($handover->received_by != null){
+                                            $handover_received_by = Admin::find($handover->received_by)->name;
+                                            $handover_received_at = $handover->received_at;
+                                        }
+                                        else{
+                                            $handover_received_by = '-';
+                                            $handover_received_at = '-';
+                                        }
                                     }
                                     else{
                                         $handover_flag = false;
