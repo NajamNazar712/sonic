@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\Admin;
@@ -23,7 +24,9 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\ShipmentPosition;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -32,6 +35,8 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
@@ -42,19 +47,23 @@ use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentInformationLog;
+use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\WMS\WmsUserInformation;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\ConsigneeRefusedReason;
 
@@ -1771,5 +1780,314 @@ class AdminTrackingController extends Controller
             $contains = 1;
         }
         return response()->json(['contains' => $contains]);
+    }
+
+    public function shipment_position_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 615);
+        return view('admin.tracking.shipment_position');
+    }
+
+    public function shipment_position_upload(Request $request)
+    {
+        $names = [
+            'tracking_number' => 'Tracking Number',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')]
+        ];
+        $fields = [0 => 'tracking_number'];
+
+        if ($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+            $valid_fields = true;
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        if(array_key_exists($key, $fields)){
+                            $row[$fields[$key]] = $value;
+                        }
+                        else{
+                            $valid_fields = false;
+                        }
+                    }
+
+                    $rows[] = $row;
+                }
+                $errors = array();
+                if($valid_fields){
+                    unset($spreadsheet);
+                    $tracking_ids = array();
+                    $tracking_id_row = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+
+                        $validate = Validator::make($row, $rules, $messages);
+
+                        $validate->setAttributeNames($names);
+
+                        if ($validate->fails()) {
+                            $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }
+                        if (empty($errors['Row #' . $row_id])) {
+                            if (!empty(trim($row['tracking_number']))) {
+                                if (empty($tracking_ids)) {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                } else {
+                                    if (in_array($row['tracking_number'], $tracking_ids)) {
+                                        $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                                    } else {
+                                        $tracking_ids[] = $row['tracking_number'];
+                                        $tracking_id_row[$row['tracking_number']] = $row_id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (empty($errors)) {
+                        $tracking_numbers = array();
+                        $shipment_ids = array();
+
+                        foreach ($rows as $key => $row) {
+                            $row_id = $key + 2;
+                            $tracking = trim($row['tracking_number']);
+                            $shipment_details = Shipment::where('tracking_number', $tracking)->first();
+                            $shipment_id = $shipment_details->id;
+                            $shipment_ids[] = $shipment_id;
+
+
+                            $tracking_numbers['Row #' . $row_id] = $tracking;
+                        }
+
+                        $shipments = Shipment::whereIn('id', $shipment_ids);
+                        if ($shipments->exists()) {
+                            $shipments = $shipments->get();
+                            foreach ($shipments as $shipment){
+                                $shipment_detail = array();
+
+                                $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
+                                if($last_shipment_journey->user_id != null){
+                                    $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
+                                }
+                                else if($last_shipment_journey->admin_id != null){
+                                    $shipment_journey_status_by = $last_shipment_journey->admin->name . ' (Admin)';
+                                }
+                                else if($last_shipment_journey->rider_id != null){
+                                    $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
+                                }
+                                else{
+                                    $shipment_journey_status_by ='-';
+                                }
+
+                                //Last screen location without Tracking Screens
+                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [8, 9, 18])->orderBy('id', 'desc');
+
+                                if($last_scanned_location->exists()){
+                                    $last_scanned_location_flag = true;
+                                    $last_scanned_location = $last_scanned_location->first();
+
+                                    $screen_location = $last_scanned_location->screen_location->name;
+                                    if ($last_scanned_location->user_type == 1) {
+                                        $account_type = 'Admin';
+                                        $admin = Admin::find($last_scanned_location->admin_id);
+                                        $c = City::find($admin->default_hub_id);
+                                        ($c) ? $city = $c['name'] : $city = '-';
+                                        $scanned_by = $admin->name;
+                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
+                                    }
+                                    else if ($last_scanned_location->user_type == 2) {
+                                        $account_type = 'Shipper';
+                                        $user = User::find($last_scanned_location->user_id);
+                                        $scanned_by = $user->name;
+                                        $city = $user->city->name;
+                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
+                                    }
+                                    else if ($last_scanned_location->user_type == 3) {
+                                        $account_type = 'Substitute Shipper';
+                                        $sub_user = SubstituteUser::find($last_scanned_location->substitute_user_id);
+                                        $scanned_by = $sub_user->name;
+                                        $city = $sub_user->shipper->city->name;
+                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
+                                    }
+                                    else if ($last_scanned_location->user_type == 4) {
+                                        $account_type = 'Retail User';
+                                        $retail_admin = RetailUser::find($last_scanned_location->admin_id);
+                                        $c = City::find($retail_admin->city_id);
+                                        ($c) ? $city = $c['name'] : $city = '-';
+                                        $scanned_by = $retail_admin->name;
+                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
+                                    }
+                                    else if ($last_scanned_location->user_type == 5) {
+                                        $account_type = 'Rider';
+                                        $rider = Rider::find($last_scanned_location->admin_id);
+                                        $c = City::find($rider->city_id);
+                                        ($c) ? $city = $c['name'] : $city = '-';
+                                        $scanned_by = $rider->name;
+                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
+                                    }
+                                    else {
+                                        $scanned_by = '-';
+                                        $city = '-';
+                                    }
+                                }
+                                else {
+                                    $last_scanned_location_flag = false;
+                                    $screen_location = '-';
+                                    $scanned_by = '-';
+                                    $city = '-';
+                                }
+
+                                $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->orderBy('id', 'desc');
+                                if($handover_shipment->exists()){
+                                    $handover_shipment = $handover_shipment->first();
+                                    $handover = Handover::find($handover_shipment->handover_id);
+                                    if($handover){
+                                        $handover_flag = true;
+
+                                        $handover_note = str_pad($handover->id, 6, '0', STR_PAD_LEFT);
+                                        $handover_created_by = Admin::find($handover->created_by)->name;
+                                        $handover_created_at = $handover->created_at;
+                                        $handover_from = Admin::find($handover->created_by)->name . ' (' . $handover->from_dept_area_desg . ')';
+                                        $handover_to = Admin::find($handover->created_by)->name . ' (' . $handover->to_dept_area_desg . ')';
+                                        $handover_received_by = Admin::find($handover->received_by)->name;
+                                        $handover_received_at = $handover->received_at;
+                                    }
+                                    else{
+                                        $handover_flag = false;
+                                    }
+                                }
+                                else{
+                                    $handover_flag = false;
+                                }
+
+                                if(!$handover_flag){
+                                    $handover_note = '-';
+                                    $handover_created_by = '-';
+                                    $handover_created_at = '-';
+                                    $handover_from = '-';
+                                    $handover_to = '-';
+                                    $handover_received_by = '-';
+                                    $handover_received_at = '-';
+                                }
+
+                                $last_action = 'Status';
+                                $last_date = $last_shipment_journey->created_at;
+                                if($last_scanned_location_flag){
+                                    if($last_scanned_location->created_at > $last_date){
+                                        $last_action = 'Scanned';
+                                        $last_date = $last_scanned_location->created_at;
+                                    }
+                                }
+                                if($handover_note){
+                                    if($handover_created_at > $last_date){
+                                        $last_action = 'Handover Created';
+                                        $last_date = $handover_created_at;
+                                    }
+                                    if($handover_received_at > $last_date){
+                                        $last_action = 'Handover Received';
+                                        $last_date = $handover_received_at;
+                                    }
+                                }
+
+                                $shipment_position = new ShipmentPosition();
+                                $shipment_position->shipment_id = $shipment->id;
+                                $shipment_position->tracking_number = $shipment->tracking_number;
+                                $shipment_position->origin = $shipment->pickup_address->city->name;
+                                $shipment_position->destination = $shipment->consignee_city->name;
+                                $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name;
+                                $shipment_position->status_at = $last_shipment_journey->created_at ? Carbon::parse($last_shipment_journey->created_at)->format('Y-m-d H:i:s') : '-';
+                                $shipment_position->status_by = $shipment_journey_status_by;
+                                $shipment_position->screen_location = $screen_location;
+                                $shipment_position->city = $city;
+                                $shipment_position->scanned_by = $scanned_by;
+                                $shipment_position->scanned_at = $last_scanned_location_flag ? Carbon::parse($last_scanned_location->created_at)->format('Y-m-d H:i:s') : '-';
+                                $shipment_position->handover_note = $handover_note;
+                                $shipment_position->handover_created_by = $handover_created_by;
+                                $shipment_position->handover_created_at = $handover_created_at != '-' ? Carbon::parse($handover_created_at)->format('Y-m-d H:i:s') : '-';
+                                $shipment_position->handover_from = $handover_from;
+                                $shipment_position->handover_to = $handover_to;
+                                $shipment_position->handover_received_by = $handover_received_by;
+                                $shipment_position->handover_received_at =  $handover_received_at != '-' ? Carbon::parse($handover_received_at)->format('Y-m-d H:i:s') : '-';
+                                $shipment_position->last_action = $last_action;
+                                $shipment_position->tracked_by = Auth::id();
+                                $shipment_position->save();
+                            }
+
+                            return redirect()->back()->with(['success' => 'Tracked Successfully']);
+                        }
+                        else{
+                            return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
+                        }
+                    }
+                    else {
+                        $errors = array_map(function ($row, $errors) {
+                            return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                        }, array_keys($errors), $errors);
+
+                        return redirect()->back()->withErrors($errors);
+                    }
+                }
+                else{
+                    $errors[] = 'In-Valid Fields';
+                    return redirect()->back()->withErrors($errors);
+                }
+            }
+            else {
+                return redirect()->back()->with('error', 'No Shipments in File');
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'File not found');
+        }
+    }
+
+    public function shipment_position_list(Request $request){
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),616);
+        }
+
+        $shipment_positions = ShipmentPosition::select(['tracking_number', 'origin', 'destination', 'status', 'status_at', 'status_by', 'screen_location', 'city', 'scanned_by', 'scanned_at', 'handover_note', 'handover_created_by', 'handover_created_at', 'handover_from', 'handover_to', 'handover_received_by', 'handover_received_at', 'last_action'])
+            ->where('tracked_by', Auth::id());
+
+        $datatables = Datatables::of($shipment_positions)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        return $datatables->make(true);
     }
 }

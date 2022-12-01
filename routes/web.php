@@ -1905,7 +1905,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
         Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
-
+        Route::prefix('shipment_position')->name('shipment_position.')->group(function() {
+            Route::get('track', 'Admins\AdminTrackingController@shipment_position_index')->name('track');
+            Route::post('upload', 'Admins\AdminTrackingController@shipment_position_upload')->name('upload');
+            Route::get('list', 'Admins\AdminTrackingController@shipment_position_list')->name('list');
+        });
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
