@@ -17,11 +17,11 @@ class UpdatePermissionSeederForTrackShipmentPosition extends Seeder
         ));
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 822, 'name' => 'Track Actual Shipment Position - View', 'module_id' => 33)
+            array('id' => 822, 'name' => 'Track Actual Shipment Position - View', 'module_id' => 19)
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Track Actual Shipment Position', 'url'=>'admin.tracking.shipment_position.track', 'permission_id' => 821));
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Track Actual Shipment Position', 'url'=>'admin.tracking.shipment_position.track', 'permission_id' => 822));
 
     }
 }
