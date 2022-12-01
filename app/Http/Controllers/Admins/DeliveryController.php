@@ -8322,8 +8322,11 @@ class DeliveryController extends Controller
 //            ->select(['riders.*','h.name as hub_name'])
         ->where('riders.operation_rider_id', $operation_id)
         ->whereNotNull('riders.employee_id')
-        ->where('riders.status', 1)
-        ->where('riders.rider_type_id', 2);
+        ->where('riders.status', 1);
+        if ($operation_id == 1) {
+            $riders->where('riders.rider_type_id', 2);
+        }
+
 
         if (session('role_id') != 1) {
             $riders = $riders->whereHas('city', function ($query) {
