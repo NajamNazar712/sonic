@@ -8324,7 +8324,9 @@ class DeliveryController extends Controller
         ->whereNotNull('riders.employee_id')
         ->where('riders.status', 1);
         if ($operation_id == 1) {
-            $riders->where('riders.rider_type_id', 2);
+            if(!$request->has('carrefour')){
+                $riders->where('riders.rider_type_id', 2);
+            }
         }
 
 
