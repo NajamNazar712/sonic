@@ -9843,7 +9843,7 @@ class AdminAPIController extends Controller
                                         }
                                         $success_message = null;
                                         if ($intercept == true || $amount_check == true) {
-                                            $success_message .= 'This Shipment with Tracking Number: ' . $shipment . tracking_number . ' has following changes:' . PHP_EOL;
+                                            $success_message .= 'This Shipment with Tracking Number: ' . $shipment->tracking_number . ' has following changes:' . PHP_EOL;
                                         }
                                         if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                             if ($amount_check) {
@@ -9927,7 +9927,7 @@ class AdminAPIController extends Controller
                                     }
                                     $success_message = null;
                                     if ($intercept == true || $amount_check == true) {
-                                        $success_message .= 'This Shipment with Tracking Number: ' . $shipment . tracking_number . ' has following changes:' . PHP_EOL;
+                                        $success_message .= 'This Shipment with Tracking Number: ' . $shipment->tracking_number . ' has following changes:' . PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                         if ($amount_check) {
