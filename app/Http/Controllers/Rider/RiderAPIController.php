@@ -12630,7 +12630,7 @@ class RiderAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null);
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
