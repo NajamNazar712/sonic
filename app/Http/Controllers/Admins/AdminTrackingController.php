@@ -1920,49 +1920,51 @@ class AdminTrackingController extends Controller
                                 if($last_scanned_location->exists()){
                                     $last_scanned_location_flag = true;
                                     $last_scanned_location = $last_scanned_location->first();
-
-                                    $screen_location = $last_scanned_location->screen_location->name;
-                                    if ($last_scanned_location->user_type == 1) {
-                                        $account_type = 'Admin';
-                                        $admin = Admin::find($last_scanned_location->admin_id);
-                                        $c = City::find($admin->default_hub_id);
-                                        ($c) ? $city = $c['name'] : $city = '-';
-                                        $scanned_by = $admin->name;
-                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
-                                    }
-                                    else if ($last_scanned_location->user_type == 2) {
-                                        $account_type = 'Shipper';
-                                        $user = User::find($last_scanned_location->user_id);
-                                        $scanned_by = $user->name;
-                                        $city = $user->city->name;
-                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
-                                    }
-                                    else if ($last_scanned_location->user_type == 3) {
-                                        $account_type = 'Substitute Shipper';
-                                        $sub_user = SubstituteUser::find($last_scanned_location->substitute_user_id);
-                                        $scanned_by = $sub_user->name;
-                                        $city = $sub_user->shipper->city->name;
-                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
-                                    }
-                                    else if ($last_scanned_location->user_type == 4) {
-                                        $account_type = 'Retail User';
-                                        $retail_admin = RetailUser::find($last_scanned_location->admin_id);
-                                        $c = City::find($retail_admin->city_id);
-                                        ($c) ? $city = $c['name'] : $city = '-';
-                                        $scanned_by = $retail_admin->name;
-                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
-                                    }
-                                    else if ($last_scanned_location->user_type == 5) {
-                                        $account_type = 'Rider';
-                                        $rider = Rider::find($last_scanned_location->admin_id);
-                                        $c = City::find($rider->city_id);
-                                        ($c) ? $city = $c['name'] : $city = '-';
-                                        $scanned_by = $rider->name;
-                                        $scanned_by = $scanned_by . ' ('. $account_type. ')';
-                                    }
-                                    else {
+                                    if($last_scanned_location->admin_id == null && $last_scanned_location->user_id == null){
+                                        $last_scanned_location_flag = false;
+                                        $screen_location = '-';
                                         $scanned_by = '-';
                                         $city = '-';
+                                    }
+                                    else {
+                                        $screen_location = $last_scanned_location->screen_location->name;
+                                        if ($last_scanned_location->user_type == 1) {
+                                            $account_type = 'Admin';
+                                            $admin = Admin::find($last_scanned_location->admin_id);
+                                            $c = City::find($admin->default_hub_id);
+                                            ($c) ? $city = $c['name'] : $city = '-';
+                                            $scanned_by = $admin->name;
+                                            $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                        } else if ($last_scanned_location->user_type == 2) {
+                                            $account_type = 'Shipper';
+                                            $user = User::find($last_scanned_location->user_id);
+                                            $scanned_by = $user->name;
+                                            $city = $user->city->name;
+                                            $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                        } else if ($last_scanned_location->user_type == 3) {
+                                            $account_type = 'Substitute Shipper';
+                                            $sub_user = SubstituteUser::find($last_scanned_location->substitute_user_id);
+                                            $scanned_by = $sub_user->name;
+                                            $city = $sub_user->shipper->city->name;
+                                            $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                        } else if ($last_scanned_location->user_type == 4) {
+                                            $account_type = 'Retail User';
+                                            $retail_admin = RetailUser::find($last_scanned_location->admin_id);
+                                            $c = City::find($retail_admin->city_id);
+                                            ($c) ? $city = $c['name'] : $city = '-';
+                                            $scanned_by = $retail_admin->name;
+                                            $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                        } else if ($last_scanned_location->user_type == 5) {
+                                            $account_type = 'Rider';
+                                            $rider = Rider::find($last_scanned_location->admin_id);
+                                            $c = City::find($rider->city_id);
+                                            ($c) ? $city = $c['name'] : $city = '-';
+                                            $scanned_by = $rider->name;
+                                            $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                        } else {
+                                            $scanned_by = '-';
+                                            $city = '-';
+                                        }
                                     }
                                 }
                                 else {
@@ -1972,6 +1974,8 @@ class AdminTrackingController extends Controller
                                     $city = '-';
                                 }
 
+
+                                $handover = '';
                                 $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->orderBy('id', 'desc');
                                 if($handover_shipment->exists()){
                                     $handover_shipment = $handover_shipment->first();
@@ -2024,7 +2028,7 @@ class AdminTrackingController extends Controller
                                         $last_action = 'Handover Created';
                                         $last_date = $handover_created_at;
                                     }
-                                    if($handover->received_by != null) {
+                                    if($handover && $handover->received_by != null) {
                                         if ($handover_received_at > $last_date) {
                                             $last_action = 'Handover Received';
                                             $last_date = $handover_received_at;
