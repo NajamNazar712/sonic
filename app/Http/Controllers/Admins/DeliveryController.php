@@ -368,15 +368,29 @@ class DeliveryController extends Controller
         }
 
         $routes = $routes->get();
-
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
-        ->where('r.id' ,$request->rider_id)
-        ->where('delivery_notes.dncc_status',0)
-        ->where('delivery_notes.status', '!=', 4)
-        ->whereDate('delivery_notes.created_at', '>', $datetime)
-        ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
-        ->where('r.operation_rider_id',1);
+        $city_id = Rider::find($request->rider_id)->city_id;
+        if ($city_id == 202) {
+            $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+                ->where('r.id' ,$request->rider_id)
+                ->where('delivery_notes.cash_collection_status',0)
+                ->where('delivery_notes.total_cod_amount', '>', 0)
+                ->where('delivery_notes.status', '!=', 4)
+                ->whereDate('delivery_notes.created_at', '>', $datetime)
+                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                ->where('r.operation_rider_id',1);
+        }
+        else{
+            $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
+                ->where('r.id' ,$request->rider_id)
+                ->where('delivery_notes.dncc_status',0)
+                ->where('delivery_notes.total_cod_amount', '>', 0)
+                ->where('delivery_notes.status', '!=', 4)
+                ->whereDate('delivery_notes.created_at', '>', $datetime)
+                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                ->where('r.operation_rider_id',1);
+        }
+
 
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -450,7 +464,7 @@ class DeliveryController extends Controller
             return ['status' => 1, 'error' => 'Invalid Tracking Number'];
         } else {
 //        todo: bypasses rider category
-        if ($request->tracking != '' && $request->rider_id != '' )
+        /*if ($request->tracking != '' && $request->rider_id != '' )
         {
             $tracking_number = $request->tracking;
             $rider_id = $request->rider_id;
@@ -501,7 +515,7 @@ class DeliveryController extends Controller
                     return ['status' => 1, 'error' => 'Shipment is light weighted and the selected rider type is heavy weighted !'];
                 }
             }
-        }
+        }*/
 //        todo: bypasses rider category end
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
         if ($request->tracking != '') {
@@ -8276,7 +8290,7 @@ class DeliveryController extends Controller
                     $shipment_otp = $shipment_otp->first();
                 } else {
                     $shipment_otp = new ShipmentOtp();
-                    $shipment_otp->shipment_id = $shipment;
+                    $shipment_otp->shipment_id = $shipment->id;
                 }
                 $shipment_otp->otp = $otp;
                 $shipment_otp->dbf_otp = $dbf_otp;
@@ -8310,6 +8324,12 @@ class DeliveryController extends Controller
         ->where('riders.operation_rider_id', $operation_id)
         ->whereNotNull('riders.employee_id')
         ->where('riders.status', 1);
+        if ($operation_id == 1) {
+            if(!$request->has('carrefour')){
+                $riders->where('riders.rider_type_id', 2);
+            }
+        }
+
 
         if (session('role_id') != 1) {
             $riders = $riders->whereHas('city', function ($query) {

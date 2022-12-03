@@ -123,6 +123,7 @@ use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\RiderDeliveryNoteStatus;
@@ -12409,13 +12410,27 @@ class RiderAPIController extends Controller
 
             $routes = $routes->select('routes.*')->get();
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-            $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-                ->where('r.id', $rider_id)
-                ->where('delivery_notes.dncc_status', 0)
-                ->where('delivery_notes.status', '!=', 4)
-                ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '!=', Carbon::today())
-                ->where('r.operation_rider_id', 1);
+            if($hub_id == 202){
+                $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                    ->where('r.id', $rider_id)
+                    ->where('delivery_notes.cash_collection_status',0)
+                    ->where('delivery_notes.total_cod_amount', '>', 0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                    ->where('r.operation_rider_id',1);
+            }
+            else{
+                $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                    ->where('r.id', $rider_id)
+                    ->where('delivery_notes.dncc_status',0)
+                    ->where('delivery_notes.total_cod_amount', '>', 0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                    ->where('r.operation_rider_id',1);
+            }
+
 
             if ($delivery_note->exists()) {
                 $delivery_note_request = DeliveryNoteRequests::where('rider_id', $rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
@@ -12449,9 +12464,10 @@ class RiderAPIController extends Controller
         } else {
             if (Shipment::where('tracking_number', $request->tracking)->exists()) {
                 $rider_hub = $request->rider_hub;
-                if ($request->tracking != '' && $request->rider_id != '') {
+                $rider_id = $request->rider_id;
+                /*if ($request->tracking != '' && $request->rider_id != '') {
                     $tracking_number = $request->tracking;
-                    $rider_id = $request->rider_id;
+                    $
 
                     $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
 
@@ -12487,7 +12503,7 @@ class RiderAPIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
                         }
                     }
-                }
+                }*/
                 $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                 if ($request->tracking != '') {
                     $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -12614,7 +12630,7 @@ class RiderAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null);
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -12633,7 +12649,7 @@ class RiderAPIController extends Controller
                                         }
                                         $success_message = null;
                                         if ($intercept == true || $amount_check == true) {
-                                            $success_message .= 'This Shipment with Tracking Number: ' . $shipment . $tracking_number . ' has following changes:' . PHP_EOL;
+                                            $success_message .= 'This Shipment with Tracking Number: ' . $shipment->tracking_number . ' has following changes:' . PHP_EOL;
                                         }
                                         if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                             if ($amount_check) {
@@ -12716,7 +12732,7 @@ class RiderAPIController extends Controller
                                     }
                                     $success_message = null;
                                     if ($intercept == true || $amount_check == true) {
-                                        $success_message .= 'This Shipment with Tracking Number: ' . $shipment . $tracking_number . ' has following changes:' . PHP_EOL;
+                                        $success_message .= 'This Shipment with Tracking Number: ' . $shipment->tracking_number . ' has following changes:' . PHP_EOL;
                                     }
                                     if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
                                         if ($amount_check) {
@@ -12911,6 +12927,10 @@ class RiderAPIController extends Controller
                         ]);
                         $serial++;
                     }
+
+                    $process_one_link['shipment_ids'] = $valid_shipments;
+                    $process_one_link['delivery_note_id'] = $note->id;
+                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for approval']);
             } else {
