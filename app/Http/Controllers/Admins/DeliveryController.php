@@ -7196,7 +7196,7 @@ class DeliveryController extends Controller
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
                     ShipmentChargesController::weight($shipment->id);
-                    ShipmentChargesController::fuel_surcharge($shipment_id);
+                    ShipmentChargesController::fuel_surcharge($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
