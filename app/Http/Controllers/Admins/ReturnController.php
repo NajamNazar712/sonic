@@ -174,7 +174,14 @@ class ReturnController extends Controller
         }
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->whereIn('oc.hub_id', session('hubs'));
+                });
+            });
             if (in_array(317, session('permissions'))) {
                 $shipments = $shipments->where('ras.admin_id', Auth::id());
             }
