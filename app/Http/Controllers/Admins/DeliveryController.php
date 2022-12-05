@@ -9015,7 +9015,7 @@ class DeliveryController extends Controller
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
         if ($delivery_request) {
-            $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
+//            $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             
             $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->pluck('shipment_id')->toArray();
             $open_box_ids = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('open_box', 1)->pluck('shipment_id')->toArray();
@@ -9059,6 +9059,7 @@ class DeliveryController extends Controller
                     'total_cod_amount' => $total_cod_amount,
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order,
+                    'created_via_app' => 1,
                     'request_note_id' => $delivery_request->id
                 ]);
                 if ($note) {
