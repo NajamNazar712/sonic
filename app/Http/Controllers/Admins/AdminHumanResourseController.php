@@ -4250,15 +4250,10 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
                 if (in_array($employee_leaves->status, [1, 2, 3])) {
                     if ($request->line_manager == 1) {
-                        if(in_array($admin_id, $department_head_ids)){
-                            $employee_leaves->status = 4;
-                        } else{
-                            $employee_leaves->status = 6;
-                        }
-                        if($employee_leaves->leave_type != 1){
+                        $employee_leaves->status = 6;
+                        if(in_array($employee_leaves->leave_type, [5, 6])){
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
                             return redirect()->back()->with('success', 'Leave Approved Successfully');
