@@ -4072,8 +4072,8 @@ class AdminHumanResourseController extends Controller
                     // }
 
                 }
-                elseif ($employee->status_id == 2) {
-                    if ((in_array(session('role_id'), [63, 69, 70,104]))) {
+                elseif($employee->status_id == 6){
+                    if ((in_array(session('role_id'), [63, 69, 70,104])) && in_array($employee->leave_type_id, [5, 6])) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -4082,23 +4082,7 @@ class AdminHumanResourseController extends Controller
                             </div>
                             ';
                         return $dropdown;
-
                     }
-
-                }elseif($employee->status_id == 6){
-
-                        if ($employee->department_head == Auth::id()) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
-                            $dropdown .= '
-                            </div>
-                          </div>
-                        ';
-                            return $dropdown;
-
-                        }
-
                 }
 
                 return '-';
