@@ -3949,7 +3949,7 @@ class AdminHumanResourseController extends Controller
             })
             ->orWhere(function ($query){
                 if ((in_array(session('role_id'), [63, 69, 70,104]))) {
-                    $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
+                    $query->whereIn('ls.id',[2,4,5,6])->where('lt.id','<>',1);
                 }
             });
 
