@@ -4234,7 +4234,7 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1, 2, 3])) {
+                if (in_array($employee_leaves->status, [1, 2, 3, 6])) {
                     if ($request->line_manager == 1) {
                         $employee_leaves->status = 6;
                         if(in_array($employee_leaves->leave_type, [5, 6])){
