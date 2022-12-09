@@ -2586,7 +2586,7 @@ class AdminCRMController extends Controller
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
                 ]);
-                if($request->close == 0 || (!$request->has('resolved_close'))){
+                if($request->close == 0 || $request->resolved_close_val==0){
                     CrmRequestStatusHistory::create([
                         'crm_request_id' => $request->req_id,
                         'status_id' => 7,

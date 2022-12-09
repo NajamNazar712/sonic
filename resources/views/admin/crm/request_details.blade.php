@@ -296,6 +296,8 @@
                                                         <input type="hidden" id="close_reason" name="close_reason"
                                                                    value="1">
                                                             @if($crm_details['status_id'] == 3)
+                                                            <input type="hidden" id="resolved_close_val" name="resolved_close_val"
+                                                                   value="0">
                                                                 <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                     <span class="d-none d-lg-block">
                                                                         Close
@@ -2732,6 +2734,12 @@
                 $('#CloseReasonModal').modal('hide');
                 $('#close_reason').val("0");
                 $('form#invalid_form').submit();
+            });
+
+            $('#resolved_close').on('click',function () {
+                //mark_close
+                $('#resolved_close_val').val("1");
+                form.submit();
             });
 
             
