@@ -1915,7 +1915,7 @@ class AdminTrackingController extends Controller
                                 }
 
                                 //Last screen location without Tracking Screens
-                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [8, 9, 18])->orderBy('id', 'desc');
+                                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
 
                                 if($last_scanned_location->exists()){
                                     $last_scanned_location_flag = true;
