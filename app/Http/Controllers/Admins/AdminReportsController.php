@@ -132,10 +132,13 @@ class AdminReportsController extends Controller
 
         $type = $request->get('search_types');
 
-        if ($type && $type == 2) {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43]);
-        } else {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43, 47, 51]);
+        if($type){
+            if($type == 1){
+                $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43, 47, 51]);
+            }
+            else if($type == 2){
+                $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43]);
+            }
         }
 
         if (session('role_id') != 1) {
