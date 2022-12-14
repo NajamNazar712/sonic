@@ -133,9 +133,9 @@ class AdminReportsController extends Controller
         $type = $request->get('search_types');
 
         if ($type && $type == 2) {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
         } else {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43, 47, 51]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38, 51]);
         }
 
         if (session('role_id') != 1) {
@@ -206,10 +206,10 @@ class AdminReportsController extends Controller
             $datatable->where('u.id', '=', $shipper);
         }*/
         if ($search_shipper = $request->get('search_shipper')) {
-            $shipments = $shipments->where('shipments.user_id', $search_shipper);
+            $datatable->where('shipments.user_id', $search_shipper);
         }
         if ($search_shippers = $request->get('search_shippers')) {
-            $shipments = $shipments->whereIn('shipments.user_id', $search_shippers);
+            $datatable->whereIn('shipments.user_id', $search_shippers);
         }
         if ($origin = $request->get('search_origin')) {
             $datatable->where('oc.id', '=', $origin);
