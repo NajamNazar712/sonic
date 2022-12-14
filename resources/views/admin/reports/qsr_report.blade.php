@@ -14,7 +14,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                   <div class="col-4">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -43,30 +43,30 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_origin" id="search_origin" class="form-control select2">
-                            @foreach($cities as $origin)
-                                <option value="{{$origin->id}}">{{$origin->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $origin)
+                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_destination" id="search_destination" class="form-control select2">
-                            @foreach($cities as $destination)
-                                <option value="{{$destination->id}}">{{$destination->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $destination)
+                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_qsr" id="search_qsr" class="form-control select2">
+                            <select name="search_qsr" id="search_qsr" class="form-control select2">
                                 <option value="1">Delivery</option>
                                 <option value="2">Return</option>
                                 <option value="3">All</option>
-                        </select>
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -80,9 +80,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipping_modes" id="search_shipping_modes" class="form-control select2">
-                                @foreach($shipping_modes as $shipping_mode)
-                                    <option value="{{$shipping_modes->id}}">{{$shipping_modes->mode}}</option>
+                            <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
+                                @foreach($shippimg_modes as $shippimg_mode)
+                                    <option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -255,7 +255,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipping_modes').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shippimg_modes').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
                 allowClear:true
@@ -302,7 +302,7 @@
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-
+                if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
@@ -380,7 +380,7 @@
                     UnblockPagePermanently();
 
                     return {body: body, header: head};
-
+                }
             } );
 
             var index_column = [];
@@ -415,7 +415,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
                         d.search_hub = $('#search_hub').val();
-                        d.search_shipping_mode = $('#search_shipping_modes').val();
+                        d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_types = $('#search_types').val();
@@ -463,7 +463,7 @@
 
 
             $('#search_filter_btn').on('click',function () {
-               table.draw();
+                table.draw();
             });
 
         });
