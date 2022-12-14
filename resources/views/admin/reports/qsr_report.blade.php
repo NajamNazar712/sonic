@@ -302,7 +302,7 @@
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+
                     blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
@@ -380,7 +380,7 @@
                     UnblockPagePermanently();
 
                     return {body: body, header: head};
-                }
+
             } );
 
             var index_column = [];
