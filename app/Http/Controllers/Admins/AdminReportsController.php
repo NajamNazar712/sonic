@@ -82,11 +82,11 @@ class AdminReportsController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id' ,'>' ,0)->select('id','name')->get();
 //        dd($shipment_status);
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types,'shipment_status' => $shipment_status]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types,'shipment_status' => $shipment_status]);
     }
 
     public function qsr_list(Request $request)

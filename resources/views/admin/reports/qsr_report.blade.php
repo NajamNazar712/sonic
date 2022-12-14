@@ -80,9 +80,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
-                                @foreach($shippimg_modes as $shippimg_mode)
-                                    <option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>
+                            <select name="search_shipping_modes" id="search_shipping_modes" class="form-control select2">
+                                @foreach($shipping_modes as $shipping_mode)
+                                    <option value="{{$shipping_modes->id}}">{{$shipping_modes->mode}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -255,7 +255,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shippimg_modes').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipping_modes').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipping Mode',
                 width:'100%',
                 allowClear:true
@@ -415,7 +415,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
                         d.search_hub = $('#search_hub').val();
-                        d.search_shipping_mode = $('#search_shippimg_modes').val();
+                        d.search_shipping_mode = $('#search_shipping_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_types = $('#search_types').val();
