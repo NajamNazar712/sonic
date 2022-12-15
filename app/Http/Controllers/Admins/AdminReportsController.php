@@ -82,11 +82,11 @@ class AdminReportsController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id' ,'>' ,0)->select('id','name')->get();
 //        dd($shipment_status);
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types,'shipment_status' => $shipment_status]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types,'shipment_status' => $shipment_status]);
     }
 
     public function qsr_list(Request $request)
@@ -9118,7 +9118,7 @@ class AdminReportsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftJoin('shipments_journey as bkg_date', function ($join) {
+            ->leftJoin ('shipments_journey as bkg_date', function ($join) {
                 $join->on('bkg_date.shipment_id', '=', 'shipments.id')
                     ->where('bkg_date.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)'));

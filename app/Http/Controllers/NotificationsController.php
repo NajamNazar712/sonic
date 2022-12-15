@@ -5628,6 +5628,7 @@ class NotificationsController extends Controller
 
                     if ($department_head->exists()) {
                         $to = array_merge($to, $department_head->pluck('email')->toArray());
+                        $to[] = 'hammad.saleem@trax.pk';
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 81) {
@@ -8522,7 +8523,7 @@ class NotificationsController extends Controller
                         }
                     }
 
-                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk', 'nadir.qureshi@trax.pk'];
+                    $other = ['hassan@trax.pk' ,'waqas@trax.pk', 'mohsin.ali@trax.pk', 'muhammad.yousuf@trax.pk', 'ali.qureshi@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'shahzad.farooq@trax.pk'];
                     $to = array_merge($to,$other);
                     if (count($to) > 0) {
                         self::email($subject, $body, $to);
