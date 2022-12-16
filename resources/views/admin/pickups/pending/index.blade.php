@@ -26,7 +26,6 @@
 										<th class="border-primary border-darken-1">Pickup Date</th>
 										<th class="border-primary border-darken-1">Requested Datetime</th>
 										<th class="border-primary border-darken-1">Shipper</th>
-										<th class="border-primary border-darken-1">Territory</th>
 										<th class="border-primary border-darken-1">Contact Person</th>
 										<th class="border-primary border-darken-1">Vendor</th>
 										<th class="border-primary border-darken-1">Contact No(s).</th>
@@ -154,7 +153,6 @@
                             head.push('Pickup Date');
                             head.push('Requested Datetime');
                             head.push('Shipper');
-                            head.push('Territory');
                             head.push('Contact Person');
                             head.push('Vendor');
                             head.push('Contact No(s).');
@@ -174,7 +172,6 @@
                                 row.push(values.pickup_date);
                                 row.push(values.requested_at);
                                 row.push(values.shipper);
-                                row.push(values.territory);
                                 row.push(values.contact_person);
                                 row.push(values.vendor);
                                 row.push(values.contact_number);
@@ -372,7 +369,6 @@
 					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-					{data: 'territory', name: 't.name', class: 'align-middle territory'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
 					{data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
