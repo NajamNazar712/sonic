@@ -133,6 +133,7 @@
                                     <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
 {{--                                    <th class="border-primary border-darken-1">Shipment(s) Received</th>--}}
                                     <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Contact Person</th>
 {{--                                    <th class="border-primary border-darken-1">Booking Type</th>--}}
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -517,6 +518,7 @@
                         head.push('Shipment(s) Rider Picked');
                         // head.push('Shipment(s) Received');
                         head.push('Shipper');
+                        head.push('Territory');
                         head.push('Contact Person');
                         head.push('Vendor');
                         head.push('Brand Name');
@@ -548,6 +550,7 @@
                             row.push(values.shipments_rider_picked);
                             // row.push(values.received);
                             row.push(values.shipper);
+                            row.push(values.territory);
                             row.push(values.contact_person);
                             row.push(values.vendor_name);
                             row.push(values.brand_name);
@@ -722,6 +725,7 @@
                 {data: 'shipments_rider_picked', name: 'vpr.shipments', class: 'align-middle shipments_rider_picked'},
                 // {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 // {data: 'type', name: 'booking_types.booking_type', class: 'align-middle type'},
                 {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},

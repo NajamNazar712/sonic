@@ -9158,6 +9158,10 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+
+                    $process_one_link['shipment_ids'] = $valid_shipments;
+                    $process_one_link['delivery_note_id'] = $note->id;
+                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
