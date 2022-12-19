@@ -88,7 +88,7 @@ class AdminNsaAccountShipmentController extends Controller
                     'rider_id' => $rider_id,
                     'route_id' => 2,
                     'shipments_count' => $shipments_count,
-                    'admin_id' => 50,
+                    'admin_id' => 346,
                     'total_cod_amount' => $total_cod_amount,
                     'password' => NULL,
                     'last_updated_at' => Carbon::now(),
@@ -634,7 +634,7 @@ class AdminNsaAccountShipmentController extends Controller
                     'rider_id' => $rider_id,
                     'route_id' => 2,
                     'shipments_count' => $shipments_count,
-                    'admin_id' => 50,
+                    'admin_id' => 346,
                     'total_cod_amount' => $total_cod_amount,
                     'password' => NULL,
                     'last_updated_at' => Carbon::now(),
@@ -977,7 +977,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 'rider_id' => $rider_id,
                                 'route_id' => 2,
                                 'shipments_count' => $shipments_count,
-                                'admin_id' => 50,
+                                'admin_id' => 346,
                                 'total_cod_amount' => $total_cod_amount,
                                 'password' => NULL,
                                 'last_updated_at' => Carbon::now(),
@@ -1024,7 +1024,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
                             }
 
-                            $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 50, 'status' => 3]);
+                            $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 346, 'status' => 3]);
                             if ($note) {
                                 foreach ($valid_shipments as $shipment_id) {
                                     $shipment = Shipment::where('id', $shipment_id);
