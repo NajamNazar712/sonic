@@ -11942,7 +11942,7 @@ class AdminDashboardController extends Controller
             $locations = RouteLocations::join('user_shipping_infos as usi', 'usi.id', '=', 'route_locations.pickup_address_id')
                 ->join('users as u', 'u.id', '=', 'usi.user_id')->where('route_locations.route_id', $route_id)->select('u.name as shipper', 'usi.pickup_address as address')->get();
             foreach ($locations as $location) {
-                $data[] = $location->shipper . ' - ' . $location->address;
+                $data[] =  '<strong>' . $location->shipper . '</strong>'  . ' - ' . $location->address;
             }
             return response()->json(['locations' => $data]);
         }
