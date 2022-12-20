@@ -9638,7 +9638,7 @@ class AdminDashboardController extends Controller
                 if (($sale_check != null || $multiple_sale_check) && $result->status != 2) {
                     if ($result->account_type_id == 1) {
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if ($result->status != 2 && (in_array($result->rate_status, [0, 1, 5]) || session('role_id') == 1 || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
+                            if ($result->status != 2 && (in_array($result->rate_status, [0, 1, 2, 5]) || session('role_id') == 1 || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
