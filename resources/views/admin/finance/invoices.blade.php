@@ -773,10 +773,9 @@
 						rowCallback: function(row, data, index) {
 							//console.log(data);
 							var total = parseInt(data.deposited_amount) + parseInt(data.adjusted_amount);
-							if (data.account_type == 2 && data.is_id != 3 && total == parseInt(data.total_invoice_amount)) {
+							if (data.account_type == 2 && data.is_id != 3 && total == parseInt(data.total_invoice_amount.replace(/,/g, ''))) {
 								$('td:eq(0)', row).addClass('select-checkbox');
 							}
-
 							var info = table.page.info();
 
 							$('td:eq(1)', row).html(index + 1 + info.page * info.length);
