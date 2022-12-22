@@ -21,13 +21,10 @@ class UpdateMobilinkShipmentTrackingNumberTableSeeder extends Seeder
                 $destination = $shipment->consignee_city_id;
                 $shipment_id = $shipment->id;
                 $new_tracking_number = $origin . $destination . $shipment_id;
-//                $shipment->order_id = null;
-//                $shipment->tracking_number = $new_tracking_number;
-//                $shipment->save();
-
-                $check_data[''.$shipment->tracking_number. ''] = $new_tracking_number;
+                $shipment->order_id = null;
+                $shipment->tracking_number = $new_tracking_number;
+                $shipment->save();
             }
-            dd($check_data);
         }
     }
 }
