@@ -2454,17 +2454,26 @@ class AdminCargoManifestController extends Controller
                         }
 
                         if ($misroute == 1) {
+                            $short_received_count = 0;
+                            $received_count = 0;
                             $bag->status_id = 5;
                             $bag->junction_mapping_id = null;
-                            $bag->short_received_shipments = $bag->shipment->count();
-                            $bag->received_shipments = 0;
                             foreach ($bag->shipment as $shipment) {
-                                ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
                                 $shipment_table = Shipment::find($shipment->shipment_id);
-                                $shipment_table->shipper_status_id = 11;
-                                $shipment_table->consignee_status_id = 11;
-                                $shipment_table->update();
+                                if(in_array($shipment_table->shipper_status_id, [3,21,26,32,49])){
+                                    ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
+                                    $shipment_table->shipper_status_id = 11;
+                                    $shipment_table->consignee_status_id = 11;
+                                    $shipment_table->update();
+                                    $short_received_count++;
+                                }
+                                else{
+                                    $received_count++;
+                                }
                             }
+
+                            $bag->short_received_shipments = $short_received_count;
+                            $bag->received_shipments = $received_count;
                         }
                         $bag->current_hub_id = Auth::user()->default_hub_id;
                         $bag->updated_by = Auth::id();
