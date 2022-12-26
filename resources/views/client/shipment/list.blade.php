@@ -60,7 +60,7 @@
 
 	<style>
 		#consignee_phone_number_search_form input.consignee_phone_number {
-			min-width: 225px;
+			min-width: 300px;
 		}
 	</style>
 @endsection
@@ -136,11 +136,11 @@
 				]
 			});
 
-			$('#consignee_phone_number_search_form input.consignee_phone_number').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+			// $('#consignee_phone_number_search_form input.consignee_phone_number').inputmask({
+			// 	'alias': 'integer',
+			// 	'allowMinus': false,
+			// 	'allowPlus': false
+			// });
 
 			var shipment_ids = [];
 			var serial_number = 1;
