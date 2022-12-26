@@ -1277,8 +1277,13 @@ class DeliveryController extends Controller
                             $dropdown .= $receive_button;
                          }
                     }
-
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+                    $rider_check = true;
+                    if($result->operation_rider_id == 1){
+                        if($result->rider_type_id == 1){
+                            $rider_check = false;
+                        }
+                    }
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions'))) && $rider_check) {
                         if (!$updatedstatusCheck) {
 
                             $dropdown .= $shift_shipment_button;
@@ -1350,7 +1355,14 @@ class DeliveryController extends Controller
             if($delivery_note->status == 4){
                 return redirect()->back()->with('error', 'Delivery note is cancelled!');
             }
-            if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+            $rider_check = true;
+            $rider = Rider::find($delivery_note->rider_id);
+            if($rider->operation_rider_id == 1){
+                if($rider->rider_type_id == 1){
+                    $rider_check = false;
+                }
+            }
+            if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions'))) && $rider_check) {
                 if (DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0) {
                     $service_type = BookingType::all();
                     return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
