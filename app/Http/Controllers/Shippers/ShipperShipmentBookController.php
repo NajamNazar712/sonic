@@ -6217,17 +6217,24 @@ class ShipperShipmentBookController extends Controller
 
     public function shipments_list_store(Request $request)
     {
-        dd($request->print_by);
-        if (isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
-            $consignee_phone_number = $request->consignee_phone_number;
-
-            if (substr($consignee_phone_number, 0, 2) == '92') {
-                $consignee_phone_number = substr($consignee_phone_number, 2);
+        $print_by = $request->print_by;
+        dd($print_by);
+        if (($print_by == 0 && isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) || ($print_by == 1 && isset($request->order_id) && !empty($request->order_id))) {
+            if($print_by == 1){
+                $order_id = $request->order_id;
+                $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('order_id', $order_id);
             }
+            else{
+                $consignee_phone_number = $request->consignee_phone_number;
 
-            $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
+                if (substr($consignee_phone_number, 0, 2) == '92') {
+                    $consignee_phone_number = substr($consignee_phone_number, 2);
+                }
 
-            $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('consignee_phone_number_1', $consignee_phone_number);
+                $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
+
+                $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('consignee_phone_number_1', $consignee_phone_number);
+            }
 
             if ($shipment->exists()) {
                 $shipment = $shipment->latest('id')->first();
