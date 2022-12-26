@@ -15531,6 +15531,9 @@ class AdminFinanceController extends Controller
             $total_adjustment = InvoiceAdjustment::where('invoice_id',$request->invoice_id)->sum('amount');
 
             $invoice->adjusted_amount = $total_adjustment;
+            if($invoice->total_invoice_amount != ($invoice->adjusted_amount + $invoice->deposited_amount)){
+                $invoice->status_id = 4;
+            }
             $invoice->save();
 
             return redirect()->back()->with('success','Adjustment Added');

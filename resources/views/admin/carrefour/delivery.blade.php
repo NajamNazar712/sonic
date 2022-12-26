@@ -134,6 +134,7 @@
                         data: {
                             '_token': '{{ csrf_token() }}',
                             'operation_rider_type': this.value,
+                            'carrefour': 1,
                         }
                     }).done(function(data){
 

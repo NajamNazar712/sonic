@@ -213,7 +213,7 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header text-center">
-                        <h4 class="modal-title w-100 font-weight-bold">View Addresses</h4>
+                        <h4 class="modal-title w-100 font-weight-bold">Pickup Addresses</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -626,7 +626,7 @@
 
                             var html = '';
                             html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
+                            html += '<thead><tr><th>S No.</th><th><strong>Details</strong></th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.locations, function(index, value) {
                                 var ind = index+1;

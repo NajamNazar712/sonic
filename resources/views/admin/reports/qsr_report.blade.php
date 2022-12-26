@@ -14,7 +14,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                   <div class="col-4">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -43,30 +43,30 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_origin" id="search_origin" class="form-control select2">
-                            @foreach($cities as $origin)
-                                <option value="{{$origin->id}}">{{$origin->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $origin)
+                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_destination" id="search_destination" class="form-control select2">
-                            @foreach($cities as $destination)
-                                <option value="{{$destination->id}}">{{$destination->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $destination)
+                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_qsr" id="search_qsr" class="form-control select2">
+                            <select name="search_qsr" id="search_qsr" class="form-control select2">
                                 <option value="1">Delivery</option>
                                 <option value="2">Return</option>
                                 <option value="3">All</option>
-                        </select>
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -463,7 +463,7 @@
 
 
             $('#search_filter_btn').on('click',function () {
-               table.draw();
+                table.draw();
             });
 
         });

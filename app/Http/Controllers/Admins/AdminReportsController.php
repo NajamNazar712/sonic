@@ -82,11 +82,11 @@ class AdminReportsController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $shippimg_modes = DB::connection('reports')->table('shipping_modes')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id' ,'>' ,0)->select('id','name')->get();
 //        dd($shipment_status);
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shippimg_modes, 'types' => $types,'shipment_status' => $shipment_status]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types,'shipment_status' => $shipment_status]);
     }
 
     public function qsr_list(Request $request)
@@ -133,9 +133,9 @@ class AdminReportsController extends Controller
         $type = $request->get('search_types');
 
         if ($type && $type == 2) {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
         } else {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [14, 16, 17, 25, 31, 36, 38, 39, 40, 41, 43, 47, 51]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38, 51]);
         }
 
         if (session('role_id') != 1) {
@@ -206,10 +206,10 @@ class AdminReportsController extends Controller
             $datatable->where('u.id', '=', $shipper);
         }*/
         if ($search_shipper = $request->get('search_shipper')) {
-            $shipments = $shipments->where('shipments.user_id', $search_shipper);
+            $datatable->where('shipments.user_id', $search_shipper);
         }
         if ($search_shippers = $request->get('search_shippers')) {
-            $shipments = $shipments->whereIn('shipments.user_id', $search_shippers);
+            $datatable->whereIn('shipments.user_id', $search_shippers);
         }
         if ($origin = $request->get('search_origin')) {
             $datatable->where('oc.id', '=', $origin);
@@ -9118,7 +9118,7 @@ class AdminReportsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftJoin('shipments_journey as bkg_date', function ($join) {
+            ->leftJoin ('shipments_journey as bkg_date', function ($join) {
                 $join->on('bkg_date.shipment_id', '=', 'shipments.id')
                     ->where('bkg_date.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)'));
@@ -9132,7 +9132,14 @@ class AdminReportsController extends Controller
             ->whereNotNull('shipments.actual_weight');
 
         if (session('role_id') != 1) {
-            $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
         }
 
         $datatable = Datatables::of($shipments)

@@ -374,18 +374,20 @@ class DeliveryController extends Controller
             $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
                 ->where('r.id' ,$request->rider_id)
                 ->where('delivery_notes.cash_collection_status',0)
+                ->where('delivery_notes.total_cod_amount', '>', 0)
                 ->where('delivery_notes.status', '!=', 4)
                 ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '<=', Carbon::today())
+                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
                 ->where('r.operation_rider_id',1);
         }
         else{
             $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
                 ->where('r.id' ,$request->rider_id)
                 ->where('delivery_notes.dncc_status',0)
+                ->where('delivery_notes.total_cod_amount', '>', 0)
                 ->where('delivery_notes.status', '!=', 4)
                 ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '<=', Carbon::today())
+                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
                 ->where('r.operation_rider_id',1);
         }
 
@@ -7208,6 +7210,7 @@ class DeliveryController extends Controller
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
                     ShipmentChargesController::weight($shipment->id);
+                    ShipmentChargesController::fuel_surcharge($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
@@ -8321,6 +8324,12 @@ class DeliveryController extends Controller
         ->where('riders.operation_rider_id', $operation_id)
         ->whereNotNull('riders.employee_id')
         ->where('riders.status', 1);
+        if ($operation_id == 1) {
+            if(!$request->has('carrefour')){
+                $riders->where('riders.rider_type_id', 2);
+            }
+        }
+
 
         if (session('role_id') != 1) {
             $riders = $riders->whereHas('city', function ($query) {
@@ -9006,7 +9015,7 @@ class DeliveryController extends Controller
         $request_id = $id;
         $delivery_request = RiderDeliveryNoteRequest::find($request_id);
         if ($delivery_request) {
-            $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
+//            $request_shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4]);
             
             $shipments = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->pluck('shipment_id')->toArray();
             $open_box_ids = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('open_box', 1)->pluck('shipment_id')->toArray();
@@ -9050,6 +9059,7 @@ class DeliveryController extends Controller
                     'total_cod_amount' => $total_cod_amount,
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order,
+                    'created_via_app' => 1,
                     'request_note_id' => $delivery_request->id
                 ]);
                 if ($note) {
@@ -9148,6 +9158,10 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+
+                    $process_one_link['shipment_ids'] = $valid_shipments;
+                    $process_one_link['delivery_note_id'] = $note->id;
+                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
