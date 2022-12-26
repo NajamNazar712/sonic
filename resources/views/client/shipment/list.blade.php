@@ -19,13 +19,16 @@
 
 							<form id="consignee_phone_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 								<div class="row justify-content-center">
-{{--									<div class="form-group mr-2">--}}
-{{--										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 mr-1">Consignee Phone Number</label>--}}
-{{--										<input type="checkbox" name="print_by_checkbox" id="print_by_checkbox" class="switchery print_by_checkbox" data-size="sm" data-switchery="true">--}}
-{{--										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 ml-1">Order ID</label>--}}
-{{--									</div>--}}
+									<div class="form-group mr-2">
+										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 mr-1">Consignee Phone Number</label>
+										<input type="checkbox" name="print_by_checkbox" id="print_by_checkbox" class="switchery print_by_checkbox" data-size="sm" data-switchery="true">
+										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 ml-1">Order ID</label>
+									</div>
 									<div class="form-group">
 										<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number" data-rule-required="true" data-msg-required="Consignee Phone Number is required">
+									</div>
+									<div class="form-group">
+										<input type="text" name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-required="true" data-msg-required="Order ID is required">
 									</div>
 
 									<div class="form-group ml-1">
@@ -41,6 +44,7 @@
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Consignee Name</th>
 										<th class="border-primary border-darken-1">Consignee Phone Number</th>
+										<th class="border-primary border-darken-1">Order ID</th>
 									</tr>
 								</thead>
 							</table>
@@ -78,9 +82,21 @@
 
 	<script>
 		$(document).ready(function() {
-			// var print_by_elem = document.querySelector('.print_by_checkbox');
-			// var print_by_switchery = new Switchery(print_by_elem);
+			var print_by_elem = document.querySelector('.print_by_checkbox');
+			var print_by_switchery = new Switchery(print_by_elem);
 
+			$(".print_by_checkbox").change(function() {
+				if(this.checked) {
+					$('.order_id').attr('data-rule-required', 'true');
+					$('.order_id').attr('data-msg-required', 'Order ID is required');
+					$('.consignee_phone_number').attr('data-rule-required', 'false');
+				}
+				else{
+					$('.consignee_phone_number').attr('data-rule-required', 'true');
+					$('.consignee_phone_number').attr('data-msg-required', 'Consignee Phone Number is required');
+					$('.order_id').attr('data-rule-required', 'false');
+				}
+			});
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
 			function print(shipment_ids) {
@@ -133,6 +149,7 @@
 					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
 					{name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
 					{name: 'consignee_phone_number', class: 'align-middle consignee_phone_number', orderable: false}
+					{name: 'order_id', class: 'align-middle order_id', orderable: false}
 				]
 			});
 
@@ -155,10 +172,12 @@
 					$('#consignee_phone_number_search_form button.add').prop('disabled', true);
 
 					var consignee_phone_number = $(form).find('input.consignee_phone_number').val();
+					var order_id = $(form).find('input.order_id').val();
 
 					$(form).find('input.consignee_phone_number').val('');
+					$(form).find('input.order_id').val('');
 
-					if (table.columns('.consignee_phone_number').data().eq(0).indexOf(consignee_phone_number) === -1) {
+					if (table.columns('.consignee_phone_number').data().eq(0).indexOf(consignee_phone_number) === -1 && table.columns('.order_id').data().eq(0).indexOf(order_id) === -1 ) {
 						blockPagePermanently();
 
 						$.ajax({
@@ -166,7 +185,9 @@
 							method: 'POST',
 							data: {
 								'_token': '{{ csrf_token() }}',
-								'consignee_phone_number': consignee_phone_number
+								'consignee_phone_number': consignee_phone_number,
+								'order_id': order_id,
+								'print_by': $('.print_by_checkbox').val()
 							}
 						})
 						.done(function(data) {
@@ -176,7 +197,7 @@
 								var index = $.inArray(id, shipment_ids);
 
 								if (index === -1) {
-									table.row.add([serial_number, data.shipment.tracking_number, data.shipment.consignee_name, data.shipment.consignee_phone_number]).node().id = data.shipment.id;
+									table.row.add([serial_number, data.shipment.tracking_number, data.shipment.consignee_name, data.shipment.consignee_phone_number, data.shipment.order_id]).node().id = data.shipment.id;
 
 									shipment_ids.push(data.shipment.id);
 
@@ -191,17 +212,16 @@
 									scan_sound(1);
 
 									UnblockPagePermanently();
-
 									$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+									$('#consignee_phone_number_search_form #order_id-error').remove();
 
 									$('#consignee_phone_number_search_form button.add').prop('disabled', false);
-
-									$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 								else {
 									$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+									$('#consignee_phone_number_search_form #order_id-error').remove();
 
 									$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
@@ -209,13 +229,13 @@
 
 									scan_sound(2);
 
-									$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
 									toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 								}
 							}
 							else if (data.status == 2) {
 								$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+								$('#consignee_phone_number_search_form #order_id-error').remove();
 
 								scan_sound(2);
 
@@ -238,13 +258,12 @@
 										$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
 										UnblockPagePermanently();
-
-										$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 									}
 								});
 							}
 							else {
 								$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+								$('#consignee_phone_number_search_form #order_id-error').remove();
 
 								$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 
@@ -252,14 +271,21 @@
 
 								scan_sound(2);
 
-								$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
-
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							}
+
+							var checkBox = document.getElementById("print_by_checkbox");
+
+							if (checkBox.checked == true){
+								$('#consignee_phone_number_search_form input.order_id').focus();
+							} else {
+								$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 							}
 						});
 					}
 					else {
 						$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+						$('#consignee_phone_number_search_form #order_id-error').remove();
 
 						$('#consignee_phone_number_search_form button.add').prop('disabled', false);
 

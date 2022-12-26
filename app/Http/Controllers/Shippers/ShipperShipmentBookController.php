@@ -6217,6 +6217,7 @@ class ShipperShipmentBookController extends Controller
 
     public function shipments_list_store(Request $request)
     {
+        dd($request->print_by);
         if (isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) {
             $consignee_phone_number = $request->consignee_phone_number;
 
