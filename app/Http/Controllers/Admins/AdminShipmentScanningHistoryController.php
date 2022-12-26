@@ -40,44 +40,46 @@ class AdminShipmentScanningHistoryController extends Controller
                     if(count($scanning_histories) > 0){
                         foreach($scanning_histories as $index => $scanning_history){
                             $screen_location = ShipmentScanningScreenLocation::where('id', $scanning_history->screen_location_id)->first();
-                            if($scanning_history->user_type == 1){
-                                $account_type = 'Admin';
-                                $admin = Admin::find($scanning_history->admin_id);
-                                $c = City::find($admin->default_hub_id);
-                                ($c)?$city=$c['name']:$city='-';
-                                $scanned_by = $admin->name;
-                            }
-                            elseif($scanning_history->user_type == 2){
-                                $account_type = 'Shipper';
-                                $user = User::find($scanning_history->user_id);
-                                $scanned_by = $user->name;
-                                $city='-';
-
-                            }
-                            elseif($scanning_history->user_type == 3){
-                                $account_type = 'Substitute Shipper';
-                                $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
-                                $scanned_by = $sub_user->name;
-                                $city='-';
-                            }
-                            else if($scanning_history->user_type == 4){
-                                $account_type = 'Retail User';
-                                $retail_admin = RetailUser::find($scanning_history->admin_id);
-                                $c = City::find($retail_admin->city_id);
-                                ($c)?$city=$c['name']:$city='-';
-                                $scanned_by = $retail_admin->name;
-                            }
-                            else if($scanning_history->user_type == 5){
-                                $account_type = 'Rider';
-                                $rider = Rider::find($scanning_history->admin_id);
-                                $c = City::find($rider->city_id);
-                                ($c)?$city=$c['name']:$city='-';
-                                $scanned_by = $rider->name;
-                            }
-                            else{
+                            if($scanning_history->admin_id == null && $scanning_history->user_id == null){
                                 $account_type = '-';
                                 $scanned_by = '-';
-                                $city='-';
+                                $city = '-';
+                            }
+                            else {
+                                if ($scanning_history->user_type == 1) {
+                                    $account_type = 'Admin';
+                                    $admin = Admin::find($scanning_history->admin_id);
+                                    $c = City::find($admin->default_hub_id);
+                                    ($c) ? $city = $c['name'] : $city = '-';
+                                    $scanned_by = $admin->name;
+                                } elseif ($scanning_history->user_type == 2) {
+                                    $account_type = 'Shipper';
+                                    $user = User::find($scanning_history->user_id);
+                                    $scanned_by = $user->name;
+                                    $city = '-';
+
+                                } elseif ($scanning_history->user_type == 3) {
+                                    $account_type = 'Substitute Shipper';
+                                    $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
+                                    $scanned_by = $sub_user->name;
+                                    $city = '-';
+                                } else if ($scanning_history->user_type == 4) {
+                                    $account_type = 'Retail User';
+                                    $retail_admin = RetailUser::find($scanning_history->admin_id);
+                                    $c = City::find($retail_admin->city_id);
+                                    ($c) ? $city = $c['name'] : $city = '-';
+                                    $scanned_by = $retail_admin->name;
+                                } else if ($scanning_history->user_type == 5) {
+                                    $account_type = 'Rider';
+                                    $rider = Rider::find($scanning_history->admin_id);
+                                    $c = City::find($rider->city_id);
+                                    ($c) ? $city = $c['name'] : $city = '-';
+                                    $scanned_by = $rider->name;
+                                } else {
+                                    $account_type = '-';
+                                    $scanned_by = '-';
+                                    $city = '-';
+                                }
                             }
                             $details[$index]['screen_location'] = $screen_location->name;
                             $details[$index]['account_type'] = $account_type;

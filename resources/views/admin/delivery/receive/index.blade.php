@@ -49,6 +49,7 @@
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
+                        <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
@@ -59,6 +60,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Last Updated (Date)</th>
                         <th class="border-primary border-darken-1">Last Updated By</th>
+                        <th class="border-primary border-darken-1">Created Via</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -106,6 +108,7 @@
                         <div class="row justify-content-center">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <input type="hidden" id="rider_otp" name="rider_otp" value="{{$rider_otp}}">
                                     <select name="operation_rider_id" id="operation_rider_id"
                                             class="form-control select2" required>
                                         @foreach($operation_rider_category as $category)
@@ -280,6 +283,7 @@
                             head.push('Business Category');
                             head.push('Rider');
                             head.push('Rider Type');
+                            head.push('Rider Category');
                             head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('No. Of Pending Shipments');
@@ -290,6 +294,7 @@
                             head.push('Status');
                             head.push('Last Updated (Date)');
                             head.push('Last Updated By');
+                            head.push('Created Via');
                             $.each(result.data, function (index, values) {
                                 row = [];
 
@@ -302,6 +307,7 @@
                                 row.push(values.business_category);
                                 row.push(values.rider);
                                 row.push(values.rt);
+                                row.push(values.operation_rider_id);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.shipments_unverified_count);
@@ -312,6 +318,7 @@
                                 row.push(values.pending_status);
                                 row.push(values.last_updated_at);
                                 row.push(values.updated_by);
+                                row.push(values.created_via);
                                 body.push(row);
                             });
                         },
@@ -373,6 +380,7 @@
                     },
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
+                    {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {
                         data: 'shipments_count_link',
@@ -403,6 +411,7 @@
                         class: 'align-middle last_updated_at'
                     },
                     {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
+                    {data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -435,11 +444,11 @@
                         '<option value="1">Domestic</option>' +
                         '<option value="2">International</option>' +
                         '</select>';
-                    var vigilance_drop = '<select name="vigilance_select" id="vigilance_select" class="select2 form-control">' +
+                  /*  var vigilance_drop = '<select name="vigilance_select" id="vigilance_select" class="select2 form-control">' +
                         '<option value="1">Yes</option>' +
                         '<option value="2">Partial</option>' +
                         '<option value="3">No</option>' +
-                        '</select>';
+                        '</select>';*/
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -456,11 +465,11 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else if ($(header).is('.vigilance_verification')) {
+                        /*} else if ($(header).is('.vigilance_verification')) {
                             $(vigilance_drop).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
+                                }).wrap(td);*/
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -483,12 +492,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    $("#vigilance_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Vigilance Verification",
+                    /*$("#vigilance_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Verification",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    });*/
                     
                     this.api().table().columns.adjust();
                 }
@@ -818,6 +827,7 @@
                 var operation_id = $('#operation_rider_id').val();
                 var route = $('#route').val();
                 var rider = $('#riders').val();
+                var rider_otp = $('#rider_otp').val();
                 var errors = 0;
                 if (rider !== '' && rider !== null) {
                     $('#rider_error').css('display', 'none');
@@ -836,7 +846,7 @@
                     $('#route_error').css('display', 'block');
                 }
                 if (errors == 0) {
-                    if (operation_id === '2') {
+                    if (operation_id === '2' || rider_otp === '0') {
                         reassign_rider();
                     } else {
                         otp_generation();
@@ -979,6 +989,8 @@
                 $('#otp_input').val('');
                 $('#OtpModal').modal('hide');
             });
+
+
 
         });
     </script>
