@@ -6218,8 +6218,26 @@ class ShipperShipmentBookController extends Controller
     public function shipments_list_store(Request $request)
     {
         $print_by = $request->print_by;
-        if (($print_by == 1 && isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)) || ($print_by == 2 && isset($request->order_id) && !empty($request->order_id))) {
-            if($print_by == 2){
+        $check = false;
+        $error = '';
+        if($print_by == 2){
+            if(isset($request->consignee_phone_number) && !empty($request->consignee_phone_number)){
+                $check = true;
+            }
+            else{
+                $error = 'No Consignee Phone Number entered';
+            }
+        }
+        elseif ($print_by == 1){
+            if(isset($request->order_id) && !empty($request->order_id)){
+                $check = true;
+            }
+            else{
+                $error = 'No Order ID entered';
+            }
+        }
+        if ($check) {
+            if($print_by == 1){
                 $order_id = $request->order_id;
                 $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('order_id', $order_id);
             }
@@ -6251,7 +6269,7 @@ class ShipperShipmentBookController extends Controller
                 return ['status' => 2, 'error' => 'No Shipment found for ' . $request->consignee_phone_number];
             }
         } else {
-            return ['status' => 1, 'error' => 'No Consignee Phone Number entered'];
+            return ['status' => 1, 'error' => $error];
         }
     }
 
