@@ -24,10 +24,10 @@
 										<input type="checkbox" name="print_by_checkbox" id="print_by_checkbox" class="switchery print_by_checkbox" data-size="sm" data-switchery="true">
 										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 ml-1">Order ID</label>
 									</div>
-									<div class="form-group hide" id="phone_number_div">
+									<div class="form-group display-hidden" id="phone_number_div">
 										<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number">
 									</div>
-									<div class="form-group hide" id="order_id_div">
+									<div class="form-group display-hidden" id="order_id_div">
 										<input type="text" name="order_id" class="form-control order_id" placeholder="Order ID">
 									</div>
 
@@ -85,6 +85,18 @@
 			var print_by_elem = document.querySelector('.print_by_checkbox');
 			var print_by_switchery = new Switchery(print_by_elem);
 
+			$(".print_by_checkbox").change(function() {
+				if(this.checked) {
+					$('.order_id').attr('data-rule-required', 'true');
+					$('.order_id').attr('data-msg-required', 'Order ID is required');
+					$('.consignee_phone_number').attr('data-rule-required', 'false');
+				}
+				else{
+					$('.consignee_phone_number').attr('data-rule-required', 'true');
+					$('.consignee_phone_number').attr('data-msg-required', 'Consignee Phone Number is required');
+					$('.order_id').attr('data-rule-required', 'false');
+				}
+			});
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
 			function print(shipment_ids) {
