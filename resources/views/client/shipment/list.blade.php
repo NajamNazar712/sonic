@@ -84,15 +84,17 @@
 		$(document).ready(function() {
 			var print_by_elem = document.querySelector('.print_by_checkbox');
 			var print_by_switchery = new Switchery(print_by_elem);
-
+			var print_by = 0;
 			$(".print_by_checkbox").change(function() {
 				if(this.checked) {
 					$('#order_id_div').removeClass('display-hidden');
 					$('#phone_number_div').addClass('display-hidden');
+					print_by = 1;
 				}
 				else{
 					$('#order_id_div').addClass('display-hidden');
 					$('#phone_number_div').removeClass('display-hidden');
+					print_by = 2;
 				}
 			});
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
@@ -185,7 +187,7 @@
 								'_token': '{{ csrf_token() }}',
 								'consignee_phone_number': consignee_phone_number,
 								'order_id': order_id,
-								'print_by': $('.print_by_checkbox').val()
+								'print_by': print_by
 							}
 						})
 						.done(function(data) {
