@@ -148,7 +148,7 @@
 					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
 					{name: 'tracking_number', class: 'align-middle tracking_number', orderable: false},
 					{name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
-					{name: 'consignee_phone_number', class: 'align-middle consignee_phone_number', orderable: false}
+					{name: 'consignee_phone_number', class: 'align-middle consignee_phone_number', orderable: false},
 					{name: 'order_id', class: 'align-middle order_id', orderable: false}
 				]
 			});
