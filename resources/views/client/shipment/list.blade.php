@@ -18,8 +18,16 @@
 							@include('client.inc.messages')
 
 							<form id="consignee_phone_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="col text-center">
+									<label class="font-medium-2 font-weight-bold block">Print By</label>
+									<div class="form-group">
+										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 mr-1">Consignee Phone Number</label>
+										<input type="checkbox" name="print_by_checkbox" id="print_by_checkbox" class="switchery print_by_checkbox" data-size="sm" data-switchery="true">
+										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 ml-1">Order ID</label>
+									</div>
+								</div>
 								<div class="form-group">
-									<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number" data-rule-required="true" data-msg-required="Consignee Phone Number is required">
+									<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number/Order ID" data-rule-required="true" data-msg-required="This Field is required">
 								</div>
 
 								<div class="form-group ml-1">
@@ -69,6 +77,9 @@
 
 	<script>
 		$(document).ready(function() {
+			var print_by_elem = document.querySelector('.print_by_checkbox');
+			var print_by_switchery = new Switchery(print_by_elem);
+
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
 			function print(shipment_ids) {
