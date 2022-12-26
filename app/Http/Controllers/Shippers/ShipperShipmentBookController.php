@@ -6245,6 +6245,7 @@ class ShipperShipmentBookController extends Controller
                 $shipment_array['tracking_number'] = $shipment->tracking_number;
                 $shipment_array['consignee_name'] = $shipment->consignee_name;
                 $shipment_array['consignee_phone_number'] = $request->consignee_phone_number;
+                $shipment_array['order_id'] = $request->order_id;
 
                 return ['status' => 0, 'success' => 'Shipment(s) found', 'shipment' => $shipment_array];
             } else {
