@@ -96,6 +96,9 @@
 					$('#phone_number_div').removeClass('display-hidden');
 					print_by = 2;
 				}
+
+				$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+				$('#consignee_phone_number_search_form #order_id-error').remove();
 			});
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
