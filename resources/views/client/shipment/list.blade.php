@@ -84,7 +84,7 @@
 		$(document).ready(function() {
 			var print_by_elem = document.querySelector('.print_by_checkbox');
 			var print_by_switchery = new Switchery(print_by_elem);
-			var print_by = 0;
+			var print_by = 2;
 			$(".print_by_checkbox").change(function() {
 				if(this.checked) {
 					$('#order_id_div').removeClass('display-hidden');
