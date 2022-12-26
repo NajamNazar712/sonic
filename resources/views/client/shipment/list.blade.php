@@ -25,10 +25,10 @@
 										<label for="print_by_checkbox" class="font-medium-2 text-bold-600 ml-1">Order ID</label>
 									</div>
 									<div class="form-group">
-										<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number" data-rule-required="true" data-msg-required="Consignee Phone Number is required">
+										<input type="text" name="consignee_phone_number" class="form-control consignee_phone_number" placeholder="Consignee Phone Number">
 									</div>
 									<div class="form-group">
-										<input type="text" name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-required="true" data-msg-required="Order ID is required">
+										<input type="text" name="order_id" class="form-control order_id" placeholder="Order ID">
 									</div>
 
 									<div class="form-group ml-1">
@@ -96,6 +96,8 @@
 					$('.consignee_phone_number').attr('data-msg-required', 'Consignee Phone Number is required');
 					$('.order_id').attr('data-rule-required', 'false');
 				}
+				$('#consignee_phone_number_search_form #consignee_phone_number-error').remove();
+				$('#consignee_phone_number_search_form #order_id-error').remove();
 			});
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
