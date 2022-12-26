@@ -78,8 +78,8 @@
 
 	<script>
 		$(document).ready(function() {
-			var print_by_elem = document.querySelector('.print_by_checkbox');
-			var print_by_switchery = new Switchery(print_by_elem);
+			// var print_by_elem = document.querySelector('.print_by_checkbox');
+			// var print_by_switchery = new Switchery(print_by_elem);
 
 			$('#consignee_phone_number_search_form input.consignee_phone_number').focus();
 
