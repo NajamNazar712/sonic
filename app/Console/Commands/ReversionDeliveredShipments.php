@@ -77,17 +77,17 @@ class ReversionDeliveredShipments extends Command
                         foreach ($destination_shipments as $hub_id => $destination_shipment){
                             if(in_array($hub_id, $assigned_hubs)){
                                 foreach ($destination_shipment as $shipment_id => $d_shipment){
-                                    dd($d_shipment);
-                                    $shipment_details[$shipment_id]['tracking_number'] = $shipment['tracking_number'];
-                                    $shipment_details[$shipment_id]['consignee_name'] = $shipment['consignee_name'];
-                                    $shipment_details[$shipment_id]['consignee_phone'] = $shipment['consignee_phone'];
-                                    $shipment_details[$shipment_id]['consignee_address'] = $shipment['consignee_address'];
-                                    $shipment_details[$shipment_id]['consignee_city'] = $shipment['consignee_city'];
-                                    $shipment_details[$shipment_id]['amount'] = $shipment['amount'];
-                                    $shipment_details[$shipment_id]['dncc'] = $shipment['dncc'];
-                                    $shipment_details[$shipment_id]['delivered_at'] = $shipment['delivered_at'];
-                                    $shipment_details[$shipment_id]['reverted_at'] = $shipment['reverted_at'];
-                                    $shipment_details[$shipment_id]['reverted_by'] = $shipment['reverted_by'];
+                                    dd($destination_shipment);
+                                    $shipment_details[$shipment_id]['tracking_number'] = $d_shipment['tracking_number'];
+                                    $shipment_details[$shipment_id]['consignee_name'] = $d_shipment['consignee_name'];
+                                    $shipment_details[$shipment_id]['consignee_phone'] = $d_shipment['consignee_phone'];
+                                    $shipment_details[$shipment_id]['consignee_address'] = $d_shipment['consignee_address'];
+                                    $shipment_details[$shipment_id]['consignee_city'] = $d_shipment['consignee_city'];
+                                    $shipment_details[$shipment_id]['amount'] = $d_shipment['amount'];
+                                    $shipment_details[$shipment_id]['dncc'] = $d_shipment['dncc'];
+                                    $shipment_details[$shipment_id]['delivered_at'] = $d_shipment['delivered_at'];
+                                    $shipment_details[$shipment_id]['reverted_at'] = $d_shipment['reverted_at'];
+                                    $shipment_details[$shipment_id]['reverted_by'] = $d_shipment['reverted_by'];
                                 }
                             }
                         }
