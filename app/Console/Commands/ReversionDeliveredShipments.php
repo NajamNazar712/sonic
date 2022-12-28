@@ -62,6 +62,7 @@ class ReversionDeliveredShipments extends Command
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['consignee_city'] = $shipment->destination_city->name;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['amount'] = $shipment->amount;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['dncc'] = $reversion_shipment->dncc;
+                $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['status'] = $shipment->status_shipper->name;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['delivered_at'] = $delivered_journey->created_at;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['reverted_at'] = $reversion_shipment->created_at;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['reverted_by'] = $reverted_by;
@@ -84,6 +85,7 @@ class ReversionDeliveredShipments extends Command
                                     $shipment_details[$shipment_id]['consignee_city'] = $d_shipment['consignee_city'];
                                     $shipment_details[$shipment_id]['amount'] = $d_shipment['amount'];
                                     $shipment_details[$shipment_id]['dncc'] = $d_shipment['dncc'];
+                                    $shipment_details[$shipment_id]['status'] = $d_shipment['status'];
                                     $shipment_details[$shipment_id]['delivered_at'] = $d_shipment['delivered_at'];
                                     $shipment_details[$shipment_id]['reverted_at'] = $d_shipment['reverted_at'];
                                     $shipment_details[$shipment_id]['reverted_by'] = $d_shipment['reverted_by'];

@@ -9848,6 +9848,7 @@ else if ($id == 178) {
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['consignee_city'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['amount'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['dncc'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['status'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['delivered_at'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['reverted_at'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['reverted_by'] . '</td>';
