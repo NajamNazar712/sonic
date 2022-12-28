@@ -77,6 +77,7 @@ class ReversionDeliveredShipments extends Command
                         foreach ($destination_shipments as $hub_id => $destination_shipment){
                             if(in_array($hub_id, $assigned_hubs)){
                                 foreach ($destination_shipments as $shipment_id => $shipment){
+                                    dd($shipment);
                                     $shipment_details[$shipment_id]['tracking_number'] = $shipment['tracking_number'];
                                     $shipment_details[$shipment_id]['consignee_name'] = $shipment['consignee_name'];
                                     $shipment_details[$shipment_id]['consignee_phone'] = $shipment['consignee_phone'];
