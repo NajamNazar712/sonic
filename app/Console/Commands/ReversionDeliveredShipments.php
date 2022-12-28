@@ -53,7 +53,7 @@ class ReversionDeliveredShipments extends Command
             $reversion_shipments = $reversion_shipments->get();
             foreach ($reversion_shipments as $reversion_shipment){
                 $shipment = Shipment::find($reversion_shipment->shipment_id);
-                $delivered_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 14)->latest('id')->first();
+                $delivered_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [14, 30, 36, 37])->latest('id')->first();
                 $reverted_by = Admin::find($reversion_shipment->reverted_by)->name;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['tracking_number'] = $shipment->tracking_number;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['consignee_name'] = $shipment->consignee_name;
