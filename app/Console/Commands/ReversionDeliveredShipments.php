@@ -61,7 +61,7 @@ class ReversionDeliveredShipments extends Command
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['consignee_address'] = $shipment->consignee_address;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['consignee_city'] = $shipment->destination_city->name;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['amount'] = $shipment->amount;
-                $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['dncc'] = $reversion_shipment;
+                $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['dncc'] = $reversion_shipment->dncc;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['delivered_at'] = $delivered_journey->created_at;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['reverted_at'] = $reversion_shipment->created_at;
                 $destination_shipments[$shipment->destination_city->hub_id][$shipment->id]['reverted_by'] = $reverted_by;
@@ -77,7 +77,6 @@ class ReversionDeliveredShipments extends Command
                         foreach ($destination_shipments as $hub_id => $destination_shipment){
                             if(in_array($hub_id, $assigned_hubs)){
                                 foreach ($destination_shipment as $shipment_id => $d_shipment){
-                                    dd($destination_shipment);
                                     $shipment_details[$shipment_id]['tracking_number'] = $d_shipment['tracking_number'];
                                     $shipment_details[$shipment_id]['consignee_name'] = $d_shipment['consignee_name'];
                                     $shipment_details[$shipment_id]['consignee_phone'] = $d_shipment['consignee_phone'];
