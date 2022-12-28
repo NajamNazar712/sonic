@@ -18,7 +18,7 @@ class ReversionDeliveredShipments extends Command
      *
      * @var string
      */
-    protected $signature = 'ReversionDelivered:Report';
+    protected $signature = 'reversion_delivered:report';
 
     /**
      * The console command description.
