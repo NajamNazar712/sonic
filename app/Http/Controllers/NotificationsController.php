@@ -9865,7 +9865,7 @@ else if ($id == 178) {
                     }
                     $to = $admin->email;
 
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to);
 
                 }
 
