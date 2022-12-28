@@ -92,6 +92,7 @@ class ReversionDeliveredShipments extends Command
                                 }
                             }
                         }
+                        dd($shipment_details);
                         if(count($shipment_details) > 0){
                             NotificationsController::send(205, $shipment_details, $admin);
                         }
