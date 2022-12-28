@@ -15,6 +15,7 @@ use App\Http\Models\Admin\InvoiceAdjustmentReasons;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Admin\ReversionDeliveredShipment;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
@@ -1602,6 +1603,16 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
+
+                //reverted report shipments data entry.
+                $reversion_report = new ReversionDeliveredShipment();
+                $reversion_report->shipment_id = $shipment->id;
+                $reversion_report->city_id = $shipment->consignee_city_id;
+                $reversion_report->dncc = $delivery_note_id;
+                $reversion_report->reverted_by = Auth::id();
+                $reversion_report->save();
+                //reverted report shipments data entry.
+
                 $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
                 if ($lost_shipment_shipper->exists()) {
                     $lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
