@@ -44,8 +44,6 @@ class ReversionDeliveredShipments extends Command
      */
     public function handle()
     {
-        //3, 15 overall
-        //
         $date = Carbon::yesterday()->format('Y-m-d');
         $reversion_shipments = ReversionDeliveredShipment::whereDate('created_at', $date);
         $destination_shipments = array();
