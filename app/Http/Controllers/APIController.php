@@ -5164,7 +5164,7 @@ class APIController extends Controller
     {
         $rules = [
             'consumer_number' => ['required', 'integer'],
-            'transaction_authentication_id' => ['required', 'integer'],
+            'transaction_authentication_id' => ['required'],
             'transaction_amount' => ['required'],
             'transaction_date' => ['required'],
             'transaction_time' => ['required'],
