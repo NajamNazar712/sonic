@@ -7441,6 +7441,7 @@ class DeliveryController extends Controller
 
                     ShipmentChargesController::cash_handling($shipment_id);
                     ShipmentChargesController::weight($shipment_id);
+                    ShipmentChargesController::fuel_surcharge($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
