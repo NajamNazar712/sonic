@@ -5584,6 +5584,7 @@ class AdminReportsController extends Controller
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
+        Storage::disk('public')->delete('/reports/revenue/' . $filename);
         Storage::disk('public')->put('/reports/revenue/' . $filename, $contents);
         return true;
     }
