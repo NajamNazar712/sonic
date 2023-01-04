@@ -5327,7 +5327,7 @@ class AdminReportsController extends Controller
 
 //        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
 //        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
-        $date = Carbon::today()->firstOfMonth()->toDateTimeString();
+        $date = Carbon::parse('01-12-2022 00:00:00')->toDateTimeString();
         $from = Carbon::parse($date)->addDays(25)->endOfDay()->toDateTimeString();
         $to = Carbon::parse($date)->addDays(31)->endOfDay()->toDateTimeString();
 
