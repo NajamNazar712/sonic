@@ -985,16 +985,17 @@
                 }
             });
 
-            var date = $('#LastWorkingDayModal #last_working_day').pickadate({
+            var date = $('#last_working_day').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
+                format:'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#last_working_day_form #last_working_day').pickadate('picker');
+                        $('#last_working_day').pickadate('picker').get('select');
                     }
                 }
             });
