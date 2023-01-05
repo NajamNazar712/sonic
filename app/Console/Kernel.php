@@ -333,11 +333,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-//        $schedule->command('email:revenuereport')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(26, '00:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(26, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->dailyAt('12:50')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
         if ($settings->exists()) {
