@@ -7568,7 +7568,7 @@ class NotificationsController extends Controller
                         $subject = str_replace('[year]', $now->year, $subject);
                     }
 
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report_26.xlsx');
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
