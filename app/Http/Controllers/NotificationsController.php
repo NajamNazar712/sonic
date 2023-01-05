@@ -7568,14 +7568,14 @@ class NotificationsController extends Controller
                         $subject = str_replace('[year]', $now->year, $subject);
                     }
 
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report_26.xlsx');
+                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'anas.anwer@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
                 } else if ($id == 133) {

@@ -5327,10 +5327,8 @@ class AdminReportsController extends Controller
 
 //        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
 //        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
-        $from = Carbon::parse('25-12-2022 00:00:00')->toDateTimeString();
-        $to = Carbon::parse('31-12-2022 23:59:59')->toDateTimeString();
-//        $from = Carbon::parse($date)->addDays(25)->endOfDay()->toDateTimeString();
-//        $to = Carbon::parse($date)->addDays(31)->endOfDay()->toDateTimeString();
+        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
 
         //Next
 
@@ -5396,7 +5394,7 @@ class AdminReportsController extends Controller
             ->get();
 
 
-        $filename = 'sonic_monthly_shipper_revenue_report_26.xlsx';
+        $filename = 'sonic_monthly_shipper_revenue_report.xlsx';
 
         $details = array();
 
