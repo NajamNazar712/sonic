@@ -9816,6 +9816,60 @@ else if ($id == 178) {
                         self::sms($body, $to, 1);
                     }
                 }
+                else if ($id == 205) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $shipment_details = $reference_1_id;
+                    $admin = $reference_2_id;
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee Phone Number</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee Address</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee City</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">DNCC Number</th> 
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered At</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Reverted At</th>
+                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Reverted By</th>';
+                    $html .= '</tr></thead><tbody>';
+
+                    $serial_number = 0;
+                    foreach ($shipment_details as $index => $shipment_detail) {
+                        $serial_number++;
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['tracking_number'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['consignee_name'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['consignee_phone'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['consignee_address'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['consignee_city'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['amount'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['dncc'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['status'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['delivered_at'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['reverted_at'] . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment_detail['reverted_by'] . '</td>';
+                        $html .= '</tr>';
+                    }
+
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[admin]') !== FALSE) {
+                        $body = str_replace('[admin]', $admin->name, $body);
+                    }
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+                    $to = $admin->email;
+
+                    self::email($subject, $body, $to);
+
+                }
 
             }
         }
