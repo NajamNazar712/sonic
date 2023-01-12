@@ -2309,7 +2309,7 @@ class AdminFinanceController extends Controller
                                 $reversion_report = new ReversionDeliveredShipment();
                                 $reversion_report->shipment_id = $shipment->id;
                                 $reversion_report->city_id = $shipment->consignee_city_id;
-                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->dncc = $delivery_note->id;
                                 $reversion_report->reverted_by = Auth::id();
                                 $reversion_report->save();
                                 //reverted report shipments data entry.
@@ -2467,7 +2467,7 @@ class AdminFinanceController extends Controller
                                 $reversion_report = new ReversionDeliveredShipment();
                                 $reversion_report->shipment_id = $shipment->id;
                                 $reversion_report->city_id = $shipment->consignee_city_id;
-                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->dncc = $delivery_note->id;
                                 $reversion_report->reverted_by = Auth::id();
                                 $reversion_report->save();
                                 //reverted report shipments data entry.
@@ -2624,6 +2624,17 @@ class AdminFinanceController extends Controller
                             $shipment->payment_status_id = 4;
 
                             $shipment->save();
+
+
+                            //reverted report shipments data entry.
+                            $reversion_report = new ReversionDeliveredShipment();
+                            $reversion_report->shipment_id = $shipment->id;
+                            $reversion_report->city_id = $shipment->consignee_city_id;
+                            $reversion_report->dncc = $delivery_note->id;
+                            $reversion_report->reverted_by = Auth::id();
+                            $reversion_report->save();
+                            //reverted report shipments data entry.
+
 
                             if ($shipment->booking_type_id == 3) {
                                 ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
