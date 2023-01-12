@@ -109,8 +109,8 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -1333,8 +1333,8 @@ class ReturnController extends Controller
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
-            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -2274,7 +2274,7 @@ class ReturnController extends Controller
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','bt.booking_type as service_type', 'dns.status as shipment_status'])
             ->where('return_notes.id',$id);
 
@@ -2384,7 +2384,7 @@ class ReturnController extends Controller
             ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->join('users','shipments.user_id','=','users.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
@@ -3768,8 +3768,8 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id','=',

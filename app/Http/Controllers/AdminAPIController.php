@@ -8926,7 +8926,7 @@ class AdminAPIController extends Controller
                 ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
                 ->join('users', 'shipments.user_id', '=', 'users.id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-                ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+                ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
                 ->leftjoin('crm_requests as crm', function ($join) {
                     $join->on('crm.shipment_id', '=', 'shipments.id')

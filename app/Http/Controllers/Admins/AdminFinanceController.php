@@ -889,7 +889,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
@@ -1242,7 +1242,7 @@ class AdminFinanceController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
