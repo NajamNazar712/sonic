@@ -40,9 +40,9 @@ class AdminTerritoryController extends Controller
         $datatable = Datatables::of($territory)
             ->editColumn('status', function ($data) {
                 if ($data->status == 0) {
-                    return 'disable';
+                    return 'Disable';
                 } else {
-                    return 'enable';
+                    return 'Enable';
                 }
             })
             ->filterColumn('status', function($query, $keyword) {
