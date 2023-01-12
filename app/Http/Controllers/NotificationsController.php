@@ -4606,12 +4606,13 @@ class NotificationsController extends Controller
                             $cc[] = $sale_head_email->email;
                         }
 
+
                         $to[] = $shipper->email;
 
                         $city_id = $shipper->city_id;
                         $hub_id = City::find($city_id)->hub_id;
 
-                        $managers = Admin::whereIn('role_id', [31, 44])->where('status', 1)->pluck('id', 'email')->toArray();
+                        $managers = Admin::whereIn('role_id', [31, 39, 44])->where('status', 1)->pluck('id', 'email')->toArray();
                         foreach ($managers as $rms => $index) {
                             $admin_hubs = AdminHub::where('admin_id', $index);
                             if ($admin_hubs->exists()) {
@@ -9502,7 +9503,7 @@ else if ($id == 178) {
                             // $body = $notification->body;
                             $random_id = date("dmy") . $val->id . date("his");
                             $send_by = Auth::id();
-                            $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+                            $timestamp = Carbon::now()->format('Y-m-d H:i:s');
                             $link = url("/survey_form/$random_id");
                             
                             $survey_record = new DisableAccountIntimationSendSurvey();

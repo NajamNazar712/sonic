@@ -836,6 +836,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_rider_deactivate(Request $request)
     {
+
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
@@ -855,7 +856,7 @@ class AdminHumanResourseController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
-        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
+        $employee->last_working_date = Carbon::parse($request->date)->format('Y-m-d');
         $employee->status_id = 2;
         $employee->save();
 
@@ -916,7 +917,7 @@ class AdminHumanResourseController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
-        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
+        $employee->last_working_date = Carbon::parse($request->date)->format('Y-m-d');
         $employee->status_id = 2;
         $employee->save();
 
