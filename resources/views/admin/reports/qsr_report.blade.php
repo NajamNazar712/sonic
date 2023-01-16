@@ -59,6 +59,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
+                                @foreach($hubs as $concerned_hub)
+                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -144,6 +153,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Product Type</th>
@@ -237,6 +247,11 @@
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_concerned_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Concerned Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -334,6 +349,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
                             head.push('Product Type');
@@ -364,6 +380,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
                                 row.push(values.product_type);
@@ -419,6 +436,7 @@
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
                 },
                 rowId: 'shId',
@@ -443,14 +461,14 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'description', name: 'si.description', class: 'align-middle description'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
-                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}
-
+                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
