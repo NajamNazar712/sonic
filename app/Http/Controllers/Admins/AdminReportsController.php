@@ -5608,10 +5608,10 @@ class AdminReportsController extends Controller
     public static function revenue_by_delivery_date_excel_download()
     {
 
-        /*$from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();*/
-        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
+        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+//        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+//        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
 
         //Next
 
