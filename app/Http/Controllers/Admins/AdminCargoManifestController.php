@@ -325,7 +325,7 @@ class AdminCargoManifestController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->leftjoin('user_shipping_infos as rsi', function ($join) {
                 $join->on('shipments.return_address_id', '=', 'rsi.id')
                     ->whereNotNull('shipments.return_address_id')
@@ -2667,7 +2667,7 @@ class AdminCargoManifestController extends Controller
         }
         $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')

@@ -41,7 +41,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
     {
         try {
             if ($this->sms->status < 2) {
-                $this->telenor($this->sms);
+//                $this->telenor($this->sms);
             }
         }
         catch(Exception $exception) {

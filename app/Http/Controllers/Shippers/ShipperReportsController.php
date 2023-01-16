@@ -51,12 +51,12 @@ class ShipperReportsController extends Controller
         }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.shipper_status_id', 2)
@@ -551,7 +551,7 @@ class ShipperReportsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -1106,7 +1106,7 @@ class ShipperReportsController extends Controller
     public function weight_reconciliation_list(Request $request)
     {
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -1176,12 +1176,12 @@ class ShipperReportsController extends Controller
 
     public function mms_index()
     {
-        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230])) {
+        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946])) {
             $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
-            $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+//            $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+//            $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
             return view('client.reports.mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
         } else{
             return redirect()->back()->with('error', 'Not Found!');
@@ -1190,7 +1190,7 @@ class ShipperReportsController extends Controller
     }
     public function mms_list(Request $request)
     {
-        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230])) {
+        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946])) {
             $connection = 'reports';
             $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
             $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
@@ -1205,7 +1205,7 @@ class ShipperReportsController extends Controller
 
             $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-                ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+                ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
                 ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')

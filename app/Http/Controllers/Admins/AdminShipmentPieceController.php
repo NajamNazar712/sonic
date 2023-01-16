@@ -44,8 +44,8 @@ class AdminShipmentPieceController extends Controller
                 return response()->json(['status' => 1, 'error' => 'Shipment doesn\'t have Multiple Pieces!']);
             }
 
-            if($shipment->shipper_status_id != 1){
-                return response()->json(['status' => 1, 'error' => 'Shipment not on Booked status anymore!']);
+            if(!in_array($shipment->shipper_status_id, [1, 53])){
+                return response()->json(['status' => 1, 'error' => 'Shipment not on Booked / Rider Picked status anymore!']);
             }
 
             $details = array();

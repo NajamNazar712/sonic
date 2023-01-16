@@ -896,7 +896,7 @@ class ShipperFinanceController extends Controller
 
         $shipments = ReceivingSheetShipment::join('shipments as s', 'receiving_sheet_shipments.shipment_id', 's.id')
             ->join('receiving_sheets as rs', 'receiving_sheet_shipments.receiving_sheet_id', 'rs.id')
-            ->join('booking_types as bt', 's.booking_type_id', 'bt.id')
+            ->leftJoin('booking_types as bt', 's.booking_type_id', 'bt.id')
             ->join('cities as c', 's.consignee_city_id', 'c.id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')

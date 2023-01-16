@@ -75,7 +75,7 @@ class AdminMasterCargoController extends Controller
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
 //            ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
             ->leftjoin('user_shipping_infos as rsi', function ($join) {
                 $join->on('shipments.return_address_id', '=', 'rsi.id')
@@ -1244,7 +1244,7 @@ class AdminMasterCargoController extends Controller
     public function history_list(Request $request) {
         $bags = Bag::join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'bags.created_by', '=', 'a.id')
             ->leftjoin('cities as jh1', 'bags.junction_hub_1_id', '=', 'jh1.id')
             ->join('bag_statuses as bs', 'bags.status_id', '=', 'bs.id')
@@ -1347,7 +1347,7 @@ class AdminMasterCargoController extends Controller
         }
         $bags = Bag::join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'bags.created_by', '=', 'a.id')
             ->leftjoin('cities as jh1', 'bags.junction_hub_1_id', '=', 'jh1.id')
             ->leftjoin('cities as jh2', 'bags.junction_hub_2_id', '=', 'jh2.id')
@@ -1742,7 +1742,7 @@ class AdminMasterCargoController extends Controller
     public function master_cargo_in_transit_list(Request $request){
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
@@ -3021,7 +3021,7 @@ class AdminMasterCargoController extends Controller
     public function master_cargo_received_list(Request $request){
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
@@ -3147,7 +3147,7 @@ class AdminMasterCargoController extends Controller
     public function master_cargo_history_list(Request $request){
         $receive_cargo = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
@@ -3286,7 +3286,7 @@ class AdminMasterCargoController extends Controller
             ->join('admins as ra', 'ra.id', '=', 'mc.received_by')
             ->join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'bags.created_by', '=', 'a.id')
             ->leftjoin('cities as jh1', 'bags.junction_hub_1_id', '=', 'jh1.id')
             ->leftjoin('cities as jh2', 'bags.junction_hub_2_id', '=', 'jh2.id')

@@ -2393,8 +2393,8 @@ class APIController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -2429,6 +2429,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id);
             })],
             'status' => ['required', 'numeric', Rule::in(1, 2)],
+            'remarks' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2439,6 +2440,13 @@ class APIController extends Controller
         } else {
             //status = 1 -> Return Confirm, Starus = 2 -> Re-attempt requested
             $tracking_number = $request->tracking_number;
+
+            $remarks = 'Marked by shipper - API';
+            if($request->has('remarks')){
+                if($request->remarks != null){
+                    $remarks = $request->remarks;
+                }
+            }
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
             if ($shipment) {
@@ -2462,7 +2470,7 @@ class APIController extends Controller
                         ShipmentChargesController::return ($shipment->id);
 
                         AdminFinanceController::add_payment($shipment->id, 1);
-                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
+                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remarks, $user_id, null);
                         return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
                     } else {
                         return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
@@ -2479,7 +2487,7 @@ class APIController extends Controller
                     $shipment->shipper_status_id = 52;
                     $shipment->consignee_status_id = 52;
                     $shipment->save();
-                    ShipmentsJourneyController::add($shipment->id, 52, 52, null, 'Marked by shipper - API', $user_id, null);
+                    ShipmentsJourneyController::add($shipment->id, 52, 52, null, $remarks, $user_id, null);
                     if ($journey) {
                         NotificationsController::send(33, $shipment->id);
                     }
@@ -5164,7 +5172,7 @@ class APIController extends Controller
     {
         $rules = [
             'consumer_number' => ['required', 'integer'],
-            'transaction_authentication_id' => ['required', 'integer'],
+            'transaction_authentication_id' => ['required'],
             'transaction_amount' => ['required'],
             'transaction_date' => ['required'],
             'transaction_time' => ['required'],

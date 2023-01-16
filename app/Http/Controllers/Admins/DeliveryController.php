@@ -139,8 +139,8 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -1277,8 +1277,13 @@ class DeliveryController extends Controller
                             $dropdown .= $receive_button;
                          }
                     }
-
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+                    $rider_check = true;
+                    if($result->operation_rider_id == 1){
+                        if($result->rider_type_id == 1){
+                            $rider_check = false;
+                        }
+                    }
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions'))) && $rider_check) {
                         if (!$updatedstatusCheck) {
 
                             $dropdown .= $shift_shipment_button;
@@ -1350,7 +1355,14 @@ class DeliveryController extends Controller
             if($delivery_note->status == 4){
                 return redirect()->back()->with('error', 'Delivery note is cancelled!');
             }
-            if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
+            $rider_check = true;
+            $rider = Rider::find($delivery_note->rider_id);
+            if($rider->operation_rider_id == 1){
+                if($rider->rider_type_id == 1){
+                    $rider_check = false;
+                }
+            }
+            if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions'))) && $rider_check) {
                 if (DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0) {
                     $service_type = BookingType::all();
                     return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
@@ -1369,7 +1381,7 @@ class DeliveryController extends Controller
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
             ->where('delivery_notes.id', $id);
 
@@ -1923,7 +1935,7 @@ class DeliveryController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('users', 'shipments.user_id', '=', 'users.id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
@@ -3165,7 +3177,7 @@ class DeliveryController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('users', 'shipments.user_id', '=', 'users.id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -6040,8 +6052,8 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
 //            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
             ->leftJoin('shipments_journey', function ($join) {
@@ -7429,6 +7441,7 @@ class DeliveryController extends Controller
 
                     ShipmentChargesController::cash_handling($shipment_id);
                     ShipmentChargesController::weight($shipment_id);
+                    ShipmentChargesController::fuel_surcharge($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
@@ -9224,7 +9237,7 @@ class DeliveryController extends Controller
         $deliveries = RiderDeliveryNoteRequest::join('rider_delivery_note_request_shipments as dns', 'dns.request_note_id', '=', 'rider_delivery_note_requests.id')
             ->join('shipments', 'shipments.id', '=', 'dns.shipment_id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->select(['rider_delivery_note_requests.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address as address', 'shipments.amount as amount', 'bt.booking_type as service_type', 'shipments.payment_mode_id as payment_mode_id'])
             ->where('rider_delivery_note_requests.id', $id)
             ->whereIn('dns.status', [0, 4]);
