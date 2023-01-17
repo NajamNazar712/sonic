@@ -128,7 +128,14 @@ class AdminReportsController extends Controller
             })
             //->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt')]);
+            ->leftJoin('cargo_manifest_bag_shipments as cmbs', function ($join) {
+                $join->on('cmbs.shipment_id', '=', 'shipments.id')
+                    ->where('cmbs.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from cargo_manifest_bag_shipments where cargo_manifest_bag_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cmbs.cargo_manifest_bag_id')
+            ->leftjoin('cities as cmbh', 'cmbh.id', '=', 'cmb.current_hub_id')
+            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id']);
 
         $type = $request->get('search_types');
 
@@ -153,6 +160,10 @@ class AdminReportsController extends Controller
                 $shipments = $shipments->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
+
+        if ($search_concerned_hub = $request->get('search_concerned_hub')) {
+            $shipments = $shipments->where('cmb.current_hub_id', $search_concerned_hub);
+        }
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -172,6 +183,18 @@ class AdminReportsController extends Controller
                     return $shipment->shipper . ' (' . $shipment->poc . ')';
                 } else {
                     return $shipment->shipper;
+                }
+            })
+            ->editColumn('current_hub', function ($shipment) {
+                if ($shipment->current_hub_id != null) {
+                    return $shipment->current_hub_name;
+                } else {
+                    if(in_array($shipment->shipper_status_id, [1, 2, 61])){
+                        return $shipment->origin;
+                    }
+                    else{
+                        return $shipment->hub;
+                    }
                 }
             })
             ->filterColumn('u.name', function ($query, $keyword) {

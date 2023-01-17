@@ -3054,6 +3054,7 @@ class AdminCargoManifestController extends Controller
             $bag->status_id = $status_id;
             $bag->received_at = Carbon::now();
             $bag->receiver_id = Auth::id();
+            $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
             ManifestBag::where('cargo_manifest_bag_id', $bag->id)->update(['status' => 1]);
