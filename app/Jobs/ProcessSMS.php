@@ -369,10 +369,10 @@ class ProcessSMS implements ShouldQueue
 
             $response = $client->post('', [
                 'form_params' => [
-                    'loginId' => '923182020101',
+                    'loginId' => '923163639562',
                     'loginPassword' => 'Zong@123',
                     'Destination' => $this->phone_number($sms->to),
-                    'Mask' => 'SWAG KICKS',
+                    'Mask' => 'TRAX PK',
                     'Message' => $sms->body,
                     'UniCode' => '0',
                     'ShortCodePrefered' => 'n'
