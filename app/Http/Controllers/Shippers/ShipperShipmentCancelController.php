@@ -37,8 +37,8 @@ class ShipperShipmentCancelController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' , 'dc.hub_id', '=' , 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));

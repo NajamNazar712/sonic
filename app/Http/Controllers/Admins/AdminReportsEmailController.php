@@ -1112,7 +1112,7 @@ class AdminReportsEmailController extends Controller
             ->join('riders as rider', 'delivery_note.rider_id', '=', 'rider.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('shipment_payment_status as sps', 's.payment_status_id', '=' , 'sps.id')
             ->leftjoin('shipments_journey as sj', function($join) {
@@ -1667,7 +1667,7 @@ class AdminReportsEmailController extends Controller
         $serial = 0;
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
@@ -1678,7 +1678,7 @@ class AdminReportsEmailController extends Controller
                     ->on('dc.id', '=', 'zcc.city_id')
                     ->on('zone_classification_id', '=', DB::connection('reports')->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftjoin('delivery_note_shipments as ds',function($join){
                 $join->on('ds.shipment_id','=','shipments.id')
@@ -2026,8 +2026,8 @@ class AdminReportsEmailController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -2217,8 +2217,8 @@ class AdminReportsEmailController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')

@@ -325,7 +325,7 @@ class AdminCargoManifestController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->leftjoin('user_shipping_infos as rsi', function ($join) {
                 $join->on('shipments.return_address_id', '=', 'rsi.id')
                     ->whereNotNull('shipments.return_address_id')
@@ -2454,17 +2454,26 @@ class AdminCargoManifestController extends Controller
                         }
 
                         if ($misroute == 1) {
+                            $short_received_count = 0;
+                            $received_count = 0;
                             $bag->status_id = 5;
                             $bag->junction_mapping_id = null;
-                            $bag->short_received_shipments = $bag->shipment->count();
-                            $bag->received_shipments = 0;
                             foreach ($bag->shipment as $shipment) {
-                                ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
                                 $shipment_table = Shipment::find($shipment->shipment_id);
-                                $shipment_table->shipper_status_id = 11;
-                                $shipment_table->consignee_status_id = 11;
-                                $shipment_table->update();
+                                if(in_array($shipment_table->shipper_status_id, [3,21,26,32,49])){
+                                    ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
+                                    $shipment_table->shipper_status_id = 11;
+                                    $shipment_table->consignee_status_id = 11;
+                                    $shipment_table->update();
+                                    $short_received_count++;
+                                }
+                                else{
+                                    $received_count++;
+                                }
                             }
+
+                            $bag->short_received_shipments = $short_received_count;
+                            $bag->received_shipments = $received_count;
                         }
                         $bag->current_hub_id = Auth::user()->default_hub_id;
                         $bag->updated_by = Auth::id();
@@ -2658,7 +2667,7 @@ class AdminCargoManifestController extends Controller
         }
         $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
@@ -3045,6 +3054,7 @@ class AdminCargoManifestController extends Controller
             $bag->status_id = $status_id;
             $bag->received_at = Carbon::now();
             $bag->receiver_id = Auth::id();
+            $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
             ManifestBag::where('cargo_manifest_bag_id', $bag->id)->update(['status' => 1]);

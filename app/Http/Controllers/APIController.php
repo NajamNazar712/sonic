@@ -25,7 +25,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OneLink\OneLink;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
@@ -41,6 +41,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\GulAhmedCities;
 use App\Http\Models\GulAhmedPickupAddress;
@@ -1199,7 +1200,8 @@ class APIController extends Controller
                 ->pluck('keyword')
                 ->toArray();
             $bdmk_error = "";
-            $bdmk_result = array();
+
+            $consignee_city = City::find($consignee_city_id);
 
             $bdmk_result = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk,$consignee_city->name);
             if (isset($bdmk_result['invalid_cities'])) {
@@ -2360,6 +2362,9 @@ class APIController extends Controller
                     $details['order_information']['items'][] = $item_details;
                 }
 
+                $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                $details['order_information']['amount'] = $shipment->amount;
+
                 foreach ($shipment->shipment_journey as $journey) {
                     if ($journey->verification) {
                         $journey_details = array();
@@ -2388,8 +2393,8 @@ class APIController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
@@ -2424,6 +2429,7 @@ class APIController extends Controller
                 $query->where('user_id', $user_id);
             })],
             'status' => ['required', 'numeric', Rule::in(1, 2)],
+            'remarks' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -2434,6 +2440,13 @@ class APIController extends Controller
         } else {
             //status = 1 -> Return Confirm, Starus = 2 -> Re-attempt requested
             $tracking_number = $request->tracking_number;
+
+            $remarks = 'Marked by shipper - API';
+            if($request->has('remarks')){
+                if($request->remarks != null){
+                    $remarks = $request->remarks;
+                }
+            }
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
             if ($shipment) {
@@ -2457,7 +2470,7 @@ class APIController extends Controller
                         ShipmentChargesController::return ($shipment->id);
 
                         AdminFinanceController::add_payment($shipment->id, 1);
-                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
+                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remarks, $user_id, null);
                         return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
                     } else {
                         return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
@@ -2474,7 +2487,7 @@ class APIController extends Controller
                     $shipment->shipper_status_id = 52;
                     $shipment->consignee_status_id = 52;
                     $shipment->save();
-                    ShipmentsJourneyController::add($shipment->id, 52, 52, null, 'Marked by shipper - API', $user_id, null);
+                    ShipmentsJourneyController::add($shipment->id, 52, 52, null, $remarks, $user_id, null);
                     if ($journey) {
                         NotificationsController::send(33, $shipment->id);
                     }
@@ -3258,6 +3271,9 @@ class APIController extends Controller
                     $account_type_id = $invoice->shipper->account_type_id;
                     $data['billing_method'] = 'Corporate Invoicing Account';
                     $data['invoice_date'] = Carbon::parse($invoice->invoicing_date)->toDateTimeString();
+                    $data['total_charges'] = $invoice->total_charges;
+                    $data['total_gst'] = $invoice->total_gst;
+                    $data['total_invoice_amount'] = $invoice->total_invoice_amount;
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
@@ -3285,6 +3301,8 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+                            $details[$shipment->tracking_number]['amount'] = $shipment->amount;
+                            $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
                             $data['shipments'][] = $details;
 
                         }
@@ -3299,9 +3317,13 @@ class APIController extends Controller
                 $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
                 if ($done_payment->exists()) {
                     $done_payment = $done_payment->first();
+                    $done_payment_calculation = DonePaymentCalculation::where('done_payment_id', $done_payment->id)->first();
                     $account_type_id = $done_payment->shipper->account_type_id;
                     $data['billing_method'] = $done_payment->shipper->account_type->name;
                     $data['invoice_date'] = Carbon::parse($done_payment->created_at)->toDateTimeString();
+                    $data['total_charges'] = $done_payment_calculation->charges;
+                    $data['total_gst'] = $done_payment_calculation->gst;
+                    $data['total_invoice_amount'] = $done_payment_calculation->payable;
                     $data['shipments'] = array();
                     $done_payment_shipments = $done_payment->done_payment_shipments;
 
@@ -3329,6 +3351,8 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
                             $details[$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
                             $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+                            $details[$shipment->tracking_number]['amount'] = $shipment->amount;
+                            $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
                             $data['shipments'][] = $details;
 
                         }
@@ -5111,22 +5135,28 @@ class APIController extends Controller
                 $delivery_note = DeliveryNote::where('id', $delivery_note_id);
                 if($delivery_note->exists()){
                     $delivery_note = $delivery_note->first();
-                    $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note->id);
-                    $transactions_amount = 0;
-                    if($hbl_konnect_transaction_delivery_note->exists()){
-                        $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
-                        $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    if($delivery_note->created_at >= $min_date){
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note->id);
+                        $transactions_amount = 0;
+                        if($hbl_konnect_transaction_delivery_note->exists()){
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                            $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                        }
+                        $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
+                        $rider_id = $delivery_note->rider_id;
+                        $rider = Rider::where('id',$rider_id);
+                        if($rider->exists())
+                        {
+                            $rider = $rider->first();
+                            $rider_name = $rider->name;
+                            $rider_trax_id = $rider->trax_id;
+                        }
+                        return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'rider_name' => $rider_name, 'rider_trax_id' =>$rider_trax_id]);
                     }
-                    $net_amount = $delivery_note->received_cod_amount - $transactions_amount;
-                    $rider_id = $delivery_note->rider_id;
-                    $rider = Rider::where('id',$rider_id);
-                    if($rider->exists())
-                    {
-                        $rider = $rider->first();
-                        $rider_name = $rider->name;
-                        $rider_trax_id = $rider->trax_id;
+                    else{
+                        return response()->json(['status' => 0, 'message' => 'Delivery Note restricted!']);
                     }
-                    return response()->json(['status' => 1, 'delivery_note_id' =>  str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'rider_name' => $rider_name, 'rider_trax_id' =>$rider_trax_id]);
                 }
                 else{
                     return response()->json(['status' => 0, 'message' => 'Delivery Note Not Found!']);
@@ -5137,6 +5167,71 @@ class APIController extends Controller
             return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
+
+    public function out_for_delivery_shipment_payment(Request $request)
+    {
+        $rules = [
+            'consumer_number' => ['required', 'integer'],
+            'transaction_authentication_id' => ['required'],
+            'transaction_amount' => ['required'],
+            'transaction_date' => ['required'],
+            'transaction_time' => ['required'],
+            'bank_mnemonic' => ['required'],
+            'reserved' => ['nullable'],
+            'consumer_prefix' => ['required'],
+            'tracking_number' => ['required'],
+            'shipment_id' => ['required', Rule::exists('shipments', 'id')],
+            'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')]
+        ];
+
+        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $consumer_number = $request->consumer_number;
+            $transaction_authentication_id = $request->transaction_authentication_id;
+            $transaction_amount = $request->transaction_amount;
+            $transaction_date = $request->transaction_date;
+            $transaction_time = $request->transaction_time;
+            $bank_mnemonic = $request->bank_mnemonic;
+            $reserved = $request->reserved;
+            $consumer_prefix = $request->consumer_prefix;
+            $tracking_number = $request->tracking_number;
+            $shipment_id = $request->shipment_id;
+            $delivery_note_id = $request->delivery_note_id;
+
+            $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
+            $one_link_payment_transaction->consumer_number = $consumer_number;
+            $one_link_payment_transaction->transaction_authentication_id = $transaction_authentication_id;
+            $one_link_payment_transaction->transaction_amount = $transaction_amount;
+            $one_link_payment_transaction->transaction_date = $transaction_date;
+            $one_link_payment_transaction->transaction_time = $transaction_time;
+            $one_link_payment_transaction->bank_mnemonic = $bank_mnemonic;
+            $one_link_payment_transaction->reserved = $reserved;
+            $one_link_payment_transaction->consumer_prefix = $consumer_prefix;
+            $one_link_payment_transaction->tracking_number = $tracking_number;
+            $one_link_payment_transaction->shipment_id = $shipment_id;
+            $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
+            $one_link_payment_transaction->save();
+
+            $delivery_note = DeliveryNote::find($delivery_note_id);
+            $update_count = $delivery_note->one_link_payment_count + 1;
+            $delivery_note->one_link_payment_count = $update_count;
+            $delivery_note->save();
+            $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
+            $shipment = Shipment::find($shipment_id);
+            $shipment->received_amount = $amount;
+            $shipment->save();
+
+            NotificationsController::app_notification(19, $delivery_note->rider_id, 2,$delivery_note->rider_id, $one_link_payment_transaction->id);
+            NotificationsController::send(185, $delivery_note->rider_id, $one_link_payment_transaction->id);
+
+            return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
+        }
+    }
+
 
     public function onelink_payment_billinquiry(Request $request)
     {
@@ -5218,7 +5313,7 @@ class APIController extends Controller
                                     if($shipment_data->amount == $shipment_data->received_amount)
                                     {
                                         // Bill paid status
-                                        $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no',$tracking_no)->first();
                                         
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5387,8 +5482,7 @@ class APIController extends Controller
 
                         if($shipment_data)
                         {
-                            // $transaction_data = OneLinkPaymentTransaction::with('shipment_data')->where('tracking_no',$tracking_no)->first();
-                            $transaction_data = OneLinkPaymentTransaction::where('tracking_no',$tracking_no)->first();
+                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_no',$tracking_no)->first();
                             
                             if($transaction_data)
                             {
@@ -5434,7 +5528,8 @@ class APIController extends Controller
                                     $request_data['tran_time_formated'] = $tran_time_formated;
                                     $request_data['delivery_note_id'] = $delivery_note;
                                     
-                                    $upload_transaction = OneLinkPaymentTransaction::create($request_data);
+                                    $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
+                                    dd($upload_transaction->id);
 
                                     if($upload_transaction)
                                     {

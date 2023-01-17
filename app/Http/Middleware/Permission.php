@@ -1188,6 +1188,16 @@ class Permission
             'shipment_otp.index' => 815,
             'shipment_otp.list' => 815,
 
+            'delivery.rider_request.index' => 35,
+            'delivery.rider_request.list' => 35,
+            'delivery.rider_request.approve' => 816,
+            'delivery.rider_request.reject' => 817,
+            'delivery.rider_request.update' => 818,
+            'delivery.rider_request.update.list' => 818,
+            'delivery.rider_request.update.remove' => 818,
+            'delivery.rider_request.update.remove.bulk' => 818,
+            'delivery.rider_request.add.shipments' => 818,
+
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
             
@@ -1293,6 +1303,10 @@ class Permission
 
             'settings.non_cod_otp_shippers.index' => 820,
             'settings.non_cod_otp_shippers.store' => 820,
+
+            'admin.tracking.shipment_position.track' => 822,
+            'admin.tracking.shipment_position.upload' => 822,
+            'admin.tracking.shipment_position.list' => 822,
 
         ],
 

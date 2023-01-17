@@ -119,6 +119,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\LeaveCountUpdate',
 		'App\Console\Commands\EmployeeConfirmationDays',
         'App\Console\Commands\MonthAverageDestinationReportEmail',
+        'App\Console\Commands\ReversionDeliveredShipments',
         ];
 
     /**
@@ -142,6 +143,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
+        $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -331,8 +333,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(2, '01:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(26, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
 

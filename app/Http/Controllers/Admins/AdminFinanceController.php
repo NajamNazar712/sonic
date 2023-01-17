@@ -6,12 +6,16 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\Http\Models\Admin\CorporateUserPackagingInvoice;
+use App\Http\Models\Admin\InvoiceAdjustment;
+use App\Http\Models\Admin\InvoiceAdjustmentReasons;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Admin\ReversionDeliveredShipment;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
@@ -885,7 +889,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
@@ -1238,7 +1242,7 @@ class AdminFinanceController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
@@ -1476,6 +1480,7 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
+
             $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
@@ -1492,6 +1497,15 @@ class AdminFinanceController extends Controller
             $delivery_note->received_cod_amount = $delivery_note_amount;
 
             $delivery_note->save();
+
+            //reverted report shipments data entry.
+            $reversion_report = new ReversionDeliveredShipment();
+            $reversion_report->shipment_id = $shipment->id;
+            $reversion_report->city_id = $shipment->consignee_city_id;
+            $reversion_report->dncc = $delivery_note->id;
+            $reversion_report->reverted_by = Auth::id();
+            $reversion_report->save();
+            //reverted report shipments data entry.
 
             $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
 
@@ -1599,6 +1613,7 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
+
                 $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
                 if ($lost_shipment_shipper->exists()) {
                     $lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
@@ -1651,6 +1666,16 @@ class AdminFinanceController extends Controller
                                     $shipment->payment_status_id = 4;
 
                                     $shipment->save();
+
+
+                                    //reverted report shipments data entry.
+                                    $reversion_report = new ReversionDeliveredShipment();
+                                    $reversion_report->shipment_id = $shipment->id;
+                                    $reversion_report->city_id = $shipment->consignee_city_id;
+                                    $reversion_report->dncc = $delivery_note_id;
+                                    $reversion_report->reverted_by = Auth::id();
+                                    $reversion_report->save();
+                                    //reverted report shipments data entry.
 
                                     if ($shipment->booking_type_id == 3) {
                                         ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -1795,6 +1820,15 @@ class AdminFinanceController extends Controller
                                     $shipment->payment_status_id = 4;
 
                                     $shipment->save();
+
+                                    //reverted report shipments data entry.
+                                    $reversion_report = new ReversionDeliveredShipment();
+                                    $reversion_report->shipment_id = $shipment->id;
+                                    $reversion_report->city_id = $shipment->consignee_city_id;
+                                    $reversion_report->dncc = $delivery_note_id;
+                                    $reversion_report->reverted_by = Auth::id();
+                                    $reversion_report->save();
+                                    //reverted report shipments data entry.
 
                                     if ($shipment->booking_type_id == 3) {
                                         ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -1942,6 +1976,15 @@ class AdminFinanceController extends Controller
 
                                 $shipment->save();
 
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
+
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                                 }
@@ -2085,6 +2128,15 @@ class AdminFinanceController extends Controller
                                 $shipment->payment_status_id = 4;
 
                                 $shipment->save();
+
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
 
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -2253,6 +2305,15 @@ class AdminFinanceController extends Controller
 
                                 $shipment->save();
 
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note->id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
+
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                                 }
@@ -2401,6 +2462,15 @@ class AdminFinanceController extends Controller
                                 $shipment->payment_status_id = 4;
 
                                 $shipment->save();
+
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note->id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
 
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -2554,6 +2624,17 @@ class AdminFinanceController extends Controller
                             $shipment->payment_status_id = 4;
 
                             $shipment->save();
+
+
+                            //reverted report shipments data entry.
+                            $reversion_report = new ReversionDeliveredShipment();
+                            $reversion_report->shipment_id = $shipment->id;
+                            $reversion_report->city_id = $shipment->consignee_city_id;
+                            $reversion_report->dncc = $delivery_note->id;
+                            $reversion_report->reverted_by = Auth::id();
+                            $reversion_report->save();
+                            //reverted report shipments data entry.
+
 
                             if ($shipment->booking_type_id == 3) {
                                 ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -4797,7 +4878,12 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id', '=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id');
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -4881,7 +4967,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable'];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
@@ -4901,6 +4987,7 @@ class AdminFinanceController extends Controller
             $now = Carbon::now()->startOfDay();
             $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
             $aging = $created_at->diffInDays($now) . 'd';
+            $arrival_date = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->first();
 
             $row = array();
 
@@ -4917,6 +5004,7 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->gst;
             $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
             $row[] = $pending_payment_shipment->payable;
+            $row[] = ($arrival_date) ? $arrival_date->created_at : '';
 
             $serial_number++;
 
@@ -6374,8 +6462,14 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                        $weight_charges = $change_shipment_weight_log->old_charges;
+                    }
                 }
             }
 
@@ -6691,8 +6785,14 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                        $weight_charges = $change_shipment_weight_log->old_charges;
+                    }
                 }
             }
 
@@ -10557,8 +10657,8 @@ class AdminFinanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 34);
         $company_banks = BanksList::where('affiliate', 1)->get();
         $invoice_statuses = InvoiceStatus::get();
-
-        return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
+        $adjustment_reasons = InvoiceAdjustmentReasons::all();
+        return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses,'adjustment_reasons' => $adjustment_reasons]);
     }
 
     public function reimbursement_invoices_index()
@@ -10588,7 +10688,7 @@ class AdminFinanceController extends Controller
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
-            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id')
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id','invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount')
             ->where('ubi.default_bank', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -10597,7 +10697,7 @@ class AdminFinanceController extends Controller
 
         $reim_invoice = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->select('invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'))
+            ->select('invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'))
             ->where('invoice_for_reimbursements.to_show', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -10612,6 +10712,14 @@ class AdminFinanceController extends Controller
                     return 'Corporate Account';
                 } else {
                     return 'Reimbursement Account';
+                }
+            })
+            ->addColumn('balance_amount', function ($invoice) {
+                if ($invoice->account_type == 2 && $invoice->is_id != 3) {
+                    return $invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount);
+                }
+                else{
+                    return '-';
                 }
             })
             ->editColumn('invoice_type', function ($invoice) {
@@ -10685,7 +10793,18 @@ class AdminFinanceController extends Controller
                 if ($invoice->account_type == 2) {
                     $invoice_slip_count = InvoiceUploadSlip::where('invoice_id', $invoice->id)->count();
                     if ($invoice_slip_count > 0) {
-                        return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                        return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">'.$invoice_slip_count .'</span></a>';
+                    }
+                    return "-";
+                } else {
+                    return "-";
+                }
+            })
+            ->addColumn('invoice_adjustment', function ($invoice) {
+                if ($invoice->account_type == 2) {
+                    $invoice_adjustment_count = InvoiceAdjustment::where('invoice_id', $invoice->id)->count();
+                    if ($invoice_adjustment_count > 0) {
+                        return '<a class="btn btn-sm btn-outline-info align-middle adjustment_view" href="#"><span class="align-middle">'.  $invoice_adjustment_count .'</span></a>';
                     }
                     return "-";
                 } else {
@@ -10720,11 +10839,13 @@ class AdminFinanceController extends Controller
             ->filterColumn('payment_type', function ($query, $keyword) {
 
                 $keyword = strtolower($keyword);
-                if ($keyword == 'done') {
+                if($keyword == 'done'){
                     $query->where('invoices.payment_type', 1);
-                } else if ($keyword == 'make') {
+                }
+                else if($keyword == 'make'){
                     $query->where('invoices.payment_type', 0);
-                } else {
+                }
+                else {
                     $query->whereRaw('false');
                 }
             })
@@ -10737,6 +10858,7 @@ class AdminFinanceController extends Controller
 
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $invoice->id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
                 $detailed_print_button = '<button type="button" class="dropdown-item detail_print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Detailed Print</div></button>';
+                $add_adjustment = '<button type="button" class="dropdown-item add_adjustment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Adjustment</div></button>';
 
                 $dropdown = '
               <div class="btn-group">
@@ -10750,6 +10872,10 @@ class AdminFinanceController extends Controller
                     $dropdown .= $email_reminder_button;
                 }
 
+                if ((session('role_id') == 1 || in_array(821, session('permissions'))) && $invoice->status_id != 3 && $invoice->account_type == 2 && ($invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount)) > 0) {
+                    $dropdown .= $add_adjustment;
+                }
+
 //                if ((session('role_id') == 1 || in_array(122, session('permissions'))) && $invoice->status_id != 3) {
 //                    $dropdown .= $mark_as_received_button;
 //                }
@@ -10758,7 +10884,7 @@ class AdminFinanceController extends Controller
                 $dropdown .= $gst_wise_print_button;
                 $dropdown .= $detailed_print_button;
 
-                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->account_type == 2) {
+                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->account_type == 2 && $invoice->status_id != 3 &&  ($invoice->total_invoice_amount - ($invoice->adjusted_amount + $invoice->deposited_amount)) > 0) {
                     $dropdown .= $upload_deposit_slip_button;
                 }
                 $dropdown .= '
@@ -10782,10 +10908,10 @@ class AdminFinanceController extends Controller
             $datatables->whereBetween('invoices.created_at', [$from, $to]);
 
         }
-
-
+        
         return $datatables->make(true);
     }
+
 
     public function reimbursement_invoices_list(Request $request)
     {
@@ -10855,10 +10981,18 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_slip(Request $request)
-    {
+    {   //dd($request->all());
         $request->validate([
             'deposit_slip.*' => 'mimes:jpg,jpeg,png',
         ]);
+
+        $invoice = Invoice::find($request->invoice_id);
+        $check_amount = $invoice->deposited_amount + $request->total_amount + $invoice->adjusted_amount;
+        if($check_amount > $invoice->total_invoice_amount){
+            return redirect()->back()->with('error','The amount you entered is exceeding the balance amount');
+        }
+
+        $deposited_amount = 0;
 
         $files = $request->file('deposit_slip');
         foreach ($request->date as $row => $date) {
@@ -10866,6 +11000,7 @@ class AdminFinanceController extends Controller
             $deposit_details->invoice_id = $request->invoice_id;
             $deposit_details->deposit_date = $request->date[$row];
             $deposit_details->bank_id = $request->bank[$row];
+            $deposit_details->amount = $request->amount[$row];
             $image = $files[$row];
             $extension = 'png';
             $random = rand(1000, 100000);
@@ -10873,9 +11008,19 @@ class AdminFinanceController extends Controller
             $time = $now->year . '_' . $now->month;
             $slip = $time . $random . Auth::id() . '.' . $extension;
             $image->move(public_path('uploads/invoices'), $slip);
-
+            $deposit_details->added_by = Auth::id();
             $deposit_details->image = $slip;
             $deposit_details->save();
+
+            $deposited_amount += $request->amount[$row];
+        }
+
+        if($deposited_amount > 0){
+            $invoice->deposited_amount += $deposited_amount;
+            if ($deposited_amount != $invoice->total_invoice_amount) {
+                $invoice->status_id = 4;
+            }
+            $invoice->save();
         }
 
         return redirect()->back()->with(['success' => 'Deposit Slips uploaded successfully!']);
@@ -10892,6 +11037,7 @@ class AdminFinanceController extends Controller
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
+                    $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $img_url = 'uploads/invoices/' . $slip->image;
                     if (file_exists($img_url)) {
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/invoices/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -10909,6 +11055,7 @@ class AdminFinanceController extends Controller
 
         }
     }
+
 
     public function received_invoices_list(Request $request)
     {
@@ -11460,8 +11607,14 @@ class AdminFinanceController extends Controller
                         $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                         if ($change_shipment_weight_log->exists()) {
                             $change_shipment_weight_log = $change_shipment_weight_log->first();
-                            $shipment_weight = $change_shipment_weight_log->old_weight;
-                            $weight_charges = $change_shipment_weight_log->old_charges;
+
+                            $invoice_shipment_date = Carbon::parse($invoice_shipment->created_at);
+                            $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                            if ($change_shipment_weight_log_date->gt($invoice_shipment_date)) {
+                                $shipment_weight = $change_shipment_weight_log->old_weight;
+                                $weight_charges = $change_shipment_weight_log->old_charges;
+                            }
                         }
                     }
 
@@ -13608,7 +13761,13 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                    }
                 }
             }
 
@@ -13801,7 +13960,13 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                    }
                 }
             }
 
@@ -15420,6 +15585,169 @@ class AdminFinanceController extends Controller
                     }
                 }
             }
+        }
+    }
+
+    public function invoice_add_adjustment(Request $request){
+
+        $invoice = Invoice::find($request->invoice_id);
+
+        if($invoice){
+            $check_amount = $invoice->deposited_amount + $invoice->adjusted_amount + $request->adjustment_amount;
+            if($check_amount > $invoice->total_invoice_amount){
+                return redirect()->back()->with('error','The amount you entered is exceeding the balance amount');
+            }
+
+            $adjustment = new InvoiceAdjustment();
+            $adjustment->invoice_id = $request->invoice_id;
+            $adjustment->amount = $request->adjustment_amount;
+            $adjustment->reason_id = $request->adjustment_reason;
+            $adjustment->remarks = $request->adjustment_remarks;
+            $adjustment->added_by = Auth::id();
+            $adjustment->save();
+
+            $total_adjustment = InvoiceAdjustment::where('invoice_id',$request->invoice_id)->sum('amount');
+
+            $invoice->adjusted_amount = $total_adjustment;
+            if($invoice->total_invoice_amount != ($invoice->adjusted_amount + $invoice->deposited_amount)){
+                $invoice->status_id = 4;
+            }
+            $invoice->save();
+
+            return redirect()->back()->with('success','Adjustment Added');
+        }
+        else{
+            return redirect()->back()->with('error','Invalid Invoice');
+        }
+
+    }
+
+    public function invoice_adjustment_view(Request $request){
+        $invoice_id = $request->invoice_id;
+        if ($invoice_id) {
+            $adjustments = InvoiceAdjustment::where('invoice_id', $invoice_id)->get();
+            if (count($adjustments) > 0) {
+                $sorted_array = array();
+                $now = Carbon::now();
+                foreach ($adjustments as $adjustment) {
+                    $sorted_array[$adjustment->id]['adjusted_date'] = Carbon::parse($adjustment->created_at)->toDateString();
+                    $sorted_array[$adjustment->id]['amount'] = $adjustment->amount;
+                    $sorted_array[$adjustment->id]['reason'] = $adjustment->reasons->name;
+                    $sorted_array[$adjustment->id]['remarks'] = $adjustment->remarks;
+                    $sorted_array[$adjustment->id]['added_by'] = Admin::find($adjustment->added_by)->name;
+                }
+
+                return ['status' => 0, 'adjustments' => $sorted_array];
+            } else {
+                return ['status' => 1, 'error' => 'No invoice slips found!'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'No Invoice Selected!'];
+
+        }
+    }
+
+    public function add_bulk_shipment_adjustment_store(Request $request)
+    {
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'payable' => 'Payable',
+            'adjustment_type_id' => 'Adjustment Type Id',
+            'remarks' => 'Remarks',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'payable' => ['required', 'integer','not_in:0','min:-500000','max:500000'],
+            'adjustment_type_id' => ['required', 'integer', Rule::exists('adjustment_types', 'id')->where(function($query) {
+                $query->whereIn('id', [6, 7, 8, 9, 10, 11, 15, 16]);
+                })],
+            'remarks' => ['required'],
+        ];
+
+        $fields = [0 => 'tracking_number', 1 => 'payable', 2 => 'adjustment_type_id', 3 => 'remarks'];
+
+        if ($file = $request->file('shipments')) {
+
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Payable', 'Adjustment Type Id','Remarks'];
+        }
+
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+            }
+            if (isset($errors)) {
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+                return redirect()->back()->withErrors($errors);
+            } else {
+                foreach ($rows as $key => $row) {
+
+                    $tracking_number = (int)$row['tracking_number'];
+                    $shipment = Shipment::where('tracking_number',$tracking_number)->first();
+                    $payable = str_replace(',', '', $row['payable']);
+                    $remarks = $row['remarks'];
+                    $adjustment_type_id = (int)$row['adjustment_type_id'];
+                    $this->add_adjustment($shipment->id, $payable, $remarks, $adjustment_type_id);
+
+                    }
+                }
+                return redirect()->back()->with(['success' => count($rows) . ' Adjustment Added']);
+            }
+
+         else {
+            return redirect()->back()->with('error', 'Invalid Tracking Numbers');
         }
     }
 }

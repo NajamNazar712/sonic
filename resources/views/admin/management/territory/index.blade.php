@@ -22,11 +22,11 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -182,11 +182,11 @@
                             head.push('S.No');
                             head.push('Name');
                             head.push('City');
-                            head.push('status');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Updated By');
                             head.push('Updated At');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                             row = [];
@@ -194,12 +194,12 @@
                             row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.city);
-                                row.push(values.status);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
-                            body.push(row);
+                                row.push(values.status);
+                                body.push(row);
                             });
                         },
                         async: false
@@ -240,16 +240,16 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.territory.list') }}',
                 rowId: 'id',
-                order: [[5, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {orderable: false,data: 'action', name: 'action', class: 'align-middle action',},
                 ],
                 rowCallback: function(row, data, index) {

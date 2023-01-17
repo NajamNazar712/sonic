@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\HR\Employee;
 use Closure;
 
@@ -32,7 +33,8 @@ class AdminAPIToken
                     {
 
                         $employee = $employee->first();
-                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id]);
+                        $admin_hubs = AdminHub::where('admin_id', $admin->id)->pluck('hub_id')->toArray();
+                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id, 'admin_hubs' => $admin_hubs]);
                         return $next($request);
                     } else{
                         return response()->json([

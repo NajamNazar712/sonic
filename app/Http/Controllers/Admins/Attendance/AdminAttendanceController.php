@@ -79,7 +79,7 @@ class AdminAttendanceController extends Controller
     public function admin_attendance_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
-        if(in_array(session('role_id'), [1, 63, 70])){
+        if(in_array(session('role_id'), [1, 63, 70,104])){
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
@@ -118,7 +118,7 @@ class AdminAttendanceController extends Controller
     public function admin_attendance_horizontal_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),453);
 
-        if(in_array(session('role_id'), [1, 63, 70])){
+        if(in_array(session('role_id'), [1, 63, 70,104])){
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', 1)->select('e.id','e.name')->get();
             $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
@@ -161,7 +161,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('rider_types as rt', 'rt.id', 'a.rider_type_id')
             ->select('a.name as name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation','rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'a.cnic as cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as shift', 'a.status_id as status_id','es.name as status_name','c.hub_id');
 
-        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
+        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70 && session('role_id') != 104) {
             if(session('department_id') != 6){
                 $attendances->where('employee_attendances.employee_type', 1)
                     ->where('ad.id', session('department_id'));
@@ -359,7 +359,7 @@ class AdminAttendanceController extends Controller
             ->select('employee_attendances.employee_id','a.name as name', 'a.trax_id as trax_id','ed.name as designation_name', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type','c.hub_id');
 
 
-        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
+        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70 && session('role_id') != 104){
             if(session('department_id') != 6){
                 $attendances->where('employee_attendances.employee_type', 1)
                     ->where('ad.id', session('department_id'));

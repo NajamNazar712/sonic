@@ -1450,6 +1450,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@replacement_to_regular_logs_list')->name('list');
             });
         });
+
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('','Admins\DeliveryController@rider_request_note_index')->name('index');
+            Route::get('list','Admins\DeliveryController@rider_request_note_list')->name('list');
+            Route::post('shipments','Admins\DeliveryController@request_note_shipments')->name('shipments');
+            Route::get('{id}/approve','Admins\DeliveryController@request_note_approve')->name('approve');
+            Route::get('{id}/reject','Admins\DeliveryController@request_note_reject')->name('reject');
+            Route::get('{id}/update','Admins\DeliveryController@request_note_update')->name('update');
+            Route::get('{id}/update/list','Admins\DeliveryController@request_note_update_list')->name('update.list');
+            Route::post('update/remove','Admins\DeliveryController@request_note_remove')->name('update.remove');
+            Route::post('update/remove_bulk','Admins\DeliveryController@request_note_remove_bulk')->name('update.remove.bulk');
+            Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_request_note')->name('add.shipments');
+        });
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
@@ -1891,7 +1905,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
         Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
-
+        Route::prefix('shipment_position')->name('shipment_position.')->group(function() {
+            Route::get('track', 'Admins\AdminTrackingController@shipment_position_index')->name('track');
+            Route::post('upload', 'Admins\AdminTrackingController@shipment_position_upload')->name('upload');
+            Route::get('list', 'Admins\AdminTrackingController@shipment_position_list')->name('list');
+        });
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
@@ -2050,6 +2068,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@add_shipment_adjustment_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminFinanceController@add_shipment_adjustment_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@add_shipment_adjustment_store')->name('store');
+            Route::post('bulk/store', 'Admins\AdminFinanceController@add_bulk_shipment_adjustment_store')->name('bulk_store');
         });
 
         Route::prefix('make_payments')->name('make_payments.')->group(function () {
@@ -2114,6 +2133,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
+            Route::post('add_adjustment', 'Admins\AdminFinanceController@invoice_add_adjustment')->name('add_adjustment');
+            Route::post('adjustment_view', 'Admins\AdminFinanceController@invoice_adjustment_view')->name('adjustment_view');
+
             //Route::get('download/{id}', 'Admins\AdminFinanceController@email_print_invoice')->name('download');
 
             Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
@@ -2495,6 +2517,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('adjustments')->name('adjustments.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@adjustments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@adjustments_list')->name('list');
+
 
         });
 

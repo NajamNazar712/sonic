@@ -106,6 +106,7 @@ class V2AdminPickupsController extends Controller
         }
         $today = Carbon::now()->startOfDay();
         $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
+            ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
             ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
@@ -131,7 +132,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks', 't.name as territory')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -759,7 +760,7 @@ class V2AdminPickupsController extends Controller
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2){
+            if($user->sub_segment_id == 2){
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -870,7 +871,7 @@ class V2AdminPickupsController extends Controller
         if ($shipment_item) {
             $shipment = Shipment::find($shipment_item->shipment_id);
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2) {
+            if($user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -899,7 +900,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_pieces->shipment_id);
 
             $user = $shipment->user;
-            if(TRUE || $user->sub_segment_id == 2) {
+            if($user->sub_segment_id == 2) {
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $details = array();
                     $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
@@ -3249,7 +3250,7 @@ class V2AdminPickupsController extends Controller
                     }
                     $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Shipper</div></button>';
 
-                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipper</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Pickup Addresses </div></button>';
 
                     $dropdown .= '
                         </div>

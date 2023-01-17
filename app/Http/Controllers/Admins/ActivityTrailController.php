@@ -60,16 +60,17 @@ class ActivityTrailController extends Controller
         }
 
         $data = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
+            ->leftjoin('employee_designations as ed', 'ed.id', '=', 'a.designation_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address', 'activity_trail_logs.latitude', 'activity_trail_logs.longitude');
+            ->select('a.name as name','ed.name as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address', 'activity_trail_logs.latitude', 'activity_trail_logs.longitude');
 
         if($request->get('search_from') && $request->get('search_to'))
         {
             $data->whereBetween('activity_trail_logs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
 
-        if(!in_array(session('role_id'), [1, 58]))
+        if(!in_array(session('role_id'), [1, 58, 24, 5]))
         {
             $head_department_id = Auth::user()->role->department_id;
             $data->where('ar.department_id',$head_department_id);

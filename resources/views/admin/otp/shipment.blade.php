@@ -16,7 +16,7 @@
                         @csrf
                         <div class="row justify-content-center">
                             <div class="input-group col-3">
-                                <label class="mr-2 font-small-3"><b>Shipment OTP: </b></label>
+                                <label class="mr-2 font-medium-3"><b>Shipment OTP: </b></label>
                                 <div class="form-group">
                                     <input type="checkbox" name="otp_toggle" id="otp_toggle" class="switchery otp_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
                                 </div>
@@ -189,7 +189,7 @@
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle name'},
-                {data: 'otp', name: 'shipment_otps.otp', class: 'align-middle otp'},
+                {data: 'otp', name: 'shipment_otps.dbf_otp', class: 'align-middle otp'},
                 {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                 {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                 {data: 'generated_at', name: 'shipment_otps.updated_at', class: 'align-middle generated_at'},

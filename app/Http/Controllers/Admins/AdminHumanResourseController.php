@@ -836,6 +836,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_rider_deactivate(Request $request)
     {
+
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
@@ -855,7 +856,7 @@ class AdminHumanResourseController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
-        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
+        $employee->last_working_date = Carbon::parse($request->date)->format('Y-m-d');
         $employee->status_id = 2;
         $employee->save();
 
@@ -916,7 +917,7 @@ class AdminHumanResourseController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
-        $employee->last_working_date = Carbon::parse($request->date)->format('y-m-d');
+        $employee->last_working_date = Carbon::parse($request->date)->format('Y-m-d');
         $employee->status_id = 2;
         $employee->save();
 
@@ -3934,24 +3935,16 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('leave_types as lt', 'lt.id', 'employee_leaves.leave_type')
             ->select('e.name as admin_name', 'e.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'ad.department_head_id as department_head', 'employee_leaves.employee_type_id as employee_type', 'e.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason', 'lt.name as leave_type', 'lt.id as leave_type_id', 'ad.working_days as working_days_id', 'e.line_manager_id as line_manager_id')
             ;
-
+        if (session('role_id') != 1 && !in_array(session('role_id'), [63, 69, 70, 104])) {
             $employee_leaves->where(function ($query) use ($emp_id) {
-                if($emp_id){
+                if ($emp_id) {
                     $query->where('e.trax_id', Auth::user()->trax_id)
-                    ->orWhere('e.line_manager_id', $emp_id);
-                }else{
+                        ->orWhere('e.line_manager_id', $emp_id);
+                } else {
                     $query->where('e.trax_id', Auth::user()->trax_id);
                 }
-            })->orWhere(function ($query){
-                $query->whereIn('ls.id',[2,3,4,5,6])
-                    ->where('ad.department_head_id', Auth::user()->id)
-                    ->where('lt.id','<>',1);
-            })
-            ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70]))) {
-                    $query->whereIn('ls.id',[2,4,5])->where('lt.id','<>',1);
-                }
             });
+        }
 
 
         $datatable = Datatables::of($employee_leaves)
@@ -4072,8 +4065,8 @@ class AdminHumanResourseController extends Controller
                     // }
 
                 }
-                elseif ($employee->status_id == 2) {
-                    if ((in_array(session('role_id'), [63, 69, 70]))) {
+                elseif($employee->status_id == 6){
+                    if ((in_array(session('role_id'), [63, 69, 70,104])) && in_array($employee->leave_type_id, [5, 6])) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
@@ -4082,23 +4075,7 @@ class AdminHumanResourseController extends Controller
                             </div>
                             ';
                         return $dropdown;
-
                     }
-
-                }elseif($employee->status_id == 6){
-
-                        if ($employee->department_head == Auth::id()) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item hod_approve" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
-                            $dropdown .= '
-                            </div>
-                          </div>
-                        ';
-                            return $dropdown;
-
-                        }
-
                 }
 
                 return '-';
@@ -4250,15 +4227,10 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                $department_head_ids = AdminDepartment::pluck('department_head_id')->toArray();
-                if (in_array($employee_leaves->status, [1, 2, 3])) {
+                if (in_array($employee_leaves->status, [1, 2, 3, 6])) {
                     if ($request->line_manager == 1) {
-                        if(in_array($admin_id, $department_head_ids)){
-                            $employee_leaves->status = 4;
-                        } else{
-                            $employee_leaves->status = 6;
-                        }
-                        if($employee_leaves->leave_type != 1){
+                        $employee_leaves->status = 6;
+                        if(in_array($employee_leaves->leave_type, [5, 6])){
                             $employee_leaves->updated_by = $admin_id;
                             $employee_leaves->save();
                             return redirect()->back()->with('success', 'Leave Approved Successfully');
@@ -4782,7 +4754,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
             ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'employee_attendance_adjustments.employee_type_id as employee_type',  'a.cnic as cnic', 'ls.name as status', 'ls.id as status_id', 'employee_attendance_adjustments.employee_id as employee_id', 'employee_attendance_adjustments.id as adjustment_id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.created_at as requested_date', 'employee_attendance_adjustments.updated_at as updated_at', 'u.name as updated_by', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as reject_reason');
 
-//        if(!in_array(session('role_id'), [58, 70, 63])) {
+//        if(!in_array(session('role_id'), [58, 70, 63,104])) {
 //            $employee_leaves = $employee_leaves->where('employee_attendance_adjustments.reporter_id', Auth::user()->employee_id);
 //        }
 
@@ -4947,7 +4919,7 @@ class AdminHumanResourseController extends Controller
                     ->where('ad.department_head_id', Auth::user()->id);
             })
             ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70]))) {
+                if ((in_array(session('role_id'), [63, 69, 70,104]))) {
                     $query->whereIn('sn.id',[2,4,6,7]);
                 }
             });
@@ -4985,7 +4957,7 @@ class AdminHumanResourseController extends Controller
                     return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div></button>';
                 }
             })->editColumn('increment_amount', function ($employee) {
-                if ((in_array(session('role_id'), [63, 69, 70])) || $employee->department_head == Auth::id()) {
+                if ((in_array(session('role_id'), [63, 69, 70,104])) || $employee->department_head == Auth::id()) {
                     return $employee->increment_amount;
                 }else{
                     return '-';
@@ -5017,7 +4989,7 @@ class AdminHumanResourseController extends Controller
 
                 }
                 elseif ($employee->status_id == 4) {
-                    if ((in_array(session('role_id'), [63, 69, 70]))) {
+                    if ((in_array(session('role_id'), [63, 69, 70,104]))) {
 
                         $dropdown .= '<button type="button" class="dropdown-item approve_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                         $dropdown .= '<button type="button" class="dropdown-item reject_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';

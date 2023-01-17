@@ -12,7 +12,8 @@ class UpdateLeadStatusForUpdate extends Seeder
     public function run()
     {
         DB::table('lead_statuses')->insert(array(
-            array('id' => 15, 'name' => 'Lead Updated')
+//            array('id' => 15, 'name' => 'Lead Updated'),
+            array('id' => 17, 'name' => 'Performance Marketing')
         ));
     }
 }

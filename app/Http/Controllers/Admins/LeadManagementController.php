@@ -148,7 +148,7 @@ class LeadManagementController extends Controller
         $leads['accounts_activated'] = number_format($leads['accounts_activated']);
         $leads['dormant'] = number_format($leads['dormant']);
 
-        $cities = City::select('id', 'name')->get();
+        $cities = City::where('status', 1)->select('id', 'name')->get();
 
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);

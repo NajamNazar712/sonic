@@ -83,6 +83,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
@@ -269,6 +270,7 @@
                             head.push('Shipper');
                             head.push('Order ID');
                             head.push('Consignee Name');
+                            head.push('Consignee Address');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Booking Date');
@@ -288,6 +290,7 @@
                                 row.push(values.shipper);
                                 row.push(values.order_id);
                                 row.push(values.consignee_name);
+                                row.push(values.consignee_address);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.booking_date);
@@ -353,6 +356,7 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data: 'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data: 'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'reason' ,name: 'ssr.name', class: 'align-middle reason'},
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},

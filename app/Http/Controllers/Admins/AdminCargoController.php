@@ -70,12 +70,12 @@ class AdminCargoController extends Controller
     public function pending_list(Request $request) {
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
-        $shipments = Shipment::join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+        $shipments = Shipment::leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
@@ -770,7 +770,7 @@ class AdminCargoController extends Controller
     public function in_transit_list(Request $request) {
         $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
             ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
             ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
@@ -2528,7 +2528,7 @@ class AdminCargoController extends Controller
     public function history_list(Request $request){
         $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
-            ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
+            ->leftJoin('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
             ->leftjoin('admins as ri','ri.id','=','cargo_consignments.receiver_id')
             ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
@@ -3026,7 +3026,7 @@ class AdminCargoController extends Controller
             ->join('draft_cargos as drc', 'drc.id', '=', 'dcs.draft_cargo_id')
             ->join('cities as oc','oc.id', '=', 'drc.origin_id')
             ->join('cities as dc','dc.id', '=', 'drc.destination_id')
-            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('misrouted_history as mh', function ($join) {
                 $join->on('mh.shipment_id', '=', 'shipments.id')
                     ->on('shipments.shipper_status_id', '=', DB::raw(49))

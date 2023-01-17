@@ -432,6 +432,9 @@
                                     @if (session('role_id') == 1 || in_array(815, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.shipment_otp.index')}}">Non-COD Shipments OTP</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(35, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.delivery.rider_request.index')}}">Pending Delivery Note Requests</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -674,6 +677,10 @@
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a></li>
+
+                    @endif
+                    @if(session('role_id') == 1 || in_array(822, session('permissions')))
+                        <li class=" nav-item"><a href="{{ route('admin.tracking.shipment_position.track') }}"><span class="menu-title">Track Actual Shipment Position</span></a></li>
 
                     @endif
                     @if (session('role_id') == 1 || in_array(1, session('permissions')))

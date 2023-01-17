@@ -48,7 +48,7 @@ class AdminShipmentCancelController extends Controller
     }
 
     static public function cancel() {
-        $active_users = User::whereIn('status', [3,4])->whereNotIn('id', [3324, 7762, 5982, 10104, 14110])->get();
+        $active_users = User::whereIn('status', [3,4])->get();
         if(count($active_users)){
             foreach ($active_users as $user){
                 if($user->auto_shipment_cancellation_days == null){
@@ -151,8 +151,8 @@ class AdminShipmentCancelController extends Controller
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
         ->join('cities as h' , 'dc.hub_id', '=' , 'h.id')
-        ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-        ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+        ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+        ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
         ->leftJoin('shipments_journey', function ($join) {
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
             ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
