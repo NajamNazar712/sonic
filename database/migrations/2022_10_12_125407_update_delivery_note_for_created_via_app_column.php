@@ -14,7 +14,7 @@ class UpdateDeliveryNoteForCreatedViaAppColumn extends Migration
     public function up()
     {
         Schema::table('delivery_notes', function (Blueprint $table) {
-            $table->integer('created_via_app')->default(0)->index();
+//            $table->integer('created_via_app')->default(0)->index();
             $table->integer('request_note_id')->nullable()->index();
         });
     }
