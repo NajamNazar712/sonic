@@ -106,7 +106,7 @@ class SSRController extends Controller
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
-            ->leftjoin('cities AS sc', 'u.city_id', '=', 'sc.id')
+            ->leftjoin('cities as sc', 'u.city_id', '=', 'sc.id')
             ->leftjoin('zones as sz', 'sz.id', '=', 'sc.zone_id')
             ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','sj.created_at as arrival_date','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.fuel_surcharge','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable','sm.id as shipping_mode_id','shipments.chargeable_weight','z.name as zone', 'oc.id as origin_city_id', 'oc.name as origin_city_name', 'dc.id as destination_city_id', 'dc.name as destination_city_name', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.shipper_status_id as dr_status_id','sz.name as shipper_zone')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
