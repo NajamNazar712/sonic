@@ -2742,6 +2742,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('one_link_charges_summary')->name('one_link_charges_summary.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@one_link_charges_summary_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@one_link_charges_summary_list')->name('list');
+
+        });
+
     });
 
     //Reports end

@@ -1216,6 +1216,9 @@
                         @if (session('role_id') == 1 || in_array(794, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.shipper_summary.index') }}">Shipper Summary</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(794, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.one_link_charges_summary.index') }}">1link shipment wise summary</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

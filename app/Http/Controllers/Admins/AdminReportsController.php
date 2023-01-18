@@ -10577,5 +10577,97 @@ public function employee_confirmation_list(Request $request){
         return $filter_data;
         
     }
+
+    public function one_link_charges_summary_index()
+    {
+        // ActivityTrailController::createActivityTrailLog(Auth::id(), 141);
+        $shipping_modes = ShippingMode::all();
+        $users = User::where('status', 3)->get(['id', 'name']);
+        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        $zones = Zone::where('status', 1)->get(['id', 'name']);
+        return view('admin.reports.one_link_charges_summary')->with(['shipping_modes' => $shipping_modes, 'users' => $users, 'hubs' => $hubs, 'zones' => $zones]);
+    }
+
+    public function one_link_charges_summary_list(Request $request)
+    {
+
+        dd($request->all);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            // ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
+        }
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin ('shipments_journey as bkg_date', function ($join) {
+                $join->on('bkg_date.shipment_id', '=', 'shipments.id')
+                    ->where('bkg_date.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)'));
+            })
+            ->leftJoin('shipments_journey as arv_date', function ($join) {
+                $join->on('arv_date.shipment_id', '=', 'shipments.id')
+                    ->where('arv_date.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'bkg_date.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height'])
+            ->whereNotNull('shipments.actual_weight');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipment) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->addColumn('difference', function ($shipment) {
+                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
+                return $difference;
+            })
+            ->addColumn('weighted_as', function ($shipment) {
+                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
+                    return 'Volumetric';
+                } else {
+                    return 'Dense';
+                }
+            });
+        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', $search_shipping_mode);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($user = $request->get('search_user')) {
+            $datatable->where('u.id', $user);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('dc.hub_id', $hub);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $datatable->where('dc.zone_id', $zone);
+        }
+        if ($weighted_as = $request->get('weighted_as')) {
+            if ($weighted_as == 1) {
+                $datatable->whereNull('shipments.length')->whereNull('shipments.breadth')->whereNull('shipments.height');
+            } else {
+                $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
+            }
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('arv_date.created_at', [$from, $to]);
+        }
+        return $datatable->make(true);
+    }
 }
 
