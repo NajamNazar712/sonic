@@ -46,7 +46,7 @@
                     </div>
                 </form>
 
-                <div class="d-none" id="table">
+                <div id="table">
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
@@ -224,7 +224,7 @@
         
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -253,7 +253,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
