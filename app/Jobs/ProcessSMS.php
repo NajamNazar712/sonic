@@ -362,4 +362,86 @@ class ProcessSMS implements ShouldQueue
             // $mail = Mail::to($to)->send(new Notifications($subject, $body));
         }
     }
+
+    private function zong($sms) {
+        try {
+            $client = new Client(['base_uri' => 'https://cbs.zong.com.pk/reachrestapi/home/SendQuickSMS', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+
+            $response = $client->post('', [
+                'form_params' => [
+                    'loginId' => '923163639562',
+                    'loginPassword' => 'Zong@123',
+                    'Destination' => $this->phone_number($sms->to),
+                    'Mask' => 'TRAX PK',
+                    'Message' => $sms->body,
+                    'UniCode' => '0',
+                    'ShortCodePrefered' => 'n'
+                ]
+            ]);
+
+            $response = $response->getBody()->getContents();
+
+            $response = explode('|', $response);
+
+            if ($response[0] == '0') {
+                $sms->status = 3;
+
+                $sms->save();
+            }
+            else if ($response[0] == '105') {
+                $sms->status = 2;
+
+                $sms->save();
+            }
+            else {
+                $sms->status = 2;
+
+                $sms->save();
+
+                $to = ['muhammad.yousuf@trax.pk'];
+                $subject = '[Error] SMS API';
+                $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+
+                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            }
+        }
+        catch (RequestException $e) {
+            $sms->status = 1;
+
+            $sms->save();
+        }
+    }
+
+    private function phone_number($phone_number) {
+        //Removing anything after Comma (,)
+        $phone_number = preg_replace('/^([^,]*).*$/', '$1', $phone_number);
+
+        //Removing anything after Slash (/)
+        $phone_number = preg_replace('/^([^\/]*).*$/', '$1', $phone_number);
+
+        //Removing all Dashes (-)
+        $phone_number = str_replace('-', '', $phone_number);
+
+        //Removing all Spaces ( )
+        $phone_number = str_replace(' ', '', $phone_number);
+
+        //Remove +92 with 92
+        if (substr($phone_number, 0, 3) == '+92') {
+            $phone_number = substr($phone_number, 1);
+        }
+        //Replace 0092 with 92
+        else if (substr($phone_number, 0, 4) == '0092') {
+            $phone_number = substr($phone_number, 2);
+        }
+        //Replace 0 with 92
+        else if (substr($phone_number, 0, 1) == '0') {
+            $phone_number = '92' . substr($phone_number, 1);
+        }
+        //Addition of 0
+        else if (substr($phone_number, 0, 2) != '92') {
+            $phone_number = '92' . $phone_number;
+        }
+
+        return $phone_number;
+    }
 }
