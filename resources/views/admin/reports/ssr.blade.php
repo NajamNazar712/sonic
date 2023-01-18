@@ -162,9 +162,9 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Shipper Zone</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
-                        <th class="border-primary border-darken-1">Cash Handling Charges</th>
-                        <th class="border-primary border-darken-1">Insurance Charges</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         {{-- <th class="border-primary border-darken-1">Packaging Charges</th> --}}
@@ -417,9 +417,9 @@
                             head.push('Shipper');
                             head.push('Sales Person');
                             head.push('Actual Weight');
+                            head.push('Arrival Date');
+                            head.push('Shipper Zone');
                             head.push('Weight Charges');
-                            head.push('Cash Handling Charges');
-                            head.push('Insurance Charges');
                             head.push('Origin');
                             head.push('Destination');
                             // head.push('Packaging Charges');
@@ -437,9 +437,9 @@
                                 row.push(values.shipper);
                                 row.push(values.sales_person);
                                 row.push(values.actual_weight);
+                                row.push(values.arrival_date);
+                                row.push(values.shipper_zone);
                                 row.push(values.weight_charges);
-                                row.push(values.cash_handling_charges);
-                                row.push(values.insurance_charges);
                                 row.push(values.origin_city_name);
                                 row.push(values.destination_city_name);
                                 // row.push(values.packaging_material_charges);
@@ -508,9 +508,9 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'shipper_zone' ,name: 'sz.name', class: 'align-middle shipper_zone'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
-                    { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
                     { data:'origin_city_name' ,name: 'oc.name', class: 'align-middle origin_city_name'},
                     { data:'destination_city_name' ,name: 'dc.name', class: 'align-middle destination_city_name'},
                     // { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
