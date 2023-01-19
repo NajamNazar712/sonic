@@ -1560,6 +1560,9 @@
                                     @if (session('role_id') == 1 || in_array(391, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.pickup_address_wise_payment_accounts.index')}}">Pickup Wise Payment Accounts</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(391, session('permissions')))
+                                    <li><a class="menu-item" href="{{route('admin.settings.onelink_payment_charges.index')}}">1Link Payment Charges</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

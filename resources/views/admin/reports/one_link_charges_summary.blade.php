@@ -119,6 +119,14 @@
                 },
             });
 
+            $('#search_form input.delivery_note_id').focus();
+            $('#search_form input.delivery_note_id').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+           
+
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -177,24 +185,22 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.weight_qc.list') }}',
+                        url: '{{ route('admin.reports.one_link_charges_summary.list') }}',
                         data: params,
                         success: function (result) {
 
                             head = [];
 
+                         
+
                             head.push('S. No.');
                             head.push('Tracking Number');
-                            head.push('Shipper Name');
-                            head.push('Shipping Mode');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Booking Date');
-                            head.push('Arrival Date');
-                            head.push('Weight Input by Shipper (A)');
-                            head.push('Arrival Weight (B)');
-                            head.push('Difference (B-A)');
-                            head.push('Weighted As');
+                            head.push('COD Amount');
+                            head.push('Delivery Note ID');
+                            head.push('Transaction ID');
+                            head.push('Created at');
+                            head.push('Charges');
+                            
 
 
                             $.each(result.data, function(index, values) {
@@ -202,16 +208,11 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.shipper);
-                                row.push(values.shipping_mode);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.booking_date);
-                                row.push(values.arrival_date);
-                                row.push(values.estimated_weight);
-                                row.push(values.actual_weight);
-                                row.push(values.difference);
-                                row.push(values.weighted_as);
+                                row.push(values.transaction_amount);
+                                row.push(values.delivery_note_id);
+                                row.push(values.transaction_authentication_id);
+                                row.push(values.created_at);
+                                row.push(values.one_link_charges);
                                 body.push(row);
                             });
                         },
@@ -229,7 +230,7 @@
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
-                        title: 'Weight QC Report',
+                        title: '1link shipment wise summary',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -248,7 +249,7 @@
                     
                     data: function (d) {
                         d.tracking_numbers = $('#search_form .tracking_numbers').val();
-                        d.delivery_note_id = $('#delivery_note_id').val();
+                        d.delivery_note_id = $('.delivery_note_id').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -256,12 +257,12 @@
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
-                    { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
-                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle text-center shipping_mode'},
-                    { data:'origin' ,name: 'oc.name', class: 'align-middle text-center origin'},
-                    { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
-                    { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
+                    { data:'tracking_number' ,name: 'tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'transaction_amount' ,name: 'transaction_amount', class: 'align-middle text-center transaction_amount'},
+                    { data:'delivery_note_id' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note_id'},
+                    { data:'transaction_authentication_id' ,name: 'transaction_authentication_id', class: 'align-middle text-center transaction_authentication_id'},
+                    { data:'created_at' ,name: 'created_at', class: 'align-middle text-center created_at'},
+                    { data:'one_link_charges' ,name: 'one_link_charges', class: 'align-middle text-center one_link_charges'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

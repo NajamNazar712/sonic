@@ -10588,8 +10588,6 @@ public function employee_confirmation_list(Request $request){
 
     public function one_link_charges_summary_list(Request $request)
     {
-
-        dd($request->all());
         if ($request->get('excel') && $request->get('excel') == true) {
             // ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
         }
@@ -10597,34 +10595,19 @@ public function employee_confirmation_list(Request $request){
 
 
         $datatable = Datatables::of($one_link_data);
-            // ->editColumn('tracking_number_link', function ($shipment) {
-            //     $route = route('admin.tracking.index');
-            //     return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
-            // })
-            // ->addColumn('difference', function ($shipment) {
-            //     $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
-            //     return $difference;
-            // })
-            // ->addColumn('weighted_as', function ($shipment) {
-            //     if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
-            //         return 'Volumetric';
-            //     } else {
-            //         return 'Dense';
-            //     }
-            // });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $datatable->whereIn('tracking_number', explode(',', $tracking_numbers));
         }
 
-        // if ($tracking_numbers = $request->get('tracking_numbers')) {
-        //     $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        // }
+        if ($delivery_note_id = $request->get('delivery_note_id')) {
+            $datatable->where('delivery_note_id', $delivery_note_id);
+        }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('arv_date.created_at', [$from, $to]);
+            $datatable->whereBetween('created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }

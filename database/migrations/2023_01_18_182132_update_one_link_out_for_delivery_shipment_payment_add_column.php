@@ -14,7 +14,7 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentAddColumn extends Migration
     public function up()
     {
         Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
-            //
+            $table->integer('one_link_charges')->default(0)->after('transaction_amount');
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateOneLinkOutForDeliveryShipmentPaymentAddColumn extends Migration
     public function down()
     {
         Schema::table('one_link_out_for_delivery_shipment_payments', function (Blueprint $table) {
-            //
+                $table->dropColumn('one_link_charges');
         });
     }
 }

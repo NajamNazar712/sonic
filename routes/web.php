@@ -3268,6 +3268,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
         });
+        Route::prefix('onelink_payment_charges')->name('onelink_payment_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@onelink_payment_charges_index')->name('index');
+            // Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
+        });
 
         Route::prefix('month_closing')->name('month_closing.')->group(function () {
             Route::prefix('types')->name('types.')->group(function () {

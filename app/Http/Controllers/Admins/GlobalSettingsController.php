@@ -3636,6 +3636,20 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function onelink_payment_charges_index()
+    {
+        $settings = GlobalSettings::where('type', 'short_received_hub_wise_cron')->first();
+
+        if ($settings) {
+            $default_time = $settings->setting_value;
+        } else {
+            $default_time = 8;
+        }
+        $cities = City::where('status', 1)->select('id', 'name')->get();
+        $existing_cities = ShortReceiveReportTimeHubWise::get();
+        return view('admin.settings.one_link_charges')->with(['default_time' => $default_time, 'cities' => $cities, 'existing_cities' => $existing_cities]);
+    }
+
     public function runner_report_enable_disable(Request $request)
     {
         $id = $request->id;
