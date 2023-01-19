@@ -7559,6 +7559,7 @@ class NotificationsController extends Controller
                     self::sms($body, $to, 1);
                 } else if ($id == 130) {
                     $now = Carbon::now();
+                    $file_path = $reference_1_id;
                     $month = $now->subMonth()->format('F');
 
                     if (strpos($subject, '[month]') !== FALSE) {
@@ -7569,14 +7570,14 @@ class NotificationsController extends Controller
                         $subject = str_replace('[year]', $now->year, $subject);
                     }
 
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
                     self::email($subject, $body, $to);
                 } else if ($id == 133) {
@@ -8619,7 +8620,7 @@ class NotificationsController extends Controller
                 } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
-
+                    $file_path = $reference_1_id;
                     if (strpos($subject, '[month]') !== FALSE) {
                         $subject = str_replace('[month]', $month, $subject);
                     }
@@ -8628,14 +8629,14 @@ class NotificationsController extends Controller
                         $subject = str_replace('[year]', $now->year, $subject);
                     }
 
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_revenue_by_delivery_return_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
                     self::email($subject, $body, $to);
                 } else if ($id == 157) {
@@ -9869,6 +9870,52 @@ else if ($id == 178) {
 
                     self::email($subject, $body, $to);
 
+                }
+                else if ($id == 206) {
+                    $now = Carbon::now();
+                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id;
+                    if (strpos($subject, '[month]') !== FALSE) {
+                        $subject = str_replace('[month]', $month, $subject);
+                    }
+
+                    if (strpos($subject, '[year]') !== FALSE) {
+                        $subject = str_replace('[year]', $now->year, $subject);
+                    }
+
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    self::email($subject, $body, $to);
+                }
+                else if ($id == 207) {
+                    $now = Carbon::now();
+                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id;
+                    if (strpos($subject, '[month]') !== FALSE) {
+                        $subject = str_replace('[month]', $month, $subject);
+                    }
+
+                    if (strpos($subject, '[year]') !== FALSE) {
+                        $subject = str_replace('[year]', $now->year, $subject);
+                    }
+
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    self::email($subject, $body, $to);
                 }
 
             }

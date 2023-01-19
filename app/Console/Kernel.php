@@ -102,6 +102,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\ShipperPaymentCalculation',
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
+        'App\Console\Commands\RevenueReportMonthlyEmail',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
 		'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
@@ -109,7 +110,7 @@ class Kernel extends ConsoleKernel
 
         '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
         'App\Console\Commands\AutoEmailDwsArrival',
-        
+
         'App\Console\Commands\RCPSMSToConsigneeReattempt',
         'App\Console\Commands\CRMCount',
         '\App\Console\Commands\ReattemptRatioCalculate',
@@ -120,6 +121,12 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\EmployeeConfirmationDays',
         'App\Console\Commands\MonthAverageDestinationReportEmail',
         'App\Console\Commands\ReversionDeliveredShipments',
+        'App\Console\Commands\RevenueReportCutOffDays',
+        'App\Console\Commands\RevenueReportByDeliveryDateCutOffDays',
+        'App\Console\Commands\RevenueReportRemainingDays',
+        'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
+        'App\Console\Commands\RetailSalesReport',
+        'App\Console\Commands\RetailSalesReportByDeliveryDate',
         ];
 
     /**
@@ -333,8 +340,18 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(26, '00:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(26, '01:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
+
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
 

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\Admins\AdminRevenueReportsController;
 use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 
@@ -39,10 +39,11 @@ class RevenueReportMonthlyByDeliveryDate extends Command
      */
     public function handle()
     {
-        $response = AdminReportsController::revenue_by_delivery_date_excel_download();
+        //from 1st to last
+        $response = AdminRevenueReportsController::revenue_report_by_delivery_date(1);
         if($response)
         {
-            NotificationsController::send(156,null);
+            NotificationsController::send(156,$response);
         }
     }
 }
