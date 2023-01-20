@@ -46,7 +46,7 @@ class ProcessSMS implements ShouldQueue
     {
         try {
             if ($this->sms->status < 2) {
-//                $this->telenor($this->sms);
+               $this->zong($this->sms);
             }
         }
         catch(Exception $exception) {
@@ -364,6 +364,10 @@ class ProcessSMS implements ShouldQueue
     }
 
     private function zong($sms) {
+        $sms->status = 1;
+
+        $sms->save();
+
         try {
             $client = new Client(['base_uri' => 'https://cbs.zong.com.pk/reachrestapi/home/SendQuickSMS', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
