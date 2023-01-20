@@ -10700,7 +10700,7 @@ class AdminReportsController extends Controller
 
     public function one_link_charges_summary_index()
     {
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 141);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 619);
 
         return view('admin.reports.one_link_charges_summary');
     }
@@ -10709,7 +10709,7 @@ class AdminReportsController extends Controller
     {
 
         if ($request->get('excel') && $request->get('excel') == true) {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 620);
         }
         $one_link_data = OneLinkOutForDeliveryShipmentPayment::select('tracking_number', 'transaction_amount', 'delivery_note_id', 'transaction_authentication_id', 'created_at', 'one_link_charges');
 

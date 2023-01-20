@@ -3562,16 +3562,15 @@ class GlobalSettingsController extends Controller
 
     public function onelink_payment_charges_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 621);
 
         $one_linke_payment_charges_ranges =  OneLinkPaymentChargesRange::all();
-        // $existing_cities = ShortReceiveReportTimeHubWise::get();
         return view('admin.settings.one_link_charges')->with(['one_linke_payment_charges_ranges' => $one_linke_payment_charges_ranges]);
     }
 
     public function onelink_payment_charges_submit(Request $request)
     {
-
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 622);
 
         OneLinkPaymentChargesRange::truncate();
         if ($request->has('one_link_charges')) {
