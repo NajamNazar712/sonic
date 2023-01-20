@@ -9395,7 +9395,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[crm_request_id]', str_pad($crm_request->id, 6, '0', STR_PAD_LEFT), $body);
                         }
                         if (strpos($body, '[comment]') !== FALSE) {
-                            $body = str_replace('[comment]', $crm_comment->comment, $body);
+                            $body = str_replace('[comment]', preg_replace("/<br\W*?\/>/", "\n", $crm_comment->comment), $body);
                         }
 
                         $to = $phone_number;
