@@ -14,6 +14,7 @@ use App\Http\Models\SaleTierTag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Shipment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -338,6 +339,81 @@ class CRMController extends Controller
                 $default_agent_id = 306;
             }
             CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment,1);
+        }
+
+        if($case_nature_id == 2){
+            $shipment = Shipment::find($shipment_id);
+            if($shipment){
+                if($case_nature_type_id == 13){
+                    $crm_request->status_id = 4;
+                    $crm_request->save();
+                    $crm_request_status_history = new CrmRequestStatusHistory();
+                    $crm_request_status_history->crm_request_id = $id;
+                    $crm_request_status_history->status_id = 4;
+                    $crm_request_status_history->save();
+                    
+                }
+                else if($case_nature_type_id == 12){
+                    if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 ){
+                        
+                        $crm_request->status_id = 4;
+                        $crm_request->save();
+                        $crm_request_status_history = new CrmRequestStatusHistory();
+                        $crm_request_status_history->crm_request_id = $id;
+                        $crm_request_status_history->status_id = 4;
+                        $crm_request_status_history->save();
+
+                    }else if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                        $shipment->shipper_status_id = 13;
+                        $shipment->consignee_status_id = 13;
+                        $shipment->save();
+                        //mark reattempt
+                        $crm_request->status_id = 4;
+                        $crm_request->save();
+                        $crm_request_status_history = new CrmRequestStatusHistory();
+                        $crm_request_status_history->crm_request_id = $id;
+                        $crm_request_status_history->status_id = 4;
+                        $crm_request_status_history->save();
+                        
+                    }else if($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 20){
+                        
+                        $crm_request->status_id = 4;
+                        $crm_request->save();
+
+                        $crm_request_status_history = new CrmRequestStatusHistory();
+                        $crm_request_status_history->crm_request_id = $id;
+                        $crm_request_status_history->status_id = 7;
+                        $crm_request_status_history->save();
+                        
+                        $crm_request_status_history = new CrmRequestStatusHistory();
+                        $crm_request_status_history->crm_request_id = $id;
+                        $crm_request_status_history->status_id = 4;
+                        $crm_request_status_history->save();
+                    }
+    
+                    // cod_amount
+                }
+                else if($case_nature_type_id == 32){
+                    $crm_request->status_id = 4;
+                    $crm_request->save();
+                    
+                    $crm_request_status_history = new CrmRequestStatusHistory();
+                    $crm_request_status_history->crm_request_id = $id;
+                    $crm_request_status_history->status_id = 7;
+                    $crm_request_status_history->save();
+
+                }
+                else if($case_nature_type_id == 20){
+                    $crm_request->status_id = 4;
+                    $crm_request->save();
+                    
+                    $crm_request_status_history = new CrmRequestStatusHistory();
+                    $crm_request_status_history->crm_request_id = $id;
+                    $crm_request_status_history->status_id = 7;
+                    $crm_request_status_history->save();
+                    
+                }
+            }
         }
         return $crm_request->id;
     }

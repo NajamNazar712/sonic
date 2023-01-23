@@ -148,6 +148,16 @@
                                             </select>
                                         </fieldset>
                                     </div>
+                                    <div class="col-6 d-none" id="alternate_phone_input">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="alternate_phone" class="form-control" id="alternate_phone" placeholder="Enter Alternate Number">
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-6 d-none" id="cod_amount_input">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="cod_amount" class="form-control" id="cod_amount" placeholder="Enter COD Amount">
+                                        </fieldset>
+                                    </div>
                                     <div class="col-6">
                                         <fieldset class="form-group">
                                             <select name="request_channel" id="request_channels" class="form-control select2">
@@ -509,6 +519,21 @@
                 'min': 0,
                 'max': 1000000
             });
+            $('#alternate_phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            $('#cod_amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0,
+                'max': 1000000
+            });
+
+            
             $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Reason'
@@ -1957,6 +1982,24 @@
                 this.value = this.value.substring(0, max_char);
             }
         });
+        $('#case_nature_requests').on('change',function (e) {
+            
+            if($(this).val() == 13){
+                $('#alternate_phone_input').removeClass('d-none');
+                $('#cod_amount_input').addClass('d-none');
+
+            }else if($(this).val() == 12){
+                $('#cod_amount_input').removeClass('d-none');
+                $('#alternate_phone_input').addClass('d-none');
+
+            }else{
+                $('#cod_amount_input').addClass('d-none');
+                $('#alternate_phone_input').addClass('d-none');
+
+            }
+        });
+
+        
         $('body').on('change','#add_request_form textarea, #add_feedback_form textarea',function() {
             $(this).val($(this).val().trim());
         });
@@ -2079,6 +2122,9 @@
                     var case_nature_complaint_id = $('#case_nature_requests').val();
                     var case_nature_channel_id = $('#request_channels').val();
                     var service_description = $('#service_description').val();
+                    var alternate_phone = $('#alternate_phone').val();
+                    var cod_amount = $('#cod_amount').val();
+                    
                     if (!case_nature_complaint_id) {
                         nature_flag = false;
                         var error = "Please select Complaint type!";
@@ -2087,6 +2133,27 @@
                             containerId: 'toast-top-center'
                         });
                     }
+                    if(case_nature_complaint_id == 13){
+                        if (!alternate_phone) {
+                            nature_flag = false;
+                            var error = "Please Enter Alternate Number!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    if(case_nature_complaint_id == 12){
+                        if (!cod_amount) {
+                            nature_flag = false;
+                            var error = "Please Enter COD Amount!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    
                     if (!case_nature_channel_id) {
                         nature_flag = false;
                         var error = "Please select Channel!";
@@ -2114,7 +2181,9 @@
                                 'case_nature_id': case_nature_id,
                                 'complaint_id': case_nature_complaint_id,
                                 'channel_id': case_nature_channel_id,
-                                'description': service_description
+                                'description': service_description,
+                                'alternate_phone': alternate_phone,
+                                'cod_amount': cod_amount,
                             }
                         })
                             .done(function (data) {
@@ -2502,6 +2571,12 @@
             $('#claim_product_cost').val('');
             $('#request_id').val('').trigger('change');
             $('#receiving_sheet_div').addClass('d-none');
+            $('#alternate_phone_input').addClass('d-none');
+            $('#alternate_phone').val('');
+            $('#cod_amount_input').addClass('d-none');
+            $('#cod_amount').val('');
+
+            
 
         });
 
