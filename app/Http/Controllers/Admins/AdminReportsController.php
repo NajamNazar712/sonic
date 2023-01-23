@@ -10665,7 +10665,7 @@ public function employee_confirmation_list(Request $request){
                     return 0;
                 }
 
-            })
+            }) 
             ->addColumn('without_scan_shipments_btn', function ($entry) {
                 $function = "without_scan_shipments_popup('".$entry->id."')";
                 if ($entry->id > 0) {
