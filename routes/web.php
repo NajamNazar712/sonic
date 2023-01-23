@@ -2742,6 +2742,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');
+        });
+
     });
 
     //Reports end

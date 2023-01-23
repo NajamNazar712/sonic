@@ -10577,5 +10577,128 @@ public function employee_confirmation_list(Request $request){
         return $filter_data;
         
     }
+
+    public function rider_pickup_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+
+        return view('admin.reports.rider_pickup_report')->with(['hubs' => $hubs, 'riders' => $riders]);
+    }
+
+    public function rider_pickup_list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+        }
+
+        // $count = DB::connection('reports')->table('v2_rider_pickups')
+        //     ->join('pickup_notes as pn', 'pn.id', '=', 'v2_rider_pickups.pickup_note_id')
+        //     ->join('riders as r', 'r.id', '=', 'pn.rider_id')
+        //     ->leftjoin('cities as c', 'c.id', '=', 'pn.city_id');
+
+        // if($rider = $request->get('search_rider')){
+        //     $count = $count->where('r.id', '=', $rider);
+        // }
+        // if($hub = $request->get('search_hub')){
+        //     $count = $count->where('c.hub_id', '=', $hub);
+        // }
+
+        // $count = $count->groupBy('r.id')->count();
+
+        // ;$rider_pickup = DB::connection('reports')->table('v2_rider_pickups')
+        //     ->join('v2_pickup_notes as pn', 'pn.id', '=', 'v2_rider_pickups.pickup_note_id')
+        //     ->join('v2_pickup_requests as pr', 'pr.id', '=', 'v2_rider_pickups.pickup_request_id')
+        //     ->join('riders as r', 'r.id', '=', 'pr.current_rider_id')
+        //     ->join('cities as c', 'c.id', '=', 'pr.city_id')
+        //     ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+        //     ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
+        //     ->leftjoin('shipments_journey as arrsh', function ($join) {
+        //         $join->on('arrsh.shipment_id', '=', 's.id')
+        //             ->where('arrsh.id', '=',
+        //                 DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = pr.id and shipments_journey.reference_2_id = pn.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
+        //     })
+        //     ->leftjoin('shipments_journey as total_s', function ($join) {
+        //         $join->on('total_s.shipment_id', '=', 's.id')
+        //             ->where('total_s.id', '=',
+        //                 DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = pr.id and shipments_journey.reference_2_id = pn.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+        //     })
+        //     ->select('pn.id as pickup_note_id','v2_rider_pickups.id','v2_rider_pickups.created_at as date','r.name as rider_name','r.id as rider_id','c.name as origin', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+        //     ->groupBy('v2_rider_pickups.id')
+        $rider_pickup = DB::connection('reports')->table('v2_rider_pickups')
+            ->join('v2_pickup_notes as pn', 'pn.id', '=', 'v2_rider_pickups.pickup_note_id')
+            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'v2_rider_pickups.pickup_request_id')
+            ->join('riders as r', 'r.id', '=', 'pr.current_rider_id')
+            ->join('cities as c', 'c.id', '=', 'pr.city_id')
+            ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+            ->leftjoin('shipments_journey as arrsh', function ($join) {
+                $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
+                    ->where('arrsh.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
+            })
+            ->leftjoin('shipments_journey as total_s', function ($join) {
+                $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
+                    ->where('total_s.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+            })
+            ->select('pn.id as pickup_note_id','pr.id as pickup_request_id','v2_rider_pickups.id','v2_rider_pickups.created_at as date','r.id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'),'v2_rider_pickups.shipments as without_scan_shipments', DB::raw('count(total_s.id) as scanned_shipments'))
+            ->groupBy('v2_rider_pickups.id');
+
+        $datatables = Datatables::of($rider_pickup)
+            // ->setTotalRecords($count)
+            ->addColumn('scanned_shipments_btn', function ($entry) {
+                $function = "scanned_shipments_popup('".$entry->id."')";
+                if ($entry->id > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+
+            })
+            ->addColumn('arrived_shipments_btn', function ($entry) {
+                $function = "arrived_shipments_popup('".$entry->id."')";
+                if ($entry->id > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+
+            })
+            ->addColumn('without_scan_shipments_btn', function ($entry) {
+                $function = "without_scan_shipments_popup('".$entry->id."')";
+                if ($entry->id > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->without_scan_shipments) . '</button>';
+                } else {
+                    return 0;
+                }
+
+            })
+            ->addColumn('pickup_note_btn', function ($entry) {
+                $function = "pickup_note('".$entry->id."')";
+                if ($entry->id > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->pickup_note_id) . '</button>';
+                } else {
+                    return 0;
+                }
+
+            });
+
+        if($rider = $request->get('search_rider')){
+            $datatables = $datatables->where('r.id', '=', $rider);
+        }
+        if($hub = $request->get('search_hub')){
+            $datatables = $datatables->where('c.hub_id', '=', $hub);
+        }
+        
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables = $datatables->whereBetween('v2_rider_pickups.created_at', [$from,$to]);
+        }
+
+        return $datatables->make(true);
+    }
 }
 
