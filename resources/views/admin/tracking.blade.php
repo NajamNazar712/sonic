@@ -1014,6 +1014,7 @@
                                 shipment += '<td>' + details.consignee.name + '</td>';
                                 shipment += '<td><strong>Destination</strong></td>';
                                 shipment += '<td>' + details.consignee.destination + '</td>';
+                                
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';
@@ -1025,7 +1026,10 @@
                                 else {
                                     shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
                                 }
-
+                                if(details.consignee.crm_status){
+                                    shipment += '<td><strong>CRM Status</strong></td>';
+                                    shipment += '<td>Hold for Self Collection</td>';
+                                }
                                 shipment += '<td colspan="2"></td>';
                                 shipment += '</tr>';
                                 shipment += '<td><strong>Email</strong></td>';
