@@ -2745,6 +2745,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');
+            Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_pickup_arrived_shipments')->name('arrived_shipments');
+            Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
+            
         });
 
     });

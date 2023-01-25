@@ -31,6 +31,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-5">
+                        <fieldset class="form-group">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -60,8 +69,8 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th>
-                            <th class="border-primary border-darken-1">Rider ID</th>
+                            <th class="border-primary border-darken-1">Date</th> 
+                            <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">No. of Scanned Shipment Pickup Notes</th>
@@ -75,18 +84,17 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="dn_no_modal" data-backdrop="static" role="dialog"
-         aria-labelledby="dn_no_modal" aria-hidden="true">
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="dn_no_modal">Delivery Notes</h4>
+                    <h4 class="modal-title" id="shipments_modal_title"></h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body text-center" id="dn_data">
+                <div class="modal-body text-center">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -158,38 +166,25 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#datatable_wrapper').hide();
-            var shipments_count = 0;
-            var pending_shipments = 0;
-            var pending_shipments_per = 0;
-            var delivered_shipments = 0;
-            var delivered_shipments_per = 0;
-            var undelivered_shipments = 0;
-            var undelivered_shipments_per = 0;
-            var confirmation_pending_shipments = 0;
-            var confirmation_pending_shipments_per = 0;
+            var scanned_shipments = 0;
+            var arrived_shipments = 0;
+            var without_scan_shipments = 0;
+            
 
-            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Zone',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider Category',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination',
+            
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Rider',
+
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
             });
@@ -258,15 +253,17 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.date);
+                                row.push(values.rider_id);
                                 row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                row.push(values.rider_name);
-                                
+                                row.push(values.origin);
+                                row.push(values.pickup_note);
+                                row.push(values.scanned_shipments);
+                                row.push(values.arrived_shipments);
+                                row.push(values.without_scan_shipments);
+                                scanned_shipments += values.scanned_shipments;
+                                arrived_shipments += values.arrived_shipments;
+                                without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
 
@@ -276,9 +273,9 @@
                             footer.push('');
                             footer.push('');
                             footer.push('');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
+                            footer.push(scanned_shipments);
+                            footer.push(arrived_shipments);
+                            footer.push(without_scan_shipments);
                         },
                         async: false
                     });
@@ -288,14 +285,14 @@
                 }
             } );
 
-            // $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Route Distribution Summary Report',
+                        title: 'Rider Pickup Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
@@ -312,20 +309,18 @@
                 ajax:{
                     url: '{{ route('admin.reports.rider_pickup.list') }}',
                     data: function (d) {
-                        d.search_destination = $('#search_destination').val();
-                        d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
-                        d.search_rider_cat = $('#search_rider_cat').val();
                     }
                 },
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'date' ,name: 'v2_rider_pickups.created_at', class: 'align-middle text-center date'},
-                    { data:'rider_id' ,name: 'r.id', class: 'align-middle text-center rider_id'},
+                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
+                    { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
                     { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
                     { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
                     { data:'pickup_note_btn', class: 'align-middle text-center pickup_note_btn'},
@@ -340,6 +335,48 @@
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 },
+                footerCallback: function(row, data, start, end, display) {
+                    scanned_shipments = 0;
+                    arrived_shipments = 0;
+                    without_scan_shipments = 0;
+                    
+                    $.each(data, function(index, shipment_data) {
+                        scanned_shipments += shipment_data.scanned_shipments;
+                        arrived_shipments += shipment_data.arrived_shipments;
+                        without_scan_shipments += shipment_data.without_scan_shipments;
+                    });
+                    var api = this.api();
+                    api.columns('.date', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html('Total');
+                    });
+                    api.columns('.pickup_note_btn', {
+                        page: 'current'
+                    }).every(function() {
+                        pickup_note = this
+                            .data()
+                            .length;
+                        $(this.footer()).html(pickup_note.toFixed(2));
+                    });
+                    api.columns('.scanned_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        
+                        $(this.footer()).html(scanned_shipments.toFixed(2));
+                    });
+                    api.columns('.arrived_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html(arrived_shipments.toFixed(2));
+                    });
+                    api.columns('.without_scan_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                       
+                        $(this.footer()).html(without_scan_shipments.toFixed(2));
+                    });
+                }
             });
 
             $('#search_filter_btn').on('click',function () {
@@ -348,16 +385,90 @@
             });
         });
 
-        function dn_no_pop(dn_no) {
-            if (dn_no) {
-                let notes = "";
-                let dn_array = dn_no.split(',');
-                console.log(dn_array);
-                $.each(dn_array,function(i,v){
-                    notes += "<u>"+v+"<u><br>";
+        function scanned_shipments_popup(pickup_note_id) {
+            if (pickup_note_id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.rider_pickup.scanned_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': pickup_note_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
                 })
-                $('#dn_no_modal .modal-body').html(notes);
-                $('#dn_no_modal').modal('show');
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Scanned Shipment(s)');
+                        
+                    }
+                });
+            }
+        }
+
+        function arrived_shipments_popup(pickup_note_id) {
+            if (pickup_note_id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.rider_pickup.arrived_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': pickup_note_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Arrived Shipment(s)');
+                        
+                    }
+                });
+            }
+        }
+
+        function without_scan_shipments_popup(pickup_note_id) {
+            if (pickup_note_id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.rider_pickup.without_scan_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': pickup_note_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
+                        }
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Without Scan Shipment(s)');
+                        
+                    }
+                });
             }
         }
 
