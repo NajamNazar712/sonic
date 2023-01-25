@@ -93,8 +93,6 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-        $filename = 'sonic_monthly_revenue_by_delivery_return_report.xlsx';
-
         if($report_id == 1){
             $filename = 'revenue_report_by_delivery_first_to_last.xlsx';
         }
@@ -373,13 +371,13 @@ class AdminRevenueReportsController extends Controller
 
 
         if($report_id == 1){
-            $filename = 'revenue_report_first_to_last.xlsx';
+            $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
         }
         if($report_id == 2){
-            $filename = 'revenue_report_first_to_25.xlsx';
+            $filename = 'revenue_report_by_arrival_first_to_25.xlsx';
         }
         if($report_id == 3){
-            $filename = 'revenue_report_26_to_last.xlsx';
+            $filename = 'revenue_report_by_arrival_to_last.xlsx';
         }
 
         $details = array();
