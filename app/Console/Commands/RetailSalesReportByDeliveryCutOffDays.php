@@ -6,21 +6,21 @@ use App\Http\Controllers\Admins\AdminRetailReportController;
 use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 
-class RetailSalesReportByDeliveryDate extends Command
+class RetailSalesReportByDeliveryCutOffDays extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:retailsalesreportbydeliverydate';
+    protected $signature = 'email:retailsalesreportbydeliverycutoffdays';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Retail Sales Report By Delivery Date';
+    protected $description = 'Retail Sales Report By Delivery Date 1st to 25th';
 
     /**
      * Create a new command instance.
@@ -39,7 +39,7 @@ class RetailSalesReportByDeliveryDate extends Command
      */
     public function handle()
     {
-        $response = AdminRetailReportController::retail_sales_report_by_delivery(1);
+        $response = AdminRetailReportController::retail_sales_report_by_delivery(2);
         if($response){
             NotificationsController::send(207, $response);
         }

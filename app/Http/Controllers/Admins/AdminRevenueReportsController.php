@@ -20,17 +20,17 @@ class AdminRevenueReportsController extends Controller
         $this->middleware('Permission');
     }
 
-    public static function revenue_report_by_delivery_date($report_id)
+    public static function revenue_report_by_delivery_date($report_type)
     {
-        if($report_id == 1){
+        if($report_type == 1){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
-        if($report_id == 2){
+        if($report_type == 2){
             $from = Carbon::today()->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
         }
-        if($report_id == 3){
+        if($report_type == 3){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
@@ -93,13 +93,13 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-        if($report_id == 1){
+        if($report_type == 1){
             $filename = 'revenue_report_by_delivery_first_to_last.xlsx';
         }
-        if($report_id == 2){
+        if($report_type == 2){
             $filename = 'revenue_report_by_delivery_first_to_25.xlsx';
         }
-        if($report_id == 3){
+        if($report_type == 3){
             $filename = 'revenue_report_by_delivery_26_to_last.xlsx';
         }
 
@@ -293,20 +293,22 @@ class AdminRevenueReportsController extends Controller
         ob_end_clean();
         $filePath = '/reports/revenue/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
-        return $filePath;
+        $from = Carbon::parse($from)->toDateString();
+        $to = Carbon::parse($to)->toDateString();
+        return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 
-    public static function revenue_report($report_id)
+    public static function revenue_report($report_type)
     {
-        if($report_id == 1){
+        if($report_type == 1){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
-        if($report_id == 2){
+        if($report_type == 2){
             $from = Carbon::today()->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
         }
-        if($report_id == 3){
+        if($report_type == 3){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
@@ -370,13 +372,13 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-        if($report_id == 1){
+        if($report_type == 1){
             $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
         }
-        if($report_id == 2){
+        if($report_type == 2){
             $filename = 'revenue_report_by_arrival_first_to_25.xlsx';
         }
-        if($report_id == 3){
+        if($report_type == 3){
             $filename = 'revenue_report_by_arrival_to_last.xlsx';
         }
 
@@ -569,6 +571,8 @@ class AdminRevenueReportsController extends Controller
         ob_end_clean();
         $filePath = '/reports/revenue/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
-        return $filePath;
+        $from = Carbon::parse($from)->toDateString();
+        $to = Carbon::parse($to)->toDateString();
+        return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 }

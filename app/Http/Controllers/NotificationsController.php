@@ -7559,16 +7559,12 @@ class NotificationsController extends Controller
                     self::sms($body, $to, 1);
                 } else if ($id == 130) {
                     $now = Carbon::now();
-                    $file_path = $reference_1_id;
-                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Arrival Date  | ';
 
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
-
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
                     $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -8621,15 +8617,12 @@ class NotificationsController extends Controller
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
                     $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
-                    $file_path = $reference_1_id;
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Delivery Date  | ';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
                     $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -9877,15 +9870,13 @@ else if ($id == 178) {
                 }
                 else if ($id == 206) {
                     $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
-                    $file_path = $reference_1_id;
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $report_type = $reference_2_id;
+                    $subject = 'Retail Sales Report By Arrival Date  | ';
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
                     $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
@@ -9902,16 +9893,12 @@ else if ($id == 178) {
                 }
                 else if ($id == 207) {
                     $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
-                    $file_path = $reference_1_id;
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Retail Sales Report By Delivery Date  | ';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
-
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
                     $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 

@@ -20,7 +20,7 @@ class RetailSalesReport extends Command
      *
      * @var string
      */
-    protected $description = 'Retail Sales Report By Arrival';
+    protected $description = 'Retail Sales Report By Arrival Overall';
 
     /**
      * Create a new command instance.
@@ -39,7 +39,7 @@ class RetailSalesReport extends Command
      */
     public function handle()
     {
-        $response = AdminRetailReportController::retail_sales_report();
+        $response = AdminRetailReportController::retail_sales_report(1);
         if($response){
             NotificationsController::send(206, $response);
         }

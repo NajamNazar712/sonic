@@ -199,10 +199,20 @@ class AdminRetailReportController extends Controller
         return $datatable->make(true);
     }
 
-    public static function retail_sales_report(){
+    public static function retail_sales_report($report_type){
 
-        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        if($report_type == 1){
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
+            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        }
+        if($report_type == 2){
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+        }
+        if($report_type == 3){
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        }
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
             ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
@@ -258,7 +268,16 @@ class AdminRetailReportController extends Controller
             ->where('shipments.shipment_type', 2)
         ->get();
 
-        $filename = 'retail_sales_report_by_arrival.xlsx';
+
+        if($report_type == 1){
+            $filename = 'retail_sales_report_by_arrival_first_to_last.xlsx';
+        }
+        if($report_type == 2){
+            $filename = 'retail_sales_report_by_arrival_first_to_25.xlsx';
+        }
+        if($report_type == 3){
+            $filename = 'retail_sales_report_by_arrival_to_last.xlsx';
+        }
 
         $details = array();
 
@@ -362,13 +381,25 @@ class AdminRetailReportController extends Controller
         ob_end_clean();
         $filePath = '/reports/retail/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
-        return $filePath;
+        $from = Carbon::parse($from)->toDateString();
+        $to = Carbon::parse($to)->toDateString();
+        return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 
-    public static function retail_sales_report_by_delivery(){
+    public static function retail_sales_report_by_delivery($report_type){
 
-        $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        if($report_type == 1){
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
+            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        }
+        if($report_type == 2){
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+        }
+        if($report_type == 3){
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        }
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
             ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
@@ -424,7 +455,15 @@ class AdminRetailReportController extends Controller
             ->where('shipments.shipment_type', 2)
             ->get();
 
-        $filename = 'retail_sales_report_by_delivery.xlsx';
+        if($report_type == 1){
+            $filename = 'retail_sales_report_by_delivery_first_to_last.xlsx';
+        }
+        if($report_type == 2){
+            $filename = 'retail_sales_report_by_delivery_first_to_25.xlsx';
+        }
+        if($report_type == 3){
+            $filename = 'retail_sales_report_by_delivery_to_last.xlsx';
+        }
 
         $details = array();
 
@@ -528,6 +567,8 @@ class AdminRetailReportController extends Controller
         ob_end_clean();
         $filePath = '/reports/retail/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
-        return $filePath;
+        $from = Carbon::parse($from)->toDateString();
+        $to = Carbon::parse($to)->toDateString();
+        return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 }
