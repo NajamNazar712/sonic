@@ -560,8 +560,8 @@
                         }
                     },
                     {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
-                    {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
-                    {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
+                    {data: 'trax_id', name: 'e.trax_id', class: 'align-middle trax_id', searchable: false},
+                    {data: 'name', name: 'e.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {

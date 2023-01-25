@@ -2611,7 +2611,13 @@ class AdminReportsController extends Controller
     public function completed_delivery_notes_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 129);
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'cnic']);
+        // $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'cnic']);
+        $riders = DB::connection('reports')->table('riders')->leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->whereNotNull('riders.employee_id')
+            ->where('riders.status', 1)
+            ->select('riders.id', 'riders.name', 'riders.trax_id','h.name as hub_name','riders.cnic')->get();
+
         $admins = DB::connection('reports')->table('admins')->get(['id', 'name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
