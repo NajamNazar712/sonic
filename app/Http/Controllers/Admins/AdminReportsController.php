@@ -2610,6 +2610,7 @@ class AdminReportsController extends Controller
 
     public function completed_delivery_notes_index()
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 129);
         // $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'cnic']);
         $riders = DB::connection('reports')->table('riders')->leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
