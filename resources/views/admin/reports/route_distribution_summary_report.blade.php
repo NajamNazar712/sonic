@@ -322,11 +322,11 @@
                                 row.push(values.confirmation_pending_shipments);
                                 row.push(values.confirmation_pending_shipments_per);
 
-                                shipments_count_excel = shipments_count_excel + shipments_count;
-                                pending_shipments_excel = pending_shipments_excel + pending_shipments;
-                                delivered_shipments_excel = delivered_shipments_excel + delivered_shipments;
-                                undelivered_shipments_excel = undelivered_shipments_excel + undelivered_shipments;
-                                confirmation_pending_shipments_excel = confirmation_pending_shipments_excel + confirmation_pending_shipments;
+                                shipments_count_excel = shipments_count_excel + values.shipments_count;
+                                pending_shipments_excel = pending_shipments_excel + values.pending_shipments;
+                                delivered_shipments_excel = delivered_shipments_excel + values.delivered_shipments;
+                                undelivered_shipments_excel = undelivered_shipments_excel + values.undelivered_shipments;
+                                confirmation_pending_shipments_excel = confirmation_pending_shipments_excel + values.confirmation_pending_shipments;
                                 body.push(row);
                             });
 
