@@ -126,7 +126,11 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RevenueReportRemainingDays',
         'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
         'App\Console\Commands\RetailSalesReport',
+        'App\Console\Commands\RetailSalesReportCutOffDays',
+        'App\Console\Commands\RetailSalesReportRemainingDays',
         'App\Console\Commands\RetailSalesReportByDeliveryDate',
+        'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
+        'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         ];
 
     /**
