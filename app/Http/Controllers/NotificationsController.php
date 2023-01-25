@@ -9890,7 +9890,7 @@ else if ($id == 178) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
                     self::email($subject, $body, $to);
                 }
@@ -9913,7 +9913,7 @@ else if ($id == 178) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
                     self::email($subject, $body, $to);
                 }
