@@ -262,7 +262,7 @@ class AdminRetailReportController extends Controller
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment Number', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
+        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
 
         $serial_number = 1;
         foreach ($sales as $sale){
@@ -428,7 +428,7 @@ class AdminRetailReportController extends Controller
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment Number', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
+        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
 
         $serial_number = 1;
         foreach ($sales as $sale){
