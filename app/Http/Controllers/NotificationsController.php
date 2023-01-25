@@ -7558,7 +7558,6 @@ class NotificationsController extends Controller
                     $to = $retail_user->phone_no;
                     self::sms($body, $to, 1);
                 } else if ($id == 130) {
-                    $now = Carbon::now();
                     $file_path = $reference_1_id['file_path'];
                     $from = $reference_1_id['from'];
                     $to = $reference_1_id['to'];
@@ -7828,7 +7827,8 @@ class NotificationsController extends Controller
 
                     }
 
-                } else if ($id == 135) {
+                }
+                else if ($id == 135) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
@@ -8616,7 +8616,6 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
-                    $now = Carbon::now();
                     $file_path = $reference_1_id['file_path'];
                     $from = $reference_1_id['from'];
                     $to = $reference_1_id['to'];
@@ -9869,8 +9868,6 @@ else if ($id == 178) {
 
                 }
                 else if ($id == 206) {
-                    $now = Carbon::now();
-                    $report_type = $reference_2_id;
                     $subject = 'Retail Sales Report By Arrival Date  | ';
                     $file_path = $reference_1_id['file_path'];
                     $from = $reference_1_id['from'];
@@ -9892,7 +9889,6 @@ else if ($id == 178) {
                     self::email($subject, $body, $to, $cc);
                 }
                 else if ($id == 207) {
-                    $now = Carbon::now();
                     $file_path = $reference_1_id['file_path'];
                     $from = $reference_1_id['from'];
                     $to = $reference_1_id['to'];

@@ -379,7 +379,7 @@ class AdminRevenueReportsController extends Controller
             $filename = 'revenue_report_by_arrival_first_to_25.xlsx';
         }
         if($report_type == 3){
-            $filename = 'revenue_report_by_arrival_to_last.xlsx';
+            $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
         }
 
         $details = array();
