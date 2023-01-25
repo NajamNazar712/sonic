@@ -7577,9 +7577,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 133) {
 
                     $data = $reference_1_id;
@@ -8636,9 +8638,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
@@ -9892,7 +9896,9 @@ else if ($id == 178) {
 
                     $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
                 else if ($id == 207) {
                     $now = Carbon::now();
@@ -9915,7 +9921,9 @@ else if ($id == 178) {
 
                     $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
 
             }
