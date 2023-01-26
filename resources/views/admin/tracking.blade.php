@@ -797,6 +797,11 @@
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
+                                var on_hold_box_icon = '';
+
+                                if(details.consignee.crm_status){
+                                    on_hold_box_icon = ' <span><i class="fas fa-person-booth"></i></span> '
+                                }
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
                                 var $international_tracking_number = '';
@@ -813,7 +818,7 @@
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
@@ -1026,10 +1031,7 @@
                                 else {
                                     shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
                                 }
-                                if(details.consignee.crm_status){
-                                    shipment += '<td><strong>CRM Status</strong></td>';
-                                    shipment += '<td>Hold for Self Collection</td>';
-                                }
+                                
                                 shipment += '<td colspan="2"></td>';
                                 shipment += '</tr>';
                                 shipment += '<td><strong>Email</strong></td>';
