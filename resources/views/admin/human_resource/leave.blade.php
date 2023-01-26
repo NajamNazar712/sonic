@@ -117,7 +117,33 @@
                           method="post" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         @csrf
                         <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
+                        
                         <div class="row mb-2 justify-content-center">
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_qoute-error" class=" w-100" for="availble_qoute">Available Quota</label>
+                                    <input type="text" name="availble_qoute"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $avaialble_qouate }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Available Leaves</label>
+                                    <input type="text" name="availble_leaves"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_leave" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $available_leaves }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="remaining_leaves-error" class=" w-100" for="remaining_leaves">Remaining Leaves</label>
+                                    <input type="text" name="remaining_leaves"
+                                           class="form-control  rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Remaining is required" value="{{ $remaing_leaves }}">
+                                </div>
+                            </div>
+                            
                             <div class="col-6 mt-1">
 
                                 <div class="form-group input-group">

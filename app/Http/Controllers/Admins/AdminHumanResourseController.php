@@ -3892,6 +3892,10 @@ class AdminHumanResourseController extends Controller
             ->get();
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
         $admin_profile = Employee::where('trax_id', Auth::user()->trax_id);
+        $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
+        $avaialble_qouate = $available_qouates->leave_count;
+        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->trax_id)->where('status',6)->count();
+        
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
             if($admin_profile->employee_gender_id == 1){
@@ -3911,7 +3915,9 @@ class AdminHumanResourseController extends Controller
             }
 
         }
-        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic, 'leave_types' => $leave_types]);
+        $remaing_leaves = $avaialble_qouate - $available_leaves;
+
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic, 'leave_types' => $leave_types, 'avaialble_qouate' => $avaialble_qouate, 'available_leaves' => $available_leaves, 'remaing_leaves' => $remaing_leaves]);
     }
 
     public function leave_list(Request $request)
