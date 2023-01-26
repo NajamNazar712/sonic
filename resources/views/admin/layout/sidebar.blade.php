@@ -1217,7 +1217,7 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.shipper_summary.index') }}">Shipper Summary</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(823, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rise Pickup Report</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rider Pickup Report</a></li>
                         @endif
                     </ul>
                 </li>
