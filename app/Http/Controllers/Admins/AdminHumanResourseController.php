@@ -1354,6 +1354,10 @@ class AdminHumanResourseController extends Controller
         $employee->sub_department = $request->sub_department;
         if($request->has('employee_confirmation_status')){
             $employee->confirmation_status = $request->employee_confirmation_status;
+
+            if($employee->confirmation_status == 1){
+                $employee->fiscal_leave_count = 23;
+            }
         }
         $employee->update();
 
