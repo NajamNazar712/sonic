@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\HR\EmployeeLeaveLogFiscal;
 use App\Http\Models\HR\Employee;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class LeaveCountUpdateFiscalYear extends Command
@@ -39,23 +41,12 @@ class LeaveCountUpdateFiscalYear extends Command
     public function handle()
     {
         $month = Carbon::now()->month;
-        $employee_leave_log = EmployeeLeaveLog::where('month',$month);
+        $employee_leave_log = EmployeeLeaveLogFiscal::where('month',$month);
         if(!$employee_leave_log->exists()){
-            if($month == 7){
-                Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => 1]);
-                Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => 2]);
-            }elseif($month == 6 || $month == 5){
-                $one = 1;
-                $two = 3;
-                Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
-                Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
-            }else{
-                $one = 1;
-                $two = 2;
-                Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
-                Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
-            }
-            EmployeeLeaveLog::create([
+            Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => 3]);
+            Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => 26]);
+            
+            EmployeeLeaveLogFiscal::create([
                 'month' => $month
             ]);
 
