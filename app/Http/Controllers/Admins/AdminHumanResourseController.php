@@ -4134,10 +4134,11 @@ class AdminHumanResourseController extends Controller
         
                             if ($diffDays <= 56) {
                                 if ($request->leave_type == 1) {
-                                    if ($admin_profile->leave_count < $diffDays) {
+                                    if ($admin_profile->leave_count < $diffDays || $admin_profile->fiscal_leave_count < $diffDays) {
                                         return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                                     } else {
                                         $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                        $admin_profile->leave_count = $admin_profile->fiscal_leave_count - $diffDays;
                                     }
                                 }
                                 if ($request->leave_type == 2) {
