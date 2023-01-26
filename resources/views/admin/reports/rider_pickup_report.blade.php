@@ -257,7 +257,7 @@
                                 row.push(values.rider_id);
                                 row.push(values.rider_name);
                                 row.push(values.origin);
-                                row.push(values.pickup_note);
+                                row.push(values.pickup_note_id);
                                 row.push(values.scanned_shipments);
                                 row.push(values.arrived_shipments);
                                 row.push(values.without_scan_shipments);
