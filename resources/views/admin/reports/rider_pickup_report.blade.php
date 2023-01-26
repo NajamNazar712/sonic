@@ -166,9 +166,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#datatable_wrapper').hide();
-            var scanned_shipments = 0;
-            var arrived_shipments = 0;
-            var without_scan_shipments = 0;
+            
             
 
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
@@ -249,7 +247,11 @@
                             head.push('No. of Scanned Shipments');
                             head.push('No. of Arrived Shipments');
                             head.push('Arrival Without Scan Shipments');
-                          
+
+                            var scanned_shipments = 0;
+                            var arrived_shipments = 0;
+                            var without_scan_shipments = 0;
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -336,14 +338,14 @@
                     this.api().table().columns.adjust();
                 },
                 footerCallback: function(row, data, start, end, display) {
-                    scanned_shipments = 0;
-                    arrived_shipments = 0;
-                    without_scan_shipments = 0;
+                    var scanned_shipments_count = 0;
+                    var arrived_shipments_count = 0;
+                    var without_scan_shipments_count = 0;
                     
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments += shipment_data.scanned_shipments;
-                        arrived_shipments += shipment_data.arrived_shipments;
-                        without_scan_shipments += shipment_data.without_scan_shipments;
+                        scanned_shipments_count += shipment_data.scanned_shipments;
+                        arrived_shipments_count += shipment_data.arrived_shipments;
+                        without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
                     var api = this.api();
                     api.columns('.date', {
@@ -363,18 +365,18 @@
                         page: 'current'
                     }).every(function() {
                         
-                        $(this.footer()).html(scanned_shipments.toFixed(2));
+                        $(this.footer()).html(scanned_shipments_count.toFixed(2));
                     });
                     api.columns('.arrived_shipments', {
                         page: 'current'
                     }).every(function() {
-                        $(this.footer()).html(arrived_shipments.toFixed(2));
+                        $(this.footer()).html(arrived_shipments_count.toFixed(2));
                     });
                     api.columns('.without_scan_shipments', {
                         page: 'current'
                     }).every(function() {
                        
-                        $(this.footer()).html(without_scan_shipments.toFixed(2));
+                        $(this.footer()).html(without_scan_shipments_count.toFixed(2));
                     });
                 }
             });
