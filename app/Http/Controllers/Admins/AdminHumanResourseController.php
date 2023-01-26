@@ -3911,7 +3911,6 @@ class AdminHumanResourseController extends Controller
             }
 
         }
-
         return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic, 'leave_types' => $leave_types]);
     }
 
@@ -4087,124 +4086,364 @@ class AdminHumanResourseController extends Controller
 
     public function leave_request(Request $request)
     {
-
-        if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+        if($request->leave_type == 3 || $request->leave_type == 2 )
+        {
+                
+                if ((!empty($request->requested_from_date) && !empty($request->requested_to_date))) {
             
-            $admin_id = $request->admin_id;
-            $from = $request->requested_from_date;
-            $to = $request->requested_to_date;
-            $reason = $request->leave_request_reason;
-            $leave_type = LeaveType::find($request->leave_type);
-            $admin = Admin::find($admin_id);
-            if ($admin && $admin->trax_id) {
-                $admin_profile = Employee::where('trax_id', $admin->trax_id);
-                if ($admin_profile->exists()) {
-                    $admin_profile = $admin_profile->first();
-                    $admin_id = $admin_profile->id;
-
-                    $working_days = $admin_profile->department->working_days;
-                    $from_date = Carbon::parse($from);
-                    $to_date = Carbon::parse($to);
-                    if ($request->leave_type == 1) {
-                        //checking for fiscal year start
-                                            $start_year = Carbon::today()->month(7)->startOfMonth();
-                                            $end_year = Carbon::today()->month(6)->endOfMonth();
-                                           
-                                            if(Carbon::now() > $start_year){
-                                                $end_year = $end_year->addYear(1);
-                                            }        
-                                            else{
-                                                $start_year = $start_year->subYear(1);        
-                                            }
-                                            if(!($from_date >= $start_year && $to_date <= $end_year)){
-                                                return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
-                        
-                                            }
-                        //checking for fiscal year end
-                    }
-                    
-                    if ($working_days == 1) {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
-                    } else {
-                        $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
-                    }
-
-                    $diffDays++;
-
-                    if ($diffDays <= 56) {
-                        if ($request->leave_type == 1) {
-                            if ($admin_profile->leave_count < $diffDays) {
-                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+                    $admin_id = $request->admin_id;
+                    $from = $request->requested_from_date;
+                    $to = $request->requested_to_date;
+                    $reason = $request->leave_request_reason;
+                    $leave_type = LeaveType::find($request->leave_type);
+                    $admin = Admin::find($admin_id);
+                    if ($admin && $admin->trax_id) {
+                        $admin_profile = Employee::where('trax_id', $admin->trax_id);
+                        if ($admin_profile->exists()) {
+                            $admin_profile = $admin_profile->first();
+                            $admin_id = $admin_profile->id;
+        
+                            $working_days = $admin_profile->department->working_days;
+                            $from_date = Carbon::parse($from);
+                            $to_date = Carbon::parse($to);
+                            if ($request->leave_type == 1) {
+                                //checking for fiscal year start
+                                                    $start_year = Carbon::today()->month(7)->startOfMonth();
+                                                    $end_year = Carbon::today()->month(6)->endOfMonth();
+                                                   
+                                                    if(Carbon::now() > $start_year){
+                                                        $end_year = $end_year->addYear(1);
+                                                    }        
+                                                    else{
+                                                        $start_year = $start_year->subYear(1);        
+                                                    }
+                                                    if(!($from_date >= $start_year && $to_date <= $end_year)){
+                                                        return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                                
+                                                    }
+                                //checking for fiscal year end
+                            }
+                            
+                            if ($working_days == 1) {
+                                $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
                             } else {
-                                $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
                             }
+        
+                            $diffDays++;
+        
+                            if ($diffDays <= 56) {
+                                if ($request->leave_type == 1) {
+                                    if ($admin_profile->leave_count < $diffDays) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+                                    } else {
+                                        $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                    }
+                                }
+                                if ($request->leave_type == 2) {
+                                    if ($admin_profile->employee_gender_id == 1) {
+                                        return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 3) {
+                                    if ($admin_profile->employee_gender_id == 2) {
+                                        return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 4) {
+                                    if ($admin_profile->religion_id != 1) {
+                                        return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 5) {
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+        
+                                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                                if ($leave->exists()) {
+                                    return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
+                                }
+        
+                                $leave_request = new EmployeeLeave();
+                                $leave_request->employee_id = $admin_id;
+                                $leave_request->employee_type_id = 1;
+                                $leave_request->reporter_id = $admin_profile->line_manager->admin->id;
+                                $leave_request->from = $from;
+                                $leave_request->to = $to;
+                                $leave_request->applied_reason = $reason;
+                                $leave_request->leave_type = $request->leave_type;
+                                $leave_request->updated_by = auth()->id();
+                                $leave_request->save();
+                                $admin_profile->save();
+        
+                                NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                                NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                                //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+                                return redirect()->back()->with('success', 'Leave Request submitted successfully');
+                            } else {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.
+                                ');
+                            }
+        
+                        } else {
+                            return redirect()->back()->with('error', 'User Not Found');
                         }
-                        if ($request->leave_type == 2) {
-                            if ($admin_profile->employee_gender_id == 1) {
-                                return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
-                            }
-                            if ($diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
-                            }
-                        }
-                        if ($request->leave_type == 3) {
-                            if ($admin_profile->employee_gender_id == 2) {
-                                return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
-                            }
-                            if ($diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
-                            }
-                        }
-                        if ($request->leave_type == 4) {
-                            if ($admin_profile->religion_id != 1) {
-                                return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
-                            }
-                            if ($diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
-                            }
-                        }
-                        if ($request->leave_type == 5) {
-                            if ($diffDays > $leave_type->count) {
-                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
-                            }
-                        }
-
-                        $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
-                        if ($leave->exists()) {
-                            return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
-                        }
-
-                        $leave_request = new EmployeeLeave();
-                        $leave_request->employee_id = $admin_id;
-                        $leave_request->employee_type_id = 1;
-                        $leave_request->reporter_id = $admin_profile->line_manager->admin->id;
-                        $leave_request->from = $from;
-                        $leave_request->to = $to;
-                        $leave_request->applied_reason = $reason;
-                        $leave_request->leave_type = $request->leave_type;
-                        $leave_request->updated_by = auth()->id();
-                        $leave_request->save();
-                        $admin_profile->save();
-
-                        NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
-                        NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
-                        //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
-                        return redirect()->back()->with('success', 'Leave Request submitted successfully');
-                    } else {
-                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.
-                        ');
                     }
-
-                } else {
                     return redirect()->back()->with('error', 'User Not Found');
+        //            return response()->json(['status' => '1', 'error' => 'User Not Found']);
+                } else {
+                    return redirect()->back()->with('error', 'All Fields Are Mandatory!');
+        //            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
                 }
             }
-            return redirect()->back()->with('error', 'User Not Found');
-//            return response()->json(['status' => '1', 'error' => 'User Not Found']);
-        } else {
-            return redirect()->back()->with('error', 'All Fields Are Mandatory!');
-//            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
-        }
+            else
+            {
+                if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+            
+                    $admin_id = $request->admin_id;
+                    $from = $request->requested_from_date;
+                    $to = $request->requested_to_date;
+                    $reason = $request->leave_request_reason;
+                    $leave_type = LeaveType::find($request->leave_type);
+                    $admin = Admin::find($admin_id);
+                    if ($admin && $admin->trax_id) {
+                        $admin_profile = Employee::where('trax_id', $admin->trax_id);
+                        if ($admin_profile->exists()) {
+                            $admin_profile = $admin_profile->first();
+                            $admin_id = $admin_profile->id;
+        
+                            $working_days = $admin_profile->department->working_days;
+                            $from_date = Carbon::parse($from);
+                            $to_date = Carbon::parse($to);
+                            if ($request->leave_type == 1) {
+                                //checking for fiscal year start
+                                                    $start_year = Carbon::today()->month(7)->startOfMonth();
+                                                    $end_year = Carbon::today()->month(6)->endOfMonth();
+                                                   
+                                                    if(Carbon::now() > $start_year){
+                                                        $end_year = $end_year->addYear(1);
+                                                    }        
+                                                    else{
+                                                        $start_year = $start_year->subYear(1);        
+                                                    }
+                                                    if(!($from_date >= $start_year && $to_date <= $end_year)){
+                                                        return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                                
+                                                    }
+                                //checking for fiscal year end
+                            }
+                            
+                            if ($working_days == 1) {
+                                $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+                            } else {
+                                $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+                            }
+        
+                            $diffDays++;
+        
+                            if ($diffDays <= 56) {
+                                if ($request->leave_type == 1) {
+                                    if ($admin_profile->leave_count < $diffDays) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+                                    } else {
+                                        $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                    }
+                                }
+                                if ($request->leave_type == 2) {
+                                    if ($admin_profile->employee_gender_id == 1) {
+                                        return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 3) {
+                                    if ($admin_profile->employee_gender_id == 2) {
+                                        return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 4) {
+                                    if ($admin_profile->religion_id != 1) {
+                                        return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
+                                    }
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+                                if ($request->leave_type == 5) {
+                                    if ($diffDays > $leave_type->count) {
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+                                    }
+                                }
+        
+                                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                                if ($leave->exists()) {
+                                    return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
+                                }
+        
+                                $leave_request = new EmployeeLeave();
+                                $leave_request->employee_id = $admin_id;
+                                $leave_request->employee_type_id = 1;
+                                $leave_request->reporter_id = $admin_profile->line_manager->admin->id;
+                                $leave_request->from = $from;
+                                $leave_request->to = $to;
+                                $leave_request->applied_reason = $reason;
+                                $leave_request->leave_type = $request->leave_type;
+                                $leave_request->updated_by = auth()->id();
+                                $leave_request->save();
+                                $admin_profile->save();
+        
+                                NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                                NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                                //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+                                return redirect()->back()->with('success', 'Leave Request submitted successfully');
+                            } else {
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.
+                                ');
+                            }
+        
+                        } else {
+                            return redirect()->back()->with('error', 'User Not Found');
+                        }
+                    }
+                    return redirect()->back()->with('error', 'User Not Found');
+        //            return response()->json(['status' => '1', 'error' => 'User Not Found']);
+                } else {
+                    return redirect()->back()->with('error', 'All Fields Are Mandatory!');
+        //            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
+                }
+            }
+//         if ((!empty($request->requested_from_date) && !empty($request->requested_to_date)) && !empty($request->leave_request_reason)) {
+            
+//             $admin_id = $request->admin_id;
+//             $from = $request->requested_from_date;
+//             $to = $request->requested_to_date;
+//             $reason = $request->leave_request_reason;
+//             $leave_type = LeaveType::find($request->leave_type);
+//             $admin = Admin::find($admin_id);
+//             if ($admin && $admin->trax_id) {
+//                 $admin_profile = Employee::where('trax_id', $admin->trax_id);
+//                 if ($admin_profile->exists()) {
+//                     $admin_profile = $admin_profile->first();
+//                     $admin_id = $admin_profile->id;
+
+//                     $working_days = $admin_profile->department->working_days;
+//                     $from_date = Carbon::parse($from);
+//                     $to_date = Carbon::parse($to);
+//                     if ($request->leave_type == 1) {
+//                         //checking for fiscal year start
+//                                             $start_year = Carbon::today()->month(7)->startOfMonth();
+//                                             $end_year = Carbon::today()->month(6)->endOfMonth();
+                                           
+//                                             if(Carbon::now() > $start_year){
+//                                                 $end_year = $end_year->addYear(1);
+//                                             }        
+//                                             else{
+//                                                 $start_year = $start_year->subYear(1);        
+//                                             }
+//                                             if(!($from_date >= $start_year && $to_date <= $end_year)){
+//                                                 return redirect()->back()->with('error', 'Leave Request Can\'t be approve');
+                        
+//                                             }
+//                         //checking for fiscal year end
+//                     }
+                    
+//                     if ($working_days == 1) {
+//                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SUNDAY]));
+//                     } else {
+//                         $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY,Carbon::SUNDAY]));
+//                     }
+
+//                     $diffDays++;
+
+//                     if ($diffDays <= 56) {
+//                         if ($request->leave_type == 1) {
+//                             if ($admin_profile->leave_count < $diffDays) {
+//                                 return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+//                             } else {
+//                                 $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+//                             }
+//                         }
+//                         if ($request->leave_type == 2) {
+//                             if ($admin_profile->employee_gender_id == 1) {
+//                                 return redirect()->back()->with('error', 'Maternity for males : Your gender doesn\'t allow to apply this leave category.');
+//                             }
+//                             if ($diffDays > $leave_type->count) {
+//                                 return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+//                             }
+//                         }
+//                         if ($request->leave_type == 3) {
+//                             if ($admin_profile->employee_gender_id == 2) {
+//                                 return redirect()->back()->with('error', 'Your gender doesn\'t allow to apply this leave category.');
+//                             }
+//                             if ($diffDays > $leave_type->count) {
+//                                 return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+//                             }
+//                         }
+//                         if ($request->leave_type == 4) {
+//                             if ($admin_profile->religion_id != 1) {
+//                                 return redirect()->back()->with('error', 'Your are not allow to apply this leave category.');
+//                             }
+//                             if ($diffDays > $leave_type->count) {
+//                                 return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+//                             }
+//                         }
+//                         if ($request->leave_type == 5) {
+//                             if ($diffDays > $leave_type->count) {
+//                                 return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from '.$leave_type->count.' days');
+//                             }
+//                         }
+
+//                         $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+//                         if ($leave->exists()) {
+//                             return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
+//                         }
+
+//                         $leave_request = new EmployeeLeave();
+//                         $leave_request->employee_id = $admin_id;
+//                         $leave_request->employee_type_id = 1;
+//                         $leave_request->reporter_id = $admin_profile->line_manager->admin->id;
+//                         $leave_request->from = $from;
+//                         $leave_request->to = $to;
+//                         $leave_request->applied_reason = $reason;
+//                         $leave_request->leave_type = $request->leave_type;
+//                         $leave_request->updated_by = auth()->id();
+//                         $leave_request->save();
+//                         $admin_profile->save();
+
+//                         NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+//                         NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+//                         //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
+//                         return redirect()->back()->with('success', 'Leave Request submitted successfully');
+//                     } else {
+//                         return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.
+//                         ');
+//                     }
+
+//                 } else {
+//                     return redirect()->back()->with('error', 'User Not Found');
+//                 }
+//             }
+//             return redirect()->back()->with('error', 'User Not Found');
+// //            return response()->json(['status' => '1', 'error' => 'User Not Found']);
+//         } else {
+//             return redirect()->back()->with('error', 'All Fields Are Mandatory!');
+// //            return response()->json(['status' => '0', 'error' => 'All Fields Are Mandatory!']);
+//         }
     }
 
     public function leave_approve(Request $request)

@@ -404,7 +404,7 @@
                 width: '100%',
                 allowClear: true
             });
-            $('#leave_type').select2({
+            $('#leave_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Leave Type',
                 width: '100%',
                 allowClear: true
@@ -875,7 +875,7 @@
             $("#leave_request_btn").click(function () {
                 $("#leave_request").modal('show');
             });
-
+           
             $('#leave_request').on('hide.bs.modal', function () {
                 $('#leave_request_reason').val('');
                 $('#leave_type').val('').trigger('change');
@@ -952,7 +952,41 @@
             //     // }
             // });
             //todo : leave request form submission end
+        
+        $("#leave_type").change(function(){
+            var leave_type_partinty = $('#leave_type').val();
+            if(leave_type_partinty !== null || leave_type_partinty !== '')
+            {   console.log(leave_type_partinty,1);
+                if (leave_type_partinty == 3 || leave_type_partinty == 2) 
+                {
+                    console.log(leave_type_partinty,2);
+                   
+                    if($("#leave_request_reason").data("rule-required")) {
+                            $("#leave_request_reason").data("rule-required",false);    
+                        }
+                  
+               
+                   
+                }
+                else
+                {
+                    console.log(leave_type_partinty,3);
+                    $("#leave_request_reason").attr('data-rule-required',true);
+                    $("#leave_request_reason").attr('data-rule-message','Reason is required');
+                }
+            }
+            else
+            {
+                console.log(leave_type_partinty,4);
+                $("#leave_request_reason").attr('data-rule-required',true);
+                $("#leave_request_reason").attr('data-rule-message','Reason is required');
+
+
+            }
+          
+    
+           
+            });
         });
     </script>
-
 @endsection
