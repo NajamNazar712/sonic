@@ -10632,7 +10632,7 @@ public function employee_confirmation_list(Request $request){
             })
             
             ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
-            ->where('v2_pickup_notes.status',4)
+            ->where('v2_pickup_notes.status',1)
             ->groupBy('v2_pickup_notes.id');
 
         $datatables = Datatables::of($rider_pickup)
