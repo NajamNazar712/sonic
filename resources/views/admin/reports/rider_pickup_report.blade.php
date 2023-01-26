@@ -73,7 +73,7 @@
                             <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Pickup Note No.</th>
+                            <th class="border-primary border-darken-1">Pickup Note ID</th>
                             <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
@@ -243,7 +243,7 @@
                             head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');
-                            head.push('Pickup Note No.');
+                            head.push('Pickup Note ID');
                             head.push('No. of Scanned Shipments');
                             head.push('No. of Arrived Shipments');
                             head.push('Arrival Without Scan Shipments');
@@ -251,7 +251,7 @@
                             var scanned_shipments = 0;
                             var arrived_shipments = 0;
                             var without_scan_shipments = 0;
-                            
+
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -385,6 +385,41 @@
                 $('#datatable_wrapper').show();
                 table.draw();
             });
+
+            $('#datatable tbody').on('click', 'tr td.pickup_note button.print', function() {
+                   
+                var pickup_note_id = parseInt($(this).attr('rel'));
+                print(pickup_note_id);
+            });
+    
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': [id],
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
+    
+                    if(!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+            }
         });
 
         function scanned_shipments_popup(pickup_note_id) {

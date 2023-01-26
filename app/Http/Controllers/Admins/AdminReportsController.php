@@ -10630,12 +10630,9 @@ public function employee_confirmation_list(Request $request){
                     ->where('total_s.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
-            ->leftjoin('shipments_journey as total_not_scanned', function ($join) {
-                $join->on('total_not_scanned.shipment_id', '=', 'prs.shipment_id')
-                    ->where('total_not_scanned.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id <> 53 and verification = 1)'));
-            })
-            ->select('pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_not_scanned.id) as without_scan_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+            
+            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+            ->where('v2_pickup_notes.status',4)
             ->groupBy('v2_pickup_notes.id');
 
         $datatables = Datatables::of($rider_pickup)
@@ -10657,12 +10654,20 @@ public function employee_confirmation_list(Request $request){
                 }
             }) 
             ->addColumn('without_scan_shipments_btn', function ($entry) {
+
                 $function = "without_scan_shipments_popup('".$entry->id."')";
-                if ($entry->without_scan_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->without_scan_shipments) . '</button>';
+                if ($entry->arrived_shipments > 0) {
+
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
                 } else {
                     return 0;
                 }
+            })
+            ->editColumn('pickup_note_id', function ($entry) {
+                if ($entry->pickup_note_id != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                return '';
             })
             ->addColumn('pickup_note_btn', function ($entry) {
                 $function = "pickup_note('".$entry->id."')";
@@ -10697,9 +10702,9 @@ public function employee_confirmation_list(Request $request){
             ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
             ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
             ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-            ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
-            ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
-            ->leftjoin('shipments_journey as total_s', function ($join) {
+            ->join('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+            ->join('shipments as s', 's.id', '=', 'prs.shipment_id')
+            ->join('shipments_journey as total_s', function ($join) {
                 $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
                     ->where('total_s.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
@@ -10732,19 +10737,36 @@ public function employee_confirmation_list(Request $request){
     }
 
     public function rider_pickup_without_scan_shipments(Request $request){
+        $scanned_shipments =  DB::connection('reports')->table('v2_pickup_notes')
+            ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
+            ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+            ->join('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+            ->join('shipments as s', 's.id', '=', 'prs.shipment_id')
+            ->join('shipments_journey as total_s', function ($join) {
+                $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
+                    ->where('total_s.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+            })->select('s.tracking_number','s.id')
+            ->where('v2_pickup_notes.id',$request->id)
+            ->pluck('id')->toArray();
+
         $shipments =  DB::connection('reports')->table('v2_pickup_notes')
         ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
         ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
         ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
         ->join('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
         ->join('shipments as s', 's.id', '=', 'prs.shipment_id')
-        ->join('shipments_journey as total_not_scanned', function ($join) {
-            $join->on('total_not_scanned.shipment_id', '=', 'prs.shipment_id')
-                ->where('total_not_scanned.id', '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id <> 53 and verification = 1)'));
+        ->join('shipments_journey as arrsh', function ($join) {
+            $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
+                ->where('arrsh.id', '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
         })->select('s.tracking_number','s.id')
         ->where('v2_pickup_notes.id',$request->id)
+        ->whereNotIn('s.id',$scanned_shipments)
         ->get();
+
+
    
         return response()->json(['status' => 1, 'data' => $shipments]);
     }
