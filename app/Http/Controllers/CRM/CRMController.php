@@ -399,7 +399,7 @@ class CRMController extends Controller
                     
                     $crm_request_status_history = new CrmRequestStatusHistory();
                     $crm_request_status_history->crm_request_id = $id;
-                    $crm_request_status_history->status_id = 7;
+                    $crm_request_status_history->status_id = 4;
                     $crm_request_status_history->save();
 
                 }
@@ -409,7 +409,7 @@ class CRMController extends Controller
                     
                     $crm_request_status_history = new CrmRequestStatusHistory();
                     $crm_request_status_history->crm_request_id = $id;
-                    $crm_request_status_history->status_id = 7;
+                    $crm_request_status_history->status_id = 4;
                     $crm_request_status_history->save();
                     
                 }
