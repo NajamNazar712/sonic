@@ -959,7 +959,6 @@
             {   console.log(leave_type_partinty,1);
                 if (leave_type_partinty == 3 || leave_type_partinty == 2) 
                 {
-                    console.log(leave_type_partinty,2);
                    
                     if($("#leave_request_reason").data("rule-required")) {
                             $("#leave_request_reason").data("rule-required",false);    
