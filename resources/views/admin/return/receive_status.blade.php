@@ -889,39 +889,39 @@
                                                         });
 
                                                     }
-                                                    else if(data.negative_shipper.length > 0) {
-                                                        $.each(data.negative_shipper, function (index, tracking_number) {
-                                                            tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                                        });
-
-                                                        var html = '<p>Following Shipment(s) Can not marked as "Return Unsuccessful for CX and Sales"</p><br>';
-                                                        html += tracking_numbers;
-                                                        content = document.createElement('div');
-                                                        content.innerHTML = html;
-                                                        swal({
-                                                            title: 'Negative Balance Shipper(s)',
-                                                            content: content,
-                                                            icon: 'warning',
-                                                            buttons: {
-                                                                confirm: {
-                                                                    text: 'OK',
-                                                                    value: null,
-                                                                    visible: true,
-                                                                    closeModal: true,
-                                                                }
-                                                            },
-                                                            closeOnClickOutside: false,
-                                                            closeOnEsc: false,
-                                                            dangerMode: true
-                                                        }).then(function (confirm) {
-                                                            if (confirm) {
-                                                                location.reload();
-                                                            }else{
-                                                                location.reload();
-                                                            }
-                                                        });
-
-                                                    }
+                                                    // else if(data.negative_shipper.length > 0) {
+                                                    //     $.each(data.negative_shipper, function (index, tracking_number) {
+                                                    //         tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                                    //     });
+                                                    //
+                                                    //     var html = '<p>Following Shipment(s) Can not marked as "Return Unsuccessful for CX and Sales"</p><br>';
+                                                    //     html += tracking_numbers;
+                                                    //     content = document.createElement('div');
+                                                    //     content.innerHTML = html;
+                                                    //     swal({
+                                                    //         title: 'Negative Balance Shipper(s)',
+                                                    //         content: content,
+                                                    //         icon: 'warning',
+                                                    //         buttons: {
+                                                    //             confirm: {
+                                                    //                 text: 'OK',
+                                                    //                 value: null,
+                                                    //                 visible: true,
+                                                    //                 closeModal: true,
+                                                    //             }
+                                                    //         },
+                                                    //         closeOnClickOutside: false,
+                                                    //         closeOnEsc: false,
+                                                    //         dangerMode: true
+                                                    //     }).then(function (confirm) {
+                                                    //         if (confirm) {
+                                                    //             location.reload();
+                                                    //         }else{
+                                                    //             location.reload();
+                                                    //         }
+                                                    //     });
+                                                    //
+                                                    // }
                                                     else{
                                                         toastr.success(data.success, 'Success!', {
                                                             positionClass: 'toast-bottom-center',

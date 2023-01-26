@@ -4,24 +4,23 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminRevenueReportsController;
 use App\Http\Controllers\NotificationsController;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class RevenueReportMonthlyEmail extends Command
+class RevenueReportByDeliveryDateRemainingDays extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:revenuereport';
+    protected $signature = 'email:revenuereportbydeliveryremainingdays';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Monthly Revenue Report';
+    protected $description = 'Revenue report by delivery date remaining days';
 
     /**
      * Create a new command instance.
@@ -40,11 +39,11 @@ class RevenueReportMonthlyEmail extends Command
      */
     public function handle()
     {
-        //from 1st to last of month
-        $response = AdminRevenueReportsController::revenue_report(1);
+        //from 25th to last
+        $response = AdminRevenueReportsController::revenue_report_by_delivery_date(3);
         if($response)
         {
-            NotificationsController::send(130,$response);
+            NotificationsController::send(156,$response);
         }
     }
 }
