@@ -7558,27 +7558,25 @@ class NotificationsController extends Controller
                     $to = $retail_user->phone_no;
                     self::sms($body, $to, 1);
                 } else if ($id == 130) {
-                    $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Arrival Date  | ';
 
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
-
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 133) {
 
                     $data = $reference_1_id;
@@ -7829,7 +7827,8 @@ class NotificationsController extends Controller
 
                     }
 
-                } else if ($id == 135) {
+                }
+                else if ($id == 135) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
@@ -8617,27 +8616,25 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
-                    $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Delivery Date  | ';
 
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
-
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_revenue_by_delivery_return_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
@@ -9395,7 +9392,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[crm_request_id]', str_pad($crm_request->id, 6, '0', STR_PAD_LEFT), $body);
                         }
                         if (strpos($body, '[comment]') !== FALSE) {
-                            $body = str_replace('[comment]', $crm_comment->comment, $body);
+                            $body = str_replace('[comment]', preg_replace("/<br\W*?\/>/", "\n", $crm_comment->comment), $body);
                         }
 
                         $to = $phone_number;
@@ -9869,6 +9866,47 @@ else if ($id == 178) {
 
                     self::email($subject, $body, $to);
 
+                }
+                else if ($id == 206) {
+                    $subject = 'Retail Sales Report By Arrival Date  | ';
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
+                }
+                else if ($id == 207) {
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Retail Sales Report By Delivery Date  | ';
+
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
 
             }
