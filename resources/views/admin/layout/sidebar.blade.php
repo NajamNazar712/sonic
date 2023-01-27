@@ -1756,12 +1756,20 @@
                                                 @if (session('role_id') == 1 || in_array(474, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.users.index') }}">Users</a></li>
                                                 @endif
+                                                @if (session('role_id') == 1 || in_array(584, session('permissions')))
+                                                    <li><a class="menu-item" href="{{ route('admin.retail.add.rates') }}">Retail Standard Rates</a></li>
+                                                @endif
+
                                                 @if (session('role_id') == 1 || in_array(431, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.franchise.index') }}">Franchise</a></li>
                                                 @endif
                                                 @if (session('role_id') == 1 || in_array(432, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.trax_center.index') }}">Trax Center</a></li>
                                                 @endif
+                                                @if (session('role_id') == 1 || in_array(585, session('permissions')))
+                                                    <li class=" nav-item"><a href="{{route('admin.retail.international.rates.index')}}"><span class="menu-title">Retail Rate Upload</span></a> </li>
+                                                @endif
+
                                             </ul>
                                         </li>
                                     @endif
