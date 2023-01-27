@@ -192,7 +192,7 @@ class AdminCRMController extends Controller
                                     }
                                     else{
                                         if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                            if(in_array($complaint_id, [11, 12, 13])){
+                                            if(in_array($complaint_id, [11, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
                                                 $flag = true;
                                                 $cannot_change = true;
@@ -231,7 +231,7 @@ class AdminCRMController extends Controller
                                 }
                                 else{
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                        if(in_array($complaint_id, [11, 12, 13])){
+                                        if(in_array($complaint_id, [11, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
                                             $flag = true;
                                             $cannot_change = true;
@@ -301,7 +301,7 @@ class AdminCRMController extends Controller
                             $complain = $is_shipment->id;
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                    if(in_array($complaint_id, [11, 12, 13])){
+                                    if(in_array($complaint_id, [11, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
                                         $flag = true;
                                         $cannot_change = true;
@@ -394,7 +394,7 @@ class AdminCRMController extends Controller
                             }
                         }else{
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                if(in_array($complaint_id, [11, 12, 13])){
+                                if(in_array($complaint_id, [11, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
                                     $cannot_change = true;
