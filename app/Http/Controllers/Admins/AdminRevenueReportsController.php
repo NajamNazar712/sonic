@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PHPExcel_Style_NumberFormat;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -308,15 +309,20 @@ class AdminRevenueReportsController extends Controller
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
 
-        $sales = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+        $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
+        $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
+
+        $sales = DB::connection('reports')->table('shipments_journey as sj')
+            ->join('shipments', 'shipments.id', 'sj.shipment_id')
+            ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=', 'bc.id')
             ->leftjoin('zone_class_cities as zcc', function ($join) {
                 $join->on('z.id', '=', 'zcc.zone_id')
                     ->on('dc.id', '=', 'zcc.city_id')
@@ -330,11 +336,6 @@ class AdminRevenueReportsController extends Controller
                         DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)'));
             })
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-            })
             ->leftJoin('pending_payment_shipments as pps', function ($join) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where('pps.id', '=',
@@ -364,7 +365,10 @@ class AdminRevenueReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to])
+            ->where('sj.id', '>=', $from_id)
+            ->where('sj.id', '<=', $to_id)
             ->get();
+
 
 
         if($report_type == 1){
@@ -382,7 +386,7 @@ class AdminRevenueReportsController extends Controller
         $details[] = ['S.No.', 'Tracking Number', 'Account No.', 'Business Category', 'Shipper', 'Order Id', 'Status', 'Payment Status', 'Payment Number', 'SDN Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Zone', 'Class', 'Shipping Mode', 'Collection Amount', 'Actual Weight', 'Chargeable Weight', 'Weight Charges', 'Cash Handling Charges', 'Insurance Charges', 'Packaging Charges', 'Fuel Surcharge', 'Return Charges', 'Replacement Charges', 'Packing Charges', 'Try & Buy Charges', 'NSA/OSA Charges', 'Intercept Charges', 'GST', 'Total Charges', 'Estimated Charges', 'Net Payable', 'Delivered/Returned Date'];
 
         $serial_number = 1;
-        foreach ($sales as $index => $sale) {
+        foreach ($sales as $sale) {
             if ($sale->dr_status_id == 20) {
                 $cash_handling_charges = "-";
                 $return_charges = number_format($sale->return_charges, 2);
@@ -523,7 +527,7 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
         $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
