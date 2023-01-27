@@ -289,6 +289,7 @@ class AdminRevenueReportsController extends Controller
         header('Cache-Control: max-age=0');
 
         ob_start();
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
@@ -567,6 +568,7 @@ class AdminRevenueReportsController extends Controller
         header('Cache-Control: max-age=0');
 
         ob_start();
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
