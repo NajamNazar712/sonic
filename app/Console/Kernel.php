@@ -345,12 +345,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '23:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(28, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
 
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(27, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(28, '02:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
         $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
