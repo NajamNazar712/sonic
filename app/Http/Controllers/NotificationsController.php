@@ -9870,7 +9870,34 @@ else if ($id == 178) {
                     self::email($subject, $body, $to);
 
                 }
+                else if($id == 208)
+                {
+                    $employee_id = $reference_1_id;
+                    $employee = Employee::find($employee_id);
+                    
+                    if($employee)
+                    {
+                        if (strpos($subject, '[employee_name]') !== FALSE) {
+                            $subject = str_replace('[employee_name]', $employee->name, $subject);
+                        }
 
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $employee->name, $body);
+                        }
+    
+                        if (strpos($body, '[emp_id]') !== FALSE) {
+                            $body = str_replace('[emp_id]', $employee->trax_id, $body);
+                        }
+
+                        $line_manager = Employee::find($employee->line_manager_id);
+                        if($line_manager)
+                        {
+                            self::email($subject, $body, $line_manager->official_email);
+                        }
+
+
+                    }
+                }
             }
         }
     }

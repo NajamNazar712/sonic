@@ -807,6 +807,9 @@ class AdminNotificationsController extends Controller
         }
         elseif($id == 205){
             $details['fields'] = ['admin', 'preview'];
+        }elseif($id == 208)
+        {
+            $details['fields'] = ['employee_name', 'emp_id'];
         }
         return $details;
     }

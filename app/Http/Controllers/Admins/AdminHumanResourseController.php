@@ -4107,6 +4107,7 @@ class AdminHumanResourseController extends Controller
                     $reason = $request->leave_request_reason;
                     $leave_type = LeaveType::find($request->leave_type);
                     $admin = Admin::find($admin_id);
+                   
                     if ($admin && $admin->trax_id) {
                         $admin_profile = Employee::where('trax_id', $admin->trax_id);
                         if ($admin_profile->exists()) {
@@ -4185,7 +4186,7 @@ class AdminHumanResourseController extends Controller
                                 if ($leave->exists()) {
                                     return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
                                 }
-        
+                              
                                 $leave_request = new EmployeeLeave();
                                 $leave_request->employee_id = $admin_id;
                                 $leave_request->employee_type_id = 1;
@@ -4200,6 +4201,7 @@ class AdminHumanResourseController extends Controller
         
                                 NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
                                 NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                                NotificationsController::send(208,$admin_id);
                                 //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
                                 return redirect()->back()->with('success', 'Leave Request submitted successfully');
                             } else {
@@ -4320,6 +4322,8 @@ class AdminHumanResourseController extends Controller
         
                                 NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
                                 NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                                NotificationsController::send(208,$admin_id);
+                                
                                 //                return response()->json(['status' => '2', 'success' => 'Leave Request submitted successfully']);
                                 return redirect()->back()->with('success', 'Leave Request submitted successfully');
                             } else {
