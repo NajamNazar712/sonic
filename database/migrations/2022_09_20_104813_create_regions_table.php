@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class RecreateBookingTypeIdIndexShipmentsTable extends Migration
+class CreateRegionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function up()
     {
-//        Schema::table('shipments', function (Blueprint $table) {
-//            $table->dropIndex(['booking_type_id']);
-//            $table->index('booking_type_id');
-//        });
+        Schema::create('regions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('status_id')->index()->default(0); //0 inactive 1 active
+            $table->timestamps();
+        });
     }
 
     /**
@@ -26,6 +28,6 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('regions');
     }
 }
