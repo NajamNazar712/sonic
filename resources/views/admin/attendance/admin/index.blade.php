@@ -140,14 +140,75 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-2 mt-1">
-                                            <div class="form-group">
-                                                <button type="button" id="search_filter_btn"
-                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
-                                                    Search
-                                                </button>
+                                        
+                                            <div class="col-2">
+                                                <div class="form-group">
+                                                    <button type="button" id="search_filter_btn"
+                                                            class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                        Search
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
+                                            <div class="col-md-6"></div>
+                                            <div class="col-md-6 mt-4 float-right">
+                                                <div class=" card">
+                                                    <div class="card-header">
+                                                        <div class="heading-elements">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="primary border-primary round"><a
+                                                                            data-action="collapse">Legend
+                                                                        <i class="ft-minus"></i></a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-content collapse">
+                                                        <div class="card-body p-1">
+                                                            <h4 class=" info">Legend</h4>
+                                                            <input type="hidden" id="legend_filter">
+                                                            <table class="table mb-0 float-left">
+                                                                <tbody>
+                                                               
+                                                                        <tr style="background-color: #b57c56bf; color:#010a10;"
+                                                                            class="legends">
+                                                                            <td>
+                                                                                {{-- <button type="button"
+                                                                                        class="btn btn-sm round btn-min-width text-white"
+                                                                                        style="background-color: #b57c56bf"
+                                                                                        disabled>
+                                                                                </button> --}}
+                                                                            </td>
+                                                                            <td class="align-middle">Leave
+                                                                                </td>
+                                                                        </tr>
+                                                                        <tr style="background-color: #FF0000; color:#010a10;"
+                                                                        class="legends">
+                                                                        <td>
+                                                                            {{-- <button type="button"
+                                                                                    class="btn btn-sm round btn-min-width text-white"
+                                                                                    style="background-color: #b57c56bf"
+                                                                                    disabled>
+                                                                            </button> --}}
+                                                                        </td>
+                                                                        <td class="align-middle">Absent
+                                                                            </td>
+                                                                    </tr>
+                                                                        <tr style="background-color: #ffa8089c; color:#010a10;"
+                                                                        class="legends">
+                                                                            <td>
+                                                                                {{-- <button type="button"
+                                                                                        class="btn btn-sm round btn-min-width text-white"
+                                                                                        style="background-color: #ffa8089c"
+                                                                                        disabled>
+                                                                                </button> --}}
+                                                                            </td>
+                                                                            <td class="align-middle">Late</td>
+                                                                        </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                     </form>
                                 </div>
                             </div>
@@ -214,7 +275,7 @@
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
-                                <tr class="bg-primary white">
+                                <tr class="bg-primary  white">
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
@@ -265,7 +326,21 @@
     <script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
             type="text/javascript"></script>
-
+    <style>
+        .leave
+        {
+            background-color: #b57c56bf;
+        }
+        .absent
+        {
+           background-color: ##FF0000;
+        }
+        
+        .late
+        {
+            background-color: #ffa8089c;
+        }
+    </style>
     <script type="text/javascript">
         $(document).ready(function () {
 
