@@ -31,6 +31,7 @@
                                         <th>Height (cm)</th>
                                         <th>Pieces</th>
                                         <th>Payment Mode ID</th>
+                                        <th>Charges Mode ID</th>
                                         <th>Shipper Cell Number (03000000000)</th>
                                         <th>Shipper Name</th>
                                         <th>Shipper CNIC</th>
@@ -40,12 +41,16 @@
                                         <th>Consignee CNIC</th>
                                         <th>Consignee Address</th>
                                         <th>Order ID</th>
+                                        <th>Insurance Offered</th>
+                                        <th>Insurance Value</th>
+                                        <th>Packaging Charges</th>
                                         <th>Trax Box ID</th>
-                                        <th>Weight Charges</th>
-                                        <th>Fuel Surcharge</th>
+                                      {{--  <th>Weight Charges</th>
+                                        <th>Fuel Surcharge</th>--}}
                                         <th>IBAN Number</th>
                                         <th>Account Number</th>
                                         <th>Bank ID</th>
+                                        <th>Special Instruction</th>
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -169,12 +174,27 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
+                                            @if(isset($errors[$no]['insurance_offered']))
+                                                <td>{!! Form::select('form[' . $no . '][insurance_offered]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control insurance_offered is-invalid select2','id'=>'insurance_offered','placeholder' => '']) !!}<font color="red">{{$errors[$no]['insurance_offered']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][insurance_offered]', $ro['insurance_offered'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['insurance_value']))
+                                                <td>{!! Form::text('form[' . $no . '][insurance_value]', $ro['insurance_value'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['insurance_value']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][insurance_value]', $ro['insurance_value'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                                @if(isset($errors[$no]['packaging_charges']))
+                                                    <td>{!! Form::text('form[' . $no . '][packaging_charges]', $ro['packaging_charges'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['packaging_charges']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][packaging_charges]', $ro['packaging_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @endif
                                             @if(isset($errors[$no]['trax_box_id']))
                                                 <td>{!! Form::select('form[' . $no . '][trax_box_id]',$trax_boxes ,null,['class' => 'form-control is-invalid trax_box_id select2','id'=>'trax_box_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['trax_box_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][trax_box_id]', $ro['trax_box_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if(isset($errors[$no]['weight_charges']))
+                                            {{--@if(isset($errors[$no]['weight_charges']))
                                                 <td>{!! Form::text('form[' . $no . '][weight_charges]', $ro['weight_charges'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['weight_charges']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][weight_charges]', $ro['weight_charges'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
@@ -183,7 +203,7 @@
                                                 <td>{!! Form::text('form[' . $no . '][fuel_surcharge]', $ro['fuel_surcharge'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['fuel_surcharge']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][fuel_surcharge]', $ro['fuel_surcharge'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
-                                            @endif
+                                            @endif--}}
                                             @if(isset($errors[$no]['iban_number']))
                                                 <td>{!! Form::text('form[' . $no . '][iban_number]', $ro['iban_number'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['iban_number']}}</font></td>
                                             @else
@@ -198,6 +218,11 @@
                                                 <td>{!! Form::select('form[' . $no . '][bank_id]',$banks ,null,['class' => 'form-control is-invalid bank_id select2','id'=>'bank_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['bank_id']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][bank_id]', $ro['bank_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['special_instruction']))
+                                                <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['special_instruction']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
@@ -255,6 +280,10 @@
             $('.volumetric_weight').select2({
                 width: '100%',
                 placeholder: 'Volumetric Weight'
+            });
+            $('.insurance_offered').select2({
+                width: '100%',
+                placeholder: 'Insurance Offered'
             });
             $('.payment_mode_id').select2({
                 width: '100%',

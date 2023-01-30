@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class RecreateBookingTypeIdIndexShipmentsTable extends Migration
+class UpdateRetailRequestCities extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function up()
     {
-//        Schema::table('shipments', function (Blueprint $table) {
-//            $table->dropIndex(['booking_type_id']);
-//            $table->index('booking_type_id');
-//        });
+        Schema::table('retail_request_cities', function (Blueprint $table) {
+            $table->string('phone_number')->nullable();
+        });
     }
 
     /**
@@ -26,6 +25,8 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('retail_request_cities', function (Blueprint $table) {
+            $table->dropColumn('phone_number');
+        });
     }
 }
