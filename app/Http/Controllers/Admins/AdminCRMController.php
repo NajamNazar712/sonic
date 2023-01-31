@@ -252,32 +252,34 @@ class AdminCRMController extends Controller
                                 }
                             }
                             if($nature_id == 2){
-                                if($complaint_id == 12){
-                                    if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                        if($shipment->amount != 0){
-                                           if($shipment->retail){
-                                            if($cod_amount > $shipment->amount){
-                                                $shipment->amount = $cod_amount;
-                                            }
-                                           }else{
-                                            $shipment->amount = $cod_amount;
-                                           }
-                                           $shipment->save(); 
-                                        }
-                                        if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                        //mark reattempt
-
-                                            $shipment->shipper_status_id = 13;
-                                            $shipment->consignee_status_id = 13;
-                                            $shipment->save();
-                                            ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
-                                        }
-                                    }
-                                }
-                                else if($complaint_id == 13){
+                                if($complaint_id == 13){
                                     $shipment->consignee_phone_number_2 = $alternate_phone;
                                     $shipment->save();
                                 }
+
+                                // else if($complaint_id == 12){
+                                //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                //         if($shipment->amount != 0){
+                                //            if($shipment->retail){
+                                //             if($cod_amount > $shipment->amount){
+                                //                 $shipment->amount = $cod_amount;
+                                //             }
+                                //            }else{
+                                //             $shipment->amount = $cod_amount;
+                                //            }
+                                //            $shipment->save(); 
+                                //         }
+                                //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                //         //mark reattempt
+
+                                //             $shipment->shipper_status_id = 13;
+                                //             $shipment->consignee_status_id = 13;
+                                //             $shipment->save();
+                                //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                //         }
+                                //     }
+                                // }
+                                 
                                 else if($complaint_id == 32){
                                     $shipment->special_instructions = 'Allow to Open Shipment';
                                     $shipment->save();
@@ -312,32 +314,32 @@ class AdminCRMController extends Controller
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
                                         if($nature_id == 2){
-                                            if($complaint_id == 12){
-                                                if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                    if($shipment->amount != 0){
-                                                       if($shipment->retail){
-                                                        if($cod_amount > $shipment->amount){
-                                                            $shipment->amount = $cod_amount;
-                                                        }
-                                                       }else{
-                                                        $shipment->amount = $cod_amount;
-                                                       }
-                                                       $shipment->save(); 
-                                                    }
-                                                    if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                    //mark reattempt
-            
-                                                        $shipment->shipper_status_id = 13;
-                                                        $shipment->consignee_status_id = 13;
-                                                        $shipment->save();
-                                                        ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
-                                                    }
-                                                }
-                                            }
-                                            else if($complaint_id == 13){
+                                            if($complaint_id == 13){
                                                 $shipment->consignee_phone_number_2 = $alternate_phone;
                                                 $shipment->save();
                                             }
+                                            // else if($complaint_id == 12){
+                                            //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                            //         if($shipment->amount != 0){
+                                            //            if($shipment->retail){
+                                            //             if($cod_amount > $shipment->amount){
+                                            //                 $shipment->amount = $cod_amount;
+                                            //             }
+                                            //            }else{
+                                            //             $shipment->amount = $cod_amount;
+                                            //            }
+                                            //            $shipment->save(); 
+                                            //         }
+                                            //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                            //         //mark reattempt
+            
+                                            //             $shipment->shipper_status_id = 13;
+                                            //             $shipment->consignee_status_id = 13;
+                                            //             $shipment->save();
+                                            //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                            //         }
+                                            //     }
+                                            // }
                                             else if($complaint_id == 32){
                                                 $shipment->special_instructions = 'Allow to Open Shipment';
                                                 $shipment->save();
@@ -353,32 +355,32 @@ class AdminCRMController extends Controller
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
                                     if($nature_id == 2){
-                                        if($complaint_id == 12){
-                                            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                if($shipment->amount != 0){
-                                                   if($shipment->retail){
-                                                    if($cod_amount > $shipment->amount){
-                                                        $shipment->amount = $cod_amount;
-                                                    }
-                                                   }else{
-                                                    $shipment->amount = $cod_amount;
-                                                   }
-                                                   $shipment->save(); 
-                                                }
-                                                if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                //mark reattempt
-        
-                                                    $shipment->shipper_status_id = 13;
-                                                    $shipment->consignee_status_id = 13;
-                                                    $shipment->save();
-                                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
-                                                }
-                                            }
-                                        }
-                                        else if($complaint_id == 13){
+                                        if($complaint_id == 13){
                                             $shipment->consignee_phone_number_2 = $alternate_phone;
                                             $shipment->save();
                                         }
+                                        // else if($complaint_id == 12){
+                                        //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         if($shipment->amount != 0){
+                                        //            if($shipment->retail){
+                                        //             if($cod_amount > $shipment->amount){
+                                        //                 $shipment->amount = $cod_amount;
+                                        //             }
+                                        //            }else{
+                                        //             $shipment->amount = $cod_amount;
+                                        //            }
+                                        //            $shipment->save(); 
+                                        //         }
+                                        //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         //mark reattempt
+        
+                                        //             $shipment->shipper_status_id = 13;
+                                        //             $shipment->consignee_status_id = 13;
+                                        //             $shipment->save();
+                                        //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                        //         }
+                                        //     }
+                                        // }
                                         else if($complaint_id == 32){
                                             $shipment->special_instructions = 'Allow to Open Shipment';
                                             $shipment->save();
@@ -405,32 +407,33 @@ class AdminCRMController extends Controller
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
                                     if($nature_id == 2){
-                                        if($complaint_id == 12){
-                                            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                if($shipment->amount != 0){
-                                                   if($shipment->retail){
-                                                    if($cod_amount > $shipment->amount){
-                                                        $shipment->amount = $cod_amount;
-                                                    }
-                                                   }else{
-                                                    $shipment->amount = $cod_amount;
-                                                   }
-                                                   $shipment->save(); 
-                                                }
-                                                if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                                //mark reattempt
-        
-                                                    $shipment->shipper_status_id = 13;
-                                                    $shipment->consignee_status_id = 13;
-                                                    $shipment->save();
-                                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
-                                                }
-                                            }
-                                        }
-                                        else if($complaint_id == 13){
+                                        if($complaint_id == 13){
                                             $shipment->consignee_phone_number_2 = $alternate_phone;
                                             $shipment->save();
                                         }
+                                        // else if($complaint_id == 12){
+                                        //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         if($shipment->amount != 0){
+                                        //            if($shipment->retail){
+                                        //             if($cod_amount > $shipment->amount){
+                                        //                 $shipment->amount = $cod_amount;
+                                        //             }
+                                        //            }else{
+                                        //             $shipment->amount = $cod_amount;
+                                        //            }
+                                        //            $shipment->save(); 
+                                        //         }
+                                        //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         //mark reattempt
+        
+                                        //             $shipment->shipper_status_id = 13;
+                                        //             $shipment->consignee_status_id = 13;
+                                        //             $shipment->save();
+                                        //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                        //         }
+                                        //     }
+                                        // }
+                                         
                                         else if($complaint_id == 32){
                                             $shipment->special_instructions = 'Allow to Open Shipment';
                                             $shipment->save();
@@ -446,32 +449,33 @@ class AdminCRMController extends Controller
                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                 }
                                 if($nature_id == 2){
-                                    if($complaint_id == 12){
-                                        if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                            if($shipment->amount != 0){
-                                               if($shipment->retail){
-                                                if($cod_amount > $shipment->amount){
-                                                    $shipment->amount = $cod_amount;
-                                                }
-                                               }else{
-                                                $shipment->amount = $cod_amount;
-                                               }
-                                               $shipment->save(); 
-                                            }
-                                            if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                            //mark reattempt
-    
-                                                $shipment->shipper_status_id = 13;
-                                                $shipment->consignee_status_id = 13;
-                                                $shipment->save();
-                                                ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
-                                            }
-                                        }
-                                    }
-                                    else if($complaint_id == 13){
+                                    if($complaint_id == 13){
                                         $shipment->consignee_phone_number_2 = $alternate_phone;
                                         $shipment->save();
                                     }
+                                    // else if($complaint_id == 12){
+                                    //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                    //         if($shipment->amount != 0){
+                                    //            if($shipment->retail){
+                                    //             if($cod_amount > $shipment->amount){
+                                    //                 $shipment->amount = $cod_amount;
+                                    //             }
+                                    //            }else{
+                                    //             $shipment->amount = $cod_amount;
+                                    //            }
+                                    //            $shipment->save(); 
+                                    //         }
+                                    //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                    //         //mark reattempt
+    
+                                    //             $shipment->shipper_status_id = 13;
+                                    //             $shipment->consignee_status_id = 13;
+                                    //             $shipment->save();
+                                    //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                    //         }
+                                    //     }
+                                    // }
+                                     
                                     else if($complaint_id == 32){
                                         $shipment->special_instructions = 'Allow to Open Shipment';
                                         $shipment->save();

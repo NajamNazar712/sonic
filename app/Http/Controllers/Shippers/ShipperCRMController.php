@@ -297,13 +297,13 @@ class ShipperCRMController extends Controller
                 $alternate_phone = null;
             }
         }
-        if($request->has('cod_amount')){
-            if($request->cod_amount){
-                $cod_amount = $request->cod_amount;
-            }else{
-                $cod_amount = null;
-            }
-        }
+        // if($request->has('cod_amount')){
+        //     if($request->cod_amount){
+        //         $cod_amount = $request->cod_amount;
+        //     }else{
+        //         $cod_amount = null;
+        //     }
+        // }
 //        if($complaint_id == 23 && $receiving_sheet_id != null){
         if($complaint_id == 23){
             $description_text = $request->description ;
@@ -467,32 +467,32 @@ class ShipperCRMController extends Controller
                         }
 
                         if($nature_id == 2){
-                            if($complaint_id == 12){
-                                if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                    if($shipment->amount != 0){
-                                       if($shipment->retail){
-                                        if($cod_amount > $shipment->amount){
-                                            $shipment->amount = $cod_amount;
-                                        }
-                                       }else{
-                                        $shipment->amount = $cod_amount;
-                                       }
-                                       $shipment->save(); 
-                                    }
-                                    if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                    //mark reattempt
-
-                                        $shipment->shipper_status_id = 13;
-                                        $shipment->consignee_status_id = 13;
-                                        $shipment->save();
-                                        ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
-                                    }
-                                }
-                            }
-                            else if($complaint_id == 13){
+                            if($complaint_id == 13){
                                 $shipment->consignee_phone_number_2 = $alternate_phone;
                                 $shipment->save();
                             }
+                            // else if($complaint_id == 12){
+                            //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                            //         if($shipment->amount != 0){
+                            //            if($shipment->retail){
+                            //             if($cod_amount > $shipment->amount){
+                            //                 $shipment->amount = $cod_amount;
+                            //             }
+                            //            }else{
+                            //             $shipment->amount = $cod_amount;
+                            //            }
+                            //            $shipment->save(); 
+                            //         }
+                            //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                            //         //mark reattempt
+
+                            //             $shipment->shipper_status_id = 13;
+                            //             $shipment->consignee_status_id = 13;
+                            //             $shipment->save();
+                            //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
+                            //         }
+                            //     }
+                            // }
                             else if($complaint_id == 32){
                                 $shipment->special_instructions = 'Allow to Open Shipment';
                                 $shipment->save();
@@ -545,32 +545,33 @@ class ShipperCRMController extends Controller
                         }
                     }
                     if($nature_id == 2){
-                        if($complaint_id == 12){
-                            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                if($shipment->amount != 0){
-                                   if($shipment->retail){
-                                    if($cod_amount > $shipment->amount){
-                                        $shipment->amount = $cod_amount;
-                                    }
-                                   }else{
-                                    $shipment->amount = $cod_amount;
-                                   }
-                                   $shipment->save(); 
-                                }
-                                if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
-                                //mark reattempt
-
-                                    $shipment->shipper_status_id = 13;
-                                    $shipment->consignee_status_id = 13;
-                                    $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
-                                }
-                            }
-                        }
-                        else if($complaint_id == 13){
+                        
+                        if($complaint_id == 13){
                             $shipment->consignee_phone_number_2 = $alternate_phone;
                             $shipment->save();
                         }
+                        // else if($complaint_id == 12){
+                        //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                        //         if($shipment->amount != 0){
+                        //            if($shipment->retail){
+                        //             if($cod_amount > $shipment->amount){
+                        //                 $shipment->amount = $cod_amount;
+                        //             }
+                        //            }else{
+                        //             $shipment->amount = $cod_amount;
+                        //            }
+                        //            $shipment->save(); 
+                        //         }
+                        //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                        //         //mark reattempt
+
+                        //             $shipment->shipper_status_id = 13;
+                        //             $shipment->consignee_status_id = 13;
+                        //             $shipment->save();
+                        //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
+                        //         }
+                        //     }
+                        // }
                         else if($complaint_id == 32){
                             $shipment->special_instructions = 'Allow to Open Shipment';
                             $shipment->save();

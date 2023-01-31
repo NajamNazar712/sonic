@@ -233,11 +233,11 @@
                                             <input type="text" name="alternate_phone" class="form-control" id="alternate_phone" placeholder="Enter Alternate Number" data-rule-required="true" data-msg-required="Alternate Number is required">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 d-none" id="cod_amount_input">
+                                    {{-- <div class="col-8 d-none" id="cod_amount_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="cod_amount" class="form-control" id="cod_amount" placeholder="Enter COD Amount" data-rule-required="true" data-msg-required="COD Amount is required">
                                         </fieldset>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="col-8">
                                         <fieldset class="form-group">
@@ -573,15 +573,15 @@
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
-            $('#cod_amount').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0,
-                'max': 1000000
-            });
+            // $('#cod_amount').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            //     'digits': 2,
+            //     'min': 0,
+            //     'max': 1000000
+            // });
 
             var booking_from_date = $('#booking_from_date').pickadate({
                 firstDay: 1,
@@ -1309,14 +1309,16 @@
             
                 if($(this).val() == 13){
                     $('#alternate_phone_input').removeClass('d-none');
-                    $('#cod_amount_input').addClass('d-none');
+                    // $('#cod_amount_input').addClass('d-none');
 
-                }else if($(this).val() == 12){
-                    $('#cod_amount_input').removeClass('d-none');
-                    $('#alternate_phone_input').addClass('d-none');
+                }
+                // else if($(this).val() == 12){
+                //     $('#cod_amount_input').removeClass('d-none');
+                //     $('#alternate_phone_input').addClass('d-none');
 
-                }else{
-                    $('#cod_amount_input').addClass('d-none');
+                // }
+                else{
+                    // $('#cod_amount_input').addClass('d-none');
                     $('#alternate_phone_input').addClass('d-none');
 
                 }
@@ -2082,7 +2084,7 @@
                                 'complaint_id': complaint_id,
                                 'description': description,
                                 'alternate_phone': $('#alternate_phone').val(),
-                                'cod_amount': $('#cod_amount').val(),
+                                // 'cod_amount': $('#cod_amount').val(),
                             }
                         })
                             .done(function (data) {
@@ -2177,8 +2179,8 @@
                 $('#receiving_sheet_div').addClass('d-none');
                 $('#alternate_phone_input').addClass('d-none');
                 $('#alternate_phone').val('');
-                $('#cod_amount_input').addClass('d-none');
-                $('#cod_amount').val('');
+                // $('#cod_amount_input').addClass('d-none');
+                // $('#cod_amount').val('');
             });
 
             $('#add_feedback_form').bind('submit', function (e) {
