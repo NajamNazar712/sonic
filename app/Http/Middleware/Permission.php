@@ -1308,6 +1308,9 @@ class Permission
             'admin.tracking.shipment_position.upload' => 822,
             'admin.tracking.shipment_position.list' => 822,
 
+            'reports.rider_pickup.index' => 823,
+            'reports.rider_pickup.list' => 823,
+
         ],
 
         'shipper' => [
