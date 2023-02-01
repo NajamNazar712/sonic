@@ -624,8 +624,7 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(266, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.return.cx_sales.index') }}">Return for CX &
-                                                Sales</a></li>
+                                                href="{{ route('admin.return.cx_sales.index') }}">Unable to Return</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(126, session('permissions')))
                                         <li><a class="menu-item"
