@@ -1308,6 +1308,9 @@ class Permission
             'admin.tracking.shipment_position.upload' => 822,
             'admin.tracking.shipment_position.list' => 822,
 
+            'admin.reports.one_link_charges_summary.index' => 824,
+            'admin.settings.onelink_payment_charges.index' => 825,
+
         ],
 
         'shipper' => [
