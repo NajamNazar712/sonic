@@ -814,10 +814,10 @@
                                     ccd_icon = ' <span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span> ';
                                 }
                                 if(details.international_shipment){
-                                    international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
+                                    $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
                                 else{
-                                    international_tracking_number = '';
+                                    $international_tracking_number = '';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
