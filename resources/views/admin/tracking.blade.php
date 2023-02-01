@@ -804,7 +804,7 @@
                                 }
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
-                                var $international_tracking_number = '';
+                                var international_tracking_number = '';
                                 var roll_id = @json(session('role_id') == 1);
                                 var department_id =  @json(session('department_id') == 6);
                                 if(details.open_box){
@@ -814,7 +814,7 @@
                                     ccd_icon = ' <span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span> ';
                                 }
                                 if(details.international_shipment){
-                                    $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
+                                    international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
