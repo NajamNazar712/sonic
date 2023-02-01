@@ -816,6 +816,9 @@
                                 if(details.international_shipment){
                                     international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
+                                else{
+                                    international_tracking_number = '';
+                                }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
