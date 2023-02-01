@@ -99,7 +99,7 @@ class AdminRetailReportController extends Controller
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
             ->leftjoin('retail_references as rref','rref.shipment_id','=','shipments.id')
             ->leftjoin('shipment_items as si','si.shipment_id','=','rs.shipment_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.charges_with_discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
@@ -160,30 +160,6 @@ class AdminRetailReportController extends Controller
                 }
                 else{
                     return $shipment->retail_trax_center_name;
-                }
-            })
-            ->addColumn('discount', function ($shipment) {
-                if($shipment->retail_category){
-
-                    if ($shipment->retail_category == 2) {
-                        $trax_center =  ($shipment->trax_discount != null) ? ($shipment->trax_discount . '%' ) : $shipment->trax_discount;
-                        return $trax_center;
-                    }
-                    else {
-                        $franchise  = ($shipment->franchise_discount != null) ? ($shipment->franchise_discount . '%' ) : $shipment->franchise_discount;
-                        return $franchise;
-                    }
-                }
-            })
-            ->addColumn('insurance', function ($shipment) {
-                if($shipment->retail_category) {
-                    if ($shipment->retail_category == 2) {
-                        $trax_center = ($shipment->trax_insurance != null) ? ($shipment->trax_insurance . '%') : $shipment->trax_insurance;
-                        return $trax_center;
-                    } else {
-                        $franchise = ($shipment->franchise_insurance != null) ? ($shipment->franchise_insurance . '%') : $shipment->franchise_discount;
-                        return $franchise;
-                    }
                 }
             })
             ->addColumn('estimated_charges',function($sale){
