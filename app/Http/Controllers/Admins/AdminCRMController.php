@@ -73,6 +73,7 @@ use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -104,11 +105,26 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
+        
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
 //        if($complaint_id == 23 && $receiving_sheet_id != null){
+        if($request->has('alternate_phone')){
+            if($request->alternate_phone){
+                $alternate_phone = $request->alternate_phone;
+            }else{
+                $alternate_phone = null;
+            }
+        }
+        if($request->has('cod_amount')){
+            if($request->cod_amount){
+                $cod_amount = $request->cod_amount;
+            }else{
+                $cod_amount = null;
+            }
+        }
         if($complaint_id == 23){
             $description_text = $request->description ;
 //            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
@@ -176,7 +192,7 @@ class AdminCRMController extends Controller
                                     }
                                     else{
                                         if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                            if(in_array($complaint_id, [11, 12, 13])){
+                                            if(in_array($complaint_id, [11, 13])){
                                                 $present_shipments[] = $shipment->tracking_number;
                                                 $flag = true;
                                                 $cannot_change = true;
@@ -215,7 +231,7 @@ class AdminCRMController extends Controller
                                 }
                                 else{
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                        if(in_array($complaint_id, [11, 12, 13])){
+                                        if(in_array($complaint_id, [11, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
                                             $flag = true;
                                             $cannot_change = true;
@@ -233,6 +249,40 @@ class AdminCRMController extends Controller
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
                                     }
+                                }
+                            }
+                            if($nature_id == 2){
+                                if($complaint_id == 13){
+                                    $shipment->consignee_phone_number_2 = $alternate_phone;
+                                    $shipment->save();
+                                }
+
+                                // else if($complaint_id == 12){
+                                //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                //         if($shipment->amount != 0){
+                                //            if($shipment->retail){
+                                //             if($cod_amount > $shipment->amount){
+                                //                 $shipment->amount = $cod_amount;
+                                //             }
+                                //            }else{
+                                //             $shipment->amount = $cod_amount;
+                                //            }
+                                //            $shipment->save(); 
+                                //         }
+                                //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                //         //mark reattempt
+
+                                //             $shipment->shipper_status_id = 13;
+                                //             $shipment->consignee_status_id = 13;
+                                //             $shipment->save();
+                                //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                //         }
+                                //     }
+                                // }
+                                 
+                                else if($complaint_id == 32){
+                                    $shipment->special_instructions = 'Allow to Open Shipment';
+                                    $shipment->save();
                                 }
                             }
                         }
@@ -253,7 +303,7 @@ class AdminCRMController extends Controller
                             $complain = $is_shipment->id;
                             if($is_shipment->case_nature_id != $nature_id){
                                 if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                    if(in_array($complaint_id, [11, 12, 13])){
+                                    if(in_array($complaint_id, [11, 13])){
                                         $present_shipments[] = $shipment->tracking_number;
                                         $flag = true;
                                         $cannot_change = true;
@@ -263,6 +313,38 @@ class AdminCRMController extends Controller
                                         if($request->has('key_account')){
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
+                                        if($nature_id == 2){
+                                            if($complaint_id == 13){
+                                                $shipment->consignee_phone_number_2 = $alternate_phone;
+                                                $shipment->save();
+                                            }
+                                            // else if($complaint_id == 12){
+                                            //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                            //         if($shipment->amount != 0){
+                                            //            if($shipment->retail){
+                                            //             if($cod_amount > $shipment->amount){
+                                            //                 $shipment->amount = $cod_amount;
+                                            //             }
+                                            //            }else{
+                                            //             $shipment->amount = $cod_amount;
+                                            //            }
+                                            //            $shipment->save(); 
+                                            //         }
+                                            //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                            //         //mark reattempt
+            
+                                            //             $shipment->shipper_status_id = 13;
+                                            //             $shipment->consignee_status_id = 13;
+                                            //             $shipment->save();
+                                            //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                            //         }
+                                            //     }
+                                            // }
+                                            else if($complaint_id == 32){
+                                                $shipment->special_instructions = 'Allow to Open Shipment';
+                                                $shipment->save();
+                                            }
+                                        }
                                         $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                                         return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                     }
@@ -271,6 +353,38 @@ class AdminCRMController extends Controller
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
+                                    }
+                                    if($nature_id == 2){
+                                        if($complaint_id == 13){
+                                            $shipment->consignee_phone_number_2 = $alternate_phone;
+                                            $shipment->save();
+                                        }
+                                        // else if($complaint_id == 12){
+                                        //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         if($shipment->amount != 0){
+                                        //            if($shipment->retail){
+                                        //             if($cod_amount > $shipment->amount){
+                                        //                 $shipment->amount = $cod_amount;
+                                        //             }
+                                        //            }else{
+                                        //             $shipment->amount = $cod_amount;
+                                        //            }
+                                        //            $shipment->save(); 
+                                        //         }
+                                        //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         //mark reattempt
+        
+                                        //             $shipment->shipper_status_id = 13;
+                                        //             $shipment->consignee_status_id = 13;
+                                        //             $shipment->save();
+                                        //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                        //         }
+                                        //     }
+                                        // }
+                                        else if($complaint_id == 32){
+                                            $shipment->special_instructions = 'Allow to Open Shipment';
+                                            $shipment->save();
+                                        }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                                     return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
@@ -282,7 +396,7 @@ class AdminCRMController extends Controller
                             }
                         }else{
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
-                                if(in_array($complaint_id, [11, 12, 13])){
+                                if(in_array($complaint_id, [11, 13])){
                                     $present_shipments[] = $shipment->tracking_number;
                                     $flag = true;
                                     $cannot_change = true;
@@ -292,6 +406,39 @@ class AdminCRMController extends Controller
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
+                                    if($nature_id == 2){
+                                        if($complaint_id == 13){
+                                            $shipment->consignee_phone_number_2 = $alternate_phone;
+                                            $shipment->save();
+                                        }
+                                        // else if($complaint_id == 12){
+                                        //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         if($shipment->amount != 0){
+                                        //            if($shipment->retail){
+                                        //             if($cod_amount > $shipment->amount){
+                                        //                 $shipment->amount = $cod_amount;
+                                        //             }
+                                        //            }else{
+                                        //             $shipment->amount = $cod_amount;
+                                        //            }
+                                        //            $shipment->save(); 
+                                        //         }
+                                        //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                        //         //mark reattempt
+        
+                                        //             $shipment->shipper_status_id = 13;
+                                        //             $shipment->consignee_status_id = 13;
+                                        //             $shipment->save();
+                                        //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                        //         }
+                                        //     }
+                                        // }
+                                         
+                                        else if($complaint_id == 32){
+                                            $shipment->special_instructions = 'Allow to Open Shipment';
+                                            $shipment->save();
+                                        }
+                                    }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                                     return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                 }
@@ -300,6 +447,39 @@ class AdminCRMController extends Controller
                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                                 if($request->has('key_account')){
                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
+                                }
+                                if($nature_id == 2){
+                                    if($complaint_id == 13){
+                                        $shipment->consignee_phone_number_2 = $alternate_phone;
+                                        $shipment->save();
+                                    }
+                                    // else if($complaint_id == 12){
+                                    //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                    //         if($shipment->amount != 0){
+                                    //            if($shipment->retail){
+                                    //             if($cod_amount > $shipment->amount){
+                                    //                 $shipment->amount = $cod_amount;
+                                    //             }
+                                    //            }else{
+                                    //             $shipment->amount = $cod_amount;
+                                    //            }
+                                    //            $shipment->save(); 
+                                    //         }
+                                    //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
+                                    //         //mark reattempt
+    
+                                    //             $shipment->shipper_status_id = 13;
+                                    //             $shipment->consignee_status_id = 13;
+                                    //             $shipment->save();
+                                    //             ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                    //         }
+                                    //     }
+                                    // }
+                                     
+                                    else if($complaint_id == 32){
+                                        $shipment->special_instructions = 'Allow to Open Shipment';
+                                        $shipment->save();
+                                    }
                                 }
                                 $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                                 return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
