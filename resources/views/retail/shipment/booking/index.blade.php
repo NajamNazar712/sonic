@@ -42,6 +42,18 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <select name="ref" id="ref" class="select2 form-control" data-rule-required="true" data-msg-required="Reference is required">
+                                            @foreach($refs as $ref)
+                                                <option value="{{$ref}}">{{$ref}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="d-none" id="other_ref">
+                                        <div class="form-group">
+                                            <input type="text" name="ref_name" id="ref_name" class="form-control" placeholder="New Reference" data-rule-required="true" data-msg-required="Reference is required">
+                                        </div>
+                                    </div>
                                     <div class="form-group d-none" id="domestic_destination_div">
                                         <select name="domestic_destination" id="domestic_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
                                             @foreach($domestic_cities as $domestic_city)
@@ -125,7 +137,10 @@
                                         <textarea name="shipper_address" class="form-control address" id="shipper_address" rows="2" placeholder="Shipper Address*" data-rule-required="true" data-msg-required="Shipper Address is required" data-rule-maxlength="255" data-msg-maxlength="Shipper Address can be maximum 255 characters"></textarea>
                                     </div>
                                     <div class="form-group col-6">
-                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control phone1" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                        <input type="text" name="consignee_phone_no" id="consignee_phone_no" class="form-control" placeholder="Consignee Cell Number*" data-rule-required="true" data-msg-required="Consignee Cell Number is required">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <a href="javascript:void(0);" id="auto_fetch" class="btn btn-sm btn-outline-success sm" disabled="disabled">Auto Fetch</a>
                                     </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="consignee_name" id="consignee_name" class="form-control consignee_name" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="Consignee Name is required">
@@ -135,7 +150,7 @@
                                     </div>
                                     <div class="form-group col">
                                         {{-- <textarea name="consignee_address" id="consignee_address" class="form-control address" rows="2" placeholder="Consignee Address*" data-rule-required="true" data-msg-required="Consignee Address is required" data-rule-maxlength="255" data-msg-maxlength="Consignee Address can be maximum 255 characters"></textarea> --}}
-                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*" onchange="bdmk()" rows="5"></textarea>
+                                        <textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Consignee Address*" onchange="bdmk()" rows="5" data-rule-required="true" data-msg-required="Consignee Address is required"></textarea>
                                     </div>
                                     <div class="col">
                                         <div class="row d-none" id="cod_check">
@@ -146,12 +161,17 @@
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <select name="insurance_offered" id="insurance_offered" class="select2 form-control" data-rule-required="true" data-msg-required="Insurance Offered is required">
-{{--                                                    <option value="1">Yes</option>--}}
+                                                    <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-6 d-none" id="insurance_amount_div">
                                                 <input type="text" name="insurance_amount" id="insurance_amount" class="form-control decimal" placeholder="Insurance Amount*" data-rule-required="true" data-msg-required="Insurance Amount is required">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="packaging_amount" id="packaging_amount" class="form-control rounded-right amount" placeholder="Packaging Amount">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -163,18 +183,27 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="row border-dashed">
+                                      {{--  <div class="row border-dashed">
                                             <div class="form-group col-6">
                                                 <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
                                             </div>
                                             <div class="form-group col-6">
                                                 <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control fuel_decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
-                                        </div>
+                                        </div>--}}
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea id="special_instructions" name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <div id="external_info" class="ml-1 col border">
-                                    <div class="col pt-5 mt-2 mb-3">
+                                    <div class="col mt-2">
+                                        <div class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">City Request</label>
+                                            <a href="javascript:void(0);" id="add_city_req" class="btn btn-outline-success" >Add</a>
+                                        </div>
+                                    </div>
+                                    <div class="col mt-1">
                                         <div class="form-group text-center p-1 border border-light rounded">
                                             <label class="d-block">Bulk Shipment</label>
                                             <input type="checkbox" name="bulk_shipment" class="switch hidden bulk_shipment">
@@ -196,15 +225,30 @@
 {{--                                            </div>--}}
 {{--                                        </div>--}}
 {{--                                    </div>--}}
-                                    <div class="col pt-5">
+                                    <div class="col mt-1">
                                         <div class="form-group">
-                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control" placeholder="Charges" disabled>
+                                            <label>Charges</label>
+                                            <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
+                                            <label>Discount</label>
+                                            <input type="text" name="discount" id="discount" class="form-control form-control-sm" placeholder="Discount" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
+                                            <label>Charges with Discount</label>
+                                            <input type="text" name="discount" id="charges_with_discount" class="form-control form-control-sm" placeholder="Charges With Discount" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>GST</label>
+                                            <input type="text" name="gst" id="gst" class="form-control form-control-sm" placeholder="GST" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Packaging & Insurance Charges</label>
+                                            <input type="text" name="packaging_and_insurance_charges" id="packaging_and_insurance_charges" class="form-control form-control-sm" placeholder="Packaging & Insurance Charges" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Total Charges</label>
+                                            <input type="text" name="total_charges" id="total_charges" class="form-control form-control-sm" placeholder="Total Charges" disabled>
                                         </div>
                                         <div class="form-group text-center">
                                             <button type="button" name="calculate_rates" id="calculate_rates" class="btn btn-outline-success width-150" value="calculate_rates">Calculate Rates</button>
@@ -267,6 +311,106 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="AddCityReqModal" data-backdrop="static" role="dialog" aria-labelledby="AddCityReqModal"
+    aria-hidden="true">
+   <div class="modal-dialog modal-sm" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Add City Request</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="add_city_req_form" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                        <select name="city_shipping_mode" id="city_shipping_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Service Type is required">
+                            @foreach($shipping_modes as $shipping_mode)
+                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                            @endforeach
+                        </select>
+                       </div>
+
+                       <div class="col-12 form-group">
+                            <select name="city_business_category" id="city_business_category" class="select2 form-control" data-rule-required="true" data-msg-required="City Category is required">
+                                @foreach($business_categories as $business_category)
+                                    <option value="{{$business_category->id}}">{{$business_category->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_domestic">
+                            <select name="city_domestic" id="city_domestic" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                <option value="other">Other</option>
+                                @foreach($domestic_cities as $domestic_city)
+                                    <option value="{{$domestic_city->name}}">{{$domestic_city->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 d-none" id="other_city_domestics">
+                            <div class="form-group">
+                                <input type="text" name="other_city_domestic" id="other_city_domestic" class="form-control" placeholder="New City" data-rule-required="true" data-msg-required="City is required">
+                            </div>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_international">
+                            <select name="city_international" id="city_international" class="select2 form-control" data-rule-required="true" data-msg-required="City is required">
+                                <option value="other">Other</option>
+                                @foreach($international_cities as $international_city)
+                                    <option value="{{$international_city->name}}">{{$international_city->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 d-none" id="other_cities_internationals">
+                            <div class="form-group">
+                                <input type="text" name="other_cities_international" id="other_cities_international" class="form-control" placeholder="New City Type" data-rule-required="true" data-msg-required="City is required">
+                            </div>
+                        </div>
+                        <div class="col-12 form-group d-none" id="cities_phone_number">
+                            <input type="text" class="form-control" id="city_phone_number" name="city_phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone # is required">
+                        </div>
+                   </div>
+                   
+                   
+               </div>
+               <div class="modal-footer">
+                   <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                   <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
+
+<div class="modal fade text-left" id="AutoFetchConsignee" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchConsignee"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Consignee Details</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="auto_fetch_consignee" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                    <div class="col-12 form-group">
+                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
+                    </div>
+                       <div class="col-12 form-group">
+                            <table class="table" id="consignee_table">
+
+                            </table>
+                       </div>
+                   </div>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
 
 @endsection
 @section('css')
@@ -383,6 +527,15 @@
         }
 
         $(document).ready(function () {
+
+            var shipping_modes = @json($shipping_modes);
+            var international_shipping_modes = @json($retail_international_shipping_modes);
+
+            $('#consignee_phone_no').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            
             function print(ids){
                 $.ajax({
                     url: '{!! route('retail.shipment.book.slip') !!}',
@@ -420,11 +573,24 @@
                 placeholder:"Select Shipment*",
                 allowClear:true
             });
+            $('#ref').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Where did you hear about us*",
+                allowClear:true
+            }).bind('change', function() {
+                if ($(this).val() === 'Others') {
+                    $('#other_ref').removeClass('d-none');
+                }
+                else{
+                    $('#other_ref').addClass('d-none');
+                }
+            });
             $('#business_category').select2({
                 width:'100%',
                 placeholder:"Select Shipment Category*"
             }).bind('change',function(){
                 var id = parseInt($(this).val());
+                console.log(id);
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
@@ -432,11 +598,26 @@
                     $('#domestic_overland_destination_div').addClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     $('#international_destination_div').removeClass('d-none');
+                    
+
+                    $('#shipping_mode').empty();
+                    $.each(international_shipping_modes, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                        $('#shipping_mode').append(newOption);
+                    });
+
                 }
                 else{
+
+                    $('#shipping_mode').empty();
+                    $.each(shipping_modes, function (key, value) {
+                        var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                        $('#shipping_mode').append(newOption);
+                    });
+
                     if(shipping_mode == 1)
                     {
-                        alert(1);
+
                         $('#domestic_overland_destination_div').removeClass('d-none');
                         $('#domestic_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
@@ -585,7 +766,9 @@
 
 
             $(".phone1").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-            // $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
+            $("#city_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            
+            $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
             $('.amount').inputmask({
@@ -619,7 +802,7 @@
                 'autoGroup': true,
             });
 
-            $('#insurance_offered').select2({
+            $('#insurance_offered').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Insurance Offered*",
                 allowClear:true
@@ -781,17 +964,21 @@
                         $('#consignee_name').val('');
                         $('#consignee_cnic').val('');
                         $('#consignee_address').val('');
-                        $('#weight_charges').val('');
+                        //$('#weight_charges').val('');
                         // $('#cash_handling_charges').val('');
-                        $('#fuel_surcharge').val('');
-                        $('#total_charges_without_gst').val('');
-                        $('#gst').val('');
+                        //$('#fuel_surcharge').val('');
+                        $('#charges').val('');
+                        $('#discount').val('');
                         $('#total_charges').val('');
+                        $('#gst').val('');
+                        $('#charges_with_discount').val('');
                         $('#insurance_amount').val('');
+                        $('#packaging_amount').val('');
                         $('#cod').val('');
                         $('#trax_box').val('').trigger('change');
                         $('#insurance_offered').val('').trigger('change');
-
+                        $('#special_instructions').val('');
+                        
                     $('#book_button').val(1);
                     $('#book').attr('disabled', false);
                }
@@ -885,30 +1072,107 @@
                 }
             });
             var city_id = null;
-            $('#calculate_rates').on('click', function () {
-                if($('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
-                    var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
-                    // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
-                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val().replace(/,/g, ''));
+            var trax_box = null;
+            var length = null;
+            var breadth = null;
+            var height = null;
+            var insurance = null;
+            var packaging = null;
 
-                    // var total_charges_without_gst = weight_charges + cash_handling_charges + fuel_surcharge;
-                    var total_charges_without_gst = weight_charges + fuel_surcharge;
+            $('#calculate_rates').on('click', function () {
+                var destination = '';
+                var shipping_mode_id = $('#shipping_mode').val();
+                var business_category = $('#business_category').val();
+                if(business_category == 1){
+                    if(shipping_mode_id == 1){
+                        destination = $('#domestic_overland_destination').val();
+                    }
+                    else if (shipping_mode_id == 2){
+                        destination = $('#domestic_destination').val();
+                    }
+                    else{
+                        destination = $('#domestic_destination').val();
+                    }
+                }
+                else{
+                    destination = $('#international_destination').val();
+                }
+
+                
+                var weight = $('#weight').val();
+                var trax_box = $('#trax_box').val();
+                 length = $('#length').val();
+                 breadth = $('#breadth').val();
+                 height = $('#height').val();
+                 insurance = $('#insurance_amount').val();
+                 packaging = $('#packaging_amount').val();
+
+
+                 if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
+                     var error = 'Insurance Amount is required';
+                     toastr.error(error, 'Error!', {
+                         positionClass: 'toast-top-center',
+                         containerId: 'toast-top-center'
+                     });
+                     return false;
+                 }
+                 else if($('#insurance_offered').val() == '' || $('#insurance_offered').val() == null){
+                     var error = 'Select option for insurance';
+                     toastr.error(error, 'Error!', {
+                         positionClass: 'toast-top-center',
+                         containerId: 'toast-top-center'
+                     });
+                     return false;
+                 }
+
+                if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
+                    if(shipping_mode_id == 5 && trax_box == ''){
+                        var error = 'Trax Box field is required';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        return false;
+                    }
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',
                         method: 'POST',
                         data: {
-                            'total_charges_without_gst': total_charges_without_gst,
+                            'shipping_mode_id': shipping_mode_id,
+                            'business_category_id': business_category,
+                            'consignee_city_id': destination,
+                            'weight': weight,
+                            'trax_box': trax_box,
+                            'length': length,
+                            'breadth': breadth,
+                            'insurance_amount': insurance,
+                            'packaging_amount': packaging,
+                            'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
+                            var total_charges = '';
                             if(data.status){
-                                $('#total_charges_without_gst').val(data.details.total_charges_without_gst);
-                                $('#gst').val(data.details.gst);
+
+                                $('#charges').val(data.details.charges);
+                                $('#discount').val(data.details.discount_amount);
+                                $('#charges_with_discount').val(data.details.charges_with_discount);
+                                $('#gst').val(data.details.gst_charges);
+                                $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
+
                                 $('#total_charges').val(data.details.total_charges);
                             }
                         });
                 }
+                else{
+                    var error = 'Shipping Mode,Business Category,Destination and Weight/Volumetric weight should not be empty';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+
             });
 
             $('#print').on('click', function () {
@@ -916,6 +1180,185 @@
                     print(shipment_ids);
                 }
             });
+            
+
+            $("#add_city_req").on('click', function(){
+                $('#AddCityReqModal').modal('show');
+            });
+
+            $('#city_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipping Modes*"
+            });
+            $('#city_business_category').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select City Category*"
+            }).bind('change',function(){
+                var id = parseInt($(this).val());
+                if(id == 1){
+
+                    $('#cities_domestic').removeClass('d-none');
+                    $('#cities_international').addClass('d-none');
+                }else if(id == 2){
+                    $('#cities_domestic').addClass('d-none');
+                    $('#cities_international').removeClass('d-none');
+                }
+                $('#cities_phone_number').removeClass('d-none');
+
+                
+                
+            });
+            $('#city_domestic').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select City*"
+            }).bind('change', function() {
+                console.log($(this).val());
+                if ($(this).val() === 'other') {
+                    $('#other_city_domestics').removeClass('d-none');
+                }
+                else{
+                    $('#other_city_domestics').addClass('d-none');
+                }
+            });
+            $('#city_international').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select City*"
+            }).bind('change', function() {
+                console.log($(this).val());
+
+                if ($(this).val() === 'other') {
+                    $('#other_cities_internationals').removeClass('d-none');
+                }
+                else{
+                    $('#other_cities_internationals').addClass('d-none');
+                }
+            });
+            $('#add_city_req_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                    url: '{!! route('retail.shipment.book.add_city_req') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'city_shipping_mode': $('select[name="city_shipping_mode"]').val(),
+                        'city_business_category': $('select[name="city_business_category"]').val(),
+                        'city_phone_number': $('input[name="city_phone_number"]').val(),
+                        
+                        'city_domestic': $('select[name="city_domestic"]').val(),
+                        'other_city_domestic': $('input[name="other_city_domestic"]').val(),
+                        'city_international': $('select[name="city_international"]').val(),
+                        'other_cities_international': $('input[name="other_cities_international"]').val()
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            UnblockPagePermanently();
+
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                            $('#AddCityReqModal').modal('hide');
+                            $('#city_shipping_mode').val('').trigger('change.select2');
+                            $('#city_business_category').val('').trigger('change.select2');
+                            $('#city_domestic').val('').trigger('change.select2');
+                            $('#other_city_domestic').val('');
+                            $('#city_international').val('').trigger('change.select2');
+                            $('#other_cities_international').val('');
+                            $('#city_phone_number').val('');
+                        }
+                    });
+                }
+            });
+
+            $('#AddCityReqModal').on('hidden.bs.modal', function () {
+                
+                $('#city_shipping_mode').val('').trigger('change.select2');
+                $('#city_business_category').val('').trigger('change.select2');
+
+                $('#city_domestic').val('').trigger('change.select2');
+                $('#other_city_domestic').val('');
+                $('#city_international').val('').trigger('change.select2');
+                $('#other_cities_international').val('');
+                $('#other_city_domestics').addClass('d-none');
+                $('#other_cities_internationals').addClass('d-none');
+                $('#cities_international').addClass('d-none');
+                $('#cities_domestic').addClass('d-none');
+                
+            });
+
+        
+
+            $('#auto_fetch').on('click', function(){
+                if($('input[name="consignee_phone_no"]').val().match(/\d/g) != null){
+					var length = $('input[name="consignee_phone_no"]').val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
+				if(length == 11){
+					$.ajax({
+                    url: '{!! route('retail.shipment.book.consignee_info') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'phone': $('input[name="consignee_phone_no"]').val(),
+                        
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            toastr.error(data.message, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                        }else{
+                            if(data.blacklist == 0){
+                                $('#black_listed_employee').addClass('d-none');
+                            }else{
+                                $('#black_listed_employee').removeClass('d-none');
+                            }
+                            console.log(data);
+                            $('#AutoFetchConsignee').modal('show');
+                            var html = '';
+                            $.each(data.consignee, function (index, details) {
+                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-success btn-sm auto_fetch_btn"><i class="ft-check"></i></a></td>';
+                                    html +='<td>'+details.name+'</td>';
+                                    html +='<td>'+details.address+'</td></tr>';
+                                });
+                                $('#consignee_table').html(html);   
+                                $('.auto_fetch_btn').on('click', function(){
+                                    var name = $(this).parent().next().html();
+                                    var address = $(this).parent().next().next().html();
+
+                                    $('#consignee_name').val(name);
+                                    $('#consignee_address').val(address);
+                                    $('#AutoFetchConsignee').modal('hide');
+
+                                });
+                        }
+                      
+                    });
+				}
+                
+            });
+
+            $('#AutoFetchConsignee').on('hidden.bs.modal', function () {
+                $('#consignee_table').html('');   
+
+            });
+
+
+
+           
         });
     </script>
 @endsection

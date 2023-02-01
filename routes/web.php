@@ -3816,6 +3816,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
         });
 
+        Route::prefix('international')->name('international.')->group(function () {
+            Route::prefix('rates')->name('rates.')->group(function () {
+                Route::get('', 'Admins\AdminInternationalRatesController@retail_international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\AdminInternationalRatesController@retail_international_rates_list')->name('list');
+                Route::post('excel', 'Admins\AdminInternationalRatesController@retail_international_rates_upload_excel')->name('excel');
+
+                Route::prefix('margin')->name('margin.')->group(function () {
+                    Route::get('', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_index')->name('index');
+                    Route::post('/submit', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_submit')->name('update');
+                    Route::get('/list', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_list')->name('list');
+                });
+            });
+        });
+
+        Route::get('add/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@add_standard_rates')->name('add.rates');
+        Route::post('standard_rates/submit', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_submit')->name('standard.rates.submit');
+        Route::get('standard_rates/edit', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_edit')->name('rates.edit');
+        Route::post('update/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_update')->name('standard.rates.update');
+
+
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
@@ -4143,8 +4163,12 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
             Route::get('/excel', 'Retail\RetailShipmentBookController@excel_index')->name('excel');
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
-            Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
+            Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
+            Route::post('/consignee_info', 'Retail\RetailShipmentBookController@consignee_info')->name('consignee_info');
+  			Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
             // address_verify
+            
+            
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
@@ -4210,4 +4234,16 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('shipment_info', 'Retail\RetailCancelShipmentsController@get_shipment_info')->name('shipment_info');
         Route::post('store', 'Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');
     });
+    Route::prefix('return')->name('return.')->group(function(){
+        Route::get('confirmation_pending','Retail\RetailReturnController@confirmation_pending')->name('confirmation_pending.index');
+        Route::get('confirmation_pending_list','Retail\RetailReturnController@confirmation_pending_list')->name('confirmation_pending.list');
+        Route::get('reattempt_history','Retail\RetailReturnController@reattempt_history')->name('reattempt_history.index');
+        Route::get('reattempt_history_list','Retail\RetailReturnController@reattempt_history_list')->name('reattempt_history.list');
+        Route::post('pending_reattempt_nsa','Retail\RetailReturnController@pending_reattempt_nsa')->name('pending_reattempt_nsa');
+        Route::post('mark_reattempt','Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
+        
+    });
+
+    
+
 });

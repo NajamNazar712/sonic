@@ -808,6 +808,14 @@ class AdminNotificationsController extends Controller
         elseif($id == 205){
             $details['fields'] = ['admin', 'preview'];
         }
+        else if ($id == 206)
+        {
+            $details['fields'] = ['month','year','link'];
+        }
+        else if ($id == 207)
+        {
+            $details['fields'] = ['month','year','link'];
+        }
         return $details;
     }
 

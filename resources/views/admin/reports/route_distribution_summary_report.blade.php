@@ -201,6 +201,15 @@
             var undelivered_shipments_per = 0;
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
+            var shipments_count_excel = 0;
+            var pending_shipments_excel = 0;
+            var pending_shipments_per_excel = 0;
+            var delivered_shipments_excel = 0;
+            var delivered_shipments_per_excel = 0;
+            var undelivered_shipments_excel = 0;
+            var undelivered_shipments_per_excel = 0;
+            var confirmation_pending_shipments_excel = 0;
+            var confirmation_pending_shipments_per_excel = 0;
 
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
@@ -312,8 +321,19 @@
                                 row.push(values.undelivered_shipments_per);
                                 row.push(values.confirmation_pending_shipments);
                                 row.push(values.confirmation_pending_shipments_per);
+
+                                shipments_count_excel = shipments_count_excel + values.shipments_count;
+                                pending_shipments_excel = pending_shipments_excel + values.pending_shipments;
+                                delivered_shipments_excel = delivered_shipments_excel + values.delivered_shipments;
+                                undelivered_shipments_excel = undelivered_shipments_excel + values.undelivered_shipments;
+                                confirmation_pending_shipments_excel = confirmation_pending_shipments_excel + values.confirmation_pending_shipments;
                                 body.push(row);
                             });
+
+                            pending_shipments_per_excel = (pending_shipments_excel/shipments_count_excel)*100;
+                            delivered_shipments_per_excel = (delivered_shipments_excel/shipments_count_excel)*100;
+                            undelivered_shipments_per_excel = (undelivered_shipments_excel/shipments_count_excel)*100;
+                            confirmation_pending_shipments_per_excel = (confirmation_pending_shipments_excel/shipments_count_excel)*100;
 
                             footer.push('-');
                             footer.push('Total');
@@ -321,15 +341,15 @@
                             footer.push('');
                             footer.push('');
                             footer.push('');
-                            footer.push(shipments_count.toFixed(2));
-                            footer.push(pending_shipments.toFixed(2));
-                            footer.push(pending_shipments_per.toFixed(2));
-                            footer.push(delivered_shipments.toFixed(2));
-                            footer.push(delivered_shipments_per.toFixed(2));
-                            footer.push(undelivered_shipments.toFixed(2));
-                            footer.push(undelivered_shipments_per.toFixed(2));
-                            footer.push(confirmation_pending_shipments.toFixed(2));
-                            footer.push(confirmation_pending_shipments_per.toFixed(2));
+                            footer.push(shipments_count_excel.toFixed(2));
+                            footer.push(pending_shipments_excel.toFixed(2));
+                            footer.push(pending_shipments_per_excel.toFixed(2));
+                            footer.push(delivered_shipments_excel.toFixed(2));
+                            footer.push(delivered_shipments_per_excel.toFixed(2));
+                            footer.push(undelivered_shipments_excel.toFixed(2));
+                            footer.push(undelivered_shipments_per_excel.toFixed(2));
+                            footer.push(confirmation_pending_shipments_excel.toFixed(2));
+                            footer.push(confirmation_pending_shipments_per_excel.toFixed(2));
                         },
                         async: false
                     });
