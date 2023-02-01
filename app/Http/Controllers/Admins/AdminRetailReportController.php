@@ -171,7 +171,7 @@ class AdminRetailReportController extends Controller
                     }
                     else {
                         $franchise  = ($shipment->franchise_discount != null) ? ($shipment->franchise_discount . '%' ) : $shipment->franchise_discount;
-                        return $shipment->franchise;
+                        return $franchise;
                     }
                 }
             })
@@ -182,7 +182,7 @@ class AdminRetailReportController extends Controller
                         return $trax_center;
                     } else {
                         $franchise = ($shipment->franchise_insurance != null) ? ($shipment->franchise_insurance . '%') : $shipment->franchise_discount;
-                        return $shipment->franchise;
+                        return $franchise;
                     }
                 }
             })
