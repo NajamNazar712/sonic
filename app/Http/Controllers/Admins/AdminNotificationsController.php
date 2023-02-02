@@ -811,6 +811,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['employee_name', 'emp_id'];
         }
+        elseif($id == 209)
+        {
+            $details['fields'] = ['line_manager'];
+        }
         return $details;
     }
 

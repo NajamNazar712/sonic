@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
@@ -100,6 +101,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
@@ -235,6 +237,7 @@ class NotificationsController extends Controller
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
         $notification = Notification::find($id);
+    
 
         if ($notification) {
             if ($notification->status) {
@@ -9896,6 +9899,108 @@ else if ($id == 178) {
                         }
 
 
+                    }
+                }
+                else if($id == 209)
+                {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $date   = Carbon::now();
+                    $line_managers = Employee::where('is_line_manager',1)->where('official_email','!=',null)->get();
+                    $original_subject = $subject;
+                    $original_body = $body;
+                    
+                    foreach($line_managers as $line_manager)
+                    {
+                        
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Trax ID</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Name</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Leaves Availed</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Attendance Adjustment</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock In</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock Out</th>';
+                        $html .= '</tr></thead><tbody>';
+                        $employees_attendances = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')
+                        ->join('employee_designations as ed','ed.id' ,'=','employees.designation_id' )
+                        ->join('employee_shifts as es','es.id','=','employees.shift_id')
+                        ->leftjoin('employee_attendance_adjustments as eaa','eaa.id' ,'=','employees.id' )
+                        ->select('employees.trax_id','employees.name as name','ed.name as designation','ea.leave_status','ea.clock_in_datetime','ea.clock_out_datetime','ea.attendance_date','es.start_time','es.extension_minutes','eaa.status')
+                        ->where('employees.line_manager_id',$line_manager->id)
+                        ->whereBetween('ea.attendance_date',[$reference_1_id, $reference_2_id])
+                        ->orderBy('ea.attendance_date')
+                        ->get();
+                        
+                        $employees_attendances_count = count($employees_attendances);
+                        
+                        $summary = [];
+                        foreach($employees_attendances as $index => $employees_attendance)
+                        { 
+                            $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date.$employees_attendance->start_time)->addMinutes((int)$employees_attendance->extension_minutes);
+                            $clock_in = Carbon::parse($employees_attendance->clock_in_datetime);
+                            $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance->trax_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance->name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance->designation . '</td>';
+                            if($employees_attendance['leave_status'] == 0)
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">No</td>';
+                            }
+                            else
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Yes</td>';
+                            }
+                            if($time_diff > 0)
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Yes</td>';
+                            }
+                            else
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">No</td>';
+                            }
+                            if($employees_attendance['status'] == 0)
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">No</td>';
+                            }
+                            else
+                            {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Yes</td>';
+                            }
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_in_datetime'] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_out_datetime'] . '</td>';
+                            $html .= '</tr>';
+                            $summary[] = AdminReportsEmailController::weekly_attendence_summary($employees_attendance);
+                        }
+                        
+                        $html .= '</tbody></table>';
+                        if($employees_attendances_count > 0  &&  isset($employees_attendances))
+                        {
+                         
+                            $link = AdminReportsEmailController::weekly_attendence_summary_excel($summary,$line_manager->id);
+                            if (strpos($body, '[line_manager]') !== FALSE) {
+                                $body = str_replace('[line_manager]', $line_manager->name, $body);
+                            }
+                            if (strpos($body, '[preview]') !== FALSE) {
+                                $body = str_replace('[preview]', $html, $body);
+                                $line_manager->official_email;
+                               
+                            }
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                                $line_manager->official_email;
+                               
+                            }
+                            
+                            self::email($subject,$body,$line_manager->official_email);
+                            $html = '';
+                            $subject = $original_subject;
+                            $body = $original_body;
+                        }
+                        
                     }
                 }
             }
