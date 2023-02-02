@@ -10748,24 +10748,6 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),198);
         }
 
-        $count = DB::connection('reports')->table('v2_pickup_notes')
-            ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-            ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-            ->join('cities as c', 'c.id', '=', 'pr.city_id');
-        
-            if($rider = $request->get('search_rider')){
-                $count = $count->where('r.id', '=', $rider);
-            }
-            if($user = $request->get('search_shipper')){
-                $count = $count->where('s.user_id', '=', $user);
-            }
-            if($hub = $request->get('search_hub')){
-                $count = $count->where('c.hub_id', '=', $hub);
-            }
-
-        $count = $count->groupBy('v2_pickup_notes.id')->count();
-
         $rider_pickup = DB::connection('reports')->table('v2_pickup_notes')
             ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
             ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
@@ -10789,7 +10771,6 @@ class AdminReportsController extends Controller
             ->groupBy('v2_pickup_notes.id');
 
         $datatables = Datatables::of($rider_pickup)
-            ->setTotalRecords($count)
             ->addColumn('scanned_shipments_btn', function ($entry) {
                 $function = "scanned_shipments_popup('".$entry->id."')";
                 if ($entry->scanned_shipments > 0) {
