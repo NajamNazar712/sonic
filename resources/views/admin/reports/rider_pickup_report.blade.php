@@ -358,18 +358,18 @@
                         page: 'current'
                     }).every(function() {
                         
-                        $(this.footer()).html(scanned_shipments_count.toFixed(2));
+                        $(this.footer()).html(scanned_shipments_count);
                     });
                     api.columns('.arrived_shipments', {
                         page: 'current'
                     }).every(function() {
-                        $(this.footer()).html(arrived_shipments_count.toFixed(2));
+                        $(this.footer()).html(arrived_shipments_count);
                     });
                     api.columns('.without_scan_shipments', {
                         page: 'current'
                     }).every(function() {
                        
-                        $(this.footer()).html(without_scan_shipments_count.toFixed(2));
+                        $(this.footer()).html(without_scan_shipments_count);
                     });
                 }
             });
@@ -433,7 +433,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
@@ -462,7 +462,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
@@ -491,7 +491,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.id+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
