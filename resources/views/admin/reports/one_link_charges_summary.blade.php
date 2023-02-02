@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        1link shipment wise summary
+        1link Shipment Wise Summary
     </h1>
 
     <div class="card">
@@ -21,7 +21,7 @@
                     <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left date_css">
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
@@ -31,7 +31,7 @@
                     <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left date_css">
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
@@ -74,6 +74,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
+    <style>
+        .date_css{
+            height:40px;
+            margin: 1px; 
+        }
+    </style>
 @endsection
 @section('js')
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
