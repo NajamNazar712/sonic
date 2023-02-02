@@ -948,6 +948,9 @@ class Permission
             'settings.rider_shipment_attempt.index' => 562,
             'settings.rider_shipment_attempt.store' => 562,
 
+            'settings.project_arrival_shippers.index' => 828,
+            'settings.project_arrival_shippers.store' => 828,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
