@@ -10816,7 +10816,17 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->editColumn('pickup_note_id', function ($entry) {
+            ->addColumn('without_scan_shipments', function ($entry) {
+
+                if ($entry->arrived_shipments > 0) {
+
+                    return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
+                } else {
+                    return 0;
+                }
+            })
+            
+            ->addColumn('pickup_note_id_btn', function ($entry) {
                 if ($entry->pickup_note_id != null) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
