@@ -1304,10 +1304,17 @@ class Permission
             'settings.non_cod_otp_shippers.index' => 820,
             'settings.non_cod_otp_shippers.store' => 820,
 
-            'admin.tracking.shipment_position.track' => 822,
-            'admin.tracking.shipment_position.upload' => 822,
-            'admin.tracking.shipment_position.list' => 822,
+            'tracking.shipment_position.track' => 822,
+            'tracking.shipment_position.upload' => 822,
+            'tracking.shipment_position.list' => 822,
 
+            'reports.one_link_charges_summary.index' => 824,
+			'reports.one_link_charges_summary.index' => 824,
+
+            'settings.onelink_payment_charges.index' => 825,
+
+			'reports.rider_pickup.index' => 823,
+            'reports.rider_pickup.list' => 823,
         ],
 
         'shipper' => [

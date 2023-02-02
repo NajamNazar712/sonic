@@ -381,7 +381,7 @@ class ShipperAPIController extends Controller
                                 CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
                             } else {
                                 if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
-                                    if (in_array($complaint_id, [11, 12, 13])) {
+                                    if (in_array($complaint_id, [11, 13])) {
                                         $tracking_no = $shipment->tracking_number;
                                         return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
                                     } else {
@@ -409,7 +409,7 @@ class ShipperAPIController extends Controller
                             }
                         } else {
                             if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
-                                if (in_array($complaint_id, [11, 12, 13])) {
+                                if (in_array($complaint_id, [11, 13])) {
                                     $tracking_no = $shipment->tracking_number;
                                     return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
                                 } else {

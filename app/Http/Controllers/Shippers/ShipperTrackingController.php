@@ -19,6 +19,7 @@ use App\Http\Models\Admin\DeliveryLocationMapping;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use Auth;
@@ -151,6 +152,12 @@ class ShipperTrackingController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
+                        $details['consignee']['crm_status'] = 0;
+
+                        $on_hold_sc = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',20);
+                        if($on_hold_sc->exists()){
+                            $details['consignee']['crm_status'] = 1;
+                        }
 
                         $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
