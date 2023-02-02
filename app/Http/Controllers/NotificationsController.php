@@ -10071,8 +10071,6 @@ else if ($id == 178) {
 
                         $subject = $original_subject;
                         $body = $original_body;
-
-                        dd('Notification Checked');
                     }
                 }
 
