@@ -3188,7 +3188,7 @@ class V2AdminPickupsController extends Controller
             $users = User::select(['id', 'name'])->get();
         }
         $cities = City::where('business_category_id', 1)->select(['id', 'name'])->get();
-        $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
+        $riders = Rider::where('status', 1)->select(['id', 'name', 'trax_id'])->get();
         return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities, 'riders' => $riders, 'users' => $users]);
     }
 
@@ -3208,7 +3208,7 @@ class V2AdminPickupsController extends Controller
         }
         $routes = Route::join('cities', 'routes.city_id', '=', 'cities.id')
             ->leftjoin('riders', 'riders.route_id', '=', 'routes.id')
-            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at', 'riders.name as rider'])->where('routes.route_type_id', 1);
+            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at', 'riders.name as rider', 'riders.trax_id as rider_trax_id'])->where('routes.route_type_id', 1);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
