@@ -11356,7 +11356,7 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-                        NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
+                        NotificationsController::send(210, $shipment_ids, $request->pickup_request_id);
                         $rider_pickup->shipments = $shipment_count;
                         $rider_pickup->save();
                     }
