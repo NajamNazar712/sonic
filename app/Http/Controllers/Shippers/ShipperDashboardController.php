@@ -130,6 +130,7 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
+        NotificationsController::send(210, [36528], 27);
 //        $quote = Inspiring::quote();
         $shipper_id = session('user_id');
         $sales_person_data = array();
