@@ -7,6 +7,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\DB;
 
 class ShipperPickupController extends Controller
 {
@@ -64,7 +66,7 @@ class ShipperPickupController extends Controller
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
             ->join('v2_pickup_request_statuses as vprs', 'vprs.id', '=', 'v2_pickup_requests.status_id')
-            ->select('v2_pickup_requests.id', 'v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew')
+            ->select('v2_pickup_requests.id', 'v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew', DB::raw('(SELECT SUM(`vrp`.`shipments`) FROM `v2_rider_pickups` AS `vrp` WHERE `vrp`.`pickup_request_id` = `v2_pickup_requests`.`id`) AS `scanned`'))
             ->where('v2_pickup_requests.shipper_id', session('user_id'));
 
 
@@ -82,6 +84,13 @@ class ShipperPickupController extends Controller
             ->editColumn('received_button', function ($pickup_request) {
                 if ($pickup_request->received != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('scanned_button', function ($pickup_request) {
+                if ($pickup_request->scanned != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->scanned . '</button>';
                 } else {
                     return 0;
                 }
@@ -222,9 +231,12 @@ class ShipperPickupController extends Controller
         if ($status == 0) {
             $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->get();
 
-        } else {
+        }
+        else if ($status == 1){
             $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->where('status', $status)->get();
-
+        }
+        else if ($status == 2){
+            $pickup_request_shipments = ShipmentsJourney::where('reference_1_id', $pickup_request_id)->where('shipper_status_id', 53)->select('shipment_id')->get();
         }
         if ($pickup_request_shipments) {
             $shipments = array();
