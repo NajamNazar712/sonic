@@ -1633,7 +1633,6 @@ class RiderAPIController extends Controller
                                 ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                             }
                         }
-                        NotificationsController::send(210, $shipment_ids, $request->pickup_request_id);
                     }
                 }
 
@@ -11352,7 +11351,7 @@ class RiderAPIController extends Controller
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                                     $shipment_count+=1;
-                                    $notification_shipments[] = $shipment_id;
+                                    $notification_shipments[] = $shipment->id;
                                 }else{
                                     self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
                                 }
