@@ -2979,8 +2979,8 @@ class AdminReportsEmailController extends Controller
         $file_name_without_path = "reports/weekly_attendence_summary_report_" . $date_file_name . ".xlsx";
         $file_name = public_path() . "/reports/weekly_attendence_summary_report_" . $date_file_name . ".xlsx";
         $writer->save($file_name);
-        $link = url('/'). '/' . $file_name_without_path;
-        $data = '<a href="' . $link . '" download> Download </a>';
-        return $data;
+        $file = url('/'). '/' . $file_name_without_path;
+        $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+        return $link;
     }
 }
