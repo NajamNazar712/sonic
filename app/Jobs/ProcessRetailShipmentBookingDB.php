@@ -281,7 +281,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             if ($cash_deposit->exists()) {
                 $cash_deposit = $cash_deposit->first();
                 $total_shipments = $cash_deposit->total_cn + 1;
-                $total_cash = $cash_deposit->total_cash + $amount;
+                $total_cash = $cash_deposit->total_cash + $rates['total_charges'];
                 $cash_deposit->total_cn = $total_shipments;
                 $cash_deposit->total_cash = $total_cash;
                 $cash_deposit->save();
@@ -290,7 +290,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
                 $cash_deposit->category = $this->booking['category'];
                 $cash_deposit->retail_user_id = $this->booking['retail_user_id'];
                 $cash_deposit->total_cn = 1;
-                $cash_deposit->total_cash = $amount;
+                $cash_deposit->total_cash = $rates['total_charges'];
                 $cash_deposit->save();
             }
 
