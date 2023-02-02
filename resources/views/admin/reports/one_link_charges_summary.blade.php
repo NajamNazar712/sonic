@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        1link shipment wise summary
+        1link Shipment Wise Summary
     </h1>
 
     <div class="card">
