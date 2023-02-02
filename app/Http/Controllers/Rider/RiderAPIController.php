@@ -11362,6 +11362,7 @@ class RiderAPIController extends Controller
                         $rider_pickup->save();
                         if(count($notification_shipments) > 0){
                             NotificationsController::send(210, $shipment_ids, $request->pickup_request_id);
+                            dd('Notification Checked');
                         }
                     }
                 }
