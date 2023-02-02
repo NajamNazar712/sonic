@@ -66,7 +66,6 @@ class ShipperPickupController extends Controller
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
             ->join('v2_pickup_request_statuses as vprs', 'vprs.id', '=', 'v2_pickup_requests.status_id')
-            ->leftjoin('v2_rider_pickups as vrp', 'vrp.pickup_request_id', '=', 'v2_pickup_requests.id')
             ->select('v2_pickup_requests.id', 'v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew', DB::raw('(SELECT SUM(`vrp`.`shipments`) FROM `v2_rider_pickups` AS `vrp` WHERE `vrp`.`pickup_request_id` = `v2_pickup_requests`.`id`) AS `scanned`'))
             ->where('v2_pickup_requests.shipper_id', session('user_id'));
 
