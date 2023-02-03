@@ -1308,6 +1308,9 @@ class Permission
             'admin.tracking.shipment_position.upload' => 822,
             'admin.tracking.shipment_position.list' => 822,
 
+            'settings.consignee_refused_otp_bypass.index' => 826,
+            'otp_history.index' => 827,
+
         ],
 
         'shipper' => [

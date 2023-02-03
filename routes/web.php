@@ -3504,7 +3504,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@non_cod_otp_shippers_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@non_cod_otp_shippers_store')->name('store');
         });
-        
+        Route::prefix('consignee_refused_otp_bypass')->name('consignee_refused_otp_bypass.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consignee_refused_otp_bypass_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@consignee_refused_otp_bypass_store')->name('store');
+        });
+
 
 	});
 
@@ -4156,6 +4160,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\DeliveryController@shipment_otp_list')->name('list');
         Route::post('update', 'Admins\DeliveryController@shipment_otp_update')->name('update');
     });
+
+    Route::prefix('otp_history')->name('otp_history.')->group(function () {
+        Route::get('', 'Admins\ShipmentOTPController@otp_history_index')->name('index');
+        Route::get('list', 'Admins\ShipmentOTPController@otp_history_list')->name('list');
+    });
+
 
     Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
