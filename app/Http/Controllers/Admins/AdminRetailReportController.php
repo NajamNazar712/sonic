@@ -264,7 +264,9 @@ class AdminRetailReportController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             })
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name')
+            ->leftjoin('retail_references as rref','rref.shipment_id','=','shipments.id')
+            ->leftjoin('shipment_items as si','si.shipment_id','=','rs.shipment_id')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2)
@@ -283,7 +285,7 @@ class AdminRetailReportController extends Controller
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
+        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'Product Insurance Value', 'Insurance Charges', 'Discount Amount', 'Packaging Charges', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID', 'Reference'];
 
         $serial_number = 1;
         foreach ($sales as $sale){
@@ -344,11 +346,16 @@ class AdminRetailReportController extends Controller
             $row[] = $sale->actual_weight;
             $row[] = $weight_charges;
             $row[] = $fuel_surcharge;
+            $row[] = $sale->product_value;
+            $row[] = $sale->insurance_charges;
+            $row[] = $sale->discount_amount;
+            $row[] = $sale->packaging_charges;
             $row[] = $gst;
             $row[] = $total_charges;
             $row[] = $net_payable;
             $row[] = $sale->delivered_or_returned;
             $row[] = str_pad($sale->booked_by_id, 6, '0', STR_PAD_LEFT);
+            $row[] = $sale->retail_reference;
 
             $details[] = $row;
             $serial_number++;
@@ -367,9 +374,13 @@ class AdminRetailReportController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('W')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('X')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('Y')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('Z')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AA')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AB')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AC')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AE')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AA1')->getFont()->setBold(TRUE);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AF1')->getFont()->setBold(TRUE);
         $spreadsheet->getActiveSheet()->fromArray($details);
         $writer = new Xlsx($spreadsheet);
 
@@ -452,7 +463,9 @@ class AdminRetailReportController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             })
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name')
+            ->leftjoin('retail_references as rref','rref.shipment_id','=','shipments.id')
+            ->leftjoin('shipment_items as si','si.shipment_id','=','rs.shipment_id')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges', 'rs.gst as gst','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name', 'rref.ref as retail_reference','rf.discount as franchise_discount','rf.insurance as franchise_insurance','rtc.discount as trax_discount','rtc.insurance as trax_insurance','rs.discount as discount_amount','rs.insurance_charges as insurance_charges','rs.packaging_charges as packaging_charges','si.price as product_value')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('dr.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2)
@@ -470,7 +483,7 @@ class AdminRetailReportController extends Controller
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID'];
+        $details[] = ['S.No.', 'Tracking Number', 'Shipper', 'Franchise/Trax Center', 'Booking Staff Name', 'Status', 'Payment Status', 'Payment ID', 'RNCC Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Origin Zone', 'Destination Zone', 'Attempts', 'Product Type', 'Collection Amount', 'Actual Weight', 'Weight Charges', 'Fuel Surcharge', 'Product Insurance Value', 'Insurance Charges', 'Discount Amount', 'Packaging Charges', 'GST', 'Total Charges', 'Net Payable', 'Delivered Date', 'Booking Staff ID', 'Reference'];
 
         $serial_number = 1;
         foreach ($sales as $sale){
@@ -531,11 +544,16 @@ class AdminRetailReportController extends Controller
             $row[] = $sale->actual_weight;
             $row[] = $weight_charges;
             $row[] = $fuel_surcharge;
+            $row[] = $sale->product_value;
+            $row[] = $sale->insurance_charges;
+            $row[] = $sale->discount_amount;
+            $row[] = $sale->packaging_charges;
             $row[] = $gst;
             $row[] = $total_charges;
             $row[] = $net_payable;
             $row[] = $sale->delivered_or_returned;
             $row[] = str_pad($sale->booked_by_id, 6, '0', STR_PAD_LEFT);
+            $row[] = $sale->retail_reference;
 
             $details[] = $row;
             $serial_number++;
@@ -554,9 +572,13 @@ class AdminRetailReportController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('W')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('X')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('Y')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('Z')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AA')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AB')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AC')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AE')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AA1')->getFont()->setBold(TRUE);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AF1')->getFont()->setBold(TRUE);
         $spreadsheet->getActiveSheet()->fromArray($details);
         $writer = new Xlsx($spreadsheet);
 
