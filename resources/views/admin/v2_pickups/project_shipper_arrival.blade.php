@@ -37,7 +37,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="form-group ">
-                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -84,7 +84,7 @@
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.individual.store') }}" novalidate="novalidate">
+                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.project_shippers.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -148,7 +148,7 @@
 
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
+                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*"  data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
                             </div>
                         </div>
 
@@ -203,7 +203,7 @@
                         </div>
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
+                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
                             </div>
                         </div>
 
@@ -520,7 +520,7 @@
                     var height = $(form).find('input.height').val();
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.shipment_details') !!}',
+                            url: '{!! route('admin.v2_pickups.arrival.project_shippers.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
@@ -690,7 +690,7 @@
                         var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
                         var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.item_details') !!}',
+                            url: '{!! route('admin.v2_pickups.arrival.project_shippers.try_and_buy.item_details') !!}',
                             method: 'POST',
                             data: {
                                 'shipment_id': shipment_id,
@@ -771,7 +771,7 @@
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
-                        url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.shipment_details') !!}',
+                        url: '{!! route('admin.v2_pickups.arrival.project_shippers.try_and_buy.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
@@ -924,7 +924,7 @@
                 var id = parseInt(parent.attr('id'));
 
                 $.ajax({
-                    url: '{!! route('admin.v2_pickups.arrival.individual.shipment_remove') !!}',
+                    url: '{!! route('admin.v2_pickups.arrival.project_shippers.shipment_remove') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -997,7 +997,7 @@
                         var shipment_tracking_number = $('#piece_tracking_number').val();
                         var shipment_piece_count = $('#piece_shipment_count').val();
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}',
+                            url: '{!! route('admin.v2_pickups.arrival.project_shippers.piece.piece_details') !!}',
                             method: 'POST',
                             data: {
                                 'shipment_id': shipment_id,
@@ -1066,7 +1066,7 @@
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     var weight = $(form).find('input.pieces_weight').val();
                     $.ajax({
-                        url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
+                        url: '{!! route('admin.v2_pickups.arrival.project_shippers.piece.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,

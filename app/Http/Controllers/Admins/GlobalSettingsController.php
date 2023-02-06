@@ -7396,7 +7396,7 @@ class GlobalSettingsController extends Controller
 
     public function project_arrival_shippers_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 412);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
         return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
@@ -7405,6 +7405,7 @@ class GlobalSettingsController extends Controller
     public function project_arrival_shippers_store(Request $request)
     {
         if ($request->has('shippers')) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 631);
             ProjectArrivalShipper::truncate();
             if (count($request->shippers) > 0) {
                 foreach ($request->shippers as $shipper){

@@ -188,7 +188,7 @@
 
 
             @if (session('role_id') == 1 ||
-                    count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670], session('permissions'))) !== 0)
+                    count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670, 830], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cubes"></i>First Mile</span></a>
                     <ul class="menu-content">
@@ -246,7 +246,7 @@
                         {{--                            </li> --}}
 
 
-                        @if (session('role_id') == 1 || count(array_intersect([17, 24, 271, 272, 366, 670], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([17, 24, 271, 272, 366, 670, 830], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a>
                                 <ul class="menu-content">
                                     {{--                                        @if (session('role_id') == 1 || in_array(17, session('permissions'))) --}}
@@ -295,12 +295,8 @@
                                                 href="{{ route('admin.v2_pickups.pickup_route.index') }}">Pickup
                                                 Route</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(24, session('permissions')))
-                                        <li><a class="menu-item"
-                                               href="{{ route('admin.v2_pickups.arrival.project_shippers.index') }}">Project Shippers Arrival</a></li>
-                                        <li><a class="menu-item"
-                                               href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk
-                                                Arrival</a></li>
+                                    @if (session('role_id') == 1 || in_array(830, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.v2_pickups.arrival.project_shippers.index') }}">Project Shippers Arrival</a></li>
                                     @endif
                                 </ul>
                             </li>
