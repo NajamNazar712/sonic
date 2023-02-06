@@ -295,6 +295,13 @@
                                                 href="{{ route('admin.v2_pickups.pickup_route.index') }}">Pickup
                                                 Route</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(24, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.v2_pickups.arrival.project_shippers.index') }}">Project Shippers Arrival</a></li>
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk
+                                                Arrival</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -1658,7 +1665,7 @@
             @endif
 
             @if (session('role_id') == 1 ||
-                    count(array_intersect([81,85,88,92,96,558,100,131,205,231,104,116,149,150,151,152,154,157,158,171,175,188,189,192,197,198,214,228,229,230,231,237,253,302,311,313,314,318,320,329,333,362,367,375,377,378,379,380,387,384,385,394,417,418,425,438,443,447,462,477,488,491,494,498,499,526,544,558,565,580,581,582,601,616,646,644,656,659,661,664,660,667,668,680,674,682,683,689,697,701,708,710,714,716,747,761,788,820,828], session('permissions'))) !== 0)
+                    count(array_intersect([81,85,88,92,96,558,100,131,205,231,104,116,149,150,151,152,154,157,158,171,175,188,189,192,197,198,214,228,229,230,231,237,253,302,311,313,314,318,320,329,333,362,367,375,377,378,379,380,387,384,385,394,417,418,425,438,443,447,462,477,488,491,494,498,499,526,544,558,565,580,581,582,601,616,646,644,656,659,661,664,660,667,668,680,674,682,683,689,697,701,708,710,714,716,747,761,788,820], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -1782,11 +1789,6 @@
                                                 href="{{ route('admin.settings.non_cod_otp_shippers.index') }}">Non-Cod
                                                 OTP Shippers Setting</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(828, session('permissions')))
-                                        <li><a class="menu-item"
-                                               href="{{ route('admin.settings.ccd_booking.index') }}">Project Arrival Shippers</a>
-                                        </li>
-                                    @endif
                                 </ul>
 
                             </li>
@@ -1838,7 +1840,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([104, 326, 761], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([104, 326, 761, 828], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">First Mile</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
@@ -1855,6 +1857,12 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.pickup.weight_bypass') }}">Weight
                                                 ByPass</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(828, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.project_arrival_shippers.index') }}">Project Arrival Shippers</a>
+                                        </li>
                                     @endif
                                 </ul>
                             </li>

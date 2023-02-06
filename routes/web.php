@@ -1133,6 +1133,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
             });
+
+            Route::prefix('project_shippers')->name('project_shippers.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
+            });
         });
 
         Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
@@ -2938,7 +2943,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
         });
 
-        Route::prefix('project_arrival_shippers')->name('project_arrival_shippers_index.')->group(function () {
+        Route::prefix('project_arrival_shippers')->name('project_arrival_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@project_arrival_shippers_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@project_arrival_shippers_store')->name('store');
         });
