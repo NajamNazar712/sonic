@@ -2356,6 +2356,7 @@ class ReturnController extends Controller
     }
 
     public function return_receive_status(Request $request,$id){
+        // dd('asd');
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();

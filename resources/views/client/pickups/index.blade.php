@@ -22,6 +22,7 @@
                         <th class="border-primary border-darken-1">Requested Date</th>
                         <th class="border-primary border-darken-1">No. of Shipments Booked</th>
                         <th class="border-primary border-darken-1">No. of Shipments Received</th>
+                        <th class="border-primary border-darken-1">No. of Shipments Scanned</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Contact No(s)</th>
@@ -434,6 +435,7 @@
                             head.push('Request Date');
                             head.push('No. of Shipments Booked');
                             head.push('No. of Shipments Received');
+                            head.push('No. of Shipments Scanned');
                             head.push('Contact Person');
                             head.push('Vendor');
                             head.push('Contact No(s)');
@@ -455,6 +457,7 @@
                                 row.push(values.requested_at);
                                 row.push(values.booked);
                                 row.push(values.received);
+                                row.push(values.scanned);
                                 row.push(values.contact_person);
                                 row.push(values.vendor);
                                 row.push(values.contact_number);
@@ -587,6 +590,7 @@
                     {data: 'requested_at', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_at'},
                     {data: 'booked_button', name: 'v2_pickup_requests.booked', class: 'text-center align-middle booked'},
                     {data: 'received_button', name: 'v2_pickup_requests.received', class: 'text-center align-middle received'},
+                    {data: 'scanned_button', name: 'vrp.shipments', class: 'text-center align-middle scanned'},
                     {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
@@ -732,6 +736,38 @@
                                 });
                             }
                             $('#shipment_modal #shipment_modal_tittle').html('Assigned Shipments');
+                            $('#shipment_modal .modal-body').html(shipments);
+                            $('#shipment_modal').modal('show');
+
+
+                        }
+                    });
+
+            });
+
+            $('body').on('click','#datatable tbody tr td.scanned button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipment_modal #shipment_modal_tittle').html('');
+                $('#shipment_modal .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('cod.pickup.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id,
+                        'status': 2
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#shipment_modal #shipment_modal_tittle').html('Scanned Shipments');
                             $('#shipment_modal .modal-body').html(shipments);
                             $('#shipment_modal').modal('show');
 

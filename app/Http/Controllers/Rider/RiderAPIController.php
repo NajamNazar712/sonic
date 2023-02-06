@@ -1633,7 +1633,6 @@ class RiderAPIController extends Controller
                                 ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                             }
                         }
-                        NotificationsController::send(73, $request->tracking_numbers, $request->pickup_request_id);
                     }
                 }
 
@@ -11341,6 +11340,7 @@ class RiderAPIController extends Controller
                     if ($request->has('shipment_ids')) {
                         $shipment_count = 0;
                         $shipment_ids = explode(',', $request->shipment_ids);
+                        $notification_shipments = array();
                         foreach ($shipment_ids as $shipment_id) {
                             $shipment = Shipment::where('tracking_number',$shipment_id);
                             if ($shipment->exists()) {
@@ -11351,14 +11351,17 @@ class RiderAPIController extends Controller
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                                     $shipment_count+=1;
+                                    $notification_shipments[] = $shipment->id;
                                 }else{
                                     self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
                                 }
                             }
                         }
-                        NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
                         $rider_pickup->shipments = $shipment_count;
                         $rider_pickup->save();
+                        if(count($notification_shipments) > 0){
+                            NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
+                        }
                     }
                 }
 

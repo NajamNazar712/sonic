@@ -985,6 +985,15 @@ class AdminTrackingController extends Controller
                         $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
 
+                        $details['consignee']['crm_status'] = 0;
+
+                        $on_hold_sc = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',20);
+                        if($on_hold_sc->exists()){
+                            $details['consignee']['crm_status'] = 1;
+                        }
+
+
+
                         foreach ($shipment->items as $item) {
                             $item_details = array();
 
