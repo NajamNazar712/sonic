@@ -11572,6 +11572,11 @@ class RiderAPIController extends Controller
                                             $shipment->save();
                                             ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 1, NULL, $rider_id,NULL,NULL, $remarks_id);
                                         }
+                                        else{
+                                            $arr['shipment_id'] = $request->shipment_id;
+                                            $arr['delivery_note_id'] = $request->delivery_note_id;
+                                            dispatch(new ProcessAgentCallMonitoring($arr));
+                                        }
 
                                     }
                                     if($rc_flag == false){
