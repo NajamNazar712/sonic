@@ -6746,9 +6746,9 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('phone', function ($shipments) {
-                return $shipments->phone1 . "<br>" . $shipments->phone2;
-            })
+//            ->editColumn('phone', function ($shipments) {
+//                return $shipments->phone1 . "<br>" . $shipments->phone2;
+//            })
             ->filterColumn('phone', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
