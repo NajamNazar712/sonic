@@ -253,7 +253,7 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Consignee Name</th>
-                            <th class="border-primary border-darken-1">Consignee Contact</th>
+{{--                            <th class="border-primary border-darken-1">Consignee Contact</th>--}}
                             <th class="border-primary border-darken-1">Consignee Address</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Booking Date</th>
@@ -463,7 +463,7 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Consignee Name');
-                            head.push('Consignee Contact');
+                            // head.push('Consignee Contact');
                             head.push('Consignee Address');
                             head.push('Collection Amount');
                             head.push('Booking Date');
@@ -490,7 +490,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                // row.push(values.phone);
                                 row.push(values.consignee_address);
                                 row.push(values.collection_amount);
                                 row.push(values.booking_date);
@@ -556,7 +556,7 @@
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    { data: 'phone', name: 'phone', class: 'align-middle phone'},
+                    // { data: 'phone', name: 'phone', class: 'align-middle phone'},
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data: 'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
                     { data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},

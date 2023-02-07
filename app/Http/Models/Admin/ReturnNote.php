@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ReturnNote extends Model
 {
     protected $fillable = [
-        'hub_id','rider_id','route_id','shipments_count','admin_id','updated_by', 'created_via_app'
+        'hub_id','rider_id','route_id','shipments_count','admin_id','updated_by', 'created_via_app', 'status'
     ];
     public function pickup_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
