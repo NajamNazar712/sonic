@@ -1155,8 +1155,14 @@
                                         shipment += '<td>' + history.status + '</td>';
                                         if(history.image_audio_location == undefined) {
                                             shipment += '<td>-</td>';}
-                                        else
-                                            shipment += '<td>' + history.image_audio_location + '</td>';
+                                        else{
+                                            if(history.return_confirm_app != undefined){
+                                                shipment += history.return_confirm_app;
+                                            }
+                                            else{
+                                                shipment += '<td>' + history.image_audio_location + '</td>';
+                                            }
+                                        }
                                         shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
                                         shipment += '<td>' + history.remarks + '</td>';
                                         shipment += '<td>' + history.user + '</td>';

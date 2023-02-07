@@ -1268,6 +1268,15 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
+                            if($journey->shipper_status_id == 20){
+                                $rc_app = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id', 12);
+                                if($rc_app->exists()){
+                                    $rc_app = $rc_app->first();
+                                    if($rc_app->rider_status_reason_id == 8 && $rc_app->otp_entered){
+                                        $journey_details['return_confirm_app'] = '<i class="la la-check-square"></i>';
+                                    }
+                                }
+                            }
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
