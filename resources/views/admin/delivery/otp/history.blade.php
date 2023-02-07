@@ -12,6 +12,40 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-12 ">
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                            <div class="col-4">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                    </div>
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Activation Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                    </div>
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Activation Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -33,6 +67,8 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
@@ -99,6 +135,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -107,6 +146,52 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';
+
+        var from_date = $('#from_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            format:'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            min: new Date(start_of_year),
+            onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+        var to_date = $('#to_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            format:'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            max: '{{ Carbon\Carbon::now() }}',
+            onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+
+        $('#search_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                table.draw(true);
+            }
+        });
+
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -165,12 +250,17 @@
             autoWidth: false,
             pagingType: 'full_numbers',
             processing: true,
+            deferLoading: [50, 0],
             language: {
                 processing: data_table_loader
             },
             serverSide: true,
             ajax:{
                 url: '{{ route('admin.otp_history.list') }}',
+                data: function (d) {
+                    d.search_date_from = $('input[name="from_date_formatted"]').val();
+                    d.search_date_to = $('input[name="to_date_formatted"]').val();
+                }
             },
             order: [[6, 'desc']],
             columns: [

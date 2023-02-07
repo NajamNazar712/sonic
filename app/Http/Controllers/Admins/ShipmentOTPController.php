@@ -44,6 +44,11 @@ class ShipmentOTPController extends Controller
                     $sub_query->where('rider_deliveries.rider_status_id', 14);
                 });
         });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $admins = $admins->whereBetween('rider_deliveries.created_at', [$from, $to]);
+        }
 
         $datatable = Datatables::of($admins)
         ->addColumn('tracking_number_link', function ($shipments) {
