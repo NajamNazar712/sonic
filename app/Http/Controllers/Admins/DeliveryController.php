@@ -3234,7 +3234,7 @@ class DeliveryController extends Controller
                 $not_rcp = false;
 
                 $rc_flag = false;
-                if(($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
+                if(($deliveries->current_status_id) && ($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
                     return $deliveries->current_status;
                 }
 //                if(ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count() < 2)
@@ -3302,7 +3302,7 @@ class DeliveryController extends Controller
             })
             ->addColumn('reason', function ($deliveries) {
                 $rc_flag = false;
-                if(($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
+                if(($deliveries->current_status_id) && ($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
                     $rc_flag = true;
                 }
                 $status_reason = '';
