@@ -1268,12 +1268,12 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
-                            if($journey->shipper_status_id == 20){
+                            if($journey->shipper_status_id == 12){
                                 $rc_app = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id', 12);
                                 if($rc_app->exists()){
                                     $rc_app = $rc_app->first();
                                     if($rc_app->rider_status_reason_id == 8 && $rc_app->otp_entered){
-                                        $journey_details['image_audio_location'] .= '<i class="la la-check-square"></i>';
+                                        $journey_details['image_audio_location'] .= '<i class="la la-check-square primary"></i>';
                                     }
                                 }
                             }
