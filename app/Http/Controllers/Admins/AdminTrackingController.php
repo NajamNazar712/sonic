@@ -1273,7 +1273,7 @@ class AdminTrackingController extends Controller
                                 if($rc_app->exists()){
                                     $rc_app = $rc_app->first();
                                     if($rc_app->rider_status_reason_id == 8 && $rc_app->otp_entered){
-                                        $journey_details['return_confirm_app'] = '<i class="la la-check-square"></i>';
+                                        $journey_details['image_audio_location'] .= '<i class="la la-check-square"></i>';
                                     }
                                 }
                             }
