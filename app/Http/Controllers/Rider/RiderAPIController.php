@@ -13264,7 +13264,7 @@ class RiderAPIController extends Controller
         $only_shippers = array();
         $excluded_shippers = array();
         $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
-        if(!$otp_bypass_setting->exists()){
+        if($otp_bypass_setting->exists()){
             $otp_bypass_setting = $otp_bypass_setting->first();
             $otp_bypass = $otp_bypass_setting->setting_value;
         }
