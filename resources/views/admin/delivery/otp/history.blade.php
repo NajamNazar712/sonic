@@ -172,7 +172,7 @@
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
             hiddenSuffix: '_formatted',
-            max: '{{ Carbon\Carbon::now() }}',
+            max: new Date('{{ Carbon\Carbon::now() }}'),
             onSet: function(context) {
                 if (context.select) {
                     $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
@@ -270,7 +270,7 @@
                 {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                 {data: 'purpose', name: 'ss.name', class: 'align-middle purpose'},
                 {data: 'otp', name: 'otp', class: 'align-middle otp', orderable: false, searchable: false},
-                {data: 'date', name: 'rider_deliveries.created_at', class: 'align-middle date'},
+                {data: 'date', name: 'shipment_otps.created_at', class: 'align-middle date'},
 
             ],
             rowCallback: function(row, data, index) {

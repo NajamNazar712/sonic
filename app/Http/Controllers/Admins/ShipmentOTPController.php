@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentOtp;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
@@ -27,12 +27,12 @@ class ShipmentOTPController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),626);
         }
-        $admins = RiderDelivery::leftJoin('shipments', 'shipments.id', '=', 'rider_deliveries.shipment_id')
+        $admins = ShipmentOtp::leftJoin('rider_deliveries', 'shipment_otps.shipment_id', '=', 'rider_deliveries.shipment_id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'shipment_otps.shipment_id')
             ->leftJoin('riders as r', 'r.id', '=', 'rider_deliveries.rider_id')
-            ->leftJoin('shipment_otps as so', 'so.shipment_id', '=', 'rider_deliveries.shipment_id')
-            ->leftJoin('shipment_otp_verifications as sov', 'sov.shipment_id', '=', 'so.shipment_id')
+            ->leftJoin('shipment_otp_verifications as sov', 'sov.shipment_id', '=', 'shipment_otps.shipment_id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'rider_deliveries.rider_status_id')
-            ->select('rider_deliveries.created_at as date', 'rider_deliveries.delivery_note_id', 'rider_deliveries.rider_status_id', 'rider_deliveries.otp_entered', 'shipments.tracking_number', 'r.name as rider_name', 'ss.name as purpose', 'so.otp as consignee_otp', 'so.dbf_otp', 'sov.via_dbf_otp');
+            ->select('shipment_otps.created_at as date', 'rider_deliveries.delivery_note_id', 'rider_deliveries.rider_status_id', 'rider_deliveries.otp_entered', 'shipments.tracking_number', 'r.name as rider_name', 'ss.name as purpose', 'shipment_otps.otp as consignee_otp', 'shipment_otps.dbf_otp', 'sov.via_dbf_otp');
 
         $admins = $admins->where(function ($query) {
             $query->where(function ($sub_query) {
@@ -44,10 +44,11 @@ class ShipmentOTPController extends Controller
                     $sub_query->where('rider_deliveries.rider_status_id', 14);
                 });
         });
+
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $admins = $admins->whereBetween('rider_deliveries.created_at', [$from, $to]);
+            $admins = $admins->whereBetween('shipment_otps.created_at', [$from, $to]);
         }
 
         $datatable = Datatables::of($admins)

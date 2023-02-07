@@ -25,9 +25,10 @@ class UpdateModulePermissionForOTPRefusalShippers extends Seeder
         ));
 
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(
+        DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > Consignee Refusal OTP Bypass', 'url'=>'admin.settings.consignee_refused_otp_bypass.index', 'permission_id' => 826),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > OTP History', 'url'=>'admin.otp_history.index', 'permission_id' => 827)
+        )
         );
     }
 }
