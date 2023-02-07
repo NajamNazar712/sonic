@@ -13280,7 +13280,7 @@ class RiderAPIController extends Controller
                         $excluded_shipper_settings = $excluded_shipper_settings->first();
                         if($excluded_shipper_settings->setting_value){
                             $excluded_shippers = array_map('intval', explode(',', $excluded_shipper_settings->text));
-                            return (in_array($user_id, $excluded_shippers)) ? true : false;
+                            return (in_array($user_id, $excluded_shippers)) ? false : true;
                         }
                         else{
                             return false;
@@ -13294,10 +13294,10 @@ class RiderAPIController extends Controller
                         $only_shippers_setting = $only_shippers_setting->first();
                         if($only_shippers_setting->setting_value){
                             $only_shippers = array_map('intval', explode(',', $only_shippers_setting->text));
-                            return (in_array($user_id, $only_shippers)) ? false : true;
+                            return (in_array($user_id, $only_shippers)) ? true : false;
                         }
                         else{
-                            return true;
+                            return false;
                         }
 
                     }
@@ -13306,7 +13306,7 @@ class RiderAPIController extends Controller
             }
         }
         else{
-            return true;
+            return false;
         }
     }
 }
