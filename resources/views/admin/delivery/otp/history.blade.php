@@ -23,7 +23,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Activation Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date(From)" data-rule-required="true" data-msg-required="Date(From) is required">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -33,7 +33,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Activation Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date(To)" data-rule-required="true" data-msg-required="Date(To) is required">
                                 </div>
                             </div>
 
