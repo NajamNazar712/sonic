@@ -112,6 +112,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
@@ -344,6 +345,7 @@
                             head.push('Shipper');
                             head.push('Order ID');
                             head.push('Consignee Name');
+                            head.push('Consignee Phone');
                             head.push('Consignee Address');
                             head.push('Status');
                             head.push('Reason');
@@ -364,6 +366,7 @@
                                 row.push(values.shipper);
                                 row.push(values.order_id);
                                 row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
                                 row.push(values.consignee_address);
                                 row.push(values.current_status);
                                 row.push(values.reason);
@@ -424,14 +427,15 @@
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data: 'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    { data: 'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    { data:'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data:'consignee_phone' ,name:'consignee_phone', class: 'align-middle consignee_phone'},
+                    { data:'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'reason' ,name: 'ssr.name', class: 'align-middle reason'},
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
