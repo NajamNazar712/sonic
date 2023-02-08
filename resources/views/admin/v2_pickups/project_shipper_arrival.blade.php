@@ -88,8 +88,6 @@
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
-                                <input type="hidden" name="rider_id" class="rider_id">
-                                <input type="hidden" name="pickup_request_ids" class="pickup_request_ids">
                                 <div class="form-group ml-1">
                                     <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
                                 </div>
@@ -209,40 +207,6 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary piece_confirm" id="piece_confirm" disabled="disabled">Confirm</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="RiderModal" data-backdrop="static" role="dialog" aria-labelledby="RiderModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="delivered_shipments_modal_title">Rider</h4>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="rider_selection_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                                <fieldset class="form-group">
-                                    <select name="rider_select" id="rider_select" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required" >
-                                        @foreach($riders as $rider)
-                                            @if($rider->trax_id)
-                                                <option value="{{ $rider->id }}">{{ $rider->name }} - {{ $rider->trax_id }}</option>
-                                            @else
-                                                <option value="{{ $rider->id }}">{{ $rider->name }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary" >Confirm</button>
                         </div>
                     </form>
                 </div>
@@ -874,45 +838,40 @@
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
                 var form = this;
-                if(unassigned_pickups){
-                    $('#RiderModal').modal('show');
-                }
-                else{
-                    swal({
-                        text: 'Are you sure, you want to Receive these Shipments?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+                swal({
+                    text: 'Are you sure, you want to Receive these Shipments?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Shipments are being marked arrived!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            blockPagePermanently();
-                            form.submit();
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
                         }
-                    });
-                }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Shipments are being marked as Received!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        blockPagePermanently();
+                        form.submit();
+                    }
+                });
 
             });
 

@@ -1146,7 +1146,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('piece_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_details')->name('piece_details');
                     Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
                 });
-                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_submit')->name('store');
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_store')->name('store');
             });
         });
 
