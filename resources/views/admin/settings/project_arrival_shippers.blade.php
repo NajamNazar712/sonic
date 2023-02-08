@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Project Arrival Shippers')
+@section('title', 'Arrival Project/Shipper Setting')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Project Arrival Shippers
+                    Arrival Project/Shipper Setting
                 </h1>
 
                 <div class="card">
@@ -90,7 +90,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update CCD Shippers Booking!',
+                        text: 'Select Yes to update Project/Shippers Arrival!',
                         icon: 'warning',
                         buttons: {
                             cancel: {

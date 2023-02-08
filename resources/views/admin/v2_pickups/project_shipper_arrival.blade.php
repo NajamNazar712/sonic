@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Project Shipper Arrival of Shipments')
+@section('title', 'Arrival Projects/Shipper of Shipments')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Project Shipper Arrival of Shipments
+                    Arrival Projects/Shipper of Shipments
                 </h1>
 
                 <div class="card">
@@ -375,9 +375,13 @@
 
                 if (this.checked) {
                     $('#add_shipment_form #weight_div').removeClass('d-none');
+                    $('#try_and_buy_weight').val('').prop('disabled', false);
+                    $('#pieces_weight').val('').prop('disabled', false);
                 }
                 else {
                     $('#add_shipment_form #weight_div').addClass('d-none');
+                    $('#try_and_buy_weight').val('').prop('disabled', true);
+                    $('#pieces_weight').val('').prop('disabled', true);
                 }
             });
 
