@@ -21,8 +21,15 @@
                                 <div id="camera_view" class="camera_view"></div>
                             </div>
 
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                        <label class="mr-1">Weight</label>
+                                        <input type="checkbox" id="weight_check" name="weight_check" class="switch hidden weight_check" data-group-cls="btn-group-sm" checked>
+                                    </div>
+                                </div>
+                            </div>
                             <form id="add_shipment_form" class="mb-1 justify-content-center" novalidate="novalidate">
-
                                 <div class="row text-center justify-content-center align-items-center">
                                     <div class="col-auto">
                                         <div class="form-group float-left">
@@ -35,34 +42,38 @@
                                         </div>
 
                                     </div>
-                                    <div class="col">
-                                        <div class="form-group ">
-                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                    <div class="col" id="weight_div">
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="form-group ">
+                                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                                    <label class="mr-1">Volumetric Weight</label>
+                                                    <input type="checkbox" id="volumetric_weight" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group ml-1 volumetric_weights">
+                                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,794]" data-msg-range="Length needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group ml-1 volumetric_weights">
+                                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,794]" data-msg-range="Breadth needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="form-group ml-1 volumetric_weights">
+                                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,794]" data-msg-range="Height needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-auto">
-                                        <div class="form-group text-center mb-1 p-1 border border-light rounded">
-                                            <label class="mr-1">Volumetric Weight</label>
-                                            <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" >
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group ml-1 volumetric_weights">
-                                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,794]" data-msg-range="Length needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group ml-1 volumetric_weights">
-                                            <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,794]" data-msg-range="Breadth needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group ml-1 volumetric_weights">
-                                            <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,794]" data-msg-range="Height needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
-                                        </div>
 
-                                    </div>
-                                    <div class="col text-right">
+                                    <div class="col-auto text-right">
                                         <div class="form-group ml-1">
                                             <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
                                         </div>
@@ -356,6 +367,17 @@
                 ],
                 initComplete: function() {
                     this.api().table().columns.adjust();
+                }
+            });
+
+            $('#weight_check').checkboxpicker().bind('change', function() {
+                var parent = $(this).parent('.form-group').prev('.form-group');
+
+                if (this.checked) {
+                    $('#add_shipment_form #weight_div').removeClass('d-none');
+                }
+                else {
+                    $('#add_shipment_form #weight_div').addClass('d-none');
                 }
             });
 
