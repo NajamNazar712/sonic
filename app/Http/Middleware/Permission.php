@@ -1323,6 +1323,9 @@ class Permission
 
 			'reports.rider_pickup.index' => 823,
             'reports.rider_pickup.list' => 823,
+
+			'settings.consignee_refused_otp_bypass.index' => 826,
+            'otp_history.index' => 827,
         ],
 
         'shipper' => [

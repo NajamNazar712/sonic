@@ -1633,7 +1633,6 @@ class RiderAPIController extends Controller
                                 ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                             }
                         }
-                        NotificationsController::send(73, $request->tracking_numbers, $request->pickup_request_id);
                     }
                 }
 
@@ -11341,6 +11340,7 @@ class RiderAPIController extends Controller
                     if ($request->has('shipment_ids')) {
                         $shipment_count = 0;
                         $shipment_ids = explode(',', $request->shipment_ids);
+                        $notification_shipments = array();
                         foreach ($shipment_ids as $shipment_id) {
                             $shipment = Shipment::where('tracking_number',$shipment_id);
                             if ($shipment->exists()) {
@@ -11351,14 +11351,17 @@ class RiderAPIController extends Controller
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                                     $shipment_count+=1;
+                                    $notification_shipments[] = $shipment->id;
                                 }else{
                                     self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
                                 }
                             }
                         }
-                        NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
                         $rider_pickup->shipments = $shipment_count;
                         $rider_pickup->save();
+                        if(count($notification_shipments) > 0){
+                            NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
+                        }
                     }
                 }
 
@@ -11398,6 +11401,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
+            $rc_flag = false;
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
@@ -11470,6 +11474,7 @@ class RiderAPIController extends Controller
                                     }
                                     if($request->has('otp_entered') && $request->status_reason_id == 8){
                                         $rider_delivery->otp_entered = $request->otp_entered;
+                                        $rc_flag = true;
                                     }
                                     $rider_delivery->save();
 
@@ -11555,9 +11560,31 @@ class RiderAPIController extends Controller
                                     dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
                                     }
 
-                                    $arr['shipment_id'] = $request->shipment_id;
-                                    $arr['delivery_note_id'] = $request->delivery_note_id;
-                                    dispatch(new ProcessAgentCallMonitoring($arr));
+
+
+                                    if($rc_flag == true){
+                                        $shipment = Shipment::find($request->shipment_id);
+                                        $shipment_user_id = $shipment->user_id;
+                                        $otp_bypass = $this->otp_bypass($shipment_user_id);
+                                        if($otp_bypass){
+                                            $shipment->shipper_status_id = 20;
+                                            $shipment->consignee_status_id = 20;
+                                            $shipment->save();
+                                            ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id,NULL,NULL, $remarks_id);
+                                        }
+                                        else{
+                                            $arr['shipment_id'] = $request->shipment_id;
+                                            $arr['delivery_note_id'] = $request->delivery_note_id;
+                                            dispatch(new ProcessAgentCallMonitoring($arr));
+                                        }
+
+                                    }
+                                    if($rc_flag == false){
+                                        $arr['shipment_id'] = $request->shipment_id;
+                                        $arr['delivery_note_id'] = $request->delivery_note_id;
+                                        dispatch(new ProcessAgentCallMonitoring($arr));
+                                    }
+
 
 
                                     $message = 'Shipment is marked as Undelivered Successfully';
@@ -13232,4 +13259,54 @@ class RiderAPIController extends Controller
         }
     }*/
 
+    public function otp_bypass($user_id){
+        $otp_bypass = false;
+        $only_shippers = array();
+        $excluded_shippers = array();
+        $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
+        if($otp_bypass_setting->exists()){
+            $otp_bypass_setting = $otp_bypass_setting->first();
+            $otp_bypass = $otp_bypass_setting->setting_value;
+        }
+        if($otp_bypass){
+            $all_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_all_shippers');
+            if($all_shipper_settings->exists()){
+                $all_shipper_settings = $all_shipper_settings->first();
+                $all_shippers = $all_shipper_settings->setting_value;
+
+                if($all_shippers){
+                    $excluded_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers');
+                    if($excluded_shipper_settings->exists()){
+                        $excluded_shipper_settings = $excluded_shipper_settings->first();
+                        if($excluded_shipper_settings->setting_value){
+                            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper_settings->text));
+                            return (in_array($user_id, $excluded_shippers)) ? false : true;
+                        }
+                        else{
+                            return false;
+                        }
+
+                    }
+                }
+                else{
+                    $only_shippers_setting = GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers');
+                    if($only_shippers_setting->exists()){
+                        $only_shippers_setting = $only_shippers_setting->first();
+                        if($only_shippers_setting->setting_value){
+                            $only_shippers = array_map('intval', explode(',', $only_shippers_setting->text));
+                            return (in_array($user_id, $only_shippers)) ? true : false;
+                        }
+                        else{
+                            return false;
+                        }
+
+                    }
+                }
+
+            }
+        }
+        else{
+            return false;
+        }
+    }
 }

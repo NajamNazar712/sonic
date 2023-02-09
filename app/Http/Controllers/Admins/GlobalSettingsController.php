@@ -7381,7 +7381,7 @@ class GlobalSettingsController extends Controller
                 $settings = $settings->first();
             } else {
                 $settings = new GlobalSettings();
-                $settings->type = 'non_cod_otp_excluded_shippers';
+                $settings->type = 'non_cod_otp_only_shippers';
                 $settings->setting_value = 0;
             }
             $settings->text = $only_users;
@@ -7393,14 +7393,132 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-
-    public function project_arrival_shippers_index()
+    public function consignee_refused_otp_bypass_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
-        return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),623);
+        $bypass_setting = false;
+        $excluded_shippers = array();
+        $only_shippers = array();
+        $all_shippers = false;
+
+        $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
+
+        if($otp_bypass_setting->exists()){
+            $otp_bypass_setting = $otp_bypass_setting->first();
+            $bypass_setting = $otp_bypass_setting->setting_value;
+        }
+
+        $bypass_all_shippers = GlobalSettings::where('type', 'otp_refusal_bypass_all_shippers');
+        if ($bypass_all_shippers->exists()) {
+            $bypass_all_shippers = $bypass_all_shippers->first();
+            $all_shippers = $bypass_all_shippers->setting_value;
+        }
+
+        $bypass_only_shipper = GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers');
+
+        if ($bypass_only_shipper->exists()) {
+            $bypass_only_shipper = $bypass_only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $bypass_only_shipper->text));
+        }
+
+        $bypass_excluded_shippers = GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers');
+
+        if ($bypass_excluded_shippers->exists()) {
+            $bypass_excluded_shippers = $bypass_excluded_shippers->first();
+            $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.settings.consignee_refused_shippers_otp_bypass')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'bypass_setting' => $bypass_setting]);
     }
+
+    public function consignee_refused_otp_bypass_store(Request $request)
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),624);
+
+        if($request->has('bypass_setting')){
+
+            $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
+
+            if(!$otp_bypass_setting->exists()){
+                $otp_bypass_setting = new GlobalSettings();
+                $otp_bypass_setting->setting_value = 1;
+                $otp_bypass_setting->type = 'otp_refusal_bypass';
+                $otp_bypass_setting->save();
+            }
+            else{
+                $otp_bypass_setting = $otp_bypass_setting->first();
+                $otp_bypass_setting->setting_value = 1;
+                $otp_bypass_setting->save();
+            }
+
+            $all_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_all_shippers');
+            if($all_shipper_settings->exists()){
+                $all_shipper_settings = $all_shipper_settings->first();
+            } else{
+                $all_shipper_settings = new GlobalSettings();
+                $all_shipper_settings->type = 'otp_refusal_bypass_all_shippers';
+            }
+            $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
+            $all_shipper_settings->save();
+
+            if ($request->has('excluded_users')) {
+                $excluded_users = implode(',', $request->excluded_users);
+                $settings = GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'otp_refusal_bypass_exclude_shippers';
+                    $settings->setting_value = 1;
+
+                }
+                $settings->text = $excluded_users;
+                $settings->save();
+            } else{
+                GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers')->delete();
+            }
+
+            if ($request->has('only_users')) {
+                $only_users = implode(',', $request->only_users);
+                $settings = GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'otp_refusal_bypass_only_shippers';
+                    $settings->setting_value = 1;
+
+                }
+                $settings->text = $only_users;
+                $settings->save();
+            } else{
+                GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers')->delete();
+            }
+        }
+        else{
+            $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
+
+            if($otp_bypass_setting->exists()){
+                $otp_bypass_setting = $otp_bypass_setting->first();
+                $otp_bypass_setting->setting_value = 0;
+                $otp_bypass_setting->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+	public function project_arrival_shippers_index()
+	    {
+	        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
+	        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+	        $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
+	        return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
+	    }
 
     public function project_arrival_shippers_store(Request $request)
     {
@@ -7419,4 +7537,5 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
+    
 }
