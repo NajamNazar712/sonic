@@ -26,7 +26,7 @@ class UpdateCitiesTableAddPermanentDisabledIndex extends Migration
     public function down()
     {
         Schema::table('cities', function (Blueprint $table) {
-            $table->index('permanent_disabled');
+            $table->dropIndex('permanent_disabled');
         });
     }
 }
