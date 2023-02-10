@@ -270,7 +270,7 @@
                 {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                 {data: 'purpose', name: 'ss.name', class: 'align-middle purpose'},
                 {data: 'otp', name: 'otp', class: 'align-middle otp', orderable: false, searchable: false},
-                {data: 'date', name: 'shipment_otps.created_at', class: 'align-middle date'},
+                {data: 'date', name: 'shipment_otps.updated_at', class: 'align-middle date'},
 
             ],
             rowCallback: function(row, data, index) {

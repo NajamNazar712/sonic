@@ -49,7 +49,7 @@ class ShipmentOTPController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $admins = $admins->whereBetween('shipment_otps.created_at', [$from, $to]);
+            $admins = $admins->whereBetween('shipment_otps.updated_at', [$from, $to]);
         }
 
         $datatable = Datatables::of($admins)
