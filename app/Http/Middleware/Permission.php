@@ -105,6 +105,10 @@ class Permission
             'v2_pickups.pending.index' => 17,
             'v2_pickups.arrival.individual.index' => 24,
             'v2_pickups.arrival.bulk.index' => 24,
+
+            'v2_pickups.arrival.project_shippers.index' => 830,
+            'v2_pickups.arrival.project_shippers.store' => 830,
+
             'v2_pickups.rider.index' => 271,
             'v2_pickups.action_log.index' => 272,
             'v2_pickups.rider_receiving.index' => 366,
@@ -115,6 +119,7 @@ class Permission
             'v2_pickups.rider_tracking.index' => 446,
             'v2_pickups.rider_tracking.by_rider' => 446,
             'v2_pickups.rider_tracking.by_city' => 446,
+
 
 
             'cargo.pending.index' => 25,
@@ -947,6 +952,9 @@ class Permission
 
             'settings.rider_shipment_attempt.index' => 562,
             'settings.rider_shipment_attempt.store' => 562,
+
+            'settings.project_arrival_shippers.index' => 828,
+            'settings.project_arrival_shippers.store' => 828,
 
 
             'dashboard.userwise' => 333,

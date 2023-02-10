@@ -88,6 +88,7 @@ use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
+use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
@@ -7510,6 +7511,31 @@ class GlobalSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+	public function project_arrival_shippers_index()
+	    {
+	        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
+	        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+	        $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
+	        return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
+	    }
+
+    public function project_arrival_shippers_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 631);
+            ProjectArrivalShipper::truncate();
+            if (count($request->shippers) > 0) {
+                foreach ($request->shippers as $shipper){
+                    $project_arrival_shipper = new ProjectArrivalShipper();
+                    $project_arrival_shipper->user_id = $shipper;
+                    $project_arrival_shipper->save();
+                }
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
     
 }

@@ -28,6 +28,7 @@ use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PickupAction;
+use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
@@ -786,7 +787,7 @@ class V2AdminPickupsController extends Controller
                     }
                 }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     if ($shipment->booking_type_id == 3) {
                         $details = array();
                         $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
@@ -872,7 +873,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_item->shipment_id);
             $user = $shipment->user;
             if($user->sub_segment_id == 2) {
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -901,7 +902,7 @@ class V2AdminPickupsController extends Controller
 
             $user = $shipment->user;
             if($user->sub_segment_id == 2) {
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     $details = array();
                     $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                     $details['id'] = $shipment->id;
@@ -944,7 +945,7 @@ class V2AdminPickupsController extends Controller
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
                 $piece_request_remarks = null;
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
                     //region Taha
                     $pickup_request=V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
@@ -1482,7 +1483,7 @@ class V2AdminPickupsController extends Controller
                 $global_rider_id = 0;
             }
 
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                 if ($shipment->booking_type_id == 3) {
 
                     $details = array();
@@ -1546,17 +1547,33 @@ class V2AdminPickupsController extends Controller
                     if ($retail_shipment->exists()) {
                         $actual_weight = $shipment->estimated_weight;
                     } else {
-                        if (empty($request->weight)) {
-                            $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
-
-                            if($actual_weight < 0.1){
-                                return ['status' => 1, 'error' => 'Volumetric weight cannot be less than 0.1'];
+                        $weight_flag = true;
+                        $project_arrival_include_shippers = ProjectArrivalShipper::where('user_id', $shipment->user_id);
+                        if($project_arrival_include_shippers->exists()){
+                            if($shipment->actual_weight == null){
+                                $weight_flag = true;
                             }
-                            $shipment->length = $request->length;
-                            $shipment->breadth = $request->breadth;
-                            $shipment->height = $request->height;
-                        } else {
-                            $actual_weight = $request->weight;
+                            else{
+                                $weight_flag = false;
+                            }
+                        }
+                        if($weight_flag == true){
+                            if (empty($request->weight)) {
+
+                                $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+
+                                if($actual_weight < 0.1){
+                                    return ['status' => 1, 'error' => 'Volumetric weight cannot be less than 0.1'];
+                                }
+                                $shipment->length = $request->length;
+                                $shipment->breadth = $request->breadth;
+                                $shipment->height = $request->height;
+                            } else {
+                                $actual_weight = $request->weight;
+                            }
+                        }
+                        else{
+                            $actual_weight = $shipment->actual_weight;
                         }
 
                         $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
@@ -1657,7 +1674,7 @@ class V2AdminPickupsController extends Controller
             $shipment_item = ShipmentItem::find($request->tracking_number);
             if ($shipment_item) {
                 $shipment = Shipment::find($shipment_item->shipment_id);
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     $details = array();
                     $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
                     $shipment_items_count = count($shipment_items);
@@ -1678,7 +1695,7 @@ class V2AdminPickupsController extends Controller
                 if ($shipment_pieces->exists()) {
                     $shipment_pieces = $shipment_pieces->first();
                     $shipment = Shipment::find($shipment_pieces->shipment_id);
-                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                         $details = array();
                         $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
                         $details['id'] = $shipment->id;
@@ -1710,7 +1727,7 @@ class V2AdminPickupsController extends Controller
             } else {
                 $global_rider_id = 0;
             }
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                 $rider_assigned_flag = false;
                 if ($shipment->booking_type_id == 3) {
                     if ($shipment->shipper_status_id == 17) {
@@ -1751,8 +1768,19 @@ class V2AdminPickupsController extends Controller
                     if ($retail_shipment->exists()) {
                         $shipment->actual_weight = $shipment->estimated_weight;
                     } else {
-                        if ($request->has('weight')) {
-                            $shipment->actual_weight = $request->weight;
+                        $project_arrival_include_shippers = ProjectArrivalShipper::where('user_id', $shipment->user_id);
+                        if($project_arrival_include_shippers->exists()){
+                            if($shipment->actual_weight == null){
+                                $weight_flag = true;
+                            }
+                            else{
+                                $weight_flag = false;
+                            }
+                        }
+                        if($weight_flag == true){
+                            if ($request->has('weight')) {
+                                $shipment->actual_weight = $request->weight;
+                            }
                         }
                     }
                     $shipment->save();
@@ -1786,7 +1814,7 @@ class V2AdminPickupsController extends Controller
         $shipment = Shipment::find($request->id);
 
         if ($shipment) {
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                 $shipment->actual_weight = null;
                 $shipment->length = null;
                 $shipment->breadth = null;
@@ -1825,7 +1853,7 @@ class V2AdminPickupsController extends Controller
                     unset($shipment_ids[$key]);
                     continue;
                 }
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                     $piece_request_remarks = null;
                     if ($shipment->shipper_status_id == 62) {
                         $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
@@ -2580,7 +2608,7 @@ class V2AdminPickupsController extends Controller
             } else {
                 $global_rider_id = 0;
             }
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
                 if ($shipment->pieces > 1) {
                     $rider_assigned_flag = false;
                     if ($shipment->shipper_status_id == 17) {
@@ -2622,9 +2650,20 @@ class V2AdminPickupsController extends Controller
                     if ($retail_shipment->exists()) {
                         $shipment->actual_weight = $shipment->estimated_weight;
                     } else {
-                        if ($request->has('weight')) {
-                            $shipment->actual_weight = $request->weight;
-                            
+                        $weight_flag = true;
+                        $project_arrival_include_shippers = ProjectArrivalShipper::where('user_id', $shipment->user_id);
+                        if($project_arrival_include_shippers->exists()){
+                            if($shipment->actual_weight == null){
+                                $weight_flag = true;
+                            }
+                            else{
+                                $weight_flag = false;
+                            }
+                        }
+                        if($weight_flag == true){
+                            if ($request->has('weight')) {
+                                $shipment->actual_weight = $request->weight;
+                            }
                         }
                     }
                     $shipment->save();
@@ -3473,71 +3512,388 @@ class V2AdminPickupsController extends Controller
         $v2_pickup_request = V2PickupRequest::find($request->pickup_req_id);
         if($v2_pickup_request){
 
-        $trax_reason = '';
-        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('reason_id');
-        if ($attempts->exists()) {
-            $reason_ids = $attempts->pluck('reason_id')->toArray();
-            if (count($reason_ids) > 0) {
-                foreach ($reason_ids as $reason_id) {
-                    $trax_reason .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
+            $trax_reason = '';
+            $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('reason_id');
+            if ($attempts->exists()) {
+                $reason_ids = $attempts->pluck('reason_id')->toArray();
+                if (count($reason_ids) > 0) {
+                    foreach ($reason_ids as $reason_id) {
+                        $trax_reason .= V2PickupRequestNotPickReason::find($reason_id)->name . ',' . PHP_EOL;
+                    }
                 }
             }
-        }
-        $trax_remarks = '';
-        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('trax_remarks');
-        if ($attempts->exists()) {
-            $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
-            if (count($trax_remarks_rows) > 0) {
-                foreach ($trax_remarks_rows as $remark) {
-                    $trax_remarks .= $remark . ',' . PHP_EOL;
+            $trax_remarks = '';
+            $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('trax_remarks');
+            if ($attempts->exists()) {
+                $trax_remarks_rows = $attempts->pluck('trax_remarks')->toArray();
+                if (count($trax_remarks_rows) > 0) {
+                    foreach ($trax_remarks_rows as $remark) {
+                        $trax_remarks .= $remark . ',' . PHP_EOL;
+                    }
                 }
             }
-        }
 
-        $shipper_remarks = '';
-        $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('shipper_remarks');
-        if ($attempts->exists()) {
-            $shipper_remarks_rows = $attempts->pluck('shipper_remarks')->toArray();
-            if (count($shipper_remarks_rows) > 0) {
-                foreach ($shipper_remarks_rows as $remark) {
-                    $shipper_remarks .= $remark . ',' . PHP_EOL;
+            $shipper_remarks = '';
+            $attempts = V2PickupRequestAttempt::where('pickup_request_id', $v2_pickup_request->id)->whereNotNull('shipper_remarks');
+            if ($attempts->exists()) {
+                $shipper_remarks_rows = $attempts->pluck('shipper_remarks')->toArray();
+                if (count($shipper_remarks_rows) > 0) {
+                    foreach ($shipper_remarks_rows as $remark) {
+                        $shipper_remarks .= $remark . ',' . PHP_EOL;
+                    }
                 }
             }
+
+            $pickup_req = V2PickupRequest::leftJoin('v2_rider_pickups as vpr', function ($join) {
+                                $join->on('vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
+                                    ->where('vpr.id', '=',
+                                        DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
+                            })->select('vpr.rider_remarks as rider_remarks')
+                            ->where('v2_pickup_requests.id',$request->pickup_req_id);
+            $rider_remarks = '';
+            if($pickup_req->exists()){
+                $rider_remarks = $pickup_req->get()->first()->rider_remarks;
+
+            }
+            $data = [];
+            $data['trax_reason'] = $trax_reason;
+            $data['trax_remarks'] = $trax_remarks;
+            $data['shipper_remarks'] = $shipper_remarks;
+            $data['rider_remarks'] = $rider_remarks;
+            $data['remarks'] = $v2_pickup_request->remarks;
+            $data['reverse_pickup'] = $v2_pickup_request->reverse_pickup;
+
+        }else{
+            $data = [];
+            $data['trax_reason'] = '';
+            $data['trax_remarks'] = '';
+            $data['shipper_remarks'] = '';
+            $data['rider_remarks'] = '';
+            $data['remarks'] = '';
+            $data['reverse_pickup'] = '';
+
         }
-
-        $pickup_req = V2PickupRequest::leftJoin('v2_rider_pickups as vpr', function ($join) {
-                            $join->on('vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-                                ->where('vpr.id', '=',
-                                    DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
-                        })->select('vpr.rider_remarks as rider_remarks')
-                        ->where('v2_pickup_requests.id',$request->pickup_req_id);
-        $rider_remarks = '';
-        if($pickup_req->exists()){
-            $rider_remarks = $pickup_req->get()->first()->rider_remarks;
-
-        }
-        $data = [];
-        $data['trax_reason'] = $trax_reason;
-        $data['trax_remarks'] = $trax_remarks;
-        $data['shipper_remarks'] = $shipper_remarks;
-        $data['rider_remarks'] = $rider_remarks;
-        $data['remarks'] = $v2_pickup_request->remarks; 
-        $data['reverse_pickup'] = $v2_pickup_request->reverse_pickup;
-
-    }else{
-        $data = [];
-        $data['trax_reason'] = '';
-        $data['trax_remarks'] = '';
-        $data['shipper_remarks'] = '';
-        $data['rider_remarks'] = ''; 
-        $data['remarks'] = ''; 
-        $data['reverse_pickup'] = '';
-
+        return response()->json(['status' => 0, 'remarks' => $data]);
     }
-    return response()->json(['status' => 0, 'remarks' => $data]);
 
 
+    public function project_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 10);
 
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        } else {
+            $global_rider_id = 0;
+        }
+        $riders = Rider::where('status', 1)->select('id', 'name','trax_id')->get();
+        return view('admin.v2_pickups.project_shipper_arrival')->with(['global_rider_id' => $global_rider_id, 'riders' => $riders]);
+    }
+
+    public function project_shippers_shipment_details(Request $request)
+    {
+        $include_shippers = ProjectArrivalShipper::all()->pluck('user_id')->toArray();
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if(in_array($shipment->user_id, $include_shippers)){
+                //todo: now checking canceled shipment arrival
+                $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+                if($user->shipper_status_id == 17)
+                {
+                    $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+                    if($canceled_shipment)
+                    {
+                        return ['status' => 1, 'error' => 'Shipment is not allowed for arrival because shipper cancelled this shipment !'];
+                    }
+                }
+                //todo: now checking canceled shipment arrival end
+
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if(!$dispute_check){
+                    return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                }
+                $shipment_origin = $shipment->pickup_address->city->hub_id;
+                if (session('role_id') != 1) {
+                    if (!in_array($shipment_origin, session('hubs'))) {
+                        return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
+                    }
+                }
+
+                if ($shipment->warehouse == 1) {
+                    if ($shipment->warehouse_order_status != 5) {
+                        return ['status' => 1, 'error' => 'Shipment is not dispatched yet!'];
+                    }
+                }
+
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                    if ($shipment->booking_type_id == 3) {
+
+                        $details = array();
+                        $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                        $shipment_items_count = count($shipment_items);
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipment_items'] = $shipment_items;
+                        $details['shipment_items_count'] = $shipment_items_count;
+
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
+                    } else if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                        $details = array();
+                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['pieces_count'] = $shipment->pieces;
+                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                    } else {
+                        if ($shipment->shipper_status_id == 17) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
+                        if (!$pickup_request_shipment->exists()) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+
+                        if(!empty($request->weight) || (!empty($request->length) && !empty($request->breadth) && !empty($request->height))){
+                            if (empty($request->weight)) {
+                                $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+
+                                if($actual_weight < 0.1){
+                                    return ['status' => 1, 'error' => 'Volumetric weight cannot be less than 0.1'];
+                                }
+                                $shipment->length = $request->length;
+                                $shipment->breadth = $request->breadth;
+                                $shipment->height = $request->height;
+                            } else {
+                                $actual_weight = $request->weight;
+                            }
+                            $shipment->actual_weight = $actual_weight;
+                        }
+                        else{
+                            $actual_weight = null;
+                        }
+
+                        $shipment->save();
+
+                        $details = array();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipper'] = $shipment->user->name;
+                        $details['weight'] = floatval($shipment->actual_weight);
+
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+
+                    }
+                } else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+            }
+            else{
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is not of Project Arrival Shipper'];
+            }
+        } else {
+            $shipment_item = ShipmentItem::find($request->tracking_number);
+            if ($shipment_item) {
+                $shipment = Shipment::find($shipment_item->shipment_id);
+
+                if(in_array($shipment->user_id, $include_shippers)) {
+                    if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                        $details = array();
+                        $shipment_items = ShipmentItem::where('shipment_id', $shipment->id)->pluck('id')->toArray();
+                        $shipment_items_count = count($shipment_items);
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipment_items'] = $shipment_items;
+                        $details['shipment_items_count'] = $shipment_items_count;
+                        $details['scanned_shipment_item'] = $shipment_item->id;
+
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
+                    } else {
+                        return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
+                    }
+                }
+                else{
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is not of Project Arrival Shipper'];
+                }
+            } else {
+                $shipment_pieces = ShipmentPiece::where('tracking_number', $request->tracking_number);
+                if ($shipment_pieces->exists()) {
+                    $shipment_pieces = $shipment_pieces->first();
+                    $shipment = Shipment::find($shipment_pieces->shipment_id);
+
+                    if(in_array($shipment->user_id, $include_shippers)) {
+                        if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                            $details = array();
+                            $shipment_all_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+                            $details['id'] = $shipment->id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['pieces'] = $shipment->pieces;
+                            $details['pieces_tracking_numbers'] = $shipment_all_pieces;
+                            $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
+                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                            return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                        } else {
+                            return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
+                        }
+                    }
+                    else{
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is not of Project Arrival Shipper'];
+                    }
+                }
+            }
+        }
+
+        return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+    }
+
+    public function project_shippers_try_and_buy_shipment_details(Request $request)
+    {
+        $include_shippers = ProjectArrivalShipper::all()->pluck('user_id')->toArray();
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if(in_array($shipment->user_id, $include_shippers)) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                    if ($shipment->booking_type_id == 3) {
+                        if ($shipment->shipper_status_id == 17) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
+                        if (!$pickup_request_shipment->exists()) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+                        if(!empty($request->weight) || (!empty($request->length) && !empty($request->breadth) && !empty($request->height))){
+                            $shipment->actual_weight = $request->weight;
+                        }
+                        $shipment->save();
+
+                        $details = array();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipper'] = $shipment->user->name;
+                        $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
+                        $details['weight'] = floatval($shipment->actual_weight);
+
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+                    } else {
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s is not try and buy'];
+                    }
+                } else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+            } else {
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is not of Project Arrival Shipper'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
+    public function project_shippers_piece_shipment_details(Request $request)
+    {
+        $include_shippers = ProjectArrivalShipper::all()->pluck('user_id')->toArray();
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+            if(in_array($shipment->user_id, $include_shippers)) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                    if ($shipment->pieces > 1) {
+                        if ($shipment->shipper_status_id == 17) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+                        $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id);
+                        if (!$pickup_request_shipment->exists()) {
+                            AdminPickupsController::generate($shipment->id);
+                        }
+
+                        if(!empty($request->weight) || (!empty($request->length) && !empty($request->breadth) && !empty($request->height))){
+                            $shipment->actual_weight = $request->weight;
+                        }
+
+                        $shipment->save();
+
+                        $details = array();
+
+                        $details['id'] = $shipment->id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['shipper'] = $shipment->user->name;
+                        $details['amount'] = $shipment->amount;
+                        $details['weight'] = floatval($shipment->actual_weight);
+
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+                    } else {
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s does not have pieces'];
+                    }
+                } else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+            } else {
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is not of Project Arrival Shipper'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
+    public function project_shippers_shipment_remove(Request $request)
+    {
+        $shipment = Shipment::find($request->id);
+
+        if ($shipment) {
+            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+                $shipment->actual_weight = null;
+                $shipment->length = null;
+                $shipment->breadth = null;
+                $shipment->height = null;
+
+                $shipment->save();
+
+                return ['status' => 0, 'success' => 'Shipment has been removed'];
+            } else {
+                return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment with given ID is present'];
+        }
+    }
+    public function project_shippers_store(Request $request)
+    {
+        $shipment_ids = explode(',', $request->shipment_ids);
+
+        foreach ($shipment_ids as $key => $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+            if ($shipment) {
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17) {
+
+                    $shipment->shipper_status_id = 64;
+                    $shipment->consignee_status_id = 64;
+
+                    $shipment->save();
+
+                    $reference_2_id = null;
+                    ShipmentsJourneyController::add($shipment_id, 64, 64, null, null, null, Auth::id(), null, null,1,null,null);
+
+                }
+            }
+        }
+
+        return redirect()->back()->with(['success' => 'Project Shipper Receiving Done']);
     }
 }

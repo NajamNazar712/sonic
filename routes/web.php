@@ -1133,6 +1133,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
             });
+
+            Route::prefix('project_shippers')->name('project_shippers.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_shipment_details')->name('shipment_details');
+                Route::post('shipment_remove', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_shipment_remove')->name('shipment_remove');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::prefix('piece')->name('piece.')->group(function () {
+                    Route::post('piece_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_details')->name('piece_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_store')->name('store');
+            });
         });
 
         Route::prefix('arrival_service')->name('arrival_service.')->group(function () {
@@ -2936,6 +2951,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ccd_booking_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
+        });
+
+        Route::prefix('project_arrival_shippers')->name('project_arrival_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@project_arrival_shippers_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@project_arrival_shippers_store')->name('store');
         });
 
         Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
