@@ -13283,9 +13283,12 @@ class RiderAPIController extends Controller
                             return (in_array($user_id, $excluded_shippers)) ? false : true;
                         }
                         else{
-                            return false;
+                            return true;
                         }
 
+                    }
+                    else{
+                        return true;
                     }
                 }
                 else{
@@ -13297,9 +13300,12 @@ class RiderAPIController extends Controller
                             return (in_array($user_id, $only_shippers)) ? true : false;
                         }
                         else{
-                            return false;
+                            return true;
                         }
 
+                    }
+                    else{
+                        return true;
                     }
                 }
 
