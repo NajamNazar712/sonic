@@ -11474,7 +11474,9 @@ class RiderAPIController extends Controller
                                     }
                                     if($request->has('otp_entered') && $request->status_reason_id == 8){
                                         $rider_delivery->otp_entered = $request->otp_entered;
-                                        $rc_flag = true;
+                                        if($request->otp_entered == 1){
+                                            $rc_flag = true;
+                                        }
                                     }
                                     $rider_delivery->save();
 
