@@ -5184,22 +5184,22 @@ class AdminReportsController extends Controller
 
             $sales->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
+                    ->whereIn('dr.shipper_status_id', [14,20, 25, 30, 36, 37, 38])
                     ->where(
                         'dr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,25,30,36,37,38) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")')
                     );
             });
             $sales->whereBetween('dr.created_at', [$from, $to]);
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
+                    ->whereIn('dr.shipper_status_id', [14,20, 25, 30, 36, 37, 38])
                     ->where(
                         'dr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20, 25 ,30,36,37, 38) and shipments_journey.verification = 1)')
                     );
             });
         }
