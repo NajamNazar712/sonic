@@ -21,6 +21,7 @@ class BagIntransitErrorSeeder extends Seeder
             foreach ($cargo_manifest_bags as $bag){
                 $bag->received_shipments = $bag->shipments;
                 $bag->completed = 1;
+                $bag->status_id = 7;
                 $bag->save();
 
                 if(count($bag->shipment) > 0){
