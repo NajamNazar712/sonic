@@ -11569,7 +11569,7 @@ class RiderAPIController extends Controller
 
 
                                     if($rc_flag == true){
-                                        $otp_bypass = $this->otp_bypass($shipment->id);
+                                        $otp_bypass = $this->otp_bypass($shipment->user_id);
                                         if($otp_bypass){
                                             $this->auto_return_confirm($shipment->id);
                                             ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id,NULL,NULL, $remarks_id);
