@@ -4,9 +4,12 @@ namespace App\Console;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalesIncentiveDate;
+use App\Http\Models\EmployeeShift;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use DB;
+use Carbon\Carbon;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -121,6 +124,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\MonthAverageDestinationReportEmail',
         'App\Console\Commands\ReversionDeliveredShipments',
         'App\Console\Commands\WeeklyAttendenceSummaryLineManager',
+        'App\Console\Commands\AttendanceAdjustmentShiftWise',
+       
         ];
 
     /**
@@ -146,6 +151,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendencesummary')->weeklyOn(1,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
+        $endshifts = EmployeeShift::get(); 
+        foreach($endshifts as $shift)
+        {
+          $schedule->command('employee:attendenceadjustment')->dailyAt($shift->end_time)->runInBackground();
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -193,6 +204,7 @@ class Kernel extends ConsoleKernel
 //            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
 //            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
+
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
         $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
@@ -405,7 +417,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
 
         $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
-
+        
 
     }
     /**

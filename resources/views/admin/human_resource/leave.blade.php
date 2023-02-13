@@ -129,7 +129,7 @@
                             </div>
                             <div class="col-3 mt-1">
                                 <div class="form-group input-group">
-                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Available Leaves</label>
+                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Availed  Leaves</label>
                                     <input type="text" name="availble_leaves"
                                            class="form-control   rounded-right" disabled
                                            id="availble_leave" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $available_leaves }}">

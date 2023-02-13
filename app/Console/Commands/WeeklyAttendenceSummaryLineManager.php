@@ -43,14 +43,6 @@ class WeeklyAttendenceSummaryLineManager extends Command
     {
         $startWeek = Carbon::now()->subWeek()->startOfWeek()->format('Y-m-d'); // 30 May 2022
         $endWeek   = Carbon::now()->subWeek()->endOfWeek()->format('Y-m-d');
-       
-       
         NotificationsController::send(209, $startWeek, $endWeek);
-        // $line_managers = Employee::where('is_line_manager',1)->where('official_email','!=',null)->get();
-        // foreach($line_managers as $line_manager)
-        // {
-        //     AdminReportsEmailController::weekly_attendence_summary(209,$line_manager->id,$startWeek,$endWeek,$date);
-
-        // }
     }
 }

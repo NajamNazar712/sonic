@@ -843,7 +843,7 @@ class NotificationsController extends Controller
 
                     $shipper = $shipment->user;
 
-//            $to = $shipper->email;
+
                     if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
                         $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
                     } else {
@@ -9897,8 +9897,6 @@ else if ($id == 178) {
                         {
                             self::email($subject, $body, $line_manager->official_email);
                         }
-
-
                     }
                 }
                 else if($id == 209)
@@ -10002,6 +10000,16 @@ else if ($id == 178) {
                         }
                         
                     }
+                }
+                else if($id == 211)
+                {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    if (strpos($body, '[Date&Day]') !== FALSE) {
+                        $body = str_replace('[Date&Day]', $reference_2_id, $body);
+                    }
+
+                    self::email($subject,$body,$reference_1_id);
                 }
             }
         }
