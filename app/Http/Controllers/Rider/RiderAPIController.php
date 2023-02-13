@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\AdminAPIController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DeliveryController;
@@ -86,6 +88,8 @@ use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
@@ -11565,13 +11569,9 @@ class RiderAPIController extends Controller
 
 
                                     if($rc_flag == true){
-                                        $shipment = Shipment::find($request->shipment_id);
-                                        $shipment_user_id = $shipment->user_id;
-                                        $otp_bypass = $this->otp_bypass($shipment_user_id);
+                                        $otp_bypass = $this->otp_bypass($shipment->id);
                                         if($otp_bypass){
-                                            $shipment->shipper_status_id = 20;
-                                            $shipment->consignee_status_id = 20;
-                                            $shipment->save();
+                                            $this->auto_return_confirm($shipment->id);
                                             ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id,NULL,NULL, $remarks_id);
                                         }
                                         else{
@@ -13315,6 +13315,48 @@ class RiderAPIController extends Controller
         }
         else{
             return false;
+        }
+    }
+
+    public function auto_return_confirm($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+
+        $shipment->shipper_status_id = 20;
+        $shipment->consignee_status_id = 20;
+        $shipment->save();
+
+        if ($shipment->shipment_type == 1) {
+            if ($shipment->booking_type_id != 4) {
+                ShipmentChargesController::return($shipment_id);
+
+                if ($shipment->packaging_material_request != 1) {
+
+                    AdminFinanceController::add_payment($shipment_id, 1);
+
+                }
+            }
+            else {
+                ShipmentChargesController::walk_in_return($shipment_id);
+
+                $shipment->walk_in_status = 2;
+
+                $shipment->save();
+
+                AdminFinanceController::done_payment($shipment_id, 1);
+            }
+        }
+        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
+        if($return_assign_shipment->exists()){
+
+            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+            $return_assign_shipment->status = 0;
+            $return_assign_shipment->save();
+
+            $return_assign_log = new ReturnAssignedShipmentLogs();
+            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+            $return_assign_log->status = 2;
+            $return_assign_log->assigned_by = 346;
+            $return_assign_log->save();
         }
     }
 }
