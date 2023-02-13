@@ -27,7 +27,7 @@ class UpdateMobilinkShipmentTrackingNumberTableSeeder extends Seeder
 //            }
 //        }
 
-        $admin_ids = [11, 381, 1365, 2546];
+        $admin_ids = [58, 381, 1365, 2546];
 
         DB::table('sale_person_tags')->whereIn('admin_id', $admin_ids)->update(['status' => 1]);
     }
