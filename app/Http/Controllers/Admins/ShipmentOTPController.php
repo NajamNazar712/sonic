@@ -70,6 +70,10 @@ class ShipmentOTPController extends Controller
                 return $shipment->consignee_otp;
             }
         });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         return $datatable->make(true);
     }
 }
