@@ -8484,18 +8484,31 @@ class NotificationsController extends Controller
                     self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
-                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th></tr></thead><tbody>';
+                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Updated By</strong></th></tr></thead><tbody>';
 
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
                         if ($shipment) {
                             $remarks = '';
                             $shipper_id = $shipment->user_id;
-                            $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->select('remarks')->latest()->first();
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->select('remarks', 'rider_id', 'admin_id')->latest()->first();
+                            $updated_by = '-';
                             if ($journey) {
                                 $remarks = $journey->remarks;
+                                if($journey->rider_id != null){
+                                    $rider = Rider::find($journey->rider_id);
+                                    if($rider){
+                                        $updated_by = $rider->name . '(Rider)';
+                                    }
+                                }
+                                if($journey->admin_id != null){
+                                    $admin = Admin::find($journey->admin_id);
+                                    if($admin){
+                                        $updated_by = $admin->name . '(Admin)';
+                                    }
+                                }
                             }
-                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td></tr>';
+                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $updated_by . '</td></tr>';
 
                         }
                     }

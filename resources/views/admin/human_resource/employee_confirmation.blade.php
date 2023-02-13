@@ -641,7 +641,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resource.adjustment.list') }}',
+                        url: '{{ route('admin.human_resource.employee_confirmation.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
