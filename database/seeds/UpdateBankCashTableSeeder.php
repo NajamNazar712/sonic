@@ -13,7 +13,7 @@ class UpdateBankCashTableSeeder extends Seeder
     {
         DB::table('banks_lists')->insert(array(
 //            array('id' => 47, 'name' => 'Cash', 'code' => 'CA', 'affiliate' => 1, 'status' => 1)
-            array('id' => 48, 'name' => 'Konnect', 'code' => 'KNT', 'affiliate' => 1, 'status' => 1)
+            array('id' => 49, 'name' => 'Konnect', 'code' => 'KNT', 'affiliate' => 1, 'status' => 1)
         ));
     }
 }
