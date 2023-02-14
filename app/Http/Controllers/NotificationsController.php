@@ -7561,27 +7561,25 @@ class NotificationsController extends Controller
                     $to = $retail_user->phone_no;
                     self::sms($body, $to, 1);
                 } else if ($id == 130) {
-                    $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Arrival Date  | ';
 
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
-
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_shipper_revenue_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 133) {
 
                     $data = $reference_1_id;
@@ -7832,7 +7830,8 @@ class NotificationsController extends Controller
 
                     }
 
-                } else if ($id == 135) {
+                }
+                else if ($id == 135) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
@@ -8488,18 +8487,31 @@ class NotificationsController extends Controller
                     self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
-                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th></tr></thead><tbody>';
+                    $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Updated By</strong></th></tr></thead><tbody>';
 
                     foreach ($shipment_ids as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
                         if ($shipment) {
                             $remarks = '';
                             $shipper_id = $shipment->user_id;
-                            $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->select('remarks')->latest()->first();
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->select('remarks', 'rider_id', 'admin_id')->latest()->first();
+                            $updated_by = '-';
                             if ($journey) {
                                 $remarks = $journey->remarks;
+                                if($journey->rider_id != null){
+                                    $rider = Rider::find($journey->rider_id);
+                                    if($rider){
+                                        $updated_by = $rider->name . '(Rider)';
+                                    }
+                                }
+                                if($journey->admin_id != null){
+                                    $admin = Admin::find($journey->admin_id);
+                                    if($admin){
+                                        $updated_by = $admin->name . '(Admin)';
+                                    }
+                                }
                             }
-                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td></tr>';
+                            $table .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->user->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->pickup_address->city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->amount . '</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $updated_by . '</td></tr>';
 
                         }
                     }
@@ -8620,27 +8632,25 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
-                    $now = Carbon::now();
-                    $month = $now->subMonth()->format('F');
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Monthly Report By Delivery Date  | ';
 
-                    if (strpos($subject, '[month]') !== FALSE) {
-                        $subject = str_replace('[month]', $month, $subject);
-                    }
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
-                    if (strpos($subject, '[year]') !== FALSE) {
-                        $subject = str_replace('[year]', $now->year, $subject);
-                    }
-
-                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_revenue_by_delivery_return_report.xlsx');
+                    $file = Storage::disk('public')->url($file_path);
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
 
-                    self::email($subject, $body, $to);
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
@@ -9398,7 +9408,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[crm_request_id]', str_pad($crm_request->id, 6, '0', STR_PAD_LEFT), $body);
                         }
                         if (strpos($body, '[comment]') !== FALSE) {
-                            $body = str_replace('[comment]', $crm_comment->comment, $body);
+                            $body = str_replace('[comment]', preg_replace("/<br\W*?\/>/", "\n", $crm_comment->comment), $body);
                         }
 
                         $to = $phone_number;
@@ -9873,6 +9883,208 @@ else if ($id == 178) {
                     self::email($subject, $body, $to);
 
                 }
+                else if ($id == 206) {
+                    $subject = 'Retail Sales Report By Arrival Date  | ';
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
+                }
+                else if ($id == 207) {
+                    $file_path = $reference_1_id['file_path'];
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Retail Sales Report By Delivery Date  | ';
+
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
+                }else if ($id == 210) {
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
+
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
+
+                    $present_fields = array();
+
+                    $first_field = NULL;
+
+                    $position = NULL;
+
+                    foreach ($possible_fields as $field) {
+                        $new_position = strpos($body, '[' . $field . ']');
+
+                        if ($new_position !== FALSE) {
+                            if ($position == NULL) {
+                                $present_fields[] = $field;
+
+                                $first_field = $field;
+                            } else if ($new_position > $position) {
+                                $present_fields[] = $field;
+                            } else {
+                                array_unshift($present_fields, $field);
+                            }
+
+                            $position = $new_position;
+                        }
+                    }
+
+                    $today = Carbon::now()->toDateTimeString();
+
+                    $user_wise_shipments = array();
+
+                    $origin_hub_ids = array();
+
+                    foreach ($reference_1_id as $shipment_id) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $origin_hub_id = $shipment->pickup_address->city->hub_id;
+
+                        if (!in_array($origin_hub_id, $origin_hub_ids)) {
+                            $origin_hub_ids[] = $origin_hub_id;
+                        }
+
+                        $details = array();
+
+                        $details['pickup_city'] = $shipment->pickup_address->city->name;
+                        $details['consignee_name'] = $shipment->consignee_name;
+                        $details['consignee_city'] = $shipment->consignee_city->name;
+                        $details['order_id'] = $shipment->order_id;
+                        $details['weight'] = $shipment->actual_weight;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['amount'] = $shipment->amount;
+
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
+                            foreach ($shipment->items as $item) {
+                                if ($item->type == 0) {
+                                    $details['item_product_type'] = $item->product->product_name;
+                                    $details['item_description'] = $item->description;
+                                    $details['item_quantity'] = $item->quantity;
+                                }
+                            }
+                        } else {
+                            $details['item_product_type'] = '';
+                            $details['item_description'] = '';
+                            $details['item_quantity'] = '';
+                        }
+
+                        $user_wise_shipments[$shipment->user_id][] = $details;
+                    }
+
+                    $original_subject = $subject;
+                    $original_body = $body;
+
+                    foreach ($user_wise_shipments as $user_id => $shipments) {
+                        $shipper = User::find($user_id);
+
+                        if (strpos($subject, '[company_name]') !== FALSE) {
+                            $subject = str_replace('[company_name]', $shipper->name, $subject);
+                        }
+
+                        if (strpos($body, '[company_name]') !== FALSE) {
+                            $body = str_replace('[company_name]', $shipper->name, $body);
+                        }
+
+                        if (strpos($subject, '[received_at]') !== FALSE) {
+                            $subject = str_replace('[received_at]', $today, $subject);
+                        }
+
+                        if (strpos($body, '[received_at]') !== FALSE) {
+                            $body = str_replace('[received_at]', $today, $body);
+                        }
+
+                        //              $to = $shipper->email;
+
+                        if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
+                            $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
+                        } else {
+                            $to = $shipper->email;
+                        }
+                        $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                        foreach ($present_fields as $field) {
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                        }
+
+                        $shipment_details .= '</tr>';
+
+                        $serial_number = 1;
+
+                        foreach ($shipments as $shipment) {
+                            $shipment_details .= '<tr>';
+
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
+                            foreach ($present_fields as $field) {
+                                if (!empty($shipment[$field])) {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                                } else {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                                }
+                            }
+
+                            $shipment_details .= '</tr>';
+
+                            $serial_number++;
+                        }
+
+                        $shipment_details .= '</tbody></table>';
+
+                        foreach ($present_fields as $field) {
+                            if ($field != $first_field) {
+                                $body = str_replace('[' . $field . ']', '', $body);
+                            }
+                        }
+
+                        $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+
+                        $bcc = array();
+
+
+                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereNotNull('email')->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                            $query->whereIn('hub_id', $origin_hub_ids);
+                        });
+
+                        if ($related_admins->exists()) {
+                            $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+                        }
+
+                        if (empty($bcc)) {
+                            $bcc = NULL;
+                        }
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+
+                        $subject = $original_subject;
+                        $body = $original_body;
+                    }
+                }
+
                 else if($id == 208)
                 {
                     $employee_id = $reference_1_id;
@@ -10012,7 +10224,7 @@ else if ($id == 178) {
                     self::email($subject,$body,$reference_1_id);
                 }
             }
-        }
+        }       
     }
     static public function custom($type, $subject, $body, $to) {
         if ($type == 1) {

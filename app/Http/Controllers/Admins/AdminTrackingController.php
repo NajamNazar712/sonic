@@ -985,6 +985,15 @@ class AdminTrackingController extends Controller
                         $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
 
+                        $details['consignee']['crm_status'] = 0;
+
+                        $on_hold_sc = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',20);
+                        if($on_hold_sc->exists()){
+                            $details['consignee']['crm_status'] = 1;
+                        }
+
+
+
                         foreach ($shipment->items as $item) {
                             $item_details = array();
 
@@ -1257,6 +1266,15 @@ class AdminTrackingController extends Controller
                                         $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
                                     }
 
+                                }
+                            }
+                            if($journey->shipper_status_id == 12){
+                                $rc_app = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id', 12);
+                                if($rc_app->exists()){
+                                    $rc_app = $rc_app->first();
+                                    if($rc_app->rider_status_reason_id == 8 && $rc_app->otp_entered){
+                                        $journey_details['image_audio_location'] .= '<i class="la la-check-square primary"></i>';
+                                    }
                                 }
                             }
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;

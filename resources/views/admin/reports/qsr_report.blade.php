@@ -161,6 +161,11 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Aging (Arrival)</th>
                         <th class="border-primary border-darken-1">Aging (Last Status)</th>
+                        <th class="border-primary border-darken-1">Request #</th>
+                        <th class="border-primary border-darken-1">Request Status</th>
+                        <th class="border-primary border-darken-1">Case Nature</th>
+                        <th class="border-primary border-darken-1">Case Nature Type</th>
+                        <th class="border-primary border-darken-1">Adjusted amount</th>
                     </tr>
                     </thead>
                 </table>
@@ -357,6 +362,11 @@
                             head.push('Amount');
                             head.push('Aging (Arrival)');
                             head.push('Aging (Last Status)');
+                            head.push('Request #');
+                            head.push('Request Status');
+                            head.push('Case Nature');
+                            head.push('Case Nature Type');
+                            head.push('Adjusted amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -388,6 +398,11 @@
                                 row.push(values.amount);
                                 row.push(values.aging);
                                 row.push(values.aging_last_status);
+                                row.push(values.crm_id_padded);
+                                row.push(values.crm_request_status);
+                                row.push(values.crm_request_case_nature);
+                                row.push(values.crm_request_case_nature_type);
+                                row.push(values.adjusted_amount);
 
                                 body.push(row);
                             });
@@ -469,7 +484,17 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
                     {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false},
+                    {data: 'crm_id_padded_link', name: 'cr.id', class: 'align-middle crm_id_padded'},
+                    {data: 'crm_request_status', name: 'aging_last_status', class: 'align-middle crm_request_status'},
+                    {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature'},
+                    {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type'},
+                    {data: 'adjusted_amount', name: 'adjusted_amount', class: 'align-middle adjusted_amount',orderable: false, searchable: false},
                 ],
+                row.push(values.crm_id_padded);
+            row.push(values.crm_request_status);
+            row.push(values.crm_request_case_nature);
+            row.push(values.crm_request_case_nature_type);
+            row.push(values.adjusted_amount);
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);

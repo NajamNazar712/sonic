@@ -3232,6 +3232,11 @@ class DeliveryController extends Controller
             ->addColumn('status', function ($deliveries) {
                 $flag = true;
                 $not_rcp = false;
+
+                $rc_flag = false;
+                if(($deliveries->current_status_id == 20) && ($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
+                    return $deliveries->current_status;
+                }
 //                if(ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count() < 2)
 //                {
 //                    $not_rcp = true;
@@ -3296,13 +3301,17 @@ class DeliveryController extends Controller
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
+                $rc_flag = false;
+                if(($deliveries->current_status_id == 20) && ($deliveries->reason_id == 8) && ($deliveries->otp_entered == 1)){
+                    $rc_flag = true;
+                }
                 $status_reason = '';
                 $reason_name = '';
                 $reason_id = '';
                 $delivered_statuses = array(14, 16, 30, 36, 37);
                 $shipment_data = Shipment::find($deliveries->shId);
                 $status_id = $shipment_data->shipment_journey()->latest()->first();
-                $status_data = ShipmentStatus::where('id', $status_id->shipper_status_id)->select('id', 'name')->first();
+//                $status_data = ShipmentStatus::where('id', $status_id->shipper_status_id)->select('id', 'name')->first();
                 if ($status_id->status_reason_id != '') {
 
                     $status_reason = ShipmentStatusReason::where('id', $status_id->status_reason_id)->first();
@@ -3310,6 +3319,8 @@ class DeliveryController extends Controller
                     $reason_id = $status_reason->id;
                 }
                 if (in_array($deliveries->current_status_id, $delivered_statuses)) {
+                    $reason = $reason_name;
+                }else if($rc_flag){
                     $reason = $reason_name;
                 } else {
                     $reason = '<select class="form-control form-control-sm select2 reasonDrop" reasonId="' . $status_id->status_reason_id . '" name="reason_drop[' . $deliveries->shId . ']" ><option value="' . $reason_id . '">' . $reason_name . '</option></select>';
@@ -4716,12 +4727,19 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('cash_amount', function ($shipment) {
-                if($shipment->cash_amount){
-                    return number_format($shipment->cash_amount);
-                }
-                else{
-                    return number_format($shipment->amount);
-                }
+                
+                $dncc_amount = $shipment->amount;
+                $hbl_connect_amount = $shipment->transactions_amount;
+                $cash_amount = $dncc_amount - $hbl_connect_amount;
+
+                return number_format($cash_amount);
+
+                // if($shipment->cash_amount){
+                //     return number_format($shipment->cash_amount);
+                // }
+                // else{
+                //     return number_format($shipment->amount);
+                // }
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);

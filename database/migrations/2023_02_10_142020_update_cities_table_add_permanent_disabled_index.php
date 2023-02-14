@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class RecreateBookingTypeIdIndexShipmentsTable extends Migration
+class UpdateCitiesTableAddPermanentDisabledIndex extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::table('shipments', function (Blueprint $table) {
-            $table->dropIndex(['booking_type_id']);
-            $table->index('booking_type_id');
+        Schema::table('cities', function (Blueprint $table) {
+            $table->index('permanent_disabled');
         });
     }
 
@@ -26,6 +25,8 @@ class RecreateBookingTypeIdIndexShipmentsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('cities', function (Blueprint $table) {
+            $table->dropIndex('permanent_disabled');
+        });
     }
 }

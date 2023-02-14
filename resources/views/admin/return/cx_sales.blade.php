@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Return - Unable to Return')
+@section('title','Unable to Return')
 
 @section('content')
     <h1 class="mb-1">
-        Return - Unable to Return
+        Unable to Return
     </h1>
 
     <div class="card">

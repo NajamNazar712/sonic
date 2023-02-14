@@ -54,13 +54,14 @@
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Lost Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Junction(s)</th>
-                                   <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
+                                    <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Shipments Weight</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
+                                    <th class="border-primary border-darken-1">Received Datetime</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                 </tr>
                                 </thead>
@@ -162,6 +163,7 @@
                             head.push('Actual Weight');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
+                            head.push('Received Datetime');
                             head.push('Status');
 
 
@@ -183,6 +185,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.transitted_at);
                                 row.push(values.transitted_by);
+                                row.push(values.received_at);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -239,6 +242,7 @@
                     {data: 'actual_weight', name: 'cargo_manifest_bags.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transitted_at', name: 'cargo_manifest_bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
+                    {data: 'received_at', name: 'cargo_manifest_bags.received_at', class: 'align-middle received_at'},
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -421,7 +425,7 @@
             });
             var route = '{!! route('admin.tracking.index') !!}';
 
-        
+
             $('#bag_type_search_form #bag_type').select2({
                 width: '125px',
                 placeholder: 'Bag Type'

@@ -25,6 +25,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -94,6 +95,20 @@ class RetailTrackingController extends Controller
                             else{
                                 $sales_person_name = null;
                             }
+
+                            if ($shipment->business_category_id == 2) {
+                                $international_shipment = InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number');
+                                if ($international_shipment->exists()) {
+                                    $international_shipment = $international_shipment->first();
+                                    $details['international_shipment'] = 1;
+                                    $details['international_tracking_number'] = $international_shipment->international_tracking_number;
+                                } else {
+                                    $details['international_shipment'] = 0;
+                                }
+                            } else {
+                                $details['international_shipment'] = 0;
+                            }
+
 
                             $pickup = $shipment->pickup_address;
 
