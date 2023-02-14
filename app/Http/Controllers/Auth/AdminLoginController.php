@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\AgentReturnConfirmation;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use Illuminate\Support\Facades\Hash;
 
 class AdminLoginController extends Controller
@@ -32,30 +33,30 @@ class AdminLoginController extends Controller
         $this->middleware('guest:admin')->except('logout');
     }
 
-    public function showLoginForm(){
-        $settings = GlobalSettings::where('type','admin_otp');
-        if($settings->doesntExist())
-        {
+    public function showLoginForm()
+    {
+        $settings = GlobalSettings::where('type', 'admin_otp');
+        if ($settings->doesntExist()) {
             $settings = new GlobalSettings();
             $settings->setting_value = 1;
             $settings->type = "admin_otp";
             $settings->save();
-        }
-        else{
+        } else {
             $settings = $settings->first();
         }
-        return view('admin.login')->with(['setting'=>$settings]);
+        return view('admin.login')->with(['setting' => $settings]);
     }
-    public function login(Request $request){
+    public function login(Request $request)
+    {
         //validate the form
-//        $errors = new MessageBag;
+        //        $errors = new MessageBag;
         $this->validate($request, [
-            'phone_number' =>'required',
+            'phone_number' => 'required',
             'pin' => 'required|min:4'
         ]);
-
+        
         //Attempt to login
-        if(Auth::guard('admin')->attempt(['phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember) || Auth::guard('admin')->attempt(['official_phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember)){
+        if (Auth::guard('admin')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('admin')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
             //if Successfull then redirect to intended location
 
             $admin = Auth::guard('admin');
@@ -76,65 +77,81 @@ class AdminLoginController extends Controller
                 ->where('multiple_sale_leads.admin_id', $id)
                 ->where('spt.status', 0)
                 ->whereNotNull('spt.user_id')->select('spt.user_id');
-            if($assigned_admins->exists()) {
+            if ($assigned_admins->exists()) {
                 $assigned_admins = $assigned_admins->pluck('spt.user_id')->toArray();
                 $shippers = array_merge($shippers, $assigned_admins);
             }
-            $KAE = SaleTierTag::where('kam',$id);
-            if($KAE->exists()){
+            $KAE = SaleTierTag::where('kam', $id);
+            if ($KAE->exists()) {
                 $KAE = $KAE->pluck('user_id')->toArray();
-                $shippers = array_merge($shippers,$KAE);
+                $shippers = array_merge($shippers, $KAE);
                 //$shippers = array_unique($shippers);
             }
 
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
-            $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
-            if(in_array($role_id, [44])){
-                if(count($hubs) > 0){
+            $sales_coordinator = SalesCommissionUser::where('user_id', $id)->whereIn('sales_commission_users.tier_id', [2, 3])->exists();
+            if (in_array($role_id, [44])) {
+                if (count($hubs) > 0) {
                     $hub_cities = City::whereIn('hub_id', $hubs)->where('status', 1)->pluck('id')->toArray();
                     $region_shippers = User::whereNotIn('id', $shippers)->whereIn('city_id', $hub_cities)->pluck('id')->toArray();
-                    if(count($region_shippers) > 0){
-                        $shippers = array_merge($shippers,$region_shippers);
+                    if (count($region_shippers) > 0) {
+                        $shippers = array_merge($shippers, $region_shippers);
                     }
                 }
             }
-//mark login start
-            $check_login = AgentReturnConfirmation::where('admin_id',$id)->where('current_date',Carbon::now()->format("Y-m-d"));
-            if(!$check_login->exists()){
-               $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                ->where('admin_roles.department_id',3)->where('a.id',$id);
-                if($agent_role->exists()){
+            //mark login start
+            $check_login = AgentReturnConfirmation::where('admin_id', $id)->where('current_date', Carbon::now()->format("Y-m-d"));
+            if (!$check_login->exists()) {
+                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                    ->where('admin_roles.department_id', 3)->where('a.id', $id);
+                if ($agent_role->exists()) {
                     $agent_login = new AgentReturnConfirmation;
                     $agent_login->login_time = Carbon::now();
                     $agent_login->admin_id = $id;
                     $agent_login->current_date = Carbon::now()->format("Y-m-d");
                     $agent_login->save();
                 }
-            }else{
+            } else {
                 $check_login = $check_login->get()->first();
-                if($check_login->login_time == NULL){
+                if ($check_login->login_time == NULL) {
                     $check_login->login_time = Carbon::now();
                     $check_login->save();
                 }
             }
-//mark login end
+            //mark login end
             $sale_users_bypass = array();
             $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
-
             if ($settings->exists()) {
                 $settings = $settings->first();
                 $sale_users_bypass = array_map('intval', explode(',', $settings->text));
             }
 
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login, 'id' => $id, 'sale_users_bypass' => $sale_users_bypass]);
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers, 'sales_coordinator' => $sales_coordinator, 'first_login' => $first_login, 'id' => $id, 'sale_users_bypass' => $sale_users_bypass]);
+
+            //Redirect to Attendence 
+          $employee_id =  $admin->user()->employee_id;
+            if($employee_id)
+            {
+               $employee_attendence =  EmployeeAttendance::where('employee_id',$employee_id);
+                if($employee_attendence->exists())
+                {
+                    $employee_attendence = $employee_attendence->orderBy('attendance_date', 'desc')->first();
+                    $check_attendence = $employee_attendence->where('attendance_date',Carbon::now()->format("Y-m-d"));
+                    
+                    if(!$check_attendence->exists())
+                    {
+                        return redirect()->route('admin.attendance.mark');
+                    }
+                }
+            }
 
             return redirect()->intended(route('admin.dashboard.index'));
         }
         $errors = [$this->username() => trans('auth.failed')];
-//        $errors = new MessageBag(['password' => ['Email and/or password invalid.']]);
-        return redirect()->back()->withInput($request->only('email','remember'))->withErrors($errors);
 
+        //        $errors = new MessageBag(['password' => ['Email and/or password invalid.']]);
+        return redirect()->back()->withInput($request->only('email', 'remember'))->withErrors($errors);
     }
 
     public function username()
@@ -145,14 +162,14 @@ class AdminLoginController extends Controller
 
     public function logout(Request $request)
     {
-        if(Auth::guard('admin')){
+        if (Auth::guard('admin')) {
             //mark logout start
             $admin = Auth::guard('admin');
-            $check_logout = AgentReturnConfirmation::where('admin_id',$admin->id())->where('current_date',Carbon::now()->format("Y-m-d"));
-            if($check_logout->exists()){
+            $check_logout = AgentReturnConfirmation::where('admin_id', $admin->id())->where('current_date', Carbon::now()->format("Y-m-d"));
+            if ($check_logout->exists()) {
                 $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                ->where('admin_roles.department_id',3)->where('a.id',$admin->id());
-                if($agent_role->exists()){
+                    ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
+                if ($agent_role->exists()) {
                     $agent_logout = $check_logout->first();
                     $agent_logout->logout_time = Carbon::now();
                     $agent_logout->save();
@@ -166,17 +183,17 @@ class AdminLoginController extends Controller
             return redirect()->route('admin.login');
         }
         return redirect()->route('admin.login');
-
     }
-    public function credentials(Request $request){
-        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
+    public function credentials(Request $request)
+    {
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number', $request->phone_number);
         if ($admin->exists()) {
             $admin = $admin->first();
         } else {
             return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
         }
         if (Hash::check($request->input('pin'), $admin->password)) {
-            if($admin->status){
+            if ($admin->status) {
                 $environment = config('app.env');
 
                 if ($environment == 'production' || $environment == 'staging') {
@@ -184,12 +201,12 @@ class AdminLoginController extends Controller
                     $admin->otp = $otp;
                     $admin->last_login_attempt = Carbon::now();
                     $admin->save();
-                    $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
+                    $data = array("otp" => $otp, "phone_number" => $request->phone_number);
                     NotificationsController::send(138, $admin, $data);
                 }
 
                 return response()->json(['status' => 1]);
-            }else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Your Account is Disabled, Contact Admin']);
             }
         } else {
@@ -197,10 +214,11 @@ class AdminLoginController extends Controller
         }
     }
 
-    public function verify_otp(Request $request){
+    public function verify_otp(Request $request)
+    {
         $environment = config('app.env');
-        if($environment == 'production' || $environment == 'staging') {
-            $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
+        if ($environment == 'production' || $environment == 'staging') {
+            $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number', $request->phone_number);
             if ($admin->exists()) {
                 $admin = $admin->first();
                 if ($admin->otp == $request->otp) {
@@ -211,8 +229,7 @@ class AdminLoginController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 1]);
         }
     }

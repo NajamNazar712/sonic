@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 |
 */
 
-Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
@@ -4032,6 +4032,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
             Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
             Route::get('{id}/payslip_download', 'Admins\AdminHumanResourseController@payslip_download')->name('download');
+        });
+        Route::prefix('employee_penalty')->name('employee_penalty.')->group(function ()
+        {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_penalty_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_penalty_list')->name('list');
+            Route::get('duplicate', 'Admins\AdminHumanResourseController@employee_penalty_duplicate')->name('duplicate');
+            Route::post('reject', 'Admins\AdminHumanResourseController@employee_penalty_reject')->name('reject');
+            Route::get('deduction', 'Admins\AdminHumanResourseController@employee_penalty_deduction_list')->name('deduction');
+            Route::post('deduction', 'Admins\AdminHumanResourseController@employee_penalty_deduction_store')->name('deduction_store');
         });
 
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {

@@ -1316,6 +1316,8 @@ class Permission
             'tracking.shipment_position.upload' => 822,
             'tracking.shipment_position.list' => 822,
 
+            'human_resource.employee_penalty.index' => 829,
+
             'reports.one_link_charges_summary.index' => 824,
 			'reports.one_link_charges_summary.index' => 824,
 

@@ -38,7 +38,7 @@
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
