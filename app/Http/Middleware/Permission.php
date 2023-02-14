@@ -1304,9 +1304,12 @@ class Permission
             'settings.non_cod_otp_shippers.index' => 820,
             'settings.non_cod_otp_shippers.store' => 820,
 
-            'admin.tracking.shipment_position.track' => 822,
-            'admin.tracking.shipment_position.upload' => 822,
-            'admin.tracking.shipment_position.list' => 822,
+            'tracking.shipment_position.track' => 822,
+            'tracking.shipment_position.upload' => 822,
+            'tracking.shipment_position.list' => 822,
+
+            'human_resource.employee_penalty.index' => 829,
+            
 
         ],
 
