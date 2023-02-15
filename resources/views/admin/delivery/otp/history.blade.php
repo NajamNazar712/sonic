@@ -28,7 +28,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date(From)" data-rule-required="true" data-msg-required="Date(From) is required">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date(From)">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -38,7 +38,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date(To)" data-rule-required="true" data-msg-required="Date(To) is required">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date(To)">
                                 </div>
                             </div>
 
@@ -60,7 +60,8 @@
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Purpose</th>
                         <th class="border-primary border-darken-1">OTP</th>
-                        <th class="border-primary border-darken-1">Date / Time</th>
+                        <th class="border-primary border-darken-1">Created Date / Time</th>
+                        <th class="border-primary border-darken-1">OTP Updated Date / Time</th>
                     </tr>
                     </thead>
                 </table>
@@ -188,11 +189,18 @@
             $('#search_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                rules: {
+                    from_date: {
+                        required: true
+                    },
+                    to_date: {
+                        required: true
+                    }
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-
                     table.draw(true);
                 }
             });
@@ -268,7 +276,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[6, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -276,6 +284,7 @@
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'purpose', name: 'ss.name', class: 'align-middle purpose'},
                     {data: 'otp', name: 'otp', class: 'align-middle otp', orderable: false, searchable: false},
+                    {data: 'created_at', name: 'rider_deliveries.created_at', class: 'align-middle created_at'},
                     {data: 'date', name: 'shipment_otps.updated_at', class: 'align-middle date'},
 
                 ],
@@ -339,14 +348,17 @@
                         return false;
                     }
                 },
-                // onChange: function (value) {
-                //     if(value.length == 0 && $('#shipment_status').val() == ''){
-                //         $('#datatable_filter_btn').attr('disabled', true);
-                //     }else{
-                //         $('#datatable_filter_btn').attr('disabled', false);
-                //     }
-                //
-                // },
+                onChange: function (value) {
+                    console.log(value)
+                    if(value.length == 0){
+                        $('#from_date').rules( "add", { required: true });
+                        $('#to_date').rules( "add", { required: true });
+                    }else{
+                        $('#from_date').rules( "remove");
+                        $('#to_date').rules( "remove");
+                    }
+
+                },
             });
 
         });
