@@ -10655,7 +10655,7 @@ class AdminDashboardController extends Controller
     public function addRouteView()
     {
         $route_types = RouteType::all();
-        $cities = City::where('business_category_id', 1)->select(['id', 'name'])->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
         $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
         return view('admin.management.add_route_form')->with(['cities' => $cities, 'riders' => $riders, 'route_types' => $route_types]);
     }
@@ -10701,7 +10701,7 @@ class AdminDashboardController extends Controller
 
     public function editRouteView($id)
     {
-        $citylist = City::select(['id', 'name'])->get();
+        $citylist = City::where('status', 1)->select(['id', 'name'])->get();
         $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
         $route_types = RouteType::all();
         $current_rider = Rider::where('route_id', $id);
@@ -11097,7 +11097,7 @@ class AdminDashboardController extends Controller
 
     public function walk_in_city_list()
     {
-        $cities = City::select('id', 'name')->get();
+        $cities = City::where('status', 1)->select('id', 'name')->get();
         $walk_in_cities = WalkInCities::all();
         $shipping_modes = ShippingMode::where('id', '<', 4)->get();
         $pickup_cities = City::select('id', 'name')->where('pickup', 1)->get();

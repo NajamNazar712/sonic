@@ -3226,7 +3226,7 @@ class V2AdminPickupsController extends Controller
         else{
             $users = User::select(['id', 'name'])->get();
         }
-        $cities = City::where('business_category_id', 1)->select(['id', 'name'])->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
         $riders = Rider::where('status', 1)->select(['id', 'name', 'trax_id'])->get();
         return view('admin.v2_pickups.pickup_route')->with(['cities' => $cities, 'riders' => $riders, 'users' => $users]);
     }

@@ -2551,6 +2551,10 @@ class ReturnController extends Controller
                 $open_box_checkbox = '<input type="checkbox" class="open_box" name="open_box[' . $deliveries->shId . ']">';
                 return $open_box_checkbox;
             })
+            ->addColumn('attempts', function ($deliveries) {
+                $attempt_counts = ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 23, 'verification' => 1])->count();
+                return $attempt_counts;
+            })
             ->addColumn('action',function($deliveries){
                 $delivered_array = array(25,31,38);
                 if(in_array($deliveries->shipper_status_id,$delivered_array)) {
