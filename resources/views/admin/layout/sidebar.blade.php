@@ -2721,17 +2721,20 @@
                             </li>
                         @endif
 
-                            @if (session('role_id') == 1 || in_array(613, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
-                            @endif
-                            @if (session('role_id') == 1 || in_array(717, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.human_resource.adjustment.index')}}">Employee Attendance Adjustment</a></li>
-                            @endif
-                            @if (session('role_id') == 1 || in_array(829, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.human_resource.employee_penalty.index')}}">Employee Penalty</a></li>
-                            @endif
+                        @if (session('role_id') == 1 || in_array(613, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(717, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.adjustment.index')}}">Employee Attendance Adjustment</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(829, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_penalty.index')}}">Employee Penalty</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(829, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.fuel_allocation.index')}}">Rider Fuel Allocation</a></li>
+                        @endif
                             
-                @endif
+                    @endif
                     <li><a class="menu-item" href="{{ route('admin.human_resource.employee_confirmation.index')}}">Employee Confirmation</a></li>
                     @if (Auth::user()->trax_id != NULL)
                         <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>

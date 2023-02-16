@@ -4053,6 +4053,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_confirmation_approve')->name('approve');
             Route::post('view', 'Admins\AdminHumanResourseController@view_employee_confirmation')->name('view');
         });
+
+        Route::prefix('fuel_allocation')->name('fuel_allocation.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@rider_fuel_allocation_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@rider_fuel_allocation_list')->name('list');
+            Route::post('allocate', 'Admins\AdminHumanResourseController@rider_fuel_allocation_allocate')->name('allocate');
+            Route::post('delivery_notes', 'Admins\AdminHumanResourseController@rider_fuel_allocation_delivery_notes')->name('delivery_notes');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
