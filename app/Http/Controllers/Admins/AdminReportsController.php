@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\AgentDay;
 use App\Http\Models\Admin\AdminRole;
@@ -6132,7 +6133,11 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
                     );
             })
-            ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+            ->leftJoin('crm_request_taggings as crt', function ($join){
+                $join->on('crt.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crt.id', '=',
+                        DB::raw('(select max(id) from crm_request_taggings where crm_request_taggings.crm_request_id = crm_requests.id)'));
+            })
             ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
                 $join->on('crth.crm_request_id', '=', 'crm_requests.id')
                     ->where(
@@ -6145,9 +6150,6 @@ class AdminReportsController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-            ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
-            ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
-            ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
             ->leftjoin('adjustment_logs as adjustment', function ($join) {
                 $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
                     ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
@@ -6179,7 +6181,7 @@ class AdminReportsController extends Controller
             ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 's.id')
 
 
-            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external', 'crm_requests.id as request_number', 's.tracking_number as tracking_number', 'crsh.created_at as reopen_date', 'crcn.id as case_nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount', 'change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'ad.name as admin_department', 'sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code', 'mc.id as month_closing_id')
+            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external', 'crm_requests.id as request_number', 's.tracking_number as tracking_number', 'crsh.created_at as reopen_date', 'crcn.id as case_nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount', 'change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'ad.name as admin_department', 'sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code', 'mc.id as month_closing_id', 'crt.tagged_id', 'crt.hub_id')
             ->groupBy('crm_requests.id');
 
         if (session('department_id') == 8) {
@@ -6188,10 +6190,10 @@ class AdminReportsController extends Controller
 
         $datatable = Datatables::of($crm)
             ->editColumn('tagged_to', function ($crm_request) {
-                if ($crm_request->tagging_type == 2) {
-                    return $crm_request->tagged_to_admin;
+                if (in_array($crm_request->tagging_type, [2,4,5])) {
+                    return Admin::find($crm_request->tagged_id)->name;
                 } else if ($crm_request->tagging_type == 1) {
-                    return $crm_request->tagged_to_department;
+                    return AdminDepartment::find($crm_request->tagged_id)->name;
                 } else {
                     return '-';
                 }
@@ -6205,7 +6207,7 @@ class AdminReportsController extends Controller
             })
             ->editColumn('tagged_hub', function ($crm_request) {
                 if ($crm_request->tagging_type == 1) {
-                    return $crm_request->tagged_to_hub;
+                    return City::find($crm_request->hub_id)->hub()->name;
                 } else {
                     return '-';
                 }
