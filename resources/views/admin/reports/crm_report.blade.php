@@ -606,7 +606,7 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[23, 'desc']],
+                order: [[25, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
