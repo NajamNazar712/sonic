@@ -6207,7 +6207,7 @@ class AdminReportsController extends Controller
             })
             ->editColumn('tagged_hub', function ($crm_request) {
                 if ($crm_request->tagging_type == 1) {
-                    return City::find($crm_request->hub_id)->hub()->name;
+                    return City::find(114)->hub_city->name;
                 } else {
                     return '-';
                 }
