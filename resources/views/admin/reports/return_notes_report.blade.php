@@ -354,7 +354,7 @@
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.aging);
-                                row.push(values.delivered_to_shipper_count_link);
+                                row.push(values.delivered_to_shipper_count);
 
                                 body.push(row);
                             });
@@ -416,7 +416,7 @@
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'},
                     {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle text-center image'},
-                    { data:'delivered_to_shipper_count' ,name: 'delivered_to_shipper_count', class: 'align-middle text-center delivered_to_shipper_count', orderable: false, searchable: false},
+                    { data:'delivered_to_shipper_count_link' ,name: 'delivered_to_shipper_count', class: 'align-middle text-center delivered_to_shipper_count', orderable: false, searchable: false},
 
                 ],
                 rowCallback: function(row, data, index) {

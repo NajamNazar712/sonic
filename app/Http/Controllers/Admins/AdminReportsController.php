@@ -303,7 +303,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments', 'shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr', 'cr.id', '=', 'return_notes.admin_id')
             ->leftjoin('admins as up', 'up.id', '=', 'return_notes.updated_by')
-            ->select(['return_notes.id', 'return_notes.id as return_note_id', 'return_notes.id as return_note_link', 'up.name as updated_by', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.updated_at', 'return_notes.updated_at as submission_date', 'riders.name as rider', 'cr.name as created_by', 'return_notes.created_at as created_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')])->groupBy('return_notes.id');
+            ->select(['return_notes.id', 'return_notes.id as return_note_id', 'return_notes.id as return_note_link', 'up.name as updated_by', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.updated_at', 'return_notes.updated_at as submission_date', 'riders.name as rider', 'cr.name as created_by', 'return_notes.created_at as created_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])->groupBy('return_notes.id');
         if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
@@ -326,7 +326,7 @@ class AdminReportsController extends Controller
             ->editColumn('return_note_link', function ($return_note) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($return_note->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
-            ->editColumn('delivered_to_shipper_count', function ($deliveries) {
+            ->editColumn('delivered_to_shipper_count_link', function ($deliveries) {
                 if ($deliveries->delivered_to_shipper_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_to_shipper_count . '</button>';
                 } else {
