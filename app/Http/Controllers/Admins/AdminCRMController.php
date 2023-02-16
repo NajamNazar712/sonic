@@ -2662,16 +2662,15 @@ class AdminCRMController extends Controller
 
                     if($crm_request->case_nature_id == 4){
                         $comment = 'Dear Customer,
-                                    Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
                                     
-                                    UAN# 021-111-11-8729
-                                    WhatsApp # 0348-111-8729
-                                    info@trax.pk
-                                    Live Chat
-                                    Messenger.
+UAN# 021-111-11-8729
+WhatsApp # 0348-111-8729
+info@trax.pk
+Live Chat Messenger
                                     
-                                    Regards,
-                                    TRAX-Customer Experience';
+Regards,
+TRAX-Customer Experience';
 
                         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                     }

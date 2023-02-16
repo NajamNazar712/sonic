@@ -44,16 +44,15 @@ class DailyAutoCommentForCRMClaims extends Command
             $crm_requests = $crm_requests->get();
 
             $comment = 'Dear Customer,
-                        We are investigating the subject case and will get back to you as soon as possible. Your patience in this regard is highly appreciated. For any further clarification please approach us.
+We are investigating the subject case and will get back to you as soon as possible. Your patience in this regard is highly appreciated. For any further clarification please approach us.
                         
-                        UAN# 021-111-11-8729
-                        WhatsApp # 0348-111-8729
-                        info@trax.pk
-                        Live Chat Messenger.
+UAN# 021-111-11-8729
+WhatsApp # 0348-111-8729
+info@trax.pk
+Live Chat Messenger
                         
-                        Regards,
-                        TRAX-Customer Experience
-';
+Regards,
+TRAX-Customer Experience';
             $internal_comment = 'Dear Team,
                                  Please conclude this case on priority.';
             foreach ($crm_requests as $crm_request){

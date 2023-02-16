@@ -30,15 +30,15 @@ class CRMClaimAutoCloseController extends Controller
             ]);
 
             $comment = 'Dear Customer,
-                        Please accept our sincere apologies for the inconvenience you had, please be noted that adjustments against the subjected tracking have been made as per the policy and your payment will be disbursed with your next transaction. Your patience in this regard is highly appreciated. For any further clarification please approach us.
-                        UAN# 021-111-11-8729
-                        WhatsApp # 0348-111-8729
-                        info@trax.pk
-                        Live Chat Messenger.
+Please accept our sincere apologies for the inconvenience you had, please be noted that adjustments against the subjected tracking have been made as per the policy and your payment will be disbursed with your next transaction. Your patience in this regard is highly appreciated. For any further clarification please approach us.
+
+UAN# 021-111-11-8729
+WhatsApp # 0348-111-8729
+info@trax.pk
+Live Chat Messenger
                         
-                        Regards,
-                        TRAX-Customer Experience
-                        ';
+Regards,
+TRAX-Customer Experience';
 
             CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
         }

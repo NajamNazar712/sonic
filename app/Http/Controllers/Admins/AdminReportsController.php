@@ -6187,7 +6187,7 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($crm)
-            ->editColumn('tagged_to', function ($crm_request) {
+            ->addColumn('tagged_to', function ($crm_request) {
                 if ($crm_request->tagging_type == 2) {
                     return $crm_request->tagged_to_admin;
                 } else if ($crm_request->tagging_type == 1) {
@@ -6411,7 +6411,8 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
-            })->addColumn('responsibe_person_name', function ($requests) {
+            })
+            ->addColumn('responsibe_person_name', function ($requests) {
                 $month_closing_responsible = MonthClosingResponsible::where('month_closing_id', $requests->month_closing_id);
                 if ($month_closing_responsible->exists()) {
                     $month_closing_responsible = $month_closing_responsible->get();
