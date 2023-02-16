@@ -2950,8 +2950,6 @@ class RiderAPIController extends Controller
             $shipment_status = $pickup_requests->shipper_status_id;
             if ($pickup_requests->current_rider_id == $rider_id) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
-            } else if ($pickup_requests->current_rider_id != null) {
-                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned']);
             } elseif ($shipment_status != 1 && $shipment_status != 17) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
             } else {
