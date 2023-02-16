@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Leads Management')
+@section('title', 'Rider Fuel Allocation')
 
 @section('content')
     <h1 class="mb-1">
-        Leads Management
+        Rider Fuel Allocation
     </h1>
 
     <div class="card">
@@ -23,20 +23,20 @@
                                             <input type="text" name="from_date"
                                                    class="form-control graph_date bg-primary border-primary white rounded-right"
                                                    id="from_date" placeholder="Date From"
-                                                   data-value="{{$dates['old_date']}}" data-rule-required="true"
+                                                   data-value="" data-rule-required="true"
                                                    data-msg-required="This field is required">
                                         </div>
                                         <div class="form-group col">
                                             <input type="text" name="to_date"
                                                    class="form-control graph_date bg-primary border-primary white rounded-right"
-                                                   id="to_date" placeholder="Date To" data-value="{{$dates['current']}}"
+                                                   id="to_date" placeholder="Date To" data-value=""
                                                    data-rule-required="true" data-msg-required="This field is required">
                                         </div>
                                         <div class="form-group col">
                                             <select name="search_hub" id="search_hub"
                                                     class="select2 form-control">
                                                 @foreach($hubs as $hub)
-                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -44,15 +44,7 @@
                                             <select name="search_rider" id="search_rider"
                                                     class="select2 form-control">
                                                 @foreach($riders as $rider)
-                                                    <option value="{{ $rider->id }}"> {{ $rider->name }} </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group col">
-                                            <select name="search_trax_id" id="search_trax_id"
-                                                    class="select2 form-control">
-                                                @foreach($riders as $rider)
-                                                    <option value="{{ $rider->id }}"> {{ $rider->trax_id }} </option>
+                                                    <option value="{{ $rider->id }}"> {{ $rider->name }} | {{ $rider->trax_id }} </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -104,9 +96,10 @@
                 </div>
                 <div class="modal-body text-center">
 
-                    <form id="allocate_fuel_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.leads.add') }}">
+                    <form id="allocate_fuel_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.human_resource.fuel_allocation.allocate') }}">
                         @method('POST')
                         @csrf
+                        <input type="hidden" name="id" id="selected_id">
                         <input type="hidden" name="ids" id="selected_ids">
                         <div class="row">
                             <div class="col-6">
@@ -121,7 +114,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount*" data-rule-required="true"  data-msg-required="Fuel Amount is required" readonly>
+                                    <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount*" data-rule-required="true"  data-msg-required="Fuel Amount is required">
                                 </div>
                             </div>
                         </div>
@@ -359,8 +352,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var area = '';
-            var territory = '';
 
             $("#search_hub").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Hub",
@@ -372,15 +363,10 @@
                 width: '100%'
             });
 
-            $("#search_trax_id").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Trax ID",
-                width: '100%'
-            });
-
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: '{{ Carbon\Carbon::yesterday() }}',
                 format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -416,7 +402,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.leads.list') }}',
+                        url: '{{ route('admin.human_resource.fuel_allocation.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -469,8 +455,9 @@
                     {
                         text: '<i class="la la-plus"></i> Allocate Fuel',
                         className: 'btn btn-primary bulk_allocate_fuel',
-                        enabled: true,
+                        enabled: false,
                         action: function (e, dt, node, config) {
+                            $("#allocate_fuel_modal #selected_ids").val(selected_rows);
                             $('#allocate_fuel_modal').modal('show');
                         }
                     },
@@ -550,11 +537,10 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.leads.list') }}',
+                    url: '{{ route('admin.human_resource.fuel_allocation.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
-                        d.search_trax_id = $('#search_trax_id').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -630,162 +616,62 @@
                 }
             });
 
-            $("#saletag").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Sales Person",
-                width: '100%',
-                dropdownParent: $('#SalesTagModal')
-            });
-            $("#saletag1").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Sales Person",
-                width: '100%',
-                dropdownParent: $('#ForwardLeadModal')
-            });
-            $("#reference_person").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Reference Person",
-                width: '100%',
-                dropdownParent: $('#ForwardLeadModal')
-            });
-            $('#salesTagSubmit').on('click', function () {
-                var assign = parseInt($('#saletag').val());
-                swal({
-                    text: 'Are you sure, you want to Tag?',
-                    icon: 'info',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        if (assign) {
-                            $('#SalesTagModal').modal('hide');
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Lead is being Tagged!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-
-                            $.ajax({
-                                url: '{!! route('admin.leads.tag_sale_person') !!}',
-                                method: 'POST',
-                                data: {
-                                    'sale_person': assign,
-                                    'lead_ids[]': selected_rows,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function (data) {
-                                    if (data.status == 1) {
-                                        $('#SalesTagModal').modal('hide');
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                    selected_rows = [];
-
-                                    table.rows().deselect();
-                                    $('#saletag').val('').trigger('change');
-                                    table.draw(true);
-                                    table.button('.bulk_tagging').disable();
-
-                                    swal.close();
-                                });
-                        } else {
-                            var error = "Lead Not Selected!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    }
-                });
-            });
-
             $('body').on('click', '#datatable .allocate_fuel', function () {
-                forward_lead_id = parseInt($(this).parents('tr').attr('id'));
+                var selected_id = parseInt($(this).parents('tr').attr('id'));
+
+                $('#selected_id').val(selected_id);
+
                 $('#allocate_fuel_modal').modal('show');
             });
-            $('#ForwardLeadSubmit').on('click', function () {
-                var tag = parseInt($('#saletag1').val());
-                var refer_person = parseInt($('#reference_person').val());
-                if (tag && refer_person) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Lead is being forwarded!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
+
+            $('body').on('click', '#datatable .delivery_notes_info', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.human_resource.fuel_allocation.delivery_notes') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function (data) {
+                        var details = '<table class="table table-sm table-bordered"><tbody>';
+
+                        details += '<tr>';
+
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Shipment</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Estimated Weight</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Chargeable Weight</strong></td>';
+
+                        details += '</tr>';
+
+                        $.each(data, function(index, shipment) {
+                            details += '<tr>';
+
+                            details += '<td class="align-middle text-center"><u><a href=' + route + '?tracking_number=' + shipment.tracking_number + ' target="_blank">' + shipment.tracking_number + '</a></u></td>';
+
+                            details += '<td class="align-middle text-center">' + shipment.estimated_weight + '</td>';
+                            details += '<td class="align-middle text-center">' + shipment.actual_weight + '</td>';
+                            details += '<td class="align-middle text-center">' + shipment.chargeable_weight + '</td>';
+
+                            details += '</tr>';
+                        });
+
+                        details += '</tbody></table>';
+
+                        $('#shipments .modal-header').html(head);
+                        $('#shipments .modal-body').html(details);
+
+                        $('#shipments').modal('show');
+
+                        $('#rider_information .modal-body').html(details);
+
+                        $('#rider_information').modal('show');
                     });
-                    $.ajax({
-                        url: '{!! route('admin.leads.tag_sale_person') !!}',
-                        method: 'POST',
-                        data: {
-                            'sale_person': tag,
-                            'reference_person': refer_person,
-                            'lead_ids[]': forward_lead_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
-                            if (data.status) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            $('#saletag1').val('').trigger('change');
-                            $('#reference_person').val('').trigger('change');
-                            $('#ForwardLeadModal').modal('hide');
-                            forward_lead_id = null;
-                            swal.close();
-                            table.draw(true);
-                        });
-                } else {
-                    if (!tag) {
-                        var error = "Sales Person Not Selected!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    if (!refer_person) {
-                        var error = "Reference Person Not Selected!";
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                }
             });
 
-            $('#add_bulk_status_form').validate({
+            $('#allocate_fuel_form').validate({
                 ignore: [],
                 errorClass: 'danger',
                 successClass: 'success',
@@ -796,107 +682,50 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-
-                    var new_status = $('#update_bulk_lead_status').val();
-                    var lead_status_rejected = $('#lead_status_rejected1').val();
-                    var lead_status_notinterested = $('#lead_status_notinterested1').val();
-                    var lead_status_irrelevant = $('#lead_status_irrelevant1').val();
-                    var lead_status_blocked = $('#lead_status_blocked1').val();
-                    var lead_status_dormant = $('#lead_status_dormant1').val();
-                    var check = 1;
-                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11) || (lead_status_dormant == "" && new_status == 14)) {
-                        check = 0;
-                        var error = 'Reason  not Selected!';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    if (new_status && check == 1) {
-                        var reason;
-                        if (lead_status_rejected)
-                            reason = lead_status_rejected;
-
-                        else if (lead_status_notinterested)
-                            reason = lead_status_notinterested;
-
-                        else if (lead_status_irrelevant)
-                            reason = lead_status_irrelevant;
-
-                        else if (lead_status_blocked)
-                            reason = lead_status_blocked;
-
-                        else if (lead_status_dormant)
-                            reason = lead_status_dormant;
-
-                        blockPagePermanently();
-                        $.ajax({
-                            url: "{{route('admin.leads.add_bulk_status')}}",
-                            method: 'POST',
-                            data: {
-                                'lead_id[]': selected_rows,
-                                'status': new_status,
-                                'reason': reason,
-                                '_token': '{{ csrf_token() }}'
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Allocate Fuel!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        }).done(function (data) {
-                            $('#add_bulk_status_modal').modal('hide');
-                            UnblockPagePermanently();
-                            new_status = null;
-                            selected_rows = [];
-
-                            table.rows().deselect();
-                            table.button('.update_status').disable();
-                            if (data.status == 1) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                table.draw();
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        });
-                    } else {
-                        if (check == 0) {
-                        } else {
-                            var error = 'Status not Selected!';
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Allocating Fuel!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
                             });
+                            form.submit();
                         }
-                    }
+                    });
                 }
             });
-            //todo bulk_status ka form submit end
 
-            $('#add_status_modal').on('hide.bs.modal', function () {
+
+            $('#allocate_fuel_modal').on('hide.bs.modal', function () {
                 $('#fuel_rate').val('');
                 $('#fuel_allocated').val('');
                 $('#fuel_amount').val('');
-                table.rows().nodes().each(function (index) {
-                    var row = table.row(index);
-
-                    if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-                        row.deselect();
-
-                        id = parseInt(row.id());
-
-                        var index = $.inArray(id, selected_rows);
-
-                        if (index !== -1) {
-                            selected_rows.splice(index, 1);
-                        }
-
-                        if (selected_rows.length == 0) {
-                            table.button('.bulk_allocate_fuel').disable();
-                        }
-                    }
-                });
+                $('#selected_id').val('');
+                $('#selected_ids').val('');
             });
 
             $("#search_form").validate({

@@ -14,6 +14,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\EmployeeLog;
+use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
@@ -5615,140 +5616,55 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 573);
         }
 
-        $emp_id = Employee::where('trax_id', Auth::user()->trax_id);
-        if ($emp_id->exists()) {
-            $emp_id = $emp_id->first()->id;
-        }else{
-            $emp_id = null;
+
+        $fuel_allocation = RiderFuelAllocation::join('riders as r', 'r.id', 'rider_fuel_allocations.rider_id')
+            ->join('cities as h', 'h.id', 'rider_fuel_allocations.hub_id')
+            ->leftjoin('admins as a', 'a.id', 'rider_fuel_allocations.allocated_by')
+            ->select('rider_fuel_allocations.id as id', 'r.name as rider_name', 'r.trax_id as trax_id', 'h.name as hub', 'rider_fuel_allocations.date as date', 'rider_fuel_allocations.delivery_notes as delivery_notes', 'rider_fuel_allocations.dncc_amount as dncc_amount', 'rider_fuel_allocations.fuel_rate as fuel_rate', 'rider_fuel_allocations.fuel_allocated as fuel_allocated', 'rider_fuel_allocations.amount as amount', 'rider_fuel_allocations.allocated_at as allocated_at', 'a.name as allocated_by');
+
+        if ($search_hub = $request->get('search_hub')) {
+            $fuel_allocation->where('rider_fuel_allocations.hub_id', $search_hub);
         }
 
-        $employee_confirmation = EmployeeConfirmation::join('employees as a', 'a.id', 'employee_confirmations.employee_id')
-            ->leftjoin('admins as lm', 'lm.id', 'employee_confirmations.approve_by_lm')
-            ->leftjoin('admins as hod', 'hod.id', 'employee_confirmations.approve_by_hod')
-            ->leftjoin('admins as hr', 'hr.id', 'employee_confirmations.approve_by_hr')
-            ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', 'a.department_id')
-            ->join('employee_confirmation_statuses as sn', 'sn.id', 'employee_confirmations.status')
-            ->select('a.name as name', 'a.trax_id as trax_id', 'ed.name as designation', 'ad.name as department', 'ad.id as department_id', 'a.joining_date',  'a.cnic as cnic', 'sn.name as status', 'sn.id as status_id', 'employee_confirmations.employee_id as employee_id', 'employee_confirmations.id as id', 'a.joining_date as joining_date', 'employee_confirmations.increment as increment', 'employee_confirmations.probation_end_date as probation_end_date', 'employee_confirmations.approve_reason as approve_reason', 'employee_confirmations.reject_reason as reject_reason', 'lm.name as approve_by_lm', 'hod.name as approve_by_hod', 'hr.name as approve_by_hr', 'employee_confirmations.approve_by_lm_at as approve_by_lm_at', 'employee_confirmations.approve_by_hod_at as approve_by_hod_at', 'employee_confirmations.approve_by_hr_at as approve_by_hr_at','employee_confirmations.probation_form','a.line_manager_id as line_manager_id','a.confirmation_status as confirmation_status','ad.department_head_id as department_head','employee_confirmations.increment_amount');
-
-        $employee_confirmation->where(function ($query) use ($emp_id) {
-            if($emp_id){
-                $query->where('a.line_manager_id', $emp_id);
-            }
-        })->orWhere(function ($query){
-            $query->whereIn('sn.id',[2,4,5,6,7])
-                ->where('ad.department_head_id', Auth::user()->id);
-        })
-            ->orWhere(function ($query){
-                if ((in_array(session('role_id'), [63, 69, 70,104]))) {
-                    $query->whereIn('sn.id',[2,4,6,7]);
-                }
-            });
-
-        if ($search_admin = $request->get('search_admin')) {
-            $employee_confirmation->where('a.id', $search_admin)->where('a.employee_type_id',1);
-        }
-        if ($search_trax_id = $request->get('search_trax_id')) {
-            $employee_confirmation->where(function($q) use ($search_trax_id){
-                $q->where('a.trax_id', $search_trax_id);
-            });
+        if ($search_rider = $request->get('search_rider')) {
+            $fuel_allocation->where('rider_fuel_allocations.rider_id', $search_rider);
         }
 
-        $datatable = Datatables::of($employee_confirmation)
-            ->editColumn('increment', function ($employee) {
-                if ($employee->increment != 0) {
-                    return "Yes";
+        $datatable = Datatables::of($fuel_allocation)
+            ->editColumn('delivery_notes_button', function ($fuel) {
+                if ($fuel->delivery_notes > 0) {
+                    return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info delivery_notes_info">' . $fuel->delivery_notes . '</button></div>';
                 } else {
                     return '-';
                 }
-
-            })->editColumn('confirmation_status', function ($employee) {
-                if ($employee->confirmation_status == 1) {
-                    return "Permanent";
-                } elseif($employee->confirmation_status == 2) {
-                    return 'Probation';
-                }else{
-                    return '';
-                }
-
-            })->editColumn('probation_form', function ($employee) {
-                if ($employee->probation_form == 0 && in_array($employee->status_id, [1, 3])) {
-                    return '<button type="button" class="btn btn-info add_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div></button>';
-                } else {
-                    return '<button type="button" class="btn btn-info view_probation_form" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div></button>';
-                }
-            })->editColumn('increment_amount', function ($employee) {
-                if ((in_array(session('role_id'), [63, 69, 70,104])) || $employee->department_head == Auth::id()) {
-                    return $employee->increment_amount;
-                }else{
-                    return '-';
-                }
-            })->addColumn("action", function ($employee) {
-                $dropdown = '
+            })->addColumn("action", function ($fuel) {
+                if (session('role_id') == 1 || in_array(session('role_id'), [63])) {
+                    $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
                   ';
-                if ($employee->status_id == 1) {
-                    $emp_id = Employee::where('trax_id', Auth::user()->trax_id);
-                    if ($emp_id->exists()) {
-                        $emp_id = $emp_id->first();
-                        if ($employee->line_manager_id == $emp_id->id) {
 
-                            $dropdown .= '<button type="button" class="dropdown-item approve_lm" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject_lm" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-                            $dropdown .= '
-                                </div>
-                              </div>
-                            ';
-                            return $dropdown;
+                    $dropdown .= '<button type="button" class="dropdown-item allocate_fuel" data-target-id=' . $fuel->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Allocate Fuel</div></button>';
 
-                        }
-                    }
-
-                }
-                elseif ($employee->status_id == 4) {
-                    if ((in_array(session('role_id'), [63, 69, 70,104]))) {
-
-                        $dropdown .= '<button type="button" class="dropdown-item approve_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item reject_hr" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel=""><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
-
-                        $dropdown .= '
+                    $dropdown .= '
                                 </div>
                             </div>
                             ';
-                        return $dropdown;
-
-                    }
-
-                }elseif($employee->status_id == 2){
-
-                    if ($employee->department_head == Auth::id()) {
-
-                        $dropdown .= '<button type="button" class="dropdown-item approve_hod" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item reject_hod" data-target-id=' . $employee->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By HOD</div></button>';
-                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . ' rel=""><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
-
-                        $dropdown .= '
-                            </div>
-                          </div>
-                        ';
-                        return $dropdown;
-
-                    }
-
+                    return $dropdown;
                 }
-
-                return '-';
-
-
+                else{
+                    return '';
+                }
             });
 
 
         return $datatable->make(true);
     }
 
+
+    public function rider_fuel_allocation_allocate(Request $request){
+        dd($request);
+    }
 }
