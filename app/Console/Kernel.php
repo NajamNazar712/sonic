@@ -131,6 +131,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryDate',
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
+        'App\Console\Commands\DailyAutoCommentForCRMClaims',
         ];
 
     /**
@@ -429,6 +430,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
 
         $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
+
+        $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
 
 
     }
