@@ -101,20 +101,22 @@
                         @csrf
                         <input type="hidden" name="id" id="selected_id">
                         <input type="hidden" name="ids" id="selected_ids">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="fuel_rate" id="fuel_rate" placeholder="Fuel Rate*" data-rule-required="true"  data-msg-required="Fuel Rate is required">
+                        <div class="col">
+                            <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control decimal" name="fuel_rate" id="fuel_rate" placeholder="Fuel Rate*" data-rule-required="true"  data-msg-required="Fuel Rate is required">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="fuel_allocated" id="fuel_allocated" placeholder="Fuel Allocated*" data-rule-required="true"  data-msg-required="Fuel Allocated is required">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control decimal" name="fuel_allocated" id="fuel_allocated" placeholder="Fuel Allocated*" data-rule-required="true"  data-msg-required="Fuel Allocated is required">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount*" data-rule-required="true"  data-msg-required="Fuel Amount is required">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount*" data-rule-required="true"  data-msg-required="Fuel Amount is required" readonly>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -137,10 +139,10 @@
     <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="DetailsModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-
+                    Delivery Notes
                 </div>
                 <div class="modal-body">
 
@@ -352,6 +354,28 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 100000.00
+            });
+            $('#fuel_rate').on('change').on('change',function (){
+                calculate();
+            });
+            $('#fuel_allocated').on('change').on('change',function (){
+                calculate();
+            });
+
+            function calculate(){
+                if($('#fuel_rate').val() != '' && $('#fuel_allocated').val() != ''){
+                    var fuel_amount = $('#fuel_rate').val() * $('#fuel_allocated').val();
+                    $('#fuel_amount').val(parseFloat(fuel_amount.toFixed(2)));
+                }
+            }
 
             $("#search_hub").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Hub",
@@ -382,7 +406,7 @@
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::yesterday() }}',
+                max: '{{ Carbon\Carbon::now() }}',
                 format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -451,7 +475,7 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
 
-                        @if (session('role_id') == 1 || in_array(769, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(832, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Allocate Fuel',
                         className: 'btn btn-primary bulk_allocate_fuel',
@@ -546,7 +570,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[13, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
@@ -639,35 +663,28 @@
 
                         details += '<tr>';
 
-                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Shipment</strong></td>';
-                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Estimated Weight</strong></td>';
-                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td>';
-                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Chargeable Weight</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>S No.</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Delivery Note</strong></td>';
+                        details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>DNCC Amount</strong></td>';
 
                         details += '</tr>';
-
-                        $.each(data, function(index, shipment) {
+                        console.log(data);
+                        var serial = 0;
+                        $.each(data.details, function(index, delivery_note) {
+                            serial++;
                             details += '<tr>';
-
-                            details += '<td class="align-middle text-center"><u><a href=' + route + '?tracking_number=' + shipment.tracking_number + ' target="_blank">' + shipment.tracking_number + '</a></u></td>';
-
-                            details += '<td class="align-middle text-center">' + shipment.estimated_weight + '</td>';
-                            details += '<td class="align-middle text-center">' + shipment.actual_weight + '</td>';
-                            details += '<td class="align-middle text-center">' + shipment.chargeable_weight + '</td>';
+                            details += '<td class="align-middle text-center">' + serial + '</td>';
+                            details += '<td class="align-middle text-center">' + delivery_note.delivery_note_id + '</td>';
+                            details += '<td class="align-middle text-center">' + delivery_note.amount + '</td>';
 
                             details += '</tr>';
                         });
 
                         details += '</tbody></table>';
 
-                        $('#shipments .modal-header').html(head);
-                        $('#shipments .modal-body').html(details);
+                        $('#DetailsModal .modal-body').html(details);
 
-                        $('#shipments').modal('show');
-
-                        $('#rider_information .modal-body').html(details);
-
-                        $('#rider_information').modal('show');
+                        $('#DetailsModal').modal('show');
                     });
             });
 
@@ -713,7 +730,36 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                            form.submit();
+
+                            $.ajax({
+                                url: '{!! route('admin.human_resource.fuel_allocation.allocate') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'fuel_rate': $('#fuel_rate').val(),
+                                    'fuel_allocated': $('#fuel_allocated').val(),
+                                    'fuel_amount': $('#fuel_amount').val(),
+                                    'id': $('#selected_id').val(),
+                                    'ids': $('#selected_ids').val(),
+                                }
+                            })
+                                .done(function (data) {
+                                    if(data.status == 1){
+                                        $('#allocate_fuel_modal').modal('hide');
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    else{
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    swal.close();
+                                });
+                            table.draw();
                         }
                     });
                 }

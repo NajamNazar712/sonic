@@ -15,6 +15,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocation;
+use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocationDeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
@@ -5602,7 +5603,7 @@ class AdminHumanResourseController extends Controller
 
     public function rider_fuel_allocation_index(){
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 572);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 632);
 
         $hubs = City::where('status', 1)->where('business_category_id', 1)->get();
 
@@ -5613,14 +5614,17 @@ class AdminHumanResourseController extends Controller
 
     public function rider_fuel_allocation_list(Request $request){
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 573);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 633);
         }
 
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
 
         $fuel_allocation = RiderFuelAllocation::join('riders as r', 'r.id', 'rider_fuel_allocations.rider_id')
             ->join('cities as h', 'h.id', 'rider_fuel_allocations.hub_id')
             ->leftjoin('admins as a', 'a.id', 'rider_fuel_allocations.allocated_by')
-            ->select('rider_fuel_allocations.id as id', 'r.name as rider_name', 'r.trax_id as trax_id', 'h.name as hub', 'rider_fuel_allocations.date as date', 'rider_fuel_allocations.delivery_notes as delivery_notes', 'rider_fuel_allocations.dncc_amount as dncc_amount', 'rider_fuel_allocations.fuel_rate as fuel_rate', 'rider_fuel_allocations.fuel_allocated as fuel_allocated', 'rider_fuel_allocations.amount as amount', 'rider_fuel_allocations.allocated_at as allocated_at', 'a.name as allocated_by');
+            ->select('rider_fuel_allocations.id as id', 'r.name as rider_name', 'r.trax_id as trax_id', 'h.name as hub', 'rider_fuel_allocations.date as date', 'rider_fuel_allocations.delivery_notes as delivery_notes', 'rider_fuel_allocations.dncc_amount as dncc_amount', 'rider_fuel_allocations.fuel_rate as fuel_rate', 'rider_fuel_allocations.fuel_allocated as fuel_allocated', 'rider_fuel_allocations.amount as amount', 'rider_fuel_allocations.allocated_at as allocated_at', 'a.name as allocated_by')
+            ->whereBetween('rider_fuel_allocations.date', [$from, $to]);
 
         if ($search_hub = $request->get('search_hub')) {
             $fuel_allocation->where('rider_fuel_allocations.hub_id', $search_hub);
@@ -5638,7 +5642,7 @@ class AdminHumanResourseController extends Controller
                     return '-';
                 }
             })->addColumn("action", function ($fuel) {
-                if (session('role_id') == 1 || in_array(session('role_id'), [63])) {
+                if (session('role_id') == 1 || in_array(832, session('permissions'))) {
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -5665,6 +5669,59 @@ class AdminHumanResourseController extends Controller
 
 
     public function rider_fuel_allocation_allocate(Request $request){
-        dd($request);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 634);
+        if($request->ids != null){
+            $ids = explode(',', $request->ids);
+            if(count($ids) > 0){
+                $fuel_allocations = RiderFuelAllocation::whereIn('id', $ids);
+                if($fuel_allocations->exists()){
+                    $fuel_allocations = $fuel_allocations->get();
+                    foreach ($fuel_allocations as $fuel_allocation){
+                        $fuel_allocation->fuel_rate = $request->fuel_rate;
+                        $fuel_allocation->fuel_allocated = $request->fuel_allocated;
+                        $fuel_allocation->amount = $request->fuel_amount;
+                        $fuel_allocation->allocated_at = Carbon::now();
+                        $fuel_allocation->allocated_by = Auth::id();
+                        $fuel_allocation->save();
+                    }
+
+                    return response()->json(['status' => 1, 'success' => 'Fuel Allocated Successfully.']);
+                }
+            }
+        }
+        else if($request->id != null){
+            $fuel_allocation = RiderFuelAllocation::find($request->id);
+            if($fuel_allocation){
+                $fuel_allocation->fuel_rate = $request->fuel_rate;
+                $fuel_allocation->fuel_allocated = $request->fuel_allocated;
+                $fuel_allocation->amount = $request->fuel_amount;
+                $fuel_allocation->allocated_at = Carbon::now();
+                $fuel_allocation->allocated_by = Auth::id();
+                $fuel_allocation->save();
+
+
+                return response()->json(['status' => 1, 'success' => 'Fuel Allocated Successfully.']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Rider Not Selected!']);
+        }
+
+        return response()->json(['status' => 0, 'error' => 'Invalid Request!']);
+    }
+
+    public function rider_fuel_allocation_delivery_notes(Request $request){
+        $rider_fuel_allocation_delivery_notes = RiderFuelAllocationDeliveryNote::where('rider_fuel_allocation_id', $request->id);
+        if($rider_fuel_allocation_delivery_notes->exists()){
+            $rider_fuel_allocation_delivery_notes = $rider_fuel_allocation_delivery_notes->get();
+
+            $details = array();
+            foreach ($rider_fuel_allocation_delivery_notes as $index => $rider_fuel_allocation_delivery_note){
+                $detail = ['delivery_note_id' => str_pad($rider_fuel_allocation_delivery_note->delivery_note_id, 6, '0', STR_PAD_LEFT), 'amount' => $rider_fuel_allocation_delivery_note->dncc_amount];
+                $details[] = $detail;
+            }
+        }
+
+        return response()->json(['details' => $details]);
     }
 }

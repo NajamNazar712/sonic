@@ -1145,6 +1145,9 @@ class Permission
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
 
+            'human_resource.fuel_allocation.index' => 831,
+            'human_resource.fuel_allocation.list' => 831,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
