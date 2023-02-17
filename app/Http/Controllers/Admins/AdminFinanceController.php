@@ -3456,6 +3456,7 @@ class AdminFinanceController extends Controller
             }
 
             ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
+            CRMClaimAutoCloseController::check_shipment_claims($shipment_id);
         } else {
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
             if (in_array($adjustment_type, [2, 6, 7, 8, 9, 10, 11, 15, 16])) {
@@ -3498,6 +3499,8 @@ class AdminFinanceController extends Controller
                 }
 
                 ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks, NULL, 1);
+
+                CRMClaimAutoCloseController::check_shipment_claims($shipment_id);
             }
         }
     }

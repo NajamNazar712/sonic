@@ -5511,7 +5511,7 @@ class DeliveryController extends Controller
                 return $query->where('station_deposit_notes.id', '=', $keyword);
             })
             ->addColumn('deposit_slip', function ($sdn) {
-                $now = Carbon::now();
+
                 if ($sdn->deposit_slip == null && $sdn->deposit_slip_status == 1) {
                     return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
@@ -6707,7 +6707,7 @@ class DeliveryController extends Controller
             ->select('rider_deliveries.id as id', 's.tracking_number as tracking_number', 's.payment_mode_id as payment_mode_id', 'rider_deliveries.ccd_image as ccd_image', 's.id as shipment_id')->get();
         if (count($rider_deliveries) > 0) {
             $sorted_array = array();
-            $now = Carbon::now();
+
             foreach ($rider_deliveries as $rider_delivery) {
                 $sorted_array[$rider_delivery->id]['tracking_number'] = $rider_delivery->tracking_number;
                 $image = '';
@@ -7982,7 +7982,7 @@ class DeliveryController extends Controller
             $slips = StationDepositNoteSlip::where('station_deposit_note_id', $sdn_id)->get();
             if (count($slips) > 0) {
                 $sorted_array = array();
-                $now = Carbon::now();
+
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;

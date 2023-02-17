@@ -32,7 +32,7 @@ class ShipmentOTPController extends Controller
             ->leftJoin('riders as r', 'r.id', '=', 'rider_deliveries.rider_id')
             ->leftJoin('shipment_otp_verifications as sov', 'sov.shipment_id', '=', 'shipment_otps.shipment_id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'rider_deliveries.rider_status_id')
-            ->select('shipment_otps.updated_at as date', 'rider_deliveries.delivery_note_id', 'rider_deliveries.rider_status_id', 'rider_deliveries.otp_entered', 'shipments.tracking_number', 'shipments.amount', 'r.name as rider_name', 'ss.name as purpose', 'shipment_otps.otp as consignee_otp', 'shipment_otps.dbf_otp', 'sov.via_dbf_otp');
+            ->select('shipment_otps.updated_at as date', 'rider_deliveries.created_at', 'rider_deliveries.delivery_note_id', 'rider_deliveries.rider_status_id', 'rider_deliveries.otp_entered', 'shipments.tracking_number', 'shipments.amount', 'r.name as rider_name', 'ss.name as purpose', 'shipment_otps.otp as consignee_otp', 'shipment_otps.dbf_otp', 'sov.via_dbf_otp');
 
         $admins = $admins->where(function ($query) {
             $query->where(function ($sub_query) {
@@ -70,6 +70,10 @@ class ShipmentOTPController extends Controller
                 return $shipment->consignee_otp;
             }
         });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         return $datatable->make(true);
     }
 }

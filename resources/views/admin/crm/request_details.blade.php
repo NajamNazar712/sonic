@@ -349,11 +349,11 @@
                                                                             @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                                                                                 <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
                                                                             @endif
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                                 <div id="updated_by_div_{{$comment->id}}">
                                                                                     @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
-                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                        <small>Updated by: {{$comment->comment_updated_by->name}} ({{$comment->comment_updated_at}})</small>
                                                                                     @endif
                                                                                 </div>
                                                                         </div>
@@ -377,7 +377,7 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                         </div>
                                                                     </div>
@@ -417,7 +417,7 @@
 
                                                                         <div class="chat-body">
                                                                             <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <p>{!! nl2br($comment->comment) !!}</p>
                                                                                 <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                             </div>
                                                                         </div>
@@ -2742,7 +2742,6 @@
                 form.submit();
             });
 
-            
         });
 
 

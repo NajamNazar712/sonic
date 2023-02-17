@@ -688,7 +688,7 @@ class AdminCRMController extends Controller
                 $all_crm_request_ids_for_shipment = CrmRequest::where('shipment_id',$crm_request->shipment_id)->pluck('id')->toArray();
                 $crm_request_ids = $all_crm_request_ids_for_shipment;
             }else{
-                $crm_request_ids = [$id];
+                $crm_request_ids[] = $id;
             }
             $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
             $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
@@ -1341,6 +1341,18 @@ class AdminCRMController extends Controller
             }
         }
         $datatables = Datatables::of($in_process_request)
+            ->setRowAttr([
+                'class' => function ($shipments) {
+                    $date_created = Carbon::parse($shipments->created_at)->firstOfMonth();
+                    $today = Carbon::today();
+                    $workint_days = $date_created->diffInDaysFiltered(function(Carbon $date) {
+                        return !$date->isWeekend();
+                    }, $today);
+                    if ($workint_days > 10) {
+                        return 'highalert_row';
+                    }
+                }
+            ])
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
@@ -2647,6 +2659,22 @@ class AdminCRMController extends Controller
                     if(CrmPaymentShipment::where('crm_request_id', $request->req_id)->exists()){
                         CrmPaymentShipment::where('crm_request_id', $request->req_id)->delete();
                     }
+
+                    if($crm_request->case_nature_id == 4){
+                        $comment = 'Dear Customer,
+Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+                                    
+UAN# 021-111-11-8729
+WhatsApp # 0348-111-8729
+info@trax.pk
+Live Chat Messenger
+                                    
+Regards,
+TRAX-Customer Experience';
+
+                        CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                    }
+
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);
