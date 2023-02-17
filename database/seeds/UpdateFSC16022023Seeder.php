@@ -72,6 +72,10 @@ class UpdateFSC16022023Seeder extends Seeder
                         $fuel_surcharge_history->fuel_surcharge = $fuel_surcharge->fuel_surcharge;
                         $fuel_surcharge_history->save();
 
+                        if ($fuel_factor_user_ids[$index] < 0) {
+                            $fuel_factor_user_ids[$index] = 0;
+                        }
+
                         if ($rate_status->fuel_charges == 1) {
                             $update_fuel_surcharge = $fuel_factor_user_ids[$index];
                         } else {
