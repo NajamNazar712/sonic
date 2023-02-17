@@ -9729,7 +9729,7 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $targets = SalePersonTarget::join('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))
+            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'), 'sale_person_targets.achieved_shipments as achieved_shipments', 'sale_person_targets.achieved_shipments_percentage as achieved_shipments_percentage', 'sale_person_targets.achieved_revenue as achieved_revenue', 'sale_person_targets.achieved_revenue_percentage as achieved_revenue_percentage')
             ->where('a.status', 1)
             ->where('a.id', $admin_id);
         if ($targets->exists()) {
