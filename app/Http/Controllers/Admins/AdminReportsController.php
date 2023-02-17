@@ -7,6 +7,7 @@ use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\AgentDay;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\DailyVisitRating;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
@@ -7339,7 +7340,7 @@ class AdminReportsController extends Controller
             }
         }
         $admins = $admins->get(['admins.id', 'admins.name']);
-        $ratings = CrmRequestRating::all();
+        $ratings = DailyVisitRating::all();
         return view('admin.reports.daily_visit_report')->with(['admins' => $admins, 'ratings' => $ratings]);
     }
 
