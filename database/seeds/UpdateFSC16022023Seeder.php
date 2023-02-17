@@ -30,6 +30,7 @@ class UpdateFSC16022023Seeder extends Seeder
 
         foreach ($include_ids as $index => $user_id) {
             $user = User::find($user_id);
+            if($user){
                 if ($user->account_type_id == 1) {
                     $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_modes_user_ids[$index]);
                 } else {
@@ -109,6 +110,7 @@ class UpdateFSC16022023Seeder extends Seeder
                         $fuel_surcharge->save();
                     }
                 }
+            }
         }
     }
 }
