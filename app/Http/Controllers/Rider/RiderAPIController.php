@@ -13355,4 +13355,11 @@ class RiderAPIController extends Controller
             $return_assign_log->save();
         }
     }
+
+    public function return_create_index(Request $request)
+    {
+        $rider = Rider::find($request->rider_id);
+        $routes = Route::where('status', 1)->where('city_id', $rider->city_id)->get();
+        return response()->json(['status' => 0, 'routes' => $routes]);
+    }
 }
