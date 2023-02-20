@@ -10907,9 +10907,11 @@ class AdminAPIController extends Controller
             $valid_shipments = array();
             $shipments_count = 0;
             $invalid_shipments = array();
+            dump($trackings);
             if (!empty($trackings)) {
                 foreach ($trackings as $shipment_id) {
                     $shipment_details = Shipment::where('tracking_number', $shipment_id);
+                    dd($shipment_details);
                     if ($shipment_details->exists()) {
                         $shipment_details = $shipment_details->first();
                         if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
