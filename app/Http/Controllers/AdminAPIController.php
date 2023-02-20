@@ -11003,8 +11003,19 @@ class AdminAPIController extends Controller
                     }
                     EmployeeAttendanceController::riders_attendance_mark($rider);
 
+                    
+                    $return_request->status = 1;
+                    $return_request->approved_by = $admin;
+                    $return_request->approved_at = Carbon::today();
+                    $return_request->save();
+                    RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
+                    RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
                     return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
                 } else {
+                    $return_request->status = 3;
+                    $return_request->updated_at = Carbon::today();
+                    $return_request->save();
+                    RiderDeliveryNoteRequestShipment::where('request_note_id', $return_request->id)->update(['status' => 3]);
                     return response()->json(['status' => 1, 'message' => "Failed to Create Return Note"]);
                 }
 
