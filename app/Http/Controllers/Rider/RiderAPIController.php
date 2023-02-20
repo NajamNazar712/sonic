@@ -13816,7 +13816,7 @@ class RiderAPIController extends Controller
                 $note = RiderReturnNoteRequest::create([
                     'hub_id' => $request->rider_hub,
                     'rider_id' => $request->rider_id,
-                    'route_id' => $request->selected_route_id,
+                    'route_id' => $request->route_id,
                     'shipment_count' => $shipments_count,
                     'total_cod_amount' => $total_cod_amount,
                     'ordering' => $order
