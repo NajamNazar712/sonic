@@ -10848,15 +10848,15 @@ class AdminAPIController extends Controller
         if($return_note_requests->exists()){
             $return_note_requests = $return_note_requests->get();
             $data = array();
-            foreach ($return_note_requests as $delivery_note_request){
+            foreach ($return_note_requests as $return_note_request){
                 $datum = array();
-                $shipments = RiderReturnNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
-                    ->where('request_note_id', $delivery_note_request->id)->pluck('s.tracking_number')->toArray();
-                $datum['date'] = Carbon::parse($delivery_note_request->date)->format("Y-m-d");
-                $datum['request_id'] = $delivery_note_request->id;
-                $datum['rider_name'] = $delivery_note_request->rider_name;
-                $datum['city_name'] = $delivery_note_request->city_name;
-                $datum['route'] = $delivery_note_request->junction. ' ('.$delivery_note_request->start. ' to '.$delivery_note_request->end.')';
+                $shipments = RiderReturnNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_return_note_request_shipments.shipment_id')
+                    ->where('request_note_id', $return_note_request->id)->pluck('s.tracking_number')->toArray();
+                $datum['date'] = Carbon::parse($return_note_request->date)->format("Y-m-d");
+                $datum['request_id'] = $return_note_request->id;
+                $datum['rider_name'] = $return_note_request->rider_name;
+                $datum['city_name'] = $return_note_request->city_name;
+                $datum['route'] = $return_note_request->junction. ' ('.$return_note_request->start. ' to '.$return_note_request->end.')';
                 $datum['tracking_no'] = implode(',',$shipments);
                 $data[] = $datum;
             }
