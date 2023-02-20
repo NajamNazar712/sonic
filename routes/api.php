@@ -225,6 +225,7 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'Rider\RiderAPIController@return_create_index')->name('index');
                 Route::post('get_shipment_details', 'Rider\RiderAPIController@get_shipment_details')->name('get_shipment_details');
                 Route::post('get_piece_details', 'Rider\RiderAPIController@get_piece_details')->name('get_piece_details');
+                Route::post('create', 'Rider\RiderAPIController@return_note_create')->name('create');
                 Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
                 Route::post('delivered_v2', 'Rider\RiderAPIController@return_shipment_delivered_v2')->name('delivered_v2');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
