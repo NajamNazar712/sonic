@@ -10865,4 +10865,19 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 1, 'message' => 'No Request Found!']);
     }
 
+    public function return_note_requests_reject(Request $request){
+        $admin_id= $request->admin_id;
+        $request_id = $request->request_note_id;
+        $return_request = RiderReturnNoteRequest::find($request_id);
+        if($return_request){
+            $return_request->status = 2;
+            $return_request->updated_by = $admin_id;
+            $return_request->save();
+            $requests_shipment = RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)
+                ->update(['status' => 2]);
+            return response()->json(['status' => 0, 'message' => "Return Note Creation Request is Rejected Successfully"]);
+        }
+        return response()->json(['status' => 1, 'message' => 'Invalid Request ID']);
+    }
+
 }
