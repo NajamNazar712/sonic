@@ -17,8 +17,6 @@ class CreateRiderReturnNoteRequestShipmentsTable extends Migration
             $table->increments('id');
             $table->integer('request_note_id')->index();
             $table->integer('shipment_id')->index();
-            $table->tinyInteger('notification')->index();
-            $table->tinyInteger('rider_information')->index();
             $table->tinyInteger('open_box')->index();
             $table->integer('ordering')->nullable();
             $table->integer('status')->default(0)->index();

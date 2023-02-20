@@ -13782,22 +13782,17 @@ class RiderAPIController extends Controller
     public function return_note_create(Request $request)
     {
         $rules = [
-            'hub_id' => ['required'],
-            'selected_route_id' => ['required'],
-            'shipment_ids' => ['required'],
-            'open_box_ids' => ['nullable'],
-            'notification_ids' => ['nullable'],
-            'rider_info_ids' => ['nullable'],
+            'route_id' => ['required'],
+            'open_box' => ['nullable'],
+            'trackings' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $tracking_numbers = explode(',', $request->shipment_ids);
-            $open_box_ids = explode(',', $request->open_box_ids);
-            $notifications = explode(',', $request->notification_ids);
-            $rider_informations = explode(',', $request->rider_info_ids);
+            $tracking_numbers = explode(',', $request->trackings);
+            $open_box_ids = explode(',', $request->open_box);
             $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
             if (count($shipments) == 0) {
                 return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
@@ -13819,7 +13814,7 @@ class RiderAPIController extends Controller
                     $order = true;
                 }
                 $note = RiderReturnNoteRequest::create([
-                    'hub_id' => $request->hub_id,
+                    'hub_id' => $request->rider_hub,
                     'rider_id' => $request->rider_id,
                     'route_id' => $request->selected_route_id,
                     'shipment_count' => $shipments_count,
@@ -13835,8 +13830,6 @@ class RiderAPIController extends Controller
                         RiderReturnNoteRequestShipment::create([
                             'request_note_id' => $note->id,
                             'shipment_id' => $shipment,
-                            'notification' => (in_array($shipment, $notifications)) ? 1 : 0,
-                            'rider_information' => (in_array($shipment, $rider_informations)) ? 1 : 0,
                             'open_box' => (in_array($shipment, $open_box_ids)) ? 1 : 0,
                             'ordering' => $serial
                         ]);
