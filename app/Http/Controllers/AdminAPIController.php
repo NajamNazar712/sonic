@@ -8508,18 +8508,111 @@ class AdminAPIController extends Controller
     {
         $role_id = $request->admin_role_id;
         $admin_id = $request->admin_id;
-        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
-        $routes = Route::where('status', 1);
-        $hubs = City::where([['status', 1], ['hub', 1]]);
-        if ($role_id != 1) {
-            $routes = $routes->whereHas('city', function ($query) use ($admin_hubs) {
-                $query->whereIn('hub_id', $admin_hubs);
-            });
-            $hubs = $hubs->WhereIn('id', $admin_hubs);
+        $admin_hubs = $request->admin_hubs;
+        if ($request->has("request_id")) {
+            $request_id = $request->request_id;
+            $request_return_note = RiderReturnNoteRequest::find($request_id);
+            $shipments = Shipment::join('rider_return_note_request_shipments as rs', 'rs.shipment_id', 'shipments.id')
+                ->where('request_note_id', $request_return_note->id)
+                ->select('shipments.*');
+            $rider = Rider::find($request_return_note->rider_id);
+            if ($shipments->exists()) {
+                $shipments = $shipments->get();
+                $data = array();
+                foreach ($shipments as $shipment) {
+                    $datum = array();
+                    $status = ' - ';
+                    $remarks = ' - ';
+                    $rider_name = ' - ';
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                    if ($shipment_journey->exists()) {
+                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
+                        $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
+                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                        if ($status_id != '') {
+                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                            $status = $status_name->name;
+                        } else {
+                            $status = ' - ';
+                        }
+                    }
+                    $complaint_row = 0;
+                    if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                        $complaint_row = 1;
+                    }
+
+                    $old_return_note_id = ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.shipment_id', $shipment->id)->where('return_notes.status', '!=', 4)->orderBy('return_note_id', 'desc');
+                    if ($old_return_note_id->exists()) {
+                        $old_return_note_id = $old_return_note_id->first();
+                        $return_note_rider = ReturnNote::where('id', $old_return_note_id->return_note_id)->first();
+                        $rider_name = ($return_note_rider->rider_id != null) ? $return_note_rider->rider->name : " - ";
+                    }
+
+                    if ($shipment->shipment_detail()->exists()) {
+                        if ($shipment->shipment_detail->is_open == 1) {
+                            $is_open_box = 1;
+                        } else {
+                            $is_open_box = 0;
+
+                        }
+                    } else {
+                        $is_open_box = 0;
+
+                    }
+
+                    $ccd_shipment = 0;
+                    if ($shipment->payment_mode_id == 2) {
+                        $ccd_shipment = 1;
+                    }
+
+                    // $consolidation_details = DeliveryController::check_consolidation($shipment->id);
+                    // $consolidation_flag = FALSE;
+
+                    // if ($consolidation_details) {
+                    //     $consolidation_flag = TRUE;
+                    // }
+
+                    $datum["shId"] = $shipment->id;
+                    $datum["tracking_number"] = $shipment->tracking_number;
+                    $datum["destination"] = $shipment->consignee_city->name;
+                    $datum["hub"] = City::find($shipment->consignee_city->hub_id)->id;
+                    $datum["consignee_name"] = $shipment->consignee_name;
+                    $datum["phone"] = $shipment->consignee_phone_number_1;
+                    $datum["address"] = $shipment->consignee_address;
+                    $datum["amount"] = number_format($shipment->amount);
+                    $datum["service_type"] = $service = $shipment->booking_type->booking_type;
+                    $datum["shipment_status"] = $status;
+                    $datum["remarks"] = $remarks;
+                    $datum["crm_row"] = $complaint_row;
+                    $datum["rider_name"] = $rider_name;
+                    $datum["is_open_box"] = $is_open_box;
+                    $datum["ccd_shipment"] = $ccd_shipment;
+                    // $datum["consolidation_flag"] = $consolidation_flag;
+                    // $datum["consolidation_details"] = $consolidation_details;
+
+                    $data[] = $datum;
+                    
+                }
+                return response()->json(['status' => 0, 'shipments' => $data, 'hub_id' => $request_return_note->hub_id, 'rider_id' => $rider->id, 'route_id' => $request_return_note->route_id, 'category_id' => $rider->operation_rider_id]);
+
+            }
+            return response()->json(['status' => 1, 'message' => "No shipment found!"]);
+
+        } else {
+
+            $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+            $routes = Route::where('status', 1);
+            $hubs = City::where([['status', 1], ['hub', 1]]);
+            if ($role_id != 1) {
+                $routes = $routes->whereHas('city', function ($query) use ($admin_hubs) {
+                    $query->whereIn('hub_id', $admin_hubs);
+                });
+                $hubs = $hubs->WhereIn('id', $admin_hubs);
+            }
+            $routes = $routes->get();
+            $hubs = $hubs->get(['id', 'name']);
+            return response()->json(['status' => 0, 'routes' => $routes, 'hubs' => $hubs]);
         }
-        $routes = $routes->get();
-        $hubs = $hubs->get(['id', 'name']);
-        return response()->json(['status' => 0, 'routes' => $routes, 'hubs' => $hubs]);
     }
 
     public function get_riders_by_hub(Request $request)
