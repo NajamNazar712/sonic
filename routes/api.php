@@ -223,6 +223,7 @@ Route::name('api.')->group(function () {
 
                 //Current
                 Route::get('index', 'Rider\RiderAPIController@return_create_index')->name('index');
+                Route::post('get_shipment_details', 'Rider\RiderAPIController@get_shipment_details')->name('get_shipment_details');
                 Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
                 Route::post('delivered_v2', 'Rider\RiderAPIController@return_shipment_delivered_v2')->name('delivered_v2');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
