@@ -8573,6 +8573,7 @@ class AdminAPIController extends Controller
                     // }
 
                     $datum["shId"] = $shipment->id;
+                    $datum["shipper_id"] = $shipment->user_id;
                     $datum["tracking_number"] = $shipment->tracking_number;
                     $datum["destination"] = $shipment->consignee_city->name;
                     $datum["hub"] = City::find($shipment->consignee_city->hub_id)->id;
