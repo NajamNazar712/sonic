@@ -10897,8 +10897,8 @@ class AdminAPIController extends Controller
 
             $return_request = RiderReturnNoteRequest::find($request_id);
 
-            $trackings = RiderReturnNoteRequestShipment::where('request_node_id', $request_id)->pluck('shipment_id'); 
-            $open_box_ids = RiderReturnNoteRequestShipment::where('request_node_id', $request_id)->pluck('open_box'); 
+            $trackings = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('shipment_id'); 
+            $open_box_ids = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('open_box'); 
             $rider = $return_request->rider_id;
             $route = $return_request->route_id;
             $hub_id = $return_request->hub_id;
