@@ -10897,8 +10897,8 @@ class AdminAPIController extends Controller
 
             $return_request = RiderReturnNoteRequest::find($request_id);
 
-            $trackings = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('shipment_id'); 
-            $open_box_ids = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('open_box'); 
+            $trackings = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('shipment_id')->toArray(); 
+            $open_box_ids = RiderReturnNoteRequestShipment::where('request_note_id', $request_id)->pluck('open_box')->toArray(); 
             $rider = $return_request->rider_id;
             $route = $return_request->route_id;
             $hub_id = $return_request->hub_id;
@@ -10907,7 +10907,6 @@ class AdminAPIController extends Controller
             $valid_shipments = array();
             $shipments_count = 0;
             $invalid_shipments = array();
-            dd($trackings);
             if (!empty($trackings)) {
                 foreach ($trackings as $shipment_id) {
                     $shipment_details = Shipment::where('tracking_number', $shipment_id);
