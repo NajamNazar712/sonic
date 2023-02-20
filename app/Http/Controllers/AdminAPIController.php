@@ -10880,4 +10880,138 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Invalid Request ID']);
     }
 
+
+    public function return_note_requests_approve(Request $request)
+    {
+        $rules = [
+            'request_note_id' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $admin = $request->admin_id;
+            $request_id = $request->request_note_id;
+
+            $return_request = RiderReturnNoteRequest::find($request_id);
+
+            $trackings = RiderReturnNoteRequestShipment::where('request_node_id', $request_id)->pluck('shipment_id'); 
+            $open_box_ids = RiderReturnNoteRequestShipment::where('request_node_id', $request_id)->pluck('open_box'); 
+            $rider = $return_request->rider_id;
+            $route = $return_request->route_id;
+            $hub_id = $return_request->hub_id;
+
+            $return_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+            $valid_shipments = array();
+            $shipments_count = 0;
+            $invalid_shipments = array();
+            if (!empty($trackings)) {
+                foreach ($trackings as $shipment_id) {
+                    $shipment_details = Shipment::where('tracking_number', $shipment_id);
+                    if ($shipment_details->exists()) {
+                        $shipment_details = $shipment_details->first();
+                        if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
+                            $valid_shipments[] = $shipment_details->id;
+                            $shipments_count++;
+                        } else {
+                            array_push($invalid_shipments, $shipment_details->tracking_number);
+                        }
+                    }
+                }
+                if (!empty($invalid_shipments)) {
+                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) " . implode(',', $invalid_shipments)]);
+                } elseif ($shipments_count != 0) {
+
+                    $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
+
+                    if ($note) {
+                        foreach ($valid_shipments as $index => $shipment_id) {
+                            $shipment = Shipment::where('id', $shipment_id);
+
+                            $shipment = $shipment->first();
+
+                            $old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment_id)->where('status', '=', 1)->orderBy('return_note_id', 'desc');
+
+                            if ($old_return_note_id->exists()) {
+                                $old_return_note_id = $old_return_note_id->first();
+
+                                if (ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status', 0)->exists()) {
+                                    $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+
+                                    ShipmentsJourneyController::add($journey->shipment_id, 57, NULL, $journey->status_reason_id, $journey->remarks, NULL, $admin, $journey->reference_1_id, NULL, 1, NULL);
+                                }
+                            }
+                            if (in_array($shipment_id, $open_box_ids)) {
+                                $shipment->open_box = 1;
+                                ShipmentOpenBoxJourneyController::add($shipment_id, 6, $admin);
+                            }
+                            if (in_array($shipment->booking_type_id, [1, 4, 5])) {
+                                ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                                $shipment->shipper_status_id = 23;
+                                $shipment->consignee_status_id = 23;
+                                $shipment->save();
+                                ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, $admin, $note->id, $rider);
+                            } else {
+                                if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
+
+                                    ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                                    $shipper_status_id = 28;
+                                    $consignee_status_id = 28;
+                                    if ($shipment->shipper_status_id == 22) {
+                                        $shipper_status_id = 23;
+                                        $consignee_status_id = 23;
+                                    }
+                                    $shipment->shipper_status_id = $shipper_status_id;
+                                    $shipment->consignee_status_id = $consignee_status_id;
+                                    $shipment->save();
+                                    ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin, $note->id, $rider);
+
+
+                                } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
+
+                                    ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                                    $shipment->shipper_status_id = 34;
+                                    $shipment->consignee_status_id = 34;
+                                    $shipment->save();
+                                    ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, $admin, $note->id, $rider);
+
+
+                                } else {
+                                    ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                                    $shipment->shipper_status_id = 23;
+                                    $shipment->consignee_status_id = 23;
+                                    $shipment->save();
+                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, $admin, $note->id, $rider);
+                                }
+                            }
+                            $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
+                            if ($return_sheet->exists()) {
+                                $return_sheet = $return_sheet->first();
+                                $return_sheet->return_note_id = $note->id;
+                            } else {
+                                $return_sheet = new ReturnSheet();
+                                $return_sheet->user_id = $shipment->user_id;
+                                $return_sheet->shipment_id = $shipment->id;
+                                $return_sheet->return_note_id = $note->id;
+                            }
+                            $return_sheet->save();
+
+                        }
+                        NotificationsController::app_notification(6, $rider, 2, $note->id);
+                    }
+                    EmployeeAttendanceController::riders_attendance_mark($rider);
+
+                    return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Failed to Create Return Note"]);
+                }
+
+            } else {
+                return response()->json(['status' => 1, 'message' => "No shipments scanned"]);
+            }
+        }
+    }
+
 }
