@@ -471,6 +471,7 @@ Route::name('api.')->group(function () {
                 Route::post('submit_individual', 'AdminAPIController@return_status_submit_individual')->name('submit_individual');
                 Route::post('submit_all', 'AdminAPIController@return_status_submit_all')->name('submit_all');
                 Route::post('image_upload', 'AdminAPIController@return_image_upload')->name('image_upload');
+                Route::get('note_requests', 'AdminAPIController@return_note_requests')->name('note_requests');
             });
 
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
