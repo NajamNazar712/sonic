@@ -13797,7 +13797,7 @@ class RiderAPIController extends Controller
             if (count($shipments) == 0) {
                 return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
             }
-            $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
+            $pending_status = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
@@ -13836,9 +13836,9 @@ class RiderAPIController extends Controller
                         $serial++;
                     }
                 }
-                return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for approval']);
+                return response()->json(['status' => 0, 'create_message' => 'Return note Request has been created successfully & Pending for approval']);
             } else {
-                return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
+                return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for return yet or already in another return note, please check tracking!']);
 
             }
         }
