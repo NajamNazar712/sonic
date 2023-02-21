@@ -11196,6 +11196,8 @@ class AdminAPIController extends Controller
         $rules = [
             'tracking_no' => ['required'],
             'case_nature_id' => ['required'],
+            'case_nature_type_id' => ['required'],
+            'channel_id' => ['required'],
             'description' => ['required'],
         ];
 
@@ -11219,7 +11221,7 @@ class AdminAPIController extends Controller
                 $description = $request->description;
 
 
-                $channel_id = 7;
+                $channel_id = $request->channel_id;
                 $launched_by = 0;
                 if (!$request->case_nature_id) {
                     return response()->json(['status' => 1, 'message' => 'Case nature not selected!']);
