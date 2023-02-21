@@ -11298,8 +11298,8 @@ class AdminAPIController extends Controller
         $crm_requests = CrmRequest::where('launched_by', 0)
         ->with(
             [
-                'shipment:id,tracking_number',
-                'shipment.status_shipper:shipper_status_id,name', 
+                'shipment:id,tracking_number,shipper_status_id',
+                'shipment.status_shipper:id,name', 
                 'nature:id,name',
                 'nature_type:id,type',     
                 'request_status:id,name', 
