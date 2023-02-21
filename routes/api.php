@@ -222,7 +222,7 @@ Route::name('api.')->group(function () {
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@return_shipment_undelivered_v3')->name('undelivered_v3');
 
                 //Current
-                Route::get('index', 'Rider\RiderAPIController@return_create_index')->name('index');
+                Route::post('index', 'Rider\RiderAPIController@return_create_index')->name('index');
                 Route::post('get_shipment_details', 'Rider\RiderAPIController@get_shipment_details')->name('get_shipment_details');
                 Route::post('get_piece_details', 'Rider\RiderAPIController@get_piece_details')->name('get_piece_details');
                 Route::post('create', 'Rider\RiderAPIController@return_note_create')->name('create');
