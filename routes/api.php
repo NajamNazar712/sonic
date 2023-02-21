@@ -502,7 +502,7 @@ Route::name('api.')->group(function () {
 
         Route::prefix('add_request')->name('add_request.')->group(function () {
             Route::get('index', 'AdminAPIController@add_request_index')->name('index');
-            // Route::post('submit', 'AdminAPIController@add_request_submit')->name('submit');
+            Route::post('submit', 'AdminAPIController@add_request_submit')->name('submit');
             // Route::post('lost_claim', 'AdminAPIController@lost_claim')->name('lost_claim');
         });
     });
