@@ -137,6 +137,7 @@ use App\Models\Admin\Lead\LeadReason;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Models\ReturnNoteRequest;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -9220,7 +9221,10 @@ class AdminAPIController extends Controller
                         $rider_request->approved_at = Carbon::today();
                         $rider_request->shipment_count = $shipments_count;
                         $rider_request->save();
-                        $note->request_note_id = $rider_request->id;
+                        ReturnNoteRequest::create([
+                            'return_note_id'=> $note->id,
+                            'request_note_id'=> $rider_request->id
+                        ]);
                         $note->save();
                     }
 
