@@ -11299,11 +11299,11 @@ class AdminAPIController extends Controller
         ->with(
             [
                 'shipment:id,tracking_number',
+                'shipment.status_shipper:shipper_status_id,name', 
                 'nature:id,name',
                 'nature_type:id,type',     
-                'request_status:name', 
+                'request_status:id,name', 
                 'shipper:id,name', 
-                'shipment.status_shipper:id,name', 
             ]
         )
         ->where('launched_by_id', $admin_id)->get();
