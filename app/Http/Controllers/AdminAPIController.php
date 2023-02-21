@@ -11303,7 +11303,7 @@ class AdminAPIController extends Controller
                 'nature_type:type',     
                 'request_status:name', 
                 'shipper:name', 
-                'shipper.status_shipper:name', 
+                'shipment.status_shipper:name', 
             ]
         )
         ->where('launched_by_id', $admin_id)->get();
