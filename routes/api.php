@@ -499,6 +499,12 @@ Route::name('api.')->group(function () {
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
             Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
         });
+
+        Route::prefix('add_request')->name('add_request.')->group(function () {
+            Route::get('index', 'AdminAPIController@add_request_index')->name('index');
+            // Route::post('submit', 'AdminAPIController@add_request_submit')->name('submit');
+            // Route::post('lost_claim', 'AdminAPIController@lost_claim')->name('lost_claim');
+        });
     });
 
     Route::prefix('retail_user')->name('retail_user.')->group(function () {
