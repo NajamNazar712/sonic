@@ -22,7 +22,6 @@ class CreateRiderReturnNoteRequestsTable extends Migration
             $table->integer('updated_by')->index()->nullable();
             $table->integer('approved_by')->index()->nullable();
             $table->dateTime('approved_at')->nullable();
-            $table->integer('total_cod_amount');
             $table->integer('status')->default(0)->index();
             $table->tinyInteger('ordering')->default(0);
             $table->timestamps();

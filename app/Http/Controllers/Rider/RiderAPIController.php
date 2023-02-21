@@ -13802,13 +13802,13 @@ class RiderAPIController extends Controller
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
-                $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
-                    $query->where('booking_type_id', '!=', 4)
-                        ->orWhere(function ($sub_query) {
-                            $sub_query->where('booking_type_id', '=', 4)
-                                ->where('charges_mode_id', '=', 2);
-                        });
-                })->sum('amount');
+                // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
+                //     $query->where('booking_type_id', '!=', 4)
+                //         ->orWhere(function ($sub_query) {
+                //             $sub_query->where('booking_type_id', '=', 4)
+                //                 ->where('charges_mode_id', '=', 2);
+                //         });
+                // })->sum('amount');
                 $order = false;
                 if ($request->has('order_checkbox')) {
                     $order = true;
@@ -13818,7 +13818,7 @@ class RiderAPIController extends Controller
                     'rider_id' => $request->rider_id,
                     'route_id' => $request->route_id,
                     'shipment_count' => $shipments_count,
-                    'total_cod_amount' => $total_cod_amount,
+                    // 'total_cod_amount' => $total_cod_amount,
                     'ordering' => $order
                 ]);
                 if ($note) {

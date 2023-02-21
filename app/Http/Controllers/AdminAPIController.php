@@ -9075,16 +9075,21 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $added_shipments = [];
             $trackings = explode(',', $request->trackings);
             $open_box_ids = explode(',', $request->open_box);
             $rider = $request->rider_id;
             $route = $request->route_id;
             $hub_id = $request->hub_id;
             $admin = $request->admin_id;
+            $shipments = Shipment::whereIn('tracking_number', $trackings)->pluck('id')->toArray();
+            if (count($shipments) == 0) {
+                return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
+            }
             $return_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
-            $valid_shipments = array();
+            $valid_shipments = [];
             $shipments_count = 0;
-            $invalid_shipments = array();
+            $invalid_shipments = [];
             if (!empty($trackings)) {
                 foreach ($trackings as $shipment_id) {
                     $shipment_details = Shipment::where('tracking_number', $shipment_id);
@@ -9102,6 +9107,14 @@ class AdminAPIController extends Controller
                     return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) " . implode(',', $invalid_shipments)]);
                 } elseif ($shipments_count != 0) {
 
+                    if($request->has("request_id")){
+                        $removed_shipments = explode(',', $request->removed_shipments);
+                        $removed_shipments = RiderReturnNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_return_note_request_shipments.shipment_id')
+                        ->whereIn('s.tracking_number', $removed_shipments)->pluck('s.id')->toArray();
+                        $requests_shipments = RiderReturnNoteRequestShipment::where('request_note_id', $request->request_id)->pluck('shipment_id')->toArray();
+                        $added_shipments = array_diff($shipments, $requests_shipments);
+                        $invalid_shipments = array_diff($requests_shipments, $valid_shipments);
+                    }
                     $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
 
                     if ($note) {
@@ -9180,6 +9193,36 @@ class AdminAPIController extends Controller
                         NotificationsController::app_notification(6, $rider, 2, $note->id);
                     }
                     EmployeeAttendanceController::riders_attendance_mark($rider);
+
+                    if(count($added_shipments) > 0){
+                        $serial = RiderReturnNoteRequestShipment::where('request_note_id', $request->request_id)->orderBy('ordering', 'DESC')->first();
+                        $serial = $serial->ordering + 1;
+                        foreach ($added_shipments as $shipment) {
+                            RiderReturnNoteRequestShipment::create([
+                                'request_note_id' => $request->request_id,
+                                'shipment_id' => $shipment,
+                                'open_box' => (in_array($shipment, $open_box_ids)) ? 1 : 0,
+                                'ordering' => $serial
+                            ]);
+                            $serial++;
+                        }
+                    }
+
+                    if($request->has("request_id")){
+                        $rider_request = RiderReturnNoteRequest::find($request->request_id);
+                        RiderReturnNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $valid_shipments)->update(['status' => 1]);
+                        RiderReturnNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $invalid_shipments)->update(['status' => 3]);
+                        RiderReturnNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $added_shipments)->update(['status' => 4]);
+                        RiderReturnNoteRequestShipment::where('request_note_id', $rider_request->id)->whereIn("shipment_id", $removed_shipments)->update(['status' => 5]);
+                        $rider_request->status = 1;
+                        $rider_request->approved_by = $admin;
+                        $rider_request->updated_by = $admin;
+                        $rider_request->approved_at = Carbon::today();
+                        $rider_request->shipment_count = $shipments_count;
+                        $rider_request->save();
+                        $note->request_note_id = $rider_request->id;
+                        $note->save();
+                    }
 
                     return response()->json(['status' => 0, 'create_message' => "Return note has been created with Return Note Number:" . $note->id]);
                 } else {
