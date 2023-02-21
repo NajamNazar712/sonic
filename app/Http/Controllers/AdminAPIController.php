@@ -11182,7 +11182,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function add_request_index(Request $request)
+    public function crm_request_index(Request $request)
     {
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $channels = CrmRequestChannel::get();
@@ -11192,7 +11192,7 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'case_nature' => $case_nature, 'channels' => $channels, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
     }
 
-    public function add_request_submit(Request $request)
+    public function crm_request_submit(Request $request)
     {
 
         $rules = [
@@ -11289,6 +11289,13 @@ class AdminAPIController extends Controller
 
         }
                 
+    }
+
+    public function crm_request_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $crm_requests = CrmRequest::where('launched_by', 0)->where('launched_by_id', $admin_id)->get();
+        return response()->json(['status' => 0, 'crm_requests' => $crm_requests ]);
     }
 
 }

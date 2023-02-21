@@ -500,9 +500,10 @@ Route::name('api.')->group(function () {
             Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
         });
 
-        Route::prefix('add_request')->name('add_request.')->group(function () {
-            Route::get('index', 'AdminAPIController@add_request_index')->name('index');
-            Route::post('submit', 'AdminAPIController@add_request_submit')->name('submit');
+        Route::prefix('crm_request')->name('crm_request.')->group(function () {
+            Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
+            Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
+            Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
             // Route::post('lost_claim', 'AdminAPIController@lost_claim')->name('lost_claim');
         });
     });
