@@ -11294,7 +11294,19 @@ class AdminAPIController extends Controller
     public function crm_request_list(Request $request)
     {
         $admin_id = $request->admin_id;
-        $crm_requests = CrmRequest::where('launched_by', 0)->where('launched_by_id', $admin_id)->get();
+        // $crm_requests = CrmRequest::where('launched_by', 0)->where('launched_by_id', $admin_id)->get();
+        $crm_requests = CrmRequest::where('launched_by', 0)
+        ->with(
+            [
+                'shipment:tracking_number',
+                'nature:name',
+                'nature_type:type',     
+                'request_status:name', 
+                'shipper:name', 
+                'shipper.status_shipper:name', 
+            ]
+        )
+        ->where('launched_by_id', $admin_id)->get();
         return response()->json(['status' => 0, 'crm_requests' => $crm_requests ]);
     }
 
