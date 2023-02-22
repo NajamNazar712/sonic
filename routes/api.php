@@ -493,18 +493,16 @@ Route::name('api.')->group(function () {
                 Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
 
+            Route::prefix('crm_request')->name('crm_request.')->group(function () {
+                Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
+                Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
+                Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
+            });
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
             Route::post('store_dws_image', 'AdminAPIController@store_dws_image')->name('store_dws_image');
-        });
-
-        Route::prefix('crm_request')->name('crm_request.')->group(function () {
-            Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
-            Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
-            Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
-            Route::post('get_receiving_sheet', 'AdminAPIController@get_receiving_sheet')->name('get_receiving_sheet');
         });
     });
 
