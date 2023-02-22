@@ -504,7 +504,7 @@ Route::name('api.')->group(function () {
             Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
             Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
             Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
-            // Route::post('lost_claim', 'AdminAPIController@lost_claim')->name('lost_claim');
+            Route::post('get_receiving_sheet', 'AdminAPIController@get_receiving_sheet')->name('get_receiving_sheet');
         });
     });
 
