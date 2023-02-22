@@ -19,10 +19,10 @@
 
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number*" data-tags-input-name="tracking_number">
+                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number/Pieces" data-tags-input-name="tracking_number">
                                 </div>
                                 <div class="ml-1 form-group">
-                                    <input type="text" name="seal_number" class="form-control seal_number" id="seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number">
+                                    <input type="text" name="seal_number" class="form-control seal_number" id="seal_number" placeholder="Seal Number" data-tags-input-name="seal_number">
                                 </div>
 
                                 <div class="form-group ml-1">
@@ -73,7 +73,7 @@
             function track(tracking_number, type) {
                 var search_type_name = '';
                 if(type == 1){
-                    search_type_name = 'Tracking Number';
+                    search_type_name = 'Tracking Number/Pieces';
                 }
                 else{
                     search_type_name = 'Seal Number';

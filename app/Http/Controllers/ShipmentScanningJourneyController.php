@@ -40,7 +40,7 @@ class ShipmentScanningJourneyController extends Controller
 
     static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
     {
-//        if(session('role_id') != 1){
+        if(session('role_id') != 1){
             $add_scanning_history = new BagScanningJourney();
             $add_scanning_history->bag_id = $bag_id;
             $add_scanning_history->screen_location_id = $screen_location_id;
@@ -59,7 +59,7 @@ class ShipmentScanningJourneyController extends Controller
             }
 
             $add_scanning_history->save();
-//        }
+        }
 
     }
 }
