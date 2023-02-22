@@ -11077,9 +11077,7 @@ class AdminAPIController extends Controller
                         }
                     }
                 }
-                if (!empty($invalid_shipments)) {
-                    return response()->json(['status' => 1, 'message' => "Return Note Already Created For Following Shipment(s) " . implode(',', $invalid_shipments)]);
-                } elseif ($shipments_count != 0) {
+                if ($shipments_count != 0) {
 
                     $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin, 'created_via_app' => 1]);
 
