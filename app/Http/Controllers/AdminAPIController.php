@@ -9245,6 +9245,13 @@ class AdminAPIController extends Controller
                     }
 
                 } else {
+                    if($request->has("request_id")){
+                        $rider_request = RiderReturnNoteRequest::find($request->request_id);
+                        $rider_request->status = 3;
+                        $rider_request->updated_at = Carbon::today();
+                        $rider_request->save();
+                        RiderDeliveryNoteRequestShipment::where('request_note_id', $rider_request->id)->update(['status' => 3]);
+                    }
                     return response()->json(['status' => 1, 'message' => "Failed to Create Return Note"]);
                 }
 
