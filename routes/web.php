@@ -4181,8 +4181,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', 'Admins\VigilanceController@verification_index')->name('index');
             Route::get('/list', 'Admins\VigilanceController@verification_list')->name('list');
             Route::get('delivery_note_info', 'Admins\verification_index@delivery_note_info')->name('delivery_note_info');
-            Route::post('/info', 'Admins\VigilanceController@verification_info')->name('info');
-            Route::post('/add', 'Admins\VigilanceController@verification_add')->name('add');
+//            Route::post('/info', 'Admins\VigilanceController@verification_info')->name('info');
+//            Route::post('/add', 'Admins\VigilanceController@vigilance_note_add')->name('add');
             Route::post('/excess_cns', 'Admins\VigilanceController@verification_excess_cns')->name('excess_cns');
             Route::post('/verify_cns', 'Admins\VigilanceController@verification_verify_cns')->name('verify_cns');
             Route::post('/unverify_cns', 'Admins\VigilanceController@verification_unverify_cns')->name('unverify_cns');
@@ -4192,6 +4192,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/list', 'Admins\VigilanceController@history_list')->name('list');
             });
         });
+
+        Route::prefix('note')->name('note.')->group(function() {
+            Route::get('', 'Admins\VigilanceController@vigilance_note_index')->name('index');
+            Route::get('list', 'Admins\VigilanceController@vigilance_note_list')->name('list');
+            Route::post('info', 'Admins\VigilanceController@vigilance_note_info')->name('info');
+            Route::post('add', 'Admins\VigilanceController@vigilance_note_add')->name('add');
+
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('/', 'Admins\VigilanceController@vigilance_note_history_index')->name('index');
+                Route::get('/list', 'Admins\VigilanceController@vigilance_note_history_list')->name('list');
+                Route::post('total_shipments', 'Admins\VigilanceController@vigilance_note_total_shipments')->name('total_shipments');
+                Route::post('excess_shipments', 'Admins\VigilanceController@vigilance_note_excess_shipments')->name('excess_shipments');
+                Route::post('verify_shipments', 'Admins\VigilanceController@vigilance_note_verify_shipments')->name('verify_shipments');
+            });
+
+        });
+
     });
 });
 

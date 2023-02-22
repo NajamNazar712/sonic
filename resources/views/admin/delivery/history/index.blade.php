@@ -50,7 +50,6 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
-                        <th class="border-primary border-darken-1">Vigilance Verification</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -307,7 +306,6 @@
 
                             head.push('S.No');
                             head.push('Delivery Note No.');
-                            head.push('Vigilance Verification');
                             head.push('Status');
                             head.push('Hub');
                             head.push('Zone');
@@ -337,7 +335,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
-                                row.push(values.vigilance_verification_excel);
                                 row.push(values.main_status);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
@@ -401,7 +398,6 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    { data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification', orderable: false},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},

@@ -1292,6 +1292,9 @@ class Permission
             'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
 
+            'vigilance.note.index' => 770,
+            'vigilance.note.history.index' => 771,
+
             'settings.booking_destination_keyword.index' => 772,
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
