@@ -19,7 +19,10 @@
 
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number*" data-tags-input-name="tracking_number">
+                                </div>
+                                <div class="ml-1 form-group">
+                                    <input type="text" name="seal_number" class="form-control seal_number" id="seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number">
                                 </div>
 
                                 <div class="form-group ml-1">
@@ -62,13 +65,25 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-            function track(tracking_number) {
-                console.log(tracking_number);
+            $('#track_form #seal_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            function track(tracking_number, type) {
+                var search_type_name = '';
+                if(type == 1){
+                    search_type_name = 'Tracking Number';
+                }
+                else{
+                    search_type_name = 'Seal Number';
+                }
                 $.ajax({
                     url: '{!! route('admin.scanning_history.details') !!}',
                     method: 'POST',
                     data: {
                         'tracking_number': tracking_number,
+                        'search_type': type,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -77,7 +92,7 @@
                         $('#tracking').html('');
                         console.log(data);
                         if (data.invalid !== undefined) {
-                            var message = 'Invalid Tracking Number: ' + data.invalid;
+                            var message = 'Invalid '+ search_type_name +': ' + data.invalid;
                             scan_sound(2);
                             toastr.error(message, 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -85,7 +100,7 @@
                             });
                         }
                         if (data.empty !== undefined) {
-                            var message = 'No scanning history found of Tracking Number: ' + data.empty;
+                            var message = 'No scanning history found of '+ search_type_name +': ' + data.empty;
                             scan_sound(2);
                             toastr.error(message, 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -151,7 +166,26 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function (form) {
-                    track($(form).find('.tracking_number').val());
+                    var search_type = 0;
+                    var scan_input = '';
+                    if($(form).find('.tracking_number').val() != ''){
+                        search_type = 1;
+                        scan_input = $(form).find('.tracking_number').val();
+                        console.log(search_type);
+                        track(scan_input, search_type);
+                    }
+                    else if($(form).find('.seal_number').val() != ''){
+                        search_type = 2;
+                        scan_input = $(form).find('.seal_number').val();
+                        console.log(search_type);
+                        track(scan_input, search_type);
+                    }
+                    else{
+                        toastr.error('Tracking Number/Seal Number is required!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
 
                     return false;
                 }
