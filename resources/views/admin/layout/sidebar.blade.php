@@ -1183,7 +1183,7 @@
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(770, session('permissions')))
                                     <li><a class="menu-item"
-                                            href="{{ route('admin.vigilance.note.index') }}">Vigilance</a></li>
+                                            href="{{ route('admin.vigilance.note.index') }}">Note</a></li>
                                 @endif
                                 @if (session('role_id') == 1 || in_array(771, session('permissions')))
                                     <li><a class="menu-item"

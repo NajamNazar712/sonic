@@ -25,7 +25,7 @@
                             <input type="text" class="form-control" name="search_return_note" id="search_return_note" placeholder="Search Return Note">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -35,7 +35,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" data-value="{{ Carbon\Carbon::yesterday() }}" placeholder="Search Date (From)">
                         </div>
                     </div>
-                    <div class="col-3 ">
+                    <div class="col-4 ">
                         <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
