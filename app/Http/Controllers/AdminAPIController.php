@@ -11307,18 +11307,4 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'crm_requests' => $crm_requests ]);
     }
 
-    public function get_receiving_sheet(Request $request)
-    {
-        $shipment = Shipment::where('tracking_number',$request->tracking_number)->first();
-        if ($shipment) {
-            $receiving_sheet_id = -1;
-            if ($shipment->receiving_sheet_shipment) {
-                $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-                return response()->json(['status' => 0, 'receiving_sheet' => [['id' => strval($receiving_sheet_id)]]]);
-            }
-            return response()->json(['status' => 0, 'receiving_sheet' => [['id' => strval($receiving_sheet_id)]], 'error_message' => 'Receiving Sheet does not exists']);
-        }
-        return response()->json(['status' => 1, 'message' => 'No Shipments Found']);
-    }
-
 }
