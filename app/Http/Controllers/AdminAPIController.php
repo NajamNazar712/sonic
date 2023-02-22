@@ -6804,6 +6804,7 @@ class AdminAPIController extends Controller
                 $user_department = $admin->role->department_id;
             }
             $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
+            $permissions['crm'] = ($user_department != 6) ? 1 : 0;
             $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
             $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
             $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
