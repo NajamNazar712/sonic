@@ -10035,7 +10035,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11801,6 +11801,7 @@ class AdminDashboardController extends Controller
             $city->update([
                 'name' => $request->countryName,
                 'city_code' => $request->city_code,
+                'iata_code' => $request->iata_code,
                 'hub' => 1,
                 'hub_id' => $id,
                 'zone_id' => $request->zone_id,
@@ -11871,6 +11872,7 @@ class AdminDashboardController extends Controller
             $city = City::create([
                 'name' => $request->countryName,
                 'city_code' => $request->city_code,
+                'iata_code' => $request->iata_code,
                 'hub' => 1,
                 'zone_id' => $request->zone_id,
                 'pickup' => 0,

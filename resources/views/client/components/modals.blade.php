@@ -122,7 +122,7 @@
                     @csrf
                     <div class="modal-body  text-center">
                         <div class="feedback">
-                            @foreach(\App\Http\Models\CRM\CrmRequestRating::all() as $rating)
+                            @foreach(\App\Http\Models\Admin\DailyVisitRating::all() as $rating)
                                     <div class="item">
                                         <label for="{{ $rating->id }}" title="{{ $rating->name }}">
                                             <input class="radio" type="radio" name="rating" id="{{ $rating->id }}" value="{{ $rating->id }}">
