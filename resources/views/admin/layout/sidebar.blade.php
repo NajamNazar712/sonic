@@ -657,6 +657,11 @@
                                                 href="{{ route('admin.return.confirmation_pending_manual_sms') }}">RCP
                                                 Manual SMS Log</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(48, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.return.rider_request.index') }}">Pending
+                                                Return Note Requests</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

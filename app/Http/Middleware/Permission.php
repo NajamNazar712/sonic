@@ -381,6 +381,10 @@ class Permission
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
             'return.confirmation_pending_sms' => 675,
+            'return.rider_request.approve' => 833,
+            'return.rider_request.reject' => 834,
+            'return.rider_request.update' => 835,
+
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
