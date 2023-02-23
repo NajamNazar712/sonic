@@ -65,7 +65,6 @@
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Request Date Aging</th>
                         <th class="border-primary border-darken-1">Confirmed Date Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -464,7 +463,6 @@
                             head.push('Payment Mode');
                             head.push('Status');
                             head.push('Remarks');
-                            head.push('Requested By');
                             head.push('Requested Date Aging');
                             head.push('Confirmed Date Aging');
 
@@ -485,7 +483,6 @@
                                 row.push(values.mode);
                                 row.push(values.status);
                                 row.push(values.remarks);
-                                row.push(values.requested_by);
                                 row.push(values.aging);
                                 row.push(values.confirmed_aging);
 
@@ -562,7 +559,6 @@
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks_view'},
-                    {data: 'requested_by', name:'rb.name', class: 'align-middle requested_by'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}

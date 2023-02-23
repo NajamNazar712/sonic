@@ -430,7 +430,8 @@ class ShipperPackagingMaterialController extends Controller
                     'phone' => $request->new_pickup_phone_number,
                     'amount' => $total_charges,
                     'status_id' => 1,
-                    'packaging_payment_mode_id' => $request->mode_of_payment
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
                 ]);
             } else {
                 $result = PackagingMaterialRequest::create([
@@ -442,8 +443,8 @@ class ShipperPackagingMaterialController extends Controller
                     'phone' => $user_address->phone,
                     'amount' => $total_charges,
                     'status_id' => 1,
-                    'packaging_payment_mode_id' => $request->mode_of_payment
-
+                    'packaging_payment_mode_id' => $request->mode_of_payment,
+                    'requested_by' => Auth::id()
                 ]);
             }
             if ($result) {
@@ -481,7 +482,8 @@ class ShipperPackagingMaterialController extends Controller
                             'phone'=>$request->new_pickup_phone_number,
                             'amount'=>$total_charges,
                             'status_id'=>1,
-                            'packaging_payment_mode_id'=>$request->mode_of_payment
+                            'packaging_payment_mode_id'=>$request->mode_of_payment,
+                            'requested_by' => Auth::id()
                         ]);
                     }
                     else {
@@ -494,7 +496,8 @@ class ShipperPackagingMaterialController extends Controller
                             'phone'=>$user_address->phone,
                             'amount'=>$total_charges,
                             'status_id'=>1,
-                            'packaging_payment_mode_id'=>$request->mode_of_payment
+                            'packaging_payment_mode_id'=>$request->mode_of_payment,
+                            'requested_by' => Auth::id()
                         ]);
                     }
                     if($result){
@@ -527,7 +530,8 @@ class ShipperPackagingMaterialController extends Controller
                         'phone'=>$request->new_pickup_phone_number,
                         'amount'=>$total_charges,
                         'status_id'=>1,
-                        'packaging_payment_mode_id'=>$request->mode_of_payment
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
                     ]);
                 }
                 else {
@@ -540,7 +544,8 @@ class ShipperPackagingMaterialController extends Controller
                         'phone'=>$user_address->phone,
                         'amount'=>$total_charges,
                         'status_id'=>1,
-                        'packaging_payment_mode_id'=>$request->mode_of_payment
+                        'packaging_payment_mode_id'=>$request->mode_of_payment,
+                        'requested_by' => Auth::id()
                     ]);
                 }
                 if($result){
