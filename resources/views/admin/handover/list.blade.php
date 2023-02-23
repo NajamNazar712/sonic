@@ -47,6 +47,9 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
                 </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
@@ -456,14 +459,14 @@
                 }
             });
 
-            // $('#search_filter_btn').on('click',function () {
-            //     table.draw();
-            // });
-
-            $('#search_tracking').on('change',function () {
+            $('#search_filter_btn').on('click',function () {
                 table.draw();
-
             });
+
+            // $('#search_tracking').on('change',function () {
+            //     table.draw();
+            //
+            // });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));
