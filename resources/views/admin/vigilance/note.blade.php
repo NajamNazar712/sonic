@@ -16,18 +16,12 @@
                             <div class="row justify-content-center mb-2" id="search_form">
                                 <div class="col-3 skin skin-line">
                                     <fieldset>
-                                        <div class="color-parent">
-                                            <input type="radio" name="note_type" value="1" id="delivery_check" checked>
-                                            <label for="delivery_check">Delivery</label>
-                                        </div>
-
+                                        <input type="radio" name="note_type" value="1" id="delivery_check" checked>
+                                        <label for="delivery_check">Delivery</label>
                                     </fieldset>
                                     <fieldset>
-                                        <div class="color-parent">
-                                            <input type="radio" name="note_type" value="2" id="return_check">
-                                            <label for="return_check">Return</label>
-                                        </div>
-
+                                        <input type="radio" name="note_type" value="2" id="return_check">
+                                        <label for="return_check">Return</label>
                                     </fieldset>
                                 </div>
                                 <div class="col-3">
@@ -196,6 +190,9 @@
             color: black;
             font-weight: bold;
         }
+        .icheckbox_line-blue.checked, .iradio_line-blue.checked {
+            background: #33d264;
+        }
     </style>
 @endsection
 
@@ -296,7 +293,7 @@
                         table.draw();
                         $('#verify_rider_id').val('');
                     }
-                    $('#search_form input[name="note_type"]:not(:checked)').parents('.iradio_line-blue').removeClass('iradio_line-blue').addClass('icheckbox_line-red');
+                    // $('#search_form input[name="note_type"]:not(:checked)').parents('.iradio_line-blue').removeClass('iradio_line-blue').addClass('icheckbox_line-red');
                     $('#search_form input[name="note_type"]:not(:checked)').attr('disabled', true);
                     if(note_type_id == 1){
                         $('#selected_note_title').text('Delivery Note');
