@@ -144,140 +144,140 @@
     </div>
 
     <!-- Add Request -->
-    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Request Packaging Material</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{route('admin.packaging.requests.submit')}}" id="material_request_form" method="post">
-                        @csrf
-                        <div class="row justify-content-md-center">
-                            <div class="col-12">
-                                <div class="form-body">
-                                    <div class="row justify-content-center">
-                                        <div class="col-md-12 col-lg-6">
-                                            <div class="form-group">
-                                                <select name="shippers_select" id="shippers_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="Pickup address is required">
-                                                    @foreach($shippers as $shipper)
-                                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                                    @endforeach
-                                                   
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 col-lg-6">
-                                            <div class="form-group">
-                                                <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="Pickup address is required">
-                                                    </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row justify-content-center">
-                                        <div class="col-md-12 col-lg-6">
-                                            <div id="new_pickup_address" class="d-none">
-                                                <div class="form-group">
-                                                    <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
-                                                </div>
+{{--    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"--}}
+{{--         aria-hidden="true">--}}
+{{--        <div class="modal-dialog modal-lg" role="document">--}}
+{{--            <div class="modal-content">--}}
+{{--                <div class="modal-header">--}}
+{{--                    <h4 class="modal-title" id="">Request Packaging Material</h4>--}}
+{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--                <div class="modal-body">--}}
+{{--                    <form action="{{route('admin.packaging.requests.submit')}}" id="material_request_form" method="post">--}}
+{{--                        @csrf--}}
+{{--                        <div class="row justify-content-md-center">--}}
+{{--                            <div class="col-12">--}}
+{{--                                <div class="form-body">--}}
+{{--                                    <div class="row justify-content-center">--}}
+{{--                                        <div class="col-md-12 col-lg-6">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <select name="shippers_select" id="shippers_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="Pickup address is required">--}}
+{{--                                                    @foreach($shippers as $shipper)--}}
+{{--                                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
+{{--                                                    @endforeach--}}
+{{--                                                   --}}
+{{--                                                </select>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="col-md-12 col-lg-6">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="Pickup address is required">--}}
+{{--                                                    </select>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                    <div class="row justify-content-center">--}}
+{{--                                        <div class="col-md-12 col-lg-6">--}}
+{{--                                            <div id="new_pickup_address" class="d-none">--}}
+{{--                                                <div class="form-group">--}}
+{{--                                                    <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>--}}
+{{--                                                </div>--}}
 
-                                                <div class="form-group">
-                                                    <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
-                                                </div>
+{{--                                                <div class="form-group">--}}
+{{--                                                    <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">--}}
+{{--                                                </div>--}}
 
-                                                <div class="form-group">
-                                                    <input type="text" name="new_pickup_phone_number" id="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
-                                                </div>
-                                                <div class="form-group">
-                                                    <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-                                                        @foreach($cities as $city)
-                                                            <option value="{{ $city->id }}">{{ $city->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" id="packaging_type_ids" name="packaging_type_ids">
-                                    <input type="hidden" id="packaging_size_ids" name="packaging_size_ids">
-                                    <input type="hidden" id="packaging_quantities" name="packaging_quantities">
-                                    <div class="row justify-content-center">
-                                        <div class="col-md-12 col-lg-6">
-                                            <div class="form-group">
-                                                <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">
-                                                    <option></option>
-                                                    @foreach($payment_mode as $mode)
-                                                        <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+{{--                                                <div class="form-group">--}}
+{{--                                                    <input type="text" name="new_pickup_phone_number" id="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">--}}
+{{--                                                </div>--}}
+{{--                                                <div class="form-group">--}}
+{{--                                                    <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">--}}
+{{--                                                        @foreach($cities as $city)--}}
+{{--                                                            <option value="{{ $city->id }}">{{ $city->name }}</option>--}}
+{{--                                                        @endforeach--}}
+{{--                                                    </select>--}}
+{{--                                                </div>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                    <input type="hidden" id="packaging_type_ids" name="packaging_type_ids">--}}
+{{--                                    <input type="hidden" id="packaging_size_ids" name="packaging_size_ids">--}}
+{{--                                    <input type="hidden" id="packaging_quantities" name="packaging_quantities">--}}
+{{--                                    <div class="row justify-content-center">--}}
+{{--                                        <div class="col-md-12 col-lg-6">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">--}}
+{{--                                                    <option></option>--}}
+{{--                                                    @foreach($payment_mode as $mode)--}}
+{{--                                                        <option value="{{$mode->id}}">{{$mode->mode}}</option>--}}
+{{--                                                    @endforeach--}}
+{{--                                                </select>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
 
-                                    <div class="row packaging_div">
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="form-group">
-                                                {{--<label for="sm_flyer">Packaging Material Type</label>--}}
-                                                <select name="packaging_material_type" class="select2" id="packaging_material_type">
-                                                    @foreach($packaging_material_types as $packaging_type)
-                                                        <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="form-group">
-                                                <select name="packaging_material_size" class="select2" id="packaging_material_size"></select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-2">
-                                            <div class="form-group">
-                                                <input name="packaging_material_quantity" class="form-control quantity" id="packaging_material_quantity" placeholder="Quantity"/>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-lg-2">
-                                            <div class="form-group">
-                                                <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>
-                                            </div>
-                                        </div>
-                                    </div>
+{{--                                    <div class="row packaging_div">--}}
+{{--                                        <div class="col-md-6 col-lg-4">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                --}}{{--<label for="sm_flyer">Packaging Material Type</label>--}}
+{{--                                                <select name="packaging_material_type" class="select2" id="packaging_material_type">--}}
+{{--                                                    @foreach($packaging_material_types as $packaging_type)--}}
+{{--                                                        <option value="{{ $packaging_type->id }}">{{ $packaging_type->type }}</option>--}}
+{{--                                                    @endforeach--}}
+{{--                                                </select>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="col-md-6 col-lg-4">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <select name="packaging_material_size" class="select2" id="packaging_material_size"></select>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="col-md-6 col-lg-2">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <input name="packaging_material_quantity" class="form-control quantity" id="packaging_material_quantity" placeholder="Quantity"/>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="col-md-6 col-lg-2">--}}
+{{--                                            <div class="form-group">--}}
+{{--                                                <button class="btn btn-primary btn-block" type="button" id="add_packaging_material_btn"> Add</button>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
 
-                                    <div class="row">
-                                        <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">
-                                            <thead>
-                                            <tr role="row" class="bg-primary white">
+{{--                                    <div class="row">--}}
+{{--                                        <table class="table table-bordered packaging_type_datatable" id="packaging_type_datatable" style="z-index: 3;">--}}
+{{--                                            <thead>--}}
+{{--                                            <tr role="row" class="bg-primary white">--}}
 
-                                                <th class="border-primary border-darken-1">S. No.</th>
-                                                <th class="border-primary border-darken-1">Packaging Type</th>
-                                                <th class="border-primary border-darken-1">Size</th>
-                                                <th class="border-primary border-darken-1">Quantity</th>
-                                                <th class="border-primary border-darken-1"></th>
+{{--                                                <th class="border-primary border-darken-1">S. No.</th>--}}
+{{--                                                <th class="border-primary border-darken-1">Packaging Type</th>--}}
+{{--                                                <th class="border-primary border-darken-1">Size</th>--}}
+{{--                                                <th class="border-primary border-darken-1">Quantity</th>--}}
+{{--                                                <th class="border-primary border-darken-1"></th>--}}
 
-                                            </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
+{{--                                            </tr>--}}
+{{--                                            </thead>--}}
+{{--                                        </table>--}}
+{{--                                    </div>--}}
 
-                                    <div class="row justify-content-center">
-                                        <div class="col-md-12 col-lg-6">
-                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>
-                                        </div>
-                                    </div>
+{{--                                    <div class="row justify-content-center">--}}
+{{--                                        <div class="col-md-12 col-lg-6">--}}
+{{--                                            <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block" disabled>Request Material</button>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
 
-                            </div>
-                        </div>
-                        </div>
-                    </form>
-                </div>
-                {{--<div class="modal-footer">--}}
-                    {{--<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
-                {{--</div>--}}
-            </div>
-        </div>
-    </div>
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                        </div>--}}
+{{--                    </form>--}}
+{{--                </div>--}}
+{{--                --}}{{--<div class="modal-footer">--}}
+{{--                    --}}{{--<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
+{{--                --}}{{--</div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
     <!-- End Add Request -->
 
@@ -393,16 +393,6 @@
 
     </script>
 
-    <script>
-        $(document).ready(function () {
-            $('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search',
-                width:'100%',
-                allowClear:false
-            });
-
-    </script>
-
     <script type="text/javascript">
         $(document).ready(function () {
 
@@ -442,6 +432,12 @@
                         }
                     });
             }
+
+            $('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search',
+                width:'100%',
+                allowClear:false
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
