@@ -15,9 +15,6 @@
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
                             <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
                         </fieldset>
                     </div>
                     <div class="col-4">
