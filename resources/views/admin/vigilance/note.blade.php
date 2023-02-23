@@ -16,12 +16,18 @@
                             <div class="row justify-content-center mb-2" id="search_form">
                                 <div class="col-3 skin skin-line">
                                     <fieldset>
-                                        <input type="radio" name="note_type" value="1" id="delivery_check" checked>
-                                        <label for="delivery_check">Delivery</label>
+                                        <div class="color-parent">
+                                            <input type="radio" name="note_type" value="1" id="delivery_check" checked>
+                                            <label for="delivery_check">Delivery</label>
+                                        </div>
+
                                     </fieldset>
                                     <fieldset>
-                                        <input type="radio" name="note_type" value="2" id="return_check">
-                                        <label for="return_check">Return</label>
+                                        <div class="color-parent">
+                                            <input type="radio" name="note_type" value="2" id="return_check">
+                                            <label for="return_check">Return</label>
+                                        </div>
+
                                     </fieldset>
                                 </div>
                                 <div class="col-3">
@@ -290,6 +296,7 @@
                         table.draw();
                         $('#verify_rider_id').val('');
                     }
+                    $('#search_form input[name="note_type"]:not(:checked)').parents('.iradio_line-blue').removeClass('iradio_line-blue').addClass('icheckbox_line-red');
                     $('#search_form input[name="note_type"]:not(:checked)').attr('disabled', true);
                     if(note_type_id == 1){
                         $('#selected_note_title').text('Delivery Note');
