@@ -1407,6 +1407,8 @@ class AdminCargoManifestController extends Controller
         if ($bag->exists()) {
             $bag = $bag->latest()->first();
 
+            ShipmentScanningJourneyController::seal_number_add($bag->id, 1, Auth::id());
+
             if (in_array($bag->status_id, [1, 3, 5])) {
                 $origin_id = Auth::user()->default_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
@@ -2348,6 +2350,8 @@ class AdminCargoManifestController extends Controller
             if ($bag->exists()) {
                 $bag = $bag->latest()->first();
 
+                ShipmentScanningJourneyController::seal_number_add($bag->id, 2, Auth::id());
+
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb', function ($join) use ($bag) {
                     $join->on('mb.cargo_manifest_id', 'cargo_manifests.id');
                 })
@@ -2902,6 +2906,7 @@ class AdminCargoManifestController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
+                ShipmentScanningJourneyController::add($shipment_id, 20, 1, Auth::id(), null, null, $shipment_piece->id);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];

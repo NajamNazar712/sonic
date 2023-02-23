@@ -2024,6 +2024,7 @@ class ReturnController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
+                ShipmentScanningJourneyController::add($shipment_id, 7, 1, Auth::id(), null, null, $shipment_piece->id);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];

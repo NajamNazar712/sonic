@@ -910,7 +910,7 @@ class V2AdminPickupsController extends Controller
                     $details['pieces'] = $shipment->pieces;
                     $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                     $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                     return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -1703,7 +1703,7 @@ class V2AdminPickupsController extends Controller
                         $details['pieces'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                         $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -2587,6 +2587,7 @@ class V2AdminPickupsController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
+                ShipmentScanningJourneyController::add($shipment_id, 1, 1, Auth::id(), null, null, $shipment_piece->id);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -3652,7 +3653,7 @@ class V2AdminPickupsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['pieces_count'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
                         if ($shipment->shipper_status_id == 17) {
@@ -3743,7 +3744,8 @@ class V2AdminPickupsController extends Controller
                             $details['pieces'] = $shipment->pieces;
                             $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                             $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+
+                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                             return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         } else {
                             return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];

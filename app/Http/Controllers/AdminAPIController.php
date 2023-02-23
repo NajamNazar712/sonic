@@ -8941,6 +8941,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $admin_id = $request->admin_id;
             $tracking = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking);
             if ($shipment->exists()) {
@@ -8952,6 +8953,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
+                        ShipmentScanningJourneyController::add($shipment_id, 7, 1, $admin_id, null, null, $shipment_piece->id);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
@@ -10292,6 +10294,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
+                        ShipmentScanningJourneyController::add($shipment_id, 4, 1, $admin_id, null, null, $shipment_piece->id);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
