@@ -288,10 +288,10 @@ class AdminReportsController extends Controller
             })
             ->addColumn('adjusted_amount', function ($requests) {
                 if($requests->missing_product_price != null){
-                    return $requests->crm_request_case_nature_type;
+                    return $requests->missing_product_price;
                 }
                 else if($requests->damage_product_price != null){
-                    return $requests->crm_request_case_nature_type;
+                    return $requests->damage_product_price;
                 }
                 else{
                     return '-';
