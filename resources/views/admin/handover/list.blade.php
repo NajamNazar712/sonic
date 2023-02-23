@@ -14,7 +14,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
+                            <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
                         </fieldset>
                     </div>
                     <div class="col-4">
