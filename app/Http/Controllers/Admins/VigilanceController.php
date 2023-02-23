@@ -586,7 +586,7 @@ class VigilanceController extends Controller
 
             if($note_type_id == 1){
                 $delivery_note = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')
-                    ->where('delivery_notes.status', 0)->where('delivery_notes.rider_id', $rider_id)->whereIn('delivery_note_shipments.shipment_id', $shipment_ids)->whereDate('delivery_notes.created_at', Carbon::today());
+                    ->where('delivery_notes.status', 0)->where('delivery_notes.rider_id', $rider_id)->whereIn('delivery_note_shipments.shipment_id', $shipment_ids);
 
                 if($delivery_note->exists()){
                     $delivery_note = $delivery_note->select('delivery_notes.id as delivery_note_id', 'delivery_note_shipments.shipment_id')->get();

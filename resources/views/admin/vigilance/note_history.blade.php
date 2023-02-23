@@ -396,10 +396,10 @@
                             if (data.shipments) {
                                 $.each(data.shipments, function(index, note_ids) {
                                     if(index !== ''){
-                                        html += '<h3 class="pt-1">Note ID: '+ index +'</h3>';
+                                        html += '<h4 class="pt-1">Note ID: '+ index +'</h4>';
                                     }
                                     else{
-                                        html += '<h3 class="pt-1">Excess Shipment(s):</h3>';
+                                        html += '<h4 class="pt-1">Excess Shipment(s):</h4>';
                                     }
 
                                     $.each(note_ids, function (i, tracking_number){
@@ -459,7 +459,7 @@
 
                             if (data.shipments) {
                                 $.each(data.shipments, function(index, note_ids) {
-                                    html += '<h3 class="pt-1">Note ID: '+ index +'</h3>';
+                                    html += '<h4 class="pt-1">Note ID: '+ index +'</h4>';
                                     $.each(note_ids, function (i, tracking_number){
                                         html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                     });
