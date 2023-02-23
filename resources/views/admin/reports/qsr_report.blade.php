@@ -488,7 +488,7 @@
                     {data: 'crm_request_status', name: 'aging_last_status', class: 'align-middle crm_request_status'},
                     {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature'},
                     {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type'},
-                    {data: 'adjusted_amount', name: 'adjusted_amount', class: 'align-middle adjusted_amount',orderable: false, searchable: false},
+                    {data: 'adjusted_amount', name: 'djustment.adjustment_amount', class: 'align-middle adjusted_amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
