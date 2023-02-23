@@ -25,22 +25,20 @@
                                                     <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Select Date">
                                                 </div>
                                             </div>
-
-
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
-                                                        @foreach($sales_person as $person)
-                                                            <option value="{{$person->id}}">{{$person->name}}</option>
+                                                    <select name="segment" id="segment_select" class="form-control select2" data-msg-required="Segment is required" data-rule-required="true" required="required">
+                                                        @foreach($segments as $segment)
+                                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <select name="segment" id="segment_select" class="form-control select2" data-msg-required="Segment is required" data-rule-required="true" required="required">
-                                                        @foreach($segments as $segment)
-                                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                                    <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
+                                                        @foreach($sales_person as $person)
+                                                            <option value="{{$person->id}}">{{$person->name}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -164,7 +162,7 @@
                 width:'100%'
             });
             $('#segment_select').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Segment Select',
+                placeholder:'Select Segment',
                 width:'100%'
             });
             $('#settings_form .class').inputmask({
