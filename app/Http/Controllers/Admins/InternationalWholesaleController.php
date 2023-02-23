@@ -541,6 +541,7 @@ class InternationalWholesaleController extends Controller
         $bookings = WholesaleShipment::join('cities as o' , 'o.id', '=', 'wholesale_shipments.origin_city_id')
             ->join('wholesale_users as wu', 'wu.id','=', 'wholesale_shipments.wholesale_user_id')
             ->join('cities as d' , 'd.id', '=', 'wholesale_shipments.destination_city_id')
+            ->join('cities as dh' , 'd.id', '=', 'wholesale_shipments.destination_city_id')
             ->join('wholesale_shipment_statuses as wss', 'wss.id', '=', 'wholesale_shipments.status_id')
             ->join('admins as cb', 'cb.id', '=', 'wholesale_shipments.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_shipments.updated_by')
