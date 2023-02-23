@@ -21,6 +21,11 @@
                 <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
             </fieldset>
         </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="iata_code" placeholder="Add Iata Code">
+            </fieldset>
+        </div>
         <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="city">
             <fieldset class="radio-inline ml-1">

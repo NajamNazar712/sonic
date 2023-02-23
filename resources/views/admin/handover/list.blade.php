@@ -417,8 +417,8 @@
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
-                    {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count'},
-                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
+                    {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count', orderable: false, searchable: false},
+                    {data: 'received_by', name: 'ad.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -440,7 +440,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.remaining_shipment_count')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -460,10 +460,6 @@
                 table.draw();
             });
 
-            // $('#search_tracking').on('change',function () {
-            //     table.draw();
-            //
-            // });
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));

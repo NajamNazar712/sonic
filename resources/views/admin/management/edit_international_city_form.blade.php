@@ -21,6 +21,11 @@
                 <input type="text" class="form-control" name="city_code" value="{{$city->city_code}}" placeholder="Add City Code">
             </fieldset>
         </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" class="form-control" name="iata_code" value="{{$city->iata_code}}" placeholder="Add Iata Code">
+            </fieldset>
+        </div>
         <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="{{($isHub == 1)? 'hub':'city'}}">
             <fieldset class="radio-inline ml-1">
