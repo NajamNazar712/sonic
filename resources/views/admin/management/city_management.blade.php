@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1" >City ID</th>
                                     <th class="border-primary border-darken-1" >Hub Name</th>
                                     <th class="border-primary border-darken-1" >Hub Code</th>
+                                    <th class="border-primary border-darken-1" >Iata Code</th>
                                     <th class="border-primary border-darken-1" >Zone</th>
                                     <th class="border-primary border-darken-1" >Businees Category</th>
                                     <th class="border-primary border-darken-1" >GC Area</th>
@@ -128,6 +129,7 @@
                             head.push('City ID');
                             head.push('Hub Name');
                             head.push('Hub Code');
+                            head.push('Iata Code');
                             head.push('Zone');
                             head.push('Business Category');
                             head.push('GC Area');
@@ -147,6 +149,7 @@
                                 row.push(values.city_id);
                                 row.push(values.hub);
                                 row.push(values.hub_id);
+                                row.push(values.iata_code);
                                 row.push(values.zone);
                                 row.push(values.business_category);
                                 row.push(values.gc_area);
@@ -227,7 +230,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
                rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
@@ -235,6 +238,7 @@
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
+                    {data: 'iata_code', name: 'cities.iata_code', class: 'align-middle iata_code'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
                     {data: 'gc_area', name: 'cities.gc_area', class: 'align-middle gc_area'},

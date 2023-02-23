@@ -21,11 +21,6 @@
                 <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
             </fieldset>
         </div>
-        <div class="col">
-            <fieldset class="form-group">
-                <input type="text" class="form-control" name="iata_code" placeholder="Add Iata Code">
-            </fieldset>
-        </div>
         <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="city">
             <fieldset class="radio-inline ml-1">
@@ -41,6 +36,8 @@
 
         </div>
     </div>
+
+
     <div class="row mb-2" id="international_hub_list_div" >
         <div class="col-6">
             <fieldset class="form-group">
@@ -54,15 +51,24 @@
         </div>
     </div>
 
-    <div class="row mb-2 d-none" id="international_zone_selection">
-        <div class="col-6">
-            <fieldset class="form-group">
-                <select name="zone_id" id="international_zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                    @foreach($zones as $zone)
-                        <option value="{{ $zone->id }}">{{ $zone->name }}</option>
-                    @endforeach
-                </select>
-            </fieldset>
+    <div class="mb-2 d-none" id="international_zone_selection">
+        <div class="row">
+            <div class="col-6">
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="iata_code" placeholder="Add Iata Code" data-rule-required="true" data-msg-required="Iata Code is required">
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <fieldset class="form-group">
+                    <select name="zone_id" id="international_zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                        @foreach($zones as $zone)
+                            <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div>
         </div>
     </div>
 
