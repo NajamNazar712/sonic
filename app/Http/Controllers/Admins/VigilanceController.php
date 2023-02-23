@@ -735,12 +735,16 @@ class VigilanceController extends Controller
         }
 
         if ($delivery_note = $request->get('search_delivery_note')) {
-            $datatable->join('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
-                ->where('vns.note_id', '=', $delivery_note)->where('vigilance_notes.vigilance_note_type_id', 1);
+            $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
+                ->where('vns.note_id', '=', $delivery_note)
+                ->where('vigilance_notes.vigilance_note_type_id', 1)
+            ->groupBy('vigilance_notes.id');
         }
         if ($return_note = $request->get('search_return_note')) {
-            $datatable->join('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
-                ->where('vns.note_id', '=', $return_note)->where('vigilance_notes.vigilance_note_type_id', 2);
+            $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
+                ->where('vns.note_id', '=', $return_note)
+                ->where('vigilance_notes.vigilance_note_type_id', 2)
+                ->groupBy('vigilance_notes.id');;
         }
 
         return $datatable->make(true);
