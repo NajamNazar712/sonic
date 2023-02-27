@@ -5354,7 +5354,7 @@ class ReturnController extends Controller
             if (count($shipments) == 0) {
                 return redirect()->back()->with('error',  'Shipments not entered!');
             }
-            $pending_status = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);;
+            $pending_status = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
@@ -5396,7 +5396,7 @@ class ReturnController extends Controller
                     $serial = 1;
                     foreach ($valid_shipments as $shipment) {
                         ReturnNoteShipment::create([
-                            'delivery_note_id' => $note->id,
+                            'return_note_id' => $note->id,
                             'shipment_id' => $shipment,
                             'ordering' => $serial
                         ]);

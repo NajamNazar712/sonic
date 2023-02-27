@@ -144,7 +144,7 @@
                             head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('Total COD');
+                            // head.push('Total COD');
                             head.push('Requested At');
                             head.push('Last Updated By');
                             head.push('Last Updated (Date)');
@@ -159,7 +159,7 @@
                                 row.push(values.rt);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
-                                row.push(values.amount);
+                                // row.push(values.amount);
                                 row.push(values.date);
                                 row.push(values.admin_name);
                                 row.push(values.updated_at);
