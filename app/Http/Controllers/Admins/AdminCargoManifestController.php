@@ -2895,7 +2895,7 @@ class AdminCargoManifestController extends Controller
         }
     }
 
-    public function bag_piece_details(Request $request)
+    public function bag_piece_details(Request $request, $screen_location_id)
     {
 
         $shipment_id = $request->shipment_id;
@@ -2906,7 +2906,7 @@ class AdminCargoManifestController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 20, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment_id, $screen_location_id, 1, Auth::id(), null, null, $shipment_piece->id);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];

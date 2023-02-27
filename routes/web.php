@@ -1665,6 +1665,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@create_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_shipment_details')->name('shipment_details');
                 Route::post('bag_details', 'Admins\AdminMasterCargoController@create_bag_details')->name('bag_details');
+                Route::post('piece_details\2', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
                 Route::get('seal_number', 'Admins\AdminMasterCargoController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminMasterCargoController@create_store')->name('store');
 
@@ -1675,7 +1676,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
             });
             Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
-            Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
 
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@history_index')->name('index');
@@ -1692,6 +1692,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('receive')->name('receive.')->group(function () {
                 Route::get('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_shipment_details')->name('shipment_details');
+                Route::post('piece_details/20', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
                 Route::post('short_received', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_short_received')->name('short_received');
                 Route::post('', 'Admins\AdminMasterCargoController@master_cargo_bag_receive_store')->name('store');
 
