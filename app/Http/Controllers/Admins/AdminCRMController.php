@@ -1343,7 +1343,7 @@ class AdminCRMController extends Controller
         $datatables = Datatables::of($in_process_request)
             ->setRowAttr([
                 'class' => function ($shipments) {
-                    if($shipments->case_nature_type_id == 4){
+                    if($shipments->case_nature_id == 4){
                         $date_created = Carbon::parse($shipments->created_at)->firstOfMonth();
                         $today = Carbon::today();
                         $workint_days = $date_created->diffInDaysFiltered(function(Carbon $date) {
