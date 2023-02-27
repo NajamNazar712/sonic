@@ -1344,7 +1344,8 @@ class AdminCRMController extends Controller
             ->setRowAttr([
                 'class' => function ($shipments) {
                     if($shipments->case_nature_id == 4){
-                        $date_created = Carbon::parse($shipments->created_at)->firstOfMonth();
+                        $temp_date_created = Carbon::parse($shipments->created_at)->format("Y-m-d 00:00:00");
+                        $date_created = Carbon::parse($temp_date_created);
                         $today = Carbon::today();
                         $workint_days = $date_created->diffInDaysFiltered(function(Carbon $date) {
                             return !$date->isWeekend();
