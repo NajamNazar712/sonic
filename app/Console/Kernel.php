@@ -135,7 +135,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         'App\Console\Commands\DailyAutoCommentForCRMClaims',
-		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',        ];
+		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',
+		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
+        ];
 
     /**
      * Define the application's command schedule.
@@ -444,6 +446,7 @@ class Kernel extends ConsoleKernel
         
 
         $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
+        $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
 
 
     }
