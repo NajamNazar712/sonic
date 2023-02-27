@@ -590,6 +590,7 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
+                                'screen_location_id': 2,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 30000,
