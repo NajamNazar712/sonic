@@ -119,7 +119,7 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
@@ -141,7 +141,7 @@
                                                                     @endif
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left {{($shipper_flag == false)? 'mr-3':'' }}">
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{$comment->created_at}}</small>
                                                                         </div>
                                                                     </div>
@@ -162,7 +162,7 @@
                                                                         @endif
                                                                         <div class="chat-body">
                                                                             <div class="chat-content text-left {{($sub_flag == false)? 'mr-3':'' }}">
-                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <p>{!! nl2br($comment->comment) !!}</p>
                                                                                 <small>{{$comment->created_at}}</small>
                                                                             </div>
                                                                         </div>
