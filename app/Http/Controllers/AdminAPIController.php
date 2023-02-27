@@ -9939,7 +9939,7 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'ccd_rider' => $ccd_rider, 'routes' => $routes, 'rider_details' => ['id' => $rider_details->id, 'name' => $rider_name]]);
             }
         } else {
-            $operation_rider_category = OperationRidersCategory::all();
+            $operation_rider_category = OperationRidersCategory::where('id', 2)->get();
             return response()->json(['status' => 0, 'rider_category' => $operation_rider_category]);
         }
     }

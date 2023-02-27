@@ -336,7 +336,12 @@ class DeliveryController extends Controller
     public function delivery_note_index()
     {
         $setting_value = 0;
-        $operation_rider_category = OperationRidersCategory::all();
+        if(session('role_id') == 1){
+            $operation_rider_category = OperationRidersCategory::all();
+        }
+        else{
+            $operation_rider_category = OperationRidersCategory::where('id', 2)->get();
+        }
         $settings = GlobalSettings::where('type','rider_otp');
         if($settings->exists()) {
             $settings = $settings->first();
