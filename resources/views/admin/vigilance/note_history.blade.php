@@ -268,7 +268,7 @@
                                 row.push(values.rider);
                                 row.push(values.rider_type);
                                 row.push(values.hub);
-                                row.push(values.shipments_count);
+                                row.push(values.total_shipments_count);
                                 row.push(values.excess_shipments_count);
                                 row.push(values.verify_shipments_count);
                                 row.push(values.created_by);
