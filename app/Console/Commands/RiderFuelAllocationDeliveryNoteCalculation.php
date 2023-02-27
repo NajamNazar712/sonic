@@ -41,7 +41,7 @@ class RiderFuelAllocationDeliveryNoteCalculation extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->format('Y-m-d');
+        $date = Carbon::yesterday()->format('Y-m-d');
         $rider_wise_details = array();
 
         $delivery_notes = DeliveryNote::whereDate('cash_collected_at', $date);
