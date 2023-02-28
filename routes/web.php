@@ -1497,6 +1497,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\ReturnController@receive_return_shipments')->name('shipments');
             Route::post('upload_image', 'Admins\ReturnController@receive_return_note_image_upload')->name('upload_image');
             Route::post('undelivered/print', 'Admins\ReturnController@return_undelivered_print')->name('undelivered.print');
+            Route::post('reassign_rider', 'Admins\ReturnController@reassign_rider')->name('reassign_rider');
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
@@ -1527,6 +1528,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
             Route::post('shipment_details', 'Admins\ReturnController@return_revert_shipment_details')->name('shipment_details');
             Route::post('submit', 'Admins\ReturnController@return_revert_submit')->name('submit');
+        });
+
+        Route::prefix('rider_request')->name('rider_request.')->group(function () {
+            Route::get('', 'Admins\ReturnController@rider_request_note_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@rider_request_note_list')->name('list');
+            Route::post('shipments', 'Admins\ReturnController@request_note_shipments')->name('shipments');
+            Route::get('{id}/approve', 'Admins\ReturnController@request_note_approve')->name('approve');
+            Route::get('{id}/reject', 'Admins\ReturnController@request_note_reject')->name('reject');
+            Route::get('{id}/update', 'Admins\ReturnController@request_note_update')->name('update');
+            Route::get('{id}/update/list', 'Admins\ReturnController@request_note_update_list')->name('update.list');
+            Route::post('update/remove', 'Admins\ReturnController@request_note_remove')->name('update.remove');
+            Route::post('update/remove_bulk', 'Admins\ReturnController@request_note_remove_bulk')->name('update.remove.bulk');
+            Route::post('/add/tracking_number', 'Admins\ReturnController@add_shipments_in_request_note')->name('add.shipments');
         });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
