@@ -1723,6 +1723,9 @@ class ReturnController extends Controller
                                                 foreach ($pending_payment_shipments as $pending_payment_shipment) {
                                                     $shipper_payable += $pending_payment_shipment->payable;
                                                 }
+                                                if(($shipper_payable < 0) && ($shipper_payable > -1)){
+                                                    $shipper_payable = 0;
+                                                }
                                             }
                                         }
                                         if ($shipper_payable < 0) {
@@ -1803,6 +1806,9 @@ class ReturnController extends Controller
                                                         $pending_payment_shipments = $pending_payment_shipments->get();
                                                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
                                                             $shipper_payable += $pending_payment_shipment->payable;
+                                                        }
+                                                        if(($shipper_payable < 0) && ($shipper_payable > -1)){
+                                                            $shipper_payable = 0;
                                                         }
                                                     }
                                                 }

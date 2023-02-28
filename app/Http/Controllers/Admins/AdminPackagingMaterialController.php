@@ -602,6 +602,11 @@ class AdminPackagingMaterialController extends Controller
 
         if ($request_details != null) {
             if ($request_details->shipment_id == null) {
+                $user_id = $request_details->user_id;
+
+                if($user_id == 9358){
+                    return response()->json(['status' => 0, 'error' => "Packaging Material Request is of Retail, Please Contact IT Department!"]);
+                }
 
                 $total_charges = $request_details->amount;
 
@@ -622,8 +627,6 @@ class AdminPackagingMaterialController extends Controller
                 $warehouse = Warehouse::where('id', $warehouse_id)->first();
 
                 $warehouse_hub_id = $warehouse->hub_id;
-
-                $user_id = $request_details->user_id;
 
                 $setting = GlobalSettings::where('type', 'packaging_material')->first();
                 $wms_user_id = $setting->setting_value;

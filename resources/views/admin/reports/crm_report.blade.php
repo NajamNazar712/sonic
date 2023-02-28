@@ -606,7 +606,7 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[23, 'desc']],
+                order: [[25, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
@@ -647,8 +647,8 @@
                     {data: 'last_comment_external', name: 'ccse.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date_external', name: 'ccse.created_at', class: 'align-middle last_comment_date'},
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to', orderable: false, searchable: false},
-                    {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub'},
-                    {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},
+                    {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub', orderable: false, searchable: false},
+                    {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at', orderable: false, searchable: false},
                     {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
                     {data: 'rating_code', name: 'crr.name', class: 'align-middle rating_code'},
                     {data: 'responsibe_person_name', name: 'responsibe_person_name', class: 'align-middle responsibe_person_name'},
