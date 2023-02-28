@@ -10757,13 +10757,18 @@ class AdminReportsController extends Controller
             ->join('cities as c', 'c.id', '=', 'pr.city_id')
             ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
             ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
+            ->leftjoin('shipments_journey as arrsh', function ($join) {
+                $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
+                    ->where('arrsh.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
+            })
             ->leftjoin('shipments_journey as total_s', function ($join) {
                 $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
                     ->where('total_s.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
             
-            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
             ->where('v2_pickup_notes.status',1)
             ->groupBy('v2_pickup_notes.id');
 
