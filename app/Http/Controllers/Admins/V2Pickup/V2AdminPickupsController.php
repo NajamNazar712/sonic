@@ -3174,10 +3174,7 @@ class V2AdminPickupsController extends Controller
 
         $rider = V2PickupNote::join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
             ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-            ->leftjoin('v2_pickup_requests as pr', function ($join) {
-                $join->on('pr.id', '=', 'pnr.pickup_request_id')
-                    ->where('pnr.pickup_note_id', '=', 'v2_pickup_notes.id');
-            })
+            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
             ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
             ->leftjoin('shipments_journey as arrsh', function ($join) {
                 $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
@@ -3189,7 +3186,7 @@ class V2AdminPickupsController extends Controller
                     ->where('total_s.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
-            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('sum(pr.booked) AS total_shipment_count'), DB::raw('count(arrsh.id) as total_arrived_count'), DB::raw('count(total_s.id) as rider_picked'))
+            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipments'), DB::raw('count(arrsh.id) as total_arrived_count'), DB::raw('count(total_s.id) as rider_picked'))
             ->whereBetween('v2_pickup_notes.created_at', [$from, $to])
             ->groupBy('v2_pickup_notes.id');
 
