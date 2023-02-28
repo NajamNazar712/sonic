@@ -24,7 +24,7 @@
 
                                         <div class="col-12 form-group">
                                             <label class="mr-2 font-small-3"><b>Auto Verification Setting: </b></label>
-                                            <input type="checkbox" name="auto_verification_setting" id="bypass_setting" class="switchery auto_verification_setting" data-size="sm" data-switchery="true" @if($auto_verification == 1) checked @endif>
+                                            <input type="checkbox" name="auto_verification_setting" id="auto_verification_setting" class="switchery auto_verification_setting" data-size="sm" data-switchery="true" @if($auto_verification == 1) checked @endif>
                                         </div>
 
                                         <div class="col-12">
@@ -110,20 +110,6 @@
                         closeOnEsc: false
                     });
                     form.submit();
-                }
-            });
-
-
-            var auto_verification_setting = '{!! $auto_verification !!}';
-            if(auto_verification_setting == 0){
-                $("#shippers_wrapper").addClass('d-none');
-            }
-
-            $("#auto_verification_setting").change(function(){
-                if($("#auto_verification_setting").is(':checked') ){
-                    $("#shippers_wrapper").removeClass('d-none');
-                }else{
-                    $("#shippers_wrapper").addClass('d-none');
                 }
             });
 
