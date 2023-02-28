@@ -1325,7 +1325,6 @@ class Permission
             'human_resource.employee_penalty.index' => 829,
 
             'reports.one_link_charges_summary.index' => 824,
-			'reports.one_link_charges_summary.index' => 824,
 
             'settings.onelink_payment_charges.index' => 825,
 
@@ -1334,6 +1333,8 @@ class Permission
 
 			'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
+
+            'settings.auto_delivery_note_verification.index' => 836,
         ],
 
         'shipper' => [

@@ -7544,5 +7544,76 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
-    
+
+    public function auto_delivery_note_verification_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),636);
+        $auto_verification = false;
+        $excluded_hubs = array();
+
+        $hubs = City::select('id', 'name')->where('status', 1)->where('hub', 1)->get();
+
+        $auto_verification_setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
+
+        if($auto_verification_setting->exists()){
+            $auto_verification_setting  = $auto_verification_setting->first();
+            $auto_verification = $auto_verification_setting->setting_value;
+        }
+
+        $excluded_hubs_setting = GlobalSettings::where('type', 'delivery_note_auto_verification_exclude_hubs');
+
+        if ($excluded_hubs_setting->exists()) {
+            $excluded_hubs_setting = $excluded_hubs_setting->first();
+            $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
+        }
+
+        return view('admin.settings.last_mile.auto_delivery_note_verification')->with(['auto_verification' => $auto_verification,'hubs' => $hubs, 'excluded_hubs' => $excluded_hubs]);
+    }
+    public function auto_delivery_note_verification_store(Request $request){
+
+        if($request->has('auto_verification_setting')){
+            $auto_verification_setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
+
+            if(!$auto_verification_setting->exists()){
+                $auto_verification_setting = new GlobalSettings();
+                $auto_verification_setting->setting_value = 1;
+                $auto_verification_setting->type = 'delivery_note_auto_verification';
+                $auto_verification_setting->save();
+            }
+            else{
+                $auto_verification_setting = $auto_verification_setting->first();
+                $auto_verification_setting->setting_value = 1;
+                $auto_verification_setting->save();
+            }
+
+            if($request->has('excluded_hubs')){
+                $excluded_hubs = implode(',', $request->excluded_hubs);
+                $settings = GlobalSettings::where('type', 'delivery_note_auto_verification_exclude_hubs');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'delivery_note_auto_verification_exclude_hubs';
+                    $settings->setting_value = 1;
+
+                }
+                $settings->text = $excluded_hubs;
+                $settings->save();
+            }else{
+                GlobalSettings::where('type', 'delivery_note_auto_verification_exclude_hubs')->delete();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        }
+        else{
+            $auto_verification_setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
+
+            if($auto_verification_setting->exists()){
+                $auto_verification_setting = $auto_verification_setting->first();
+                $auto_verification_setting->setting_value = 0;
+                $auto_verification_setting->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        }
+    }
 }

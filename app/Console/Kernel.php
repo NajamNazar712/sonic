@@ -445,6 +445,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
 
+        $schedule->command('auto:deliverynoteverification')->dailyAt('00:05')->runInBackground();
+
 
     }
     /**

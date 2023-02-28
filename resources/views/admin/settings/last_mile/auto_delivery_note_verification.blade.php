@@ -1,0 +1,132 @@
+@extends('admin.layout.master')
+
+@section('title', 'Delivery Note Auto Verification Setting')
+
+@section('content')
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Delivery Note Auto Verification Setting
+                </h1>
+
+                <div class="card">
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <div class="row justify-content-center">
+                                <div class="col-md-6">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.auto_delivery_note_verification.store') }}" novalidate="novalidate">
+                                        {{ csrf_field() }}
+
+                                        <div class="col-12 form-group">
+                                            <label class="mr-2 font-small-3"><b>Auto Verification Setting: </b></label>
+                                            <input type="checkbox" name="auto_verification_setting" id="bypass_setting" class="switchery auto_verification_setting" data-size="sm" data-switchery="true" @if($auto_verification == 1) checked @endif>
+                                        </div>
+
+                                        <div class="col-12">
+
+                                            <div class="col-12 form-group">
+                                                <label class="mr-2 font-small-3"><b>Exclude Hub(s) </b></label>
+                                                <select name="excluded_hubs[]" id="excluded_hubs" class="form-control select2" multiple="multiple">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-md-12 form-group">
+                                            <button type="submit" class="col-md-4 btn btn-primary">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style>
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #64a0d2 !important;
+            border-color: #5587b4 !important;
+            color: #FFFFFF;
+        }
+        .select2-search.select2-search--inline, .select2-search.select2-search--inline input{
+            width: 100% !important;
+        }
+    </style>
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+
+
+            $('#excluded_hubs').select2({
+                placeholder:'Select Excluded Hubs',
+                width:'100%',
+                allowClear:true
+            });
+
+
+            @if(count($excluded_hubs) > 0)
+            var ids = @json($excluded_hubs);
+            $('#excluded_hubs').val(ids).trigger('change');
+            @endif
+
+
+            $('#settings_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Setting is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
+
+
+            var auto_verification_setting = '{!! $auto_verification !!}';
+            if(auto_verification_setting == 0){
+                $("#shippers_wrapper").addClass('d-none');
+            }
+
+            $("#auto_verification_setting").change(function(){
+                if($("#auto_verification_setting").is(':checked') ){
+                    $("#shippers_wrapper").removeClass('d-none');
+                }else{
+                    $("#shippers_wrapper").addClass('d-none');
+                }
+            });
+
+        });
+    </script>
+@endsection

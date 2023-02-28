@@ -3450,6 +3450,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@consignee_refused_otp_bypass_store')->name('store');
         });
 
+        Route::prefix('auto_delivery_note_verification')->name('auto_delivery_note_verification.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_delivery_note_verification_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@auto_delivery_note_verification_store')->name('store');
+        });
 
 	});
 
