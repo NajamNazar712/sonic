@@ -3174,7 +3174,10 @@ class V2AdminPickupsController extends Controller
 
         $rider = V2PickupNote::join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
             ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+            ->leftjoin('v2_pickup_requests as pr', function ($join) {
+                $join->on('pr.id', '=', 'pnr.pickup_request_id')
+                    ->where('pnr.pickup_note_id', '=', 'v2_pickup_notes.id');
+            })
             ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
             ->leftjoin('shipments_journey as arrsh', function ($join) {
                 $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
