@@ -60,15 +60,15 @@ class AdminRetailReportController extends Controller
                 $join->on('rc.id', '=', 'ru.category_id')
                     ->where('ru.category','=', DB::raw(2));
             })
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->join('retail_shipping_modes as rsm','rsm.id','=','rs.shipping_mode')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('retail_shipping_modes as rsm','rsm.id','=','rs.shipping_mode')
+            ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'shipments.pickup_address_id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as oz', 'oz.id', '=', 'oc.zone_id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('zones as dz', 'dz.id', '=', 'dc.zone_id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftjoin('retail_pickup_note_shipments as pns',function($join){
                 $join->on('pns.shipment_id','=','shipments.id')
@@ -76,7 +76,7 @@ class AdminRetailReportController extends Controller
                         DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
             })
 //            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -103,6 +103,21 @@ class AdminRetailReportController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
+
+            $from_id = DB::connection('reports')->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $sales->where('sj.id', '>=', $from_id)
+                        ->where('sj.id', '<=', $to_id);
+                }
+            }
+
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
 //            $yesterday = Carbon::now()->subDays(3);
