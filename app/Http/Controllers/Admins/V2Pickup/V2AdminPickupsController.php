@@ -1768,6 +1768,7 @@ class V2AdminPickupsController extends Controller
                     if ($retail_shipment->exists()) {
                         $shipment->actual_weight = $shipment->estimated_weight;
                     } else {
+                        $weight_flag = true;
                         $project_arrival_include_shippers = ProjectArrivalShipper::where('user_id', $shipment->user_id);
                         if($project_arrival_include_shippers->exists()){
                             if($shipment->actual_weight == null){
