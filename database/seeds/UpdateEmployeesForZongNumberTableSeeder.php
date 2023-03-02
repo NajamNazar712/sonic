@@ -827,7 +827,6 @@ class UpdateEmployeesForZongNumberTableSeeder extends Seeder
             array('phone_no' => '0316-2616074', 'trax_id' => 'Trax07600'),
             array('phone_no' => '0316-2616182', 'trax_id' => 'Trax02172'),
             array('phone_no' => '0316-2600143', 'trax_id' => 'Trax09337'),
-            array('phone_no' => '0335-2282139', 'trax_id' => 'Trax00348'),
         );
 
         foreach ($details as $detail){
