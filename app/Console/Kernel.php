@@ -135,7 +135,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         'App\Console\Commands\DailyAutoCommentForCRMClaims',
-		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',
+//		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         ];
 
@@ -161,7 +161,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
-        $schedule->command('email:weeklyattendencesummary')->weeklyOn(1,'09:00')->runInBackground();
+//        $schedule->command('email:weeklyattendencesummary')->weeklyOn(1,'09:00')->runInBackground();
         $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
         $endshifts = EmployeeShift::get(); 
         foreach($endshifts as $shift)
