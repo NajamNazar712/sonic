@@ -834,7 +834,7 @@ class UpdateEmployeesForZongNumberTableSeeder extends Seeder
             if($employee->exists()){
                 $employee = $employee->first();
 
-                $employee->phone_number = $detail['phone_no'];
+                $employee->official_phone_number = $detail['phone_no'];
                 $employee->save();
 
                 if($employee->employee_type_id == 1){
@@ -843,7 +843,7 @@ class UpdateEmployeesForZongNumberTableSeeder extends Seeder
                     if($admin->exists()){
                         $admin = $admin->first();
 
-                        $admin->phone_number = $detail['phone_no'];
+                        $admin->official_phone_number = $detail['phone_no'];
                         $admin->save();
                     }
                 }
