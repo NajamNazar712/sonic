@@ -15,7 +15,7 @@ class AttendanceAdjustmentShiftWise extends Command
      *
      * @var string
      */
-    protected $signature = 'employee:attendenceadjustment';
+    protected $signature = 'employee:attendenceadjustment {shift_id}';
 
     /**
      * The console command description.
@@ -41,12 +41,14 @@ class AttendanceAdjustmentShiftWise extends Command
      */
     public function handle()
     {
+        $shift_id = $this->argument('shift_id');
         $yesterday = Carbon::yesterday()->format('Y-m-d');
         $yesterdayname = Carbon::yesterday();
         $dayname =  $yesterdayname->format('l');
         $dateAndDay =  $yesterday.' on '.$dayname;
         $check_employee_attendences = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')->where('ea.attendance_date',"!=",$yesterday)
         ->whereNotNull('official_email')
+        ->where('shift_id', $shift_id)
         ->select('employees.official_email as email','ea.employee_id as employee_attendence_id','ea.clock_in as clock_in')->get();
         foreach($check_employee_attendences as $check_employee_attendence)
         {

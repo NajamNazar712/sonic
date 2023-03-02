@@ -163,15 +163,19 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
-//        $schedule->command('email:weeklyattendencesummary')->weeklyOn(1,'09:00')->runInBackground();
-//        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
-//        $endshifts = EmployeeShift::get();
-//        if($endshifts){
-//            foreach($endshifts as $shift)
-//            {
-//                $schedule->command('employee:attendenceadjustment')->dailyAt($shift->end_time)->runInBackground();
-//            }
-//        }
+        $schedule->command('email:weeklyattendencesummary')->weeklyOn(1,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
+        $endshifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
+        if($endshifts){
+            foreach($endshifts as $shift)
+            {
+                // run 1 hour before from the shift ends, to get save from the next day switch as well
+                $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
+                $schedule->command('employee:attendenceadjustment', [$shift->id])
+                ->dailyAt($dailyAt)
+                ->runInBackground();
+            }
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
