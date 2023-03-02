@@ -1217,6 +1217,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 //HBL Konnect
                 Route::post('transactions/information', 'Admins\DeliveryController@hbl_konnect_transactions_information')->name('transactions.information');
                 //HBL Konnect
+                Route::post('snatch_collect', 'Admins\CashCollectionController@pending_cash_collect_snatch')->name('snatch_collect');
 
             });
             Route::prefix('retail')->name('retail.')->group(function () {

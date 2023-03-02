@@ -72,6 +72,9 @@
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
+                        <th class="border-primary border-darken-1">Deposit Amount</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Deposit Slip</th>
                     </tr>
                     </thead>
                 </table>
@@ -229,6 +232,10 @@
         }
         .selectize-control {
             width: 300px !important;
+        }
+        tr.pcc_snatch_deduction {
+            background-color: yellow;
+            color: black;
         }
     </style>
 @endsection
@@ -488,10 +495,13 @@
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data:'deposit_amount' ,name: 'dcc.amount', class: 'align-middle deposit_amount', orderable: false},
+                    { data:'remarks' ,name: 'dcc.remarks', class: 'align-middle remarks', orderable: false},
+                    { data:'deposit_slip_view' ,name: 'deposit_slip_view', class: 'align-middle deposit_slip_view', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data.status == 1){
+                    if(data.status == 1 && data.cash_collection_status == 1){
                         $('td:eq(0)', row).addClass('select-checkbox');
                     }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
@@ -510,7 +520,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view')) {
                             $(td).appendTo($(search));
                         }
                         else {
