@@ -42,7 +42,7 @@ class AdminShipmentScanningHistoryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $flag = true;
-                $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->get();
+                $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNull('piece_id')->get();
             }
             else {
                 $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);

@@ -935,7 +935,13 @@ class V2AdminPickupsController extends Controller
 
         $unassigned_pickup_requests = array();
 
-        $pickup_rider_id = $request->rider_id;
+        $settings = GlobalSettings::where('type', 'global_rider_id');
+        $pickup_rider_id = null;
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $pickup_rider_id = $settings->setting_value;
+        }
+
         if ($pickup_rider_id) {
             $unassigned_pickup_requests = explode(',', $request->pickup_request_ids);
         }
@@ -1841,7 +1847,13 @@ class V2AdminPickupsController extends Controller
 
         $unassigned_pickup_requests = array();
 
-        $pickup_rider_id = $request->rider_id;
+        $settings = GlobalSettings::where('type', 'global_rider_id');
+        $pickup_rider_id = null;
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $pickup_rider_id = $settings->setting_value;
+        }
+
         if ($pickup_rider_id) {
             $unassigned_pickup_requests = explode(',', $request->pickup_request_ids);
         }
