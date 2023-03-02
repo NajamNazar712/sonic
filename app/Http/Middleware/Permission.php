@@ -381,6 +381,10 @@ class Permission
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
             'return.confirmation_pending_sms' => 675,
+            'return.rider_request.approve' => 833,
+            'return.rider_request.reject' => 834,
+            'return.rider_request.update' => 835,
+
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -1145,6 +1149,9 @@ class Permission
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
 
+            'human_resource.fuel_allocation.index' => 831,
+            'human_resource.fuel_allocation.list' => 831,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
@@ -1289,6 +1296,9 @@ class Permission
             'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
 
+            'vigilance.note.index' => 770,
+            'vigilance.note.history.index' => 771,
+
             'settings.booking_destination_keyword.index' => 772,
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
@@ -1315,6 +1325,8 @@ class Permission
             'tracking.shipment_position.track' => 822,
             'tracking.shipment_position.upload' => 822,
             'tracking.shipment_position.list' => 822,
+
+            'human_resource.employee_penalty.index' => 829,
 
             'reports.one_link_charges_summary.index' => 824,
 			'reports.one_link_charges_summary.index' => 824,

@@ -43,7 +43,6 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
-                        <th class="border-primary border-darken-1">Vigilance Verification</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
@@ -277,7 +276,6 @@
 
                             head.push('S.No');
                             head.push('Delivery Note No.');
-                            head.push('Vigilance Verification');
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Business Category');
@@ -301,7 +299,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
-                                row.push(values.vigilance_verification_excel);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.business_category);
@@ -369,7 +366,6 @@
                         }
                     },
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                    {data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification', orderable: false},
 
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
@@ -444,11 +440,6 @@
                         '<option value="1">Domestic</option>' +
                         '<option value="2">International</option>' +
                         '</select>';
-                  /*  var vigilance_drop = '<select name="vigilance_select" id="vigilance_select" class="select2 form-control">' +
-                        '<option value="1">Yes</option>' +
-                        '<option value="2">Partial</option>' +
-                        '<option value="3">No</option>' +
-                        '</select>';*/
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -465,11 +456,6 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        /*} else if ($(header).is('.vigilance_verification')) {
-                            $(vigilance_drop).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);*/
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -492,12 +478,6 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    /*$("#vigilance_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Verification",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });*/
                     
                     this.api().table().columns.adjust();
                 }

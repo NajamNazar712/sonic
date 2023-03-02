@@ -25,8 +25,15 @@
                                                     <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Select Date">
                                                 </div>
                                             </div>
-
-
+                                            <div class="col">
+                                                <div class="form-group">
+                                                    <select name="segment" id="segment_select" class="form-control select2" data-msg-required="Segment is required" data-rule-required="true" required="required">
+                                                        @foreach($segments as $segment)
+                                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <div class="col">
                                                 <div class="form-group">
                                                     <select name="sales_person[]" id="sales_person_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Sales Person is required" data-rule-required="true" required="required">
@@ -94,6 +101,7 @@
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Sales Person</th>
+                                        <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Start Date</th>
                                         <th class="border-primary border-darken-1">End Date</th>
                                         <th class="border-primary border-darken-1">Target Shipments/Day</th>
@@ -153,6 +161,10 @@
                 placeholder:'Sales Person Select',
                 width:'100%'
             });
+            $('#segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Segment',
+                width:'100%'
+            });
             $('#settings_form .class').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -189,6 +201,7 @@
 
                             head.push('S.No');
                             head.push('Sales Person');
+                            head.push('Segment');
                             head.push('Start Date');
                             head.push('End Date');
                             head.push('Target Shipments/Day');
@@ -202,6 +215,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.sales_person);
+                                row.push(values.segment);
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
@@ -317,6 +331,7 @@
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
+                    {data: 'segment', name:'spts.name', class: 'align-middle segment'},
                     {data: 'start_date', name: 'sale_person_targets.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_targets.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_targets.target_days', class: 'align-middle target_days'},

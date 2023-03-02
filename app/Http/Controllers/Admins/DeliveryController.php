@@ -176,7 +176,7 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)'));
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
@@ -279,6 +279,27 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->addColumn('consignee_phone',function ($shipper){
+                $consignee_phone = '';
+                $consignee_phone .= $shipper->consignee_phone_number_1;
+                if($shipper->consignee_phone_number_2 != null){
+                    $consignee_phone .= "| ".$shipper->consignee_phone_number_2;
+                }
+                return $consignee_phone;
+
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->addColumn('sub_station', function ($shipments) {
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
@@ -800,6 +821,7 @@ class DeliveryController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
+                ShipmentScanningJourneyController::add($shipment_id, 4, 1, Auth::id(), null, null, $shipment_piece->id);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -1089,12 +1111,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->leftjoin('vigilance_verifications as vv', function ($join) {
-                $join->on('vv.delivery_note_id', '=', 'delivery_notes.id')
-                    ->where('vv.id', '=',
-                        DB::raw('(select max(id) from vigilance_verifications where vigilance_verifications.delivery_note_id = delivery_notes.id)'));
-            })
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','vv.verify_shipments_count','vv.excess_shipments_count','delivery_notes.created_via_app as created_via'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','delivery_notes.created_via_app as created_via'])
             ->where('delivery_notes.status', 0);
 
 
@@ -1210,49 +1227,6 @@ class DeliveryController extends Controller
                     $query->where('oc.business_category_id', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
-                }
-            })
-            ->addColumn('vigilance_verification', function ($result) {
-
-                if ($result->shipments_count == $result->verify_shipments_count) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle verified_count">Yes</button>';
-                } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle partial_count">Partial</button>';
-                }else{
-                    return '<strong class="text-danger">No</strong>';
-                }
-            })
-            ->addColumn('vigilance_verification_excel', function ($result) {
-
-                if ($result->shipments_count == $result->verify_shipments_count) {
-                    return 'Yes';
-                } elseif($result->verify_shipments_count != 0 || $result->excess_shipments_count != 0) {
-                    return 'Partial';
-                }else{
-                    return 'No';
-                }
-            })
-            ->filterColumn('vigilance_verification', function ($query, $keyword) {
-                 $keyword = strtolower($keyword);
-                if ($keyword == 'yes') {
-                    //verified
-                    $query->where('vv.verify_shipments_count', '=', DB::raw('shipments_count'));
-
-                } elseif($keyword == 'partial') {
-                    //partial
-                    $query->where('vv.verify_shipments_count', '<>', DB::raw('shipments_count'))
-                    ->where(function ($query){
-                        $query->where('vv.excess_shipments_count','<>',0)
-                        ->orWhere('vv.verify_shipments_count','<>',0);
-                    });
-
-                }
-                elseif($keyword == 'no'){
-                    //no
-                    $query->where('vv.verify_shipments_count', '=', null);
-                }
-                else{
-                        $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
@@ -5495,7 +5469,7 @@ class DeliveryController extends Controller
                 return $query->where('station_deposit_notes.id', '=', $keyword);
             })
             ->addColumn('deposit_slip', function ($sdn) {
-                $now = Carbon::now();
+
                 if ($sdn->deposit_slip == null && $sdn->deposit_slip_status == 1) {
                     return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
@@ -6691,7 +6665,7 @@ class DeliveryController extends Controller
             ->select('rider_deliveries.id as id', 's.tracking_number as tracking_number', 's.payment_mode_id as payment_mode_id', 'rider_deliveries.ccd_image as ccd_image', 's.id as shipment_id')->get();
         if (count($rider_deliveries) > 0) {
             $sorted_array = array();
-            $now = Carbon::now();
+
             foreach ($rider_deliveries as $rider_delivery) {
                 $sorted_array[$rider_delivery->id]['tracking_number'] = $rider_delivery->tracking_number;
                 $image = '';
@@ -6787,12 +6761,7 @@ class DeliveryController extends Controller
             ->leftjoin('cities as c','c.id','=','riders.city_id')
             ->leftjoin('zones as zn','zn.id','=','c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftjoin('vigilance_verifications as vv', function ($join) {
-                $join->on('vv.delivery_note_id', '=', 'delivery_notes.id')
-                    ->where('vv.id', '=',
-                        DB::raw('(select max(id) from vigilance_verifications where vigilance_verifications.delivery_note_id = delivery_notes.id)'));
-            })
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','vv.verify_shipments_count','vv.excess_shipments_count','delivery_notes.created_via_app as created_via','riders.operation_rider_id'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count','delivery_notes.created_via_app as created_via','riders.operation_rider_id'])
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
@@ -6961,29 +6930,6 @@ class DeliveryController extends Controller
                     return 'Partial';
                 }else{
                     return 'No';
-                }
-            })
-            ->filterColumn('vigilance_verification', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-                if ($keyword == 'yes') {
-                    //verified
-                    $query->where('vv.verify_shipments_count', '=', DB::raw('shipments_count'));
-
-                } elseif($keyword == 'partial') {
-                    //partial
-                    $query->where('vv.verify_shipments_count', '<>', DB::raw('shipments_count'))
-                        ->where(function ($query){
-                            $query->where('vv.excess_shipments_count','<>',0)
-                                ->orWhere('vv.verify_shipments_count','<>',0);
-                        });
-
-                }
-                elseif($keyword == 'no'){
-                    //no
-                    $query->where('vv.verify_shipments_count', '=', null);
-                }
-                else{
-                    $query->whereRaw('false');
                 }
             })
             ->editColumn('operation_rider_id', function ($deliveries) {
@@ -7966,7 +7912,7 @@ class DeliveryController extends Controller
             $slips = StationDepositNoteSlip::where('station_deposit_note_id', $sdn_id)->get();
             if (count($slips) > 0) {
                 $sorted_array = array();
-                $now = Carbon::now();
+
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;

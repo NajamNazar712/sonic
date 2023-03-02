@@ -18,6 +18,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">Segment</th>
                         <th class="border-primary border-darken-1">Start Date</th>
                         <th class="border-primary border-darken-1">End Date</th>
                         <th class="border-primary border-darken-1">Target Shipments/Day</th>
@@ -62,6 +63,7 @@
 
                             head.push('S.No');
                             head.push('Sales Person');
+                            head.push('Segment');
                             head.push('Start Date');
                             head.push('End Date');
                             head.push('Target Shipments/Day');
@@ -74,6 +76,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.sales_person);
+                                row.push(values.segment);
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
@@ -115,6 +118,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
+                    {data: 'segment', name:'spts.name', class: 'align-middle segment'},
                     {data: 'start_date', name: 'sale_person_target_logs.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_target_logs.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_target_logs.target_days', class: 'align-middle target_days'},

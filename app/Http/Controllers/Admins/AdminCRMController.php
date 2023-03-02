@@ -688,7 +688,7 @@ class AdminCRMController extends Controller
                 $all_crm_request_ids_for_shipment = CrmRequest::where('shipment_id',$crm_request->shipment_id)->pluck('id')->toArray();
                 $crm_request_ids = $all_crm_request_ids_for_shipment;
             }else{
-                $crm_request_ids = [$id];
+                $crm_request_ids[] = $id;
             }
             $crm_status_history = CrmRequestStatusHistory::whereIn('crm_request_id', $crm_request_ids)->get();
             $crm_tagging_history = CrmRequestTaggingHistory::where('crm_request_id', $id)->get();
@@ -1287,7 +1287,7 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id')
+			->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
 
@@ -1341,6 +1341,24 @@ class AdminCRMController extends Controller
             }
         }
         $datatables = Datatables::of($in_process_request)
+            ->setRowAttr([
+                'class' => function ($shipments) {
+                    if($shipments->case_nature_id == 4){
+                        $temp_date_created = Carbon::parse($shipments->created_at)->format("Y-m-d 00:00:00");
+                        $date_created = Carbon::parse($temp_date_created);
+                        $today = Carbon::today();
+                        $workint_days = $date_created->diffInDaysFiltered(function(Carbon $date) {
+                            return !$date->isWeekend();
+                        }, $today);
+                        if ($workint_days > 10) {
+                            return 'highalert_row';
+                        }
+                    }
+                    else{
+                        return '';
+                    }
+                }
+            ])
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
             })
@@ -2647,6 +2665,22 @@ class AdminCRMController extends Controller
                     if(CrmPaymentShipment::where('crm_request_id', $request->req_id)->exists()){
                         CrmPaymentShipment::where('crm_request_id', $request->req_id)->delete();
                     }
+
+                    if($crm_request->case_nature_id == 4){
+                        $comment = 'Dear Customer,
+Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+                                    
+UAN# 021-111-11-8729
+WhatsApp # 0348-111-8729
+info@trax.pk
+Live Chat Messenger
+                                    
+Regards,
+TRAX-Customer Experience';
+
+                        CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                    }
+
                     return redirect()->back()->with(['success' => 'Request marked as Resolved']);
                 } else {
                     return redirect()->back()->with(['error' => 'Request is already marked as Resolved']);

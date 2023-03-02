@@ -33,7 +33,9 @@ use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Zone;
+use App\Http\Models\Notification;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
@@ -47,6 +49,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPExcel_Style_Fill;
 use PHPExcel_Cell;
+use Illuminate\Support\Facades\URL;
 
 class AdminReportsEmailController extends Controller
 {
@@ -125,6 +128,12 @@ class AdminReportsEmailController extends Controller
                         $target_revenue_achieved = 0;
                     }
                 }
+
+                $target->achieved_shipments = $sale_person_shipment->shipment_count;
+                $target->achieved_shipments_percentage = $target_shipments_achieved;
+                $target->achieved_revenue = $revenue[$sale_person_shipment->admin_id];
+                $target->achieved_revenue_percentage = $target_revenue_achieved;
+                $target->save();
             }
             $sale_person_array[] = ['serial' => $serial, 'Admin' => $sale_person_shipment->admin, 'Achieved Shipments' => $sale_person_shipment->shipment_count, 'Target Shipments' => $target_shipments, 'Target Achieved %' => round($target_shipments_achieved, 2).'%', 'Achieved Revenue' => $revenue[$sale_person_shipment->admin_id], 'Target Revenue' => $all_shipments_target_revenue, 'Target Revenue Achieved %' => round($target_revenue_achieved, 2).'%', 'Avg Revenue/Parcel' => round($avg_revenue[$sale_person_shipment->admin_id], 2), 'Contribution' => ($contribution[$sale_person_shipment->admin_id]) * 100];
             $sale_person_entry = new SalePersonNumbers();
@@ -2903,5 +2912,81 @@ class AdminReportsEmailController extends Controller
         }
 
     }
-
+    static public function weekly_attendence_summary($employees_attendance)
+    {
+        $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date.$employees_attendance->start_time)->addMinutes((int)$employees_attendance->extension_minutes);
+        $clock_in = Carbon::parse($employees_attendance->clock_in_datetime);
+        $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+        $leave_status = '';
+        $late = '';
+        $attendence_adjustment = '';
+        if($employees_attendance['leave_status'] == 0)
+        {
+            $leave_status = "No";
+        }
+        else
+        {
+            $leave_status= "Yes";
+        }
+        if($time_diff > 0)
+        {
+            $late="Yes";
+        }
+        else
+        {
+            $late="No";  
+        }
+        if($employees_attendance['status'] == 0)
+        {
+            $attendence_adjustment="No";
+        }
+        else
+        {
+            $attendence_adjustment="Yes";
+        }
+    
+        $weekly_attendance_summary = ['Trax ID' => $employees_attendance['trax_id'], 'Name' => $employees_attendance['name'], 'Designation' => $employees_attendance['designation'], 'Leaves Availed' => $leave_status , 'Late' => $late, 'Attendance Adjustment' => $attendence_adjustment, 'Clock In' => $employees_attendance['clock_in_datetime'], 'Clock Out' => $employees_attendance['clock_out_datetime']];
+        return $weekly_attendance_summary;
+    }
+    static public function weekly_attendence_summary_excel($summary,$line_manager)
+    {
+        
+        $date = Carbon::now();
+        $create_excel['header'] = ['Trax ID','Name', 'Designation', 'Leaves Availed', 'Late', 'Attendance Adjustment','Clock In','Clock Out'];
+        foreach ($summary as $key => $value) {
+            $create_excel[] = $value;
+        }
+        $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+        $sps_count  = count($create_excel); 
+        
+        $ts = "D3:D" . $sps_count;
+        $tas = "E3:E" . $sps_count;
+        $tr = "G3:G" . $sps_count;
+        $tar = "H3:H" . $sps_count;
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->fromArray($create_excel, NULL, 'A2', true);
+        $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+        $sheet->getStyle($tr)->getFill();
+        $sheet->getStyle($tar)->getFill();
+        $sheet->setTitle('Weekly Attendence Summary');
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+        header('Cache-Control: max-age=0');
+        $date_file_name = Carbon::parse($date)->format('Y_m_d').'_'.$line_manager;
+        $time_string = Carbon::now()->toTimeString();
+        $time_string = Carbon::parse($time_string)->format('h_i_s');
+        $file_name_without_path = "reports/weekly_attendence_summary_report_" . $date_file_name . ".xlsx";
+        $file_name = public_path() . "/reports/weekly_attendence_summary_report_" . $date_file_name . ".xlsx";
+        $writer->save($file_name);
+        $file = url('/'). '/' . $file_name_without_path;
+        $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+        return $link;
+    }
 }

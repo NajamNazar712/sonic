@@ -66,6 +66,7 @@
                             <th class="border-primary border-darken-1">Received By</th>
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Address</th>
+                            <th class="border-primary border-darken-1">Attempts Count</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Collection Charges</th>
@@ -443,6 +444,7 @@
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'current_status_name',name: 'current_status_name', class: 'align-middle current_status_name',orderable: false, searchable: false},
                     {data:'return_address',name: 'return_address', class: 'align-middle return_address',orderable: false, searchable: false},
+                    {data:'attempts',name: 'attempts', class: 'align-middle attempts',orderable: false, searchable: false},
                     {data:'return_city',name: 'return_city', class: 'align-middle return_city',orderable: false, searchable: false},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'charges',name: 'shipments.charges', class: 'align-middle charges'},

@@ -657,6 +657,11 @@
                                                 href="{{ route('admin.return.confirmation_pending_manual_sms') }}">RCP
                                                 Manual SMS Log</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(48, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.return.rider_request.index') }}">Pending
+                                                Return Note Requests</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -1179,17 +1184,18 @@
                     @endif
 
                     @if (session('role_id') == 1 || count(array_intersect([770, 771], session('permissions'))) !== 0)
-                        <li class=" nav-item"><a href="#"><span class="menu-title">Vigilance
-                                    Verification</span></a>
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Vigilance</span></a>
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(770, session('permissions')))
                                     <li><a class="menu-item"
-                                            href="{{ route('admin.vigilance.verification.index') }}">Vigilance
-                                            Delivery Note</a></li>
+                                            href="{{ route('admin.vigilance.note.index') }}">Note</a></li>
                                 @endif
                                 @if (session('role_id') == 1 || in_array(771, session('permissions')))
                                     <li><a class="menu-item"
-                                            href="{{ route('admin.vigilance.verification.history.index') }}">History</a>
+                                            href="{{ route('admin.vigilance.verification.history.index') }}">History (Old)</a>
+                                    </li>
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.vigilance.note.history.index') }}">History</a>
                                     </li>
                                 @endif
 
@@ -2664,8 +2670,7 @@
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human
                         Resource</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 ||
-                            count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 829, 831], session('permissions'))) !== 0)
 
                         <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs') }}">Download
                                 Docs</a></li>
@@ -2723,23 +2728,24 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(613, session('permissions')))
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.human_resource.leave.index') }}">Employee Leaves</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(717, session('permissions')))
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.human_resource.adjustment.index') }}">Employee Attendance
-                                    Adjustment</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.adjustment.index')}}">Employee Attendance Adjustment</a></li>
                         @endif
-
+                        @if (session('role_id') == 1 || in_array(829, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_penalty.index')}}">Employee Penalty</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(831, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.fuel_allocation.index')}}">Rider Fuel Allocation</a></li>
+                        @endif
+                            
                     @endif
-                    <li><a class="menu-item"
-                            href="{{ route('admin.human_resource.employee_confirmation.index') }}">Employee
-                            Confirmation</a></li>
-                    @if (Auth::user()->trax_id != null)
-                        <li><a class="menu-item"
-                                href="{{ route('admin.human_resource.payslip.index') }}">Payslips</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.human_resource.employee_confirmation.index')}}">Employee Confirmation</a></li>
+                    @if (Auth::user()->trax_id != NULL)
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
+                    
 
                 </ul>
             </li>

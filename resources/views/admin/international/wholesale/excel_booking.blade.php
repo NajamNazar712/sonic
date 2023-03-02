@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Iota Code</th>
                         <th class="border-primary border-darken-1">Type</th>
                         <th class="border-primary border-darken-1">Weight</th>
                         <th class="border-primary border-darken-1">Pieces</th>
@@ -202,6 +203,7 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Iota Code');
                             head.push('Type');
                             head.push('Weight');
                             head.push('Pieces');
@@ -224,6 +226,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.Iota Code);
                                 row.push(values.type);
                                 row.push(values.weight);
                                 row.push(values.pieces);
@@ -263,7 +266,7 @@
                 pagingType: 'full_numbers',
                 ajax: '{{ route('admin.international.wholesale.excel.list') }}',
                 rowId: 'shipment_id',
-                order: [14, 'desc'],
+                order: [15, 'desc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'shipment_id', name: 'wholesale_shipments.id', class: 'align-middle shipment_id'},
@@ -271,6 +274,7 @@
                     {data: 'shipper_name', name: 'wu.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'o.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'd.name', class: 'align-middle destination'},
+                    {data: 'iota_code', name: 'd.iota_code', class: 'align-middle iota_code'},
                     {data: 'type', name: 'wholesale_shipments.type', class: 'align-middle type'},
                     {data: 'weight', name: 'wholesale_shipments.weight', class: 'align-middle type'},
                     {data: 'pieces', name: 'wholesale_shipments.pieces', class: 'align-middle pieces'},

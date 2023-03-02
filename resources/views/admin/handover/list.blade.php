@@ -12,14 +12,40 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
+                            <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
                         </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_from_admin" id="search_from_admin" class="form-control select2">
+                                @foreach($handover_admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_to_admin" id="search_to_admin" class="form-control select2">
+                                @foreach($handover_admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
 
@@ -133,9 +159,25 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_from_admin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select From Person',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_to_admin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select To Person',
+                width:'100%',
+                allowClear:true
+            });
             function print(ids) {
 				$.ajax({
 					url: '{!! route('admin.handover.list.print') !!}',
@@ -332,7 +374,9 @@
                     extend: 'excelHtml5',
                     title: 'Handover List',
                     text:'<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },
+
+                    'reset'
 
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -352,8 +396,10 @@
                 ajax: {
                     url: '{{ route('admin.handover.list.list') }}',
                     data: function (d) {
-                       
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_from_admin = $('#search_from_admin').val();
+                        d.search_to_admin = $('#search_to_admin').val();
                     }
                 },
                 rowId: 'handover_id',
@@ -371,8 +417,8 @@
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
-                    {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count'},
-                    {data: 'received_by', name: 'a.name', class: 'align-middle received_by'},
+                    {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count', orderable: false, searchable: false},
+                    {data: 'received_by', name: 'ad.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -385,18 +431,35 @@
                     }
                 },
                 initComplete: function() {
-                    this.api().table().columns.adjust();
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.remaining_shipment_count')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
                 }
             });
 
-            // $('#search_filter_btn').on('click',function () {
-            //     table.draw();
-            // });
-
-            $('#search_tracking').on('change',function () {
+            $('#search_filter_btn').on('click',function () {
                 table.draw();
-
             });
+
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));

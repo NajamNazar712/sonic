@@ -111,7 +111,7 @@ class AdminAttendanceController extends Controller
             $disabled_users = Admin::leftjoin('employees as e','e.id','admins.employee_id')->where('admins.status', '!=', 1)->select('e.id','e.name')->get();
             $disabled_riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')->where('riders.status', '!=', 1)->select('e.id', 'e.name')->get();
         }
-
+       
         return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "disabled_admins" => $disabled_users, "trax_ids" => $trax_ids, "riders" => $riders, "disabled_riders" => $disabled_riders, "cnics"=>$cnic]);
     }
 
@@ -159,7 +159,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
             ->leftjoin('employee_statuses as es', 'es.id', 'a.status_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'a.rider_type_id')
-            ->select('a.name as name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation','rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'a.cnic as cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as shift', 'a.status_id as status_id','es.name as status_name','c.hub_id');
+            ->select('a.name as name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation','rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'a.cnic as cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as shift', 'a.status_id as status_id','es.name as status_name','c.hub_id','aes.start_time as aes_start_time','aes.end_time as aes_end_time','aes.extension_minutes as aes_extension_minutes','employee_attendances.leave_status as employee_attendence_leave');
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70 && session('role_id') != 104) {
             if(session('department_id') != 6){
@@ -194,6 +194,25 @@ class AdminAttendanceController extends Controller
         
         
         $datatable = Datatables::of($attendances)
+        ->setRowAttr([
+            'class' => function ($attendances){
+                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendances->attendance_date.$attendances->aes_start_time)->addMinutes((int)$attendances->aes_extension_minutes);
+                $clock_in = Carbon::parse($attendances->clock_in_datetime);
+                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                if($attendances->employee_attendence_leave == 1)
+                {
+                    return "leave";
+                }
+                if($attendances->clock_in_datetime == null)
+                {
+                    return "absent";
+                }
+                elseif ($time_diff > 0) {
+                    return "late";
+                    // $datum["status"] = 2;//Late
+                }
+            },
+        ])
             ->editColumn('clock_in', function ($employee) {
                 if ($employee->clock_in_datetime) {
                     return Carbon::parse($employee->clock_in_datetime)->format("Y-m-d H:i:s");

@@ -132,6 +132,8 @@ use App\Jobs\ProcessAgentCallMonitoring;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Models\Rider\RiderReturnNoteRequest;
+use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
 use App\RiderMainCategory;
@@ -2950,8 +2952,6 @@ class RiderAPIController extends Controller
             $shipment_status = $pickup_requests->shipper_status_id;
             if ($pickup_requests->current_rider_id == $rider_id) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
-            } else if ($pickup_requests->current_rider_id != null) {
-                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned']);
             } elseif ($shipment_status != 1 && $shipment_status != 17) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
             } else {
@@ -2991,8 +2991,6 @@ class RiderAPIController extends Controller
 
             if ($pickup_requests->current_rider_id == $rider_id) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
-            } else if ($pickup_requests->current_rider_id != null) {
-                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned']);
             } else {
                 $pickup_request_id = $pickup_requests->pickup_request_id;
                 $riders = array();
@@ -13365,6 +13363,492 @@ class RiderAPIController extends Controller
             $return_assign_log->status = 2;
             $return_assign_log->assigned_by = 346;
             $return_assign_log->save();
+        }
+    }
+
+    public function return_create_index(Request $request)
+    {
+        $routes = Route::where('status', 1)->where('city_id', $request->rider_hub)->get();
+        return response()->json(['status' => 0, 'routes' => $routes]);
+    }
+
+    public function get_shipment_details(Request $request)
+    {
+        $rules = [
+            'tracking' => ['required']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_hub = $request->rider_hub;
+            $rider_id = $request->rider_id;
+            // $role_id = $request->admin_role_id;
+            // $admin_id = $request->admin_id;
+            // $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+            $different_city_statuses_2 = array(22, 24, 27, 29, 33, 35, 42, 44, 45, 46, 47, 48, 60);
+            $different_city_statuses = array(22, 24, 27, 29, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+            $allowed_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 680);
+            $return_note_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 4, 60);
+            $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $allowed_statuses);
+            $status = '';
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if (!$dispute_check) {
+                    return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
+                }
+                ShipmentScanningJourneyController::add($shipment->id, 7, 5, $rider_id, null, null);
+                if ($request->shipper_id != null) {
+                    $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
+                    if ($request->shipper_id != $shipment->user_id) {
+                        if (in_array($request->shipper_id, $mandatory_shipper) || in_array($shipment->user_id, $mandatory_shipper)) {
+                            return response()->json(['status' => 1, 'message' => 'Different Shipper, scan shipments of same shipper!.']);
+                        }
+                    }
+                }
+                if ($shipment->return_address_id != NULL) {
+                    $destination_id = $shipment->return_address->city_id;
+                } else {
+                    $destination_id = $shipment->pickup_address->city_id;
+                }
+                $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
+                $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
+                // if ($role_id == 1 || in_array($destination_id, $admin_hubs)) {
+                if ($destination_id == $rider_hub) {
+                    $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
+                    if (!$request->has('hub_id')) {
+                        if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $return_note_statuses))) {
+                            if ($shipment->return_address_id != NULL) {
+                                $destination_city_id = $shipment->return_address->city_id;
+                            } else {
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                            }
+
+                            $destination_city = City::find($destination_city_id);
+                            if ($destination_city->id == $destination_city->hub_id) {
+                                $destination = $destination_city->name;
+                                $hub = $destination_city->id;
+                            } else {
+                                $hubid = $destination_city->hub_id;
+                                $destinationHub = City::find($hubid);
+                                $destination = $destinationHub->name;
+                                $hub = $destinationHub->id;
+                            }
+                            $service = $shipment->booking_type->booking_type;
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                            if ($shipment_journey->exists()) {
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                if ($status_id != '') {
+                                    $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                    $status = $status_name->name;
+                                } else {
+                                    $status = ' - ';
+                                }
+                            }
+                            // if ($shipment->booking_type_id != 4) {
+                            //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+                            //     if ($settings->exists()) {
+                            //         $settings = $settings->first();
+                            //         $role_ids = array_map('intval', explode(',', $settings->text));
+                            //     } else {
+                            //         $role_ids = array();
+                            //     }
+                            //     array_push($role_ids, 1);
+
+                            //     if (!in_array($role_id, $role_ids)) {
+                            //         if (!$shipment->packaging_material_request) {
+                            //             $shipper_payable = 0;
+                            //             $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                            //             if ($pending_payment->exists()) {
+                            //                 $pending_payment = $pending_payment->first();
+
+                            //                 $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                            //                 if ($pending_payment_shipments->exists()) {
+                            //                     $pending_payment_shipments = $pending_payment_shipments->get();
+                            //                     foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                            //                         $shipper_payable += $pending_payment_shipment->payable;
+                            //                     }
+                            //                 }
+                            //             }
+                            //             if ($shipper_payable < 0) {
+                            //                 return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                            //             }
+                            //         }
+                            //     }
+                            // }
+                            $crm_row = 0;
+                            if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                $crm_row = 1;
+                            }
+                            if (!$request->has('pieces_confirm')) {
+                                if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                    $details = array();
+                                    $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                    $details['id'] = $shipment->id;
+                                    $details['shipper_id'] = $shipment->user_id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['pieces_count'] = $shipment->pieces;
+                                    $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                    return ['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1];
+                                }
+                            }
+                            return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
+
+                        } else
+                            if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
+                                if ($shipment->return_address_id != NULL) {
+                                    $destination_city_id = $shipment->return_address->city_id;
+                                } else {
+                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                }
+
+                                $destination_city = City::find($destination_city_id);
+                                if ($destination_city->id == $destination_city->hub_id) {
+                                    $destination = $destination_city->name;
+                                    $hub = $destination_city->id;
+                                } else {
+                                    $hubid = $destination_city->hub_id;
+                                    $destinationHub = City::find($hubid);
+                                    $destination = $destinationHub->name;
+                                    $hub = $destinationHub->id;
+                                }
+
+                                $service = $shipment->booking_type->booking_type;
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                if ($shipment_journey->exists()) {
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                    if ($status_id != '') {
+                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                        $status = $status_name->name;
+                                    } else {
+                                        $status = ' - ';
+                                    }
+                                }
+                                // if ($shipment->booking_type_id != 4) {
+                                //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                //     if ($settings->exists()) {
+                                //         $settings = $settings->first();
+                                //         $role_ids = array_map('intval', explode(',', $settings->text));
+                                //         array_push($role_ids, 1);
+                                //         if (!in_array($role_id, $role_ids)) {
+                                //             if (!$shipment->packaging_material_request) {
+                                //                 $shipper_payable = 0;
+                                //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                //                 if ($pending_payment->exists()) {
+                                //                     $pending_payment = $pending_payment->first();
+
+                                //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                //                     if ($pending_payment_shipments->exists()) {
+                                //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                                //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                //                             $shipper_payable += $pending_payment_shipment->payable;
+                                //                         }
+                                //                     }
+                                //                 }
+                                //                 if ($shipper_payable < 0) {
+                                //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                //                 }
+                                //             }
+                                //         }
+                                //     }
+                                // }
+                                $crm_row = 0;
+                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                    $crm_row = 1;
+                                }
+                                if (!$request->has('pieces_confirm')) {
+                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                        $details = array();
+                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                        $details['id'] = $shipment->id;
+                                        $details['shipper_id'] = $shipment->user_id;
+                                        $details['tracking_number'] = $shipment->tracking_number;
+                                        $details['pieces_count'] = $shipment->pieces;
+                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
+                                    }
+                                }
+                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
+                            }
+                    } 
+                    else if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
+                            $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+                            if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
+                                if ($shipment->return_address_id != NULL) {
+                                    $destination_city_id = $shipment->return_address->city_id;
+                                } else {
+                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                }
+
+                                $destination_city = City::find($destination_city_id);
+                                if ($destination_city->id == $destination_city->hub_id) {
+                                    $destination = $destination_city->name;
+                                    $hub = $destination_city->id;
+                                } else {
+                                    $hubid = $destination_city->hub_id;
+                                    $destinationHub = City::find($hubid);
+                                    $destination = $destinationHub->name;
+                                    $hub = $destinationHub->id;
+                                }
+                                $service = $shipment->booking_type->booking_type;
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                if ($shipment_journey->exists()) {
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                    if ($status_id != '') {
+                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                        $status = $status_name->name;
+                                    } else {
+                                        $status = ' - ';
+                                    }
+                                }
+                                // if ($shipment->booking_type_id != 4) {
+                                //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+                                //     if ($settings->exists()) {
+                                //         $settings = $settings->first();
+                                //         $role_ids = array_map('intval', explode(',', $settings->text));
+                                //         array_push($role_ids, 1);
+                                //         if (!in_array($role_id, $role_ids)) {
+                                //             if (!$shipment->packaging_material_request) {
+                                //                 $shipper_payable = 0;
+                                //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                //                 if ($pending_payment->exists()) {
+                                //                     $pending_payment = $pending_payment->first();
+
+                                //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                //                     if ($pending_payment_shipments->exists()) {
+                                //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                                //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                //                             $shipper_payable += $pending_payment_shipment->payable;
+                                //                         }
+                                //                     }
+                                //                 }
+                                //                 if ($shipper_payable < 0) {
+                                //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                //                 }
+                                //             }
+                                //         }
+                                //     }
+                                // }
+                                $crm_row = 0;
+                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                    $crm_row = 1;
+                                }
+                                if (!$request->has('pieces_confirm')) {
+                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                        $details = array();
+                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                        $details['id'] = $shipment->id;
+                                        $details['tracking_number'] = $shipment->tracking_number;
+                                        $details['pieces_count'] = $shipment->pieces;
+                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
+                                    }
+                                }
+                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+
+                            } else
+                                if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
+                                    if ($shipment->return_address_id != NULL) {
+                                        $destination_city_id = $shipment->return_address->city_id;
+                                    } else {
+                                        $destination_city_id = $shipment->pickup_address->city_id;
+                                    }
+                                    $destination_city = City::find($destination_city_id);
+                                    if ($destination_city->id == $destination_city->hub_id) {
+                                        $destination = $destination_city->name;
+                                        $hub = $destination_city->id;
+                                    } else {
+                                        $hubid = $destination_city->hub_id;
+                                        $destinationHub = City::find($hubid);
+                                        $destination = $destinationHub->name;
+                                        $hub = $destinationHub->id;
+                                    }
+
+                                    $service = $shipment->booking_type->booking_type;
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                    if ($shipment_journey->exists()) {
+                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                        if ($status_id != '') {
+                                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                            $status = $status_name->name;
+                                        } else {
+                                            $status = ' - ';
+                                        }
+                                    }
+                                    // if ($shipment->booking_type_id != 4) {
+                                    //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                                    //     if ($settings->exists()) {
+                                    //         $settings = $settings->first();
+                                    //         $role_ids = array_map('intval', explode(',', $settings->text));
+                                    //         array_push($role_ids, 1);
+                                    //         if (!in_array($role_id, $role_ids)) {
+                                    //             if (!$shipment->packaging_material_request) {
+                                    //                 $shipper_payable = 0;
+                                    //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                                    //                 if ($pending_payment->exists()) {
+                                    //                     $pending_payment = $pending_payment->first();
+
+                                    //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                                    //                     if ($pending_payment_shipments->exists()) {
+                                    //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                                    //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                                    //                             $shipper_payable += $pending_payment_shipment->payable;
+                                    //                         }
+                                    //                     }
+                                    //                 }
+                                    //                 if ($shipper_payable < 0) {
+                                    //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                                    //                 }
+                                    //             }
+                                    //         }
+                                    //     }
+                                    // }
+                                    $crm_row = 0;
+                                    if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                        $crm_row = 1;
+                                    }
+                                    if (!$request->has('pieces_confirm')) {
+                                        if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                            $details = array();
+                                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                            $details['id'] = $shipment->id;
+                                            $details['tracking_number'] = $shipment->tracking_number;
+                                            $details['pieces_count'] = $shipment->pieces;
+                                            $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                            return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
+                                        }
+                                    }
+                                    return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
+                                }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);
+                        }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipment with given Tracking Number is present, Check tracking!']);
+            }
+
+
+        }
+    }
+
+    public function get_piece_details(Request $request)
+    {
+        $rules = [
+            'tracking' => ['required'],
+            'piece_id' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                $shipment_id = $shipment->id;
+                $shipment_piece_id = $request->piece_id;
+                $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+                if ($shipment_piece->exists()) {
+                    $shipment_piece = $shipment_piece->first();
+                    if ($shipment_piece->shipment_id == $shipment_id) {
+                        $scanned_shipment_piece = $shipment_piece->tracking_number;
+                        return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No Shipment Item with given Item ID is present']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No Shipment Found!']);
+            }
+        }
+    }
+
+    public function return_note_create(Request $request)
+    {
+        $rules = [
+            'route_id' => ['required'],
+            'open_box' => ['nullable'],
+            'trackings' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking_numbers = explode(',', $request->trackings);
+            $open_box_ids = explode(',', $request->open_box);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->pluck('id')->toArray();
+            if (count($shipments) == 0) {
+                return response()->json(['status' => 0, 'message' => 'Shipments not entered!']);
+            }
+            $pending_status = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+            $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
+            $shipments_count = count($valid_shipments);
+            if ($shipments_count != 0) {
+                $valid_shipments = $valid_shipments->toArray();
+                // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
+                //     $query->where('booking_type_id', '!=', 4)
+                //         ->orWhere(function ($sub_query) {
+                //             $sub_query->where('booking_type_id', '=', 4)
+                //                 ->where('charges_mode_id', '=', 2);
+                //         });
+                // })->sum('amount');
+                $order = false;
+                if ($request->has('order_checkbox')) {
+                    $order = true;
+                }
+                $note = RiderReturnNoteRequest::create([
+                    'hub_id' => $request->rider_hub,
+                    'rider_id' => $request->rider_id,
+                    'route_id' => $request->route_id,
+                    'shipment_count' => $shipments_count,
+                    // 'total_cod_amount' => $total_cod_amount,
+                    'ordering' => $order
+                ]);
+                if ($note) {
+                    if (!$order) {  //Default
+                        sort($valid_shipments); //sort_valid_shipments;
+                    }
+                    $serial = 1;
+                    foreach ($valid_shipments as $shipment) {
+                        RiderReturnNoteRequestShipment::create([
+                            'request_note_id' => $note->id,
+                            'shipment_id' => $shipment,
+                            'open_box' => (in_array($shipment, $open_box_ids)) ? 1 : 0,
+                            'ordering' => $serial
+                        ]);
+                        $serial++;
+                    }
+                }
+                return response()->json(['status' => 0, 'create_message' => 'Return note Request has been created successfully & Pending for approval']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for return yet or already in another return note, please check tracking!']);
+
+            }
         }
     }
 }

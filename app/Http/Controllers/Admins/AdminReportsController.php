@@ -8,6 +8,7 @@ use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\AgentDay;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\DailyVisitRating;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
@@ -149,7 +150,19 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('cargo_manifest_bags as cmb', 'cmb.id', '=', 'cmbs.cargo_manifest_bag_id')
             ->leftjoin('cities as cmbh', 'cmbh.id', '=', 'cmb.current_hub_id')
-            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id']);
+            ->leftJoin('crm_requests as cr', function ($join) {
+                $join->on('cr.shipment_id', '=', 'shipments.id')
+                    ->where('cr.id', '=', DB::connection('reports')->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'cr.status_id')
+            ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'cr.case_nature_id')
+            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'cr.case_nature_type_id')
+            ->leftjoin('adjustment_logs as adjustment', function ($join) {
+                $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
+                    ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            })
+            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id', 'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 'adjustment.adjustment_amount as adjusted_amount']);
 
         $type = $request->get('search_types');
 
@@ -236,6 +249,46 @@ class AdminReportsController extends Controller
                     return "-";
                 } else {
                     return $days;
+                }
+            })
+            ->addColumn('crm_id_padded', function ($requests) {
+                if($requests->crm_request_id){
+                    return str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT);
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('crm_id_padded_link', function ($requests) {
+                if($requests->crm_request_id){
+                    return '<u><a href=' . route('admin.crm.request.details', ['id' => $requests->crm_request_id]) . '  target="_blank">' . str_pad($requests->crm_request_id, 6, '0', STR_PAD_LEFT). '</a></u>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('crm_request_status', function ($requests) {
+                if($requests->crm_request_status){
+                    return $requests->crm_request_status;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('crm_request_case_nature', function ($requests) {
+                if($requests->crm_request_case_nature){
+                    return $requests->crm_request_case_nature;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('crm_request_case_nature_type', function ($requests) {
+                if($requests->crm_request_case_nature_type){
+                    return $requests->crm_request_case_nature_type;
+                }
+                else{
+                    return '-';
                 }
             });
         /*if ($shipper = $request->get('search_shipper')) {
@@ -2650,8 +2703,15 @@ class AdminReportsController extends Controller
 
     public function completed_delivery_notes_index()
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 129);
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'cnic']);
+        // $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'cnic']);
+        $riders = DB::connection('reports')->table('riders')->leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+            ->whereNotNull('riders.employee_id')
+            ->where('riders.status', 1)
+            ->select('riders.id', 'riders.name', 'riders.trax_id','h.name as hub_name','riders.cnic')->get();
+
         $admins = DB::connection('reports')->table('admins')->get(['id', 'name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
@@ -6189,7 +6249,7 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($crm)
-            ->editColumn('tagged_to', function ($crm_request) {
+            ->addColumn('tagged_to', function ($crm_request) {
                 if (in_array($crm_request->tagging_type, [2,4,5])) {
                     return Admin::find($crm_request->tagged_id)->name;
                 } else if ($crm_request->tagging_type == 1) {
@@ -6413,7 +6473,8 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
-            })->addColumn('responsibe_person_name', function ($requests) {
+            })
+            ->addColumn('responsibe_person_name', function ($requests) {
                 $month_closing_responsible = MonthClosingResponsible::where('month_closing_id', $requests->month_closing_id);
                 if ($month_closing_responsible->exists()) {
                     $month_closing_responsible = $month_closing_responsible->get();
@@ -7275,7 +7336,7 @@ class AdminReportsController extends Controller
             }
         }
         $admins = $admins->get(['admins.id', 'admins.name']);
-        $ratings = CrmRequestRating::all();
+        $ratings = DailyVisitRating::all();
         return view('admin.reports.daily_visit_report')->with(['admins' => $admins, 'ratings' => $ratings]);
     }
 
@@ -7289,7 +7350,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
             ->leftjoin('cities as c', 'c.id', '=', 'a.default_hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
-            ->leftjoin('crm_request_ratings as rate', 'rate.id', 'daily_visits.rating_id')
+            ->leftjoin('daily_visit_ratings as rate', 'rate.id', 'daily_visits.rating_id')
             ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone', 'rate.name as rating_text', 'daily_visits.comment as rating_comment', 'rate.code as rating');
 
         $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
@@ -7479,7 +7540,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'us.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1)')
                     );
             })
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type')
@@ -7522,14 +7583,14 @@ class AdminReportsController extends Controller
             })
             ->addColumn('pending_shipments', function ($entry) {
                 if ($entry->shipments_count) {
-                    return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments));
+                    return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments + $entry->confirmation_pending_shipments));
                 } else {
                     return '';
                 }
             })
             ->addColumn('pending_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
-                    return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
+                    return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments + $entry->confirmation_pending_shipments)) / $entry->shipments_count) * 100, 2);
                 } else {
                     return '';
                 }

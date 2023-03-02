@@ -46,6 +46,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Admin\SalePersonTargetDelete;
+use App\Http\Models\Admin\SalePersonTargetSegment;
 use App\Http\Models\Admin\SalesDesignation;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesIncentiveDate;
@@ -2028,7 +2029,8 @@ class GlobalSettingsController extends Controller
         })->select('id', 'name')->where('admins.status', 1)->get();
 
         $targets = SalePersonTarget::all();
-        return view('admin.settings.sales_person.sales_target')->with(['sales_person' => $sales, 'targets' => $targets]);
+        $segments = SalePersonTargetSegment::select('id', 'name')->get();
+        return view('admin.settings.sales_person.sales_target')->with(['sales_person' => $sales, 'targets' => $targets, 'segments' => $segments]);
     }
 
     public function sales_person_targets_submit(Request $request)
@@ -2053,6 +2055,11 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->target_days = $sales_target->target_days;
                     $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
+                    $sales_person_log->segment_id = $sales_target->segment_id;
+                    $sales_person_log->achieved_shipments = $sales_target->achieved_shipments;
+                    $sales_person_log->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
+                    $sales_person_log->achieved_revenue = $sales_target->achieved_revenue;
+                    $sales_person_log->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                     $sales_person_log->save();
 
                     $sales_target->start_date = $start_date;
@@ -2060,6 +2067,11 @@ class GlobalSettingsController extends Controller
                     $sales_target->target_days = $request->target_shipment_days;
                     $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
+                    $sales_target->segment_id = $request->segment;
+                    $sales_target->achieved_shipments = null;
+                    $sales_target->achieved_shipments_percentage = null;
+                    $sales_target->achieved_revenue = null;
+                    $sales_target->achieved_revenue_percentage = null;
                     $sales_target->save();
                 } else {
                     $sale_person_target = new SalePersonTarget();
@@ -2069,6 +2081,11 @@ class GlobalSettingsController extends Controller
                     $sale_person_target->target_days = $request->target_shipment_days;
                     $sale_person_target->target_month = $request->target_shipment_month;
                     $sale_person_target->average_revenue = $request->average_revenue;
+                    $sale_person_target->segment_id = $request->segment;
+                    $sale_person_target->achieved_shipments = null;
+                    $sale_person_target->achieved_shipments_percentage = null;
+                    $sale_person_target->achieved_revenue = null;
+                    $sale_person_target->achieved_revenue_percentage = null;
                     $sale_person_target->save();
                 }
             }
@@ -2083,7 +2100,8 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
+            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_targets.segment_id')
+            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'), 'spts.name as segment')->where('a.status', 1);
 
         $datatable = Datatables::of($targets);
         return $datatable->make(true);
@@ -2101,7 +2119,8 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
+            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_target_logs.segment_id')
+            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
             ->orderBy('sale_person_target_logs.created_at');
         return Datatables::of($targets)->make(true);
     }
@@ -7270,6 +7289,10 @@ class GlobalSettingsController extends Controller
                         $sale_person_target_del->target_days = $sales_target->target_days;
                         $sale_person_target_del->target_month = $sales_target->target_month;
                         $sale_person_target_del->average_revenue = $sales_target->average_revenue;
+                        $sale_person_target_del->achieved_shipments = $sales_target->achieved_shipments;
+                        $sale_person_target_del->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
+                        $sale_person_target_del->achieved_revenue = $sales_target->achieved_revenue;
+                        $sale_person_target_del->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                         $sale_person_target_del->deleted_by = Auth::id();
                         $sale_person_target_del->save();
                     }

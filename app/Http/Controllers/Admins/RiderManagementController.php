@@ -163,7 +163,7 @@ class RiderManagementController extends Controller
     }
 
     public function addRiderView($type){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -286,7 +286,7 @@ class RiderManagementController extends Controller
         return response()->json(['route' => $route]);
     }
     public function editRiderView($id, $type){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -896,7 +896,7 @@ class RiderManagementController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),60);
         $rider_type = RiderType::all();
-        $city = City::where('business_category_id', 1)->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route = Route::all();
