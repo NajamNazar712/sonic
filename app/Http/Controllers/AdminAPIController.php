@@ -7462,6 +7462,7 @@ class AdminAPIController extends Controller
                             $notify = true;
                         }
                     }
+                    NotificationsController::send(212, $employee_id);
                     NotificationsController::app_notification(17, $admin_id, 1, $leave_request->id);
                     if ($notify) {
                         NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
