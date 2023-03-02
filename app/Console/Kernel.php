@@ -135,7 +135,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
         'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
         'App\Console\Commands\DailyAutoCommentForCRMClaims',
-		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',
+		'App\Console\Commands\WeeklyAttendenceSummaryLineManager',//Spelling mistake
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         ];
 
