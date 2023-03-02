@@ -105,17 +105,17 @@
                             <div class="row justify-content-center">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <input type="text" class="form-control decimal" name="fuel_rate" id="fuel_rate" placeholder="Fuel Rate*" data-rule-required="true"  data-msg-required="Fuel Rate is required">
+                                        <input type="text" class="form-control decimal" name="fuel_rate" id="fuel_rate" placeholder="Fuel Rate(Rs)*" data-rule-required="true"  data-msg-required="Fuel Rate is required">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <input type="text" class="form-control decimal" name="fuel_allocated" id="fuel_allocated" placeholder="Fuel Allocated*" data-rule-required="true"  data-msg-required="Fuel Allocated is required">
+                                        <input type="text" class="form-control decimal" name="fuel_allocated" id="fuel_allocated" placeholder="Fuel Allocated (Ltrs)*" data-rule-required="true"  data-msg-required="Fuel Allocated is required">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount*" data-rule-required="true"  data-msg-required="Fuel Amount is required" readonly>
+                                        <input type="text" class="form-control" name="fuel_amount" id="fuel_amount" placeholder="Fuel Amount (Rs)*" data-rule-required="true"  data-msg-required="Fuel Amount is required" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -540,7 +540,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Lead Management',
+                        title: 'Rider Fuel Allocation',
                         className: 'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

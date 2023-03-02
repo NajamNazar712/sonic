@@ -429,6 +429,7 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
+                                'screen_location_id': 20,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function(data) {

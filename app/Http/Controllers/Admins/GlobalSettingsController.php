@@ -2056,6 +2056,10 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
                     $sales_person_log->segment_id = $sales_target->segment_id;
+                    $sales_person_log->achieved_shipments = $sales_target->achieved_shipments;
+                    $sales_person_log->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
+                    $sales_person_log->achieved_revenue = $sales_target->achieved_revenue;
+                    $sales_person_log->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                     $sales_person_log->save();
 
                     $sales_target->start_date = $start_date;
@@ -2064,6 +2068,10 @@ class GlobalSettingsController extends Controller
                     $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
                     $sales_target->segment_id = $request->segment;
+                    $sales_target->achieved_shipments = null;
+                    $sales_target->achieved_shipments_percentage = null;
+                    $sales_target->achieved_revenue = null;
+                    $sales_target->achieved_revenue_percentage = null;
                     $sales_target->save();
                 } else {
                     $sale_person_target = new SalePersonTarget();
@@ -2074,6 +2082,10 @@ class GlobalSettingsController extends Controller
                     $sale_person_target->target_month = $request->target_shipment_month;
                     $sale_person_target->average_revenue = $request->average_revenue;
                     $sale_person_target->segment_id = $request->segment;
+                    $sale_person_target->achieved_shipments = null;
+                    $sale_person_target->achieved_shipments_percentage = null;
+                    $sale_person_target->achieved_revenue = null;
+                    $sale_person_target->achieved_revenue_percentage = null;
                     $sale_person_target->save();
                 }
             }
@@ -7277,6 +7289,10 @@ class GlobalSettingsController extends Controller
                         $sale_person_target_del->target_days = $sales_target->target_days;
                         $sale_person_target_del->target_month = $sales_target->target_month;
                         $sale_person_target_del->average_revenue = $sales_target->average_revenue;
+                        $sale_person_target_del->achieved_shipments = $sales_target->achieved_shipments;
+                        $sale_person_target_del->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
+                        $sale_person_target_del->achieved_revenue = $sales_target->achieved_revenue;
+                        $sale_person_target_del->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                         $sale_person_target_del->deleted_by = Auth::id();
                         $sale_person_target_del->save();
                     }

@@ -89,6 +89,7 @@
                 })
                     .done(function (data){
                     $('#tracking_number').val('');
+                    $('#seal_number').val('');
                         $('#tracking').html('');
                         console.log(data);
                         if (data.invalid !== undefined) {
