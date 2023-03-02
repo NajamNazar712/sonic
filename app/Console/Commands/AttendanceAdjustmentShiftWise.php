@@ -49,16 +49,15 @@ class AttendanceAdjustmentShiftWise extends Command
         $check_employee_attendences = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')
         ->where('ea.attendance_date',"!=",$today)
         ->whereNotNull('official_email')
+        ->whereNull('clock_in')
         ->where('shift_id', $shift_id)
+        ->distinct()
         ->select('employees.official_email as email','ea.employee_id as employee_attendence_id','ea.clock_in as clock_in')->get();
         foreach($check_employee_attendences as $check_employee_attendence)
         {
             if($dayname != 'Monday')
             {
-                if($check_employee_attendence->clock_in == null)
-                {   
-                    NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
-                }
+                NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
             }
         }
     }
