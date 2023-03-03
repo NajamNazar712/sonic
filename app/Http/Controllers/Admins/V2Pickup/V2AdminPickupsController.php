@@ -1774,6 +1774,7 @@ class V2AdminPickupsController extends Controller
                     if ($retail_shipment->exists()) {
                         $shipment->actual_weight = $shipment->estimated_weight;
                     } else {
+                        $weight_flag = true;
                         $project_arrival_include_shippers = ProjectArrivalShipper::where('user_id', $shipment->user_id);
                         if($project_arrival_include_shippers->exists()){
                             if($shipment->actual_weight == null){
@@ -3186,7 +3187,15 @@ class V2AdminPickupsController extends Controller
         $count = $count->count();
 
         $rider = V2PickupNote::join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from . '" and "' . $to . '") AS total_arrived_count'), DB::raw('(SELECT SUM(vrp.shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
+            ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+            ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+            ->leftjoin('shipments_journey as total_s', function ($join) {
+                $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
+                    ->where('total_s.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+            })
+            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from . '" and "' . $to . '") as total_arrived_count'), DB::raw('count(total_s.id) as rider_picked'))
             ->whereBetween('v2_pickup_notes.created_at', [$from, $to])
             ->groupBy('v2_pickup_notes.id');
 

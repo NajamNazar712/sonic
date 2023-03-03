@@ -42,18 +42,19 @@ class AdminShipmentScanningHistoryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $flag = true;
-                $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNull('piece_id')->get();
+                $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->get();
+//                $scanning_histories = ShipmentScanningJourney::where('shipment_id', $shipment->id)->whereNull('piece_id')->get();
             }
             else {
-                $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
-                if ($shipment_piece->exists()) {
-                    $shipment_piece = $shipment_piece->first();
-                    $flag = true;
-                    $scanning_histories = ShipmentScanningJourney::where('piece_id', $shipment_piece->id)->get();
-                }
-                else{
+//                $shipment_piece = ShipmentPiece::where('tracking_number', $request->tracking_number);
+//                if ($shipment_piece->exists()) {
+//                    $shipment_piece = $shipment_piece->first();
+//                    $flag = true;
+//                    $scanning_histories = ShipmentScanningJourney::where('piece_id', $shipment_piece->id)->get();
+//                }
+//                else{
                     $data['invalid'][] = $request->tracking_number;
-                }
+//                }
             }
             if($flag == true){
                 if(count($scanning_histories) > 0){

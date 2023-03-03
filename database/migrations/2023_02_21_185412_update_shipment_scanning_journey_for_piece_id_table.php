@@ -13,9 +13,9 @@ class UpdateShipmentScanningJourneyForPieceIdTable extends Migration
      */
     public function up()
     {
-        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->integer('piece_id')->nullable()->index();
-        });
+//        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
+//            $table->integer('piece_id')->nullable()->index();
+//        });
     }
 
     /**
@@ -25,8 +25,8 @@ class UpdateShipmentScanningJourneyForPieceIdTable extends Migration
      */
     public function down()
     {
-        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->dropColumn('piece_id');
-        });
+//        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
+//            $table->dropColumn('piece_id');
+//        });
     }
 }
