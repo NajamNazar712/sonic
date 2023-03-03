@@ -51,6 +51,7 @@ Route::name('api.')->group(function () {
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
             Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
+            Route::post('book/jazzcash', 'APIController@shipment_book_jazzcash')->name('book.jazzcash');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');

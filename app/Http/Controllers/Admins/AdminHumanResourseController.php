@@ -3905,7 +3905,7 @@ class AdminHumanResourseController extends Controller
         ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
         ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','el.employee_type_id as employee_type','ls.name as status','employee_penalties.status as penalties_status',  'employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
-        ->where('el.status',6)->groupBy(['employee_penalties.employee_id'])->get();
+        ->where('el.status',6)->groupBy(['employee_penalties.employee_id']);
         
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
