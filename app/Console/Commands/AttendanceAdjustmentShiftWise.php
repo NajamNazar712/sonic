@@ -49,7 +49,7 @@ class AttendanceAdjustmentShiftWise extends Command
         $check_employee_attendences = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')
         ->where('ea.attendance_date',"!=",$today)
         ->whereNotNull('official_email')
-        // ->whereNull('clock_in')
+        ->whereNull('clock_in')
         ->where('shift_id', $shift_id)
         ->distinct()
         ->select('employees.official_email as email','ea.employee_id as employee_attendence_id','ea.clock_in as clock_in')->get();
