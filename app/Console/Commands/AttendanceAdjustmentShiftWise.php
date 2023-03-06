@@ -55,10 +55,7 @@ class AttendanceAdjustmentShiftWise extends Command
         ->select('employees.official_email as email','ea.employee_id as employee_attendence_id','ea.clock_in as clock_in')->get();
         foreach($check_employee_attendences as $check_employee_attendence)
         {
-            if($dayname != 'Monday')
-            {
-                NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
-            }
+            NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
         }
     }
 }
