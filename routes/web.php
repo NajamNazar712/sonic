@@ -385,6 +385,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperReportsController@mms_index')->name('index');
             Route::post('list', 'Shippers\ShipperReportsController@mms_list')->name('list');
         });
+
+
+        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@rider_pickup_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@rider_pickup_list')->name('list');
+            Route::post('scanned_shipments', 'Shippers\ShipperReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Shippers\ShipperReportsController@rider_pickup_arrived_shipments')->name('arrived_shipments');
+            Route::post('without_scan_shipments', 'Shippers\ShipperReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
+
+        });
     });
 
     Route::prefix('rates')->name('rates.')->group(function () {
