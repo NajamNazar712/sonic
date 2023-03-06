@@ -3883,9 +3883,10 @@ class AdminHumanResourseController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 627);
         $users = Admin::join('employees as e','e.trax_id','admins.trax_id')
+            ->join('cities as c','c.id','e.city_id')
             ->where('admins.status', 1)
             ->whereNotNull('e.trax_id')
-            ->select('e.id', 'e.name')->get();
+            ->select('e.id', 'e.name','e.trax_id as trax_id','c.name as city_name')->get();
         
         $trax_ids = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $employee_confirmation_statuses = EmployeeConfirmationStatus::all();
@@ -3896,6 +3897,7 @@ class AdminHumanResourseController extends Controller
          if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 628);
         }
+       
         $employee_leaves = EmployeePenalty::join('employees as a','a.id','employee_penalties.employee_id')
         ->leftjoin('admins as u', 'u.id', 'employee_penalties.updated_by')
         ->leftjoin('employees as lm', 'lm.id', 'a.line_manager_id')
@@ -3905,7 +3907,8 @@ class AdminHumanResourseController extends Controller
         ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
         ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','el.employee_type_id as employee_type','ls.name as status','employee_penalties.status as penalties_status',  'employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
-        ->where('el.status',6)->groupBy(['employee_penalties.employee_id']);
+        ->whereIn('el.status',[4,6])
+        ->groupBy(['employee_penalties.employee_id']);
         
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
@@ -4076,12 +4079,13 @@ class AdminHumanResourseController extends Controller
         $available_qouates = Employee::where('id',$employee_id)->first();
         $availble_qouate = $available_qouates->leave_count;
         
-        $available_leaves = EmployeeLeave::where('employee_id',$employee_id)->whereIn('status',[2,4,6])->count();
+        $available_leaves = EmployeeLeave::where('employee_id',$employee_id)->whereIn('status',[2,4,6])->where('leave_type',1)->count(); // availed
         $remaing_leaves = $availble_qouate - $available_leaves;
         
-        $data['availble_qouate'] = $availble_qouate;
-        $data['available_leaves'] = $available_leaves;
-        $data['remaing_leaves'] = $remaing_leaves;
+        $data['availble_qouate'] = max(0,$availble_qouate);
+        $data['available_leaves'] = max(0,$available_leaves);
+        // $data['remaing_leaves'] = $remaing_leaves;
+        $data['remaing_leaves'] = max(0, $remaing_leaves);    
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function employee_penalty_deduction_store(Request $request)
@@ -4157,8 +4161,9 @@ class AdminHumanResourseController extends Controller
         $admin_profile = Employee::where('trax_id', Auth::user()->trax_id);
         $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
         $avaialble_qouate = $available_qouates->leave_count;
+        $avaialble_qouate = max(0,$avaialble_qouate);
         $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->count();
-        
+        $available_leaves = max(0,$available_leaves);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
             if($admin_profile->employee_gender_id == 1){
@@ -4179,7 +4184,8 @@ class AdminHumanResourseController extends Controller
 
         }
         $remaing_leaves = $avaialble_qouate - $available_leaves;
-
+        $remaing_leaves = max(0,$remaing_leaves);
+        
         return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics" => $cnic, 'leave_types' => $leave_types, 'avaialble_qouate' => $avaialble_qouate, 'available_leaves' => $available_leaves, 'remaing_leaves' => $remaing_leaves]);
     }
 
@@ -4277,7 +4283,7 @@ class AdminHumanResourseController extends Controller
                 $leave_count = EmployeeAttendance::where('employee_type', $employee->employee_type)
                     ->where('employee_id', $employee->employee_id)
                     ->where('leave_status', 1)->count();
-                return $leave_count;
+                return max(0,$leave_count);
             })
         // ->addColumn("action", function ($employee) use ($department_head) {
             ->addColumn("action", function ($employee) {
@@ -4286,7 +4292,7 @@ class AdminHumanResourseController extends Controller
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
                   ';
-                if ($employee->status_id == 1) {
+                if ($employee->status_id == 1 || $employee->status_id == 7) {
 
                     // if ($employee->leave_type_id == 1) {
 
@@ -4303,19 +4309,20 @@ class AdminHumanResourseController extends Controller
                             ';
                                 return $dropdown;
 
-                            } elseif ($employee->trax_id == $emp_id->trax_id) {
+                            } 
+                            elseif ($employee->trax_id == $emp_id->trax_id) {
                                 $dropdown = '
                                 <div class="btn-group">
                                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                                   <div class="dropdown-menu dropdown-menu-sm">
                               ';
-                                $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                                $dropdown .= '
+                                    $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                                    $dropdown .= '
+                                </div>
                             </div>
-                          </div>
-                        ';
+                            ';
                                 return $dropdown;
-                            }
+                            }                
                         }
 
                     // }
@@ -4333,7 +4340,7 @@ class AdminHumanResourseController extends Controller
                         return $dropdown;
                     }
                 }
-
+               
                 return '-';
 
 
@@ -4404,12 +4411,13 @@ class AdminHumanResourseController extends Controller
         
                             if ($diffDays <= 56) {
                                 if ($request->leave_type == 1) {
-                                    if ($admin_profile->leave_count < $diffDays || $admin_profile->fiscal_leave_count < $diffDays) {
-                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
-                                    } else {
+                            
+                                    // if ($admin_profile->leave_count < $diffDays || $admin_profile->fiscal_leave_count < $diffDays) {
+                                    //     return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+                                    // } else {
                                         $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
                                         $admin_profile->leave_count = $admin_profile->fiscal_leave_count - $diffDays;
-                                    }
+                                    // }
                                 }
                                 if ($request->leave_type == 2) {
                                     if ($admin_profile->employee_gender_id == 1) {
@@ -4526,11 +4534,13 @@ class AdminHumanResourseController extends Controller
         
                             if ($diffDays <= 56) {
                                 if ($request->leave_type == 1) {
-                                    if ($admin_profile->leave_count < $diffDays) {
-                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
-                                    } else {
+                                    
+                                    // if ($admin_profile->leave_count < $diffDays) {
+                                    //     return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
+                                    // } 
+                                    // else {
                                         $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
-                                    }
+                                    // }
                                 }
                                 if ($request->leave_type == 2) {
                                     if ($admin_profile->employee_gender_id == 1) {
@@ -4728,12 +4738,16 @@ class AdminHumanResourseController extends Controller
 
     public function leave_reject(Request $request)
     {
+        $employee_id = EmployeeLeave::find($request->leave_id);
+        $employee_id = $employee_id->employee_id;
         $admin_id = Auth::id();
-        $admin = Admin::find($admin_id);
+        $admin = Admin::where('employee_id',$employee_id)->first();
+       
         if ($admin && $admin->trax_id) {
-            $admin_profile = Employee::where('trax_id', $admin->trax_id);
-            if ($admin_profile->exists()) {
+            $admin_profile = Employee::with('department')->where('trax_id', $admin->trax_id);
 
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
                 $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();

@@ -21,13 +21,13 @@
                                             <fieldset class="form-group">
                                                 <select name="search_admin" id="search_admin" class="form-control select2">
                                                     @foreach($admins as $admin)
-                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                        <option value="{{$admin->id}}">{{$admin->name}} - {{ $admin->trax_id }} - {{ $admin->city_name }}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
                                       
-                                        <div class="col-5 mt-1">
+                                        {{-- <div class="col-5 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_trax_id" id="search_trax_id" class="form-control select2">
                                                     @foreach($trax_ids as $trax_id)
@@ -35,7 +35,7 @@
                                                     @endforeach
                                                 </select>
                                             </fieldset>
-                                        </div>
+                                        </div> --}}
                                         
                                         <div class="col-2 mt-1">
                                             <div class="form-group">
@@ -59,7 +59,7 @@
                                         <th class="border-primary border-darken-1">Designation</th>
                                         <th class="border-primary border-darken-1">Department</th>
                                         <th class="border-primary border-darken-1">Employee Type</th>
-                                        <th class="border-primary border-darken-1">Availed Leave</th>
+                                        {{-- <th class="border-primary border-darken-1">Availed Leave</th> --}}
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">No of Late</th>
                                         <th class="border-primary border-darken-1">Requested Date</th>
@@ -279,7 +279,7 @@
                             head.push('Designation');
                             head.push('Department');
                             head.push('Employee Type');
-                            head.push('Availed Leave');
+                            // head.push('Availed Leave');
                             head.push('Status');
                             head.push('No of Late');
                             head.push('Requested Date');
@@ -299,7 +299,7 @@
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.employee_type);
-                                row.push(values.leave_availed);
+                                // row.push(values.leave_availed);
                                 row.push(values.status);
                                 row.push(values.no_of_late_excel);
                                 row.push(values.requested_date);
@@ -357,7 +357,7 @@
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_type', name: 'el.employee_type_id ', class: 'align-middle employee_type'},
-                    {data: 'leave_availed', name: 'leave_availed', class: 'align-middle leave_availed'},
+                    // {data: 'leave_availed', name: 'leave_availed', class: 'align-middle leave_availed'},
                     {data: 'status', name: 'ls.name', class: 'align-middle status'},
                     {data: 'no_of_late', name: 'no_of_late', class: 'align-middle no_late'},
                     {data: 'requested_date', name: 'employee_penalties.created_at', class: 'align-middle requested_date'},
