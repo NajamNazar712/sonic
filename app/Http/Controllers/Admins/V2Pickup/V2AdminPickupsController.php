@@ -3809,7 +3809,6 @@ class V2AdminPickupsController extends Controller
                         $details['id'] = $shipment->id;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['shipper'] = $shipment->user->name;
-                        $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
                         $details['weight'] = floatval($shipment->actual_weight);
 
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
