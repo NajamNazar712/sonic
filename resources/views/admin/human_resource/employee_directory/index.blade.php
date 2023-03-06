@@ -2316,7 +2316,7 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-
+                        let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.rider.activate') !!}',
                             method: 'POST',
@@ -2331,6 +2331,7 @@
                                         positionClass: 'toast-bottom-center',
                                         containerId: 'toast-bottom-center'
                                     });
+                                    window.location.href = edit_url;
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
@@ -2346,6 +2347,7 @@
 
             $('body').on('click', '.activate_staff', function (e) {
                 var id = $(this).data('target-id');
+                var edit_url = '';
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to Make Staff Active!',
@@ -2378,6 +2380,7 @@
                             closeOnEsc: false
                         });
 
+                        let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.staff.activate') !!}',
                             method: 'POST',
@@ -2390,8 +2393,9 @@
                                 if (data.status == 0) {
                                     toastr.success(data.success, 'Success!', {
                                         positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
+                                        containerId: 'toast-bottom-center',
                                     });
+                                    window.location.href = edit_url;
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',

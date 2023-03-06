@@ -171,7 +171,7 @@ class Kernel extends ConsoleKernel
             {
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
-                $schedule->command('employee:attendenceadjustment', [$shift->id])
+                $schedule->command('employee:attendanceadjustment', [$shift->id])
                 ->dailyAt($dailyAt)
                 ->runInBackground();
             }

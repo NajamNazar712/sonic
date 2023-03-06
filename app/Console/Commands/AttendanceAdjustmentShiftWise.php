@@ -15,14 +15,14 @@ class AttendanceAdjustmentShiftWise extends Command
      *
      * @var string
      */
-    protected $signature = 'employee:attendenceadjustment {shift_id}';
+    protected $signature = 'employee:attendanceadjustment {shift_id}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Employee Attendence Adjustment Command';
+    protected $description = 'Employee Attendance Adjustment Command';
 
     /**
      * Create a new command instance.
