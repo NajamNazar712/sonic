@@ -50,6 +50,15 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-3">
+                                        <select name="sub_segment_select" id="sub_segment_select" class="select2">
+                                            @foreach($sub_segments as $sub_segment)
+                                                <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                     <div class="col-4">
                                         <div class="form-group">
                                             <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)" id="tracking_numbers" style="width: 100%">
@@ -99,6 +108,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Sub Segment</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Recovery Status</th>
@@ -245,6 +255,11 @@
                 $(this).valid();
             });
 
+            $('#search_form #sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Sub Segment*'
+            });
+
             $('#search_form #service').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Service'
@@ -311,6 +326,7 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Shipper');
+                            head.push('Sub Segment');
                             head.push('Service Type');
                             head.push('Amount');
                             head.push('Recovery Status');
@@ -336,6 +352,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.shipper);
+                                row.push(values.sub_segment);
                                 row.push(values.service_type);
                                 row.push(values.amount);
                                 row.push(values.shipment_recovery_status);
@@ -645,11 +662,12 @@
                         d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
                         d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
                         d.tracking_numbers = $('#search_form #tracking_numbers').val();
+                        d.sub_segment = $('#search_form #sub_segment_select').val();
                     }
                 },
                 deferLoading: 0,
                 rowId: 'id',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -659,6 +677,7 @@
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+                    {data:'sub_segment', name: 'scs.name', class: 'align-middle text-center sub_segment'},
                     {data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
                     {data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
                     {data:'shipment_recovery_status', name: 'delivery_note_shipments.status', class: 'align-middle text-center shipment_recovery_status'},

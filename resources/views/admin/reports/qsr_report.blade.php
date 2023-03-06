@@ -105,6 +105,13 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <select name="sub_segment_select" id="sub_segment_select" class="select2">
+                            @foreach($sub_segments as $sub_segment)
+                                <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -139,6 +146,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
@@ -284,6 +292,10 @@
                 placeholder:'Search Type',
                 width:'100%'
             });
+            $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Sub Segment*'
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -340,6 +352,7 @@
                             head.push('Order ID');
                             head.push('Account No.');
                             head.push('Shipper');
+                            head.push('Sub Segment');
                             head.push('Consignee Name');
                             head.push('Status');
                             head.push('Reason');
@@ -375,6 +388,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.sub_segment);
                                 row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.status);
@@ -442,6 +456,7 @@
                     data: function (d) {
                         d.search_shipment_status = $('#search_shipment_status').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.sub_segment = $('#sub_segment_select').val();
                         d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
@@ -455,13 +470,14 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},

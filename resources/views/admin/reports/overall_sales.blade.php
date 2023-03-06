@@ -106,6 +106,16 @@
                     </div>
 
                     <div class="col-3">
+                        <div class="form-group">
+                            <select name="sub_segment_select" id="sub_segment_select" class="select2">
+                                @foreach($sub_segments as $sub_segment)
+                                    <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -160,6 +170,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -338,6 +349,10 @@
                 placeholder:"Select Multiple Shippers",
                 allowClear:true,
             });
+            $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Sub Segment*'
+            });
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -447,7 +462,7 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
-
+                            head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('Status');
@@ -502,7 +517,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
-
+                                row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.current_status);
@@ -595,6 +610,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
+                        d.sub_segment = $('#sub_segment_select').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_business_category = $('#search_business_category').val();
@@ -603,13 +619,13 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-
+                    { data:'sub_segment' ,name: 'scs.name', class: 'align-middle sub_segment'},
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
