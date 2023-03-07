@@ -6983,6 +6983,7 @@ class AdminAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
+        $today_date = Carbon::now()->format('Y-m-d');
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         if ($admin) {
@@ -7004,6 +7005,12 @@ class AdminAPIController extends Controller
             $permissions['return_note_receive'] = (in_array(50, $user_permissions)) ? 1 : 0;
             $permissions['delivery_note_create'] = (in_array(35, $user_permissions)) ? 1 : 0;
             $permissions['crm'] = ($user_department != 6) ? 1 : 0;
+
+            $attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)
+            ->whereDate('attendance_date', $today_date)
+            ->exists();
+            $permissions['attendance_status'] = $attendance ? 1 : 0;
+
             $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
             if ($global_settings->exists()) {
                 $global_settings = $global_settings->first();
