@@ -7455,7 +7455,7 @@ class AdminAPIController extends Controller
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
                     $message = "Adjustment Request submitted successfully";
-                    $notify = true;
+                    $notify = false;
                     if ($leave_request->employee_type_id == 1) {
                         $user = Admin::where('employee_id', $reporter_id)->first();
                         if ($user) {
