@@ -2702,6 +2702,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
             
         });
+
+
+        Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function(){
+            Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
+            Route::get('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');
+        });
     });
 
     //Reports end

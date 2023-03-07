@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PHPExcel_Style_NumberFormat;
@@ -572,5 +573,31 @@ class AdminRevenueReportsController extends Controller
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
+    }
+
+    public function revenue_report_by_invoice_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 637);
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $segments = DB::connection('reports')->table('segments')->select('id', 'name')->get();
+        $sub_segments = DB::connection('reports')->table('sub_category_segments')->select('id', 'name')->get();
+        $account_types = DB::connection('reports')->table('account_types')->select('id', 'name')->get();
+        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        return view('admin.reports.revenue_report_by_invoice')->with(['business_categories' => $business_categories, 'shippers' => $shippers, 'cities' => $cities, 'account_types' => $account_types, 'segments' => $segments, 'sub_segments' => $sub_segments, 'shipping_modes' => $shipping_modes]);
+    }
+
+    public function revenue_report_by_invoice_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 638);
+        }
+
+        $invoice = DB::connection('reports')->table('invoices')
+            ->leftjoin('users', 'invoices.user_id', '=', 'users.id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
+            ->leftjoin('business_categories as bc', 'bc.id', '=', 'users.business_category_id');
+
     }
 }
