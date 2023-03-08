@@ -8118,6 +8118,8 @@ class AdminAPIController extends Controller
                             $leave_request->to = $request->to;
                             $leave_request->applied_reason = $request->reason;
                             $leave_request->leave_type = $request->leave_type;
+                            // if rejected by line manager and user re apply leave
+                            $leave_request->status = ($leave_request->status == 7) ? 1 : $leave_request->status;
                             $leave_request->save();
                             $message = "Leave Request edited successfully";
                         } else {
