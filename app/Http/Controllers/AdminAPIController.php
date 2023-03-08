@@ -5008,10 +5008,10 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    if ($employee_leaves->status == 2) {
+                    if ($employee_leaves->status == 6 && in_array($employee_leaves->leave_type, [5,6])) {
                         $employee_leaves->status = 5;
                     } elseif ($employee_leaves->status == 1) {
-                        $employee_leaves->status = 3;
+                        $employee_leaves->status = 7;
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
