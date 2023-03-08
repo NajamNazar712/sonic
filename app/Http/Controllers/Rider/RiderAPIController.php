@@ -10946,8 +10946,10 @@ class RiderAPIController extends Controller
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if($attendance->leave_status == 2){
-                        $datum["status"] = 4;
-                    }else{
+                        $datum["status"] = 4; //adjustment apply
+                    } else if($attendance->leave_status == 1) {
+                        $datum["status"] = 5; //leave apply
+                    } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
                                 $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
@@ -12119,7 +12121,7 @@ class RiderAPIController extends Controller
         $rules = [
             'from' => ['required'],
             'to' => ['required'],
-            'reason' => ['required', 'max:500'],
+            'reason' => ['required_if:leave_type,[2,3,4]', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
