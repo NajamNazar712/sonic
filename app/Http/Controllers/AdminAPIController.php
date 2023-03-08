@@ -8062,7 +8062,7 @@ class AdminAPIController extends Controller
             $result = $employee->leave_count;
         }
 
-        dd($result);
+        dd($result, $difference, $to_date_month);
 
     }
 
