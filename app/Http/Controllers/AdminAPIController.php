@@ -8121,20 +8121,26 @@ class AdminAPIController extends Controller
 
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
-                        $response = $this->calculateToDateLeaves($employee, $to_date);
-                        // dd($response['status']);
-                        if($response['status'] == 1){
-                            dd($response['data']);
-                        } else {
-                            dd($response['msg']);
-                        }
-
-                        // if($employee->confirmation_status == 1){
-                        // }
-                        if ($employee->leave_count < $diffDays) {
-                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
-                        } else {
-                            $employee->leave_count = $employee->leave_count - $diffDays;
+                        // For Permanent employees
+                        if($employee->confirmation_status == 1){
+                            $response = $this->calculateToDateLeaves($employee, $to_date);
+                            // dd($response['status']);
+                            if($response['status'] == 1){
+                                if($diffDays > $response['data']){
+                                    return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                } else {
+                                    $employee->leave_count = $employee->leave_count - $response['data'];
+    
+                                }
+                            } else {
+                                return response()->json(['status' => 1, 'message' => $response['msg']]);
+                            }
+                        } else if($employee->confirmation_status == 2) { // For Probation
+                            if ($employee->leave_count < $diffDays) {
+                                return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                            } else {
+                                $employee->leave_count = $employee->leave_count - $diffDays;
+                            }
                         }
                     }
                     if ($request->leave_type == 2) {
