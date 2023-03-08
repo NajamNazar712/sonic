@@ -8028,9 +8028,10 @@ class AdminAPIController extends Controller
 
     public function calculateToDateLeaves($employee, $toDate)
     {
-        $now = Carbon::now();
-        // $to_date_month = Carbon::parse($toDate)->month;
-        $difference = $toDate->diffInMonths($now);
+        // $now = Carbon::now();
+        $start = Carbon::now()->startOfMonth();
+        $to_date = Carbon::parse($toDate)->startOfMonth();
+        $difference = $to_date->diffInMonths($start);
         dd($difference);
 
     }
