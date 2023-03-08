@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\HR\EmployeeLeaveLogFiscal;
+use App\Http\Models\HR\EmployeeLeaveLogFiscal;
 use App\Http\Models\HR\Employee;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
