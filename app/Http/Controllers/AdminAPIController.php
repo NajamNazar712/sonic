@@ -8026,35 +8026,9 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function getFiscalYear(){
-        // Get the current month and year
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
-        // If the current month is June or later, add 1 to the current year
-        if ($currentMonth >= 6) {
-            $upcomingJuneYear = $currentYear + 1;
-        } else {
-            $upcomingJuneYear = $currentYear;
-        }
-
-        // Set the date to the last day of June of the upcoming June year
-        $upcomingJune = Carbon::create($upcomingJuneYear, 6, 30);
-
-        // Output the result in the desired format
-        return $upcomingJune;
-    }
     public function calculateToDateLeaves($employee, $toDate)
     {
-        // get fiscal year last date to not exceed apply leave from that date
-        $fiscal_year_date = $this->getFiscalYear();
-        $endDate = Carbon::createFromFormat('Y-m-d', $toDate);
-
-        // Check if the input start date is greater than the upcoming June date
-        if ($endDate->greaterThan($fiscal_year_date)) {
-            return response()->json(['status' => 0, 'msg' => 'Apply leave is greater than fiscal year which is not allowed']);
-        } 
-
+        
         // $now = Carbon::now();
         $start = Carbon::now()->startOfMonth();
         $to_date = Carbon::parse($toDate)->startOfMonth();
@@ -8143,6 +8117,7 @@ class AdminAPIController extends Controller
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
                         $response = $this->calculateToDateLeaves($employee, $to_date);
+                        dd($response);
                         if($response['status'] == 1){
                             dd($response['data']);
                         } else {
