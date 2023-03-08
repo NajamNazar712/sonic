@@ -8511,7 +8511,7 @@ class AdminAPIController extends Controller
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
                     $admin_profile = $employee_leaves->employee;
-                    if ($employee_leaves->status == 2) {
+                    if ($employee_leaves->status == 6) {
                         $employee_leaves->status = 5;
                     } elseif ($employee_leaves->status == 1) {
                         if ($employee_leaves->leave_type == 1) {
@@ -8530,8 +8530,6 @@ class AdminAPIController extends Controller
                             $admin_profile->save();
                         }
                         $employee_leaves->status = 7;
-                    } else if (in_array($employee_leaves->status == 6)) {
-                        $employee_leaves->status = 3;
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
