@@ -8117,7 +8117,7 @@ class AdminAPIController extends Controller
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
                         $response = $this->calculateToDateLeaves($employee, $to_date);
-                        dd($response);
+                        dd($response['data']['status']);
                         if($response['status'] == 1){
                             dd($response['data']);
                         } else {
