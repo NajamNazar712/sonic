@@ -12109,6 +12109,10 @@ class RiderAPIController extends Controller
                 $data['approver_email'] = $employee->line_manager->email;
                 $data['approver_name'] = $employee->line_manager->name;
                 $data['user_type'] = 0;
+                $data['total_leaves'] = $employee->leave_count;
+                $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                $data['availed_leaves'] = $availed_leaves;
                 return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
             }
             return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);

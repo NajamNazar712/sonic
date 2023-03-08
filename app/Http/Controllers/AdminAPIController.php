@@ -7970,6 +7970,11 @@ class AdminAPIController extends Controller
                         $data['approver_email'] = $employee->line_manager->email;
                         $data['approver_name'] = $employee->line_manager->name;
                         $data['user_type'] = 0;
+                        $data['total_leaves'] = $employee->leave_count;
+                        $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                        ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                        $data['availed_leaves'] = $availed_leaves;
+
                         if ($employee->is_line_manager) {
                             $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                         }
@@ -8006,6 +8011,10 @@ class AdminAPIController extends Controller
                     $data['approver_email'] = $employee->line_manager->email;
                     $data['approver_name'] = $employee->line_manager->name;
                     $data['user_type'] = 0;
+                    $data['total_leaves'] = $employee->leave_count;
+                    $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                    ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                    $data['availed_leaves'] = $availed_leaves;
                     if ($employee->is_line_manager) {
                         $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                     }
