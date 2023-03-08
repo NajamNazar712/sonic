@@ -8026,6 +8026,14 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function calculateToDateLeaves($employee, $toDate)
+    {
+        $current_month = Carbon::now()->month;
+        $to_date_month = Carbon::parse($toDate)->month;
+        dd($current_month, $to_date_month);
+
+    }
+
     public function leave_apply_v2(Request $request)
     {
         $rules = [
@@ -8067,10 +8075,13 @@ class AdminAPIController extends Controller
                     $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                 }
                 $diffDays++;
-                dd($diffDays);
+                // dd($to_date);
 
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
+                        $this->calculateToDateLeaves($employee, $to_date);
+                        // if($employee->confirmation_status == 1){
+                        // }
                         if ($employee->leave_count < $diffDays) {
                             return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
                         } else {
