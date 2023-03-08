@@ -8031,8 +8031,38 @@ class AdminAPIController extends Controller
         // $now = Carbon::now();
         $start = Carbon::now()->startOfMonth();
         $to_date = Carbon::parse($toDate)->startOfMonth();
+        $to_date_month = Carbon::parse($toDate)->month;
         $difference = $to_date->diffInMonths($start);
-        dd($difference);
+
+        if($difference >= 2) {
+            if($to_date_month == 6){
+
+                $nd = $difference - 2;
+                $result = $nd * 2;
+                $result+6;
+            } 
+
+            else if($to_date_month == 5){
+
+                $nd = $difference - 1;
+                $result = $nd * 2;
+                $result+3;
+            } else {
+                $result = $difference * 2;
+            }
+        }
+        else if ($difference == 1){
+            if($to_date_month == 5 || $to_date_month == 6){
+
+                $result = 3;
+            }  else {
+                $result = 3;
+            }
+        } else {
+            $result = $employee->leave_count;
+        }
+        
+        dd($result);
 
     }
 
