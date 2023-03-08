@@ -8126,7 +8126,6 @@ class AdminAPIController extends Controller
                             $response = $this->calculateToDateLeaves($employee, $to_date);
                             if($response['status'] == 1){
                                 if($diffDays <= $response['data']){
-                                    dd($diffDays, $response['data'], $employee->leave_count);
                                     $employee->leave_count = $employee->leave_count - $diffDays;
                                 } else {
                                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
