@@ -12125,7 +12125,7 @@ class RiderAPIController extends Controller
         $rules = [
             'from' => ['required'],
             'to' => ['required'],
-            'reason' => ['required_if:leave_type,[2,3,4]', 'max:500'],
+            'reason' => ['required_if:leave_type,[1,5,6]', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
