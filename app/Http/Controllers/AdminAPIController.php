@@ -8066,8 +8066,8 @@ class AdminAPIController extends Controller
                 } else {
                     $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                 }
-                dd($diffDays);
                 $diffDays++;
+                dd($diffDays);
 
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
