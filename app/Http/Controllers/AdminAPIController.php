@@ -8033,7 +8033,7 @@ class AdminAPIController extends Controller
         $to_date = Carbon::parse($toDate)->startOfMonth();
         $to_date_month = Carbon::parse($toDate)->month;
         $difference = $to_date->diffInMonths($start);
-
+        dd($difference);
         if($difference >= 2) {
             if($to_date_month == 6){
 
@@ -8061,7 +8061,7 @@ class AdminAPIController extends Controller
         } else {
             $result = $employee->leave_count;
         }
-        
+
         dd($result);
 
     }
