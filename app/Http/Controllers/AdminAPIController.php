@@ -8214,20 +8214,35 @@ class AdminAPIController extends Controller
             //         });
             //     $is_hod = true;
             // } else
-            // if ($admin->employee->is_line_manager) {
-            //     $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-            //         ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
-            //         ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-            //         ->where('employee_leaves.reporter_id', $admin_id);
-            //     $is_line_manger = true;
-            // } else
             if (in_array($admin_role, [63, 69, 70])) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
+                    ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
+                    ->where(function ($query) use ($admin_id) {
+                        $query->where('employee_leaves.reporter_id', $admin_id);
+                    })
+                    ->orwhere(function ($query) use ($employee) {
+                        $query->where('employee_leaves.status', 6)
+                            ->whereIn('employee_leaves.leave_type', [5,6]);
+                    });
+                    $is_hr = true;
+            } else
+            if ($admin->employee->is_line_manager) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.status', 6);
-                $is_hr = true;
-            } else {
+                    ->where('employee_leaves.reporter_id', $admin_id);
+                $is_line_manger = true;
+            } 
+            // elseif (in_array($admin_role, [63, 69, 70])) {
+            //     $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            //         ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+            //         ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            //         ->where('employee_leaves.status', 6);
+            //     $is_hr = true;
+            // } 
+            else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
             if ($employee_leaves->exists()) {
