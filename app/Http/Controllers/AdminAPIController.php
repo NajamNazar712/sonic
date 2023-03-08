@@ -8306,8 +8306,8 @@ class AdminAPIController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1, 2, 3])) {
-                    if ($admin->employee->is_line_manager) {
+                if (in_array($employee_leaves->status, [1, 2, 3, 6, 7])) {
+                    if ($admin->employee->is_line_manager && $employee_leaves->status != 6) {
                         $employee_leaves->status = 6;
                         if(in_array($employee_leaves->leave_type, [5, 6])){
                             $employee_leaves->updated_by = $admin_id;
