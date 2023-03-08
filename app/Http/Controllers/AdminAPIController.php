@@ -8039,14 +8039,14 @@ class AdminAPIController extends Controller
 
                 $nd = $difference - 2;
                 $result = $nd * 2;
-                $result+6;
+                $result = $result+6;
             } 
 
             else if($to_date_month == 5){
 
                 $nd = $difference - 1;
                 $result = $nd * 2;
-                $result+3;
+                $result = $result+3;
             } else {
                 $result = $difference * 2;
             }
