@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\InvoiceByOriginReportController;
+use App\Http\Models\Admin\RevenueByInvoiceReport;
+use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceForReimbursement;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -41,6 +45,26 @@ class CreateInvoiceOriginWise extends Command
         $now = Carbon::now();
         $weekStartDate = $now->startOfWeek()->format('Y-m-d H:i');
         $weekEndDate = $now->endOfWeek()->format('Y-m-d H:i');
-        dd($now, $weekStartDate, $weekEndDate);
+
+        $invoices = Invoice::whereBetween('invoicing_date', [$weekStartDate, $weekEndDate]);
+        if($invoices->exists()){
+            $invoices = $invoices->get();
+            if(count($invoices) > 0){
+                foreach ($invoices as $invoice){
+                  InvoiceByOriginReportController::create_invoice($invoice);
+
+                }
+            }
+        }
+
+        $reim_invoice = InvoiceForReimbursement::whereBetween('invoicing_date', [$weekStartDate, $weekEndDate]);
+        if($reim_invoice->exists()){
+            $reim_invoice = $reim_invoice->get();
+            if(count($reim_invoice) > 0){
+                foreach ($reim_invoice as $invoice){
+                    InvoiceByOriginReportController::create_invoice($invoice);
+                }
+            }
+        }
     }
 }

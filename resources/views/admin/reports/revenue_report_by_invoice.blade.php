@@ -83,7 +83,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(6)->toDateString() }}">
                         </div>
                     </div>
                     <div class="col-5 ">
@@ -94,7 +94,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Invoicing Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Invoicing Date (To)" data-value="{{ \Carbon\Carbon::today()->toDateString() }}">
                         </div>
 
                     </div>
@@ -295,28 +295,15 @@
                             head = [];
 
                             head.push('S. No.');
-                            head.push('Tracking No.');
-                            head.push('Account No.');
+                            head.push('Account Type');
                             head.push('Business Category');
-                            head.push('Shipper');
-                            head.push('Order ID');
-                            head.push('Status');
-                            head.push('Payment Status');
+                            head.push('Segment');
+                            head.push('Sub Category Segment');
                             head.push('Invoice No.');
-                            head.push('Payment Number');
-                            head.push('SDN Number');
-                            head.push('Service Type');
-                            head.push('Arrival Date');
+                            head.push('Invoicing Date');
+                            head.push('Account ID');
+                            head.push('Shipper Name');
                             head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Return City');
-                            head.push('Zone');
-                            head.push('Class');
-                            head.push('Shipping Mode');
-                            head.push('Collection Amount');
-                            head.push('Actual Weight');
-                            head.push('Chargeable Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
@@ -330,35 +317,19 @@
                             head.push('Intercept Charges');
                             head.push('GST');
                             head.push('Total Charges');
-                            head.push('Estimated Charges');
-                            head.push('Net Payable');
-                            head.push('Delivered / Returned Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.account_no);
-                                row.push(values.name);
-                                row.push(values.shipper);
-                                row.push(values.order_id);
-                                row.push(values.current_status);
-                                row.push(values.payment_status);
+                                row.push(values.account_type);
+                                row.push(values.business_category);
+                                row.push(values.segment);
+                                row.push(values.sub_segment);
                                 row.push(values.invoice_number);
-                                row.push(values.payment_id);
-                                row.push(values.sdn_id);
-                                row.push(values.service_type);
-                                row.push(values.arrival_date);
+                                row.push(values.invoicing_date);
+                                row.push(values.account_no);
+                                row.push(values.shipper);
                                 row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.return_city);
-                                row.push(values.zone);
-                                row.push(values.class);
-                                row.push(values.shipping_mode);
-                                row.push(values.p_collection_amount);
-                                row.push(values.actual_weight);
-                                row.push(values.chargeable_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
@@ -366,15 +337,12 @@
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
-                                row.push(values.packaging_charges);
+                                row.push(values.packing_charges);
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.intercept_charges);
-                                row.push(values.p_gst);
-                                row.push(values.p_total_charges);
-                                row.push(values.estimated_charges);
-                                row.push(values.p_net_payable);
-                                row.push(values.delivered_or_returned);
+                                row.push(values.gst);
+                                row.push(values.total_charges);
 
                                 body.push(row);
                             });
@@ -424,47 +392,31 @@
                         d.search_business_category = $('#search_business_category').val();
                     }
                 },
-                order: [[12, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
-                    { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
-                    { data:'name' ,name: 'bc.name', class: 'align-middle name'},
-                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
-                    { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    { data:'payment_id' ,name: 'dps.done_payment_id', class: 'align-middle payment_status'},
-                    { data:'sdn_id' ,name: 'dnsdn.station_deposit_note_id', class: 'align-middle payment_status'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'account_type' ,name: 'at.name', class: 'align-middle text-center account_type'},
+                    { data:'business_category' ,name: 'bc.name', class: 'align-middle business_category'},
+                    { data:'segment' ,name: 'seg.name', class: 'align-middle segment'},
+                    { data:'sub_segment' ,name: 'seg_sub.name', class: 'align-middle sub_segment'},
+                    { data:'invoice_number' ,name: 'rbi.invoice_number', class: 'align-middle text-center invoice_number'},
+                    { data:'invoicing_date' ,name: 'rbi.invoicing_date', class: 'align-middle text-center invoicing_date'},
+                    { data:'account_no' ,name: 'users.id', class: 'align-middle account_no'},
+                    { data:'shipper' ,name: 'users.name', class: 'align-middle shipper'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
-                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'return_city', name: 'return_city', class: 'align-middle return_city'},
-                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
-                    { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
-                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
-                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
-                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
-                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
-                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
-                    { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
-                    { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
-                    { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
-                    { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
-                    { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges'},
-                    { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
-                    { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
-                    { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
-                    { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
-                    { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
-                    { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
+                    { data:'weight_charges' ,name: 'rbi.weight_charges', class: 'align-middle weight_charges'},
+                    { data:'cash_handling_charges' ,name: 'rbi.cash_handling_charges', class: 'align-middle cash_handling_charges'},
+                    { data:'insurance_charges' ,name: 'rbi.insurance_charges', class: 'align-middle insurance_charges'},
+                    { data:'packaging_charges' ,name: 'rbi.packaging_charges', class: 'align-middle packaging_charges'},
+                    { data:'fuel_surcharge' ,name: 'rbi.fuel_surcharge', class: 'align-middle fuel_surcharge'},
+                    { data:'return_charges' ,name: 'rbi.return_charges', class: 'align-middle return_charges'},
+                    { data:'replacement_charges' ,name: 'rbi.replacement_charges', class: 'align-middle replacement_charges'},
+                    { data:'packing_charges' ,name: 'rbi.packing_charges', class: 'align-middle packing_charges'},
+                    { data:'try_buy_charges' ,name: 'rbi.try_buy_charges', class: 'align-middle try_buy_charges'},
+                    { data:'nsa_osa_charges' ,name: 'rbi.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
+                    { data:'intercept_charges' ,name: 'rbi.intercept_charges', class: 'align-middle intercept_charges'},
+                    { data:'gst' ,name: 'rbi.gst', class: 'align-middle gst'},
+                    { data:'total_charges' ,name: 'rbi.total_charges', class: 'align-middle total_charges'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

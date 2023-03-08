@@ -15,7 +15,8 @@ class CreateRevenueByInvoiceReportsTable extends Migration
     {
         Schema::create('revenue_by_invoice_reports', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipper_id')->index();
+            $table->integer('business_category_id')->index();
+            $table->integer('user_id')->index();
             $table->integer('origin_id')->index();
             $table->bigInteger('invoice_number')->index();
             $table->timestamp('invoicing_date')->index();

@@ -2706,7 +2706,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function(){
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
-            Route::get('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');
+            Route::post('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');
         });
     });
 
