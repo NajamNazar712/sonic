@@ -2316,7 +2316,6 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-                        let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.rider.activate') !!}',
                             method: 'POST',
@@ -2331,7 +2330,7 @@
                                         positionClass: 'toast-bottom-center',
                                         containerId: 'toast-bottom-center'
                                     });
-                                    window.location.href = edit_url;
+                                    window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',
@@ -2380,7 +2379,7 @@
                             closeOnEsc: false
                         });
 
-                        let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
+                        // let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.staff.activate') !!}',
                             method: 'POST',
@@ -2395,7 +2394,7 @@
                                         positionClass: 'toast-bottom-center',
                                         containerId: 'toast-bottom-center',
                                     });
-                                    window.location.href = edit_url;
+                                    window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',

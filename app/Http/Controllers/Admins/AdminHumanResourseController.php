@@ -821,20 +821,22 @@ class AdminHumanResourseController extends Controller
         if ($rider->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = $rider->first();
+        $route = route("admin.human_resource.employee_directory.edit",['employee'=>$employee_id]);
+        return response()->json(['status'=> 0 , 'route'=>$route]);
+        // $rider = $rider->first();
 
-        $rider->status = 1;
-        $rider->updated_by = Auth::id();
-        $rider->save();
+        // $rider->status = 1;
+        // $rider->updated_by = Auth::id();
+        // $rider->save();
 
-        $employee->status_id = self::GetStatusOfEmployee($employee->id);
-        $employee->first_inactive = 1;
-        $employee->last_working_date = NULL;
-        $employee->save();
+        // $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        // $employee->first_inactive = 1;
+        // $employee->last_working_date = NULL;
+        // $employee->save();
 
-        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
+        // $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
 
-        return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
+        // return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
     }
 
@@ -880,23 +882,28 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $staff = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
+        
         if ($staff->doesntExist()) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
-        $staff = $staff->first();
 
-        $staff->status = 1;
-        $staff->updated_by = Auth::id();
-        $staff->save();
+        $route = route("admin.human_resource.employee_directory.edit",['employee'=>$employee_id]);
+        return response()->json(['status'=> 0 , 'route'=>$route]);
 
-        $employee->status_id = self::GetStatusOfEmployee($employee->id);
-        $employee->first_inactive = 1;
-        $employee->last_working_date = NULL;
-        $employee->save();
+        // $staff = $staff->first();
 
-        $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+        // $staff->status = 1;
+        // $staff->updated_by = Auth::id();
+        // $staff->save();
 
-        return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
+        // $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        // $employee->first_inactive = 1;
+        // $employee->last_working_date = NULL;
+        // $employee->save();
+
+        // $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+
+        // return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
     }
 
@@ -1229,8 +1236,10 @@ class AdminHumanResourseController extends Controller
 
     }
 
-    public function employee_directory_edit(Employee $employee)
+    public function employee_directory_edit(Request $request, Employee $employee)
     {
+        
+        $intended_url = $request->get('from');
         $religions = EmployeeReligion::all();
         $nationalities = EmployeeNationality::all();
         $domiciles = EmployeeDomicile::all();
@@ -1268,11 +1277,12 @@ class AdminHumanResourseController extends Controller
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
-        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers'));
+        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','intended_url'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
+       
 //        return $request->joining_date_formatted;
         $request->validate([
             'personal_number' => [Rule::unique('employees', 'phone_number')->ignore($employee->id), Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
@@ -1363,7 +1373,22 @@ class AdminHumanResourseController extends Controller
                 $employee->fiscal_leave_count = 23;
             }
         }
+        $employee_id = $employee->id;
+        $staff = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null)->first();
+        if($request->intended_url != null && $staff != null)
+        {
+            $staff->status = 1;
+            $staff->updated_by = Auth::id();
+            $staff->save();
+
+            $employee->status_id = self::GetStatusOfEmployee($employee->id);
+            $employee->first_inactive = 1;
+            $employee->last_working_date = NULL;
+            $employee->save();
+            $this->employee_log_save($employee_id,1,$employee->staff_category_id,self::GetStatusOfEmployee($employee->id),null,null,null,auth()->id());
+        }
         $employee->update();
+
 
         if ($employee->employee_type_id == 1) {
             $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
@@ -1406,6 +1431,7 @@ class AdminHumanResourseController extends Controller
 
             }
         } else {
+            
             $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
             if ($rider->exists()) {
                 $rider = $rider->first();
@@ -1423,6 +1449,37 @@ class AdminHumanResourseController extends Controller
                 $rider->route_id = $request->rider_route;
                 $rider->updated_by = Auth::id();
                 $rider->save();
+                $employee_id = $employee->id;
+                $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null)->first();
+                if($request->intended_url != null &&  $rider != null)
+                {
+                    if($request->intended_url == 'staff-profile')
+                    {
+                        $rider->status = 1;
+                        $rider->updated_by = Auth::id();
+                        $rider->save();
+                
+                        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+                        $employee->first_inactive = 1;
+                        $employee->last_working_date = NULL;
+                        $employee->save();
+                        $this->employee_log_save($employee_id,2,null,self::GetStatusOfEmployee($employee->id),null,$employee->rider_type_id,null,auth()->id());
+                    }
+                    else
+                    {
+                        $trax_id = $rider->trax_id;
+                        $employee_id = $employee->id;
+                        $employee->trax_id = $trax_id;
+                        $employee->rider_type_id = 1;
+                        $employee->update();
+                        
+                        $rider->trax_id = $trax_id;
+                        $rider->rider_type_id = 1;
+                        $rider->updated_by = Auth::id();
+                        $rider->save();
+                    }
+                }
+
             }
         }
 
@@ -3897,19 +3954,31 @@ class AdminHumanResourseController extends Controller
          if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 628);
         }
-       
+        // dd(Auth::user()->employee_id);
+        // dd('in');
+        // DB::enableQueryLog();
         $employee_leaves = EmployeePenalty::join('employees as a','a.id','employee_penalties.employee_id')
         ->leftjoin('admins as u', 'u.id', 'employee_penalties.updated_by')
         ->leftjoin('employees as lm', 'lm.id', 'a.line_manager_id')
         ->join('admin_departments as ad', 'ad.id', 'a.department_id')
         ->join('employee_designations as ed', 'ed.id', 'a.designation_id')
-        ->join('employee_leaves as el', 'el.employee_id', 'employee_penalties.employee_id')
+        ->leftjoin('employee_leaves as el', 'el.employee_id', 'employee_penalties.employee_id')
         ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
-        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','el.employee_type_id as employee_type','ls.name as status','employee_penalties.status as penalties_status',  'employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
-        ->whereIn('el.status',[4,6])
-        ->groupBy(['employee_penalties.employee_id']);
-        
+        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ls.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
+        ->whereIn('employee_penalties.status',[1,4,6])
+        ->where(function($q){
+            if (session('department_id') != 10) {
+                $q->where('employee_penalties.employee_id', Auth::user()->employee_id)
+                ->orWhere('a.line_manager_id', Auth::user()->employee_id);
+                // $q->where('a.line_manager_id', Auth::user()->employee_id);
+            }
+        })
+        ->groupBy(['employee_penalties.employee_id'])->get();
+        // dd($employee_leaves);
+        // dd(DB::getQueryLog());
+
+
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
             $availed_leave = EmployeeLeave::where('employee_id', $employee_leaves->employee_id2)
@@ -3918,12 +3987,13 @@ class AdminHumanResourseController extends Controller
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
             $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
+            ->where('ea.employee_id',$employee_leaves->employee_id)
             ->count();
-            
             return  '<button data-user_id='.$employee_leaves->employee_id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
             $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
+            ->where('ea.employee_id',$employee_leaves->employee_id)
             ->count();
             return  $late;  
             })
@@ -4054,6 +4124,7 @@ class AdminHumanResourseController extends Controller
         ->select('ea.attendance_date','ea.clock_in')->get(); 
        
         $data = $duplicate;
+        
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function employee_penalty_reject(Request $request){
@@ -4303,6 +4374,7 @@ class AdminHumanResourseController extends Controller
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                                 $dropdown .= '
                                 </div>
                               </div>
@@ -4375,9 +4447,13 @@ class AdminHumanResourseController extends Controller
                     $admin = Admin::find($admin_id);
                    
                     if ($admin && $admin->trax_id) {
-                        $admin_profile = Employee::where('trax_id', $admin->trax_id);
+                        $admin_profile = Employee::where('trax_id', $admin->trax_id)
+                        ->whereNotNull('line_manager_id');
                         if ($admin_profile->exists()) {
                             $admin_profile = $admin_profile->first();
+                            if(!isset($admin_profile->line_manager))
+                                return redirect()->back()->with('error', 'Employee`s line manager not exist');
+                                
                             $admin_id = $admin_profile->id;
         
                             $working_days = $admin_profile->department->working_days;
@@ -4453,7 +4529,6 @@ class AdminHumanResourseController extends Controller
                                 if ($leave->exists()) {
                                     return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
                                 }
-                              
                                 $leave_request = new EmployeeLeave();
                                 $leave_request->employee_id = $admin_id;
                                 $leave_request->employee_type_id = 1;
@@ -4498,9 +4573,13 @@ class AdminHumanResourseController extends Controller
                     $leave_type = LeaveType::find($request->leave_type);
                     $admin = Admin::find($admin_id);
                     if ($admin && $admin->trax_id) {
-                        $admin_profile = Employee::where('trax_id', $admin->trax_id);
+                        $admin_profile = Employee::where('trax_id', $admin->trax_id)
+                        ->whereNotNull('line_manager_id');
+
                         if ($admin_profile->exists()) {
                             $admin_profile = $admin_profile->first();
+                            if(!isset($admin_profile->line_manager))
+                            return redirect()->back()->with('error', 'Employee`s line manager not exist');
                             $admin_id = $admin_profile->id;
         
                             $working_days = $admin_profile->department->working_days;

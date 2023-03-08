@@ -41,6 +41,7 @@
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
                         <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate">
                             @csrf
+                            <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-body">
@@ -436,7 +437,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-actions center">
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile"  type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -450,10 +451,12 @@
                     <div class="tab-pane" id="medical" aria-labelledby="medical-tab" >
                         <form id="medical-form" novalidate="novalidate" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.medical.update',$employee->id)}}">
                             @csrf
+                            <input type="hidden" name="">
                             <div class="row justify-content-center">
                                 <div class="col-md-8">
                                     <div class="form-body" id="medical_info_container">
                                         <h4 class="form-section">Medical Details</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         @forelse($medical_infos as $index => $medical_info)
                                             <div class="row">
                                                 @if(!$loop->first)
@@ -558,7 +561,7 @@
                                 <div class="col-md-8">
                                     <div class="form-actions center">
                                         <button type="button" id="add_family_member" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Family Member</button>
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -576,6 +579,7 @@
                                 <div class="col-md-8">
                                     <div class="form-body">
                                         <h4 class="form-section">Bank Information</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bank Name<span class="text-danger">*</span></label>
@@ -602,7 +606,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -620,6 +624,7 @@
                                 <div class="col-md-8">
                                     <div class="form-body" id="education_info_container">
                                         <h4 class="form-section">Educational Background</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         @forelse($educations as $index => $education)
                                             @if(!$loop->first)
                                                 <hr style="width: 100%;">
@@ -724,7 +729,7 @@
                                 <div class="col-md-8">
                                     <div class="form-actions center">
                                         <button type="button" id="add_education" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Another Institute</button>
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -742,6 +747,7 @@
                                 <div class="col-md-8">
                                     <div class="form-body" id="employment_info_container">
                                         <h4 class="form-section">Employment History</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         @forelse($employments as $index => $employment)
                                             <div class="row">
                                                 @if(!$loop->first)
@@ -852,7 +858,7 @@
                                 <div class="col-md-8">
                                     <div class="form-actions center">
                                         <button type="button" id="add_employment" class="btn btn-success mr-1"><i class="ft-plus"></i> Add Experience</button>
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -870,6 +876,7 @@
                                 <div class="col-md-8">
                                     <div class="form-body">
                                         <h4 class="form-section">References</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Name</label>
@@ -910,7 +917,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -928,6 +935,7 @@
                                 <div class="col-md-8">
                                     <div class="form-body" id="employment_info_container">
                                         <h4 class="form-section">Attachments</h4>
+                                        <input type="hidden" name="intended_url" value="{{ $intended_url }}">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="form-group">
@@ -2090,7 +2098,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <div class="form-actions center">
-                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1">
+                                        <button id="cancel-button-profile" type="button" class="btn btn-warning mr-1 cancel-btn">
                                             Cancel
                                         </button>
                                         <button type="submit" class="btn btn-primary">
@@ -2131,8 +2139,15 @@
 
 
     <script type="text/javascript">
+        var intended_url = "{{ $intended_url }}";
+
         $("#cancel-button-profile").on('click',function (){
-            window.location.href = "{{route("admin.human_resource.employee_directory.index")}}";
+            if(intended_url == 'staff-profile')
+                window.location.href = "{{route("admin.human_resource.employee_directory.index")}}";
+            else if(intended_url == 'rider-incentive')
+                window.location.href = "{{route("admin.management.riders.incentive.index")}}";
+            else 
+                window.location.href = "{{route("admin.human_resource.employee_directory.index")}}";
         });
         var today = new Date();
         today.setHours(0,0,0,0);
@@ -2810,6 +2825,9 @@
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
+            });
+            $(".cancel-btn").on('click',function(){
+                location.reload();
             });
 
         });

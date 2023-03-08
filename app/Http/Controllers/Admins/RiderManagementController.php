@@ -531,6 +531,7 @@ class RiderManagementController extends Controller
         $rider_id = $request->rider_id;
         if($rider_id){
             $rider = Rider::find($rider_id);
+            
             if($rider){
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
@@ -550,16 +551,20 @@ class RiderManagementController extends Controller
                     if($employee->exists())
                     {
                         $employee = $employee->first();
-                        $employee->trax_id = $trax_id;
-                        $employee->rider_type_id = 1;
-                        $employee->update();
+                       
+                        $employee_id = $employee->id;
+                        // $employee->trax_id = $trax_id;
+                        // $employee->rider_type_id = 1;
+                        // $employee->update();
+                    $route = route("admin.human_resource.employee_directory.edit",['employee'=>$employee_id]);
+                    return response()->json(['status'=> 0 , 'route'=>$route]);
                     }
-                    $rider->trax_id = $trax_id;
-                    $rider->rider_type_id = 1;
-                    $rider->updated_by = Auth::id();
-                    $rider->save();
+                    // $rider->trax_id = $trax_id;
+                    // $rider->rider_type_id = 1;
+                    // $rider->updated_by = Auth::id();
+                    // $rider->save();
 
-                    return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                    // return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
             }
