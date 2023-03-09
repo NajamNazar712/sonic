@@ -4776,7 +4776,7 @@ TRAX-Customer Experience';
                             <td colspan="8" class="text-center border twice-top font-small"><em>Kindly do not give any addtional charges to the rider/courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
                           </tr>
                           <tr>
-                            <td colspan="8" class="text-center border twice-top font-small"><em>Trax Logistics has nothing to do with any item or content contained in this parcel/packet. We ship goods from one place to another. If you have a complaint about this, please contact the relevant online store.</em></td>
+                            <td colspan="8" class="text-center border twice-top font-small"><em>TRAX has nothing to do with any item or content contained in this parcel/packet. We ship goods from one place to another. If you have a complaint about this, please contact the relevant online store.</em></td>
                           </tr>
                         </tbody>
                     </table>

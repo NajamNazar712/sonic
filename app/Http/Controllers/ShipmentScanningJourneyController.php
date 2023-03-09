@@ -20,7 +20,7 @@ class ShipmentScanningJourneyController extends Controller
             $add_scanning_history->admin_id = $admin_id;
             $add_scanning_history->user_id = $user_id;
             $add_scanning_history->substitute_user_id = $substitute_user_id;
-            $add_scanning_history->piece_id = $piece_id;
+//            $add_scanning_history->piece_id = $piece_id;
 
             $whip = new Whip();
             $client_address = $whip->getValidIpAddress();
