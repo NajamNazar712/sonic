@@ -78,10 +78,11 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\HR\EmployeeConfirmationStatus;
 use App\Http\Models\HR\EmployeeConfirmation;
-
+use App\Http\Traits\CommonTrait;
 
 class AdminHumanResourseController extends Controller
 {
+    use CommonTrait;
     //
     public function __construct()
     {
@@ -3995,9 +3996,10 @@ class AdminHumanResourseController extends Controller
 
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
-            $availed_leave = EmployeeLeave::where('employee_id', $employee_leaves->employee_id2)
-            ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
-            return $availed_leave;    
+            $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+            ->where('employee_id', $employee_leaves->employee_id)
+            ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+            return $availed_leaves;    
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
             $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
@@ -4372,7 +4374,9 @@ class AdminHumanResourseController extends Controller
             })
             ->editColumn('availed_leaves', function($employee)
             {
-             $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->whereIn('leave_type', [1,2,3,4])->count();
+                $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                ->where('employee_id', Auth::user()->employee_id)
+                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
                 return max(0,$availed_leaves);
             })
         // ->addColumn("action", function ($employee) use ($department_head) {
@@ -4506,6 +4510,31 @@ class AdminHumanResourseController extends Controller
         
                             if ($diffDays <= 56) {
                                 if ($request->leave_type == 1) {
+                                    // For Permanent employees
+                                    if($admin_profile->confirmation_status == 1){
+                                        $response = $this->calculateToDateLeaves($admin_profile, $to_date);
+                                        if($response['status'] == 1){
+                                            $calcDays = $diffDays;
+                                            if($admin_profile->leave_count < 0) {
+                                                $calcDays = $diffDays - ($admin_profile->leave_count);
+                                            }
+                                            if($calcDays <= $response['data']){
+                                                $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                                $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
+                                            } else {
+                                                return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                            }
+                                        } else {
+                                            return response()->json(['status' => 1, 'message' => $response['msg']]);
+                                        }
+                                    } else if($admin_profile->confirmation_status == 2) { // For Probation
+                                        if ($admin_profile->leave_count < $diffDays) {
+                                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                        } else {
+                                            $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
+                                            $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
+                                        }
+                                    }
                             
                                     // if ($admin_profile->leave_count < $diffDays || $admin_profile->fiscal_leave_count < $diffDays) {
                                     //     return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');

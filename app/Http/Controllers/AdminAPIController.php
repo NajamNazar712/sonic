@@ -8079,7 +8079,11 @@ class AdminAPIController extends Controller
                         if($employee->confirmation_status == 1){
                             $response = $this->calculateToDateLeaves($employee, $to_date);
                             if($response['status'] == 1){
-                                if($diffDays <= $response['data']){
+                                $calcDays = $diffDays;
+                                if($employee->leave_count < 0) {
+                                    $calcDays = $diffDays - ($employee->leave_count);
+                                }
+                                if($calcDays <= $response['data']){
                                     $employee->leave_count = $employee->leave_count - $diffDays;
                                     $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
                                 } else {
