@@ -1275,7 +1275,7 @@ class AdminHumanResourseController extends Controller
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
-        $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
+        $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
             ->where('is_line_manager', 1)
@@ -4457,8 +4457,8 @@ class AdminHumanResourseController extends Controller
 
     public function leave_request(Request $request)
     {
-        if($request->leave_type == 3 || $request->leave_type == 2 )
-        {
+            if($request->leave_type == 3 || $request->leave_type == 2 )
+            {
                 
                 if ((!empty($request->requested_from_date) && !empty($request->requested_to_date))) {
             
@@ -4932,11 +4932,12 @@ class AdminHumanResourseController extends Controller
 
     public function leave_edit(Request $request)
     {
+        
         $leave_request = EmployeeLeave::find($request->leave_id);
         
-        if($leave_request->stauts == 1){
-            return redirect()->back()->with('error', 'Leave Request Can\'t be edited');
-        }
+        // if($leave_request->status == 1){
+        //     return redirect()->back()->with('error', 'Leave Request Can\'t be edited');
+        // }
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
         $edit_leave_type = LeaveType::find($request->edit_leave_type);
