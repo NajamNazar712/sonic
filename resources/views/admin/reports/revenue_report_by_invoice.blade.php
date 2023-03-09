@@ -83,7 +83,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(6)->toDateString() }}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(14)->toDateString() }}">
                         </div>
                     </div>
                     <div class="col-5 ">
@@ -207,6 +207,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -247,7 +248,7 @@
             });
 
 
-            var from_date = $('#search_date_from').pickadate({
+            var from_date = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -256,12 +257,24 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var currentDate = moment(old_date_formatted);
+
+                        var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var toDate = moment(to_date_formatted);
+
+
+                        to_date.pickadate('picker').clear();
+
+
+                        var afterDate = currentDate.add(14, 'days');
+                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
                     }
                 }
             });
-
-            var to_date = $('#search_date_to').pickadate({
+            var to_date = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -270,7 +283,18 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+                        var currentDate = moment(current_date_formatted);
+
+                        var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                        var fromDate = moment(from_date_formatted);
+
+                        if (currentDate.format('x') < fromDate.format('x')) {
+                            from_date.pickadate('picker').clear();
+                        }
+
+                        var beforeDate = currentDate.subtract(14, 'days');
+                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
             });
