@@ -223,7 +223,30 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="row mb-2 justify-content-center">
-                           
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_qoute-error" class=" w-100" for="availble_qoute">Available Quota</label>
+                                    <input type="text" name="availble_qoute"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $avaialble_qouate }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Availed  Leaves</label>
+                                    <input type="text" name="availble_leaves"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_leave" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $available_leaves }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="remaining_leaves-error" class=" w-100" for="remaining_leaves">Remaining Leaves</label>
+                                    <input type="text" name="remaining_leaves"
+                                           class="form-control  rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Remaining is required" value="{{ $remaing_leaves }}">
+                                </div>
+                            </div>
                             <div class="col-6 mt-1">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -985,13 +1008,9 @@
             {   console.log(leave_type_partinty,1);
                 if (leave_type_partinty == 3 || leave_type_partinty == 2) 
                 {
-                   
-                    if($("#leave_request_reason").data("rule-required")) {
+                   if($("#leave_request_reason").data("rule-required")) {
                             $("#leave_request_reason").data("rule-required",false);    
                         }
-                  
-               
-                   
                 }
                 else
                 {
@@ -1012,6 +1031,37 @@
     
            
             });
+
+            $("#edit_leave_type").change(function(){
+            var leave_type_partinty = $('#edit_leave_type').val();
+            if(leave_type_partinty !== null || leave_type_partinty !== '')
+            {   console.log(leave_type_partinty,1);
+                if (leave_type_partinty == 3 || leave_type_partinty == 2) 
+                {
+                   if($("#edit_reason").data("rule-required")) {
+                            $("#edit_reason").data("rule-required",false);    
+                        }
+                }
+                else
+                {
+                    console.log(leave_type_partinty,3);
+                    $("#edit_reason").attr('data-rule-required',true);
+                    $("#edit_reason").attr('data-rule-message','Reason is required');
+                }
+            }
+            else
+            {
+                console.log(leave_type_partinty,4);
+                $("#edit_reason").attr('data-rule-required',true);
+                $("#edit_reason").attr('data-rule-message','Reason is required');
+
+
+            }
+          
+    
+           
+            });
+
         });
     </script>
 @endsection

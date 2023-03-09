@@ -416,7 +416,7 @@
                                                 <label>Replacement Employee<span class="text-danger">*</span></label>
                                                 <select name="replacement_employee_id" id="replacement_employee_list" data-rule-required="true"  data-msg-required="Replacement Employee is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($replacement_employees as $replacement_employee)
-                                                        <option value="{{$replacement_employee->id}}">{{$replacement_employee->trax_id}} | {{$replacement_employee->name}}</option>
+                                                        <option value="{{$replacement_employee->id}}" data-last-working-date="{{$replacement_employee->last_working_date}}">{{$replacement_employee->trax_id}} | {{$replacement_employee->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -2279,8 +2279,9 @@
                 hiddenPrefix: 'formatted_',
                 max: today,
             });
-
-
+            
+            const currentDate = new Date();
+            const futureDate = new Date(currentDate.setMonth(currentDate.getMonth() + 2));
             var replacement_last_working_day = $('#profile-form #replacement_last_working_day').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -2288,7 +2289,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                max: today,
+                max: futureDate,
             });
 
             $("#religion").prepend('<option value="" selected></option>').select2({
@@ -2441,6 +2442,18 @@
             $("#replacement_employee_list").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Replacement Employee",
                 width:'100%',
+            });
+            $("#replacement_employee_list").on('change',function()
+            {
+                id = $(this).val();
+                // last_working_dates = $(this).attr('data-last-working-hour');
+                var optionSelected = $(this).find('option:selected').attr('data-last-working-date');
+                if(optionSelected != null)
+                {
+                    $("#replacement_last_working_day").val(optionSelected);
+                }
+                $("#replacement_last_working_day").val();
+                console.log(optionSelected);//this will show the value of the atribute of that option.
             });
             $("#replacement_employee_list").val("{{$employee->replacement_employee_id ?? ''}}").trigger('change');
 
