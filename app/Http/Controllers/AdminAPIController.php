@@ -7973,7 +7973,7 @@ class AdminAPIController extends Controller
                         $data['total_leaves'] = $employee->leave_count;
                         $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(to_date, from_date) + 1) as leaves_availed')
                         ->where('employee_id', $employee->id)
-                        ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->get()[0]['leaves_availed']; 
+                        ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->get(); 
                         $data['availed_leaves'] = $availed_leaves;
 
                         if ($employee->is_line_manager) {
@@ -8015,7 +8015,8 @@ class AdminAPIController extends Controller
                     $data['total_leaves'] = $employee->leave_count;
                     $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(to_date, from_date) + 1) as leaves_availed')
                     ->where('employee_id', $employee->id)
-                    ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->get()[0]['leaves_availed']; 
+                    ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->get(); 
+                    dd($availed_leaves);
                     $data['availed_leaves'] = $availed_leaves;
                     if ($employee->is_line_manager) {
                         $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
