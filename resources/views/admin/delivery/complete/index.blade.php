@@ -41,7 +41,37 @@
                         </form>
                     </div>
 
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="heading-elements">
+                                    <ul class="list-inline mb-0">
+                                        <li class="primary border-primary round"><a
+                                                    data-action="collapse">Legend
+                                                <i class="ft-minus"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-content collapse">
+                                <div class="card-body p-1">
+                                    <h4 class=" info">Legend</h4>
+                                    <input type="hidden" id="legend_filter">
 
+                                    <table class="table mb-0" id="legends_table">
+                                        <tbody>
+                                        <tr class="legends">
+                                            <td class="align-middle" id="2" style="background-color: yellow;">Snatch / Deduction</td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
                 <form id="post_delivery_note_ids_form" action="{{route('admin.delivery.completed.deposit.dncc')}}" method="post">
                     @csrf
@@ -236,6 +266,12 @@
         tr.pcc_snatch_deduction {
             background-color: yellow;
             color: black;
+        }
+        .legends{
+            cursor:pointer;
+        }
+        .legends tr td{
+            color:black;
         }
     </style>
 @endsection
@@ -468,6 +504,7 @@
                     url:'{{ route('admin.delivery.completed.list') }}',
                     data:function (d) {
                         //d.search_tracking = $('#search_tracking').val();
+                        d.legend_filter = $('#legend_filter').val();
                         d.tracking_numbers = $('#search_tracking').val();
                         d.dncc = $('#dncc').val();
                     }
@@ -905,7 +942,13 @@
                     });
 
             });
-
+            $('table#legends_table').on('click', 'tr td', function(){
+                var id = parseInt($(this).attr('id'));
+                if(id){
+                    $('#legend_filter').val(id);
+                    table.draw()
+                }
+            });
 
         });
     </script>

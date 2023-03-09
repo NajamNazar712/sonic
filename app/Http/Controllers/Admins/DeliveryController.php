@@ -5022,6 +5022,9 @@ class DeliveryController extends Controller
         if ($dncc = $request->get('dncc')) {
             $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
         }
+        if ($legend_id = $request->get('legend_filter')) {
+            $datatable->whereIn('delivery_notes.cash_collection_status', [2,3]);
+        }
 
         return $datatable->make(true);
 
