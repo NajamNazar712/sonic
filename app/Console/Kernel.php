@@ -139,6 +139,7 @@ class Kernel extends ConsoleKernel
 //		'App\Console\Commands\LateEmployeePenalty',
 //		'App\Console\Commands\AttendanceAdjustmentShiftWise',
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
+		'App\Console\Commands\CreateInvoiceOriginWise',
         ];
 
     /**
@@ -452,7 +453,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
         $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
 
-
+        $schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
