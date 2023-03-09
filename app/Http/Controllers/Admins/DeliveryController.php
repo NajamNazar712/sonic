@@ -70,6 +70,7 @@ use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
 use App\Http\Models\RiderCategory;
@@ -96,7 +97,6 @@ use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
-use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -5021,6 +5021,9 @@ class DeliveryController extends Controller
         }
         if ($dncc = $request->get('dncc')) {
             $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
+        }
+        if ($legend_id = $request->get('legend_filter')) {
+            $datatable->whereIn('delivery_notes.cash_collection_status', [2,3]);
         }
 
         return $datatable->make(true);
