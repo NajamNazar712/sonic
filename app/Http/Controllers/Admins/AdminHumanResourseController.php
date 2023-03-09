@@ -376,6 +376,8 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->trax_id = $trax_id;
         $employee->joining_date = $request->joining_date_formatted;
+        $employee->old_trax_id = $request->old_trax_id;
+        $employee->remarks = $request->remarks;
         $employee->save();
 
         $this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
@@ -433,8 +435,7 @@ class AdminHumanResourseController extends Controller
                     ->where('eb.id', '=', DB::raw('(select max(id) from employee_bank_informations where employee_bank_informations.employee_id = employees.id)'));
             })
             ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
-            
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id','employees.last_working_date as last_working_date','employees.guardian_name as father_name', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name','employees.confirmation_status'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id','employees.last_working_date as last_working_date','employees.guardian_name as father_name', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name','employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -742,30 +743,33 @@ class AdminHumanResourseController extends Controller
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
                     if ($rider_status == 2) {
-                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                        // $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                        if ($global_setting->exists()) {
-                            $global_setting = $global_setting->first();
-                            $trax_id = $global_setting->setting_value + 1;
-                            $global_setting->setting_value = $trax_id;
-                            $global_setting->save();
-                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                        } else {
-                            $trax_id = null;
-                        }
+                        // if ($global_setting->exists()) {
+                        //     $global_setting = $global_setting->first();
+                        //     $trax_id = $global_setting->setting_value + 1;
+                        //     $global_setting->setting_value = $trax_id;
+                        //     $global_setting->save();
+                        //     $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                        // } else {
+                        //     $trax_id = null;
+                        // }
 
-                        $rider->trax_id = $trax_id;
-                        $rider->rider_type_id = 1;
-                        $rider->updated_by = Auth::id();
-                        $rider->save();
+                        // $rider->trax_id = $trax_id;
+                        // $rider->rider_type_id = 1;
+                        // $rider->updated_by = Auth::id();
+                        // $rider->save();
 
-                        $employee->trax_id = $trax_id;
-                        $employee->rider_type_id = 1;
-                        $employee->update();
+                        // $employee->trax_id = $trax_id;
+                        // $employee->rider_type_id = 1;
+                        // $employee->update();
 
-                        $this->employee_log_save($employee_id,2,null,null,null,1,null,auth()->id());
+                        // $this->employee_log_save($employee_id,2,null,null,null,1,null,auth()->id());
 
-                        return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                        // return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                        
+                        $route = route("admin.human_resource.employee_directory.edit",['employee'=>$employee_id]);
+                        return response()->json(['status'=> 0 , 'route'=>$route]);
                     }
 
                     return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
@@ -1467,7 +1471,17 @@ class AdminHumanResourseController extends Controller
                     }
                     else
                     {
-                        $trax_id = $rider->trax_id;
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                        if ($global_setting->exists()) {
+                            $global_setting = $global_setting->first();
+                            $trax_id = $global_setting->setting_value + 1;
+                            $global_setting->setting_value = $trax_id;
+                            $global_setting->save();
+                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                        } else {
+                            $trax_id = null;
+                        }
+
                         $employee_id = $employee->id;
                         $employee->trax_id = $trax_id;
                         $employee->rider_type_id = 1;
@@ -3982,7 +3996,7 @@ class AdminHumanResourseController extends Controller
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
             $availed_leave = EmployeeLeave::where('employee_id', $employee_leaves->employee_id2)
-            ->whereIn('status', [2,4,6])->count(); 
+            ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
             return $availed_leave;    
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
@@ -4233,7 +4247,7 @@ class AdminHumanResourseController extends Controller
         $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
         $avaialble_qouate = $available_qouates->leave_count;
         $avaialble_qouate = max(0,$avaialble_qouate);
-        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->count();
+        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->whereIn('leave_type', [1,2,3,4])->count();
         $available_leaves = max(0,$available_leaves);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
@@ -4355,6 +4369,11 @@ class AdminHumanResourseController extends Controller
                     ->where('employee_id', $employee->employee_id)
                     ->where('leave_status', 1)->count();
                 return max(0,$leave_count);
+            })
+            ->editColumn('availed_leaves', function($employee)
+            {
+             $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->whereIn('leave_type', [1,2,3,4])->count();
+                return max(0,$availed_leaves);
             })
         // ->addColumn("action", function ($employee) use ($department_head) {
             ->addColumn("action", function ($employee) {
@@ -4492,7 +4511,7 @@ class AdminHumanResourseController extends Controller
                                     //     return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                                     // } else {
                                         $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
-                                        $admin_profile->leave_count = $admin_profile->fiscal_leave_count - $diffDays;
+                                        $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
                                     // }
                                 }
                                 if ($request->leave_type == 2) {

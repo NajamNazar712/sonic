@@ -449,7 +449,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
         $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
-
+        $every_first_july = '0 0 1 7 *';  
+        $schedule->command('employee:leave_count_fiscal')->cron($every_first_july)->runInBackground();
         $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
         
 

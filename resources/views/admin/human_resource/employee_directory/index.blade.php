@@ -102,6 +102,7 @@
 {{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
+                                    <th class="border-primary border-darken-1">Old Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Father Name</th>
                                     <th class="border-primary border-darken-1">Gender</th>
@@ -125,6 +126,7 @@
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1">Last Working Date</th>
+                                    <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Confirmation Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -343,6 +345,23 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- <div id="rejoin_rider_div" class="d-none">
+                            <div class="col-md-12">
+                                <label>Old Trax Id</label>
+                                <input type="text" name="old_trax_id" data-rule-required="true"
+                                data-msg-required="This Field is required"
+                                class="form-control bg-primary border-primary white rounded-right pickadate"
+                                id="old_trax_id" placeholder="Old Trax id" disabled>
+                            </div>
+                            <div class="col-md-12">
+                                <label>Remarks</label>
+                                <fieldset class="form-group">
+                                    <textarea name="remarks" class="form-control" placeholder="Remarks" id="remarks"
+                                                cols="30" rows="5" required data-rule-required="true"
+                                                data-msg-required="This field is required"></textarea>
+                                </fieldset>
+                            </div>
+                        </div> --}}
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update
@@ -662,15 +681,30 @@
                             <label>Joining Date<span class="text-danger">*</span></label>
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
-                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                            <span class="la la-calendar-o small-calender-icon"></span>
-                                                        </span>
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
                                 </div>
                                 <input type="text" name="joining_date" data-rule-required="true"
-                                       data-msg-required="This Field is required"
-                                       class="form-control bg-primary border-primary white rounded-right pickadate"
-                                       id="joining_date" placeholder="Joining Date">
+                                    data-msg-required="This Field is required"
+                                    class="form-control bg-primary border-primary white rounded-right pickadate"
+                                    id="joining_date" placeholder="Joining Date">
                             </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Old Trax Id</label>
+                            <input type="text" name="old_trax_id" data-rule-required="true"
+                            data-msg-required="This Field is required"
+                            class="form-control bg-primary border-primary white rounded-right pickadate"
+                            id="old_trax_id" placeholder="Old Trax id" disabled>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Remarks</label>
+                            <fieldset class="form-group">
+                                <textarea name="remarks" class="form-control" placeholder="Remarks" id="remarks"
+                                            cols="30" rows="5" required data-rule-required="true"
+                                            data-msg-required="This field is required"></textarea>
+                            </fieldset>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1160,6 +1194,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
+                            head.push('Employee Old Trax ID');
                             head.push('Employee Name');
                             head.push('Father Name');
                             head.push('Gender');
@@ -1183,12 +1218,14 @@
                             head.push('Requested At');
                             head.push('Joining Date');
                             head.push('Last Working Date');
+                            head.push('Remarks');
                             head.push('Confirmation Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.trax_id);
+                                row.push(values.old_trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.father_name);
                                 row.push(values.gender);
@@ -1212,6 +1249,7 @@
                                 row.push(values.requested_at);
                                 row.push(values.joining_date);
                                 row.push(values.last_working_date);
+                                row.push(values.remarks);
                                 row.push(values.confirmation_status);
 
                                 body.push(row);
@@ -1468,6 +1506,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
+                    {data: 'old_trax_id', name: 'employees.old_trax_id', class: 'align-middle old_trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
                     {data: 'father_name', name: 'employees.father_name', class: 'align-middle father_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
@@ -1491,6 +1530,7 @@
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
+                    {data: 'remarks', name: 'employees.remarks', class: 'align-middle remarks'},
                     {data: 'confirmation_status', name: 'employees.confirmation_status', class: 'align-middle confirmation_status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -1782,8 +1822,11 @@
             $('body').on('click', '.rejoin', function (e) {
                 var id = $(this).data('target-id');
                 var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
+                var trax_id = table.row($(this).parents('tr')).data().trax_id;
+                
                 if(employee_type == 1) {
                     $("#rejoinStaffForm #employee_id").val(id);
+                    $("#rejoinStaffForm #old_trax_id").val(trax_id);
                     $("#rejoinStaffModal").modal("show");
                 }
                 else{
@@ -1966,6 +2009,7 @@
                     // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(elm).parents('tr')).data().route_id;
+                    trax_id = table.row($(elm).parents('tr')).data().trax_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
@@ -2001,6 +2045,8 @@
                     $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
                     $('#editRiderModal #joining_date_group').removeClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
+                    // $("#editRiderForm #rejoin_rider_div").removeClass("d-none");
+                    // $('#editRiderModal #old_trax_id').val(trax_id);
                 }
                 else{
                     $('#editRiderModal .modal-title').text("Update Rider");
@@ -2050,7 +2096,7 @@
 
             });
 
-            $('body').on('hidden.bs.modal', '#rejoinStaffModal', function () {
+            $('body').on('hidden.bs.modal', '#rejoinStaffModal',function () {
                 $('#rejoinStaffForm #employee_id').val('');
                 $('#rejoinStaffForm #joining_date').val('');
             });
@@ -2187,10 +2233,12 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
+                                    // toastr.success(data.success, 'Success!', {
+                                    //     positionClass: 'toast-bottom-center',
+                                    //     containerId: 'toast-bottom-center'
+                                    // });
+                                    window.location.href = data.route + '?from=rider-incentive';
+                                    
                                 } else {
                                     toastr.error(data.error, 'Error!', {
                                         positionClass: 'toast-top-center',

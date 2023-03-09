@@ -535,17 +535,17 @@ class RiderManagementController extends Controller
             if($rider){
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
-                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    // $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                    if ($global_setting->exists()) {
-                        $global_setting = $global_setting->first();
-                        $trax_id = $global_setting->setting_value + 1;
-                        $global_setting->setting_value = $trax_id;
-                        $global_setting->save();
-                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                    } else {
-                        $trax_id = null;
-                    }
+                    // if ($global_setting->exists()) {
+                    //     $global_setting = $global_setting->first();
+                    //     $trax_id = $global_setting->setting_value + 1;
+                    //     $global_setting->setting_value = $trax_id;
+                    //     $global_setting->save();
+                    //     $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    // } else {
+                    //     $trax_id = null;
+                    // }
 
                     $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
                     if($employee->exists())

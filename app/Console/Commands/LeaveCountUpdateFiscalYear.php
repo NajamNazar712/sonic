@@ -41,15 +41,9 @@ class LeaveCountUpdateFiscalYear extends Command
     public function handle()
     {
         $month = Carbon::now()->month;
-        $employee_leave_log = EmployeeLeaveLogFiscal::where('month',$month);
-        if(!$employee_leave_log->exists()){
+        if($month == 7){
             Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['fiscal_leave_count' => 3]);
             Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['fiscal_leave_count' => 26]);
-            
-            EmployeeLeaveLogFiscal::create([
-                'month' => $month
-            ]);
-
         }
     }
 }

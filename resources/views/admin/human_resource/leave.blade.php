@@ -501,7 +501,7 @@
                             head.push('Days');
                             head.push('Requested Date');
                             head.push('Updated By');
-                            head.push('Updated At');re
+                            head.push('Updated At');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -513,7 +513,7 @@
                                 row.push(values.department);
                                 row.push(values.employee_type);
                                 row.push(values.cnic);
-                                row.push(values.leave_count);
+                                row.push(values.availed_leaves);
                                 row.push(values.status);
                                 row.push(values.applied_reason);
                                 row.push(values.leave_type);
@@ -597,8 +597,8 @@
                     },
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
                     {
-                        data: 'leave_count',
-                        name: 'ls.name',
+                        data: 'availed_leaves',
+                        name: 'availed_leaves',
                         class: 'align-middle leave_count',
                         orderable: false,
                         searchable: false
