@@ -10585,7 +10585,8 @@ else if ($id == 178) {
                         if (strpos($body, '[date]') !== FALSE) {
                             $body = str_replace('[date]', $leave->date, $body);
                         }
-                        self::push_notification($employee_id, $employee_type, $title, $body);
+                        $admin_id = Admin::where('employee_id', $employee_id)->value('id');
+                        self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 }
                 else if ($id == 19) {
