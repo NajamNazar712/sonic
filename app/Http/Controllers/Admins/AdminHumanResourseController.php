@@ -4279,6 +4279,7 @@ class AdminHumanResourseController extends Controller
 
     public function leave_list(Request $request)
     {
+        
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
         }
@@ -4387,18 +4388,18 @@ class AdminHumanResourseController extends Controller
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
                   ';
-                if ($employee->status_id == 1 || $employee->status_id == 7) {
+                $emp_id = Employee::where('trax_id', Auth::user()->trax_id);
+                if ($employee->status_id == 1) {
 
                     // if ($employee->leave_type_id == 1) {
 
-                        $emp_id = Employee::where('trax_id', Auth::user()->trax_id);
                         if ($emp_id->exists()) {
                             $emp_id = $emp_id->first();
                             if ($employee->line_manager_id == $emp_id->id) {
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
-                                $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                                // $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                                 $dropdown .= '
                                 </div>
                               </div>
@@ -4434,6 +4435,38 @@ class AdminHumanResourseController extends Controller
                             </div>
                             ';
                         return $dropdown;
+                    }
+                }
+                elseif($employee->status_id == 7)
+                {
+                    
+                    if ($emp_id->exists()) {
+                        $emp_id = $emp_id->first();
+                        if ($employee->line_manager_id == $emp_id->id) {
+
+                            $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
+                            // $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                            $dropdown .= '
+                            </div>
+                          </div>
+                        ';
+                            return $dropdown;
+
+                        } 
+                        elseif ($employee->trax_id == $emp_id->trax_id) {
+                            $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                          ';
+                                $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                                $dropdown .= '
+                            </div>
+                        </div>
+                        ';
+                            return $dropdown;
+                        }                
                     }
                 }
                
