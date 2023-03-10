@@ -4250,7 +4250,7 @@ class AdminHumanResourseController extends Controller
         $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
         $avaialble_qouate = $available_qouates->leave_count;
         $avaialble_qouate = max(0,$avaialble_qouate);
-        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->where('status',6)->whereIn('leave_type', [1,2,3,4])->count();
+        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
         $available_leaves = max(0,$available_leaves);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
@@ -4376,9 +4376,23 @@ class AdminHumanResourseController extends Controller
             })
             ->editColumn('availed_leaves', function($employee)
             {
-                $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-                ->where('employee_id', Auth::user()->employee_id)
-                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                if($employee->line_manager_id == Auth::user()->employee_id)
+                {
+                    $availed_leaves = EmployeeLeave::join('employees as a','a.id','a.id','employee_leaves.employee_id')
+                    ->where('a.line_manager_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
+                    
+                    // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')->
+                    // join('employees as a','a.id','a.id','employee_leaves.employee_id')
+                    // ->where('a.line_manager_id', Auth::user()->employee_id)
+                    // ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                    
+                }else{
+
+                    $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
+                    // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                    // ->where('employee_id', Auth::user()->employee_id)
+                    // ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                }
                 return max(0,$availed_leaves);
             })
         // ->addColumn("action", function ($employee) use ($department_head) {
