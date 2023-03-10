@@ -652,6 +652,9 @@ class AdminRevenueReportsController extends Controller
             ->editColumn('gst', function ($invoice) {
                 return number_format($invoice->gst);
             });
+            if($search_invoice_number = $request->get('search_invoice_number')){
+                $datatable->where('rbi.invoice_number','=', $search_invoice_number);
+            }
             if($shipper = $request->get('search_shipper')){
                 $datatable->where('rbi.user_id','=', $shipper);
             }
