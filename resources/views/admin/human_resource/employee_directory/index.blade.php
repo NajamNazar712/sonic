@@ -2374,10 +2374,10 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
+                                    // toastr.success(data.success, 'Success!', {
+                                    //     positionClass: 'toast-bottom-center',
+                                    //     containerId: 'toast-bottom-center'
+                                    // });
                                     window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
@@ -2438,10 +2438,10 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center',
-                                    });
+                                    // toastr.success(data.success, 'Success!', {
+                                    //     positionClass: 'toast-bottom-center',
+                                    //     containerId: 'toast-bottom-center',
+                                    // });
                                     window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
