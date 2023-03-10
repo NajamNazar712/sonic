@@ -269,6 +269,7 @@
 
                         var afterDate = currentDate.add(14, 'days');
                         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+                        to_date.pickadate('picker').set('select', afterDate.toDate(),{muted:true});
 
 
                     }
