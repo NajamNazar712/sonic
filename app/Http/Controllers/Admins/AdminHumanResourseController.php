@@ -379,6 +379,7 @@ class AdminHumanResourseController extends Controller
         $employee->joining_date = $request->joining_date_formatted;
         $employee->old_trax_id = $request->old_trax_id;
         $employee->remarks = $request->remarks;
+        $employee->last_working_date = null;
         $employee->save();
 
         $this->employee_log_save($employee->id,$employee->employee_type_id,$employee->staff_category_id,4,null,$employee->rider_type_id,null,auth()->id());
