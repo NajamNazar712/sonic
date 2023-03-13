@@ -15,7 +15,7 @@ class AttendanceAdjustmentShiftWise extends Command
      *
      * @var string
      */
-    protected $signature = 'employee:attendanceadjustment {shift_id}';
+    protected $signature = 'employee:attendanceadjustment {shift_id} {notify_for}';
 
     /**
      * The console command description.
@@ -42,6 +42,7 @@ class AttendanceAdjustmentShiftWise extends Command
     public function handle()
     {
         $shift_id = $this->argument('shift_id');
+        $notify_for = $this->argument('notify_for');
         $today = Carbon::now()->format('Y-m-d');
         $todayname = Carbon::now();
         $dayname =  $todayname->format('l');
@@ -55,7 +56,10 @@ class AttendanceAdjustmentShiftWise extends Command
         ->select('employees.official_email as email','ea.employee_id as employee_attendence_id','ea.clock_in as clock_in')->get();
         foreach($check_employee_attendences as $check_employee_attendence)
         {
-            NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
+            if($notify_for == 'web')
+                NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
+            elseif ($notify_for == 'app')
+                // NotificationsController::app_notification(211,$check_employee_attendence->email,$dateAndDay);
         }
     }
 }
