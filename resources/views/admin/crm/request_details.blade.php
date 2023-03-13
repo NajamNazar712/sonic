@@ -353,7 +353,7 @@
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                                 <div id="updated_by_div_{{$comment->id}}">
                                                                                     @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
-                                                                                        <small>Updated by: {{$comment->comment_updated_by->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
                                                                                     @endif
                                                                                 </div>
                                                                         </div>
