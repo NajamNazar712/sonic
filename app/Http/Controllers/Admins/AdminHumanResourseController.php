@@ -4120,7 +4120,9 @@ class AdminHumanResourseController extends Controller
             {
                 return '--';
             }    
-            } else {
+            } 
+            else 
+            {
                 return '--';
             }
         });
