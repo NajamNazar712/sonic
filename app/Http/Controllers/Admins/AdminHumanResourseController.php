@@ -4384,7 +4384,7 @@ class AdminHumanResourseController extends Controller
                     $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
                     ->where('employee_id', $employee->employee_id)
                     ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])
-                    ->get();
+                    ->value('leaves_availed');
                 }
                 elseif($employee->employee_id == Auth::user()->employee_id){
                     
