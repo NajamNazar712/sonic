@@ -59,7 +59,7 @@ class AttendanceAdjustmentShiftWise extends Command
             if($notify_for == 'web')
                 NotificationsController::send(211,$check_employee_attendence->email,$dateAndDay);
             elseif ($notify_for == 'app')
-                // NotificationsController::app_notification(211,$check_employee_attendence->email,$dateAndDay);
+                NotificationsController::app_notification(20, $check_employee_attendence->employee_attendence_id, 1, $check_employee_attendence->employee_attendence_id);
         }
     }
 }

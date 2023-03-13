@@ -10605,6 +10605,12 @@ else if ($id == 178) {
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 }
+                else if ($id == 20) {
+                    if($employee_id){
+                        $admin_id = Admin::where('employee_id', $employee_id)->value('id');
+                        self::push_notification($admin_id, $employee_type, $title, $body);
+                    }
+                }
             }
         }
     }
