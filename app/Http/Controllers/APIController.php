@@ -6536,8 +6536,9 @@ class APIController extends Controller
 
             $return_address_id = null;
 
-            if($request->has('return_city_id') && $request->has('return_vendor') && $request->has('return_address') && $request->has('return_contact_person') && $request->has('return_phone_number') && $request->has('return_email_address')){
+            $shipping_mode_id = $request->input('shipping_mode_id');
 
+            if($request->has('return_city_id') && $request->has('return_vendor') && $request->has('return_address') && $request->has('return_contact_person') && $request->has('return_phone_number') && $request->has('return_email_address')){
                 $return_city_id = $request->return_city_id;
                 $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city_id);
                 if ($return_address->exists()) {
@@ -6546,14 +6547,14 @@ class APIController extends Controller
                 } else {
                     $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city_id, 0);
                 }
-            }
 
-            $shipping_mode_id = $request->input('shipping_mode_id');
-            //Return Address
 
-            $result = ShipperShipmentBookController::check_return_destination($return_address_id, $shipping_mode_id, $user_id);
-            if (!$result) {
-                return response()->json(['status' => 1, 'message' => 'Return city not allowed, please contact your sales person!']);
+                //Return Address
+
+                $result = ShipperShipmentBookController::check_return_destination($return_address_id, $shipping_mode_id, $user_id);
+                if (!$result) {
+                    return response()->json(['status' => 1, 'message' => 'Return city not allowed, please contact your sales person!']);
+                }
             }
 
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);

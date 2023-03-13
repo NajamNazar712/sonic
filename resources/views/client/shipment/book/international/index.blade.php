@@ -87,8 +87,8 @@
 
                                             <div class="form-group">
                                                 <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-                                                    @foreach($cities as $city)
-                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                    @foreach($pickup_cities as $pickup_city)
+                                                        <option value="{{ $pickup_city->id }}">{{ $pickup_city->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
