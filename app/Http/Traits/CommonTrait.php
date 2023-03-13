@@ -19,20 +19,36 @@ trait CommonTrait
             // Saturday and Sunday are off
             $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
         }
-        $availed_leaves = EmployeeLeave::selectRaw("SUM(
-            CASE
-                WHEN DATEDIFF(`to`, `from`) >= 0 THEN
-                    DATEDIFF(`to`, `from`) + 1 -
-                    (FLOOR((DATEDIFF(`to`, `from`) + WEEKDAY(`from`) + 1) / 7) * COUNT(?)) -
-                    SUM(WEEKDAY(`date`) IN (?))
-                ELSE 0
-            END
-        ) as leaves_availed", [$weekend_days, $weekend_days])
-        ->where('employee_id', $employee->id)
-        ->whereIn('status', [6])
+        // $availed_leaves = EmployeeLeave::selectRaw("SUM(
+        //     CASE
+        //         WHEN DATEDIFF(`to`, `from`) >= 0 THEN
+        //             DATEDIFF(`to`, `from`) + 1 -
+        //             (FLOOR((DATEDIFF(`to`, `from`) + WEEKDAY(`from`) + 1) / 7) * COUNT(?)) -
+        //             SUM(WEEKDAY(`date`) IN (?))
+        //         ELSE 0
+        //     END
+        // ) as leaves_availed", [$weekend_days, $weekend_days])
+        // ->where('employee_id', $employee->id)
+        // ->whereIn('status', [6])
+        // ->whereIn('leave_type', [1,2,3,4])
+        // ->value('leaves_availed'); 
+        $leaves_availed = EmployeeLeave::where('employee_id', $employee->id)
+        ->whereIn('status', [2,4,6])
         ->whereIn('leave_type', [1,2,3,4])
-        ->value('leaves_availed'); 
-        return $availed_leaves;
+        ->get()
+        ->filter(function ($leave) {
+            return $leave->from <= $leave->to;
+        })
+        ->sum(function ($leave) use ($weekend_days, $employee) {
+            $leave_days = Carbon::parse($leave->from)->diffInDaysFiltered(function (Carbon $date) use ($weekend_days) {
+                return !in_array($date->dayOfWeek, $weekend_days);
+            }, $leave->to);
+            if ($employee->working_days == 2) {
+                $leave_days -= Carbon::parse($leave->from)->isWeekend() ? 1 : 0;
+            }
+            return $leave_days + 1;
+        });
+        return $leaves_availed;
     }
 
     public function calculateToDateLeaves($employee, $toDate)
