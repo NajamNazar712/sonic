@@ -62,7 +62,7 @@
                                         {{-- <th class="border-primary border-darken-1">Availed Leave</th> --}}
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">No of Late</th>
-                                        <th class="border-primary border-darken-1">Requested Date</th>
+                                        <th class="border-primary border-darken-1">Date</th>
                                         <th class="border-primary border-darken-1">Updated By</th>
                                         <th class="border-primary border-darken-1">Updated At</th>
                                         <th class="border-primary border-darken-1">Deduction Count</th>
@@ -99,16 +99,13 @@
                         <input type="hidden" name="reject_by_id" id="reject_by_id">
 
                         <div class="row mb-2 justify-content-center">
-                           
-                            <div class="col-12">
+                           <div class="col-12">
                                 <div class="form-group">
                                     <label for="">Reason</label>
                                     <textarea class="form-control" name="reject_reason" id="reject_reason" cols="30" rows="10" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                                    
                                 </div>
                             </div>
-                          
-
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary btn-min-width">Reject
@@ -274,7 +271,7 @@
                             // head.push('Availed Leave');
                             head.push('Status');
                             head.push('No of Late');
-                            head.push('Requested Date');
+                            head.push('Date');
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Deduction Count');
