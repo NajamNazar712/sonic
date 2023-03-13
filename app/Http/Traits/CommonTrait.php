@@ -15,9 +15,11 @@ trait CommonTrait
             $weekend_days = [];
             $working_days = 1;
             if (isset($employee->department) && $employee->department->working_days == 1) {
+                $working_days = 1;
                 // Sunday is off
                 $weekend_days = [Carbon::SUNDAY];
             } else if (isset($employee->department) && $employee->department->working_days == 2){
+                $working_days = 2;
                 // Saturday and Sunday are off
                 $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
             }
