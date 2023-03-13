@@ -19,7 +19,7 @@ trait CommonTrait
             // Saturday and Sunday are off
             $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
         }
-        $availed_leaves = EmployeeLeave::selectRaw('SUM(
+        $availed_leaves = EmployeeLeave::selectRaw("SUM(
             CASE
                 WHEN DATEDIFF(`to`, `from`) >= 0 THEN
                     DATEDIFF(`to`, `from`) + 1 -
@@ -27,7 +27,7 @@ trait CommonTrait
                     SUM(WEEKDAY(`date`) IN (?))
                 ELSE 0
             END
-        ) as leaves_availed', [$weekend_days, $weekend_days])
+        ) as leaves_availed", [$weekend_days, $weekend_days])
         ->where('employee_id', $employee->id)
         ->whereIn('status', [6])
         ->whereIn('leave_type', [1,2,3,4])
