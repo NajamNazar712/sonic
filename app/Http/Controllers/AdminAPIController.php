@@ -3716,10 +3716,7 @@ class AdminAPIController extends Controller
                     }
 
                 }
-            }
-            $response["status"] = 0;
-            if ($admin_shift->exists()) {
-                $admin_shift = $admin_shift->first();
+                $response["status"] = 0;
                 $response["shift_name"] = $admin_shift->name;
                 $response["start_time"] = $admin_shift->start_time;
                 $response["end_time"] = $admin_shift->end_time;
@@ -7285,6 +7282,7 @@ class AdminAPIController extends Controller
                 $last_action_log = $last_action_log->first();
                 if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
                     $attendance_date = $attendance_date->addDays(1);
+//                    return response()->json($attendance_date);
                 }
             }
             $admin_attendance = EmployeeAttendance::where('employee_id', $employee_id)
