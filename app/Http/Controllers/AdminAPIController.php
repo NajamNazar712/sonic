@@ -7282,7 +7282,7 @@ class AdminAPIController extends Controller
                 $last_action_log = $last_action_log->first();
                 if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
                     $attendance_date = $attendance_date->addDays(1);
-                    return response()->json($attendance_date);
+//                    return response()->json($attendance_date);
                 }
             }
             $admin_attendance = EmployeeAttendance::where('employee_id', $employee_id)
