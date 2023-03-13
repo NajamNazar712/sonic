@@ -171,13 +171,13 @@ class Kernel extends ConsoleKernel
             {
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id])
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
                 ->dailyAt($dailyAt)
                 ->runInBackground();
                
                 // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
                 $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id])
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
                 ->dailyAt($dailyAt)
                 ->runInBackground();
             }
