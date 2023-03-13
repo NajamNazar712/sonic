@@ -411,7 +411,7 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data = $.map({!! $employee_confirmation_statuses !!}, function (obj) {
+                    var data = $.map({!! $penalty_statuses !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
 
@@ -571,7 +571,12 @@
             $('body').on('click', 'button.deduction_modal',  function(){
             var id = $(this).parents('tr').attr('id');
             employee_id = $(this).attr("data-target-id");
-            var no_of_late = $('.duplicate_modal').text();
+            console.log(employee_id);
+
+            let no_of_late = $(this).closest('tr').children('.no_late').text();
+
+            // var no_of_late = $('.duplicate_modal').text();
+            // console.log(no_of_late);
             var no_of_deduction = Math.floor(no_of_late/3);
             late_count = no_of_late;
             deduction_count = no_of_deduction;

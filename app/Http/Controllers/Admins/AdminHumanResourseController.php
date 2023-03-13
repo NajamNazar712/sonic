@@ -53,6 +53,7 @@ use App\Http\Models\HR\EmployeePenalty;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\HR\PenaltyStatus;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -3963,7 +3964,8 @@ class AdminHumanResourseController extends Controller
         
         $trax_ids = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $employee_confirmation_statuses = EmployeeConfirmationStatus::all();
-        return view('admin.human_resource.employee_penalty')->with(["admins" => $users, "trax_ids" => $trax_ids, "employee_confirmation_statuses" => $employee_confirmation_statuses]);
+        $penalty_statuses = PenaltyStatus::all();
+        return view('admin.human_resource.employee_penalty')->with(["admins" => $users, "trax_ids" => $trax_ids, "employee_confirmation_statuses" => $employee_confirmation_statuses,"penalty_statuses" => $penalty_statuses]);
     }
     public function employee_penalty_list(Request $request)
     {
@@ -3979,10 +3981,10 @@ class AdminHumanResourseController extends Controller
         ->join('admin_departments as ad', 'ad.id', 'a.department_id')
         ->join('employee_designations as ed', 'ed.id', 'a.designation_id')
         ->leftjoin('employee_leaves as el', 'el.employee_id', 'employee_penalties.employee_id')
-        ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
+        // ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
+        ->leftjoin('penalty_statuses as ps','ps.id','employee_penalties.status')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
-        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ls.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
-        ->whereIn('employee_penalties.status',[1,4,6])
+        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
         ->where(function($q){
             if (session('department_id') != 10) {
                 $q->where('employee_penalties.employee_id', Auth::user()->employee_id)
@@ -4100,7 +4102,7 @@ class AdminHumanResourseController extends Controller
                     }
                 }
                 
-                if ($employee_leaves->penalties_status == 1 || $employee_leaves->penalties_status == 7) {
+                if ($employee_leaves->penalties_status == 1) {
                     if ($employee_leaves->status_id != 2 && (session('role_id') == 1 || $employee_leaves['line_manager_id'] == Auth::user()->employee_id)) {
                         $dropdown .= '<button type="button" class="dropdown-item deduction_modal" data-target-id=' . $employee_leaves->employee_id . ' data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deduct</div></button>';
                     }
@@ -4110,9 +4112,13 @@ class AdminHumanResourseController extends Controller
             </div>
             </div>
         ';
-            if($employee_leaves->penalties_status == 1 || $employee_leaves->penalties_status == 2 || $employee_leaves->penalties_status == 3 || $employee_leaves->penalties_status == 4 || $employee_leaves->penalties_status == 5 ||$employee_leaves->penalties_status == 7)          
+            if($employee_leaves->penalties_status == 1)          
             {
                 return $dropdown;
+            }
+            else
+            {
+                return '--';
             }    
             } else {
                 return '--';
@@ -4136,13 +4142,11 @@ class AdminHumanResourseController extends Controller
     {
         
         $employee_id = $request->employee_id;
-    
+        
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
         ->where('ea.employee_id',$employee_id)
         ->select('ea.attendance_date','ea.clock_in')->get(); 
-       
         $data = $duplicate;
-        
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function employee_penalty_reject(Request $request){
@@ -4150,7 +4154,7 @@ class AdminHumanResourseController extends Controller
         $employee_penalty = EmployeePenalty::find($request->reject_confirmation_id);
         if($employee_penalty){
             if($request->reject_by == 'lm'){
-                $employee_penalty->status = 7;
+                $employee_penalty->status = 2;
             }
             $employee_penalty->updated_by = $request->reject_by_id;
             $employee_penalty->reject_reason = $request->reject_reason;
@@ -4196,7 +4200,7 @@ class AdminHumanResourseController extends Controller
                     if($employee_penalty){
                         if($request->approve_by == 'lm')
                         {
-                            $employee_penalty->status = 6;
+                            $employee_penalty->status = 3;
                         }
                         $employee_penalty->updated_by = $request->line_manager_id;
                         $employee_penalty->leave_deduction = $request->deduction_count;
@@ -4214,7 +4218,7 @@ class AdminHumanResourseController extends Controller
                     {
                         if($request->approve_by == 'lm')
                         {
-                            $employee_penalty->status = 6;
+                            $employee_penalty->status = 3;
                         }
                         $employee_penalty->updated_by = $request->line_manager_id;
                         $employee_penalty->leave_without_pay = $request->salary_deduction_count;
