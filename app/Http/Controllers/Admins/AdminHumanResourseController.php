@@ -4250,8 +4250,11 @@ class AdminHumanResourseController extends Controller
         $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
         $avaialble_qouate = $available_qouates->leave_count;
         $avaialble_qouate = max(0,$avaialble_qouate);
-        $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
-        $available_leaves = max(0,$available_leaves);
+        $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                    ->where('employee_id', Auth::user()->employee_id)
+                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+        // $available_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
+        $available_leaves = max(0,$availed_leaves);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
             if($admin_profile->employee_gender_id == 1){
@@ -4386,12 +4389,17 @@ class AdminHumanResourseController extends Controller
                     ->where('a.line_manager_id', Auth::user()->employee_id)
                     ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
                     
-                }else{
+                }
+                elseif($employee->employee_id == Auth::user()->employee_id){
 
                     // $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
                     $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
                     ->where('employee_id', Auth::user()->employee_id)
                     ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                }
+                else
+                {
+                    $availed_leaves = '-';
                 }
                 return max(0,$availed_leaves);
             })
