@@ -6695,7 +6695,11 @@ class APIController extends Controller
             }
 
             $estimated_weight = $request->input('estimated_weight');
-            $amount = $request->input('amount');
+
+            $amount = 0;
+            if($request->has('amount')){
+                $amount = $request->input('amount');
+            }
 
             $same_day_timing_id = null;
             $try_and_buy_charges = null;
