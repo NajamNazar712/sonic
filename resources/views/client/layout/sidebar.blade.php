@@ -164,7 +164,7 @@
                             <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
                         @endif
 
-                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>
+{{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
                     </ul>
                 </li>
             @endif
