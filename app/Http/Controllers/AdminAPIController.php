@@ -3695,6 +3695,7 @@ class AdminAPIController extends Controller
         if ($admins) {
             $response = array();
             $admin_shift = EmployeeShift::where('id', $admins->shift_id);
+            return response()->json($admin_shift);
             if ($admin_shift->exists()) {
                 $admin_shift = $admin_shift->first();
                 $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
