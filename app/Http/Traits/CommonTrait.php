@@ -2,10 +2,39 @@
 
 namespace App\Http\Traits;
 
+use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeLeave;
 use Carbon\Carbon;
 
 trait CommonTrait
 {
+    public function getAvailedLeaves($employee_id)
+    {
+        $employee = Employee::find($employee_id);
+        $weekend_days = [];
+        if ($employee->department->working_days == 1) {
+            // Sunday is off
+            $weekend_days = [Carbon::SUNDAY];
+        } else {
+            // Saturday and Sunday are off
+            $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
+        }
+        $availed_leaves = EmployeeLeave::selectRaw('SUM(
+            CASE
+                WHEN DATEDIFF(`to`, `from`) >= 0 THEN
+                    DATEDIFF(`to`, `from`) + 1 -
+                    (FLOOR((DATEDIFF(`to`, `from`) + WEEKDAY(`from`) + 1) / 7) * COUNT(?)) -
+                    SUM(WEEKDAY(`date`) IN (?))
+                ELSE 0
+            END
+        ) as leaves_availed', [$weekend_days, $weekend_days])
+        ->where('employee_id', $employee->id)
+        ->whereIn('status', [6])
+        ->whereIn('leave_type', [1,2,3,4])
+        ->value('leaves_availed'); 
+        return $availed_leaves;
+    }
+
     public function calculateToDateLeaves($employee, $toDate)
     {
         try {

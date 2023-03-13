@@ -3997,10 +3997,11 @@ class AdminHumanResourseController extends Controller
 
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
-            $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-            ->where('employee_id', $employee_leaves->employee_id)
-            ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
-            return $availed_leaves;    
+            $availed_leaves = $this->getAvailedLeaves($employee_leaves->employee_id);
+            // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+            // ->where('employee_id', $employee_leaves->employee_id)
+            // ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+            // return $availed_leaves;    
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
             $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
@@ -4250,9 +4251,8 @@ class AdminHumanResourseController extends Controller
         $available_qouates = Employee::where('trax_id', Auth::user()->trax_id)->first();
         $avaialble_qouate = $available_qouates->leave_count;
         $avaialble_qouate = max(0,$avaialble_qouate);
-        $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-                    ->where('employee_id', Auth::user()->employee_id)
-                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+        $availed_leaves = $this->getAvailedLeaves(Auth::user()->employee_id);
+        
         $available_leaves = max(0,$availed_leaves);
         if ($admin_profile->exists()) {
             $admin_profile = $admin_profile->first();
@@ -4380,17 +4380,10 @@ class AdminHumanResourseController extends Controller
             {
                 if($employee->line_manager_id == Auth::user()->employee_id)
                 {
-                   
-                    $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-                    ->where('employee_id', $employee->employee_id)
-                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])
-                    ->value('leaves_availed');
+                    $availed_leaves = $this->getAvailedLeaves($employee->employee_id);
                 }
                 elseif($employee->employee_id == Auth::user()->employee_id){
-                    
-                    $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-                    ->where('employee_id', Auth::user()->employee_id)
-                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                    $availed_leaves = $this->getAvailedLeaves(Auth::user()->employee_id);
                 }
                 else
                 {
