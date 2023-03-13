@@ -3694,8 +3694,7 @@ class AdminAPIController extends Controller
         $admins = Admin::find($admin_id);
         if ($admins) {
             $response = array();
-            $admin_shift = EmployeeShift::where('id', $admins->shift_id)->first();
-            return response()->json($admin_shift);
+            $admin_shift = EmployeeShift::where('id', $admins->shift_id);
             if ($admin_shift->exists()) {
                 $admin_shift = $admin_shift->first();
                 $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
@@ -3719,7 +3718,7 @@ class AdminAPIController extends Controller
                 }
             }
             $response["status"] = 0;
-            if ($admin_shift->exists()) {
+            if ($admin_shift) {
                 $admin_shift = $admin_shift->first();
                 $response["shift_name"] = $admin_shift->name;
                 $response["start_time"] = $admin_shift->start_time;
