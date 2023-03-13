@@ -3716,10 +3716,7 @@ class AdminAPIController extends Controller
                     }
 
                 }
-            }
-            $response["status"] = 0;
-            if ($admin_shift) {
-                $admin_shift = $admin_shift->first();
+                $response["status"] = 0;
                 $response["shift_name"] = $admin_shift->name;
                 $response["start_time"] = $admin_shift->start_time;
                 $response["end_time"] = $admin_shift->end_time;
