@@ -11,32 +11,35 @@ trait CommonTrait
     public function getAvailedLeaves($employee_id)
     {
         $employee = Employee::find($employee_id);
-        $weekend_days = [];
-        $working_days = 1;
-        if (isset($employee->department) && $employee->department->working_days == 1) {
-            // Sunday is off
-            $weekend_days = [Carbon::SUNDAY];
-        } else if (isset($employee->department) && $employee->department->working_days == 2){
-            // Saturday and Sunday are off
-            $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
-        }
-        $leaves_availed = EmployeeLeave::where('employee_id', $employee->id)
-        ->whereIn('status', [2,4,6])
-        ->whereIn('leave_type', [1,2,3,4])
-        ->get()
-        ->filter(function ($leave) {
-            return $leave->from <= $leave->to;
-        })
-        ->sum(function ($leave) use ($weekend_days, $working_days) {
-            $leave_days = Carbon::parse($leave->from)->diffInDaysFiltered(function (Carbon $date) use ($weekend_days) {
-                return !in_array($date->dayOfWeek, $weekend_days);
-            }, $leave->to);
-            if ($working_days == 2) {
-                $leave_days -= Carbon::parse($leave->from)->isWeekend() ? 1 : 0;
+        if($employee){
+            $weekend_days = [];
+            $working_days = 1;
+            if (isset($employee->department) && $employee->department->working_days == 1) {
+                // Sunday is off
+                $weekend_days = [Carbon::SUNDAY];
+            } else if (isset($employee->department) && $employee->department->working_days == 2){
+                // Saturday and Sunday are off
+                $weekend_days = [Carbon::SATURDAY, Carbon::SUNDAY];
             }
-            return $leave_days + 1;
-        });
-        return $leaves_availed;
+            $leaves_availed = EmployeeLeave::where('employee_id', $employee->id)
+            ->whereIn('status', [2,4,6])
+            ->whereIn('leave_type', [1,2,3,4])
+            ->get()
+            ->filter(function ($leave) {
+                return $leave->from <= $leave->to;
+            })
+            ->sum(function ($leave) use ($weekend_days, $working_days) {
+                $leave_days = Carbon::parse($leave->from)->diffInDaysFiltered(function (Carbon $date) use ($weekend_days) {
+                    return !in_array($date->dayOfWeek, $weekend_days);
+                }, $leave->to);
+                if ($working_days == 2) {
+                    $leave_days -= Carbon::parse($leave->from)->isWeekend() ? 1 : 0;
+                }
+                return $leave_days + 1;
+            });
+            return $leaves_availed;
+        }
+        return 0;
     }
 
     public function calculateToDateLeaves($employee, $toDate)
