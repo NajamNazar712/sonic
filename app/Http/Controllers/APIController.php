@@ -6405,7 +6405,7 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-        $jazzcash_account_ids = [10104, 14781 , 14110, 10364, 10358];
+        $jazzcash_account_ids = [10104, 14781 , 14110, 10381, 10358];
         if (!in_array($user_id, $jazzcash_account_ids)) {
             return response()->json(['status' => 1, 'message' => 'Shipper is not allowed.']);
         }
