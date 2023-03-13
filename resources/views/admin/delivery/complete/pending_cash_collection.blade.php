@@ -229,7 +229,7 @@
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <input type="text" name="amount" id="amount" placeholder="Amount" class="form-control" data-rule-required="true" data-msg-required="Deposit Amount is Required">
+                                    <input type="text" name="amount" id="amount" placeholder="Amount" class="form-control amount" data-rule-required="true" data-msg-required="Deposit Amount is Required">
                                 </div>
                             </div>
                             <div class="col-8">
@@ -239,7 +239,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-group">
-                                    <input class="form-control form-control" type="file" name="deposit_slip" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">
+                                    <input class="form-control form-control" id="deposit_slip" type="file" name="deposit_slip" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">
                                 </div>
                             </div>
                         </div>
@@ -321,6 +321,8 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -1151,9 +1153,19 @@
                     }
                 }
             });
-
+            $('#amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'groupSeparator': ',',
+                'autoGroup': true,
+                'min': 0,
+                'max': 1000000
+            });
             $('#uploadPCCDepositSlip').on('hidden.bs.modal', function () {
                 $("#pcc_upload_form").validate().resetForm();
+                $("#pcc_upload_form")[0].reset();
+                $("#pcc_upload_form #deposit_slip").val('');
             });
 
             $('#pcc_upload_form').validate({
