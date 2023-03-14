@@ -11279,6 +11279,13 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if($request->has('alternate_phone')){
+                if($request->alternate_phone){
+                    $alternate_phone = $request->alternate_phone;
+                }else{
+                    $alternate_phone = null;
+                }
+            }
             $shipment = Shipment::where('tracking_number', $request->tracking_no);
             $shipment_info = array();
             if ($shipment->exists()) {
@@ -11345,6 +11352,12 @@ class AdminAPIController extends Controller
                                 } else {
                                     CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                 }
+                            }
+                        }
+                        if($nature_id == 2){
+                            if($case_nature_type_id == 13){
+                                $shipment->consignee_phone_number_2 = $alternate_phone;
+                                $shipment->save();
                             }
                         }
                     }
