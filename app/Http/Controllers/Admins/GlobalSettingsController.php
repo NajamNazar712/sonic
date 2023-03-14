@@ -7562,7 +7562,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function auto_delivery_note_verification_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),636);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),639);
         $auto_verification = false;
         $excluded_hubs = array();
 

@@ -22,7 +22,7 @@ class UpdateModulePermissionsForDeliveryAutoVerificationSeeder extends Seeder
         ));
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 636, 'screen_name' => 'Auto Delivery Note Verification', 'action'=> 'View'),
+            array('id' => 639, 'screen_name' => 'Auto Delivery Note Verification', 'action'=> 'View'),
         ));
     }
 }
