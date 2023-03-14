@@ -4502,7 +4502,7 @@ class AdminHumanResourseController extends Controller
 
     public function leave_request(Request $request)
     {
-            if($request->leave_type == 3 || $request->leave_type == 2 )
+            if($request->leave_type == 3 || $request->leave_type == 2 || $request->leave_type == 4)
             {
                 
                 if ((!empty($request->requested_from_date) && !empty($request->requested_to_date))) {

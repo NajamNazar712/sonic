@@ -1006,7 +1006,7 @@
             var leave_type_partinty = $('#leave_type').val();
             if(leave_type_partinty !== null || leave_type_partinty !== '')
             {   console.log(leave_type_partinty,1);
-                if (leave_type_partinty == 3 || leave_type_partinty == 2) 
+                if (leave_type_partinty == 3 || leave_type_partinty == 2 || leave_type_partinty == 4) 
                 {
                    if($("#leave_request_reason").data("rule-required")) {
                             $("#leave_request_reason").data("rule-required",false);    
@@ -1036,7 +1036,7 @@
             var leave_type_partinty = $('#edit_leave_type').val();
             if(leave_type_partinty !== null || leave_type_partinty !== '')
             {   console.log(leave_type_partinty,1);
-                if (leave_type_partinty == 3 || leave_type_partinty == 2) 
+                if (leave_type_partinty == 3 || leave_type_partinty == 2 || leave_type_partinty == 4) 
                 {
                    if($("#edit_reason").data("rule-required")) {
                             $("#edit_reason").data("rule-required",false);    
