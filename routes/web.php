@@ -3465,6 +3465,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@consignee_refused_otp_bypass_store')->name('store');
         });
 
+        Route::prefix('star_shippers')->name('star_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@star_shippers_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
+            Route::post('remove', 'Admins\GlobalSettingsController@star_shippers_remove')->name('remove');
+        });
+
 
 	});
 

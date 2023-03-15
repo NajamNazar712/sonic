@@ -28,6 +28,7 @@
 
                                             <option value="10">Pickup Request Before Cut Off Time</option>
                                             <option value="0">All</option>
+                                            <option value="1">Star Shippers</option>
                                         </select>
                                     </div>
                                     <div class="col">
@@ -63,6 +64,15 @@
                                         </button>
                                     </div>
                                     <div class="col-md-6">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline" style="margin-top: -10px">
+                                                    <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                            Star Shippers</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
                                         <div class="card">
                                             <div class="card-header">
                                                 <div class="heading-elements">
@@ -390,6 +400,12 @@
         .legends{
             cursor:pointer;
         }
+
+        .star_sippers
+        {
+            color: white;
+            background-color: #0EDB8B;
+        }
         
 @foreach($legends as $legend)
     @if($legend->id == 1)
@@ -709,6 +725,7 @@
                         d.before_cut_off_time = $('#search_filter').val();
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
+                        d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
             rowId: 'id',
@@ -1180,6 +1197,12 @@
 
             $('#search_filter_btn').on('click',function () {
                table.draw(true);
+            });
+
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+               table.draw(true);
+                $('#star_shippers_filter').val(0);
             });
 
             $('#datatable tbody').on('click', 'tr td.all_remarks button.all_remarks_btn', function() {

@@ -112,6 +112,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\StarShipper;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
@@ -7560,5 +7561,38 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
-    
+
+    public function star_shippers_index()
+    {
+        $shippers = User::all();
+        return view('admin.settings.star_shippers.index')->with(['shippers'=>$shippers]);
+    }
+
+    public function star_shippers_add(Request $request)
+    {
+        $shipper_id = $request->star_shipper_id;
+        if (!empty($shipper_id))
+        {
+            $shipper_exist = StarShipper::where('shipper_id',$shipper_id);
+            if ($shipper_exist->exists())
+            {
+                $data = ['status'=>'0','message'=>'Already Exists !'];
+                return $data;
+            }
+            else
+            {
+                $new_shipper = new StarShipper();
+                $new_shipper->shipper_id = $shipper_id;
+                $new_shipper->add_by = $shipper_id;
+                $new_shipper->save();
+                $data = ['status'=>'1'];
+            }
+        }
+        else
+        {
+            $data = ['status'=>'0'];
+        }
+
+        return response()->json($data);
+    }
 }

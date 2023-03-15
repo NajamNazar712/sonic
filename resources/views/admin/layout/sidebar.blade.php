@@ -2636,6 +2636,10 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+                            @if (session('role_id') == 1 || in_array(697, session('permissions')))
+                                <li><a class="menu-item"
+                                       href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
+                            @endif
 
 
 
