@@ -10159,6 +10159,7 @@ class NotificationsController extends Controller
                     if ($general_admins->exists()) {
                         $to = array_merge($to, $general_admins->pluck('email')->toArray());
                     }
+                    self::email($subject, $body, $to);
                 }
             }
         }       
