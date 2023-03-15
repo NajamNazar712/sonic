@@ -1339,18 +1339,18 @@ class VisionSoftAPIController extends Controller
             //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
-            $sheet->setTitle('Vision Soft Payable');
+            $sheet->setTitle('COD Payable');
             $writer = new Xlsx($spreadsheet);
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="vision_soft_cod_payable_excel_.xlsx"');
+            header('Content-Disposition: attachment;filename="vs_cod_payable_excel_.xlsx"');
             header('Cache-Control: max-age=0');
             $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
             $time_string = Carbon::now()->toTimeString();
             $time_string = Carbon::parse($time_string)->format('h_i_s');
 
-            $file_name_without_path = "reports/vision_soft_cod_payable_excel_" . $date_file_name . ".xlsx";
-            $file_name = public_path() . "/reports/vision_soft_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $file_name_without_path = "reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
 
             return url('/') . '/' . $file_name_without_path;
@@ -1401,18 +1401,18 @@ class VisionSoftAPIController extends Controller
             //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
-            $sheet->setTitle('Vision Soft Receivable');
+            $sheet->setTitle('COD Receivable');
             $writer = new Xlsx($spreadsheet);
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="vision_soft_cod_receivable_excel_.xlsx"');
+            header('Content-Disposition: attachment;filename="vs_cod_receivable_excel_.xlsx"');
             header('Cache-Control: max-age=0');
             $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
             $time_string = Carbon::now()->toTimeString();
             $time_string = Carbon::parse($time_string)->format('h_i_s');
 
-            $file_name_without_path = "reports/vision_soft_cod_receivable_excel_" . $date_file_name . ".xlsx";
-            $file_name = public_path() . "/reports/vision_soft_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $file_name_without_path = "reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
             $writer->save($file_name);
 
             return url('/') . '/' . $file_name_without_path;
