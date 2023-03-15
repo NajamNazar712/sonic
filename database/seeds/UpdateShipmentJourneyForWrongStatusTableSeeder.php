@@ -47,9 +47,9 @@ class UpdateShipmentJourneyForWrongStatusTableSeeder extends Seeder
                             $shipment->save();
                         }
 
-                        $check_out_for_delivery_previous_shipment_journey->shipper_status_id = $shipper_status_id;
-                        $check_out_for_delivery_previous_shipment_journey->consignee_status_id = $consignee_status_id;
-                        $check_out_for_delivery_previous_shipment_journey->save();
+                        $check_out_for_delivery_shipment_journey->shipper_status_id = $shipper_status_id;
+                        $check_out_for_delivery_shipment_journey->consignee_status_id = $consignee_status_id;
+                        $check_out_for_delivery_shipment_journey->save();
                     }
                 }
             }
