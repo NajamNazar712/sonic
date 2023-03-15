@@ -35,6 +35,10 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PHPExcel_Style_Fill;
+use PHPExcel_Cell;
 
 class VisionSoftAPIController extends Controller
 {
@@ -1292,5 +1296,126 @@ class VisionSoftAPIController extends Controller
             }
         }
 
+    }
+    static public function cod_payable_excel(){
+
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+
+        $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
+            ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
+            })
+            ->select('users.id as account_id', 'users.name as account_name', DB::raw('(select sum(s.amount)) as amount'))
+            ->whereBetween('sj.created_at', [$startDate, $endDate])
+            ->groupBy('users.id')
+            ->get();
+        if(count($shippers) > 0){
+
+            $shipper_array['header'] = ['S. No.','Account ID', 'Account Name', 'Amount'];
+            $serial = 1;
+
+            foreach ($shippers as $shipper){
+                $shipper_array[] = ['serial' => $serial, 'Account ID' => $shipper->account_id, 'Account Name' => $shipper->account_name, 'Amount' => number_format($shipper->amount)];
+                $serial++;
+            }
+
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            // $sps_count  = count($sale_person_shipments);
+            $sps_count = $serial;
+            $tas = "D3:D" . $sps_count;
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            $sheet->fromArray($shipper_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+            // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+
+            // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
+            $sheet->setTitle('Vision Soft Payable');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="vision_soft_cod_payable_excel_.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/vision_soft_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vision_soft_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
+
+        }
+    }
+
+    static public function cod_receivable_excel(){
+
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
+
+        $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
+            ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
+            ->join('shipments_journey as sj', function($join) use($startDate,$endDate) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
+            })
+            ->select('hc.id as hub_id', DB::raw('(select sum(s.amount)) as amount'))
+            ->whereBetween('sj.created_at', [$startDate, $endDate])
+            ->whereNotIn('s.user_id', [8761, 9358])
+            ->groupBy('hc.id')
+            ->get();
+        if(count($cities) > 0){
+            $shipper_array['header'] = ['S. No.','HUB ID', 'Amount'];
+            $serial = 1;
+
+            foreach ($cities as $value){
+                $shipper_array[] = ['serial' => $serial, 'HUB ID' => $value->hub_id, 'Amount' => number_format($value->amount)];
+                $serial++;
+            }
+
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            // $sps_count  = count($sale_person_shipments);
+            $sps_count = $serial;
+            $tas = "D3:D" . $sps_count;
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            $sheet->fromArray($shipper_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+            // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+
+            // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
+            $sheet->setTitle('Vision Soft Receivable');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="vision_soft_cod_receivable_excel_.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/vision_soft_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vision_soft_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
+        }
     }
 }
