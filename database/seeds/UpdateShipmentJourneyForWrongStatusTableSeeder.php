@@ -30,12 +30,12 @@ class UpdateShipmentJourneyForWrongStatusTableSeeder extends Seeder
                         $shipper_status_id = 23;
                         $consignee_status_id = 23;
 
-                        if($shipment->booking_type_id = 2){
+                        if($shipment->booking_type_id == 2){
                             $shipper_status_id = 28;
                             $consignee_status_id = 28;
                         }
 
-                        if($shipment->booking_type_id = 3){
+                        if($shipment->booking_type_id == 3){
                             $shipper_status_id = 34;
                             $consignee_status_id = 34;
                         }
