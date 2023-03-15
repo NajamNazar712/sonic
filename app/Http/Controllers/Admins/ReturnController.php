@@ -5371,7 +5371,7 @@ class ReturnController extends Controller
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
-                Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+                Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 23, 'consignee_status_id' => 23]);
                 // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                 //     $query->where('booking_type_id', '!=', 4)
                 //         ->orWhere(function ($sub_query) {
@@ -5442,7 +5442,7 @@ class ReturnController extends Controller
                             }
                         }
 
-                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
+                        ShipmentsJourneyController::add($shipment, 23, 23, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
 
                         $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                         if ($handover_shipments->exists()) {
