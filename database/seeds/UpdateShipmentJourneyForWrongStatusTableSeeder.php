@@ -24,20 +24,20 @@ class UpdateShipmentJourneyForWrongStatusTableSeeder extends Seeder
                 if($check_try_and_buy_previous_shipment_journey->exists()){
                     $check_try_and_buy_previous_shipment_journey = $check_try_and_buy_previous_shipment_journey->first();
 
-                    if(in_array($check_try_and_buy_previous_shipment_journey->shipper_status_id, [52, 23])){
+                    if(in_array($check_try_and_buy_previous_shipment_journey->shipper_status_id, [25, 28])){
                         $shipment = Shipment::find($shipment_id);
 
                         $shipper_status_id = 24;
                         $consignee_status_id = 24;
 
-                        if($check_try_and_buy_previous_shipment_journey->shipper_status_id == 52){
-                            $shipper_status_id = 20;
-                            $consignee_status_id = 20;
+                        if($check_try_and_buy_previous_shipment_journey->shipper_status_id == 25){
+                            $shipper_status_id = 47;
+                            $consignee_status_id = 47;
                         }
 
-                        if($check_try_and_buy_previous_shipment_journey->booking_type_id == 23){
-                            $shipper_status_id = 24;
-                            $consignee_status_id = 24;
+                        if($check_try_and_buy_previous_shipment_journey->booking_type_id == 28){
+                            $shipper_status_id = 29;
+                            $consignee_status_id = 29;
                         }
 
 
