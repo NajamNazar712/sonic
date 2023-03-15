@@ -265,7 +265,15 @@ class ShipperDashboardController extends Controller
         $count = DB::connection($connection)->table('shipments')->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
                 ->orwhereIn('shipments.user_id', session('sister_users'));
-            })->count();
+            });
+
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $count = $count->whereBetween('shipments.created_at', [$from, $to]);
+        }
+
+        $count = $count->count();
 
         $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

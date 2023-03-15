@@ -593,9 +593,13 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
-                    }
+
+                    var old_date_formatted = $('input[name="booking_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
+                    booking_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    booking_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    booking_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
 
@@ -609,9 +613,9 @@
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
-                    }
+                    // if (context.select) {
+                    //     $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                    // }
                 }
             });
 
