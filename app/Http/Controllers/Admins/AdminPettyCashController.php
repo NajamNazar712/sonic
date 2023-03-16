@@ -2332,11 +2332,12 @@ class AdminPettyCashController extends Controller
             ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 0,
-//                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-            ]);
+//            return response()->json([
+//                'status' => 0,
+////                'message' => 'The given data was invalid.',
+//                'errors' => $validator->errors(),
+//            ]);
+            return redirect()->back()->with('error',$validator->errors()->first());
         }
 
         $petty_cash_detail_id = $request->petty_cash_id;
