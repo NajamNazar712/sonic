@@ -496,6 +496,22 @@
                     return true;
                 }
             });
+            
+            var pickup_requests = [];
+            function check_pickup_requests(pickup_request_id,total_quantity){
+            
+                 var index = $.inArray(pickup_request_id, pickup_requests);
+                    if (index === -1) {
+                        pickup_requests.push(pickup_request_id);
+                        pickup_requests[pickup_request_id]["quantity"] = 1;
+                    }
+                    else{
+                          pickup_requests[pickup_request_id]["quantity"]++;
+                    }
+                    pickup_requests[pickup_request_id]["total_quantity"] = total_quantity;
+                    console.log(pickup_requests);
+                    return pickup_requests;
+            }
 
           
 
@@ -556,12 +572,14 @@
                                         var rowNo = table.rows().count();
                                         if(data.details.rider_assigned == true){
                                             var int_pickup_request_id = data.details.pickup_request_id_unpadded;
+                                             var pickup_requests_total_booked = data.details.pickup_requests_total_booked;
                                             remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
                                             var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
                                             if(pickup_index === -1){
                                                 unassigned_pickup_request_ids.push(int_pickup_request_id);
                                             }
                                             unassigned_pickups = true;
+                                            check_pickup_requests(int_pickup_request_id,pickup_requests_total_booked)
                                         }
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).node().id = data.details.id;
                                         table.draw(false);
