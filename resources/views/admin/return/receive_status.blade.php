@@ -664,20 +664,11 @@
                 var shipment = $('#shipment_ids');
                 event.preventDefault();
                 var this_form = this;
-                var statusSelection = $(this).find('status_drop');
+                var statusSelection = $(form).find('status_drop');
                 console.log(statusSelection);
                 var status = statusSelection.val();
-                var remarks = $(this).closest('tr').find('.return_remarks');
-                if (status == 60) {
-                remarks.rules('add', {
-                    required: true,
-                    messages: {
-                    required: 'Remark is required'
-                    }
-                });
-                } else {
-                remarks.rules('remove', 'required');
-                } 
+                var remarks = $(form).closest('tr').find('.return_remarks');
+               
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to change shipment\'s status!',
@@ -711,7 +702,7 @@
                             shipments.push(id);
                         }
                         
-                        if (remarks[0].checkValidity()) {
+                        if (remarks.length && remarks[0].checkValidity()) {
                             remarks.removeClass('error');
                             remarks.next('.error-msg').html('');
                         } else {
@@ -721,7 +712,7 @@
                         var open_box_input = $('#open_box_ids');
                         open_box_input.val(open_box_ids);
                         shipment.val(shipments);
-                        this_form.submit();
+                        form.submit();
                     }
                 });
             }
