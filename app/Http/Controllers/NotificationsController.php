@@ -10223,6 +10223,33 @@ else if ($id == 178) {
 
                     self::email($subject,$body,$reference_1_id);
                 }
+                else if($id == 212)
+                {
+                    $employee_id = $reference_1_id;
+                    $employee = Employee::find($employee_id);
+                    
+                    if($employee)
+                    {
+                        if (strpos($subject, '[employee_name]') !== FALSE) {
+                            $subject = str_replace('[employee_name]', $employee->name, $subject);
+                        }
+
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $employee->name, $body);
+                        }
+
+                        $line_manager = Employee::whereNotNull('official_email')
+                        ->where('id',$employee->line_manager_id)
+                        ->first();
+
+                        if($line_manager)
+                        {
+                            self::email($subject, $body, $line_manager->official_email);
+                        }
+                    }
+
+                    
+                }
             }
         }       
     }
@@ -10558,7 +10585,8 @@ else if ($id == 178) {
                         if (strpos($body, '[date]') !== FALSE) {
                             $body = str_replace('[date]', $leave->date, $body);
                         }
-                        self::push_notification($employee_id, $employee_type, $title, $body);
+                        $admin_id = Admin::where('employee_id', $employee_id)->value('id');
+                        self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 }
                 else if ($id == 19) {
@@ -10575,6 +10603,13 @@ else if ($id == 178) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
                         self::push_notification($employee_id, $employee_type, $title, $body);
+                    }
+                }
+                else if ($id == 20) {
+                    if($employee_id){
+                        $admin_id = Admin::where('employee_id', $employee_id)->value('id');
+                        if($admin_id)
+                            self::push_notification($admin_id, $employee_type, $title, $body);
                     }
                 }
             }

@@ -21,13 +21,13 @@
                                             <fieldset class="form-group">
                                                 <select name="search_admin" id="search_admin" class="form-control select2">
                                                     @foreach($admins as $admin)
-                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                        <option value="{{$admin->id}}">{{$admin->name}} - {{ $admin->trax_id }} - {{ $admin->city_name }}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
                                       
-                                        <div class="col-5 mt-1">
+                                        {{-- <div class="col-5 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_trax_id" id="search_trax_id" class="form-control select2">
                                                     @foreach($trax_ids as $trax_id)
@@ -35,7 +35,7 @@
                                                     @endforeach
                                                 </select>
                                             </fieldset>
-                                        </div>
+                                        </div> --}}
                                         
                                         <div class="col-2 mt-1">
                                             <div class="form-group">
@@ -53,16 +53,16 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S No.</th>
-                                        <th class="border-primary border-darken-1">ID</th>
+                                        {{-- <th class="border-primary border-darken-1">ID</th> --}}
                                         <th class="border-primary border-darken-1">Employee ID</th>
                                         <th class="border-primary border-darken-1">Employee Name</th>
                                         <th class="border-primary border-darken-1">Designation</th>
                                         <th class="border-primary border-darken-1">Department</th>
                                         <th class="border-primary border-darken-1">Employee Type</th>
-                                        <th class="border-primary border-darken-1">Availed Leave</th>
+                                        {{-- <th class="border-primary border-darken-1">Availed Leave</th> --}}
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">No of Late</th>
-                                        <th class="border-primary border-darken-1">Requested Date</th>
+                                        <th class="border-primary border-darken-1">Date</th>
                                         <th class="border-primary border-darken-1">Updated By</th>
                                         <th class="border-primary border-darken-1">Updated At</th>
                                         <th class="border-primary border-darken-1">Deduction Count</th>
@@ -99,16 +99,13 @@
                         <input type="hidden" name="reject_by_id" id="reject_by_id">
 
                         <div class="row mb-2 justify-content-center">
-                           
-                            <div class="col-12">
+                           <div class="col-12">
                                 <div class="form-group">
                                     <label for="">Reason</label>
                                     <textarea class="form-control" name="reject_reason" id="reject_reason" cols="30" rows="10" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                                    
                                 </div>
                             </div>
-                          
-
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary btn-min-width">Reject
@@ -250,16 +247,8 @@
                 width:'100%',
                 allowClear:true
             });
+          // probation_end_date
          
-
-
-        
-
-
-            // probation_end_date
-         
-
-
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -273,16 +262,16 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('ID');
+                            // head.push('ID');
                             head.push('Employee ID');
                             head.push('Employee Name');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Employee Type');
-                            head.push('Availed Leave');
+                            // head.push('Availed Leave');
                             head.push('Status');
                             head.push('No of Late');
-                            head.push('Requested Date');
+                            head.push('Date');
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Deduction Count');
@@ -293,13 +282,13 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.id);
+                                // row.push(values.id);
                                 row.push(values.trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.employee_type);
-                                row.push(values.leave_availed);
+                                // row.push(values.leave_availed);
                                 row.push(values.status);
                                 row.push(values.no_of_late_excel);
                                 row.push(values.requested_date);
@@ -351,13 +340,13 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
-                    {data: 'id', name: 'employee_penalties.id', class: 'align-middle id', searchable: false},
+                    // {data: 'id', name: 'employee_penalties.id', class: 'align-middle id', searchable: false},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'employee_name', name: 'a.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'employee_type', name: 'el.employee_type_id ', class: 'align-middle employee_type'},
-                    {data: 'leave_availed', name: 'leave_availed', class: 'align-middle leave_availed'},
+                    {data: 'employee_type', name: 'a.employee_type_id', class: 'align-middle employee_type'},
+                    // {data: 'leave_availed', name: 'leave_availed', class: 'align-middle leave_availed'},
                     {data: 'status', name: 'ls.name', class: 'align-middle status'},
                     {data: 'no_of_late', name: 'no_of_late', class: 'align-middle no_late'},
                     {data: 'requested_date', name: 'employee_penalties.created_at', class: 'align-middle requested_date'},
@@ -382,8 +371,8 @@
                     var status_filter = '<select name="status_filter" id="status_filter" class="select2 form-control"></select>';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type" id="employee_type" class="select2 form-control">' +
-                        '<option value="1">Permanent</option>' +
-                        '<option value="2">Probation</option>' +
+                        '<option value="1">Staff</option>' +
+                        '<option value="2">Rider</option>' +
                         '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
@@ -422,7 +411,7 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data = $.map({!! $employee_confirmation_statuses !!}, function (obj) {
+                    var data = $.map({!! $penalty_statuses !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
 
@@ -444,12 +433,6 @@
                 table.draw(true);
             });
           
-           
-            
-
-   
-
-            
 
             $("#editConfirmationForm").validate({
                 errorClass: "danger",
@@ -588,7 +571,12 @@
             $('body').on('click', 'button.deduction_modal',  function(){
             var id = $(this).parents('tr').attr('id');
             employee_id = $(this).attr("data-target-id");
-            var no_of_late = $('.duplicate_modal').text();
+            console.log(employee_id);
+
+            let no_of_late = $(this).closest('tr').children('.no_late').text();
+
+            // var no_of_late = $('.duplicate_modal').text();
+            // console.log(no_of_late);
             var no_of_deduction = Math.floor(no_of_late/3);
             late_count = no_of_late;
             deduction_count = no_of_deduction;
