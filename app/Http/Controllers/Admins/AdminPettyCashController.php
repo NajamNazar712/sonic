@@ -1225,18 +1225,28 @@ class AdminPettyCashController extends Controller
                     }
             })
             ->addColumn('action', function ($petty) {
+                if ((session('role_id') == 1)) 
+                {
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                ';
 
-                $dropdown .= '<button type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
-                $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';
-                return $dropdown;
+                if ((session('role_id') == 1) || in_array(840, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                }
+                if ((session('role_id') == 1) || in_array(841, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';
+                }
+                    return $dropdown;
 
-            })
-            ->make(true);
+                }
+                else
+                {
+                    $dropdown = '--';
+                }
+                })->make(true);
     }
 
     public function rejected_petty_cash_statements_index()
