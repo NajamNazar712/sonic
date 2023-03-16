@@ -2538,7 +2538,7 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)) {
                     return $deliveries->remarks;
                 }else{
-                    $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
+                    $reason = '<input class="form-control form-control-sm return_remarks"  name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks" data-msg-required="Remarks is required"><span class="error-msg"></span>';
                     return $reason;
                 }
 

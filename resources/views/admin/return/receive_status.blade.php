@@ -214,6 +214,11 @@
             var shipment_remarks_obj = {};
             var shipment_received_refused_obj = {};
             var note_id = $('#return_note').val();
+            var statusSelection = $('#status_update_form').find('status_drop');
+            var status = statusSelection.val();
+            
+            var remarks = $('#status_update_form').closest('tr').find('.return_remarks');
+            
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(50, session('permissions')))
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -222,8 +227,31 @@
                         className: 'btn btn-primary returned',
                         enabled: false,
                         action: function (e, dt, node, config) {
+                           
                             if(selected_rows !== '') {
-                                swal({
+                               var flag = false;
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var status = $(row.node()).find('select.statusDrop').val();
+                                       var remarks = $(row.node()).find('input.return_remarks');
+                                        if (status == 60 && remarks.val() == '') {
+                                        remarks.attr('data-rule-required', 'true');
+                                        remarks.attr('data-msg-required', 'Remarks is required');
+                                        flag = true;
+                                    } else {
+                                        
+                                        remarks.attr('data-rule-required', 'false');
+                                        flag = false;
+                                        }
+
+                                    }
+                                });
+                                if(!flag)
+                                {
+                                    swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to change this shipment\'s status! Please make sure you have collected the charges!',
                                     icon: 'warning',
@@ -244,7 +272,7 @@
                                     closeOnClickOutside: false,
                                     closeOnEsc: false,
                                     dangerMode: true
-                                }).then(function (confirm) {
+                                    }).then(function (confirm) {
                                     if (confirm) {
                                         var submit_all_status_flag = true;
                                         var not_updated_shipments = [];
@@ -270,6 +298,7 @@
 
                                             }
                                         });
+                                        
                                         if (submit_all_status_flag == false) {
                                             swal({
                                                 title: 'Enter Receiver Name for remaining Returned Shipment(s)',
@@ -347,9 +376,15 @@
                                             });
                                         }
                                     }
-                                });
-
-                            }else{
+                                    });
+                                }
+                                else
+                                {
+                                    var error = "Remarks are Required When status is Unable to Return";
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            }
+                            else{
                                 var error = "Something went wrong please refresh page and try again!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
@@ -440,7 +475,7 @@
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
-                    {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'remarks',name: 'remarks', class: 'form-group align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'current_status_name',name: 'current_status_name', class: 'align-middle current_status_name',orderable: false, searchable: false},
                     {data:'return_address',name: 'return_address', class: 'align-middle return_address',orderable: false, searchable: false},
@@ -530,7 +565,13 @@
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-
+                var remarks = $(this).closest('tr').find('.return_remarks');
+                if (status == 60) {
+                remarks.attr('data-rule-required', 'true');
+                remarks.attr('data-msg-required', 'Remarks is required');
+                } else {
+                remarks.attr('data-rule-required', 'false');
+                } 
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
                     type:'POST',
@@ -546,6 +587,7 @@
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
                         });
+                        reason.val('').trigger('change');
                     }else{
                         reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -612,10 +654,30 @@
             });
 
             var shipments = [];
-            $('#status_update_form').bind('submit', function(event) {
+            $('#status_update_form').validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+
                 var shipment = $('#shipment_ids');
                 event.preventDefault();
                 var this_form = this;
+                var statusSelection = $(this).find('status_drop');
+                console.log(statusSelection);
+                var status = statusSelection.val();
+                var remarks = $(this).closest('tr').find('.return_remarks');
+                if (status == 60) {
+                remarks.rules('add', {
+                    required: true,
+                    messages: {
+                    required: 'Remark is required'
+                    }
+                });
+                } else {
+                remarks.rules('remove', 'required');
+                } 
                 swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes to change shipment\'s status!',
@@ -648,13 +710,21 @@
                             id = table.row( i ).id();
                             shipments.push(id);
                         }
+                        
+                        if (remarks[0].checkValidity()) {
+                            remarks.removeClass('error');
+                            remarks.next('.error-msg').html('');
+                        } else {
+                            remarks.addClass('error');
+                            remarks.next('.error-msg').html('This field is required.');
+                        }
                         var open_box_input = $('#open_box_ids');
                         open_box_input.val(open_box_ids);
                         shipment.val(shipments);
                         this_form.submit();
                     }
                 });
-
+            }
             });
 
 
