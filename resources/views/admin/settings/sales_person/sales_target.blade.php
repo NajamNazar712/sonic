@@ -27,12 +27,13 @@
                                             </div>
                                             <div class="col">
                                                 <div class="form-group">
-                                                    <select name="segment" id="segment_select" class="form-control select2" data-msg-required="Segment is required" data-rule-required="true" required="required">
+                                                    <select name="segment[]" id="segment_select" class="form-control select2" multiple data-msg-required="Segment is required" data-rule-required="true" required="required">
                                                         @foreach($segments as $segment)
                                                             <option value="{{$segment->id}}">{{$segment->name}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
+                                                
                                             </div>
                                             <div class="col">
                                                 <div class="form-group">
@@ -135,33 +136,46 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
 
-            var search_date_from = $('#search_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#search_date_root').css('bottom','40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                    }
+           
+            var search_date = $('#search_date_from').pickadate({
+            firstDay: 1,
+            clear: '',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onOpen: function() {
+            $('#search_date_root').css('bottom','40px');
+            },
+            onSet: function(context) {
+            if (context.select) {
+                var selectedDate = moment(context.select);
+                daysInMonth = selectedDate.daysInMonth(); // Update daysInMonth
+                var searchDateToPicker = $('#search_date_to').pickadate('picker');
+                if (searchDateToPicker) {
+                searchDateToPicker.set('min', selectedDate.toDate());
                 }
-            });
+            }
+            }
+        });
 
-
+        $('#target_shipment_days').on('change', function() {
+            var days = $(this).val();
+            $('#target_shipment_month').val(daysInMonth * days); // Use daysInMonth here
+        });
             $('#sales_person_select').select2({
                 placeholder:'Sales Person Select',
                 width:'100%'
             });
-            $('#segment_select').prepend('<option value="" selected="selected"></option>').select2({
+            // $('#segment_select').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Select Segment',
+            //     width:'100%'
+            // });
+            $('#segment_select').select2({
                 placeholder:'Select Segment',
                 width:'100%'
             });
@@ -178,11 +192,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
-            $('#target_shipment_days').on('change', function(){
-                var days = $(this).val();
-
-                $('#target_shipment_month').val(days * 30);
-            });
+            
         });
 
         @if(count($targets) > 0)
@@ -215,7 +225,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.sales_person);
-                                row.push(values.segment);
+                                row.push(values.segments);
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
@@ -331,7 +341,7 @@
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
-                    {data: 'segment', name:'spts.name', class: 'align-middle segment'},
+                    {data: 'segments', name:'segments', class: 'align-middle segment'},
                     {data: 'start_date', name: 'sale_person_targets.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_targets.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_targets.target_days', class: 'align-middle target_days'},
