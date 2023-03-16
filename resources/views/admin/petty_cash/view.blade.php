@@ -102,6 +102,7 @@
                             <th class="border-primary border-darken-1"> Delivered Shipments</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> Status</th>
+                            <th class="border-primary border-darken-1"> Action</th>
                         </tr>
                         </thead>
                     </table>
@@ -130,6 +131,82 @@
         </div>
     </div>
 
+    <button type="button" id="edit_petty_cash_fields_button" class="btn btn-primary display-hidden" data-toggle="modal"
+            data-target="#edit_petty_cash_fields">
+        Edit Fields
+    </button>
+
+    <div class="modal fade" id="edit_petty_cash_fields" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <Form method="POST" id="edit_fields_form" enctype="multipart/form-data" action="{{route('admin.petty_cash.edit.edit_petty_cash')}}">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Petty Cash</h5>
+{{--                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>--}}
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group display-hidden">
+                            <div id="petty_cash_id"></div>
+                        </div>
+                        <div class="form-group" id="select_head">
+                            <select name="head_id" id="head_id" class="form-control select2" data-rule-required="true" data-msg-required="Head is required">
+                                @foreach($heads as $head)
+                                    <option value="{{ $head->id }}" > {{ $head->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group" id="select_title">
+                            <select name="title_id" id="title_id" class="form-control select2" data-rule-required="true" data-msg-required="Title is required">
+                            </select>
+                        </div>
+                        <div class="form-group" >
+                            <input type="file" name="reference_document"  id="reference_document" class="form-control" />
+                        </div>
+                        <div class="form-group" >
+                            <input type="file" name="reference_document_2"  id="reference_document2" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" id="edit_fields_form_button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </Form>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="edit_petty_cash_amount_button" class="btn btn-primary display-hidden" data-toggle="modal"
+            data-target="#edit_petty_cash_amount">
+        Edit Amount
+    </button>
+    <div class="modal fade" id="edit_petty_cash_amount" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" id="edit_amount_form">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Petty Cash Amount</h5>
+{{--                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>--}}
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group display-hidden">
+                            <div id="petty_cash_idd"></div>
+                        </div>
+                        <div class="form-group" id="select_title">
+                            <input type="number" name="amount" id="amount" class="form-control " data-rule-required="true" data-msg-required="Amount is required"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" id="edit_amount_form_button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -190,6 +267,7 @@
                     {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
                     {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document'},
                     {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
+                    {data:'action' ,name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -276,6 +354,188 @@
                     });
                 }
             });
+
+            $('#select_title').css('display','none');
+            $('#head_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Chart Head",
+                allowClear:true,
+                dropdownParent:$('#edit_fields_form'),
+            }).bind('change', function()
+            {
+                var id = parseInt($(this).val());
+
+                $('#select_title').css('display','block');
+
+                $.ajax({
+                    url: '{{route('admin.petty_cash.make.titles')}}',
+                    method: 'post',
+                    data: {
+                        account_head:id,
+                        _token: '{{ csrf_token() }}',
+                    }
+                }).done(function (data) {
+                    console.log('data',data);
+                    let html = '';
+                    for (let i = 0; i < data.titles.length; i++) {
+                        html += '<option value="' + data.titles[i].id + '" >' + data.titles[i].name + '</option>';
+                    }
+                    console.log('html',html);
+                    $('#title_id').html(html);
+                });
+
+                $('#title_id').prepend('<option selected></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Title",
+                    allowClear:true,
+                    dropdownParent:$('#edit_fields_form'),
+                });
+            });
+
+            $('body').on('click', 'button.edit_fields', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Update !',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            console.log('Edit button Clicked !', id);
+                            let html = '';
+                            html += '<input name="petty_cash_id" value="' + id + '" >';
+                            $('#petty_cash_id').html(html);
+                            $('#edit_petty_cash_fields_button').click();
+                        }
+                    });
+                } else {
+                    var error = 'Statement ID Not Found, Please Try again!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+
+            $( "#edit_fields_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+            });
+
+            // $('#edit_fields_form').submit(function(event) {
+            {{--event.preventDefault();--}}
+            {{--var form_data = new FormData($(this)[0]);--}}
+
+            {{--var reference_document =  document.getElementById("reference_document").files[0];--}}
+            {{--var reference_document2 =  document.getElementById("reference_document2").files[0];--}}
+
+
+            {{--form_data.append('reference_document', reference_document);--}}
+            {{--form_data.append('reference_document2', reference_document2);--}}
+
+            {{--$.ajax({--}}
+            {{--    url: '{{route('admin.petty_cash.edit.edit_petty_cash')}}' , // the URL to submit the form data to--}}
+            {{--    method: 'POST',--}}
+            {{--    data: form_data,--}}
+            {{--}).done(function(data) {--}}
+            {{--    if (data.status == 1) {--}}
+            {{--        toastr.success(data.success, 'Success!', {--}}
+            {{--            positionClass: 'toast-top-center',--}}
+            {{--            containerId: 'toast-top-center'--}}
+            {{--        });--}}
+            {{--    } else {--}}
+            {{--        toastr.error(data.error, 'Error!', {--}}
+            {{--            positionClass: 'toast-top-center',--}}
+            {{--            containerId: 'toast-top-center'--}}
+            {{--        });--}}
+            {{--    }--}}
+            {{--});--}}
+            // });
+
+            $('body').on('click', 'button.edit_amount', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Update Amount!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            console.log('Edit Amount button Clicked !', id);
+                            let html = '';
+                            html += '<input name="petty_cash_id" value="' + id + '" >';
+                            $('#petty_cash_idd').html(html);
+                            $('#edit_petty_cash_amount_button').click();
+                        }
+                    });
+                } else {
+                    var error = 'Statement ID Not Found, Please Try again!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+            $( "#edit_amount_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+            });
+            $('#edit_amount_form').submit(function(event) {
+                var formData = $('#edit_amount_form').serialize();
+                event.preventDefault();
+                console.log('final Amount form',formData);
+
+                $.ajax({
+                    url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}' , // the URL to submit the form data to
+                    method: 'POST',
+                    data: formData,
+                }).done(function(data) {
+                    if (data.status == 1) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
         });
+
     </script>
 @endsection

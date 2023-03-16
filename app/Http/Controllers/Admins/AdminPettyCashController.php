@@ -30,6 +30,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\Admins\ActivityTrailController;
@@ -1223,6 +1224,18 @@ class AdminPettyCashController extends Controller
                         return "Approved";
                     }
             })
+            ->addColumn('action', function ($petty) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';
+                return $dropdown;
+
+            })
             ->make(true);
     }
 
@@ -2291,5 +2304,114 @@ class AdminPettyCashController extends Controller
             return response()->json(['status' => 0, 'success' => 'Checked!']);
         }
         return response()->json(['status' => 1, 'error' => 'No Statement Ids selected!']);
+    }
+
+    public function edit_petty_cash(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'head_id' => 'required|int|max:255',
+                'title_id' => 'required|int|max:255',
+                'reference_document' => 'image|mimes:jpeg,png,jpg,gif',
+                'reference_document2' => 'image|mimes:jpeg,png,jpg,gif',
+            ],
+            [
+                'head_id.required' => 'The head field is required.',
+                'title_id.required' => 'The title field is required.',
+                'reference_document' => 'The email field must be a valid email address.',
+                'reference_document2' => 'The email address has already been taken.',
+            ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 0,
+//                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        $petty_cash_detail_id = $request->petty_cash_id;
+        $head_id = $request->head_id;
+        $title_id = $request->title_id;
+        $reference_document = $request->reference_document;
+        $reference_document2 = $request->reference_document_2;
+
+        $existing_petty_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
+            ->select('id', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
+
+        if ($existing_petty_detail->exists()) {
+            $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
+                ->update(['account_head_id' => $head_id, 'account_title_id' => $title_id]);
+
+            $petty_detail = $existing_petty_detail->first();
+            if ($request->file('reference_document')) {
+                //todo: remove image first usin veriable $petty_detail
+                //todo: remove image first using veriable $petty_detail end
+
+                $file = $request->file('reference_document');
+                $filename = 'statement_' . $petty_detail->petty_cash_statement_id . '_detail_' . $petty_cash_detail_id . '.' . $file->getClientOriginalExtension();
+                Storage::disk('public')->putFileAs('petty_cash_statement_details/', $file, $filename);
+
+                $update_petty_cash = PettyCashStatementDetail::where('id', $petty_cash_detail_id)->update(['reference_document' => $filename]);
+            }
+
+            if ($request->file('reference_document_2')) {
+                //todo: remove image first usin veriable $petty_detail
+                //todo: remove image first usin veriable $petty_detail end
+
+                $file = $request->file('reference_document_2');
+                $filename = 'statement_2_' . $petty_detail->petty_cash_statement_id . '_detail_' . $petty_cash_detail_id . '.' . $file->getClientOriginalExtension();
+                Storage::disk('public')->putFileAs('petty_cash_statement_details/', $file, $filename);
+
+                $update_petty_cash = PettyCashStatementDetail::where('id', $petty_cash_detail_id)->update(['reference_document_2' => $filename]);
+            }
+
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Updated !!',
+            ]);
+        } else {
+            $data = response()->json([
+                'status' => 0,
+                'message' => 'Petty Cash Details Not Found !!',
+            ]);
+            return $data;
+        }
+
+        return redirect()->back()->with(['data' => $data]);
+    }
+
+    public function edit_petty_cash_amount(Request $request)
+    {
+        dd($request->all());
+        $petty_cash_detail_id = $request->petty_cash_id;
+        $amount = $request->amount;
+
+        $existing_petty_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
+            ->select('id','amount', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
+        if ($existing_petty_detail->exists()) {
+            $petty_detail = $existing_petty_detail->first();
+
+            $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
+                ->update(['amount' => $amount]);
+
+            $existing_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
+                ->select('amount')
+                ->first();
+
+            $update_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
+                ->update(['amount'=>$existing_petty_cash->amount - $petty_detail->amount + $amount]);
+
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Updated !!',
+            ]);
+        } else {
+            $data = response()->json([
+                'status' => 0,
+                'message' => 'Petty Cash Details Not Found !!',
+            ]);
+            return $data;
+        }
     }
 }

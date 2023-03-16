@@ -2219,6 +2219,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/submit', 'Admins\AdminPettyCashController@draft_edit_petty_cash_statements_submit')->name('edit.submit');
             Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@draft_reference_document')->name('reference_document');
         });
+        Route::prefix('edit')->name('edit.')->group(function () {
+            Route::post('edit_petty_cash', 'Admins\AdminPettyCashController@edit_petty_cash')->name('edit_petty_cash');
+            Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');
+        });
     });
 
     Route::prefix('month_closing')->name('month_closing.')->group(function () {
