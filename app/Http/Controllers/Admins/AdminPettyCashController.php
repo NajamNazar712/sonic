@@ -1225,10 +1225,10 @@ class AdminPettyCashController extends Controller
                     }
             })
             ->addColumn('action', function ($petty) {
-                if ((session('role_id') == 1)) 
+                if ((session('role_id') == 1) || in_array(840, session('permissions')) || in_array(841, session('permissions')))
                 {
                 $dropdown = '
-              <div class="btn-group">
+                <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
                 ';
@@ -1240,7 +1240,6 @@ class AdminPettyCashController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';
                 }
                     return $dropdown;
-
                 }
                 else
                 {
@@ -2376,19 +2375,12 @@ class AdminPettyCashController extends Controller
                 $update_petty_cash = PettyCashStatementDetail::where('id', $petty_cash_detail_id)->update(['reference_document_2' => $filename]);
             }
 
-            $data = response()->json([
-                'status' => 1,
-                'message' => 'Updated !!',
-            ]);
-        } else {
-            $data = response()->json([
-                'status' => 0,
-                'message' => 'Petty Cash Details Not Found !!',
-            ]);
-            return $data;
-        }
+            return redirect()->back()->with('success','Updated !');
 
-        return redirect()->back()->with(['data' => $data]);
+        } else {
+
+            return redirect()->back()->with('error','Petty Cash Details Not Found !!');
+        }
     }
 
     public function edit_petty_cash_amount(Request $request)

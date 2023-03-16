@@ -2,6 +2,7 @@
 @section('title','View Petty Cash Statement')
 
 @section('content')
+
     <h1 class="mb-1">
         View Petty Cash Statement # {{$petty_statement->id}}
     </h1>
@@ -144,7 +145,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash</h5>
-{{--                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>--}}
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group display-hidden">
@@ -189,18 +190,18 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash Amount</h5>
-{{--                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>--}}
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group display-hidden">
                             <div id="petty_cash_idd"></div>
                         </div>
                         <div class="form-group" id="select_title">
-                            <input type="number" name="amount" id="amount" placeholder="Enter Amount" class="form-control " data-rule-required="true" data-msg-required="Amount is required"/>
+                            <input type="text" onkeyup="(this.value == 0) ? this.value = '' : ''" name="amount" id="amount" placeholder="Enter Amount" class="form-control amount" data-rule-required="true" data-msg-required="Amount is required" />
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit_amount_form_button_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" id="edit_amount_form_button" class="btn btn-primary">Save changes</button>
                     </div>
                 </form>
@@ -228,11 +229,11 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -438,36 +439,6 @@
                 },
             });
 
-            // $('#edit_fields_form').submit(function(event) {
-            {{--event.preventDefault();--}}
-            {{--var form_data = new FormData($(this)[0]);--}}
-
-            {{--var reference_document =  document.getElementById("reference_document").files[0];--}}
-            {{--var reference_document2 =  document.getElementById("reference_document2").files[0];--}}
-
-
-            {{--form_data.append('reference_document', reference_document);--}}
-            {{--form_data.append('reference_document2', reference_document2);--}}
-
-            {{--$.ajax({--}}
-            {{--    url: '{{route('admin.petty_cash.edit.edit_petty_cash')}}' , // the URL to submit the form data to--}}
-            {{--    method: 'POST',--}}
-            {{--    data: form_data,--}}
-            {{--}).done(function(data) {--}}
-            {{--    if (data.status == 1) {--}}
-            {{--        toastr.success(data.success, 'Success!', {--}}
-            {{--            positionClass: 'toast-top-center',--}}
-            {{--            containerId: 'toast-top-center'--}}
-            {{--        });--}}
-            {{--    } else {--}}
-            {{--        toastr.error(data.error, 'Error!', {--}}
-            {{--            positionClass: 'toast-top-center',--}}
-            {{--            containerId: 'toast-top-center'--}}
-            {{--        });--}}
-            {{--    }--}}
-            {{--});--}}
-            // });
-
             $('body').on('click', 'button.edit_amount', function () {
                 var id = $(this).parents('tr').attr('id');
                 if (id) {
@@ -506,6 +477,18 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
+
+
+
+            $('#amount').inputmask({
+                'alias': 'numeric',
+                'rightAlign': false,
+                'allowMinus': false,
+                'allowPlus': false,
+                'mask': '9999999',
+                'numericInput': true,
+            });
+
             $( "#edit_amount_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
@@ -527,15 +510,17 @@
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
-                    } else {
+                    }
+                    else {
                         toastr.error(data.error, 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
                     }
+                    $('#edit_amount_form_button_close').click();
+                    table.draw();
                 });
             });
         });
-
     </script>
 @endsection
