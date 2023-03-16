@@ -7909,13 +7909,21 @@ class RiderAPIController extends Controller
             $pickup_address = $pickup_address->first();
             $pickup_city_id = $pickup_address->pickup_address->city_id;
             $discount =  $pickup_address->discount;
+            $insurance =  $pickup_address->insurance;
             $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
             if ($request->volumetric_weight == 1) {
                 $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
+
+            $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+            $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+            if($insurance_amount > 0 ){
+                $insurance_amount = round($insurance_amount * $insurance / 100,2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
