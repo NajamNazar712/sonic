@@ -42,22 +42,29 @@ class LeaveCountUpdate extends Command
     public function handle()
     {
         $month = Carbon::now()->month;
+        if($month == 7)
+            EmployeeLeaveLog::truncate();
         $employee_leave_log = EmployeeLeaveLog::where('month',$month);
-        if(!$employee_leave_log->exists()){
-            if($month == 7){
+        if($employee_leave_log->doesntExist()){
+            if($month == 7) {
                 Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => 1]);
                 Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => 2]);
-            }elseif($month == 6 || $month == 5){
+            } else if($month == 6 || $month == 5) {
                 $one = 1;
                 $two = 3;
-                Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
-                Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
-            }else{
+                Employee::where('employee_type_id',1)->where('confirmation_status',2)->increment('leave_count' , $one);
+                Employee::where('employee_type_id',1)->where('confirmation_status',1)->increment('leave_count' , $two);
+                // Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
+                // Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
+            } else {
                 $one = 1;
                 $two = 2;
-                Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
-                Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
+                Employee::where('employee_type_id',1)->where('confirmation_status',2)->increment('leave_count' , $one);
+                Employee::where('employee_type_id',1)->where('confirmation_status',1)->increment('leave_count' , $two);
+                // Employee::where('employee_type_id',1)->where('confirmation_status',2)->update(['leave_count' => DB::raw('leave_count + '.$one)]);
+                // Employee::where('employee_type_id',1)->where('confirmation_status',1)->update(['leave_count' => DB::raw('leave_count + '.$two)]);
             }
+
             EmployeeLeaveLog::create([
                 'month' => $month
             ]);
