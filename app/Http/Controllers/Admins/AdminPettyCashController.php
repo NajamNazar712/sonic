@@ -2383,7 +2383,6 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash_amount(Request $request)
     {
-        dd($request->all());
         $petty_cash_detail_id = $request->petty_cash_id;
         $amount = $request->amount;
 
@@ -2396,11 +2395,11 @@ class AdminPettyCashController extends Controller
                 ->update(['amount' => $amount]);
 
             $existing_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
-                ->select('amount')
+                ->select('total_amount')
                 ->first();
 
             $update_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
-                ->update(['amount'=>$existing_petty_cash->amount - $petty_detail->amount + $amount]);
+                ->update(['total_amount'=>$existing_petty_cash->total_amount - $petty_detail->amount + $amount]);
 
             $data = response()->json([
                 'status' => 1,
@@ -2411,7 +2410,7 @@ class AdminPettyCashController extends Controller
                 'status' => 0,
                 'message' => 'Petty Cash Details Not Found !!',
             ]);
-            return $data;
         }
+        return $data;
     }
 }

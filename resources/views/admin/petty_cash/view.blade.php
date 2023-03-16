@@ -196,7 +196,7 @@
                             <div id="petty_cash_idd"></div>
                         </div>
                         <div class="form-group" id="select_title">
-                            <input type="number" name="amount" id="amount" class="form-control " data-rule-required="true" data-msg-required="Amount is required"/>
+                            <input type="number" name="amount" id="amount" placeholder="Enter Amount" class="form-control " data-rule-required="true" data-msg-required="Amount is required"/>
                         </div>
                     </div>
                     <div class="modal-footer">
