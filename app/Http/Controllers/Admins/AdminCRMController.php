@@ -10,6 +10,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\CrmSmsLog;
 use App\Http\Models\Admin\KeyAccountDailyShipmentCrm;
@@ -895,7 +896,7 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date')
+			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date','crm_requests.shipment_id')
             ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
@@ -1185,7 +1186,47 @@ class AdminCRMController extends Controller
                 ';
 
                     return $dropdown;
-            });
+            })
+            ->addColumn('responsible_hub', function ($requests) {
+                $responsible_hub = "";
+                $status = $requests->shipment_status_id;
+                $shipment_id = $requests->shipment_id;
+                if($status == 1 || $status == 17 || $status == 19){
+                    $responsible_hub = $requests->hub;
+                }
+                if($status == 3 || $status == 21){
+                    $manifest_bag = CargoManifestBagShipments::
+                         leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
+                         ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
+                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
+                         ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
+                        ->select(['cargo_manifest_bag_shipments.id','cmb.status_id','c.name as origin_hub','cd.name as destination_hub'])
+                        ->orderby('cargo_manifest_bag_shipments.id','desc');
+                    if($manifest_bag->exists()){
+                        $manifest_bag = $manifest_bag->first();
+                        if($status == 3) {
+                            if ($manifest_bag->status_id == 1) {
+                                $responsible_hub = $manifest_bag->origin_hub;
+                            }
+                        }
+                        if($status == 21){
+                            if ($manifest_bag->status_id == 1) {
+                                $responsible_hub = $manifest_bag->destination_hub;
+                            }
+                        }
+                    }
+                }
+                return $responsible_hub;
+            })
+            ->addColumn('responsible_zone', function ($requests) {
+                $responsible_zone = "";
+                $status = $requests->shipment_status_id;
+                if($status == 1 || $status == 17 || $status == 19){
+                    $responsible_zone = $requests->zone;
+                }
+                return $responsible_zone;
+            })
+        ;
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }

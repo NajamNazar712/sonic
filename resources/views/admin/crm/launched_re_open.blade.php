@@ -44,6 +44,8 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
@@ -627,6 +629,8 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
@@ -685,7 +689,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat')|| $(header).is('.responsible_hub')|| $(header).is('.responsible_zone')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.status')) {
