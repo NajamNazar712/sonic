@@ -78,7 +78,7 @@
                                                     <h4 class=" info">Legend</h4>
                                                     <input type="hidden" id="legend_filter">
 
-                                                    <table class="table mb-0">
+                                                    <table class="table mb-0" id="legends_table">
                                                         <tbody>
                                                         @foreach($legends as $legend)
                                                             @if($legend->id == 7)
@@ -1040,12 +1040,14 @@
                     });
             }
 
-            for (let i = 1; i <= 8; i++) {
-                $('#'+i+'').on('click', function () {
-                $('#legend_filter').val(i);
-                table.draw();
-            });
-            }
+            
+            $('table#legends_table').on('click', 'tr', function(){
+                var id = parseInt($(this).attr('id'));
+                if(id){
+                    $('#legend_filter').val(id);
+                    table.draw()
+                }
+            })
             $('body').on('click','.reminderMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
