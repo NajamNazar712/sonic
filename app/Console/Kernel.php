@@ -465,7 +465,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
         $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
 
-        $schedule->command('auto:deliverynoteverification')->dailyAt('00:05')->runInBackground();
+        $schedule->command('auto:deliverynoteverification')->dailyAt('00:55')->runInBackground();
 
 
     }
