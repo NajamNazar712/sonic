@@ -1256,7 +1256,7 @@ class AdminPettyCashController extends Controller
                 ';
 
                 if ((session('role_id') == 1) || in_array(840, session('permissions'))) {
-                    $dropdown .= '<button type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                    $dropdown .= '<button data-account_title_id="'.$petty->account_title_id.'" data-account_head_id="'.$petty->account_head_id.'" data-id="'.$petty->statement_detail_id.'" data-target="#edit_petty_cash_fields" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
                 }
                 if ((session('role_id') == 1) || in_array(841, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';

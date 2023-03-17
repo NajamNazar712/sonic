@@ -134,10 +134,6 @@
         </div>
     </div>
 
-    <button type="button" id="edit_petty_cash_fields_button" class="btn btn-primary display-hidden" data-toggle="modal"
-            data-target="#edit_petty_cash_fields">
-        Edit Fields
-    </button>
     <div class="modal fade" id="edit_petty_cash_fields" tabindex="-1" aria-labelledby="exampleModalLabel"
          aria-hidden="true">
         <div class="modal-dialog">
@@ -404,13 +400,20 @@
                 });
             });
 
-            $('body').on('click', 'button.edit_fields', function () {
-                var id = $(this).parents('tr').attr('id');
-                console.log('Edit button Clicked !', id);
+
+
+            $('#edit_petty_cash_fields').on('show.bs.modal', function(e) {
+
+                var id = $(e.relatedTarget).data('id');
+                var head_id = $(e.relatedTarget).data('account_head_id');
+                var account_title_id = $(e.relatedTarget).data('account_title_id');
                 let html = '';
                 html += '<input name="petty_cash_id" value="' + id + '" >';
                 $('#petty_cash_id').html(html);
-                $('#edit_petty_cash_fields_button').click();
+                $('#head_id').val(head_id).trigger('change');
+                setTimeout(function() {
+                    $('#title_id').val(account_title_id).trigger('change');
+                }, 500);
             });
 
             $('#edit_fields_form_button').on('click', function (e) {
