@@ -103,6 +103,8 @@
                             <th class="border-primary border-darken-1"> Delivered Shipments</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> Status</th>
+                            <th class="border-primary border-darken-1"> Edit By</th>
+                            <th class="border-primary border-darken-1"> Edit At</th>
                             <th class="border-primary border-darken-1"> Action</th>
                         </tr>
                         </thead>
@@ -267,6 +269,8 @@
                     {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
                     {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document'},
                     {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
+                    {data:'edit_by_admin' ,name: 'ad.name', class: 'align-middle edit_by'},
+                    {data:'edit_at' ,name: 'petty_cash_statement_details.edit_at', class: 'align-middle edit_at'},
                     {data:'action' ,name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false},
                 ],
 
