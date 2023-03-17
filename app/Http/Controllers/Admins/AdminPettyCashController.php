@@ -2369,13 +2369,20 @@ class AdminPettyCashController extends Controller
         $reference_document2 = $request->reference_document_2;
 
         $existing_petty_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
-            ->select('id', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
+            ->select('id','account_head_id','account_title_id', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
 
         if ($existing_petty_detail->exists()) {
+            $petty_detail = $existing_petty_detail->first();
+
+            if (($petty_detail->account_head_id == $head_id) && ($petty_detail->account_title_id == $title_id))
+            {
+                return redirect()->back()->with('error','Already Updated !!');
+            }
+
             $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
                 ->update(['account_head_id' => $head_id, 'account_title_id' => $title_id,'edit_by'=>Auth::id(),'edit_at'=>Carbon::now()]);
 
-            $petty_detail = $existing_petty_detail->first();
+
             if ($request->file('reference_document')) {
                 //todo: remove image first usin veriable $petty_detail
                 //todo: remove image first using veriable $petty_detail end
@@ -2415,6 +2422,15 @@ class AdminPettyCashController extends Controller
             ->select('id','amount', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
         if ($existing_petty_detail->exists()) {
             $petty_detail = $existing_petty_detail->first();
+
+            if($petty_detail->amount == $amount)
+            {
+                $data = response()->json([
+                    'status' => 0,
+                    'message' => 'Already Updated !!',
+                ]);
+                return $data;
+            }
 
             $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
                 ->update(['amount' => $amount,'edit_by'=>Auth::id(),'edit_at'=>Carbon::now()]);

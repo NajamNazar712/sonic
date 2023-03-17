@@ -146,7 +146,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <button type="button" id="edit_fields_form_button_close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group display-hidden">
@@ -158,10 +158,12 @@
                                     <option value="{{ $head->id }}" > {{ $head->name }} </option>
                                 @endforeach
                             </select>
+                            <label id="head_id-error" class="error" for="head_id"></label>
                         </div>
                         <div class="form-group" id="select_title">
                             <select name="title_id" id="title_id" class="form-control select2" data-rule-required="true" data-msg-required="Title is required">
                             </select>
+                            <label id="title_id-error" class="error" for="title_id"></label>
                         </div>
                         <div class="form-group" >
                             <input type="file" name="reference_document"  id="reference_document" class="form-control" />
@@ -171,7 +173,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit_fields_form_button_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" id="edit_fields_form_button" class="btn btn-primary">Save changes</button>
                     </div>
                 </Form>
@@ -221,6 +223,12 @@
         .total_amount_span{
             font-size: 24px;
             color: #64a0d2;
+        }
+        .error
+        {
+            color: #FF4961 !important;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
     </style>
 @endsection
@@ -406,6 +414,8 @@
             });
 
             $('#edit_fields_form_button').on('click', function (e) {
+                var test = $('#edit_fields_form').valid();
+                if (test === true) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to Update !',
@@ -432,13 +442,12 @@
                             $('#edit_fields_form').submit();
                         }
                     });
+                }
             });
 
-            $( "#edit_fields_form" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
+            $('#edit_fields_form_button_close').on('click', function (e) {
+                console.log('lll');
+                $('#edit_fields_form')[0].reset();
             });
 
             $('body').on('click', 'button.edit_amount', function () {
@@ -466,57 +475,58 @@
                 },
             });
 
-            $('#edit_amount_form_button').on('click',function(event) {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Update Amount!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
+            $('#edit_amount_form_button').on('click', function (event) {
+                var test = $('#edit_amount_form').valid();
+                if (test === true) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Update Amount!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
                         },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            var formData = $('#edit_amount_form').serialize();
+                            event.preventDefault();
+                            console.log('final Amount form', formData);
+                            $.ajax({
+                                url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}', // the URL to submit the form data to
+                                method: 'POST',
+                                data: formData,
+                            }).done(function (data) {
+                                table.ajax.reload(null, false);
+                                if (data.status == 1) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, data.message, {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                $('#edit_amount_form_button_close').click();
+                                document.getElementById("edit_amount_form").reset();
+                            });
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        var formData = $('#edit_amount_form').serialize();
-                        event.preventDefault();
-                        console.log('final Amount form',formData);
-                        $.ajax({
-                            url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}' , // the URL to submit the form data to
-                            method: 'POST',
-                            data: formData,
-                        }).done(function(data)
-                        {
-                            table.ajax.reload(null, false);
-                            if (data.status == 1) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            $('#edit_amount_form_button_close').click();
-                            document.getElementById("edit_amount_form").reset();
-                        });
-                    }
-                });
+                    });
+                }
             });
         });
     </script>
