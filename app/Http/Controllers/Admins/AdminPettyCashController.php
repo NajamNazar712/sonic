@@ -1227,6 +1227,7 @@ class AdminPettyCashController extends Controller
             ->addColumn('action', function ($petty) {
                 if ((session('role_id') == 1) || in_array(840, session('permissions')) || in_array(841, session('permissions')))
                 {
+
                 $dropdown = '
                 <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

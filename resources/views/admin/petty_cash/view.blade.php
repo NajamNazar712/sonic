@@ -495,6 +495,7 @@
                             data: formData,
                         }).done(function(data)
                         {
+                            table.ajax.reload(null, false);
                             if (data.status == 1) {
                                 toastr.success(data.success, 'Success!', {
                                     positionClass: 'toast-top-center',
@@ -508,8 +509,8 @@
                                 });
                             }
                             $('#edit_amount_form_button_close').click();
+                            document.getElementById("edit_amount_form").reset();
                         });
-                        table.draw();
                     }
                 });
             });
