@@ -1080,7 +1080,7 @@ class AdminPettyCashController extends Controller
                             if (session('role_id') == 1 || in_array(461, session('permissions'))) {
 
                                 $view_route = route('admin.petty_cash.approved.view', $petty->statement_id);
-                                $dropdown .= '<a href=' . $view_route . '><button type="button" class="dropdown-item view" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View</div></button></a>';
+                                $dropdown .= '<a href=' . $view_route . '><button type="button" class="dropdown-item view" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">View/Edit</div></button></a>';
 
                             }
                             if ($petty->status == 3) {
