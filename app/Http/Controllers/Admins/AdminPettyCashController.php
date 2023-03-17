@@ -2374,10 +2374,10 @@ class AdminPettyCashController extends Controller
         if ($existing_petty_detail->exists()) {
             $petty_detail = $existing_petty_detail->first();
 
-            if (($petty_detail->account_head_id == $head_id) && ($petty_detail->account_title_id == $title_id))
-            {
-                return redirect()->back()->with('error','Already Updated !!');
-            }
+//            if (($petty_detail->account_head_id == $head_id) && ($petty_detail->account_title_id == $title_id))
+//            {
+//                return redirect()->back()->with('error','Already Updated !!');
+//            }
 
             $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
                 ->update(['account_head_id' => $head_id, 'account_title_id' => $title_id,'edit_by'=>Auth::id(),'edit_at'=>Carbon::now()]);
@@ -2423,14 +2423,14 @@ class AdminPettyCashController extends Controller
         if ($existing_petty_detail->exists()) {
             $petty_detail = $existing_petty_detail->first();
 
-            if($petty_detail->amount == $amount)
-            {
-                $data = response()->json([
-                    'status' => 0,
-                    'message' => 'Already Updated !!',
-                ]);
-                return $data;
-            }
+//            if($petty_detail->amount == $amount)
+//            {
+//                $data = response()->json([
+//                    'status' => 0,
+//                    'message' => 'Already Updated !!',
+//                ]);
+//                return $data;
+//            }
 
             $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
                 ->update(['amount' => $amount,'edit_by'=>Auth::id(),'edit_at'=>Carbon::now()]);

@@ -103,8 +103,8 @@
                             <th class="border-primary border-darken-1"> Delivered Shipments</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> Status</th>
-                            <th class="border-primary border-darken-1"> Edit By</th>
-                            <th class="border-primary border-darken-1"> Edit At</th>
+                            <th class="border-primary border-darken-1"> Updated By</th>
+                            <th class="border-primary border-darken-1"> Updated At</th>
                             <th class="border-primary border-darken-1"> Action</th>
                         </tr>
                         </thead>
@@ -189,7 +189,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash Amount</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <button type="button" id="edit_amount_form_button_close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group display-hidden">
@@ -200,7 +200,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="edit_amount_form_button_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit_amount_form_button_close1" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" id="edit_amount_form_button" class="btn btn-primary">Save changes</button>
                     </div>
                 </form>
@@ -448,11 +448,6 @@
                 }
             });
 
-            $('#edit_fields_form_button_close').on('click', function (e) {
-                console.log('lll');
-                $('#edit_fields_form')[0].reset();
-            });
-
             $('body').on('click', 'button.edit_amount', function () {
                 var id = $(this).parents('tr').attr('id');
                 console.log('Edit Amount button Clicked !', id);
@@ -530,6 +525,17 @@
                         }
                     });
                 }
+            });
+
+            $('#edit_amount_form_button_close').on('click', function (e) {
+                console.log('lll');
+                document.getElementById("edit_amount_form").reset();
+                // $('#amount').val(0);
+            });
+            $('#edit_amount_form_button_close1').on('click', function (e) {
+                console.log('eee');
+                document.getElementById("edit_amount_form").reset();
+                // $('#amount').val(0);
             });
         });
     </script>
