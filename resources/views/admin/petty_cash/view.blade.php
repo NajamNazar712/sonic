@@ -535,7 +535,6 @@
             $('#edit_amount_form_button_close1').on('click', function (e) {
                 console.log('eee');
                 document.getElementById("edit_amount_form").reset();
-                // $('#amount').val(0);
             });
         });
     </script>
