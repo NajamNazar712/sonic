@@ -356,12 +356,12 @@ class ShipperDashboardController extends Controller
         }
 
         if ($from_id && $to_id) {
-            $count = $count->where('shipments.id', '>=', $from_id)
+            $shipments = $shipments->where('shipments.id', '>=', $from_id)
                 ->where('shipments.id', '<=', $to_id);
         }
 
         if ($from_sj_id && $to_sj_id) {
-            $count = $count->where('shipments_journey.id', '>=', $from_sj_id)
+            $shipments = $shipments->where('shipments_journey.id', '>=', $from_sj_id)
                 ->where('shipments_journey.id', '<=', $to_sj_id);
         }
 
