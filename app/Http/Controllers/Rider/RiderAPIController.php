@@ -11369,8 +11369,11 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-                        $rider_pickup->shipments = $shipment_count;
-                        $rider_pickup->save();
+//                        $pickup_note = V2PickupNote::find($request->pickup_note_id);
+//                        if($pickup_note){
+//                            $pickup_note->scanned_shipments = $shipment_count;
+//                            $pickup_note->save();
+//                        }
                         if(count($notification_shipments) > 0){
                             NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
                         }
