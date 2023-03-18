@@ -273,6 +273,51 @@ class ShipperDashboardController extends Controller
             $count = $count->whereBetween('shipments.created_at', [$from, $to]);
         }
 
+        $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
+
+        $to_id = NULL;
+
+        if ($from_id->exists()) {
+            $from_id = $from_id->first()->id;
+
+            $to_id = DB::connection($connection)->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+            if ($to_id->exists()) {
+                $to_id = $to_id->first()->id;
+            }
+            else {
+                $to_id = NULL;
+            }
+        }
+        else {
+            $from_id = NULL;
+        }
+
+        if ($from_id && $to_id) {
+            $count = $count->where('shipments.id', '>=', $from_id)
+                ->where('shipments.id', '<=', $to_id);
+        }
+
+        $from_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+
+        $to_sj_id = NULL;
+
+        if ($from_sj_id->exists()) {
+            $from_sj_id = $from_sj_id->first()->id;
+
+            $to_sj_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+            if ($to_sj_id->exists()) {
+                $to_sj_id = $to_sj_id->first()->id;
+            }
+            else {
+                $to_sj_id = NULL;
+            }
+        }
+        else {
+            $from_sj_id = NULL;
+        }
+
         $count = $count->count();
 
         $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -283,7 +328,7 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
@@ -308,6 +353,16 @@ class ShipperDashboardController extends Controller
                         ->where('sus.substitute_user_id', '=', Auth::id());
                 });
             }
+        }
+
+        if ($from_id && $to_id) {
+            $count = $count->where('shipments.id', '>=', $from_id)
+                ->where('shipments.id', '<=', $to_id);
+        }
+
+        if ($from_sj_id && $to_sj_id) {
+            $count = $count->where('shipments_journey.id', '>=', $from_sj_id)
+                ->where('shipments_journey.id', '<=', $to_sj_id);
         }
 
         $datatable = Datatables::of($shipments)
