@@ -20,9 +20,9 @@ class MarchBranchesForSunday extends Migration
             $table->Decimal('fintech_charges')->after('esc_charges')->nullable();
         });
         Schema::table('v2_pickup_notes', function (Blueprint $table) {
-            $table->integer('shipments');
-            $table->integer('arrived_shipments');
-            $table->integer('scanned_shipments');
+            $table->integer('shipments')->default(0);
+            $table->integer('arrived_shipments')->default(0);
+            $table->integer('shipments_scanned_by_rider')->default(0);
         });
     }
 
@@ -42,8 +42,7 @@ class MarchBranchesForSunday extends Migration
         Schema::table('v2_pickup_notes', function (Blueprint $table) {
             $table->dropColumn('shipments');
             $table->dropColumn('arrived_shipments');
-            $table->dropColumn('scanned_shipments');
-            $table->dropColumn('received_shipments');
+            $table->dropColumn('shipments_scanned_by_rider');
         });
     }
 }
