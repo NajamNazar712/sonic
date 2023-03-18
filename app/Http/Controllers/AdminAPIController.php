@@ -5592,9 +5592,18 @@ class AdminAPIController extends Controller
                         }
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                    if ($pickup_note_requests_count == 0) {
-                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    if($pickup_note_requests_count == 0){
+                        $v2_pickup_note->status = 1;
                     }
+
+                    $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
+                    if(count($pickup_note_pickup_request_ids) > 0){
+                        $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
+                        $v2_pickup_note->arrived_shipments = $arrived_shipments;
+                    }
+                    $v2_pickup_note->save();
                     // NotificationsController::send(4, $shipment_ids);
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
