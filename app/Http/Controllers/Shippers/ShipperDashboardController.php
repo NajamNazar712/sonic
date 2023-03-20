@@ -280,10 +280,10 @@ class ShipperDashboardController extends Controller
         if ($from_id->exists()) {
             $from_id = $from_id->first()->id;
 
-            $to_id = DB::connection($connection)->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+            $to_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from)->where('created_at', '<=', $to)->where('id', '>=', $from_id);
 
             if ($to_id->exists()) {
-                $to_id = $to_id->first()->id;
+                $to_id = $to_id->orderBy('id', 'DESC')->first()->id;
             }
             else {
                 $to_id = NULL;
@@ -305,10 +305,10 @@ class ShipperDashboardController extends Controller
         if ($from_sj_id->exists()) {
             $from_sj_id = $from_sj_id->first()->id;
 
-            $to_sj_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+            $to_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->where('created_at', '<=', $to)->where('id', '>=', $from_sj_id);
 
             if ($to_sj_id->exists()) {
-                $to_sj_id = $to_sj_id->first()->id;
+                $to_sj_id = $to_sj_id->orderBy('id', 'DESC')->first()->id;
             }
             else {
                 $to_sj_id = NULL;
