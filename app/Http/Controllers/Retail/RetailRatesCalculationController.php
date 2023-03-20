@@ -222,6 +222,7 @@ class RetailRatesCalculationController extends Controller
         $rates['gst_charges'] = $gst_amount;
         $rates['packaging_and_insurance_charges'] = $packaging_and_insurance_charges;
         $rates['total_charges'] = $total_charges;
+    
 
         return $rates;
     }
