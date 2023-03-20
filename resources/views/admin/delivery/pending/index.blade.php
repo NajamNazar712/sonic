@@ -40,6 +40,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Sub Stations</th>
@@ -175,7 +176,8 @@
                         head.push('Destination');
                         head.push('Hub');
                         head.push('Consignee Name');
-                        head.push('Reattempted By');
+                        head.push('Consignee Phone');
+                        head.push('Reattempt By');
                         head.push('Address');
                         head.push('Sub Station');
                         head.push('Weight');
@@ -200,6 +202,7 @@
                             row.push(values.destination);
                             row.push(values.hub);
                             row.push(values.consignee_name);
+                            row.push(values.consignee_phone);
                             row.push(values.agent);
                             row.push(values.consignee_address);
                             row.push(values.sub_station);
@@ -254,7 +257,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[19, 'desc']],
+            order: [[20, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -263,6 +266,7 @@
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                 {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false, searchable:false},

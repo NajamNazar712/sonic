@@ -15,6 +15,7 @@ use App\Http\Models\Admin\InvoiceAdjustmentReasons;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Admin\ReversionDeliveredShipment;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
@@ -888,7 +889,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)'));
@@ -1241,7 +1242,7 @@ class AdminFinanceController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftJoin('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
@@ -1479,6 +1480,7 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
+
             $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
@@ -1495,6 +1497,15 @@ class AdminFinanceController extends Controller
             $delivery_note->received_cod_amount = $delivery_note_amount;
 
             $delivery_note->save();
+
+            //reverted report shipments data entry.
+            $reversion_report = new ReversionDeliveredShipment();
+            $reversion_report->shipment_id = $shipment->id;
+            $reversion_report->city_id = $shipment->consignee_city_id;
+            $reversion_report->dncc = $delivery_note->id;
+            $reversion_report->reverted_by = Auth::id();
+            $reversion_report->save();
+            //reverted report shipments data entry.
 
             $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
 
@@ -1602,6 +1613,7 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
+
                 $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
                 if ($lost_shipment_shipper->exists()) {
                     $lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
@@ -1654,6 +1666,16 @@ class AdminFinanceController extends Controller
                                     $shipment->payment_status_id = 4;
 
                                     $shipment->save();
+
+
+                                    //reverted report shipments data entry.
+                                    $reversion_report = new ReversionDeliveredShipment();
+                                    $reversion_report->shipment_id = $shipment->id;
+                                    $reversion_report->city_id = $shipment->consignee_city_id;
+                                    $reversion_report->dncc = $delivery_note_id;
+                                    $reversion_report->reverted_by = Auth::id();
+                                    $reversion_report->save();
+                                    //reverted report shipments data entry.
 
                                     if ($shipment->booking_type_id == 3) {
                                         ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -1798,6 +1820,15 @@ class AdminFinanceController extends Controller
                                     $shipment->payment_status_id = 4;
 
                                     $shipment->save();
+
+                                    //reverted report shipments data entry.
+                                    $reversion_report = new ReversionDeliveredShipment();
+                                    $reversion_report->shipment_id = $shipment->id;
+                                    $reversion_report->city_id = $shipment->consignee_city_id;
+                                    $reversion_report->dncc = $delivery_note_id;
+                                    $reversion_report->reverted_by = Auth::id();
+                                    $reversion_report->save();
+                                    //reverted report shipments data entry.
 
                                     if ($shipment->booking_type_id == 3) {
                                         ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -1945,6 +1976,15 @@ class AdminFinanceController extends Controller
 
                                 $shipment->save();
 
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
+
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                                 }
@@ -2088,6 +2128,15 @@ class AdminFinanceController extends Controller
                                 $shipment->payment_status_id = 4;
 
                                 $shipment->save();
+
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note_id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
 
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -2256,6 +2305,15 @@ class AdminFinanceController extends Controller
 
                                 $shipment->save();
 
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note->id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
+
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                                 }
@@ -2404,6 +2462,15 @@ class AdminFinanceController extends Controller
                                 $shipment->payment_status_id = 4;
 
                                 $shipment->save();
+
+                                //reverted report shipments data entry.
+                                $reversion_report = new ReversionDeliveredShipment();
+                                $reversion_report->shipment_id = $shipment->id;
+                                $reversion_report->city_id = $shipment->consignee_city_id;
+                                $reversion_report->dncc = $delivery_note->id;
+                                $reversion_report->reverted_by = Auth::id();
+                                $reversion_report->save();
+                                //reverted report shipments data entry.
 
                                 if ($shipment->booking_type_id == 3) {
                                     ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -2557,6 +2624,17 @@ class AdminFinanceController extends Controller
                             $shipment->payment_status_id = 4;
 
                             $shipment->save();
+
+
+                            //reverted report shipments data entry.
+                            $reversion_report = new ReversionDeliveredShipment();
+                            $reversion_report->shipment_id = $shipment->id;
+                            $reversion_report->city_id = $shipment->consignee_city_id;
+                            $reversion_report->dncc = $delivery_note->id;
+                            $reversion_report->reverted_by = Auth::id();
+                            $reversion_report->save();
+                            //reverted report shipments data entry.
+
 
                             if ($shipment->booking_type_id == 3) {
                                 ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
@@ -3378,6 +3456,7 @@ class AdminFinanceController extends Controller
             }
 
             ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks);
+            CRMClaimAutoCloseController::check_shipment_claims($shipment_id);
         } else {
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
             if (in_array($adjustment_type, [2, 6, 7, 8, 9, 10, 11, 15, 16])) {
@@ -3420,6 +3499,8 @@ class AdminFinanceController extends Controller
                 }
 
                 ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), $payable_remarks, NULL, 1);
+
+                CRMClaimAutoCloseController::check_shipment_claims($shipment_id);
             }
         }
     }
@@ -6384,8 +6465,14 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                        $weight_charges = $change_shipment_weight_log->old_charges;
+                    }
                 }
             }
 
@@ -6701,8 +6788,14 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
-                    $weight_charges = $change_shipment_weight_log->old_charges;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                        $weight_charges = $change_shipment_weight_log->old_charges;
+                    }
                 }
             }
 
@@ -11517,8 +11610,14 @@ class AdminFinanceController extends Controller
                         $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                         if ($change_shipment_weight_log->exists()) {
                             $change_shipment_weight_log = $change_shipment_weight_log->first();
-                            $shipment_weight = $change_shipment_weight_log->old_weight;
-                            $weight_charges = $change_shipment_weight_log->old_charges;
+
+                            $invoice_shipment_date = Carbon::parse($invoice_shipment->created_at);
+                            $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                            if ($change_shipment_weight_log_date->gt($invoice_shipment_date)) {
+                                $shipment_weight = $change_shipment_weight_log->old_weight;
+                                $weight_charges = $change_shipment_weight_log->old_charges;
+                            }
                         }
                     }
 
@@ -13665,7 +13764,13 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                    }
                 }
             }
 
@@ -13858,7 +13963,13 @@ class AdminFinanceController extends Controller
                 $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
                 if ($change_shipment_weight_log->exists()) {
                     $change_shipment_weight_log = $change_shipment_weight_log->first();
-                    $shipment_weight = $change_shipment_weight_log->old_weight;
+
+                    $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                    $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                    if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                        $shipment_weight = $change_shipment_weight_log->old_weight;
+                    }
                 }
             }
 
@@ -15501,6 +15612,9 @@ class AdminFinanceController extends Controller
             $total_adjustment = InvoiceAdjustment::where('invoice_id',$request->invoice_id)->sum('amount');
 
             $invoice->adjusted_amount = $total_adjustment;
+            if($invoice->total_invoice_amount != ($invoice->adjusted_amount + $invoice->deposited_amount)){
+                $invoice->status_id = 4;
+            }
             $invoice->save();
 
             return redirect()->back()->with('success','Adjustment Added');

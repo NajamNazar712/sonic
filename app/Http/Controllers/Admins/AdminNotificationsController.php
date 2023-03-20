@@ -805,6 +805,27 @@ class AdminNotificationsController extends Controller
         elseif($id == 192){
             $details['fields'] = ['consignee_name', 'rider_name', 'tracking_number', 'otp'];
         }
+        elseif($id == 205){
+            $details['fields'] = ['admin', 'preview'];
+        }elseif($id == 208)
+        {
+            $details['fields'] = ['employee_name', 'emp_id'];
+        }
+        elseif($id == 209)
+        {
+            $details['fields'] = ['line_manager'];
+        }
+        else if ($id == 206)
+        {
+            $details['fields'] = ['month','year','link'];
+        }
+        else if ($id == 207)
+        {
+            $details['fields'] = ['month','year','link'];
+        }
+        else if ($id == 210) {
+            $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
+        }
         return $details;
     }
 

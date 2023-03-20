@@ -51,6 +51,7 @@ Route::name('api.')->group(function () {
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
             Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
+            Route::post('book/jazzcash', 'APIController@shipment_book_jazzcash')->name('book.jazzcash');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
@@ -222,6 +223,10 @@ Route::name('api.')->group(function () {
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@return_shipment_undelivered_v3')->name('undelivered_v3');
 
                 //Current
+                Route::post('index', 'Rider\RiderAPIController@return_create_index')->name('index');
+                Route::post('get_shipment_details', 'Rider\RiderAPIController@get_shipment_details')->name('get_shipment_details');
+                Route::post('get_piece_details', 'Rider\RiderAPIController@get_piece_details')->name('get_piece_details');
+                Route::post('create', 'Rider\RiderAPIController@return_note_create')->name('create');
                 Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
                 Route::post('delivered_v2', 'Rider\RiderAPIController@return_shipment_delivered_v2')->name('delivered_v2');
                 Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
@@ -264,7 +269,9 @@ Route::name('api.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
                 Route::post('retail_bank_info', 'Rider\RiderAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('calculate_charges', 'Rider\RiderAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
+                Route::post('retail_shipment_store_v2', 'Rider\RiderAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
             });
 
             Route::prefix('profile')->name('profile.')->group(function () {
@@ -367,7 +374,9 @@ Route::name('api.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'AdminAPIController@retail_index')->name('retail_data');
                 Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('calculate_charges', 'AdminAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
+                Route::post('retail_shipment_store_v2', 'AdminAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
             });
 
             Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
@@ -452,7 +461,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::prefix('return')->name('return.')->group(function () {
-                Route::get('index', 'AdminAPIController@return_create_index')->name('index');
+                Route::post('index', 'AdminAPIController@return_create_index')->name('index');
                 Route::post('get_riders', 'AdminAPIController@get_riders_by_hub')->name('get_riders');
                 Route::post('get_shipment_details', 'AdminAPIController@get_shipment_details')->name('get_shipment_details');
                 Route::post('get_piece_details', 'AdminAPIController@get_piece_details')->name('get_piece_details');
@@ -463,6 +472,9 @@ Route::name('api.')->group(function () {
                 Route::post('submit_individual', 'AdminAPIController@return_status_submit_individual')->name('submit_individual');
                 Route::post('submit_all', 'AdminAPIController@return_status_submit_all')->name('submit_all');
                 Route::post('image_upload', 'AdminAPIController@return_image_upload')->name('image_upload');
+                Route::get('note_requests', 'AdminAPIController@return_note_requests')->name('note_requests');
+                Route::post('reject', 'AdminAPIController@return_note_requests_reject')->name('reject');
+                Route::post('approve', 'AdminAPIController@return_note_requests_approve')->name('approve');
             });
 
             Route::prefix('sales_target')->name('sales_target.')->group(function () {
@@ -482,6 +494,11 @@ Route::name('api.')->group(function () {
                 Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
 
+            Route::prefix('crm_request')->name('crm_request.')->group(function () {
+                Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
+                Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
+                Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
+            });
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
@@ -501,7 +518,9 @@ Route::name('api.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Retail\RetailAPIController@retail_index')->name('retail_data');
                 Route::post('retail_bank_info', 'Retail\RetailAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('calculate_charges', 'Retail\RetailAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'Retail\RetailAPIController@retail_shipment_store')->name('retail_shipment_store');
+                Route::post('retail_shipment_store_v2', 'Retail\RetailAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
             });
 
         });

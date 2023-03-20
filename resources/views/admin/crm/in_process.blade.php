@@ -297,6 +297,13 @@
             border-color: #5587b4 !important;
             color: #FFFFFF;
         }
+        tr.highalert_row{
+            background-color: #ff6326;
+            color: whitesmoke;
+        }
+        tr.highalert_row a{
+            color: whitesmoke;
+        }
     </style>
 @endsection
 

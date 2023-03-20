@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.3
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.5
 ">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded blank-page blank-page"
@@ -51,7 +51,7 @@
 
                     <div class="col-md-4 col-10 p-0">
                         <div class="mb-2 text-center">
-                            <p class="white bold" style="font-size: 17px !important;">For Help Dial : 021-111-118-729 or email us info@trax.pk</p>
+                            <p class="bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@trax.pk" style="text-decoration:underline;">info@trax.pk</a></p>
                         </div>
 
                         <div class="card box-shadow-1 border-grey border-lighten-3 px-1 py-1 m-0">

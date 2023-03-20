@@ -226,7 +226,12 @@ class AdminShipmentHandoverController extends Controller
 //list
     public function handover_list_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),383);
-        return view('admin.handover.list');   
+        $hubs = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
+            ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
+
+        $handover_admins = HandoverResponsibilities::select('id', 'name')->get();
+
+        return view('admin.handover.list')->with(['hubs'=>$hubs, 'handover_admins'=>$handover_admins]);
     }
 
     public function handover_list(Request $request){
@@ -272,7 +277,18 @@ class AdminShipmentHandoverController extends Controller
                 $datatable->join('handover_shipments as hsh', 'hsh.handover_id', '=', 'handovers.id')
                 ->join('shipments as s', 'hsh.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
-                
+            }
+
+            if ($hub = $request->get('search_hub')) {
+                $datatable->where('handovers.hub', '=', $hub);
+            }
+
+            if ($from_admin = $request->get('search_from_admin')) {
+                $datatable->where('handovers.from', '=', $from_admin);
+            }
+
+            if ($to_admin = $request->get('search_to_admin')) {
+                $datatable->where('handovers.to', '=', $to_admin);
             }
 
         return  $datatable->make(true);

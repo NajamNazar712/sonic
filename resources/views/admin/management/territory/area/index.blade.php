@@ -22,11 +22,11 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Territory</th>
-                                    <th class="border-primary border-darken-1">Area Status</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -221,11 +221,11 @@
                             head.push('S.No');
                             head.push('Area');
                             head.push('Territory');
-                            head.push('area_status');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Updated At');
                             head.push('Updated At');
+                            head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -233,11 +233,11 @@
                                 row.push(index + 1);
                                 row.push(values.area);
                                 row.push(values.territory);
-                                row.push(values.area_status);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
+                                row.push(values.area_status);
                                 body.push(row);
                             });
                         },
@@ -262,7 +262,7 @@
                             $('#TerritoryTag').modal('show');
                             $('#territoryTagSubmit').on('click', function () {
                                 var territory = parseInt($('#tag_territory').val());
-                                console.log(territory);
+
                                 swal({
                                     text: 'Are you sure, you want to Tag?',
                                     icon: 'info',
@@ -439,17 +439,17 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.area.list') }}',
                 rowId: 'id',
-                order: [[5, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
-                    {data: 'area_status', name: 'area_status', class: 'align-middle area_status'},
                     {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.created_by', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'ad.updated_at', class: 'align-middle created_by'},
+                    {data: 'area_status', name: 'area_status', class: 'align-middle area_status'},
                     {data: 'action', orderable: false, name: 'action', class: 'align-middle action',},
                 ],
                 rowCallback: function(row, data, index) {

@@ -1,0 +1,10 @@
+<?php
+
+namespace App\Http\Models\Admin\Vigilance;
+
+use Illuminate\Database\Eloquent\Model;
+
+class VigilanceNoteShipment extends Model
+{
+    //
+}

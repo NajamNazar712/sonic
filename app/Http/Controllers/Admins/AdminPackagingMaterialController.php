@@ -602,6 +602,11 @@ class AdminPackagingMaterialController extends Controller
 
         if ($request_details != null) {
             if ($request_details->shipment_id == null) {
+                $user_id = $request_details->user_id;
+
+                if($user_id == 9358){
+                    return response()->json(['status' => 0, 'error' => "Packaging Material Request is of Retail, Please Contact IT Department!"]);
+                }
 
                 $total_charges = $request_details->amount;
 
@@ -622,8 +627,6 @@ class AdminPackagingMaterialController extends Controller
                 $warehouse = Warehouse::where('id', $warehouse_id)->first();
 
                 $warehouse_hub_id = $warehouse->hub_id;
-
-                $user_id = $request_details->user_id;
 
                 $setting = GlobalSettings::where('type', 'packaging_material')->first();
                 $wms_user_id = $setting->setting_value;
@@ -2100,10 +2103,10 @@ class AdminPackagingMaterialController extends Controller
                 $pickup = $pickup->first();
                 $pickup_address_id = $pickup->id;
             } else {
-                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($settings->setting_value, 'Trax Office', 'Trax Logistics', null, '0213-8772222', 'info@trax.pk', $pickup_hub_id, 0, 1);
+                $pickup_address_id = ShipperShipmentBookController::add_pickup_address($settings->setting_value, 'Trax Office', 'TRAX', null, '0213-8772222', 'info@trax.pk', $pickup_hub_id, 0, 1);
             }
 
-            $shipment = $this->book($settings->setting_value, 1, $pickup_address_id, 1, $consignee_hub_id, 'Trax Logistics', 'Trax Office', '0213-8772222', NULL, 'info@trax.pk', NULL, 0, Carbon::now(), NULL, 1, 1, NULL, 0, 1, 2, 2);
+            $shipment = $this->book($settings->setting_value, 1, $pickup_address_id, 1, $consignee_hub_id, 'TRAX', 'Trax Office', '0213-8772222', NULL, 'info@trax.pk', NULL, 0, Carbon::now(), NULL, 1, 1, NULL, 0, 1, 2, 2);
 
             $tracking_number = $this->generate_tracking_number($shipment->id, $pickup_hub_id, $consignee_hub_id);
             $stock_request = WarehouseStockRequest::find($request_id);

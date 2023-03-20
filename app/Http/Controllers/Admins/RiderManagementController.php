@@ -163,7 +163,7 @@ class RiderManagementController extends Controller
     }
 
     public function addRiderView($type){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -286,7 +286,7 @@ class RiderManagementController extends Controller
         return response()->json(['route' => $route]);
     }
     public function editRiderView($id, $type){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -531,35 +531,40 @@ class RiderManagementController extends Controller
         $rider_id = $request->rider_id;
         if($rider_id){
             $rider = Rider::find($rider_id);
+            
             if($rider){
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
-                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    // $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                    if ($global_setting->exists()) {
-                        $global_setting = $global_setting->first();
-                        $trax_id = $global_setting->setting_value + 1;
-                        $global_setting->setting_value = $trax_id;
-                        $global_setting->save();
-                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                    } else {
-                        $trax_id = null;
-                    }
+                    // if ($global_setting->exists()) {
+                    //     $global_setting = $global_setting->first();
+                    //     $trax_id = $global_setting->setting_value + 1;
+                    //     $global_setting->setting_value = $trax_id;
+                    //     $global_setting->save();
+                    //     $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    // } else {
+                    //     $trax_id = null;
+                    // }
 
                     $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
                     if($employee->exists())
                     {
                         $employee = $employee->first();
-                        $employee->trax_id = $trax_id;
-                        $employee->rider_type_id = 1;
-                        $employee->update();
+                       
+                        $employee_id = $employee->id;
+                        // $employee->trax_id = $trax_id;
+                        // $employee->rider_type_id = 1;
+                        // $employee->update();
+                    $route = route("admin.human_resource.employee_directory.edit",['employee'=>$employee_id]);
+                    return response()->json(['status'=> 0 , 'route'=>$route]);
                     }
-                    $rider->trax_id = $trax_id;
-                    $rider->rider_type_id = 1;
-                    $rider->updated_by = Auth::id();
-                    $rider->save();
+                    // $rider->trax_id = $trax_id;
+                    // $rider->rider_type_id = 1;
+                    // $rider->updated_by = Auth::id();
+                    // $rider->save();
 
-                    return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                    // return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
             }
@@ -896,7 +901,7 @@ class RiderManagementController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),60);
         $rider_type = RiderType::all();
-        $city = City::where('business_category_id', 1)->get();
+        $city = City::where('business_category_id', 1)->where('status', 1)->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route = Route::all();

@@ -43,7 +43,6 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
-                        <th class="border-primary border-darken-1">Vigilance Verification</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
@@ -108,6 +107,7 @@
                         <div class="row justify-content-center">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <input type="hidden" id="rider_otp" name="rider_otp" value="{{$rider_otp}}">
                                     <select name="operation_rider_id" id="operation_rider_id"
                                             class="form-control select2" required>
                                         @foreach($operation_rider_category as $category)
@@ -276,7 +276,6 @@
 
                             head.push('S.No');
                             head.push('Delivery Note No.');
-                            head.push('Vigilance Verification');
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Business Category');
@@ -300,7 +299,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
-                                row.push(values.vigilance_verification_excel);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.business_category);
@@ -317,7 +315,7 @@
                                 row.push(values.pending_status);
                                 row.push(values.last_updated_at);
                                 row.push(values.updated_by);
-                                row.push(values.created_via_app);
+                                row.push(values.created_via);
                                 body.push(row);
                             });
                         },
@@ -368,7 +366,6 @@
                         }
                     },
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                    {data: 'vigilance_verification', name: 'vigilance_verification', class: 'align-middle vigilance_verification', orderable: false},
 
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
@@ -410,7 +407,7 @@
                         class: 'align-middle last_updated_at'
                     },
                     {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
-                    {data: 'created_via_app', name: 'delivery_notes.created_via_app', class: 'align-middle created_via_app'},
+                    {data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -443,11 +440,6 @@
                         '<option value="1">Domestic</option>' +
                         '<option value="2">International</option>' +
                         '</select>';
-                  /*  var vigilance_drop = '<select name="vigilance_select" id="vigilance_select" class="select2 form-control">' +
-                        '<option value="1">Yes</option>' +
-                        '<option value="2">Partial</option>' +
-                        '<option value="3">No</option>' +
-                        '</select>';*/
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -464,11 +456,6 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        /*} else if ($(header).is('.vigilance_verification')) {
-                            $(vigilance_drop).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);*/
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -491,12 +478,6 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    /*$("#vigilance_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Verification",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });*/
                     
                     this.api().table().columns.adjust();
                 }
@@ -826,6 +807,7 @@
                 var operation_id = $('#operation_rider_id').val();
                 var route = $('#route').val();
                 var rider = $('#riders').val();
+                var rider_otp = $('#rider_otp').val();
                 var errors = 0;
                 if (rider !== '' && rider !== null) {
                     $('#rider_error').css('display', 'none');
@@ -844,7 +826,7 @@
                     $('#route_error').css('display', 'block');
                 }
                 if (errors == 0) {
-                    if (operation_id === '2') {
+                    if (operation_id === '2' || rider_otp === '0') {
                         reassign_rider();
                     } else {
                         otp_generation();
@@ -987,6 +969,8 @@
                 $('#otp_input').val('');
                 $('#OtpModal').modal('hide');
             });
+
+
 
         });
     </script>

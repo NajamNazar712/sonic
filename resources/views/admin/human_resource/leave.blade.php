@@ -117,7 +117,33 @@
                           method="post" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         @csrf
                         <input type="text" name="admin_id" value="{{auth()->id()}}" hidden>
+                        
                         <div class="row mb-2 justify-content-center">
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_qoute-error" class=" w-100" for="availble_qoute">Available Quota</label>
+                                    <input type="text" name="availble_qoute"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $avaialble_qouate }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Availed  Leaves</label>
+                                    <input type="text" name="availble_leaves"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_leave" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $available_leaves }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="remaining_leaves-error" class=" w-100" for="remaining_leaves">Remaining Leaves</label>
+                                    <input type="text" name="remaining_leaves"
+                                           class="form-control  rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Remaining is required" value="{{ $remaing_leaves }}">
+                                </div>
+                            </div>
+                            
                             <div class="col-6 mt-1">
 
                                 <div class="form-group input-group">
@@ -197,7 +223,30 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="row mb-2 justify-content-center">
-                           
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_qoute-error" class=" w-100" for="availble_qoute">Available Quota</label>
+                                    <input type="text" name="availble_qoute"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $avaialble_qouate }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="availble_leave-error" class=" w-100" for="availble_leaves">Availed  Leaves</label>
+                                    <input type="text" name="availble_leaves"
+                                           class="form-control   rounded-right" disabled
+                                           id="availble_leave" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Available is required" value="{{ $available_leaves }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <label id="remaining_leaves-error" class=" w-100" for="remaining_leaves">Remaining Leaves</label>
+                                    <input type="text" name="remaining_leaves"
+                                           class="form-control  rounded-right" disabled
+                                           id="availble_qoute" placeholder="From" aria-required="true" data-rule-required="true" data-msg-required="Remaining is required" value="{{ $remaing_leaves }}">
+                                </div>
+                            </div>
                             <div class="col-6 mt-1">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -246,7 +295,7 @@
 
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Edit
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Update
                             </button>
                         </div>
                     </form>
@@ -404,7 +453,7 @@
                 width: '100%',
                 allowClear: true
             });
-            $('#leave_type').select2({
+            $('#leave_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Leave Type',
                 width: '100%',
                 allowClear: true
@@ -475,7 +524,7 @@
                             head.push('Days');
                             head.push('Requested Date');
                             head.push('Updated By');
-                            head.push('Updated At');re
+                            head.push('Updated At');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -487,7 +536,7 @@
                                 row.push(values.department);
                                 row.push(values.employee_type);
                                 row.push(values.cnic);
-                                row.push(values.leave_count);
+                                row.push(values.availed_leaves);
                                 row.push(values.status);
                                 row.push(values.applied_reason);
                                 row.push(values.leave_type);
@@ -560,8 +609,8 @@
                         }
                     },
                     {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
-                    {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
-                    {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
+                    {data: 'trax_id', name: 'e.trax_id', class: 'align-middle trax_id', searchable: false},
+                    {data: 'name', name: 'e.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {
@@ -571,8 +620,8 @@
                     },
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
                     {
-                        data: 'leave_count',
-                        name: 'ls.name',
+                        data: 'availed_leaves',
+                        name: 'availed_leaves',
                         class: 'align-middle leave_count',
                         orderable: false,
                         searchable: false
@@ -875,7 +924,7 @@
             $("#leave_request_btn").click(function () {
                 $("#leave_request").modal('show');
             });
-
+           
             $('#leave_request').on('hide.bs.modal', function () {
                 $('#leave_request_reason').val('');
                 $('#leave_type').val('').trigger('change');
@@ -952,7 +1001,67 @@
             //     // }
             // });
             //todo : leave request form submission end
+        
+        $("#leave_type").change(function(){
+            var leave_type_partinty = $('#leave_type').val();
+            if(leave_type_partinty !== null || leave_type_partinty !== '')
+            {   console.log(leave_type_partinty,1);
+                if (leave_type_partinty == 3 || leave_type_partinty == 2 || leave_type_partinty == 4) 
+                {
+                   if($("#leave_request_reason").data("rule-required")) {
+                            $("#leave_request_reason").data("rule-required",false);    
+                        }
+                }
+                else
+                {
+                    console.log(leave_type_partinty,3);
+                    $("#leave_request_reason").attr('data-rule-required',true);
+                    $("#leave_request_reason").attr('data-rule-message','Reason is required');
+                }
+            }
+            else
+            {
+                console.log(leave_type_partinty,4);
+                $("#leave_request_reason").attr('data-rule-required',true);
+                $("#leave_request_reason").attr('data-rule-message','Reason is required');
+
+
+            }
+          
+    
+           
+            });
+
+            $("#edit_leave_type").change(function(){
+            var leave_type_partinty = $('#edit_leave_type').val();
+            if(leave_type_partinty !== null || leave_type_partinty !== '')
+            {   console.log(leave_type_partinty,1);
+                if (leave_type_partinty == 3 || leave_type_partinty == 2 || leave_type_partinty == 4) 
+                {
+                   if($("#edit_reason").data("rule-required")) {
+                            $("#edit_reason").data("rule-required",false);    
+                        }
+                }
+                else
+                {
+                    console.log(leave_type_partinty,3);
+                    $("#edit_reason").attr('data-rule-required',true);
+                    $("#edit_reason").attr('data-rule-message','Reason is required');
+                }
+            }
+            else
+            {
+                console.log(leave_type_partinty,4);
+                $("#edit_reason").attr('data-rule-required',true);
+                $("#edit_reason").attr('data-rule-message','Reason is required');
+
+
+            }
+          
+    
+           
+            });
+
         });
     </script>
-
 @endsection

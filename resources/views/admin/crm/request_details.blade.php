@@ -296,6 +296,8 @@
                                                         <input type="hidden" id="close_reason" name="close_reason"
                                                                    value="1">
                                                             @if($crm_details['status_id'] == 3)
+                                                            <input type="hidden" id="resolved_close_val" name="resolved_close_val"
+                                                                   value="0">
                                                                 <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                     <span class="d-none d-lg-block">
                                                                         Close
@@ -347,11 +349,11 @@
                                                                             @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
                                                                                 <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
                                                                             @endif
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                                 <div id="updated_by_div_{{$comment->id}}">
                                                                                     @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
-                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                        <small>Updated by: {{$comment->comment_updated_by->name}} ({{$comment->comment_updated_at}})</small>
                                                                                     @endif
                                                                                 </div>
                                                                         </div>
@@ -375,7 +377,7 @@
 
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
-                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
                                                                             <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                         </div>
                                                                     </div>
@@ -415,7 +417,7 @@
 
                                                                         <div class="chat-body">
                                                                             <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <p>{!! nl2br($comment->comment) !!}</p>
                                                                                 <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
                                                                             </div>
                                                                         </div>
@@ -2734,7 +2736,12 @@
                 $('form#invalid_form').submit();
             });
 
-            
+            $('#resolved_close').on('click',function () {
+                //mark_close
+                $('#resolved_close_val').val("1");
+                form.submit();
+            });
+
         });
 
 

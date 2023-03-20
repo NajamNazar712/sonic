@@ -403,7 +403,7 @@ class InternationalWholesaleController extends Controller
                 $query->where('status', 1);
             })],
             'dhl_waybill' => ['required'],
-            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where(function($query){
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'iota_code')->where(function($query){
                 $query->where('status', 1)->where('hub', 1)->where('business_category_id', 2);
             })],
             'type' => ['required', 'between:0,190'],
@@ -470,14 +470,14 @@ class InternationalWholesaleController extends Controller
                         $row_id = $key + 2;
                         $shipper_id = trim($row['shipper_id']);
                         $tracking = trim($row['dhl_waybill']);
-                        $destination_name = trim($row['destination']);
+                        $iota_code = trim($row['destination']);
                         $type = trim($row['type']);
                         $weight = $row['weight'];
                         $pieces = $row['pieces'];
                         $other_charges = $row['other_charges'];
                         $shipper = WholesaleUser::find($shipper_id);
 
-                        $destination = City::where('name', $destination_name)->first();
+                        $destination = City::where('iota_code', $iota_code)->first();
 
                         $wholesale_shipment = new WholesaleShipment();
                         $wholesale_shipment->dhl_waybill = $tracking;
@@ -544,7 +544,7 @@ class InternationalWholesaleController extends Controller
             ->join('wholesale_shipment_statuses as wss', 'wss.id', '=', 'wholesale_shipments.status_id')
             ->join('admins as cb', 'cb.id', '=', 'wholesale_shipments.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_shipments.updated_by')
-            ->select('wholesale_shipments.id as shipment_id', 'wholesale_shipments.dhl_waybill','wu.name as shipper_name', 'o.name as origin', 'd.name as destination', 'wholesale_shipments.type', 'wholesale_shipments.weight', 'wholesale_shipments.pieces', 'wholesale_shipments.courier_charges', 'wholesale_shipments.other_charges', 'wholesale_shipments.bill_amount', 'wholesale_shipments.created_at as booking_date', 'wholesale_shipments.updated_at as updated_date', 'wss.name as shipment_status', 'ub.name as updated_by', 'cb.name as booked_by', 'wholesale_shipments.status_id');
+            ->select('wholesale_shipments.id as shipment_id', 'wholesale_shipments.dhl_waybill','wu.name as shipper_name', 'o.name as origin', 'd.name as destination', 'wholesale_shipments.type', 'wholesale_shipments.weight', 'wholesale_shipments.pieces', 'wholesale_shipments.courier_charges', 'wholesale_shipments.other_charges', 'wholesale_shipments.bill_amount', 'wholesale_shipments.created_at as booking_date', 'wholesale_shipments.updated_at as updated_date', 'wss.name as shipment_status', 'ub.name as updated_by', 'cb.name as booked_by', 'wholesale_shipments.status_id', 'd.iota_code as iota_code');
 
 
         if (session('role_id') != 1) {

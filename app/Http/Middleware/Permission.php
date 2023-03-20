@@ -105,6 +105,10 @@ class Permission
             'v2_pickups.pending.index' => 17,
             'v2_pickups.arrival.individual.index' => 24,
             'v2_pickups.arrival.bulk.index' => 24,
+
+            'v2_pickups.arrival.project_shippers.index' => 830,
+            'v2_pickups.arrival.project_shippers.store' => 830,
+
             'v2_pickups.rider.index' => 271,
             'v2_pickups.action_log.index' => 272,
             'v2_pickups.rider_receiving.index' => 366,
@@ -115,6 +119,7 @@ class Permission
             'v2_pickups.rider_tracking.index' => 446,
             'v2_pickups.rider_tracking.by_rider' => 446,
             'v2_pickups.rider_tracking.by_city' => 446,
+
 
 
             'cargo.pending.index' => 25,
@@ -376,6 +381,10 @@ class Permission
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
             'return.confirmation_pending_sms' => 675,
+            'return.rider_request.approve' => 833,
+            'return.rider_request.reject' => 834,
+            'return.rider_request.update' => 835,
+
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -948,6 +957,9 @@ class Permission
             'settings.rider_shipment_attempt.index' => 562,
             'settings.rider_shipment_attempt.store' => 562,
 
+            'settings.project_arrival_shippers.index' => 828,
+            'settings.project_arrival_shippers.store' => 828,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1137,6 +1149,9 @@ class Permission
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
 
+            'human_resource.fuel_allocation.index' => 831,
+            'human_resource.fuel_allocation.list' => 831,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
@@ -1281,6 +1296,9 @@ class Permission
             'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
 
+            'vigilance.note.index' => 770,
+            'vigilance.note.history.index' => 771,
+
             'settings.booking_destination_keyword.index' => 772,
             'settings.booking_destination_keyword.add' => 773,
             'qa.cx_training.index' =>777,
@@ -1304,6 +1322,22 @@ class Permission
             'settings.non_cod_otp_shippers.index' => 820,
             'settings.non_cod_otp_shippers.store' => 820,
 
+            'tracking.shipment_position.track' => 822,
+            'tracking.shipment_position.upload' => 822,
+            'tracking.shipment_position.list' => 822,
+
+            'human_resource.employee_penalty.index' => 829,
+
+            'reports.one_link_charges_summary.index' => 824,
+			'reports.one_link_charges_summary.index' => 824,
+
+            'settings.onelink_payment_charges.index' => 825,
+
+			'reports.rider_pickup.index' => 823,
+            'reports.rider_pickup.list' => 823,
+
+			'settings.consignee_refused_otp_bypass.index' => 826,
+            'otp_history.index' => 827,
         ],
 
         'shipper' => [

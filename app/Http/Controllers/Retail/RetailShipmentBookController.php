@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
 use App\Http\Models\Admin\Retail\RetailShipment;
@@ -24,6 +25,7 @@ use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
+use App\Http\Models\RetailInternationalShippingMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -34,6 +36,12 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Retail\RetailReference;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Blacklist\ConsigneeInformationLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +51,7 @@ use Yajra\Datatables\Datatables;
 use Validator;
 use Illuminate\Validation\Rule;
 use DNS2D;
+use App\Http\Models\RetailRequestCity;
 
 class RetailShipmentBookController extends Controller
 {
@@ -103,7 +112,49 @@ class RetailShipmentBookController extends Controller
 
         $reference_1_id = null;
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
+        
+        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+        if(!$consignee_information->exists()){
+            $consignee_information = new ConsigneeInformation();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->retail_consignee = 1;
+            $consignee_information->save();
 
+            // $consignee_information = $consignee_information->first();
+            $consignee_information_log = new ConsigneeInformationLog();
+            $consignee_information_log->consignee_information_id = $consignee_information->id;
+            $consignee_information_log->phone = $consignee_information->phone;
+            $consignee_information_log->phone2 = $consignee_information->phone2;
+            $consignee_information_log->name = $consignee_information->name;
+            $consignee_information_log->address = $consignee_information->address;
+            $consignee_information_log->city_id = $consignee_information->city_id;
+            $consignee_information_log->user_id = $user_id;
+            $consignee_information_log->save();
+
+        }else{
+
+          $consignee_information = $consignee_information->first();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->save();
+
+            $consignee_information_log = new ConsigneeInformationLog();
+            $consignee_information_log->consignee_information_id = $consignee_information->id;
+            $consignee_information_log->phone = $consignee_information->phone;
+            $consignee_information_log->phone2 = $consignee_information->phone2;
+            $consignee_information_log->name = $consignee_information->name;
+            $consignee_information_log->address = $consignee_information->address;
+            $consignee_information_log->city_id = $consignee_information->city_id;
+            $consignee_information_log->user_id = $user_id;
+            $consignee_information_log->save();
+        }
         return $shipment_id;
     }
 
@@ -152,7 +203,8 @@ class RetailShipmentBookController extends Controller
     public function index(){
         $products = Product::all();
         $business_categories = BusinessCategory::all();
-        $shipping_modes = RetailShippingMode::all();
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        $retail_international_shipping_modes =  RetailShippingMode::where('business_category_id',2)->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
@@ -160,10 +212,18 @@ class RetailShipmentBookController extends Controller
         $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes]);
+
+        $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes, 'refs' => $refs,'retail_international_shipping_modes' => $retail_international_shipping_modes]);
     }
 
     public function store(Request $request){
+
+        if($request->ref == 'Others'){
+          $ref = $request->ref_name;
+        }else{
+          $ref = $request->ref;
+        }
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
         $user_id = $shipper_user_id;
@@ -172,6 +232,8 @@ class RetailShipmentBookController extends Controller
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
 
+        $discount =  Auth::user()->store->discount;
+        $insurance = Auth::user()->store->insurance;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
@@ -179,7 +241,15 @@ class RetailShipmentBookController extends Controller
         $consignee_email_address = NULL;
         $order_id = $request->input('order_id');
         $package_type = FALSE;
-        $special_instructions = NULL;
+        $special_instructions = $request->special_instructions;
+        $business_category_id = $request->input('business_category');
+
+        $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+        $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+
+        if($insurance_amount > 0 ){
+            $insurance_amount = round($insurance_amount * $insurance / 100,2);
+        }
 
 
         $shipping_mode_check = $request->input('shipping_mode');
@@ -213,35 +283,6 @@ class RetailShipmentBookController extends Controller
         }
         $same_day_timing_id = NULL;
 
-        $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
-        $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));
-
-        $city = City::find($pickup_city_id);
-        $gst = $city->zone->gst;
-        $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
-        $gst = $gst * $total_charges_without_gst;
-        $total_charges = $total_charges_without_gst + $gst;
-        $charges_mode_id = $request->input('charges_mode');
-        if($shipping_mode_check == 3){
-            $amount = str_replace(',', '', $request->input('cod'));
-            $r_amount = 0;
-            if($charges_mode_id == 2){
-                $amount = $amount + $total_charges;
-            }
-        }
-        else{
-            $amount = 0;
-            if($charges_mode_id == 2){
-                $amount = $total_charges;
-            }
-            $r_amount = 0;
-        }
-        $payment_mode_id = 1;
-        $try_and_buy_charges = NULL;
-
-        $pieces_quantity = $request->input('pieces');
-        $business_category_id = $request->input('business_category');
-
         if ($request->volumetric_weight == "on") {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             $length = $request->length;
@@ -253,6 +294,37 @@ class RetailShipmentBookController extends Controller
             $breadth = null;
             $height = null;
         }
+
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
+       
+        if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
+            return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
+        }
+
+
+        $city = City::find($pickup_city_id);
+
+        $charges_mode_id = $request->input('charges_mode');
+        if($shipping_mode_check == 3){
+            $amount = str_replace(',', '', $request->input('cod'));
+            $r_amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $amount + $rates['total_charges'];
+            }
+        }
+        else{
+            $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $rates['total_charges'];
+            }
+            $r_amount = 0;
+        }
+        $payment_mode_id = 1;
+        $try_and_buy_charges = NULL;
+
+        $pieces_quantity = $request->input('pieces');
+        $business_category_id = $request->input('business_category');
+
 
         $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
@@ -366,12 +438,14 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
         $retail_shipment->trax_box_id = $request->trax_box;
-        $retail_shipment->total_charges_without_gst = $total_charges_without_gst;
-        $retail_shipment->gst = $gst;
-        $retail_shipment->total_charges = $total_charges;
-        $retail_shipment->weight_charges = $request->weight_charges;
-//        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
-        $retail_shipment->fuel_surcharge = $request->fuel_surcharge;
+        $retail_shipment->total_charges_without_gst = $rates['charges'];
+        $retail_shipment->gst = $rates['gst_charges'];
+        $retail_shipment->total_charges = $rates['total_charges'];
+        $retail_shipment->weight_charges = $rates['charges'];
+        $retail_shipment->discount = $rates['discount_amount'];
+        $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+        $retail_shipment->insurance_charges = $insurance_amount;
+        $retail_shipment->packaging_charges = $packaging;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;
@@ -387,7 +461,7 @@ class RetailShipmentBookController extends Controller
             if($cash_deposit->exists()){
                 $cash_deposit = $cash_deposit->first();
                 $total_shipments = $cash_deposit->total_cn + 1;
-                $total_cash = floatval($cash_deposit->total_cash) + floatval($total_charges);
+                $total_cash = floatval($cash_deposit->total_cash) + floatval($rates['total_charges']);
                 $cash_deposit->total_cn = $total_shipments;
                 $cash_deposit->total_cash = $total_cash;
                 $cash_deposit->save();
@@ -397,7 +471,7 @@ class RetailShipmentBookController extends Controller
                 $cash_deposit->category = Auth::user()->category;
                 $cash_deposit->retail_user_id = Auth::id();
                 $cash_deposit->total_cn = 1;
-                $cash_deposit->total_cash = floatval($total_charges);
+                $cash_deposit->total_cash = floatval($rates['total_charges']);
                 $cash_deposit->save();
             }
 
@@ -412,6 +486,11 @@ class RetailShipmentBookController extends Controller
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
+        $retail_reference = new RetailReference;
+        $retail_reference->shipment_id = $shipment_id;
+        $retail_reference->ref = $ref;
+        $retail_reference->save();
+
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
         }
@@ -421,22 +500,28 @@ class RetailShipmentBookController extends Controller
         }
     }
     public function calculate_rates(Request $request){
-        if($request->has('total_charges_without_gst')){
-            $pickup_address_id = session('pickup_address_id');
-            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-            $pickup_city_id = $user_shipping_info->city_id;
-            $city = City::find($pickup_city_id);
-            $total_charges_without_gst = $request->total_charges_without_gst;
-            $gst = $city->zone->gst;
-            $gst = $gst * $total_charges_without_gst;
-            $total_charges = $gst + $total_charges_without_gst;
-            $details = array();
 
-            $details['total_charges_without_gst'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
-            $details['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
-            $details['total_charges'] = number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN));
-            return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
+        $pickup_city_id = Auth::user()->store->pickup_address->city_id;
+        $discount =  Auth::user()->store->discount;
+        $insurance =  Auth::user()->store->insurance;
+
+        if($request->weight != null){
+
+            $weight = $request->weight;
         }
+        else{
+            $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+        }
+        
+        $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+        $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+
+        if($insurance_amount > 0 ){
+            $insurance_amount = round($insurance_amount * $insurance / 100,2);
+        }
+
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
+        return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
     public function shipper_info(Request $request){
@@ -709,23 +794,30 @@ class RetailShipmentBookController extends Controller
                         <td colspan="5" class="border twice-bottom twice-right">' . $shipment->consignee_address . '</td>
                       </tr>
                 ';
-                    $fuel_and_gst = $shipment->retail->fuel_surcharge + $shipment->retail->gst;
+                    $gst = $shipment->retail->gst;
+                    $packaging_and_insurance = $shipment->retail->packaging_charges + $shipment->retail->insurance_charges;
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
-                                <td colspan="2" class="color primary"><strong>Weight</strong></td>
-                                <td colspan="2" class="color primary"><strong>Service Charges</strong></td>
-                                <td colspan="2" class="color primary border"><strong>Fuel and GST</strong></td>
+                                <td colspan="1" class="color primary"><strong>Weight</strong></td>
+                                <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
+                                <td colspan="1" class="color primary border"><strong>GST</strong></td>
+                                <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
                                 <td colspan="2" class="color primary border twice-right"><strong>Total Charges</strong></td>
                             </tr>
                               <tr>
                                 <td colspan="2" class="border twice-bottom twice-left">' . $shipment->retail->shipping_modes->name . '</td>
                                 <td colspan="2" class="border twice-bottom">' . $shipment->pieces . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($shipment->retail->weight_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                <td colspan="2" class="border twice-bottom">' . number_format(ROUND($fuel_and_gst, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
+                                <td colspan="2" class="border twice-bottom twice-right">' . number_format(ROUND($shipment->retail->total_charges)) . '</td>
                               </tr>';
 
                     foreach($shipment->items as $item){
@@ -1612,7 +1704,7 @@ class RetailShipmentBookController extends Controller
     public function excel_index() {
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', 1)->get();
-        $shipping_modes = RetailShippingMode::where('id', '!=', 3)->get();
+        $shipping_modes = RetailShippingMode::where('id','!=',3)->where('business_category_id',1)->get();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
@@ -1651,13 +1743,16 @@ class RetailShipmentBookController extends Controller
             'consignee_cnic' => 'Consignee CNIC',
             'consignee_address' => 'Consignee Address',
             'order_id' => 'Order ID',
-//            'insurance_offered' => 'Insurance Offered',
+            'insurance_offered' => 'Insurance Offered',
+            'insurance_value' => 'Insurance Value',
+            'packaging_charges' => 'Packaging Charges',
             'trax_box_id' => 'Trax Box ID',
-            'weight_charges' => 'Weight Charges',
-            'fuel_surcharge' => 'Fuel Surcharge',
+        /*    'weight_charges' => 'Weight Charges',
+            'fuel_surcharge' => 'Fuel Surcharge',*/
             'iban_number' => 'IBAN Number',
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
+            'special_instruction' => 'Special Instruction',
         ];
 
         $messages = [
@@ -1701,13 +1796,17 @@ class RetailShipmentBookController extends Controller
             'consignee_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'consignee_address' => ['required', 'between:1,255'],
             'order_id' => ['nullable'],
-//            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'insurance_offered' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'insurance_value' => ['required_if:insurance_offered,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'packaging_charges' => ['nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
             'trax_box_id' => ['required_if:shipping_mode_id,5', 'nullable', 'integer', Rule::exists('retail_trax_boxes', 'id')],
-            'weight_charges' => ['required', 'numeric'],
-            'fuel_surcharge' => ['required', 'numeric'],
+          /*  'weight_charges' => ['required', 'numeric'],
+            'fuel_surcharge' => ['required', 'numeric'],*/
             'iban_number' => ['nullable', 'between:1,50'],
             'account_number' => ['nullable', 'numeric'],
-            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
+            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
+            'special_instruction' => ['nullable', 'between:1,190'],
+            
         ];
 
         if($file = $request->file('shipments')) {
@@ -1717,8 +1816,8 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id'];
-            if (count($spreadsheet[0]) != 27){
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+            if (count($spreadsheet[0]) != 29){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -1735,7 +1834,6 @@ class RetailShipmentBookController extends Controller
                     foreach ($spreadsheet_row as $key => $value) {
                         $row[$fields[$key]] = $value;
                     }
-
                     $rows[] = $row;
                 }
 
@@ -1751,6 +1849,7 @@ class RetailShipmentBookController extends Controller
                     foreach ($form as $key=>$value){
                         $row[$key] = $value;
                     }
+
                     $rows[] = $row;
                 }
             }
@@ -1765,12 +1864,22 @@ class RetailShipmentBookController extends Controller
                 }
 
                 $rows[$key]['pieces'] = $row['pieces'];
+                $rows[$key]['packaging_charges'] = $row['packaging_charges'];
 
                 if(!isset($row['insurance_offered']) || $row['insurance_offered'] == null){
-                    $row['insurance_offered'] = 'no';
+                    //$row['insurance_offered'] = 'no';
+                    $errors[$row_id]['insurance_offered'] = 'Select option for insurance as yes/no';
                 }
 
                 $rows[$key]['insurance_offered'] = $row['insurance_offered'];
+
+                if(in_array($row['insurance_offered'],['YES','YEs','YeS','Yes','yES','yEs','yeS','yes']) && !isset($row['insurance_value'])){
+                    $errors[$row_id]['insurance_value'] = 'Insurance value is required';
+                }
+                else{
+                    $rows[$key]['insurance_value'] = $row['insurance_value'];
+                }
+
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -1817,6 +1926,7 @@ class RetailShipmentBookController extends Controller
                         $row['length'] = null;
                         $row['breadth'] = null;
                         $row['height'] = null;
+                        $row['business_category_id'] = null;
                         $rows[$key]['length'] = $row['length'];
                         $rows[$key]['breadth'] = $row['breadth'];
                         $rows[$key]['height'] = $row['height'];
@@ -1831,7 +1941,6 @@ class RetailShipmentBookController extends Controller
                     $row['pickup_address_id'] = $pickup_address_id;
                     $row['category'] = $category;
                     $row['category_id'] = $category_id;
-
                     dispatch(new ProcessRetailShipmentBookingDB($row));
                 }
 
@@ -1864,7 +1973,58 @@ class RetailShipmentBookController extends Controller
             return redirect()->back()->with('error', 'No Shipments in File');
         }
     }
-    public function address_verify(Request $request){
+    public function add_city_req(Request $request){
+      $city_name = '';
+      if($request->city_domestic == null){
+        if($request->city_international == 'other'){
+          $city_name = $request->other_cities_international;
+        }else{
+          $city_name = $request->city_international;
+
+        }
+      }else{
+        if($request->city_domestic == 'other'){
+          $city_name = $request->other_city_domestic;
+        }else{
+          $city_name = $request->city_domestic;
+
+        }
+      }
+      RetailRequestCity::create([
+        'added_by' => Auth::id(),
+        'business_category_id' => $request->city_business_category,
+        'shipping_mode_id' => $request->city_shipping_mode,
+        'city_name' => $city_name,
+        'phone_number' => $request->city_phone_number,
+      ]);
+
+      return response()->json(['status' => 1, 'success' => 'City Request Added']);
+
+    }
+
+    public function consignee_info(Request $request){
+      $phone = $request->phone;
+      // $phone = substr_replace($request->phone, '-', 4, 0);
+        $message = '';
+        $consignee_information = ConsigneeInformation::where('phone', $phone);
+        if ($consignee_information->exists()) {
+          $consignee_information = $consignee_information->first();
+          $consignee_info = ConsigneeInformationLog::where('consignee_information_id',$consignee_information->id)->get();
+          
+          $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+          if ($blacklist->exists()) {
+                  // dd($blacklist->get());
+                  
+                  return response()->json(['status' => 0, 'consignee' => $consignee_info, 'blacklist'=> 1]);
+                }else{
+                  
+                  return response()->json(['status' => 0, 'consignee' => $consignee_info, 'blacklist'=> 0]);
+                }
+        }
+        return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
+
+    }
+	public function address_verify(Request $request){
       if(isset($request->city_id)){
 
 

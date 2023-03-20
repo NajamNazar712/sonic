@@ -148,6 +148,16 @@
                                             </select>
                                         </fieldset>
                                     </div>
+                                    <div class="col-6 d-none" id="alternate_phone_input">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="alternate_phone" class="form-control" id="alternate_phone" placeholder="Enter Alternate Number">
+                                        </fieldset>
+                                    </div>
+                                    {{-- <div class="col-6 d-none" id="cod_amount_input">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="cod_amount" class="form-control" id="cod_amount" placeholder="Enter COD Amount">
+                                        </fieldset>
+                                    </div> --}}
                                     <div class="col-6">
                                         <fieldset class="form-group">
                                             <select name="request_channel" id="request_channels" class="form-control select2">
@@ -509,6 +519,21 @@
                 'min': 0,
                 'max': 1000000
             });
+            $('#alternate_phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+            // $('#cod_amount').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            //     'digits': 2,
+            //     'min': 0,
+            //     'max': 1000000
+            // });
+
+            
             $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Reason'
@@ -772,9 +797,14 @@
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
+                                var on_hold_box_icon = '';
+
+                                if(details.consignee.crm_status){
+                                    on_hold_box_icon = ' <span><i class="fas fa-person-booth"></i></span> '
+                                }
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
-                                var $international_tracking_number = '';
+                                var international_tracking_number = '';
                                 var roll_id = @json(session('role_id') == 1);
                                 var department_id =  @json(session('department_id') == 6);
                                 if(details.open_box){
@@ -786,9 +816,12 @@
                                 if(details.international_shipment){
                                     $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
+                                else{
+                                    $international_tracking_number = '';
+                                }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
@@ -989,6 +1022,7 @@
                                 shipment += '<td>' + details.consignee.name + '</td>';
                                 shipment += '<td><strong>Destination</strong></td>';
                                 shipment += '<td>' + details.consignee.destination + '</td>';
+                                
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';
@@ -1000,7 +1034,7 @@
                                 else {
                                     shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
                                 }
-
+                                
                                 shipment += '<td colspan="2"></td>';
                                 shipment += '</tr>';
                                 shipment += '<td><strong>Email</strong></td>';
@@ -1957,6 +1991,26 @@
                 this.value = this.value.substring(0, max_char);
             }
         });
+        $('#case_nature_requests').on('change',function (e) {
+            
+            if($(this).val() == 13){
+                $('#alternate_phone_input').removeClass('d-none');
+                // $('#cod_amount_input').addClass('d-none');
+
+            }
+            // else if($(this).val() == 12){
+            //     $('#cod_amount_input').removeClass('d-none');
+            //     $('#alternate_phone_input').addClass('d-none');
+
+            // }
+            else{
+                // $('#cod_amount_input').addClass('d-none');
+                $('#alternate_phone_input').addClass('d-none');
+
+            }
+        });
+
+        
         $('body').on('change','#add_request_form textarea, #add_feedback_form textarea',function() {
             $(this).val($(this).val().trim());
         });
@@ -2079,6 +2133,9 @@
                     var case_nature_complaint_id = $('#case_nature_requests').val();
                     var case_nature_channel_id = $('#request_channels').val();
                     var service_description = $('#service_description').val();
+                    var alternate_phone = $('#alternate_phone').val();
+                    // var cod_amount = $('#cod_amount').val();
+                    
                     if (!case_nature_complaint_id) {
                         nature_flag = false;
                         var error = "Please select Complaint type!";
@@ -2087,6 +2144,27 @@
                             containerId: 'toast-top-center'
                         });
                     }
+                    if(case_nature_complaint_id == 13){
+                        if (!alternate_phone) {
+                            nature_flag = false;
+                            var error = "Please Enter Alternate Number!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                    // if(case_nature_complaint_id == 12){
+                    //     if (!cod_amount) {
+                    //         nature_flag = false;
+                    //         var error = "Please Enter COD Amount!";
+                    //         toastr.error(error, 'Error!', {
+                    //             positionClass: 'toast-top-center',
+                    //             containerId: 'toast-top-center'
+                    //         });
+                    //     }
+                    // }
+                    
                     if (!case_nature_channel_id) {
                         nature_flag = false;
                         var error = "Please select Channel!";
@@ -2114,7 +2192,9 @@
                                 'case_nature_id': case_nature_id,
                                 'complaint_id': case_nature_complaint_id,
                                 'channel_id': case_nature_channel_id,
-                                'description': service_description
+                                'description': service_description,
+                                'alternate_phone': alternate_phone,
+                                // 'cod_amount': cod_amount,
                             }
                         })
                             .done(function (data) {
@@ -2502,6 +2582,12 @@
             $('#claim_product_cost').val('');
             $('#request_id').val('').trigger('change');
             $('#receiving_sheet_div').addClass('d-none');
+            $('#alternate_phone_input').addClass('d-none');
+            $('#alternate_phone').val('');
+            // $('#cod_amount_input').addClass('d-none');
+            // $('#cod_amount').val('');
+
+            
 
         });
 

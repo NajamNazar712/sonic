@@ -14,7 +14,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                   <div class="col-4">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -43,30 +43,39 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_origin" id="search_origin" class="form-control select2">
-                            @foreach($cities as $origin)
-                                <option value="{{$origin->id}}">{{$origin->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $origin)
+                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_destination" id="search_destination" class="form-control select2">
-                            @foreach($cities as $destination)
-                                <option value="{{$destination->id}}">{{$destination->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $destination)
+                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
+                                @foreach($hubs as $concerned_hub)
+                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                        <select name="search_qsr" id="search_qsr" class="form-control select2">
+                            <select name="search_qsr" id="search_qsr" class="form-control select2">
                                 <option value="1">Delivery</option>
                                 <option value="2">Return</option>
                                 <option value="3">All</option>
-                        </select>
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -144,6 +153,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Product Type</th>
@@ -151,6 +161,11 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Aging (Arrival)</th>
                         <th class="border-primary border-darken-1">Aging (Last Status)</th>
+                        <th class="border-primary border-darken-1">Request #</th>
+                        <th class="border-primary border-darken-1">Request Status</th>
+                        <th class="border-primary border-darken-1">Case Nature</th>
+                        <th class="border-primary border-darken-1">Case Nature Type</th>
+                        <th class="border-primary border-darken-1">Adjusted amount</th>
                     </tr>
                     </thead>
                 </table>
@@ -237,6 +252,11 @@
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_concerned_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Concerned Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -334,6 +354,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
                             head.push('Product Type');
@@ -341,6 +362,11 @@
                             head.push('Amount');
                             head.push('Aging (Arrival)');
                             head.push('Aging (Last Status)');
+                            head.push('Request #');
+                            head.push('Request Status');
+                            head.push('Case Nature');
+                            head.push('Case Nature Type');
+                            head.push('Adjusted amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -364,6 +390,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
                                 row.push(values.product_type);
@@ -371,6 +398,11 @@
                                 row.push(values.amount);
                                 row.push(values.aging);
                                 row.push(values.aging_last_status);
+                                row.push(values.crm_id_padded);
+                                row.push(values.crm_request_status);
+                                row.push(values.crm_request_case_nature);
+                                row.push(values.crm_request_case_nature_type);
+                                row.push(values.adjusted_amount);
 
                                 body.push(row);
                             });
@@ -419,6 +451,7 @@
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
                 },
                 rowId: 'shId',
@@ -443,14 +476,19 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'description', name: 'si.description', class: 'align-middle description'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
-                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}
-
+                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false},
+                    {data: 'crm_id_padded_link', name: 'cr.id', class: 'align-middle crm_id_padded'},
+                    {data: 'crm_request_status', name: 'aging_last_status', class: 'align-middle crm_request_status'},
+                    {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature'},
+                    {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type'},
+                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -463,7 +501,7 @@
 
 
             $('#search_filter_btn').on('click',function () {
-               table.draw();
+                table.draw();
             });
 
         });

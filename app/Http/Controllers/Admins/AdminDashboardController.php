@@ -195,6 +195,7 @@ class AdminDashboardController extends Controller
 
     public function index()
     {
+
         /*$stats = array();
         $graph = array();
         $sales=array();
@@ -9637,7 +9638,7 @@ class AdminDashboardController extends Controller
                 if (($sale_check != null || $multiple_sale_check) && $result->status != 2) {
                     if ($result->account_type_id == 1) {
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if ($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || $result->status == 5 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
+                            if ($result->status != 2 && (in_array($result->rate_status, [0, 1, 2, 5]) || session('role_id') == 1 || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
@@ -10034,7 +10035,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -10654,7 +10655,7 @@ class AdminDashboardController extends Controller
     public function addRouteView()
     {
         $route_types = RouteType::all();
-        $cities = City::where('business_category_id', 1)->select(['id', 'name'])->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
         $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
         return view('admin.management.add_route_form')->with(['cities' => $cities, 'riders' => $riders, 'route_types' => $route_types]);
     }
@@ -10700,7 +10701,7 @@ class AdminDashboardController extends Controller
 
     public function editRouteView($id)
     {
-        $citylist = City::select(['id', 'name'])->get();
+        $citylist = City::where('status', 1)->select(['id', 'name'])->get();
         $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
         $route_types = RouteType::all();
         $current_rider = Rider::where('route_id', $id);
@@ -11096,7 +11097,7 @@ class AdminDashboardController extends Controller
 
     public function walk_in_city_list()
     {
-        $cities = City::select('id', 'name')->get();
+        $cities = City::where('status', 1)->select('id', 'name')->get();
         $walk_in_cities = WalkInCities::all();
         $shipping_modes = ShippingMode::where('id', '<', 4)->get();
         $pickup_cities = City::select('id', 'name')->where('pickup', 1)->get();
@@ -11800,6 +11801,7 @@ class AdminDashboardController extends Controller
             $city->update([
                 'name' => $request->countryName,
                 'city_code' => $request->city_code,
+                'iata_code' => $request->iata_code,
                 'hub' => 1,
                 'hub_id' => $id,
                 'zone_id' => $request->zone_id,
@@ -11870,6 +11872,7 @@ class AdminDashboardController extends Controller
             $city = City::create([
                 'name' => $request->countryName,
                 'city_code' => $request->city_code,
+                'iata_code' => $request->iata_code,
                 'hub' => 1,
                 'zone_id' => $request->zone_id,
                 'pickup' => 0,
@@ -11941,7 +11944,7 @@ class AdminDashboardController extends Controller
             $locations = RouteLocations::join('user_shipping_infos as usi', 'usi.id', '=', 'route_locations.pickup_address_id')
                 ->join('users as u', 'u.id', '=', 'usi.user_id')->where('route_locations.route_id', $route_id)->select('u.name as shipper', 'usi.pickup_address as address')->get();
             foreach ($locations as $location) {
-                $data[] = $location->shipper . ' - ' . $location->address;
+                $data[] =  '<strong>' . $location->shipper . '</strong>'  . ' - ' . $location->address;
             }
             return response()->json(['locations' => $data]);
         }

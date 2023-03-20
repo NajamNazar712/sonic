@@ -532,7 +532,7 @@ class RegisterController extends Controller
                         <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
                     </div>';
         $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing Trax Logistics</h3>
+                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing TRAX</h3>
                     <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'You have entered Your Contact number is: '. $newUser->phone .', address: '. $newUser->address .''. PHP_EOL .'Your Bank information is:';
                     if(count($user_bank_infos) > 0){
                         $html .='<table style="width:100%;">';
@@ -557,7 +557,7 @@ class RegisterController extends Controller
                         <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
                     </div>
                 </div>
-                    <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © 2020 By Trax Logistics, All Rights Reserved.</p>
+                    <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                 </div>';
         $body = $html;
         $to = array();
@@ -705,7 +705,7 @@ class RegisterController extends Controller
     {
         $city_id = $request->id;
         if ($city_id) {
-            $territory = Territory::where('city_id', $city_id)->where('territory_status','=','1');
+            $territory = Territory::where('city_id', $city_id)->where('territory_status', 1);
             if ($territory->exists()) {
                 $territory = $territory->get();
                 return response()->json(['status' => 0, 'territory' => $territory]);

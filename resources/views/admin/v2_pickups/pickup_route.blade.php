@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">City Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider Trax ID</th>
                                     <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Start Point</th>
                                     <th class="border-primary border-darken-1">End Point</th>
@@ -100,7 +101,7 @@
                                 <select name="rider_id" id="rider" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                                     <option value="" selected>Select a Rider</option>
                                     @foreach($riders as $rider)
-                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
@@ -180,7 +181,7 @@
                                         <select name="rider_id" id="rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                                             <option value="" selected>Select a Rider</option>
                                             @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
@@ -213,7 +214,7 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header text-center">
-                        <h4 class="modal-title w-100 font-weight-bold">View Addresses</h4>
+                        <h4 class="modal-title w-100 font-weight-bold">Pickup Addresses <span></span></h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -400,6 +401,7 @@
                             head.push('S.No');
                             head.push('City Name');
                             head.push('Route Code');
+                            head.push('Rider Trax ID');
                             head.push('Rider Name');
                             head.push('Start Point');
                             head.push('End Point');
@@ -415,6 +417,7 @@
                                 row.push(index + 1);
                                 row.push(values.city);
                                 row.push(values.code);
+                                row.push(values.rider_trax_id);
                                 row.push(values.rider);
                                 row.push(values.start);
                                 row.push(values.end);
@@ -471,12 +474,13 @@
                 serverSide: true,
                 ajax: '{{ route('admin.v2_pickups.pickup_route.list') }}',
                 rowId: 'id',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     //{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'code', name: 'routes.code', class: 'align-middle code'},
+                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'start', name: 'routes.start', class: 'align-middle start'},
                     {data: 'end', name: 'routes.end', class: 'align-middle end'},
@@ -613,6 +617,8 @@
 
                 if ($(this).hasClass('view_location')) {
                     var route_id = table.row( $(this).parents('tr') ).data().id;
+                    var rider_trax_id = table.row( $(this).parents('tr') ).data().rider_trax_id;
+                    var rider_name = table.row($(this).parents('tr')).data().rider;
 
                     $.ajax({
                         url: '{!! route('admin.management.route.assign_locations_view') !!}',
@@ -626,7 +632,7 @@
 
                             var html = '';
                             html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th><strong>Addresses</strong></th></tr></thead>';
+                            html += '<thead><tr><th>S No.</th><th><strong>Details</strong></th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.locations, function(index, value) {
                                 var ind = index+1;
@@ -635,6 +641,7 @@
                             });
                             html += '</tbody></table>';
 
+                            $('#AssignLocationsView .modal-header h4 span').html(' (' + rider_name + ' - ' + rider_trax_id + ')');
                             $('#AssignLocationsView .modal-body').html(html);
                             $('#AssignLocationsView').modal('show');
                         }

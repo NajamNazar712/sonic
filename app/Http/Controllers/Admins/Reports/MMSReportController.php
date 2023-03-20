@@ -23,7 +23,7 @@ class MMSReportController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
 
-        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104])->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946, 14110, 19507])->whereIn('status', [3, 4])->select('id', 'name')->get();
 
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
@@ -53,7 +53,7 @@ class MMSReportController extends Controller
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -86,9 +86,9 @@ class MMSReportController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason')
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
-            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104])
+            ->whereIn('u.id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946, 14110, 19507])
             ->whereBetween('sj.created_at', [$from,$to]);
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
@@ -174,7 +174,25 @@ class MMSReportController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })
+            ->addColumn('consignee_phone', function ($shipments) {
+                return $shipments->consignee_phone_number_1 . "<br>" . $shipments->consignee_phone_number_2;
+            })
+            ->filterColumn('consignee_phone', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $keyword = str_replace('-', '', $keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
+                            ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                    });
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
         if ($tracking = $request->get('search_tracking')) {
             $datatable->where('shipments.tracking_number', '=', $tracking);

@@ -423,7 +423,7 @@ class InternationalWholesaleInvoiceController extends Controller
                 $row['dhl_waybill'] = $shipment->dhl_waybill;
                 $row['weight'] = $shipment->weight;
                 $row['type'] = $shipment->type;
-                $row['destination'] = $shipment->destination_city->name;
+                $row['iota_code'] = $shipment->destination_city->iota_code;
                 $row['courier_charges'] = $shipment->courier_charges;
                 $row['other_charges'] = $shipment->other_charges;
                 $row['bill_amount'] = $shipment->bill_amount;
@@ -532,7 +532,7 @@ class InternationalWholesaleInvoiceController extends Controller
                             <td>' . $shipment_detail['dhl_waybill'] . '</td>
                             <td>' . $shipment_detail['weight'] . '</td>
                             <td>' . $shipment_detail['type'] . '</td>
-                            <td>' . $shipment_detail['destination'] . '</td>
+                            <td>' . $shipment_detail['iota_code'] . '</td>
                             <td>' . number_format($shipment_detail['courier_charges'], 2) . '</td>
                             <td>' . number_format($shipment_detail['other_charges'], 2) . '</td>
                             <td>' . number_format($shipment_detail['bill_amount'], 2) . '</td>

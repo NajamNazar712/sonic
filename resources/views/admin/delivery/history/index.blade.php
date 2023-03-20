@@ -55,6 +55,7 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
+                        <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
@@ -68,7 +69,8 @@
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
-                        <th class="border-primary border-darken-1">Updated via App</th>
+                        <th class="border-primary border-darken-1">Created Via</th>
+                        <th class="border-primary border-darken-1">Updated Via App</th>
                         <th class="border-primary border-darken-1">Last Updated At</th>
                     </tr>
                     </thead>
@@ -309,6 +311,7 @@
                             head.push('Zone');
                             head.push('Rider');
                             head.push('Rider Type');
+                            head.push('Rider Category');
                             head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('No. Of Shipments Delivered');
@@ -322,7 +325,8 @@
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
-                            head.push('Updated via App');
+                            head.push('Created Via');
+                            head.push('Updated Via App');
                             head.push('Last Updated At');
 
                             $.each(result.data, function(index, values) {
@@ -336,6 +340,7 @@
                                 row.push(values.zone_name);
                                 row.push(values.rider);
                                 row.push(values.rider_type);
+                                row.push(values.operation_rider_id);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
@@ -349,6 +354,7 @@
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
+                                row.push(values.created_via);
                                 row.push(values.updated_via_app);
                                 row.push(values.last_updated_at);
 
@@ -397,6 +403,7 @@
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
+                    { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
@@ -410,6 +417,7 @@
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                 ],
@@ -651,11 +659,11 @@
 
                                         <tr>
                                             <td>${index+1}</td>
-                                            <td>${values.tracking_no}</td>
-                                            <td>${values.tran_auth_id}</td>
-                                            <td>${values.amount}</td>
-                                            <td>${values.tran_date_formated}</td>
-                                            <td>${values.tran_time_formated}</td>
+                                            <td>${values.tracking_number}</td>
+                                            <td>${values.transaction_authentication_id}</td>
+                                            <td>${values.transaction_amount}</td>
+                                            <td>${values.transaction_date}</td>
+                                            <td>${values.transaction_time}</td>
                                             <td>${values.created_at}</td>
                                         </tr>
 
@@ -710,8 +718,65 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.vigilance_verification button.verified_count', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.shipments_verified') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function (index, tracking_number) {
+                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
 
             });
+
+            $('#datatable tbody').on('click', 'tr td.vigilance_verification button.partial_count', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.shipment_partial') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data) {
+                            var html = '';
+                            console.log(data);
+                            if (data.shipments) {
+                                $.each(data.shipments, function (index, tracking_number) {
+                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+
 
 
         });

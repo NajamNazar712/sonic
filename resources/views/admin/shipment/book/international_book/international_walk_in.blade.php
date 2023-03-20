@@ -523,7 +523,7 @@
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'City*'
+                placeholder: 'Country*'
             }).bind('change', function() {
                 if ($(this).hasClass('danger')) {
                     $(this).valid();

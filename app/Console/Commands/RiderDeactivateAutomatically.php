@@ -15,6 +15,7 @@ use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\WMS\WmsPickupRun;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class RiderDeactivateAutomatically extends Command
 {
@@ -82,6 +83,32 @@ class RiderDeactivateAutomatically extends Command
                             if ($employee_directory->exists()) {
                                 $employee_directory = $employee_directory->first();
                                 $employee_directory->status_id = 2;
+
+                                $riders = Rider::leftJoin('delivery_notes', function ($join) {
+                                    $join->on('delivery_notes.rider_id', '=', 'riders.id')
+                                        ->where('delivery_notes.created_at', '=',
+                                            DB::raw('(select max(created_at) from delivery_notes where delivery_notes.rider_id = riders.id)'));
+                                })
+                                ->leftJoin('pickup_notes', function ($join) {
+                                    $join->on('pickup_notes.rider_id', '=', 'riders.id')
+                                        ->where('pickup_notes.created_at', '=',
+                                            DB::raw('(select max(created_at) from pickup_notes where pickup_notes.rider_id = riders.id)'));
+                                })
+                                ->leftJoin('return_notes', function ($join) {
+                                    $join->on('return_notes.rider_id', '=', 'riders.id')
+                                        ->where('return_notes.created_at', '=',
+                                            DB::raw('(select max(created_at) from return_notes where return_notes.rider_id = riders.id)'));
+                                })
+                                ->select('riders.name','riders.id','delivery_notes.created_at as delivery_notes_created_at','pickup_notes.created_at as pickup_notes_created_at','return_notes.created_at as return_notes_created_at')
+                                ->where('riders.id',1)
+                                ->get();
+                                $pickup_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->pickup_notes_created_at)->format('Y-m-d');
+                                $delivery_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->delivery_notes_created_at)->format('Y-m-d');
+                                $return_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->return_notes_created_at)->format('Y-m-d');
+                                $max_date = max($pickup_date,$delivery_date,$return_date);
+
+                                $employee_directory->last_working_date = $max_date;
+
                                 $employee_directory->save();
                             }
                         }

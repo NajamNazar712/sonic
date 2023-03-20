@@ -186,7 +186,7 @@
             });
 
             $("#rate_daily_visit_btn").on('click',function (e){
-                if(!$("#DailyVisitRateForm .feedback .radio").is(':checked'))
+                if(!$("#DailyVisitRateForm .rate .radio").is(':checked'))
                 {
                     toastr.error("Please Select Rating", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return;

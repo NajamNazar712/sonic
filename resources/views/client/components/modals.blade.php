@@ -121,16 +121,24 @@
                 <form action="{{route('cod.rate_daily_visit')}}" method="post" id="DailyVisitRateForm">
                     @csrf
                     <div class="modal-body  text-center">
-                        <div class="feedback">
-                            @foreach(\App\Http\Models\CRM\CrmRequestRating::all() as $rating)
-                                    <div class="item">
-                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
-                                            <input class="radio" type="radio" name="rating" id="{{ $rating->id }}" value="{{ $rating->id }}">
-                                            <span>{{$rating->code}}</span>
-                                        </label>
-                                    </div>
-                            @endforeach
+                        <div class="row justify-content-center">
+                            <div class="rate">
+                                @foreach(\App\Http\Models\Admin\DailyVisitRating::orderByDesc('id')->get() as $rating)
+                                    <input class="radio" type="radio" name="rating" id="{{ $rating->id }}" value="{{ $rating->id }}">
+                                    <label for="{{ $rating->id }}" title="{{ $rating->name }}"></label>
+                                @endforeach
+                            </div>
                         </div>
+{{--                        <div class="feedback">--}}
+{{--                            @foreach(\App\Http\Models\Admin\DailyVisitRating::all() as $rating)--}}
+{{--                                    <div class="item">--}}
+{{--                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">--}}
+{{--                                            <input class="radio" type="radio" name="rating" id="{{ $rating->id }}" value="{{ $rating->id }}">--}}
+{{--                                            <span>{{$rating->code}}</span>--}}
+{{--                                        </label>--}}
+{{--                                    </div>--}}
+{{--                            @endforeach--}}
+{{--                        </div>--}}
                         <input type="hidden" name="daily_visit_id" value="{{$visit->id}}">
                         <input type="hidden" name="action" id="action_id" value="">
                         <textarea name="comment" class="form-control" id="comment" cols="30" rows="5" placeholder="Enter Comment"></textarea>

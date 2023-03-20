@@ -4,9 +4,12 @@ namespace App\Console;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalesIncentiveDate;
+use App\Http\Models\EmployeeShift;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use DB;
+use Carbon\Carbon;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -102,6 +105,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\ShipperPaymentCalculation',
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
+        'App\Console\Commands\RevenueReportMonthlyEmail',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
 		'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
@@ -109,7 +113,7 @@ class Kernel extends ConsoleKernel
 
         '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
         'App\Console\Commands\AutoEmailDwsArrival',
-        
+
         'App\Console\Commands\RCPSMSToConsigneeReattempt',
         'App\Console\Commands\CRMCount',
         '\App\Console\Commands\ReattemptRatioCalculate',
@@ -119,6 +123,22 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\LeaveCountUpdate',
 		'App\Console\Commands\EmployeeConfirmationDays',
         'App\Console\Commands\MonthAverageDestinationReportEmail',
+        'App\Console\Commands\ReversionDeliveredShipments',
+        'App\Console\Commands\RevenueReportCutOffDays',
+        'App\Console\Commands\RevenueReportByDeliveryDateCutOffDays',
+        'App\Console\Commands\RevenueReportRemainingDays',
+        'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
+        'App\Console\Commands\RetailSalesReport',
+        'App\Console\Commands\RetailSalesReportCutOffDays',
+        'App\Console\Commands\RetailSalesReportRemainingDays',
+        'App\Console\Commands\RetailSalesReportByDeliveryDate',
+        'App\Console\Commands\RetailSalesReportByDeliveryCutOffDays',
+        'App\Console\Commands\RetailSalesReportByDeliveryRemainingDays',
+        'App\Console\Commands\DailyAutoCommentForCRMClaims',
+		'App\Console\Commands\WeeklyAttendanceSummaryLineManager',
+		'App\Console\Commands\LateEmployeePenalty',
+		'App\Console\Commands\AttendanceAdjustmentShiftWise',
+		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         ];
 
     /**
@@ -142,6 +162,26 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
+        $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
+        $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
+        $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
+        if($shifts){
+            foreach($shifts as $shift)
+            {
+                // run 1 hour before from the shift ends, to get save from the next day switch as well
+                $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
+                ->dailyAt($dailyAt)
+                ->runInBackground();
+               
+                // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
+                $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
+                ->dailyAt($dailyAt)
+                ->runInBackground();
+            }
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -189,6 +229,7 @@ class Kernel extends ConsoleKernel
 //            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
 //            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
+
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
         $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
@@ -331,8 +372,23 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(2, '01:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
+        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
 
@@ -399,8 +455,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
 
         $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
-
+        $every_first_july = '0 0 1 7 *';  
+        $schedule->command('employee:leave_count_fiscal')->cron($every_first_july)->runInBackground();
         $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
+        
+
+        $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
+        $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
 
 
     }
