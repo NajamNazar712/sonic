@@ -73,6 +73,14 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    <div class="col-4">
+                        <select name="sub_segment_select" id="sub_segment_select" class="select2">
+                            @foreach($sub_segments as $sub_segment)
+                                <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -109,6 +117,7 @@
                         <th class="border-primary border-darken-1">In Transit Date</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -244,6 +253,10 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Sub Segment*'
+            });
             // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
             //     placeholder:'Search Shipper',
             //     width:'100%',
@@ -320,6 +333,7 @@
                             head.push('In Transit Date');
                             head.push('Vendor Name');
                             head.push('Shipper');
+                            head.push('Sub Segment');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -367,6 +381,7 @@
                                 row.push(values.cargo_date_time);
                                 row.push(values.vendor);
                                 row.push(values.shipper);
+                                row.push(values.sub_segment);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -449,12 +464,13 @@
                         d.search_status = $('#search_status').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.sub_segment = $('#search_form #sub_segment_select').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -463,6 +479,7 @@
                     {data: 'cargo_date_time', name: 'ccss.created_at', class: 'align-middle cargo_date_time'},
                     {data: 'vendor', name: 'cc.transport_mode_vendor_id', class: 'align-middle vendor'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},

@@ -537,7 +537,17 @@ class RetailAPIController extends Controller
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
+            $insurance =  intval($retail_user->store->insurance);
+        
+            $packaging = ($request->packaging_amount != null) ? str_replace(',', '', $request->packaging_amount) : 0;
+
+            $insurance_amount = ($request->insurance_amount != null) ? intval($request->insurance_amount) : 0;
+    
+            if ($insurance_amount > 0) {
+                $insurance_amount = round($insurance_amount * $insurance / 100, 2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, intval($packaging));
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid User"]);

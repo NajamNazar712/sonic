@@ -59,6 +59,7 @@
 															<option value="" selected="selected"></option>
 															<option value="1">General Logistics</option>
 															<option value="2">E-Commerce</option>
+															<option value="3">All</option>
 														</select>
 													</div>
 

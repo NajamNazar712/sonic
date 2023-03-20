@@ -160,7 +160,7 @@
         </div>
     </div>
     <!--HBL Konnect Information -->
-    <!--CCD Slip popup-->
+
 
     <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="ViewCCDSlip"
@@ -205,6 +205,59 @@
             </div>
         </div>
     </div>
+    <!--Deposit Slip Snatch Upload-->
+    <div class="modal fade text-left" id="uploadPCCDepositSlip" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="uploadPCCDepositSlip"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Deposit Slip Upload For <span></span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="pcc_upload_form" class="form" action="{{route('admin.delivery.cash_collection.pending.snatch_collect')}}" method="post"
+                          enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="delivery_note_id" id="delivery_note_id"/>
+                        <input type="hidden" name="action" id="action"/>
+                        <div class="row">
+                            <div class="col-12">
+                                <h2>Delivery Note: <span></span></h2>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <input type="text" name="amount" id="amount" placeholder="Amount" class="form-control amount" data-rule-required="true" data-msg-required="Deposit Amount is Required">
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <div class="form-group">
+                                    <textarea name="remarks" id="" cols="20" rows="3" placeholder="Remarks" class="form-control" data-rule-required="true" data-msg-required="Remarks are Required" id="remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <input class="form-control form-control" id="deposit_slip" type="file" name="deposit_slip" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block">
+                                    Upload
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Deposit Slip Snatch Upload-->
+
 
 @endsection
 
@@ -268,6 +321,8 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -1060,6 +1115,107 @@
                 var dncc = $('#track_form .dncc').val();
                 if (tracking_numbers != '' || dncc != '' ) {
                     table.draw();
+                }
+            });
+
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+            $('#datatable tbody').on('click', 'tr td.action a', function (){
+                var note_id_pad = $(this).data('note');
+                if($(this).hasClass('snatch')){
+                    var id = parseInt($(this).parents('tr').attr('id'));
+                    if(id){
+                        $('#pcc_upload_form #delivery_note_id').val(id);
+                        $('#pcc_upload_form #action').val(2);
+                        $('#uploadPCCDepositSlip').modal('show');
+                        $('#pcc_upload_form h2 span').text(note_id_pad);
+                        $('#uploadPCCDepositSlip .modal-title span').text('Snatch');
+                    }
+                }
+                else if($(this).hasClass('deduction')){
+                    var id = parseInt($(this).parents('tr').attr('id'));
+                    if(id){
+                        $('#pcc_upload_form #delivery_note_id').val(id);
+                        $('#pcc_upload_form #action').val(3);
+                        $('#uploadPCCDepositSlip').modal('show');
+                        $('#pcc_upload_form h2 span').text(note_id_pad);
+                        $('#uploadPCCDepositSlip .modal-title span').text('Deduction');
+                    }
+                }
+            });
+            $('#amount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'groupSeparator': ',',
+                'autoGroup': true,
+                'min': 0,
+                'max': 1000000
+            });
+            $('#uploadPCCDepositSlip').on('hidden.bs.modal', function () {
+                $("#pcc_upload_form").validate().resetForm();
+                $("#pcc_upload_form")[0].reset();
+                $("#pcc_upload_form #deposit_slip").val('');
+            });
+
+            $('#pcc_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    $(form).find('button[type=submit]').prop('disabled', true);
+                    swal({
+                        text: 'Are you sure you want to update deposit slip?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Cash collection is being updated!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            form.submit();
+                        }
+                        else {
+                            $(form).find('button[type=submit]').prop('disabled', false);
+                        }
+                    });
                 }
             });
 
