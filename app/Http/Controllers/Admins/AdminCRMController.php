@@ -1219,6 +1219,8 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 4) { // onward forwarded
                             $responsible_hub = $manifest_bag->destination_hub;
+                        }elseif ($manifest_bag->status_id == 5) { // mis routed
+                            $responsible_hub = $manifest_bag->destination_hub;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_hub = $manifest_bag->curren_hub_origin;
                         }
@@ -1263,6 +1265,8 @@ class AdminCRMController extends Controller
                             $responsible_zone = $manifest_bag->curren_zone_origin ;
                         }
                         elseif ($manifest_bag->status_id == 4) { // onward forwarded
+                            $responsible_zone = $manifest_bag->destination_zone;
+                        }elseif ($manifest_bag->status_id == 5) { // mis routed
                             $responsible_zone = $manifest_bag->destination_zone;
                         }
                         elseif ($manifest_bag->status_id == 9) {
@@ -1858,6 +1862,8 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 4) { // onward forwarded
                             $responsible_hub = $manifest_bag->destination_hub;
+                        }elseif ($manifest_bag->status_id == 5) { // mis routed
+                            $responsible_hub = $manifest_bag->destination_hub;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_hub = $manifest_bag->curren_hub_origin;
                         }
@@ -1902,6 +1908,8 @@ class AdminCRMController extends Controller
                             $responsible_zone = $manifest_bag->curren_zone_origin ;
                         }
                         elseif ($manifest_bag->status_id == 4) { // onward forwarded
+                            $responsible_zone = $manifest_bag->destination_zone;
+                        }elseif ($manifest_bag->status_id == 5) { // mis routed
                             $responsible_zone = $manifest_bag->destination_zone;
                         }
                         elseif ($manifest_bag->status_id == 9) {
