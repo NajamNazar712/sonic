@@ -1207,7 +1207,10 @@ class AdminCRMController extends Controller
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
                         $manifest_bag = $manifest_bag->first();
-                        if ($manifest_bag->status_id == 1) {  //bag created
+                        if ($manifest_bag->status_id == 0) {  //bag created
+                            $responsible_hub = $manifest_bag->origin_hub;
+                        }
+                        elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_hub = $manifest_bag->origin_hub;
                         } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
                             $responsible_hub = $manifest_bag->curren_hub_origin . '/' . $manifest_bag->destination_hub;
@@ -1246,8 +1249,10 @@ class AdminCRMController extends Controller
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
                         $manifest_bag = $manifest_bag->first();
-
-                        if ($manifest_bag->status_id == 1) {  //bag created
+                        if ($manifest_bag->status_id == 0) {  //bag created
+                            $responsible_zone = $manifest_bag->origin_zone;
+                        }
+                        elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_zone = $manifest_bag->origin_zone;
                         } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
                             $responsible_zone = $manifest_bag->curren_zone_origin . '/' . $manifest_bag->destination_zone;
