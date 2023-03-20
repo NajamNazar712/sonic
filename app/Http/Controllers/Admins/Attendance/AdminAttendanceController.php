@@ -191,16 +191,20 @@ class AdminAttendanceController extends Controller
 //                    ->orWhereIn('rc.hub_id', session('hubs'));
 //            });
 //        }
-        // dd($attendances->orderBy('a.id', 'desc')->take(10)->get()[4]);
-        // $attendances = $attendances->whereNotNull('clock_in')->orderBy('a.id', 'desc')->take(1);
+       
         $datatable = Datatables::of($attendances)
         ->setRowAttr([
             'class' => function ($attendances){
-                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendances->attendance_date.$attendances->aes_start_time)->addMinutes((int)$attendances->aes_extension_minutes);
-                $clock_in = Carbon::parse($attendances->clock_in_datetime);
+                // $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendances->attendance_date.' '.$attendances->aes_start_time)->addMinutes((int)$attendances->aes_extension_minutes);
+                // dd($attendances->attendance_date.' '.$attendances->aes_start_time);
+                $expected_clockin = Carbon::parse($attendances->attendance_date.' '.$attendances->aes_start_time)->addMinutes((int)$attendances->aes_extension_minutes);
+              
+                $clock_in = Carbon::parse($attendances->clock_in);
                 $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+              
                 if($attendances->employee_attendence_leave == 1)
                 {
+                   
                     return "leave";
                 }
                 if($attendances->clock_in_datetime == null)
@@ -208,6 +212,8 @@ class AdminAttendanceController extends Controller
                     return "absent";
                 }
                 elseif ($time_diff > 0) {
+                  
+                    
                     return "late";
                     // $datum["status"] = 2;//Late
                 }
