@@ -1901,7 +1901,7 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            })
+            });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
