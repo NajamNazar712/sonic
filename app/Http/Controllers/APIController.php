@@ -2063,6 +2063,21 @@ class APIController extends Controller
         }
     }
 
+    public function shopify_cities(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $cities = City::where('status', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->select('id', 'name')->get();
+
+            return response()->json(['status' => 0, 'message' => 'List of Cities', 'cities' => $cities]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+
     public function charges_calculate(Request $request)
     {
         $user_id = $request->user_id;

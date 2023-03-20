@@ -2053,6 +2053,38 @@ class V2AdminPickupsController extends Controller
             }
         }
 
+        $pickup_note_ids = array();
+        foreach ($pickup_request_ids as $pickup_request_id) {
+            $pickup_request = V2PickupRequest::find($pickup_request_id);
+            if ($pickup_request->received >= 1) {
+                if ($pickup_rider_id && in_array($pickup_request_id, $unassigned_pickup_requests)) {
+                    $pickup_note_id = $this->generate_assigned_pickup($pickup_request_id, $pickup_rider_id);
+
+                    if (!in_array($pickup_note_id, $pickup_note_ids)) {
+                        $pickup_note_ids[] = $pickup_note_id;
+                    }
+
+                } else {
+                    $pickup_note_request = $pickup_request->pickup_note_request;
+                    if ($pickup_note_request) {
+                        $pickup_note_id = $pickup_note_request->pickup_note_id;
+                        $pickup_note_request->status = 1;
+                        $pickup_note_request->save();
+                        $pickup_note = V2PickupNote::find($pickup_note_id);
+                        if ($pickup_note) {
+                            if ($pickup_note->status == 0) {
+                                if (!in_array($pickup_note_id, $pickup_note_ids)) {
+                                    $pickup_note_ids[] = $pickup_note_id;
+                                }
+                            }
+                        }
+                    }
+                    $this->retail_pickup_arrival($pickup_request_id);
+                }
+
+            }
+        }
+
         foreach ($shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
@@ -2091,37 +2123,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->save();
             }
         }
-        $pickup_note_ids = array();
-        foreach ($pickup_request_ids as $pickup_request_id) {
-            $pickup_request = V2PickupRequest::find($pickup_request_id);
-            if ($pickup_request->received >= 1) {
-                if ($pickup_rider_id && in_array($pickup_request_id, $unassigned_pickup_requests)) {
-                    $pickup_note_id = $this->generate_assigned_pickup($pickup_request_id, $pickup_rider_id);
 
-                    if (!in_array($pickup_note_id, $pickup_note_ids)) {
-                        $pickup_note_ids[] = $pickup_note_id;
-                    }
-
-                } else {
-                    $pickup_note_request = $pickup_request->pickup_note_request;
-                    if ($pickup_note_request) {
-                        $pickup_note_id = $pickup_note_request->pickup_note_id;
-                        $pickup_note_request->status = 1;
-                        $pickup_note_request->save();
-                        $pickup_note = V2PickupNote::find($pickup_note_id);
-                        if ($pickup_note) {
-                            if ($pickup_note->status == 0) {
-                                if (!in_array($pickup_note_id, $pickup_note_ids)) {
-                                    $pickup_note_ids[] = $pickup_note_id;
-                                }
-                            }
-                        }
-                    }
-                    $this->retail_pickup_arrival($pickup_request_id);
-                }
-
-            }
-        }
         if (!empty($pickup_note_ids)) {
             foreach ($pickup_note_ids as $pickup_note_id) {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
