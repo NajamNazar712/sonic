@@ -333,7 +333,7 @@
         }
         .absent
         {
-           background-color: ##FF0000;
+           background-color: #FF0000;
         }
         
         .late

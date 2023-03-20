@@ -160,7 +160,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('employee_statuses as es', 'es.id', 'a.status_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'a.rider_type_id')
             ->select('a.name as name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'ed.name as designation','rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'a.cnic as cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as shift', 'a.status_id as status_id','es.name as status_name','c.hub_id','aes.start_time as aes_start_time','aes.end_time as aes_end_time','aes.extension_minutes as aes_extension_minutes','employee_attendances.leave_status as employee_attendence_leave');
-
+        
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70 && session('role_id') != 104) {
             if(session('department_id') != 6){
                 $attendances->where('employee_attendances.employee_type', 1)
@@ -191,8 +191,8 @@ class AdminAttendanceController extends Controller
 //                    ->orWhereIn('rc.hub_id', session('hubs'));
 //            });
 //        }
-        
-        
+        // dd($attendances->orderBy('a.id', 'desc')->take(10)->get()[4]);
+        // $attendances = $attendances->whereNotNull('clock_in')->orderBy('a.id', 'desc')->take(1);
         $datatable = Datatables::of($attendances)
         ->setRowAttr([
             'class' => function ($attendances){
