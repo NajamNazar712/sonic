@@ -1198,11 +1198,11 @@ class AdminCRMController extends Controller
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
-                         leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
-                         ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
-                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
-                         ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
-                         ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
+                    leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
+                        ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
+                        ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
+                        ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
+                        ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
                         ->select(['cargo_manifest_bag_shipments.id','cmb.status_id','c.name as origin_hub','cd.name as destination_hub','chi.name as curren_hub_origin'])
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
@@ -1222,9 +1222,10 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 12 || $status == 20|| $status == 24){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
                     $responsible_hub = $requests->hub;
-                }else{
+                }
+                else{
                     $responsible_hub = "-";
                 }
                 return $responsible_hub;
@@ -1265,14 +1266,13 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 12 || $status == 20|| $status == 24){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            })
-        ;
+            });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
@@ -1856,9 +1856,10 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 12 || $status == 20|| $status == 24){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
                     $responsible_hub = $requests->hub;
-                }else{
+                }
+                else{
                     $responsible_hub = "-";
                 }
                 return $responsible_hub;
@@ -1899,7 +1900,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 12 || $status == 20|| $status == 24){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
