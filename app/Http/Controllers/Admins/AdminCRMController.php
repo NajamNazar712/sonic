@@ -1239,7 +1239,7 @@ class AdminCRMController extends Controller
                     $manifest_bag = CargoManifestBagShipments::
                     leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
                         ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
-                        ->leftjoin('zones as cz','cz.id','=','c.hub_id')
+                        ->leftjoin('zones as cz','cz.id','=','c.zone_id')
                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
                         ->leftjoin('zones as cdz','cdz.id','=','cd.zone_id')
                         ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
@@ -1835,11 +1835,14 @@ class AdminCRMController extends Controller
                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
                         ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
                         ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
-                        ->select(['cargo_manifest_bag_shipments.cargo_manifest_bag_id','cargo_manifest_bag_shipments.id','cmb.status_id','c.name as origin_hub','cd.name as destination_hub','chi.name as curren_hub_origin'])
+                        ->select(['cargo_manifest_bag_shipments.id','cmb.status_id','c.name as origin_hub','cd.name as destination_hub','chi.name as curren_hub_origin'])
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
                         $manifest_bag = $manifest_bag->first();
-                        if ($manifest_bag->status_id == 1) {  //bag created
+                        if ($manifest_bag->status_id == 0) {  //bag created
+                            $responsible_hub = $manifest_bag->origin_hub;
+                        }
+                        elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_hub = $manifest_bag->origin_hub;
                         } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
                             $responsible_hub = $manifest_bag->curren_hub_origin . '/' . $manifest_bag->destination_hub;
@@ -1868,7 +1871,7 @@ class AdminCRMController extends Controller
                     $manifest_bag = CargoManifestBagShipments::
                     leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
                         ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
-                        ->leftjoin('zones as cz','cz.id','=','c.hub_id')
+                        ->leftjoin('zones as cz','cz.id','=','c.zone_id')
                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
                         ->leftjoin('zones as cdz','cdz.id','=','cd.zone_id')
                         ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
@@ -1878,8 +1881,10 @@ class AdminCRMController extends Controller
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
                         $manifest_bag = $manifest_bag->first();
-
-                        if ($manifest_bag->status_id == 1) {  //bag created
+                        if ($manifest_bag->status_id == 0) {  //bag created
+                            $responsible_zone = $manifest_bag->origin_zone;
+                        }
+                        elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_zone = $manifest_bag->origin_zone;
                         } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
                             $responsible_zone = $manifest_bag->curren_zone_origin . '/' . $manifest_bag->destination_zone;
@@ -1896,7 +1901,7 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            });
+            })
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
