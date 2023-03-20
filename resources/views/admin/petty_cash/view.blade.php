@@ -448,15 +448,6 @@
                 }
             });
 
-            $('body').on('click', 'button.edit_amount', function () {
-                var id = $(this).parents('tr').attr('id');
-                console.log('Edit Amount button Clicked !', id);
-                let html = '';
-                html += '<input name="petty_cash_id" value="' + id + '" >';
-                $('#petty_cash_idd').html(html);
-                $('#edit_petty_cash_amount_button').click();
-            });
-
             $('#amount').inputmask({
                 'alias': 'numeric',
                 'rightAlign': false,
@@ -471,6 +462,15 @@
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
+            });
+
+            $('body').on('click', 'button.edit_amount', function () {
+                var id = $(this).parents('tr').attr('id');
+                console.log('Edit Amount button Clicked !', id);
+                let html = '';
+                html += '<input name="petty_cash_id" value="' + id + '" >';
+                $('#petty_cash_idd').html(html);
+                $('#edit_petty_cash_amount_button').click();
             });
 
             $('#edit_amount_form_button').on('click', function (event) {
@@ -529,11 +529,14 @@
 
             $('#edit_amount_form_button_close').on('click', function (e) {
                 console.log('lll');
+                $("#edit_amount_form").validate().resetForm();
+                $("#edit_amount_form")[0].reset();
                 document.getElementById("edit_amount_form").reset();
-                // $('#amount').val(0);
             });
             $('#edit_amount_form_button_close1').on('click', function (e) {
                 console.log('eee');
+                $("#edit_amount_form").validate().resetForm();
+                $("#edit_amount_form")[0].reset();
                 document.getElementById("edit_amount_form").reset();
             });
         });
