@@ -461,6 +461,19 @@
 												@endforeach
 											</select>
 										</div>
+
+										{{--Todo : Parcle Value--}}
+										<div class="form-group input-group">
+											<div class="input-group-prepend">
+												<span class="input-group-text">Rs</span>
+											</div>
+
+											<input type="text" name="parcel_value" id="parcel_value"
+												   class="form-control rounded-right parcel_value"
+												   placeholder="Parcel Value*" data-rule-required="true"
+												   data-msg-required="Parcel Value"  oninput="if(this.value==='0') this.value=''">
+										</div>
+										{{--Parcle Value End--}}
 									</div>
 								</div>
 
@@ -700,6 +713,24 @@
         }
 
 		$(document).ready(function() {
+
+			$('#parcel_value').prop('disabled', true);
+			$( "#amount" ).keyup(function() {
+				console.log( "Amount Field Hits" );
+				var amt = $('#amount').val();
+				console.log('Amount',amt)
+				if (amt == 0 )
+				{
+					$("#parcel_value").css("background-color", "yellow");
+					$('#parcel_value').prop('disabled', false);
+				}
+				else if((amt !== 0) || (amt == null) || (isEmpty(amt)))
+				{
+					$("#parcel_value").css("background-color", "lightgray");
+					$('#parcel_value').prop('disabled', true);
+					$('#parcel_value').val('');
+				}
+			});
 
             $('#open_shipment').checkboxpicker();
 

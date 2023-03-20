@@ -827,6 +827,7 @@ class AdminTrackingController extends Controller
         foreach ($tracking_numbers as $tracking_number) {
 
             $shipment = Shipment::where('tracking_number', $tracking_number);
+
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
@@ -1041,6 +1042,8 @@ class AdminTrackingController extends Controller
                                 $details['order_information']['amount'] = number_format($shipment->amount);
                             }
                         }
+
+                        $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
 

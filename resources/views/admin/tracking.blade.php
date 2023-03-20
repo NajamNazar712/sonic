@@ -1120,6 +1120,9 @@
                                 shipment +=breadth;
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                // shipment += '<td>HH</td>';
+                                shipment += '<td>' + ((details.order_information.parcel_value != 0) ? details.order_information.parcel_value : '-') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment +=height;

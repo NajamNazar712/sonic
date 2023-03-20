@@ -149,7 +149,7 @@ class ShipperShipmentBookController extends Controller
     }
 
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id)
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
 
 
@@ -202,6 +202,7 @@ class ShipperShipmentBookController extends Controller
         if ($return_address_id) {
             $shipment->return_address_id = $return_address_id;
         }
+        $shipment->parcel_value = $parcel_value;
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -500,6 +501,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -721,8 +723,8 @@ class ShipperShipmentBookController extends Controller
                     $pieces_quantity = $request->pieces_quantity;
                 }
                 $business_category_id = 1;
-
-                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
+                $parcel_value = $request->parcel_value;
+                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value);
 
                 if (session('user_type') == 2) {
                     $substitute_user_shipment = new SubstituteUserShipment();
@@ -3477,6 +3479,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
