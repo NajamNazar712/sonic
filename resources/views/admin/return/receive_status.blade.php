@@ -171,6 +171,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+    var flag = false;
         $(document).ready(function () {
 
             var date = $('#actual_date').pickadate({
@@ -229,7 +231,7 @@
                         action: function (e, dt, node, config) {
                            
                             if(selected_rows !== '') {
-                               var flag = false;
+                               
                                 table.rows().nodes().each(function(index) {
                                     var row = table.row(index);
                                     
@@ -380,8 +382,32 @@
                                 }
                                 else
                                 {
-                                    var error = "Remarks are Required When status is Unable to Return";
-                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                    table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var status = $(row.node()).find('select.statusDrop').val();
+                                        var remarks = $(row.node()).find('input.return_remarks');
+                                        console.log(remarks.val());
+                                        if (status == 60 && remarks.val() == '') {
+                                        
+                                        remarks.attr('data-rule-required', 'true');
+                                        remarks.attr('data-msg-required', 'Remarks is required');
+                                        var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
+                                        remarks.after(errorMsg);
+                                        flag = true;
+                                    } else {
+                                        remarks.attr('data-rule-required', 'false');
+                                        flag = false;
+                                        }
+
+                                    }
+                                });
+
+                                    remarks.attr('data-rule-required', 'true');
+                                    remarks.attr('data-msg-required', 'Remarks is required');
+                                    flag = true;
                                 }
                             }
                             else{
@@ -561,16 +587,24 @@
             });
 
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
+
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-                var remarks = $(this).closest('tr').find('.return_remarks');
-                if (status == 60) {
-                remarks.attr('data-rule-required', 'true');
-                remarks.attr('data-msg-required', 'Remarks is required');
-                } else {
-                remarks.attr('data-rule-required', 'false');
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                if (status == 60 && remarks.val() == '') 
+                {
+                    remarks.attr('data-rule-required', 'true');
+                    remarks.attr('data-msg-required', 'Remarks is required');
+                    flag = true;
+                    // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
+                    // remarks.after(errorMsg);
+                } 
+                else 
+                {
+                    remarks.attr('data-rule-required', 'false');
+                    flag = false;
                 } 
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
@@ -668,53 +702,65 @@
                 console.log(statusSelection);
                 var status = statusSelection.val();
                 var remarks = $(form).closest('tr').find('.return_remarks');
-               
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to change shipment\'s status!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
+                console.log(flag);
+                if(!flag)
+                {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment\'s status!43',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
                         },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $(table.table().header()).find('input').val('');
+                            $(table.table().header()).find('select').val('').trigger('change.select2');
+                            table.columns().search('').draw();
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            
+                            if (remarks.length && remarks[0].checkValidity()) {
+                                remarks.removeClass('error');
+                                remarks.next('.error-msg').html('');
+                            } else {
+                                remarks.addClass('error');
+                                remarks.next('.error-msg').html('This field is required.');
+                            }
+                            var open_box_input = $('#open_box_ids');
+                            open_box_input.val(open_box_ids);
+                            shipment.val(shipments);
+                            form.submit();
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $(table.table().header()).find('input').val('');
-                        $(table.table().header()).find('select').val('').trigger('change.select2');
-                        table.columns().search('').draw();
-                        var id = '';
-                        var count = table.data().count();
-                        for(var i = 0;i<count;i++){
-                            id = table.row( i ).id();
-                            shipments.push(id);
-                        }
-                        
-                        if (remarks.length && remarks[0].checkValidity()) {
-                            remarks.removeClass('error');
-                            remarks.next('.error-msg').html('');
-                        } else {
-                            remarks.addClass('error');
-                            remarks.next('.error-msg').html('This field is required.');
-                        }
-                        var open_box_input = $('#open_box_ids');
-                        open_box_input.val(open_box_ids);
-                        shipment.val(shipments);
-                        form.submit();
-                    }
-                });
+                    });
+                }
+                else
+                {
+                    // var error = "Remarks are Required When status is Unable to Return";
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    remarks.attr('data-rule-required', 'true');
+                    remarks.attr('data-msg-required', 'Remarks is required');
+                    flag = true;
+                }
+            
             }
             });
 
