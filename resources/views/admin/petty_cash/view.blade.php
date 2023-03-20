@@ -185,7 +185,7 @@
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" id="edit_amount_form">
+                <form method="POST" action="{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}" id="edit_amount_form">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash Amount</h5>
@@ -400,8 +400,6 @@
                 });
             });
 
-
-
             $('#edit_petty_cash_fields').on('show.bs.modal', function(e) {
 
                 var id = $(e.relatedTarget).data('id');
@@ -499,29 +497,31 @@
                         dangerMode: true
                     }).then(function (confirm) {
                         if (confirm) {
-                            var formData = $('#edit_amount_form').serialize();
-                            event.preventDefault();
-                            console.log('final Amount form', formData);
-                            $.ajax({
-                                url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}', // the URL to submit the form data to
-                                method: 'POST',
-                                data: formData,
-                            }).done(function (data) {
-                                table.ajax.reload(null, false);
-                                if (data.status == 1) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, data.message, {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                $('#edit_amount_form_button_close').click();
-                                document.getElementById("edit_amount_form").reset();
-                            });
+                            $('#edit_amount_form').submit();
+                            {{--var formData = $('#edit_amount_form').serialize();--}}
+                            {{--event.preventDefault();--}}
+                            {{--console.log('final Amount form', formData);--}}
+                            {{--$.ajax({--}}
+                            {{--    url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}', // the URL to submit the form data to--}}
+                            {{--    method: 'POST',--}}
+                            {{--    data: formData,--}}
+                            {{--})--}}
+                            //     .done(function (data) {
+                            //     table.ajax.reload(null, false);
+                            //     if (data.status == 1) {
+                            //         toastr.success(data.success, 'Success!', {
+                            //             positionClass: 'toast-top-center',
+                            //             containerId: 'toast-top-center'
+                            //         });
+                            //     } else {
+                            //         toastr.error(data.error, data.message, {
+                            //             positionClass: 'toast-top-center',
+                            //             containerId: 'toast-top-center'
+                            //         });
+                            //     }
+                            //     $('#edit_amount_form_button_close').click();
+                            //     document.getElementById("edit_amount_form").reset();
+                            // });
                         }
                     });
                 }
