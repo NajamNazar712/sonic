@@ -5671,4 +5671,11 @@ class ReturnController extends Controller
         }
 
     }
+
+    public function return_confirm_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),625);
+        $rider_name = Rider::all();
+        $hub_name =City::where('hub',1)->get();
+       return view('admin.return.return_confirm_otp')->with(['sale_name'=>$rider_name,'hub_name'=>$hub_name]);
+    }
 }
