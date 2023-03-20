@@ -173,6 +173,9 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
+                    if (context.select) {
+                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                    }
                 }
             });
             var to_date = $('#to_date').pickadate({
@@ -187,6 +190,9 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
+                    if (context.select) {
+                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
 
