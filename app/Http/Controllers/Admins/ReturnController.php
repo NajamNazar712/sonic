@@ -5673,9 +5673,76 @@ class ReturnController extends Controller
     }
 
     public function return_confirm_otp_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),625);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),640);
+        
         $rider_name = Rider::all();
-        $hub_name =City::where('hub',1)->get();
-       return view('admin.return.return_confirm_otp')->with(['sale_name'=>$rider_name,'hub_name'=>$hub_name]);
+        $hub_name =City::where('hub',1)->where('status',1)->select('id','name')->get();
+       return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name]);
+    }
+    public function return_confirm_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),641);
+        }
+
+            $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
+            ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+            ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
+            ->leftJoin('cities', 'cities.shipment_id', 'user_shipping_infos.city_id')
+            ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
+            ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
+            ->leftJoin('shipment_status', 'shipment_status.id', 'rider_deliveries.rider_status_id')
+            ->leftJoin('shipment_status_reason', 'shipment_status_reason.id', 'rider_deliveries.rider_status_reason_id')
+
+
+            ->select('rider_deliveries.delivery_note_id as delivery_note_id', 'riders.name as rider_name', 'riders.employee_id as rider_employee_id',
+            'shipments.tracking_number as tracking_number', 'cities.name as origin', 'destinationcity.name as destination', 'shipment_status.name as last_status            ',
+            'r.name as rider_name', 'ss.name as purpose', 'shipment_otps.otp as consignee_otp', 'shipment_otps.dbf_otp', 'sov.via_dbf_otp');
+
+        $admins = $admins->where(function ($query) {
+            $query->where(function ($sub_query) {
+                $sub_query->where('rider_deliveries.rider_status_id', 12)
+                    ->where('rider_deliveries.rider_status_reason_id', 8)
+                    ->where('rider_deliveries.otp_entered', 1);
+            })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('rider_deliveries.rider_status_id', 14)
+                    ->where('shipments.amount', '=', 0);
+                });
+        });
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $admins = $admins->whereBetween('shipment_otps.updated_at', [$from, $to]);
+        }
+
+        $datatable = Datatables::of($admins)
+        ->addColumn('tracking_number_link', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->addColumn('otp', function ($shipment){
+            if($shipment->rider_status_id == 14){
+                if($shipment->via_dbf_otp){
+                    return $shipment->dbf_otp;
+                }
+                else{
+                    return $shipment->consignee_otp;
+                }
+            }
+            else{
+                return $shipment->consignee_otp;
+            }
+        });
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        return $datatable->make(true);
+    }
+
+    public function return_confirm_otp_search(Request $request){
+       dd('asdasdas');
     }
 }

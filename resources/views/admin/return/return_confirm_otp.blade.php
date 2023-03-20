@@ -17,8 +17,8 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($sale_name as $admin)
+                                    <select name="search_rider[]" id="search_rider" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($rider_name as $admin)
                                             <option value="{{$admin->id}}">{{$admin->name}}</option>
                                         @endforeach
                                     </select>
@@ -68,12 +68,16 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note ID</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Rider Employee ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Rider Employee ID</th>
+                        <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Last Status</th>
+                        <th class="border-primary border-darken-1">Current Status</th>
+                        <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">OTP Status</th>
                     </tr>
                     </thead>
                 </table>
@@ -165,38 +169,34 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';
-
-            var from_date = $('#from_date').pickadate({
+            var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';    
+            $('#from_date').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                min: new Date(start_of_year),
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
                     }
                 }
             });
-            var to_date = $('#to_date').pickadate({
+            $('#to_date').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                max: new Date('{{ Carbon\Carbon::now() }}'),
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
                     }
                 }
             });
+
 
             $('#search_form').validate({
                 errorClass: 'danger',
@@ -225,7 +225,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.otp_history.list') }}',
+                        url: '{{ route('admin.return.return_confirm_otp.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -263,7 +263,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'OTP History',
+                        title: 'Return Confirm OTP',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -281,9 +281,9 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.otp_history.list') }}',
+                    url: '{{ route('admin.return.return_confirm_otp.search') }}',
                     data: function (d) {
-                        d.tracking_numbers = $('#search_form input.tracking_numbers').val();
+                        d.tracking_numbers = $('#search_form search_rider').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -374,9 +374,9 @@
             });
 
         });
-        $('#search_admins').select2({
+        $('#search_rider').select2({
             width:'100%',
-            placeholder:"Select Sale Persons",
+            placeholder:"Select Rider",
             allowClear:true,
             dropdownParent:$('#search_form')
         });

@@ -1545,6 +1545,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('return_confirm_otp')->name('return_confirm_otp.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_confirm_otp_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
+            Route::post('search', 'Admins\ReturnController@return_confirm_otp_search')->name('search');
             // Route::get('list', 'Admins\ReturnController@rider_request_note_list')->name('list');
             // Route::post('shipments', 'Admins\ReturnController@request_note_shipments')->name('shipments');
             // Route::get('{id}/approve', 'Admins\ReturnController@request_note_approve')->name('approve');
