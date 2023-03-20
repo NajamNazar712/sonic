@@ -1212,14 +1212,10 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_hub = $manifest_bag->origin_hub;
-                        } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
-                            $responsible_hub = $manifest_bag->destination_hub;
                         }elseif ($manifest_bag->status_id == 3) { // bag Received at junction
                             $responsible_hub = $manifest_bag->curren_hub_origin;
                         }
-                        elseif ($manifest_bag->status_id == 4) { // onward forwarded
-                            $responsible_hub = $manifest_bag->destination_hub;
-                        }elseif ($manifest_bag->status_id == 5) { // mis routed
+                        elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
                             $responsible_hub = $manifest_bag->destination_hub;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_hub = $manifest_bag->curren_hub_origin;
@@ -1259,17 +1255,12 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_zone = $manifest_bag->origin_zone;
-                        } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
-                            $responsible_zone =  $manifest_bag->destination_zone;
                         }elseif ($manifest_bag->status_id == 3) { // bag Received at junction
                             $responsible_zone = $manifest_bag->curren_zone_origin ;
                         }
-                        elseif ($manifest_bag->status_id == 4) { // onward forwarded
+                        elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
                             $responsible_zone = $manifest_bag->destination_zone;
-                        }elseif ($manifest_bag->status_id == 5) { // mis routed
-                            $responsible_zone = $manifest_bag->destination_zone;
-                        }
-                        elseif ($manifest_bag->status_id == 9) {
+                        } elseif ($manifest_bag->status_id == 9) {
                             $responsible_zone = $manifest_bag->curren_zone_origin;
                         }
                     }
@@ -1855,14 +1846,10 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_hub = $manifest_bag->origin_hub;
-                        } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
-                            $responsible_hub = $manifest_bag->destination_hub;
                         }elseif ($manifest_bag->status_id == 3) { // bag Received at junction
                             $responsible_hub = $manifest_bag->curren_hub_origin;
                         }
-                        elseif ($manifest_bag->status_id == 4) { // onward forwarded
-                            $responsible_hub = $manifest_bag->destination_hub;
-                        }elseif ($manifest_bag->status_id == 5) { // mis routed
+                        elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
                             $responsible_hub = $manifest_bag->destination_hub;
                         } elseif ($manifest_bag->status_id == 9) {
                             $responsible_hub = $manifest_bag->curren_hub_origin;
@@ -1902,17 +1889,12 @@ class AdminCRMController extends Controller
                         }
                         elseif ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_zone = $manifest_bag->origin_zone;
-                        } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
-                            $responsible_zone =  $manifest_bag->destination_zone;
                         }elseif ($manifest_bag->status_id == 3) { // bag Received at junction
                             $responsible_zone = $manifest_bag->curren_zone_origin ;
                         }
-                        elseif ($manifest_bag->status_id == 4) { // onward forwarded
+                        elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
                             $responsible_zone = $manifest_bag->destination_zone;
-                        }elseif ($manifest_bag->status_id == 5) { // mis routed
-                            $responsible_zone = $manifest_bag->destination_zone;
-                        }
-                        elseif ($manifest_bag->status_id == 9) {
+                        } elseif ($manifest_bag->status_id == 9) {
                             $responsible_zone = $manifest_bag->curren_zone_origin;
                         }
                     }
