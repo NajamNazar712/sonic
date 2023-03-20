@@ -57,6 +57,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Zone;
 use App\SpecialApprovalRequest;
+use App\SpecialApprovalRequestAdmin;
 use App\SpecialRequestReason;
 use App\SpecialRequestReasonOption;
 use Carbon\Carbon;
@@ -735,11 +736,11 @@ class AdminCRMController extends Controller
             // $approvers = array();
             $special_request_agent = null;
             // $sepcial_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
-            $sepcial_request_admins = Admin::whereIn('role_id',[4,6,4])->where('status',1)->get();
+            $sepcial_request_admins = Admin::whereIn('role_id',[4,6,44])->where('status',1)->get();
             $special_request_reasons = SpecialRequestReason::all();
             $special_request_reason_options = SpecialRequestReasonOption::all();
             $special_request = SpecialApprovalRequest::join('admins as a','a.id','=','special_approval_requests.admin_id')
-               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin','a.id as id','special_approval_requests.adjusted_percentage as percentage')->get()->first();
+               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin','a.id as id','special_approval_requests.adjusted_percentage as percentage')->first();
             //    foreach($special_request as $admin_request){
                 // array_push($special_request_agents,$admin_request->id) ;
                 // array_push($approvers['admin_id'],$admin_request->id) ;
@@ -5229,14 +5230,24 @@ TRAX-Customer Experience';
          $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
         //  foreach($admin_ids as $admin){
 
-             NotificationsController::send(131,$request_id,$admin_id);
+            NotificationsController::send(131,$request_id,$admin_id);
 
-             $approval_request =  new SpecialApprovalRequest();
-             $approval_request->crm_request_id = $request_id;
-             $approval_request->admin_id = $admin_id;
-             $approval_request->status = 1;
-             $approval_request->requested_by = Auth::id();
-             $approval_request->save();
+            $approval_request =  new SpecialApprovalRequest();
+            $approval_request->crm_request_id = $request_id;
+            // $approval_request->admin_id = $admin;
+            $approval_request->status = 1;
+            $approval_request->requested_by = Auth::id();
+            $approval_request->save();
+
+            foreach ($request->admin as $key => $admin) {
+                
+                $special_approval_request_admin = new SpecialApprovalRequestAdmin();
+                $special_approval_request_admin->special_request_id = $approval_request->id;
+                $special_approval_request_admin->admin_id = $admin;
+                $special_approval_request_admin->save();
+            }
+
+            
  
         //  }
          return redirect()->back()->with(['success'=> "Request Submitted"]);
