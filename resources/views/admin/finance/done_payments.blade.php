@@ -164,7 +164,8 @@
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
-{{--										<th class="border-primary border-darken-1">Aging</th>--}}
+										<th class="border-primary border-darken-1">Paid / Reverted Datetime</th>
+										{{--										<th class="border-primary border-darken-1">Aging</th>--}}
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -536,7 +537,7 @@
                             head.push('Done Datetime');
                             head.push('Company Bank');
                             head.push('Status');
-							// head.push('Updated At');
+							head.push('Paid / Reverted Datetime');
 							// head.push('Updated By');
 							// head.push('Aging');
 
@@ -567,7 +568,7 @@
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
                                 row.push(values.status);
-								// row.push(values.updated_at);
+								row.push(values.status_updated_at);
 								// row.push(values.updated_by);
 								// row.push(values.aging);
 
@@ -808,6 +809,7 @@
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
+					{data:'paid_reverted_at', name: 'done_payments.status_updated_at', class: 'align-middle text-center paid_reverted_at'},
 					// {data:'aging', name: 'aging', class: 'align-middle text-center aging'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],

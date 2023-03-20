@@ -874,10 +874,10 @@
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
                 var form = this;
-                if(unassigned_pickups){
-                    $('#RiderModal').modal('show');
-                }
-                else{
+                // if(unassigned_pickups){
+                //     $('#RiderModal').modal('show');
+                // }
+                // else{
                     swal({
                         text: 'Are you sure, you want to Receive these Shipments?',
                         icon: 'warning',
@@ -912,7 +912,7 @@
                             form.submit();
                         }
                     });
-                }
+                // }
 
             });
 
