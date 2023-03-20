@@ -1212,7 +1212,7 @@
 
     <div class="modal fade text-left" id="special_request_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="special_request_modal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Special Request</h4>
@@ -1222,105 +1222,85 @@
                 </div>
 
                 <div class="modal-body  text-center">
-                    @if ($special_request_agent == null)
-                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
-                        @csrf
-                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
+                    @if ($special_request_agent == null || $special_request_agent != session('id'))
+                        <form name="special_request_form" id="special_request_form" action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
+                            @csrf
+                            <input type="hidden" name="request_id" value="{{$crm_details->id}}">
 
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Admin</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                @if(!empty($approvers))
-                                   
-                                @endif
-                                @foreach ($sepcial_request_admins as $special_admin)
-                                    <tr>
-                                        <td>
-                                            <div class="custom-control custom-checkbox">
+                            <div class="row justify-content-center">
+                                <div class="col-12 text-left">
+                                    <fieldset class="form-group">
+                                        {{-- <label class="font-weight-bold">Select Admin</label> --}}
+                                        <select name="admin[]" id="admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin Required*" multiple>
+                                            @foreach ($sepcial_request_admins as $special_admin)
                                                 @if(!empty($approvers))
-                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
+                                                    <option value="{{$special_admin->id}}" {{$special_admin->id == $approvers->id ? 'selected' : ' '}} > {{$special_admin->name}}</option>
                                                 @else
-                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
+                                                    <option value="{{$special_admin->id}}"> {{$special_admin->name}}</option>
                                                 @endif
-                                            </div>
-                                        </td>
-                                        <td>{{$special_admin->name}}</td>
-                                    </tr>
-                                @endforeach
-                            
-                            </tbody>
-                        </table>
-
-                        <div class="row justify-content-center mt-2 ml-2">
-                            <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                    @elseif($special_request_agent != session('id'))
-                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
-                        @csrf
-                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
 
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Admin</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                @if(!empty($approvers))
-                                   
-                                @endif
-                                @foreach ($sepcial_request_admins as $special_admin)
-                                    <tr>
-                                        <td>
-                                            <div class="custom-control custom-checkbox">
-                                                @if(!empty($approvers))
-                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
-                                                @else
-                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>{{$special_admin->name}}</td>
-                                    </tr>
-                                @endforeach
-                            
-                            </tbody>
-                        </table>
-
-                        <div class="row justify-content-center mt-2 ml-2">
-                            <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                            <div class="row justify-content-center">
+                                <div class="col-12 text-left">
+                                    <fieldset class="form-group">
+                                        <select name="special_request_reason" id="special_request_reason" class="form-control select2" data-rule-required="true" data-msg-required="Reason Required*">
+                                            @foreach ($special_request_reasons as $special_request_reason)
+                                                <option value="{{$special_request_reason->id}}"> {{$special_request_reason->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+
+                            <div class="row justify-content-center">
+                                <div class="col-12 text-left">
+                                    <fieldset class="form-group">
+                                        <select name="special_request_reason_option[]" id="special_request_reason_option" class="form-control select2" data-rule-required="true" data-msg-required="Option Required*" multiple>
+                                            @foreach ($special_request_reason_options as $special_request_reason_option)
+                                                <option value="{{$special_request_reason_option->id}}"> {{$special_request_reason_option->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                 <div class="col-12 text-left">
+                                    <fieldset class="form-group">
+                                        <input type="text" id="adjustment_amount_percentage" placeholder="Adjustment amount percentage" name="adjustment_amount_percentage" class="form-control text-left" data-rule-required="true" data-msg-required="Amount in % is Required*" min="1" max="100">
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-2 ml-2">
+                                <div class="col-4">
+                                    <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                                </div>
+                            </div>
+                        </form>
                     @endif
 
                     @if ($special_request_agent != null)
-                    <hr>
-                    <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
-                        @csrf
-                        <input type="hidden" name="special_request_agent_id" value="{{$special_request_agent}}">
-                        <input type="hidden" name="crm_request_id" value="{{$crm_details->id}}">
+                        <hr>
+                        <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
+                            @csrf
+                            <input type="hidden" name="special_request_agent_id" value="{{$special_request_agent}}">
+                            <input type="hidden" name="crm_request_id" value="{{$crm_details->id}}">
 
-                        <div class="row justify-content-center mt-2 ml-2">
-                            <div class="col-4">
-                                <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control">
+                            <div class="row justify-content-center mt-2 ml-2">
+                                <div class="col-4">
+                                    <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control">
+                                </div>
+                                <div class="col-4">
+                                    <button id="special_request_approve_btn" type="submit" class="btn btn-primary btn-block">Approve</button>
+                                </div>
                             </div>
-                            <div class="col-4">
-                                <button id="special_request_approve_btn" type="submit" class="btn btn-primary btn-block">Approve</button>
-                            </div>
-                        </div>
-                    </form>
-                    <hr>
+                        </form>
+                        <hr>
                     @endif
                 </div>
 
@@ -1603,6 +1583,31 @@
                 width: '100%',
                 dropdownParent: $('#tagModal')
             });
+
+            $("#admin").select2({
+                placeholder: "Select Admins",
+                width: '100%',
+                dropdownParent: $('#special_request_modal')
+            });
+
+            $("#special_request_reason").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width: '100%',
+                dropdownParent: $('#special_request_modal')
+            });
+
+            $("#special_request_reason_option").select2({
+                placeholder: "Select Options",
+                width: '100%',
+                dropdownParent: $('#special_request_modal')
+            });
+
+            $('#adjustment_amount_percentage').inputmask({
+				'alias': 'decimal',
+				'allowMinus': false,
+				'allowPlus': false,
+				'digits': 2,
+			});
 
             $("#tag_department , #admin_tag_department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
@@ -2396,6 +2401,20 @@
                     
                 }
             });
+
+            $('#special_request_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();
+                }
+            });
             // $('#valid_form').on('submit', function (e) {
             //     blockPagePermanently();
             // });
@@ -2743,8 +2762,6 @@
             });
 
         });
-
-
 
     </script>
 @endsection

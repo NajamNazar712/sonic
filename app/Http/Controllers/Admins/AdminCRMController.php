@@ -57,6 +57,8 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Zone;
 use App\SpecialApprovalRequest;
+use App\SpecialRequestReason;
+use App\SpecialRequestReasonOption;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -732,7 +734,10 @@ class AdminCRMController extends Controller
 
             // $approvers = array();
             $special_request_agent = null;
-            $sepcial_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
+            // $sepcial_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
+            $sepcial_request_admins = Admin::whereIn('role_id',[4,6,4])->where('status',1)->get();
+            $special_request_reasons = SpecialRequestReason::all();
+            $special_request_reason_options = SpecialRequestReasonOption::all();
             $special_request = SpecialApprovalRequest::join('admins as a','a.id','=','special_approval_requests.admin_id')
                ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin','a.id as id','special_approval_requests.adjusted_percentage as percentage')->get()->first();
             //    foreach($special_request as $admin_request){
@@ -752,7 +757,7 @@ class AdminCRMController extends Controller
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
 //            dd($crm_sms_history);
             $closed_reason_statuses  = CrmClosedReasonStatus::all();
-            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $special_request,'special_request_agent' => $special_request_agent, 'sepcial_request_admins' => $sepcial_request_admins, 'ratings' => $ratings, 'crm_sms_history' => $crm_sms_history, 'closed_reason_statuses' => $closed_reason_statuses]);
+            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $special_request,'special_request_agent' => $special_request_agent, 'sepcial_request_admins' => $sepcial_request_admins, 'ratings' => $ratings, 'crm_sms_history' => $crm_sms_history, 'closed_reason_statuses' => $closed_reason_statuses, 'special_request_reasons' => $special_request_reasons, 'special_request_reason_options' => $special_request_reason_options]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -5215,6 +5220,8 @@ TRAX-Customer Experience';
 
     public function special_request_appvove(Request $request){
 
+    //  dd($request->all());
+
      $request_id = $request->request_id;
      $admin_id = $request->admin;
 
@@ -5230,7 +5237,7 @@ TRAX-Customer Experience';
              $approval_request->status = 1;
              $approval_request->requested_by = Auth::id();
              $approval_request->save();
-
+ 
         //  }
          return redirect()->back()->with(['success'=> "Request Submitted"]);
      }
