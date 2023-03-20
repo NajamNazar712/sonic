@@ -19,7 +19,7 @@ class UpdateNotificationForDonePaymentSmsSeeder extends Seeder
 //        $id = (int) $id +1;
 
         DB::table('notifications')->insert(array(
-            array('id' => 172, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Done Payment SMS', 'type_id' => 2, 'subject' => '', 'body' => 'Dear  [shipper_name],' . PHP_EOL . 'Your shipment has been paid by TRAX Logistics at [updated_at] of amount [total_amount].'. PHP_EOL .'Thank you for being our valued customer.', 'updated_by' => 7, 'status' => 1),
+            array('id' => 172, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Done Payment SMS', 'type_id' => 2, 'subject' => '', 'body' => 'Dear  [shipper_name],' . PHP_EOL . 'Your shipment has been paid by TRAX at [updated_at] of amount [total_amount].'. PHP_EOL .'Thank you for being our valued customer.', 'updated_by' => 7, 'status' => 1),
         ));
     }
 }

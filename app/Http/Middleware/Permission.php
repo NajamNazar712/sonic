@@ -1338,10 +1338,8 @@ class Permission
 			'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
 
-            'reports.revenue_report_by_invoice.index' => 839,
-
-
-        ],
+            'settings.auto_delivery_note_verification.index' => 836,
+			'reports.revenue_report_by_invoice.index' => 839,        ],
 
         'shipper' => [
             'shipment.book.index' => 1,

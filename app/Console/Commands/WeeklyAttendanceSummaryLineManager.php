@@ -2,27 +2,26 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\AdminReportsEmailController;
 use Illuminate\Console\Command;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
-use App\Http\Models\HR\Employee;
 
-class WeeklyAttendenceSummaryLineManager extends Command
+class WeeklyAttendanceSummaryLineManager extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:weeklyattendencesummary';
+    protected $signature = 'email:weeklyattendancesummary';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'weekly attendence summary of employee notification sent to their line manger';
+    protected $description = 'weekly attendance summary of employee notification sent to their line manger';
+
 
     /**
      * Create a new command instance.

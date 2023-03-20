@@ -51,6 +51,7 @@ Route::name('api.')->group(function () {
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
             Route::post('book/daraz', 'APIController@shipment_book_daraz')->name('book.daraz');
+            Route::post('book/jazzcash', 'APIController@shipment_book_jazzcash')->name('book.jazzcash');
         });
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
@@ -83,6 +84,7 @@ Route::name('api.')->group(function () {
 
 
         Route::prefix('shopify')->name('shopify.')->group(function () {
+            Route::get('cities', 'APIController@shopify_cities')->name('cities');
             Route::post('invoice', 'ShopifyController@invoice_settings')->name('invoice');
             Route::post('air_waybill', 'APIController@shipment_air_waybill_shopify_invoice')->name('air_waybill');
         });

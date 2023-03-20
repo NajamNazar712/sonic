@@ -48,6 +48,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $date = Carbon::today();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
+        $pickup_cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $cities = City::where('status', 1)->where('hub', 1)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->select('name','id')->get();
         $products = Product::orderBy('product_name')->get();
         $payment_modes = PaymentMode::whereNotIn('id', [2, 3, 5])->get();
@@ -83,7 +84,7 @@ class ShipperInternationalShipmentBookController extends Controller
                 $credit_msg = "Dear Customer, you have utilized $credit_percentage% (or the corresponding percentage) of your credit limit. Kindly clear your dues to avoid interruption in the services.";
             }
         }
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'allow_booking' => $allow_booking, 'credit_msg' => $credit_msg, 'credit_limit' => $credit_limit]);
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'allow_booking' => $allow_booking, 'credit_msg' => $credit_msg, 'credit_limit' => $credit_limit, 'pickup_cities' => $pickup_cities]);
     }
 
     public function store(Request $request) {
