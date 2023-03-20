@@ -7917,14 +7917,14 @@ class RiderAPIController extends Controller
                 $weight = $request->input('weight');
             }
 
-            $packaging = ($request->packaging_amount != null) ?  str_replace(',', '', $request->packaging_amount) : 0;
+            $packaging = ($request->packaging_amount != null) ?  intval($request->packaging_amount) : 0;
         
             $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
             if($insurance_amount > 0 ){
                 $insurance_amount = round(intval($insurance_amount) * $insurance / 100,2);
             }
         
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, intval($packaging));
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
