@@ -56,6 +56,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\SubCategorySegment;
 use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\ZoneClassCity;
@@ -859,7 +860,8 @@ class AdminFinanceController extends Controller
         $booking_types = BookingType::all();
         $service_type = BookingType::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
-        return view('admin.finance.outstanding_shipments')->with(['hubs' => $hubs, 'booking_types' => $booking_types, 'service_type' => $service_type, 'shipment_status' => $shipment_status]);
+        $sub_segments = SubCategorySegment::select('id', 'name')->get();
+        return view('admin.finance.outstanding_shipments')->with(['hubs' => $hubs, 'booking_types' => $booking_types, 'service_type' => $service_type, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments]);
     }
 
     public function outstanding_shipments_list(Request $request)
@@ -889,6 +891,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
@@ -914,7 +917,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id', '=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('s.id', 's.user_id', 's.tracking_number', 's.tracking_number as tracking_id', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id', 'consolidations.consolidation_id', 'a.name as request_reverted_by');
+            ->select('s.id', 's.user_id', 's.tracking_number', 's.tracking_number as tracking_id', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id', 'consolidations.consolidation_id', 'a.name as request_reverted_by', 'scs.name as sub_segment');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1128,6 +1131,10 @@ class AdminFinanceController extends Controller
 
         if ($service = $request->get('service')) {
             $datatables->where('bt.id', '=', $service);
+        }
+
+        if ($sub_segment = $request->get('sub_segment')) {
+            $datatables->where('u.sub_segment_id', '=', $sub_segment);
         }
 
         if ($delivery_date_from = $request->get('delivery_date_from')) {
@@ -5794,6 +5801,17 @@ class AdminFinanceController extends Controller
                     return 'Paid';
                 } else if ($done_payment->status == 2) {
                     return 'Reverted';
+                } else {
+                    return 'Unknown';
+                }
+            })
+            ->addColumn('paid_reverted_at', function($done_payment) {
+                if ($done_payment->status == 0) {
+                    return '-';
+                } else if ($done_payment->status == 1) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 2) {
+                    return $done_payment->status_updated_at;
                 } else {
                     return 'Unknown';
                 }

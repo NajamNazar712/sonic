@@ -2063,6 +2063,21 @@ class APIController extends Controller
         }
     }
 
+    public function shopify_cities(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $cities = City::where('status', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->select('id', 'name')->get();
+
+            return response()->json(['status' => 0, 'message' => 'List of Cities', 'cities' => $cities]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+
     public function charges_calculate(Request $request)
     {
         $user_id = $request->user_id;
@@ -6405,7 +6420,7 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-        $jazzcash_account_ids = [10104, 14781 , 14110];
+        $jazzcash_account_ids = [10104, 14781 , 14110, 10381, 10358];
         if (!in_array($user_id, $jazzcash_account_ids)) {
             return response()->json(['status' => 1, 'message' => 'Shipper is not allowed.']);
         }
@@ -6536,8 +6551,9 @@ class APIController extends Controller
 
             $return_address_id = null;
 
-            if($request->has('return_city_id') && $request->has('return_vendor') && $request->has('return_address') && $request->has('return_contact_person') && $request->has('return_phone_number') && $request->has('return_email_address')){
+            $shipping_mode_id = $request->input('shipping_mode_id');
 
+            if($request->has('return_city_id') && $request->has('return_vendor') && $request->has('return_address') && $request->has('return_contact_person') && $request->has('return_phone_number') && $request->has('return_email_address')){
                 $return_city_id = $request->return_city_id;
                 $return_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $request->return_vendor)->where('city_id', $return_city_id);
                 if ($return_address->exists()) {
@@ -6546,14 +6562,14 @@ class APIController extends Controller
                 } else {
                     $return_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->return_address, $request->return_contact_person, $request->return_vendor, $request->return_phone_number, $request->return_email_address, $return_city_id, 0);
                 }
-            }
 
-            $shipping_mode_id = $request->input('shipping_mode_id');
-            //Return Address
 
-            $result = ShipperShipmentBookController::check_return_destination($return_address_id, $shipping_mode_id, $user_id);
-            if (!$result) {
-                return response()->json(['status' => 1, 'message' => 'Return city not allowed, please contact your sales person!']);
+                //Return Address
+
+                $result = ShipperShipmentBookController::check_return_destination($return_address_id, $shipping_mode_id, $user_id);
+                if (!$result) {
+                    return response()->json(['status' => 1, 'message' => 'Return city not allowed, please contact your sales person!']);
+                }
             }
 
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
@@ -6694,7 +6710,11 @@ class APIController extends Controller
             }
 
             $estimated_weight = $request->input('estimated_weight');
-            $amount = $request->input('amount');
+
+            $amount = 0;
+            if($request->has('amount')){
+                $amount = $request->input('amount');
+            }
 
             $same_day_timing_id = null;
             $try_and_buy_charges = null;

@@ -60,6 +60,15 @@
                         </fieldset>
                     </div>
                     <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="sub_segment_select" id="sub_segment_select" class="select2">
+                                @foreach($sub_segments as $sub_segment)
+                                    <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -94,6 +103,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">Sub Segment</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -184,6 +194,10 @@
                 width: '100%',
                 placeholder: 'Select Weighted As',
             });
+            $('#search_form #sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Sub Segment*'
+            });
 
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -250,6 +264,7 @@
                             head.push('S. No.');
                             head.push('Tracking Number');
                             head.push('Shipper Name');
+                            head.push('Sub Segment');
                             head.push('Shipping Mode');
                             head.push('Origin');
                             head.push('Destination');
@@ -267,6 +282,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
+                                row.push(values.sub_segment);
                                 row.push(values.shipping_mode);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -315,15 +331,17 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_zone = $('#search_zone').val();
                         d.weighted_as = $('#weighted_as').val();
+                        d.sub_segment = $('#search_form #sub_segment_select').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
+                    { data:'sub_segment' ,name: 'scs.name', class: 'align-middle text-center sub_segment'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle text-center shipping_mode'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle text-center origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
