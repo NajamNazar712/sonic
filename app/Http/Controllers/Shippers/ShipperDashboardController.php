@@ -297,7 +297,15 @@ class ShipperDashboardController extends Controller
             $count = $count->where('shipments.id', '>=', $from_id)
                 ->where('shipments.id', '<=', $to_id);
         }
-        
+
+        $from_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+
+        if ($from_sj_id->exists()) {
+            $from_sj_id = $from_sj_id->first()->id;
+        }
+        else {
+            $from_sj_id = NULL;
+        }
 
         $count = $count->count();
 
@@ -342,6 +350,9 @@ class ShipperDashboardController extends Controller
                 ->where('shipments.id', '<=', $to_id);
         }
 
+        if ($from_sj_id) {
+            $shipments = $shipments->where('shipments_journey.id', '>=', $from_sj_id);
+        }
 
         $datatable = Datatables::of($shipments)
             ->setTotalRecords($count)
