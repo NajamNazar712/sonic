@@ -1193,7 +1193,7 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17){
                     $responsible_hub = $requests->origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
@@ -1220,6 +1220,8 @@ class AdminCRMController extends Controller
                 }
                 elseif($status == 12 || $status == 20|| $status == 24){
                     $responsible_hub = $requests->hub;
+                }else{
+                    $responsible_hub = "-";
                 }
                 return $responsible_hub;
             })
@@ -1227,7 +1229,7 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17){
                     $responsible_zone = $requests->origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
@@ -1236,14 +1238,15 @@ class AdminCRMController extends Controller
                         ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
                         ->leftjoin('zones as cz','cz.id','=','c.hub_id')
                         ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
-                        ->leftjoin('zones as cdz','cdz.id','=','cd.hub_id')
+                        ->leftjoin('zones as cdz','cdz.id','=','cd.zone_id')
                         ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
-                        ->leftjoin('zones as chiz','chiz.id','=','chi.hub_id')
+                        ->leftjoin('zones as chiz','chiz.id','=','chi.zone_id')
                         ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
                         ->select(['cargo_manifest_bag_shipments.id','cmb.status_id','cz.name as origin_zone','cdz.name as destination_zone','chiz.name as curren_zone_origin'])
                         ->orderby('cargo_manifest_bag_shipments.id','desc');
                     if($manifest_bag->exists()){
                         $manifest_bag = $manifest_bag->first();
+
                         if ($manifest_bag->status_id == 1) {  //bag created
                             $responsible_zone = $manifest_bag->origin_zone;
                         } elseif ($manifest_bag->status_id == 2) { // bag dispatch from origin
@@ -1257,6 +1260,8 @@ class AdminCRMController extends Controller
                 }
                 elseif($status == 12 || $status == 20|| $status == 24){
                     $responsible_zone = $requests->zone;
+                }else{
+                    $responsible_zone = '-';
                 }
                 return $responsible_zone;
             })
