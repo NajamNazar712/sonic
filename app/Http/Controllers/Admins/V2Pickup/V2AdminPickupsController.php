@@ -1521,6 +1521,9 @@ class V2AdminPickupsController extends Controller
                             //                            $rider = Rider::find($rider_id)->name;
                             $rider = '';
                             $rider_assigned_flag = true;
+                            
+
+
                         } else {
                             $rider = $pickup_request->rider->name;
                         }
