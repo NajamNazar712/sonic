@@ -151,7 +151,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-
+//        dd('got yeah 1',\request()->all());
 
         $shipment = new Shipment();
 
@@ -501,7 +501,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
+        dd($request->all());
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -696,6 +696,7 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 $amount = str_replace(',', '', $request->input('amount'));
+                $parcel_value = str_replace(',', '', $request->input('parcel_value'));
                 if ($service_type_id != 5) {
                     $payment_mode_id = $request->input('payment_mode');
                 } else {
@@ -712,6 +713,7 @@ class ShipperShipmentBookController extends Controller
                 if ($service_type_id == 3) {
                     $try_and_buy_charges = $request->input('try_and_buy_charges');
                     $amount = 0;
+                    $parcel_value = 0;
                 } else {
                     $try_and_buy_charges = NULL;
                 }
@@ -723,7 +725,7 @@ class ShipperShipmentBookController extends Controller
                     $pieces_quantity = $request->pieces_quantity;
                 }
                 $business_category_id = 1;
-                $parcel_value = $request->parcel_value;
+
                 $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value);
 
                 if (session('user_type') == 2) {
@@ -3314,10 +3316,8 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id)
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
-
-
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -3341,6 +3341,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
+        $shipment->amount = $parcel_value;
 
         if ($payment_mode_id == 2) {
             $settings = GlobalSettings::where('type', 'ccd_booking')->first();
@@ -3671,6 +3672,7 @@ class ShipperShipmentBookController extends Controller
             }
 
             $amount = str_replace(',', '', $request->input('amount'));
+            $parcel_value = str_replace(',', '', $request->input('parcel_value'));
 
             if ($service_type_id == 3 && $payment_mode_id == 4) {
                 $payment_mode_id == 1;
@@ -3683,6 +3685,7 @@ class ShipperShipmentBookController extends Controller
             if ($service_type_id == 3) {
                 $try_and_buy_charges = $request->input('try_and_buy_charges');
                 $amount = 0;
+                $parcel_value = 0;
             } else {
                 $try_and_buy_charges = NULL;
             }
@@ -3692,7 +3695,7 @@ class ShipperShipmentBookController extends Controller
                 $pieces_quantity = $request->pieces_quantity ?? 1;
             }
             $business_category_id = 1;
-            $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+            $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value);
 
             if (session('user_type') == 2) {
                 $substitute_user_shipment = new SubstituteUserShipment();
