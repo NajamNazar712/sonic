@@ -342,7 +342,7 @@
                     },
                     // {data: 'id', name: 'employee_penalties.id', class: 'align-middle id', searchable: false},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
-                    {data: 'employee_name', name: 'a.name', class: 'align-middle name', searchable: false},
+                    {data: 'employee_name', name: 'a.name', class: 'align-middle name', searchable: true},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_type', name: 'a.employee_type_id', class: 'align-middle employee_type'},
