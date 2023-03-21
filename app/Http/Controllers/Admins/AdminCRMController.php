@@ -1222,7 +1222,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_hub = $requests->hub;
                 }
                 else{
@@ -1266,7 +1266,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
@@ -1856,7 +1856,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_hub = $requests->hub;
                 }
                 else{
@@ -1900,7 +1900,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
@@ -2386,7 +2386,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_hub = $requests->hub;
                 }
                 else{
@@ -2430,7 +2430,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
@@ -2785,7 +2785,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_hub = $requests->hub;
                 }
                 else{
@@ -2829,7 +2829,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11){
+                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
                     $responsible_zone = $requests->zone;
                 }else{
                     $responsible_zone = '-';
