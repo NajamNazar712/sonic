@@ -59,6 +59,7 @@ use App\Http\Models\Zone;
 use App\SpecialApprovalRequest;
 use App\SpecialApprovalRequestAdmin;
 use App\SpecialRequestReason;
+use App\SpecialRequestOption;
 use App\SpecialRequestReasonOption;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -733,32 +734,83 @@ class AdminCRMController extends Controller
 
             $crm_images_count = $crm_request->images->count();
 
-            // $approvers = array();
-            $special_request_agent = null;
-            // $sepcial_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
-            $sepcial_request_admins = Admin::whereIn('role_id',[4,6,44])->where('status',1)->get();
+
+            $special_request_admins = Admin::whereIn('role_id',[4,6,44])->where('status',1)->get();
             $special_request_reasons = SpecialRequestReason::all();
             $special_request_reason_options = SpecialRequestReasonOption::all();
-            $special_request = SpecialApprovalRequest::join('admins as a','a.id','=','special_approval_requests.admin_id')
-               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin','a.id as id','special_approval_requests.adjusted_percentage as percentage')->first();
-            //    foreach($special_request as $admin_request){
-                // array_push($special_request_agents,$admin_request->id) ;
-                // array_push($approvers['admin_id'],$admin_request->id) ;
-                // $approvers['admin_id'] = $admin_request->id;
-                if($special_request){
 
-                    if(Auth::id() == $special_request->id){
-                        $special_request_agent = Auth::id();
-    
-                    }
-                }
-            // }
+            // $approvers = array();
+            $special_request_agent = [];
+            $special_request_approval_options = [];
+            // $special_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
+            
+           
+            
+            $special_request = SpecialApprovalRequest::where('crm_request_id',$id)
+                ->where('status',1)
+                ->select('id', 'special_request_reason_id', 'approved_status', 'adjusted_percentage as percentage');
+
+            if($special_request->exists())
+            {
+                $special_request = $special_request->first();
+                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
+                $special_request_approval_options = SpecialRequestOption::where('special_request_id',$special_request->id)->pluck('reason_option_id')->toArray();
+            }
+            else{
+                $special_request = [];
+            }
 
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
-//            dd($crm_sms_history);
             $closed_reason_statuses  = CrmClosedReasonStatus::all();
-            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $special_request,'special_request_agent' => $special_request_agent, 'sepcial_request_admins' => $sepcial_request_admins, 'ratings' => $ratings, 'crm_sms_history' => $crm_sms_history, 'closed_reason_statuses' => $closed_reason_statuses, 'special_request_reasons' => $special_request_reasons, 'special_request_reason_options' => $special_request_reason_options]);
+            return view('admin.crm.request_details')->with([
+                'tagged_kae_name' => $tagged_kae_name,
+                'tagged_operation_name' => $tagged_operation_name,
+                'crm_histories' => $crm_histories,
+                'crm_historiescount' => $crm_histories->count(),
+                'crm_details' => $crm_request,
+                'launched_by' => $launched_by,
+                'comments' => $crm_comments,
+                'last_comment_id' => $last_comment,
+                'admins' => $admins,
+                'types' => $types,
+                'departments' => $departments,
+                'tagged_name' => $tagged_name,
+                'crm_tagging' => $crm_tagging,
+                'crm_agent_history' => $crm_agent_history,
+                'crm_status_history' => $crm_status_history,
+                'crm_tagging_history' => $crm_tagging_history,
+                'agent' => $agent_name,
+                'tag_check' => $tagged, 
+                'tag_permission' => $tag_permission,
+                'shipment_status' => $shipment_status,
+                'shipper' => $shipper,
+                'case_nature' => $case_nature,
+                'case_nature_complaints' => $case_nature_type_complaints,
+                'case_nature_service_requests' => $case_nature_type_service_requests,
+                'arrival_date' => $arrival_date, 
+                'shipment_status_date' => $shipment_status_date, 
+                'sale_person' => $sale_person, 
+                'case_nature_type_claims' => $case_nature_type_claims, 
+                'hubs' => $hubs, 
+                'escalation_tagged_check' => $escalation_tagged_check, 
+                'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 
+                'escalation_status_flag' => $escalation_status_flag, 
+                'escalation_log_flag' => $escalation_log_flag, 
+                'escalation_tagging_id' => $escalation_tagging_id, 
+                'crm_escalation_levels' => $crm_escalation_levels, 
+                'crm_images_count' => $crm_images_count,
+                'insurance' => $insurance,
+                'special_request' => $special_request,
+                'special_request_agent' => $special_request_agent,
+                'ratings' => $ratings, 
+                'crm_sms_history' => $crm_sms_history, 
+                'closed_reason_statuses' => $closed_reason_statuses, 
+                'special_request_reasons' => $special_request_reasons, 
+                'special_request_admins' => $special_request_admins,
+                'special_request_reason_options' => $special_request_reason_options,
+                'special_request_approval_options' => $special_request_approval_options,
+                ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -5221,36 +5273,42 @@ TRAX-Customer Experience';
 
     public function special_request_appvove(Request $request){
 
-    //  dd($request->all());
-
      $request_id = $request->request_id;
      $admin_id = $request->admin;
+     $special_request_reason = $request->special_request_reason;
+     $special_request_reason_option = $request->special_request_reason_option;
+     $adjusted_percentage = $request->adjustment_amount_percentage;
 
      if($admin_id){
-         $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
-        //  foreach($admin_ids as $admin){
+        $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
+         
+        $approval_request =  new SpecialApprovalRequest();
+        $approval_request->crm_request_id = $request_id;
+        // $approval_request->admin_id = $admin;
+        $approval_request->status = 1;
+        $approval_request->adjusted_percentage = $adjusted_percentage;
+        $approval_request->special_request_reason_id = $special_request_reason;
+        $approval_request->requested_by = Auth::id();
+        $approval_request->save();
+
+        foreach ($admin_id as $key => $admin) {
 
             NotificationsController::send(131,$request_id,$admin_id);
-
-            $approval_request =  new SpecialApprovalRequest();
-            $approval_request->crm_request_id = $request_id;
-            // $approval_request->admin_id = $admin;
-            $approval_request->status = 1;
-            $approval_request->requested_by = Auth::id();
-            $approval_request->save();
-
-            foreach ($request->admin as $key => $admin) {
-                
-                $special_approval_request_admin = new SpecialApprovalRequestAdmin();
-                $special_approval_request_admin->special_request_id = $approval_request->id;
-                $special_approval_request_admin->admin_id = $admin;
-                $special_approval_request_admin->save();
-            }
-
             
- 
-        //  }
-         return redirect()->back()->with(['success'=> "Request Submitted"]);
+            $special_approval_request_admin = new SpecialApprovalRequestAdmin();
+            $special_approval_request_admin->special_request_id = $approval_request->id;
+            $special_approval_request_admin->admin_id = $admin;
+            $special_approval_request_admin->save();
+        }
+
+        foreach ($special_request_reason_option as $key => $option) {
+            $special_request_option = new SpecialRequestOption();
+            $special_request_option->special_request_id = $approval_request->id;
+            $special_request_option->reason_option_id = $option;
+            $special_request_option->save();
+        }
+
+        return redirect()->back()->with(['success'=> "Request Submitted"]);
      }
      else{
          return redirect()->back()->with(['error'=> "Select One Admin At-least"]);

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSpecialApprovalRequestAdminsTable extends Migration
+class CreateSpecialRequestOptionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateSpecialApprovalRequestAdminsTable extends Migration
      */
     public function up()
     {
-        Schema::create('special_approval_request_admins', function (Blueprint $table) {
+        Schema::create('special_request_options', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('special_request_id')->index();
-            $table->integer('admin_id')->index();
-            $table->integer('approved_status')->default(1);
-            $table->dateTime('approved_date')->nullable();
+            $table->integer('reason_option_id')->index();
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateSpecialApprovalRequestAdminsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('special_approval_request_admins');
+        Schema::dropIfExists('special_request_options');
     }
 }
