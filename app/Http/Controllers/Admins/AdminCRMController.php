@@ -1193,7 +1193,7 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_hub = $requests->origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
@@ -1234,7 +1234,7 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_zone = $requests->origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
@@ -1827,7 +1827,7 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_hub = $requests->origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
@@ -1868,7 +1868,7 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_zone = $requests->origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
@@ -2357,7 +2357,7 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_hub = $requests->origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
@@ -2398,7 +2398,7 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_zone = $requests->origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
@@ -2756,7 +2756,7 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_hub = $requests->origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
@@ -2797,7 +2797,7 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-                if($status == 1 || $status == 2 || $status == 17){
+                if($status == 1 || $status == 2 || $status == 17 || $status == 22){
                     $responsible_zone = $requests->origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
