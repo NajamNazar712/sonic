@@ -4092,7 +4092,7 @@ class AdminHumanResourseController extends Controller
         })
         ->addColumn("action", function ($employee_leaves) {
             
-            if (session('role_id') == 1 || $employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
+            if ($employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
                 
                 $dropdown = '
             <div class="btn-group">
@@ -4100,7 +4100,7 @@ class AdminHumanResourseController extends Controller
             <div class="dropdown-menu dropdown-menu-sm">
         ';
                 if ($employee_leaves->penalties_status == 1) {
-                    if (session('role_id') == 1 || $employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
+                    if ($employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
                         $dropdown .= '<button type="button" class="dropdown-item reject_lm" data-target-id=' . $employee_leaves->id . '  data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                     }
                 }
@@ -4174,9 +4174,8 @@ class AdminHumanResourseController extends Controller
     public function employee_penalty_deduction_list(Request $request)
     {
         $employee_id = $request->employee_id;
-        $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count')->first();
+        $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count','employees.line_manager_id as line_manager_id','employees.leave_count as leave_count')->first();
         $availble_qouate = $available_qouates->leave_count;
-
         if($available_qouates->line_manager_id == Auth::user()->employee_id)
         {
             $availed_leaves = $this->getAvailedLeaves($employee_id);
