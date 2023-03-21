@@ -3544,7 +3544,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('resolved')->name('resolved.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@resolved_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@resolved_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@resolved_list')->name('list');
         });
         Route::prefix('closed')->name('closed.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@closed_index')->name('index');

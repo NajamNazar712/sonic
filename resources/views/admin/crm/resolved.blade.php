@@ -41,6 +41,8 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">COD Amount</th>
@@ -681,12 +683,16 @@
                 },
                 ajax: {
                     url: '{{ route('admin.crm.resolved.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                     }
                 },
                 rowId: 'id',
-                order: [[24, 'desc']],
+                order: [[26, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -695,6 +701,8 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
@@ -764,7 +772,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.in_process_resolved_tat')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.in_process_resolved_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
