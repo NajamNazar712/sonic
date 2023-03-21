@@ -604,8 +604,8 @@
                     html += '<td>'+ data.info.availed_leaves +'</td>';
                     html += '</tr>';
                     html += '<tr>';
-                    html += '<th>Remaining Leave</th>';
-                    html += '<td>'+ data.info.remaing_leaves +'</td>';
+                    // html += '<th>Remaining Leave</th>';
+                    // html += '<td>'+ data.info.remaing_leaves +'</td>';
                     html += '</tr>';
                     html += '</table>';
                     html += '</div>'; 

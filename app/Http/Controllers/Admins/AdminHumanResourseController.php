@@ -4107,7 +4107,7 @@ class AdminHumanResourseController extends Controller
                 
                 if ($employee_leaves->penalties_status == 1) {
                     if ($employee_leaves->status_id != 2 && (session('role_id') == 1 || $employee_leaves['line_manager_id'] == Auth::user()->employee_id)) {
-                        $dropdown .= '<button type="button" class="dropdown-item deduction_modal" data-target-id=' . $employee_leaves->employee_id . ' data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deduct</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item deduction_modal" data-target-id=' . $employee_leaves->employee_id . ' data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Deduct</div></button>';
                     }
                 }
                 
