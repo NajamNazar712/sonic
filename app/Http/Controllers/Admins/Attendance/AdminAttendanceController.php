@@ -199,7 +199,7 @@ class AdminAttendanceController extends Controller
                 // dd($attendances->attendance_date.' '.$attendances->aes_start_time);
                 $expected_clockin = Carbon::parse($attendances->attendance_date.' '.$attendances->aes_start_time)->addMinutes((int)$attendances->aes_extension_minutes);
               
-                $clock_in = Carbon::parse($attendances->clock_in);
+                $clock_in = Carbon::parse($attendances->clock_in_datetime);
                 $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
               
                 if($attendances->employee_attendence_leave == 1)

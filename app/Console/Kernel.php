@@ -165,7 +165,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
-        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
         $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
         if($shifts){
             foreach($shifts as $shift)

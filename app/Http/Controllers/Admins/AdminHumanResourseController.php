@@ -3983,8 +3983,10 @@ class AdminHumanResourseController extends Controller
         ->leftjoin('employee_leaves as el', 'el.employee_id', 'employee_penalties.employee_id')
         // ->leftjoin('leave_statuses as ls', 'ls.id', 'employee_penalties.status')
         ->leftjoin('penalty_statuses as ps','ps.id','employee_penalties.status')
+        ->leftjoin('employee_attendances as ea','ea.id','employee_penalties.attendence_id')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
         ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
+        ->whereNotNull('ea.clock_in_datetime')
         ->where(function($q){
             if (session('department_id') != 10) {
                 $q->where('employee_penalties.employee_id', Auth::user()->employee_id)
@@ -3992,10 +3994,11 @@ class AdminHumanResourseController extends Controller
                 // $q->where('a.line_manager_id', Auth::user()->employee_id);
             }
         })
-        ->groupBy(['employee_penalties.employee_id'])->get();
+        ->groupBy(['employee_penalties.employee_id']);
+        // dd($employee_leaves);
         // dd($employee_leaves);
         // dd(DB::getQueryLog());
-
+        // dd($employee_leaves);
 
         $datatable = Datatables::of($employee_leaves)
         ->addColumn("leave_availed", function ($employee_leaves) {
@@ -4146,8 +4149,8 @@ class AdminHumanResourseController extends Controller
         $employee_id = $request->employee_id;
         
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-        ->where('ea.employee_id',$employee_id)
-        ->select('ea.attendance_date','ea.clock_in')->get(); 
+        ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')
+        ->select('ea.attendance_date','ea.clock_in_datetime')->get(); 
         $data = $duplicate;
         return response()->json(['status' => 1, 'info' => $data]);
     }
@@ -4171,16 +4174,28 @@ class AdminHumanResourseController extends Controller
     public function employee_penalty_deduction_list(Request $request)
     {
         $employee_id = $request->employee_id;
-        $available_qouates = Employee::where('id',$employee_id)->first();
+        $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count')->first();
         $availble_qouate = $available_qouates->leave_count;
-        
-        $available_leaves = EmployeeLeave::where('employee_id',$employee_id)->whereIn('status',[2,4,6])->where('leave_type',1)->count(); // availed
-        $remaing_leaves = $availble_qouate - $available_leaves;
-        
+
+        if($available_qouates->line_manager_id == Auth::user()->employee_id)
+        {
+            $availed_leaves = $this->getAvailedLeaves($employee_id);
+        }
+        elseif($employee_id == Auth::user()->employee_id){
+            $availed_leaves = $this->getAvailedLeaves(Auth::user()->employee_id);
+        }
+        else
+        {
+            $availed_leaves = '-';
+        }
+
+        // $available_leaves = EmployeeLeave::where('employee_id',$employee_id)->whereIn('status',[2,4,6])->where('leave_type',1)->count(); // availed
+        $remaing_leaves = $availble_qouate - $availed_leaves;
         $data['availble_qouate'] = max(0,$availble_qouate);
-        $data['available_leaves'] = max(0,$available_leaves);
+        $data['availed_leaves'] = max(0,$availed_leaves);
         // $data['remaing_leaves'] = $remaing_leaves;
         $data['remaing_leaves'] = max(0, $remaing_leaves);    
+        $data['deduction_count'] = max(0, $available_qouates->deduction_count);    
         return response()->json(['status' => 1, 'info' => $data]);
     }
     public function employee_penalty_deduction_store(Request $request)

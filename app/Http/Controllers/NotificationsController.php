@@ -10069,6 +10069,8 @@ class NotificationsController extends Controller
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Leaves Availed</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Attendance Adjustment</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Day</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock In</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock Out</th>';
                         $html .= '</tr></thead><tbody>';
@@ -10076,7 +10078,7 @@ class NotificationsController extends Controller
                             ->join('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
                             ->join('employee_shifts as es', 'es.id', '=', 'employees.shift_id')
                             ->leftjoin('employee_attendance_adjustments as eaa', 'eaa.id', '=', 'employees.id')
-                            ->select('employees.trax_id', 'employees.name as name', 'ed.name as designation', 'ea.leave_status', 'ea.clock_in_datetime', 'ea.clock_out_datetime', 'ea.attendance_date', 'es.start_time', 'es.extension_minutes', 'eaa.status')
+                            ->select('employees.trax_id', 'employees.name as name', 'ed.name as designation', 'ea.leave_status', 'ea.clock_in_datetime', 'ea.clock_out_datetime', 'ea.attendance_date as attendance_date', 'es.start_time', 'es.extension_minutes', 'eaa.status')
                             ->where('employees.line_manager_id', $line_manager->id)
                             ->whereBetween('ea.attendance_date', [$reference_1_id, $reference_2_id])
                             ->orderBy('ea.attendance_date')
@@ -10108,6 +10110,8 @@ class NotificationsController extends Controller
                             } else {
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Yes</td>';
                             }
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance->attendance_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . Carbon::parse($employees_attendance->attendance_date)->format('l') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_in_datetime'] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_out_datetime'] . '</td>';
                             $html .= '</tr>';

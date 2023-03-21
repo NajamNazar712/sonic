@@ -601,7 +601,7 @@
                     html += '</tr>';
                     html += '<tr>';
                     html += '<th>Availed Leave</th>';
-                    html += '<td>'+ data.info.available_leaves +'</td>';
+                    html += '<td>'+ data.info.availed_leaves +'</td>';
                     html += '</tr>';
                     html += '<tr>';
                     html += '<th>Remaining Leave</th>';
@@ -617,7 +617,7 @@
                     html += '</tr>';    
                     html += '<tr>';    
                     html += '<th>Deduction</th>';
-                    html += '<td>'+ no_of_deduction +'</td>';
+                    html += '<td>'+ data.info.deduction_count +'</td>';
                     html += '</tr>';    
                     html += '</table>';
                     html += '</div>'; 
@@ -627,6 +627,13 @@
                 
             }
             });
+            $('#deductionEmployeeLateModal').on('hidden.bs.modal', function () {
+
+                $('#deductionEmployeeLateModal .employee_attendence_qouta').empty();
+                $("#select_deduction").val(0);
+                 
+            });
+
             $('#rejectEmployeeLateModal').on('hide.bs.modal', function () {
                 $('#reject_confirmation_id').val('');
                 $('#reject_by').val('');
@@ -756,8 +763,9 @@
                     var html = '<table class="table table-bordered">';
                         html+='<thead><th>Date</th><th>Clock_in</th></thead>';
                     $.each(data.info, function(index, value) {
-                        
-                        html+= '<tr><td>'+ value.attendance_date +'</td><td>'+ value.clock_in +'</td></tr>';
+                        var carbon = moment(value.clock_in_datetime).parseZone();
+                        var time = carbon.format('HH:mm:ss');
+                        html+= '<tr><td>'+ value.attendance_date +'</td><td>'+ time +'</td></tr>';
                     });
                     $('#duplicate_modal .modal-body').html(html);
                 });
