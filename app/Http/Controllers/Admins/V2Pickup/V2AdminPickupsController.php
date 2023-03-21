@@ -1654,6 +1654,19 @@ class V2AdminPickupsController extends Controller
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
+                    $rider_picked = false;
+                    if(!$rider_assigned_flag){
+                        $v2_pickup_note_request = V2PickupNoteRequest::where('pickup_request_id',$pickup_request_id)->latest()->first();
+                        if($v2_pickup_note_request){
+                            $check_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',53)->where('reference_1_id',$pickup_request_id)->where('reference_2_id',$v2_pickup_note_request->pickup_note_id)->latest()->first();
+                            if($check_journey){
+                                $rider_picked = true;
+                            }
+                        } 
+                    
+                    }
+
+
                     $details = array();
 
                     $details['id'] = $shipment->id;
@@ -1664,6 +1677,7 @@ class V2AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
                     $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     $details['rider_assigned'] = $rider_assigned_flag;
+                    $details['rider_picked'] = $rider_picked;
                     $id = Auth::user();
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);

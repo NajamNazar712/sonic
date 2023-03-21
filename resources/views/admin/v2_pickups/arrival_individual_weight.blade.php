@@ -268,6 +268,7 @@
 
     <script>
         $(document).ready(function() {
+              var not_picked_tracking_numbers = [];
 
             @if (session('print_shipment_ids'))
                 var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
@@ -343,6 +344,7 @@
             var all_shipment_item_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
+          
 
             $('#rider_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Rider Select',
@@ -497,21 +499,22 @@
                 }
             });
             
-            var pickup_requests = [];
-            function check_pickup_requests(pickup_request_id,total_quantity){
-            
-                 var index = $.inArray(pickup_request_id, pickup_requests);
-                    if (index === -1) {
-                        pickup_requests.push(pickup_request_id);
-                        pickup_requests[pickup_request_id]["quantity"] = 1;
+           
+            function check_pickup_requests(tracking_number,rider_name){
+
+                    var flag = true;
+                    for (not_picked_tracking_number in not_picked_tracking_numbers){
+                    if (not_picked_tracking_number['tracking_number'] === tracking_number){
+                        flag = false; 
+                    
                     }
-                    else{
-                          pickup_requests[pickup_request_id]["quantity"]++;
-                    }
-                    pickup_requests[pickup_request_id]["total_quantity"] = total_quantity;
-                    console.log(pickup_requests);
-                    return pickup_requests;
-            }
+                }
+                if (flag === true) {
+                    let array = { 'tracking_number' : tracking_number,'rider':rider_name}
+                    not_picked_tracking_numbers.push(array);
+                }
+
+                }
 
           
 
@@ -567,19 +570,21 @@
                                     id = data.details.id;
 
                                     var index = $.inArray(id, shipment_ids);
-
+                                   
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
                                         if(data.details.rider_assigned == true){
                                             var int_pickup_request_id = data.details.pickup_request_id_unpadded;
-                                             var pickup_requests_total_booked = data.details.pickup_requests_total_booked;
                                             remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
                                             var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
                                             if(pickup_index === -1){
                                                 unassigned_pickup_request_ids.push(int_pickup_request_id);
                                             }
                                             unassigned_pickups = true;
-                                            check_pickup_requests(int_pickup_request_id,pickup_requests_total_booked)
+                                           
+                                        }
+                                         if(data.details.rider_picked == false){
+                                                check_pickup_requests(data.details.tracking_number,data.details.rider);
                                         }
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).node().id = data.details.id;
                                         table.draw(false);
@@ -896,7 +901,79 @@
                     $('#RiderModal').modal('show');
                 }
                 else{
-                    swal({
+
+                    if(not_picked_tracking_numbers.length > 0){
+
+                        const table = document.createElement('table');
+                        table.style.width = '100%';
+                        table.style.textAlign = 'center'; // center the table
+                        table.style.fontSize = '18px'; 
+                        const header = table.createTHead();
+                        const row = header.insertRow();
+                        const cell1 = row.insertCell(0);
+                        cell1.innerText = 'S.No.';
+                        cell1.style.fontWeight = 'bold';
+                        cell1.style.textAlign = 'center'; // center the cell content
+                        const cell2 = row.insertCell(1);
+                        cell2.innerText = 'Rider';
+                        cell2.style.fontWeight = 'bold';
+                        cell2.style.textAlign = 'center'; // center the cell content
+                        const cell3 = row.insertCell(2);
+                        cell3.innerText = 'Tracking Number';
+                        cell3.style.fontWeight = 'bold';
+                        cell3.style.textAlign = 'center'; // center the cell content
+                        const tbody = table.createTBody();
+                        var count = 1;
+                        not_picked_tracking_numbers.forEach(item => {
+                        const tr = tbody.insertRow();
+                        tr.style.textAlign = 'center'; // center the row content
+                        tr.insertCell(0).innerText = count;
+                        tr.insertCell(1).innerText = item.rider;
+                        tr.insertCell(2).innerText = item.tracking_number;
+                        count++;
+                        });
+
+                        // create the SweetAlert modal and set its content to the table
+                        swal({
+                        title: 'Following shipments are not rider picked, do you wish to continue?',
+                        content: table,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                            },
+                            confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                        }).then(function(confirm) {
+                        if (confirm) {
+                            swal({
+                            title: 'Please Wait!',
+                            text: 'Shipments are being marked arrived!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                            });
+                            blockPagePermanently();
+                            form.submit();
+
+
+                        }
+                        });
+                    }
+                    else{
+                         swal({
                         text: 'Are you sure, you want to Receive these Shipments?',
                         icon: 'warning',
                         buttons: {
@@ -930,11 +1007,10 @@
                             form.submit();
                         }
                     });
+                    }
                 }
 
             });
-
-
 
 
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
@@ -954,6 +1030,17 @@
                     },
                     success: function (data) {
                         if (data.status == 0) {
+
+                            let columnValue =  table.row(parent).data();
+                            let tracking_number = columnValue[1];
+
+                            $.each(not_picked_tracking_numbers, function(index, obj) {
+                                if (obj.tracking_number == tracking_number) {
+                                    not_picked_tracking_numbers.splice(index, 1);
+                                    return false;
+                                }
+                            });
+
                             table.row(parent).remove();
                             table.draw(false);
 
@@ -1157,6 +1244,7 @@
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
             });
+
         });
 
         function camera_scan_detected(tracking_number) {
