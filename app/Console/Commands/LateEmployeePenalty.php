@@ -69,9 +69,11 @@ class LateEmployeePenalty extends Command
                         ]);
                     $counter++;
                 }
-                $no_of_late = EmployeeLate::join('employee_attendances as ea','ea.id','=','employee_lates.attendence_id')
-                ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+                $no_of_late = EmployeeLate::whereBetween('attendance_date',[$startMonth, $endMonth])
                 ->count();
+                // $no_of_late = EmployeeLate::join('employee_attendances as ea','ea.id','=','employee_lates.attendence_id')
+                // ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+                // ->count();
                 $employee_penalties = EmployeePenalty::where('employee_id',$employees_attendance->employee_id)->first(); 
                 if($employee_penalties != null)
                 {
