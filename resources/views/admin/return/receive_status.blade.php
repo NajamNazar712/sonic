@@ -436,7 +436,6 @@
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
                                     table.button('.returned').enable();
                                     $('#submit_selected_status').attr('disabled', false);
 
@@ -587,24 +586,49 @@
             });
 
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
-
+                // alert("asd");
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
                 var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+                remarks.attr('data-rule-required', 'false');
+                remarks.remove('data-msg-required', '');
+                flag = false;
+                // var errorMsg = $(this).closest('tr').find('.error-msg');
+                // alert(errorMsg);
+                // errorMsg.remove();
+                
                 if (status == 60 && remarks.val() == '') 
                 {
                     remarks.attr('data-rule-required', 'true');
                     remarks.attr('data-msg-required', 'Remarks is required');
+                    
+                    // flag = true;
                     flag = true;
+                    if (errorMsg.length == 0) {
+                        errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
+                        remarks.after(errorMsg);
+                    } else {
+                        errorMsg.show();
+                    }
+                    // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
+                    // remarks.after(errorMsg);
                     // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
                     // remarks.after(errorMsg);
                 } 
                 else 
                 {
                     remarks.attr('data-rule-required', 'false');
+                    remarks.attr('data-msg-required', '');
                     flag = false;
+                    // var errorMsg = $(this).closest('tr').find('.error-msg');
+                    errorMsg.remove();
+                    flag = false;
+                    if (errorMsg.length > 0) {
+                        errorMsg.hide();
+                    }
                 } 
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
@@ -702,7 +726,7 @@
                 console.log(statusSelection);
                 var status = statusSelection.val();
                 var remarks = $(form).closest('tr').find('.return_remarks');
-                console.log(flag);
+
                 if(!flag)
                 {
                     swal({
