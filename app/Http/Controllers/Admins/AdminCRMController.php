@@ -1198,6 +1198,7 @@ class AdminCRMController extends Controller
                 $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
                     ->where('shipper_status_id',20)
                     ->where('shipment_id',$shipment_id);
+                dd($shipment_journey->get());
                 if($shipment_journey->exists()){
                     $temp = $destination_hub;
                     $destination_hub = $origin_hub;
