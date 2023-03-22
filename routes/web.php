@@ -2667,8 +2667,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('crm_agent_wise_report_list', 'Admins\AdminReportsController@crm_agent_wise_report_list')->name('list');
         });
         Route::prefix('crm_special_approval')->name('crm_special_approval.')->group(function () {
+           
             Route::get('', 'Admins\AdminReportsController@crm_special_approval_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_special_approval_list')->name('list');
+            Route::get('get_approvers', 'Admins\AdminReportsController@get_approvers')->name('get_approvers');
         });
 
         Route::prefix('mms')->name('mms.')->group(function () {

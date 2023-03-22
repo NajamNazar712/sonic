@@ -65,6 +65,7 @@ use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\CRM\CRMCount;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\V2Pickup\V2PickupNote;
+use App\SpecialApprovalRequestAdmin;
 
 class AdminReportsController extends Controller
 {
@@ -10609,20 +10610,27 @@ class AdminReportsController extends Controller
         }
         $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('special_approval_requests as sar', 'sar.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('admins as sarapproveby', 'sarapproveby.id', '=', 'sar.admin_id')
+            ->leftjoin('special_approval_request_admins as sara', 'sara.special_request_id', '=', 'sar.id')
+            // ->leftjoin('admins as sarapproveby', 'sarapproveby.id', '=', 'sar.admin_id')
             ->leftjoin('admins as sarrequestedby', 'sarrequestedby.id', '=', 'sar.requested_by')
-            ->leftjoin('admin_roles as ar', 'ar.id', '=', 'sarapproveby.role_id')
-            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
+            // ->leftjoin('admin_roles as ar', 'ar.id', '=', 'sarapproveby.role_id')
+            // ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
             ->leftjoin('adjustment_logs as adjustment', function ($join) {
                 $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
                     ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
             })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount', 'sarrequestedby.name as requested_by', 'sar.created_at as requested_date', 'sarapproveby.name as approved_by', 'ar.name as designation', 'ad.name as department', 'sar.approved_date as approved_at', 'sar.adjusted_percentage as adjusted_percentage', 'sar.status as status')
+            ->select('sar.id as id','crm_requests.id as request_number', 's.tracking_number as tracking_number', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount',
+             'sarrequestedby.name as requested_by', 'sar.created_at as requested_date', 'sar.adjusted_percentage as adjusted_percentage', 'sar.status as status',
+             DB::raw('count(sara.admin_id) as approved_by'))
             ->where('sar.status', 1);
-
+            
         $datatable = Datatables::of($crm)
             ->editColumn('request_number', function ($crm_request) {
                 return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('approved_by', function ($crm_request) {
+                $btn = '<button class="btn btn-sm btn-outline-info align-middle approved_by"> ' .$crm_request->approved_by. ' </button>';
+                return $btn;
             })
             ->addColumn('id_padded_link', function ($crm_request) {
                 return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT) . '</a></u>';
@@ -10630,14 +10638,14 @@ class AdminReportsController extends Controller
             ->addColumn('tracking_number_link', function ($crm_request) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
-            })
-            ->editColumn('approved_by', function ($crm_request) {
-                if ($crm_request->adjusted_percentage == null) {
-                    return '';
-                } else {
-                    return $crm_request->approved_by;
-                }
             });
+            // ->editColumn('approved_by', function ($crm_request) {
+            //     if ($crm_request->adjusted_percentage == null) {
+            //         return '';
+            //     } else {
+            //         return $crm_request->approved_by;
+            //     }
+            // });
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);
             $datatable->whereIn('s.tracking_number', $tracking_numbers);
@@ -10653,6 +10661,19 @@ class AdminReportsController extends Controller
         }
 
         return $datatable->make(true);
+    }
+
+    public function get_approvers(Request $request)
+    {
+        $sar_id = $request->sar_id;
+        $sar_admins = SpecialApprovalRequestAdmin::join('admins','admins.id','special_approval_request_admins.admin_id')
+        ->leftjoin('admin_roles as ar', 'ar.id', 'admins.role_id')
+        ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+        ->where('special_approval_request_admins.special_request_id', $sar_id)
+        ->select('admins.name as approver', 'special_approval_request_admins.approved_status', 'special_approval_request_admins.reason' , 'special_approval_request_admins.approved_date' ,'ar.name as designation', 'ad.name as department' )
+        ->get();
+        
+        return response()->json(['status' => 1, 'sar_admins' => $sar_admins]);
     }
 
     public function rider_unresponsive_report_index()

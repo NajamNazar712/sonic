@@ -64,7 +64,7 @@
                     </div>
                     
                 </div>
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
@@ -73,15 +73,35 @@
                         <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Requested Date</th>
                         <th class="border-primary border-darken-1">Approved By</th>
-                        <th class="border-primary border-darken-1">Department</th>
+                        {{-- <th class="border-primary border-darken-1">Department</th>
                         <th class="border-primary border-darken-1">Designation</th>
-                        <th class="border-primary border-darken-1">Approval Date</th>
+                        <th class="border-primary border-darken-1">Approval Date</th> --}}
                         <th class="border-primary border-darken-1">Adjusted Percentage</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
                     </tr>
                     </thead>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sar_admins_modal" data-backdrop="static" role="dialog" aria-labelledby="sar_admins_modal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="bookings_modal_title">Special Request Approval Details</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -292,10 +312,10 @@
                                 row.push(values.tracking_number);
                                 row.push(values.requested_by);
                                 row.push(values.requested_date);
-                                row.push(values.approved_by);
-                                row.push(values.department);
-                                row.push(values.designation);
-                                row.push(values.approved_at);
+                                // row.push(values.approved_by);
+                                // row.push(values.department);
+                                // row.push(values.designation);
+                                // row.push(values.approved_at);
                                 row.push(values.adjusted_percentage);
                                 row.push(values.cod_amount);
                                 row.push(values.adjusted_amount);
@@ -330,6 +350,7 @@
                 },
                 serverSide: true,
                 deferLoading: 0,
+                rowId: 'id',
 
                 ajax: {
                     url: '{{ route('admin.reports.crm_special_approval.list') }}',
@@ -354,10 +375,10 @@
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'requested_by', name: 'sarrequestedby.name', class: 'align-middle requested_by'},
                     {data: 'requested_date', name: 'sarrequestedby.created_at', class: 'align-middle requested_date'},
-                    {data: 'approved_by', name: 'sarapproveby.name', class: 'align-middle approved_by'},
-                    {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'designation', name: 'ar.name', class: 'align-middle designation'},
-                    {data: 'approved_at', name: 'sar.approved_date', class: 'align-middle approved_at'},
+                    {data: 'approved_by', name: 'sarrequestedby.created_at', class: 'align-middle text-center approved_by', orderable: false, searchable: false},
+                    // {data: 'department', name: 'ad.name', class: 'align-middle department'},
+                    // {data: 'designation', name: 'ar.name', class: 'align-middle designation'},
+                    // {data: 'approved_at', name: 'sar.approved_date', class: 'align-middle approved_at'},
                     {data: 'adjusted_percentage', name: 'sar.adjusted_percentage', class: 'align-middle adjusted_percentage'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
@@ -369,6 +390,51 @@
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
+                }
+            });
+
+            $('body').on('click', 'button.approved_by',  function(){
+                var id = $(this).parents('tr').attr('id');
+                // alert(id);
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.reports.crm_special_approval.get_approvers') !!}',
+                        data: {
+                            'sar_id': id,
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status){
+
+                                $('#sar_admins_modal').modal('show');
+                                var html = `<table class="table table-bordered"> <thead class="text-center"> <tr> <th> Name </th>  <th> Department </th>  <th> Designation </th>  <th> Status </th>  <th> Approved/Reject Date </th>  <th> Reason </th> </tr>  </thead> <tbody class="text-center">`;
+                                 
+
+                                $.each(data.sar_admins, function(index, admin_data) {
+
+                                    var status = admin_data.approved_status == 1 ? "<td class='font-weight-bold'> Pending </td>" : admin_data.approved_status == 2 ? "<td class='text-success font-weight-bold'> Approved </td>" : admin_data.approved_status == 3 ? "<td class='text-danger font-weight-bold'> Rejected </td>" : "";
+                                    var date = admin_data.approved_date ? admin_data.approved_date : '-';
+                                    var reason = admin_data.reason ? admin_data.reason : '-';
+
+                                    html +=`<tr>`;
+                                        html +=`<td>`+admin_data.approver+`</td>`;
+                                        html +=`<td>`+admin_data.department+`</td>`;
+                                        html +=`<td>`+admin_data.designation+`</td>`;
+                                        html += status;
+                                        html +=`<td>`+date+`</td>`;
+                                        html +=`<td>`+reason+`</td>`;
+                                    html +=`</td>`;
+                                });
+
+                                html += `</tbody> </table>`;
+
+                                
+                                   
+                                    ;
+                                $('#sar_admins_modal .modal-body').html(html);
+                            }
+
+                        });
                 }
             });
 

@@ -5341,7 +5341,7 @@ TRAX-Customer Experience';
         $crm_id = $request->crm_request_id;
         $admin_id = $request->special_request_agent_id;
         $special_approve_reject_reason = $request->special_approve_reject_reason;
-        $approved_date = Carbon::today();
+        $approved_date = Carbon::now();
 
         $special_approval_request_id = SpecialApprovalRequest::where('crm_request_id',$crm_id)->where('status',1)->pluck('id')->first();
 
