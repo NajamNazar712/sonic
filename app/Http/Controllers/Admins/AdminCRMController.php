@@ -1193,8 +1193,18 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+                $origin_hub = $requests->origin_hub;
+                $destination_hub = $requests->hub;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_hub;
+                    $destination_hub = $origin_hub;
+                    $origin_hub = $temp;
+                }
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_hub = $requests->origin_hub;
+                    $responsible_hub = $origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -1223,7 +1233,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_hub = $requests->hub;
+                    $responsible_hub = $destination_hub;
                 }
                 else{
                     $responsible_hub = "-";
@@ -1234,8 +1244,20 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+
+                $origin_zone = $requests->origin_zone;
+                $destination_zone = $requests->zone;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_zone;
+                    $destination_zone = $origin_zone;
+                    $origin_zone = $temp;
+                }
+
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_zone = $requests->origin_zone;
+                    $responsible_zone = $origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -1267,7 +1289,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_zone = $requests->zone;
+                    $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
                 }
@@ -1827,8 +1849,18 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+                $origin_hub = $requests->origin_hub;
+                $destination_hub = $requests->hub;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_hub;
+                    $destination_hub = $origin_hub;
+                    $origin_hub = $temp;
+                }
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_hub = $requests->origin_hub;
+                    $responsible_hub = $origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -1857,7 +1889,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_hub = $requests->hub;
+                    $responsible_hub = $destination_hub;
                 }
                 else{
                     $responsible_hub = "-";
@@ -1868,8 +1900,20 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+
+                $origin_zone = $requests->origin_zone;
+                $destination_zone = $requests->zone;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_zone;
+                    $destination_zone = $origin_zone;
+                    $origin_zone = $temp;
+                }
+
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_zone = $requests->origin_zone;
+                    $responsible_zone = $origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -1901,7 +1945,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_zone = $requests->zone;
+                    $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
                 }
@@ -2357,8 +2401,18 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+                $origin_hub = $requests->origin_hub;
+                $destination_hub = $requests->hub;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_hub;
+                    $destination_hub = $origin_hub;
+                    $origin_hub = $temp;
+                }
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_hub = $requests->origin_hub;
+                    $responsible_hub = $origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -2387,7 +2441,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_hub = $requests->hub;
+                    $responsible_hub = $destination_hub;
                 }
                 else{
                     $responsible_hub = "-";
@@ -2398,8 +2452,20 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+
+                $origin_zone = $requests->origin_zone;
+                $destination_zone = $requests->zone;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_zone;
+                    $destination_zone = $origin_zone;
+                    $origin_zone = $temp;
+                }
+
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_zone = $requests->origin_zone;
+                    $responsible_zone = $origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -2431,7 +2497,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_zone = $requests->zone;
+                    $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
                 }
@@ -2756,8 +2822,18 @@ class AdminCRMController extends Controller
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+                $origin_hub = $requests->origin_hub;
+                $destination_hub = $requests->hub;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_hub;
+                    $destination_hub = $origin_hub;
+                    $origin_hub = $temp;
+                }
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_hub = $requests->origin_hub;
+                    $responsible_hub = $origin_hub;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -2786,7 +2862,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_hub = $requests->hub;
+                    $responsible_hub = $destination_hub;
                 }
                 else{
                     $responsible_hub = "-";
@@ -2797,8 +2873,20 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
+
+                $origin_zone = $requests->origin_zone;
+                $destination_zone = $requests->zone;
+                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
+                    ->where('shipper_status_id',20)
+                    ->where('shipment_id',$shipment_id);
+                if($shipment_journey->exists()){
+                    $temp = $destination_zone;
+                    $destination_zone = $origin_zone;
+                    $origin_zone = $temp;
+                }
+
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
-                    $responsible_zone = $requests->origin_zone;
+                    $responsible_zone = $origin_zone;
                 }
                 elseif($status == 3 || $status == 21){
                     $manifest_bag = CargoManifestBagShipments::
@@ -2830,7 +2918,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
-                    $responsible_zone = $requests->zone;
+                    $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
                 }
