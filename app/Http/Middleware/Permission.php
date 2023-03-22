@@ -1339,7 +1339,7 @@ class Permission
             'otp_history.index' => 827,
 
             'settings.auto_delivery_note_verification.index' => 836,
-        ],
+			'reports.revenue_report_by_invoice.index' => 839,        ],
 
         'shipper' => [
             'shipment.book.index' => 1,

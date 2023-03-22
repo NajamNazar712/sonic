@@ -2067,7 +2067,7 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
 
-        $cities = City::where('status', 1);
+        $cities = City::where('status', 1)->where('business_category_id', 1);
 
         if ($cities->exists()) {
             $cities = $cities->select('id', 'name')->get();

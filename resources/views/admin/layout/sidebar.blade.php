@@ -1294,6 +1294,7 @@
                                 794,
                                 823,
                                 824,
+                                839,
                             ],
                             session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
@@ -1664,6 +1665,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(823, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rider Pickup Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(839, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.revenue_report_by_invoice.index') }}">Revenue Report By Invoice</a></li>
                         @endif
                     </ul>
                 </li>

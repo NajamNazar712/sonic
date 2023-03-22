@@ -140,6 +140,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\AttendanceAdjustmentShiftWise',
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         'App\Console\Commands\VisionSoftApiExcel',
+		'App\Console\Commands\CreateInvoiceOriginWise',
         ];
 
     /**
@@ -466,6 +467,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
 
         $schedule->command('auto:deliverynoteverification')->dailyAt('00:55')->runInBackground();
+
+		$schedule->command('invoice:revenueoriginwise')->weeklyOn(4, '1:00')->runInBackground();
 
 
     }
