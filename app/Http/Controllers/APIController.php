@@ -1388,6 +1388,11 @@ class APIController extends Controller
             $origin = $shipment->pickup_address->city->name;
             $destination = $shipment->consignee_city->name;
 
+
+
+            $order_date = $shipment->pickup_date;
+            $booking_date = $shipment->created_at;
+
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -1424,7 +1429,7 @@ class APIController extends Controller
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination, 'order_date' => $order_date, 'booking_date' => $booking_date]);
         }
     }
 
@@ -1460,6 +1465,9 @@ class APIController extends Controller
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
+
+            $details['order_date'] = $shipment->pickup_date;
+            $details['booking_date'] = $shipment->created_at;
 
             $shipper = $shipment->user;
 
@@ -2903,6 +2911,9 @@ class APIController extends Controller
 
                     $detail['order_id'] = $shipment->order_id;
 
+                    $details['order_date'] = $shipment->pickup_date;
+                    $details['booking_date'] = $shipment->created_at;
+
                     $shipper = $shipment->user;
 
                     $detail['shipper']['name'] = $shipper->name;
@@ -3084,6 +3095,8 @@ class APIController extends Controller
                     $detail['status'] = $current_status;
                     $detail['reason'] = $reason;
                     $detail['current_status_datetime'] = $current_status_datetime;
+                    $detail['order_date'] = $shipment->pickup_date;
+                    $detail['booking_date'] = $shipment->created_at;
 
                     $details[] = $detail;
                 }
