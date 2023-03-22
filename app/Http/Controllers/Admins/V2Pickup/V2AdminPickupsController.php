@@ -1257,6 +1257,17 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
+
+
+                $pickup_note_request = $pickup_request->pickup_note_request;
+                if ($pickup_note_request) {
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if ($pickup_note) {
+                        $pickup_note->arrived_shipments = $pickup_note->arrived_shipments + 1;
+                        $pickup_note->save();
+                    }
+                }
             }
         }
         $pickup_note_ids = array();
@@ -1293,18 +1304,12 @@ class V2AdminPickupsController extends Controller
         }
         if (!empty($pickup_note_ids)) {
             foreach ($pickup_note_ids as $pickup_note_id) {
-                $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
                 if ($pickup_note_requests_count == 0) {
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
                     $v2_pickup_note->status = 1;
+                    $v2_pickup_note->save();
                 }
-                $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
-
-                if(count($pickup_note_pickup_request_ids) > 0){
-                    $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
-                    $v2_pickup_note->arrived_shipments = $arrived_shipments;
-                }
-                $v2_pickup_note->save();
             }
         }
 
@@ -2107,6 +2112,17 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
+
+
+                $pickup_note_request = $pickup_request->pickup_note_request;
+                if ($pickup_note_request) {
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if ($pickup_note) {
+                        $pickup_note->arrived_shipments = $pickup_note->arrived_shipments + 1;
+                        $pickup_note->save();
+                    }
+                }
             }
         }
         $pickup_note_ids = array();
@@ -2143,17 +2159,11 @@ class V2AdminPickupsController extends Controller
         if (!empty($pickup_note_ids)) {
             foreach ($pickup_note_ids as $pickup_note_id) {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
                 if($pickup_note_requests_count == 0){
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
                     $v2_pickup_note->status = 1;
+                    $v2_pickup_note->save();
                 }
-
-                $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
-                if(count($pickup_note_pickup_request_ids) > 0){
-                    $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
-                    $v2_pickup_note->arrived_shipments = $arrived_shipments;
-                }
-                $v2_pickup_note->save();
             }
         }
         NotificationsController::send(4, $shipment_ids);
