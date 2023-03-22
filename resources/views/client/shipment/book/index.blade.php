@@ -713,7 +713,7 @@
         }
 
 		$(document).ready(function() {
-
+			//todo: for parcel value
 			$('#parcel_value').prop('disabled', true);
 			$( "#amount" ).keyup(function() {
 				console.log( "Amount Field Hits" );
@@ -731,6 +731,7 @@
 					$('#parcel_value').val('');
 				}
 			});
+			//todo: for parcel value end
 
             $('#open_shipment').checkboxpicker();
 
@@ -1899,6 +1900,13 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
+
+			$('.parcel_value').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+			
 					@if($user->logo_status)
 			var cb_table = $('#cod_breakup_table').DataTable({
 						dom: '<"d-inline-block"l><"pull-right"B>tipr',
