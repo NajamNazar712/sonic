@@ -297,6 +297,7 @@ class AdminRevenueReportsController extends Controller
 
     public static function revenue_report($report_type)
     {
+//        dd('got yeah !');
         if($report_type == 1){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
@@ -308,6 +309,11 @@ class AdminRevenueReportsController extends Controller
         if($report_type == 3){
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        }
+        if($report_type == 4){
+            $from = Carbon::today()->subDay()->toDateTimeString();
+            $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
+            dd('hit !',$from,$to);
         }
 
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
@@ -382,6 +388,9 @@ class AdminRevenueReportsController extends Controller
         }
         if($report_type == 3){
             $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
+        }
+        if($report_type == 4 ){
+            $filename = 'revenue_report_by_arrival_on_daily_basis.xlsx';
         }
 
         $details = array();

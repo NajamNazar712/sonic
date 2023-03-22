@@ -128,6 +128,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RevenueReportByDeliveryDateCutOffDays',
         'App\Console\Commands\RevenueReportRemainingDays',
         'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
+        'App\Console\Commands\RevenueReportDailyBasis',
         'App\Console\Commands\RetailSalesReport',
         'App\Console\Commands\RetailSalesReportCutOffDays',
         'App\Console\Commands\RetailSalesReportRemainingDays',
