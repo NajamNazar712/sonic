@@ -4096,9 +4096,6 @@ class APIController extends Controller
         }
 
         $rules = [
-            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
             'case_nature_id' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4108,6 +4105,16 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if ($nature_id == 1 || $nature_id == 2 || $nature_id == 4) {
+                $rules = [
+                    'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+            }
 
             if ($nature_id == 1 || $nature_id == 2) {
                 //complaints
@@ -4243,6 +4250,23 @@ class APIController extends Controller
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
+                }
+            } else if($nature_id == 3){
+                $rules = [
+                    'description' => ['required'],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+
+                if ($validate->fails()) {
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                } else {
+
+                    $crm_request = CRMController::add($nature_id, null, 1, 1, $user_id, $launched_by, null, $user_id, null, $description);
+
+                        // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                    return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
