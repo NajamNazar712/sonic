@@ -1195,10 +1195,8 @@ class AdminCRMController extends Controller
                 $shipment_id = $requests->shipment_id;
                 $origin_hub = $requests->origin_hub;
                 $destination_hub = $requests->hub;
-                $shipment_journey = ShipmentsJourney::where('shipper_status_id',12)
-                    ->where('shipper_status_id',20)
+                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20])
                     ->where('shipment_id',$shipment_id);
-                dd($shipment_journey->get());
                 if($shipment_journey->exists()){
                     $temp = $destination_hub;
                     $destination_hub = $origin_hub;
