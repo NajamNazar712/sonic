@@ -91,12 +91,12 @@
                                         <div class="row">
                                             <div class="col">
                                                 <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+                                                    <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}?v=22_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
                                                 </div>
                                             </div>
                                             <div class="col">
                                                 <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Replacement Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
+                                                    <a href="{{ asset('file/Trax Book Corporate Replacement Shipment Template.xlsx') }}?v=22_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
                                                 </div>
                                             </div>
                                             <div class="col">
@@ -112,16 +112,16 @@
                                             <div class="col">
                                                 <div class="form-group text-right">
                                                     @if($omni_user != 1)
-                                                        <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+                                                        <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=22_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
                                                         @else
-                                                        <a href="{{ asset('file/Trax Book Omni Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+                                                        <a href="{{ asset('file/Trax Book Omni Corporate Shipment Template.xlsx') }}?v=22_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
                                                     @endif
                                                 </div>
                                             </div>
                                             @if($omni_user == 1)
                                                 <div class="col">
                                                     <div class="form-group text-right">
-                                                        <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+                                                        <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=22_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
                                                     </div>
                                                 </div>
                                             @endif

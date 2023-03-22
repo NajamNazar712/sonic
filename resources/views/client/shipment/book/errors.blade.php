@@ -447,6 +447,13 @@
                                             <td>{!! Form::text('form[' . $no . '][return_address_id]', $ro['return_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                         @endif
                                 @endif
+                                    @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
+                                        @if(isset($errors[$no]['parcel_value']))
+                                            <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
+                                        @else
+                                            <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                        @endif
+                                    @endif
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
 
                             </tr>
