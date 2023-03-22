@@ -33,6 +33,7 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
+use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -5674,7 +5675,7 @@ class ReturnController extends Controller
 
     public function return_confirm_otp_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),640);
-        
+
         $rider_name = Rider::all();
         $hub_name =City::where('hub',1)->where('status',1)->select('id','name')->get();
        return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name]);
@@ -5685,64 +5686,45 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
-            $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
-            ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
-            ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
-            ->leftJoin('cities', 'cities.shipment_id', 'user_shipping_infos.city_id')
-            ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
-            ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
-            ->leftJoin('shipment_status', 'shipment_status.id', 'rider_deliveries.rider_status_id')
-            ->leftJoin('shipment_status_reason', 'shipment_status_reason.id', 'rider_deliveries.rider_status_reason_id')
+        $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
+        ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+        ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
+        ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
+        ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
+        ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
+        ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
 
-
-            ->select('rider_deliveries.delivery_note_id as delivery_note_id', 'riders.name as rider_name', 'riders.employee_id as rider_employee_id',
-            'shipments.tracking_number as tracking_number', 'cities.name as origin', 'destinationcity.name as destination', 'shipment_status.name as last_status            ',
-            'r.name as rider_name', 'ss.name as purpose', 'shipment_otps.otp as consignee_otp', 'shipment_otps.dbf_otp', 'sov.via_dbf_otp');
-
-        $admins = $admins->where(function ($query) {
-            $query->where(function ($sub_query) {
-                $sub_query->where('rider_deliveries.rider_status_id', 12)
-                    ->where('rider_deliveries.rider_status_reason_id', 8)
-                    ->where('rider_deliveries.otp_entered', 1);
-            })
-                ->orWhere(function ($sub_query) {
-                    $sub_query->where('rider_deliveries.rider_status_id', 14)
-                    ->where('shipments.amount', '=', 0);
-                });
-        });
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $admins = $admins->whereBetween('shipment_otps.updated_at', [$from, $to]);
-        }
-
-        $datatable = Datatables::of($admins)
-        ->addColumn('tracking_number_link', function ($shipments) {
+        ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
+            'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
+            'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
+            'destinationcity.name as destination','shipments_journey.updated_at as date','rider_deliveries.otp_entered as otp_status')
+            ->where('rider_deliveries.rider_status_id',12);
+      
+            
+        $datatable = Datatables::of($data)
+        ->editColumn('tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         })
-        ->addColumn('otp', function ($shipment){
-            if($shipment->rider_status_id == 14){
-                if($shipment->via_dbf_otp){
-                    return $shipment->dbf_otp;
-                }
-                else{
-                    return $shipment->consignee_otp;
-                }
+        ->addColumn('current_status', function ($datatable) {
+            $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
+            ->where('shipments_journey.shipment_id', $datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
+            return $res->name  ; //$datatable->
+        })
+        ->addColumn('last_status', function ($datatable) {
+            $journey_ids =  ShipmentsJourney::where('shipment_id',$datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->get();
+            $journey_ids_length = sizeOf($journey_ids);
+            if($journey_ids_length > 1)
+            {
+                $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
+                ->where('shipments_journey.id', $journey_ids[1]->id)->first();
+                return $res->name  ; //$datatable->
             }
             else{
-                return $shipment->consignee_otp;
+                return '-'; 
             }
         });
-
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
+        
         return $datatable->make(true);
-    }
-
-    public function return_confirm_otp_search(Request $request){
-       dd('asdasdas');
     }
 }

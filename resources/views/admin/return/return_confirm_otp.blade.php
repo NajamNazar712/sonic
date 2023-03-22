@@ -275,30 +275,38 @@
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
-                deferLoading: [50, 0],
-                language: {
-                    processing: data_table_loader
-                },
+            
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.return.return_confirm_otp.search') }}',
+                    url: '{{ route('admin.return.return_confirm_otp.list') }}',
                     data: function (d) {
-                        d.tracking_numbers = $('#search_form search_rider').val();
+                        d.rider = $('#search_form search_rider').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                    {data: 'delivery_note_id', name: 'rider_deliveries.delivery_note_id', class: 'align-middle delivery_note_id'},
-                    {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
-                    {data: 'purpose', name: 'ss.name', class: 'align-middle purpose'},
-                    {data: 'otp', name: 'otp', class: 'align-middle otp', orderable: false, searchable: false},
-                    {data: 'created_at', name: 'rider_deliveries.created_at', class: 'align-middle created_at'},
-                    {data: 'date', name: 'shipment_otps.updated_at', class: 'align-middle date'},
-
+                    {data: 'delivery_note_id', name: 'shipments.rider_deliveries.delivery_note_id', class: 'align-middle tracking_number_link'},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle purpose'},
+                    {data: 'rider_employee_id', name: 'riders.employee_id', class: 'align-middle rider_name'},
+                    {data: 'rider_name', name: 'riders.rider_name', class: 'align-middle delivery_note_id'},
+                    {data: 'origin', name: 'cities.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'destinationcity.name', class: 'align-middle destination'},
+                    {data: 'origin', name: 'cities.name', class: 'align-middle hub'},
+                    {data: 'last_status', name: 'last_status', class: 'align-middle last_status'},
+                    {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
+                    {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
+                    {data: 'otp_status', name: 'rider_deliveries.otp_entered', class: 'align-middle otp_status',
+                        render: function (data, type, row) {
+                            if (data === null) {
+                            return 'No';
+                            } else {
+                            return 'Yes';
+                            }
+                        }
+                    }
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -333,58 +341,58 @@
             });
 
             //Selectize
-            var select = $('#search_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
+            // var select = $('#search_form .tracking_numbers').selectize({
+            //     placeholder: 'Tracking Number(s)',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
 
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                },
-                onChange: function (value) {
-                    console.log(value)
-                    if(value.length == 0){
-                        $('#from_date').rules( "add", { required: true });
-                        $('#to_date').rules( "add", { required: true });
-                    }else{
-                        $('#from_date').rules( "remove");
-                        $('#to_date').rules( "remove");
-                    }
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     },
+            //     onChange: function (value) {
+            //         console.log(value)
+            //         if(value.length == 0){
+            //             $('#from_date').rules( "add", { required: true });
+            //             $('#to_date').rules( "add", { required: true });
+            //         }else{
+            //             $('#from_date').rules( "remove");
+            //             $('#to_date').rules( "remove");
+            //         }
 
-                },
+            //     },
+            // });
+
+            $('#search_rider').select2({
+                width:'100%',
+                placeholder:"Select Rider",
+                allowClear:true,
+                dropdownParent:$('#search_form')
             });
-
-        });
-        $('#search_rider').select2({
-            width:'100%',
-            placeholder:"Select Rider",
-            allowClear:true,
-            dropdownParent:$('#search_form')
-        });
-        $('#search_hub').select2({
-            width:'100%',
-            placeholder:"Select Hub",
-            allowClear:true,
-            dropdownParent:$('#search_form')
+            $('#search_hub').select2({
+                width:'100%',
+                placeholder:"Select Hub",
+                allowClear:true,
+                dropdownParent:$('#search_form')
+            });
         });
 
     </script>

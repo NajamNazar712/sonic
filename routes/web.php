@@ -1546,16 +1546,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_confirm_otp')->name('return_confirm_otp.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_confirm_otp_index')->name('index');
             Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
-            Route::post('search', 'Admins\ReturnController@return_confirm_otp_search')->name('search');
-            // Route::get('list', 'Admins\ReturnController@rider_request_note_list')->name('list');
-            // Route::post('shipments', 'Admins\ReturnController@request_note_shipments')->name('shipments');
-            // Route::get('{id}/approve', 'Admins\ReturnController@request_note_approve')->name('approve');
-            // Route::get('{id}/reject', 'Admins\ReturnController@request_note_reject')->name('reject');
-            // Route::get('{id}/update', 'Admins\ReturnController@request_note_update')->name('update');
-            // Route::get('{id}/update/list', 'Admins\ReturnController@request_note_update_list')->name('update.list');
-            // Route::post('update/remove', 'Admins\ReturnController@request_note_remove')->name('update.remove');
-            // Route::post('update/remove_bulk', 'Admins\ReturnController@request_note_remove_bulk')->name('update.remove.bulk');
-            // Route::post('/add/tracking_number', 'Admins\ReturnController@add_shipments_in_request_note')->name('add.shipments');
         });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
